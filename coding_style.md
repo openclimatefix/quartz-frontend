@@ -1,4 +1,4 @@
-At OCF, we use [Black](https://black.readthedocs.io/en/stable/) to format our Python code.  We use these changes to the default:
+At OCF, we use [Black](https://black.readthedocs.io/en/stable/) to format our Python code.  We use these changes to Black's default settings:
 - `max-line-length = 100`
 
 We use [Google-style docstrings](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings).
