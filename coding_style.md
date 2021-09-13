@@ -1,5 +1,5 @@
 At OCF, we use [Black](https://black.readthedocs.io/en/stable/) to format our Python code.  We use these changes to Black's default settings:
-- `max-line-length = 100`
+- `max-line-length = 100` (_why_ do we allow up to 100 characters per line, unlike a lot of Python code that limits lines to 80 characters?  For the same reason that [Linus Torvalds recently changed the Linux kernel coding guidelines to allow up to 100 characters per line](https://linux.slashdot.org/story/20/05/31/211211/linus-torvalds-argues-against-80-column-line-length-coding-style-as-linux-kernel-deprecates-it) :) )
 
 We use [Google-style docstrings](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings).
 
