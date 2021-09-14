@@ -6,7 +6,7 @@ We use [Black](https://black.readthedocs.io/en/stable/) to format our Python cod
 We use [Google-style docstrings](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings).
 
 ## Unittesting
-In terms of requirements around unittesting etc, please see [our Pull Request template](https://github.com/openclimatefix/nowcasting_dataset/blob/main/.github/PULL_REQUEST_TEMPLATE.md) (which lists all the criteria we hope each pull request satisfies).
+In terms of requirements around unittesting etc, please see [our Pull Request template](https://github.com/openclimatefix/.github/blob/master/PULL_REQUEST_TEMPLATE.md) (which lists all the criteria we hope each pull request satisfies).
 
 ## Jupyter Notebooks
 For now, we maintain the `.py` files, and try to ensure they're all internally consistent, but we don't promise to maintain all our notebooks!  (That might change if our code starts being used by lots of people!)
