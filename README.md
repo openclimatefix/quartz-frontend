@@ -18,7 +18,7 @@ In OCF, we're curious to see if it's possible to rapidly mitigate climate change
 
 # What's the likely climate impact?
 
-It's _really_ hard to estimate climate impact of forecasting!  But, as a super-rough back-of-the-envelope calculation, we estimate that better solar forecasts, if rolled out globally, could reduce CO2 emissions by about a billion tonnes between now and 2035.
+It's really, really, _really_ hard to estimate climate impact of forecasting!  But, as a super-rough back-of-the-envelope calculation, we estimate that better solar forecasts, if rolled out globally, could reduce CO2 emissions by about a billion tonnes between now and 2035.
 
 
 # Getting involved
