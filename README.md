@@ -1,11 +1,8 @@
 # Solar electricity Nowcasting
 
-This is a "meta-repository" for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project.  See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to the problem.
+This is a "meta-repository" for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project.  See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to solar electricity nowcasting.
 
-
-# What is solar electricity nowcasting?
-
-The plan is to collaboratively build the world's best near-term forecasting system for solar electricity generation :)   We'll do this by using state-of-the-art machine learning and 5-minutely satellite imagery to predict the movement of clouds over the next few hours, and then use this to predict solar electricity generation.
+The plan is to enable the community to build the world's best near-term forecasting system for solar electricity generation, and then let anyone use it! :)   We'll do this by using state-of-the-art machine learning and 5-minutely satellite imagery to predict the movement of clouds over the next few hours, and then use this to predict solar electricity generation.
 
 The term "nowcasting" just means "forecasting for the next few hours using statistical techniques".
 
@@ -17,6 +14,11 @@ In OCF, we're curious to see if it's possible to rapidly mitigate climate change
 1. Enabling thousands of people to help solve ML problems which, if solved, might help reduce CO2 emissions
 2. Running small(ish) pilot projects to implement the best solution in industry
 3. Enabling thousands of practitioners to use the code in their products.
+
+
+# What's the likely climate impact?
+
+It's _really_ hard to estimate climate impact of forecasting!  But, as a super-rough back-of-the-envelope calculation, we estimate that better solar forecasts, if rolled out globally, could reduce CO2 emissions by about a billion tonnes between now and 2035.
 
 
 # Getting involved
