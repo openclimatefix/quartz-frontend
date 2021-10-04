@@ -31,7 +31,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting!  B
 ## Downloading data & getting the data in the right shape for ML experiments
 
 * [nowcasting_dataset](https://github.com/openclimatefix/nowcasting_dataset): Pre-prepares ML training batches.  Loads satellite data, numerical weather predictions, solar PV power generation timeseries, and other datasets.  Outputs pre-prepared ML training batches as NetCDF files (one batch per NetCDF file).
-* [Satip](https://github.com/openclimatefix/Satip): Retrieve, transform and store EUMETSAT data using an Airflow pipeline.
+* [Satip](https://github.com/openclimatefix/Satip): Retrieve, transform and store EUMETSAT data.
 * [pvoutput](https://github.com/openclimatefix/pvoutput): Python code for downloading PV data from [PVOutput.org](https://PVOutput.org).
 
 ### Older code (no longer maintained)
