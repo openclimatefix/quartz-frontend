@@ -33,7 +33,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Nowcasting - A better way to think about solar</title>
+        <title>Nowcasting - A Better Way to Think about Solar</title>
         <meta name="description" content={taglineText} />
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
