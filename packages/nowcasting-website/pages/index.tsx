@@ -116,7 +116,8 @@ const Home: NextPage = () => {
                   <p className="mt-3 text-sm text-gray-500">
                     We care about the protection of your data. Read our{" "}
                     <a
-                      href="https://docs.google.com/document/d/1ld-faFUnXpOmxXcxI8cxpH_S6NHnpQEzqQrYe6Y6Sjg/edit?usp=sharing"
+                      href="https://www.iubenda.com/privacy-policy/92003532"
+                      target="_blank"
                       className="font-medium text-gray-900 underline"
                     >
                       Privacy Policy
@@ -168,7 +169,7 @@ const Home: NextPage = () => {
               <div className="relative pl-4 -mr-40 sm:mx-auto sm:max-w-3xl sm:px-0 lg:max-w-none lg:h-full lg:pl-12">
                 <img
                   className="w-full rounded-md shadow-xl ring-1 ring-black ring-opacity-5 lg:h-full lg:w-auto lg:max-w-none"
-                  src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2372&q=80"
+                  src="/solarpanels.jpg"
                   alt=""
                 />
               </div>
