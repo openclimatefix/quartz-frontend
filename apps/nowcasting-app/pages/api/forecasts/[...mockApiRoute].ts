@@ -7,5 +7,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if ((mockApiRoute as string[]).join("/") === "GB/pv/gsp") {
     res.status(200).json(gbPvGSPJson);
+  } else {
+    res.status(400).json({ type: "error", message: "Bad request" });
   }
 }
