@@ -4,7 +4,7 @@ import { SVGProps } from "react";
 
 const Home: NextPage = () => {
   const taglineText =
-    "Forecasting solar power production is hard - but it doesn't need to be! Get reliable forecasts, powered by cutting-edge Machine Learning.";
+    "Forecasting solar power production is hard - but it doesn't need to be! Get reliable forecasts now, powered by cutting-edge Machine Learning.";
   const footerNavigation = [
     {
       name: "Twitter",
