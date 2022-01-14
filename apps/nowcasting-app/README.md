@@ -1,27 +1,33 @@
-# Next.js + Tailwind CSS Example
+# Nowcasting App
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.0)](https://tailwindcss.com/blog/tailwindcss-v3) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+This is the main Nowcasting App, hosted at [app.nowcasting.io](app.nowcasting.io).
+It is used by customers to login and view their forecasts.
 
-## Preview
+## Getting Started
 
-Preview the example live on [StackBlitz](http://stackblitz.com/):
-
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
-
-## Deploy your own
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
-
-## How to use
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
+First, run the development server:
 
 ```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-# or
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
+yarn install
+yarn dev
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+## Environment Variables
+
+The following environment variables need to be populated:
+
+```bash
+# A long, secret value used to encrypt the session cookie
+AUTH0_SECRET='<secret>'
+# The base url of your application
+AUTH0_BASE_URL='http://localhost:3002'
+# The url of your Auth0 tenant domain
+AUTH0_ISSUER_BASE_URL='https://<tenent domain>.auth0.com'
+# Your Auth0 application's Client ID
+AUTH0_CLIENT_ID='<client id>'
+# Your Auth0 application's Client Secret
+AUTH0_CLIENT_SECRET='<client secret>'
+
+```
+
+Open [http://localhost:3002](http://localhost:3002) with your browser to see the result.
