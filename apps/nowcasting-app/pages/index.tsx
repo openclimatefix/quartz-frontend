@@ -1,8 +1,10 @@
 import Head from "next/head";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
-import Layout from "../components/layout";
-
 import useSWR from "swr";
+
+import { Button } from "@openclimatefix/nowcasting-ui";
+
+import Layout from "../components/layout";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -56,6 +58,7 @@ export default function Home() {
           >
             Throw error
           </button>
+          <Button>Hello</Button>
         </main>
       </div>
     </Layout>
