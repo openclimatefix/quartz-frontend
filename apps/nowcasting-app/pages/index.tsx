@@ -9,7 +9,8 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 
 const API_PREFIX_LOCAL = "/api";
 const API_PREFIX_REMOTE = "https://api.nowcasting.io/v0";
-const API_PREFIX = API_PREFIX_LOCAL;
+const IS_LOCAL_REQ = true;
+const API_PREFIX = IS_LOCAL_REQ ? API_PREFIX_LOCAL : API_PREFIX_REMOTE;
 
 export default function Home() {
   const { data, error } = useSWR(`${API_PREFIX}/forecasts/GB/pv/gsp`, fetcher);
@@ -30,6 +31,14 @@ export default function Home() {
           <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900">
             API Response
           </h1>
+          <p className="mb-2">
+            Fetching data{" "}
+            <strong>
+              {IS_LOCAL_REQ
+                ? "from locally mocked endpoint."
+                : "remotely from api.nowcasting.io!"}
+            </strong>
+          </p>
 
           {!data ? (
             <p>Loading...</p>
