@@ -1,9 +1,12 @@
 import { handleAuth, handleLogout } from "@auth0/nextjs-auth0";
+import { withSentry } from "@sentry/nextjs";
 
-export default handleAuth({
-  async logout(req, res) {
-    await handleLogout(req, res, {
-      returnTo: "/logout",
-    });
-  },
-});
+export default withSentry(
+  handleAuth({
+    async logout(req, res) {
+      await handleLogout(req, res, {
+        returnTo: "/logout",
+      });
+    },
+  })
+);

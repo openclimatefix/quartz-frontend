@@ -47,6 +47,15 @@ export default function Home() {
               <code>{JSON.stringify(data, null, 2)}</code>
             </pre>
           )}
+
+          <button
+            type="button"
+            onClick={() => {
+              throw new Error("Sentry Frontend Error");
+            }}
+          >
+            Throw error
+          </button>
         </main>
       </div>
     </Layout>
