@@ -1,5 +1,5 @@
 {
-  "name": "nowcasting-website",
+  "name": "@openclimatefix/nowcasting-website",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,6 +20,7 @@
     "tailwindcss": "^2.2.16"
   },
   "devDependencies": {
+    "@openclimatefix/nowcasting-tsconfig": "*",
     "@types/react": "17.0.28",
     "eslint": "8.0.0",
     "eslint-config-next": "11.1.2",
