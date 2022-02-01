@@ -3,13 +3,16 @@ interface ISolarMap {
 }
 
 import { GeoJsonObject } from "geojson";
-import { LatLng } from "leaflet";
-import { useState } from "react";
+import { LeafletMouseEvent } from "leaflet";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 
 const SolarMap = ({ data }: ISolarMap) => {
-  console.log(data);
-  const [mousePosition, setMousePosition] = useState<LatLng>();
+  const onEachGSP = (feature, layer) => {
+    const { region_name: regionName, gsp_name: gspName } = feature.properties;
+    layer.on("mouseover", function (e: LeafletMouseEvent) {
+      layer.bindPopup(`${regionName} (${gspName})`).openPopup();
+    });
+  };
 
   return (
     <MapContainer
@@ -22,17 +25,7 @@ const SolarMap = ({ data }: ISolarMap) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <GeoJSON
-        attribution=""
-        data={data}
-        eventHandlers={{
-          mousemove: ({ latlng }) => {
-            console.log("hovered");
-            console.log(latlng);
-            setMousePosition(latlng);
-          },
-        }}
-      ></GeoJSON>
+      <GeoJSON attribution="" data={data} onEachFeature={onEachGSP}></GeoJSON>
     </MapContainer>
   );
 };
