@@ -10,7 +10,7 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
 
 const API_PREFIX_LOCAL = "/api";
-const API_PREFIX_REMOTE = "https://api.nowcasting.io/v0";
+const API_PREFIX_REMOTE = "https://api-dev.nowcasting.io/v0";
 const IS_LOCAL_REQ = true;
 const API_PREFIX = IS_LOCAL_REQ ? API_PREFIX_LOCAL : API_PREFIX_REMOTE;
 
@@ -38,7 +38,7 @@ export default function Home() {
             <strong>
               {IS_LOCAL_REQ
                 ? "from locally mocked endpoint."
-                : "remotely from api.nowcasting.io!"}
+                : "remotely from api-dev.nowcasting.io!"}
             </strong>
           </p>
 
