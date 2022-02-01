@@ -9,6 +9,11 @@ class MyDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Inter&display=optional"
             rel="stylesheet"
           />
+          <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          />
+          <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
         </Head>
         <body className="h-full">
           <Main />
