@@ -12,8 +12,7 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
 
 const API_PREFIX_LOCAL = "/api";
-const API_PREFIX_REMOTE =
-  "http://nowcasting-api-development.eba-zvmmnmkp.eu-west-1.elasticbeanstalk.com/v0"; // TODO(nowcasting_infrastructure#34): Change once fixed
+const API_PREFIX_REMOTE = "https://api-dev.nowcasting.io/v0";
 const IS_LOCAL_REQ = false;
 const API_PREFIX = IS_LOCAL_REQ ? API_PREFIX_LOCAL : API_PREFIX_REMOTE;
 
@@ -53,7 +52,7 @@ export default function Home() {
             <strong>
               {IS_LOCAL_REQ
                 ? "from locally mocked endpoint."
-                : `remotely from ${API_PREFIX_REMOTE}!`}
+                : "remotely from api-dev.nowcasting.io!"}
             </strong>
           </p>
 
