@@ -6,13 +6,15 @@ import dynamic from "next/dynamic";
 import { Button } from "@openclimatefix/nowcasting-ui";
 
 import Layout from "../components/layout";
+import Chart from "../components/chart";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
 
 const API_PREFIX_LOCAL = "/api";
-const API_PREFIX_REMOTE = "https://api-dev.nowcasting.io/v0";
-const IS_LOCAL_REQ = true;
+const API_PREFIX_REMOTE =
+  "http://nowcasting-api-development.eba-zvmmnmkp.eu-west-1.elasticbeanstalk.com/v0"; // TODO(nowcasting_infrastructure#34): Change once fixed
+const IS_LOCAL_REQ = false;
 const API_PREFIX = IS_LOCAL_REQ ? API_PREFIX_LOCAL : API_PREFIX_REMOTE;
 
 const DynamicSolarMapWithNoSSR = dynamic(
@@ -26,7 +28,7 @@ export default function Home() {
     fetcher
   );
   const { data: gspregionData, error: gspregionError } = useSWR(
-    `${API_PREFIX}/forecasts/GB/gsp-regions`,
+    `${API_PREFIX}/forecasts/GB/pv/gsp_boundaries`,
     fetcher
   );
 
@@ -55,15 +57,29 @@ export default function Home() {
             </strong>
           </p>
 
-          <div className="my-6">
-            {gspregionData && <DynamicSolarMapWithNoSSR data={gspregionData} />}
-          </div>
+          {gspregionData && (
+            <div className="my-6">
+              {gspregionData && (
+                <DynamicSolarMapWithNoSSR
+                  data={
+                    // TODO(nowcasting_infrastructure#35): Remove parse once fixed
+                    IS_LOCAL_REQ ? gspregionData : JSON.parse(gspregionData)
+                  }
+                />
+              )}
+            </div>
+          )}
           {!forecastData ? (
             <p>Loading...</p>
           ) : (
-            <pre className="p-2 rounded-md bg-slate-800 text-slate-200">
-              <code>{JSON.stringify(forecastData, null, 2)}</code>
-            </pre>
+            <>
+              <div className="my-6 border-2 border-black h-72">
+                <Chart data={forecastData.forecasts.slice(2)} />
+              </div>
+              <pre className="p-2 rounded-md bg-slate-800 text-slate-200">
+                <code>{JSON.stringify(forecastData, null, 2)}</code>
+              </pre>
+            </>
           )}
 
           <button

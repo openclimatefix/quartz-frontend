@@ -25,7 +25,7 @@ const SolarMap = ({ data }: ISolarMap) => {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <GeoJSON attribution="" data={data} onEachFeature={onEachGSP}></GeoJSON>
+      <GeoJSON data={data} onEachFeature={onEachGSP}></GeoJSON>
     </MapContainer>
   );
 };

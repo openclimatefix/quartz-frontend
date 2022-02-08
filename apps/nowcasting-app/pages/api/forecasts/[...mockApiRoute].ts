@@ -9,7 +9,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if ((mockApiRoute as string[]).join("/") === "GB/pv/gsp") {
     res.status(200).json(gbPvGSPJson);
-  } else if ((mockApiRoute as string[]).join("/") === "GB/gsp-regions") {
+  } else if ((mockApiRoute as string[]).join("/") === "GB/pv/gsp_boundaries") {
     res.status(200).json(gspRegions);
   } else {
     res.status(400).json({ type: "error", message: "Bad request" });
