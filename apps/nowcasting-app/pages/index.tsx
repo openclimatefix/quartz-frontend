@@ -53,7 +53,7 @@ export default function Home() {
             <strong>
               {IS_LOCAL_REQ
                 ? "from locally mocked endpoint."
-                : "remotely from api-dev.nowcasting.io!"}
+                : `remotely from ${API_PREFIX_REMOTE}!`}
             </strong>
           </p>
 
