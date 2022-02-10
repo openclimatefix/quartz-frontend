@@ -24,7 +24,7 @@ const Chart = ({ data }: IChart) => {
 
   const yScale = d3
     .scaleLinear()
-    .domain([0, 10])
+    .domain(d3.extent(data, forecastAccessor))
     .range([dms.boundedHeight, 0])
     .nice();
 
@@ -49,8 +49,6 @@ const Chart = ({ data }: IChart) => {
   if (yAxisRef.current) {
     d3.select(yAxisRef.current).transition().call(d3.axisLeft().scale(yScale));
   }
-
-  console.log(dms);
 
   return (
     <div ref={ref} className="w-full h-full">

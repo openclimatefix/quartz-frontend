@@ -73,7 +73,8 @@ export default function Home() {
           ) : (
             <>
               <div className="my-6 border-2 border-black h-72">
-                <Chart data={forecastData.forecasts.slice(2)} />
+                {/* TODO: don't pop last element once NATIONAL fc not in GSP */}
+                <Chart data={forecastData.forecasts.slice(0, -1)} />
               </div>
               <pre className="p-2 rounded-md bg-slate-800 text-slate-200">
                 <code>{JSON.stringify(forecastData, null, 2)}</code>
