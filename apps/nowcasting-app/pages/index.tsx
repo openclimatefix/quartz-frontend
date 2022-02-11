@@ -56,14 +56,16 @@ export default function Home() {
             </strong>
           </p>
 
-          {gspregionData && (
+          {gspregionData && forecastData && (
             <div className="my-6">
               {gspregionData && (
                 <DynamicSolarMapWithNoSSR
-                  data={
+                  gspregionData={
                     // TODO(nowcasting_infrastructure#35): Remove parse once fixed
                     IS_LOCAL_REQ ? gspregionData : JSON.parse(gspregionData)
                   }
+                  // TODO: don't pop last element once NATIONAL fc not in GSP
+                  forecastData={forecastData.forecasts.slice(0, -1)}
                 />
               )}
             </div>
