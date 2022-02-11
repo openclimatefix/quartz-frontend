@@ -8,37 +8,39 @@ import { GeoJSON } from "react-leaflet";
 import { LeafletMouseEvent } from "leaflet";
 import * as d3 from "d3";
 import { MapContainer, TileLayer } from "react-leaflet";
+import { forecastAccessor } from "./utils";
+
+const SHADES_OF_YELLOW = {
+  DEFAULT: "#FFC425",
+  "50": "#FFF6DD",
+  "100": "#FFF0C8",
+  "200": "#FFE59F",
+  "300": "#FFDA77",
+  "400": "#FFCF4E",
+  "500": "#FFC425",
+  "600": "#ECAC00",
+  "700": "#B48300",
+  "800": "#7C5A00",
+  "900": "#443100",
+};
 
 const SolarMap = ({ gspregionData, forecastData }: ISolarMap) => {
-  // GET THE COLORS FOR THE SHAPES
-  const forecastAccessor = (d) =>
-    d.forecastValues[0].expectedPowerGenerationMegawatts;
-  const colorScale = d3
-    .scaleQuantize()
-    .domain(d3.extent(forecastData, forecastAccessor))
-    .range([
-      // '#FFF6DD',
-      "#FFF0C8",
-      // '#FFE59F',
-      "#FFDA77",
-      // '#FFCF4E',
-      "#FFC425",
-      // '#ECAC00',
-      "#B48300",
-      // '#7C5A00',
-      "#443100",
-    ]);
-  console.log(d3.extent(forecastData, forecastAccessor));
-  console.log(colorScale(2000));
-
   const getForecastColorForGSP = (id) => {
-    forecastAccessor(forecastData[id]);
+    const colorScale = d3
+      .scaleQuantize()
+      .domain(d3.extent(forecastData, forecastAccessor))
+      .range([
+        SHADES_OF_YELLOW["100"],
+        SHADES_OF_YELLOW["300"],
+        SHADES_OF_YELLOW["500"],
+        SHADES_OF_YELLOW["700"],
+        SHADES_OF_YELLOW["900"],
+      ]);
+
     return colorScale(forecastAccessor(forecastData[id]));
   };
 
-  // other stuff
-
-  const onEachGSP = (feature, layer) => {
+  const addPopupToEachGSP = (feature, layer) => {
     const {
       gsp_id,
       region_name: regionName,
@@ -55,7 +57,7 @@ const SolarMap = ({ gspregionData, forecastData }: ISolarMap) => {
     });
   };
 
-  const styliseGSP = (feature) => {
+  const addColorToEachGSP = (feature) => {
     return {
       fillColor: getForecastColorForGSP(feature.properties.gsp_id),
       fillOpacity: 1,
@@ -77,8 +79,8 @@ const SolarMap = ({ gspregionData, forecastData }: ISolarMap) => {
       />
       <GeoJSON
         data={gspregionData}
-        onEachFeature={onEachGSP}
-        style={styliseGSP}
+        onEachFeature={addPopupToEachGSP}
+        style={addColorToEachGSP}
       />
     </MapContainer>
   );

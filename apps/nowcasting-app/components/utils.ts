@@ -90,3 +90,6 @@ export const useUniqueId = (prefix = "") => {
   lastId++;
   return [prefix, lastId].join("-");
 };
+
+export const forecastAccessor = (d) =>
+  d.forecastValues[0].expectedPowerGenerationMegawatts;
