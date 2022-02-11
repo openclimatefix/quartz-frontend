@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import * as d3 from "d3";
 
-import { useChartDimensions } from "./utils";
+import { forecastAccessor, useChartDimensions } from "./utils";
 
 interface IChart {
   data: any;
@@ -12,8 +12,6 @@ interface IChart {
 
 const Chart = ({ data }: IChart) => {
   const gspAccessor = (d) => d.location.gspId;
-  const forecastAccessor = (d) =>
-    d.forecastValues[0].expectedPowerGenerationMegawatts;
 
   const [ref, dms] = useChartDimensions({});
 
