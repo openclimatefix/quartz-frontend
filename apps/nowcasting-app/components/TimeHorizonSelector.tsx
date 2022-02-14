@@ -1,4 +1,4 @@
-import { classNames } from "./utils";
+import { classNames, getTimeFromDate } from "./utils";
 
 interface ITimeHorizonSelector {
   selectedTimeHorizon: number;
@@ -18,14 +18,6 @@ interface ITimeHorizonSelector {
     }
   ];
 }
-
-/**
- * @param date Date object
- * @returns HH:MM representation of the date, as string
- */
-const getTimeFromDate = (date: Date) => {
-  return date.toTimeString().split(" ")[0].slice(0, -3);
-};
 
 const TimeHorizonSelector = ({
   selectedTimeHorizon,

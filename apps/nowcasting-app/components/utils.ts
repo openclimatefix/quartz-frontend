@@ -91,6 +91,7 @@ export const useUniqueId = (prefix = "") => {
   return [prefix, lastId].join("-");
 };
 
+export const allForecastsAccessor = (d) => d.forecastValues;
 const forecastAccessor0 = (d) =>
   d.forecastValues[0].expectedPowerGenerationMegawatts;
 const forecastAccessor1 = (d) =>
@@ -110,4 +111,12 @@ export const getForecastAccessorForTimeHorizon = (selectedTimeHorizon) => {
 
 export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(" ");
+};
+
+/**
+ * @param date Date object
+ * @returns HH:MM representation of the date, as string
+ */
+export const getTimeFromDate = (date: Date) => {
+  return date.toTimeString().split(" ")[0].slice(0, -3);
 };
