@@ -26,7 +26,7 @@ const DynamicSolarMapWithNoSSR = dynamic(
 
 export default function Home() {
   const [selectedTimeHorizon, setSelectedTimeHorizon] = useState(0);
-  const [showGSPForecast, setShowGSPForecast] = useState(false);
+  const [showGSPForecast, setShowGSPForecast] = useState(true);
 
   const { data: forecastData, error: forecastError } = useSWR(
     `${API_PREFIX}/forecasts/GB/pv/gsp`,
