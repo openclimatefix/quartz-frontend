@@ -25,9 +25,9 @@ const TimeHorizonSelector = ({
   targetTimes,
 }: ITimeHorizonSelector) => {
   const ACTIVE_BUTTON_STYLES =
-    "bg-indigo-500 focus:ring-black focus:border-black text-white";
+    "bg-danube-500 focus:ring-black focus:border-black text-white";
   const INACTIVE_BUTTON_STYLES =
-    "bg-white hover:bg-gray-50 focus:ring-indigo-500 focus:border-indigo-500";
+    "bg-white hover:bg-gray-50 focus:ring-danube-500 focus:border-danube-500";
   const BASE_BUTTON_STYLES =
     "relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 focus:z-10 focus:outline-none focus:ring-1";
 

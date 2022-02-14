@@ -33,12 +33,12 @@ const Navbar = ({ environment }: INavbar) => {
                 <div
                   className={classNames(
                     environment === "local"
-                      ? "bg-gray-100 text-gray-900"
+                      ? "bg-danube-500 text-white"
                       : "text-gray-900 hover:bg-gray-50 hover:text-gray-900",
-                    "rounded-md py-2 px-3 inline-flex items-center text-sm font-medium"
+                    "py-2 px-3 inline-flex items-center text-sm font-medium"
                   )}
                 >
-                  {environment}
+                  Environment: {environment}
                 </div>
               </div>
             </div>
@@ -46,7 +46,7 @@ const Navbar = ({ environment }: INavbar) => {
               {/* Profile dropdown */}
               <Menu as="div" className="relative ml-3">
                 <div>
-                  <Menu.Button className="flex text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                  <Menu.Button className="flex text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">
                     <span className="sr-only">Open user menu</span>
                     <img
                       className="w-8 h-8 rounded-full"

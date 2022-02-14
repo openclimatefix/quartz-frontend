@@ -56,7 +56,7 @@ const Chart = ({ data, selectedTimeHorizon }: IChart) => {
       {/* <ChartContext.Provider value={dms}> */}
       <svg width={dms.width} height={dms.height}>
         <g transform={`translate(${dms.marginLeft}, ${dms.marginTop})`}>
-          <path fill="none" stroke="red" d={line} />
+          <path fill="none" stroke="#468AC9" stroke-width="2" d={line} />
           <g
             className="xAxis"
             ref={xAxisRef}
