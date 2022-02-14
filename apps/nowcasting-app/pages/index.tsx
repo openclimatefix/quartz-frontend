@@ -46,7 +46,7 @@ export default function Home() {
           <title>Nowcasting App</title>
         </Head>
 
-        <main className="pt-12">
+        <main className="py-24">
           {gspregionData && forecastData && (
             <>
               <div className="my-6">
