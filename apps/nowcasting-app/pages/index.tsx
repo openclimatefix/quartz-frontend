@@ -16,7 +16,7 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 
 const API_PREFIX_LOCAL = "/api";
 const API_PREFIX_REMOTE = "https://api-dev.nowcasting.io/v0";
-const IS_LOCAL_REQ = true;
+const IS_LOCAL_REQ = !(process.env.NODE_ENV === "development");
 const API_PREFIX = IS_LOCAL_REQ ? API_PREFIX_LOCAL : API_PREFIX_REMOTE;
 
 const DynamicSolarMapWithNoSSR = dynamic(
@@ -43,7 +43,7 @@ export default function Home() {
   }
 
   return (
-    <Layout environment={IS_LOCAL_REQ ? "local" : "dev"}>
+    <Layout environment={IS_LOCAL_REQ ? "local" : "development"}>
       <div className="container min-h-screen">
         <Head>
           <title>Nowcasting App</title>

@@ -5,7 +5,7 @@ import { useUser } from "@auth0/nextjs-auth0";
 import { classNames } from "./utils";
 
 interface INavbar {
-  environment: "local" | "dev";
+  environment: "local" | "development";
 }
 
 const Navbar = ({ environment }: INavbar) => {

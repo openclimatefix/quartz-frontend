@@ -5,7 +5,7 @@ import Navbar from "./navbar";
 
 interface ILayout {
   children: React.ReactNode;
-  environment: "local" | "dev";
+  environment: "local" | "development";
 }
 
 const Layout = ({ children, environment }: ILayout) => {
