@@ -15,7 +15,7 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 
 const API_PREFIX_LOCAL = "/api";
 const API_PREFIX_REMOTE = "https://api-dev.nowcasting.io/v0";
-const IS_LOCAL_REQ = false;
+const IS_LOCAL_REQ = true;
 const API_PREFIX = IS_LOCAL_REQ ? API_PREFIX_LOCAL : API_PREFIX_REMOTE;
 
 const DynamicSolarMapWithNoSSR = dynamic(
