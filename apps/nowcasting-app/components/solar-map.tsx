@@ -9,7 +9,11 @@ import { GeoJSON } from "react-leaflet";
 import { LeafletMouseEvent } from "leaflet";
 import * as d3 from "d3";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { getForecastAccessorForTimeHorizon } from "./utils";
+import {
+  getForecastAccessorForTimeHorizon,
+  allForecastsAccessor,
+  getTimeFromDate,
+} from "./utils";
 
 const SHADES_OF_YELLOW = {
   DEFAULT: "#FFC425",
@@ -49,16 +53,55 @@ const SolarMap = ({
 
   const addPopupToEachGSP = (feature, layer) => {
     const {
-      gsp_id,
+      gsp_id: gspId,
       region_name: regionName,
       gsp_name: gspName,
     } = feature.properties;
+    const allForecasts = allForecastsAccessor(forecastData[gspId]);
+
     layer.on("mouseover", function (e: LeafletMouseEvent) {
       layer
         .bindPopup(
-          `${regionName} (${gspName}) will produce ${forecastAccessor(
-            forecastData[gsp_id]
-          )}MW`
+          `
+          <h2 class="text-xl font-bold">${regionName} (${gspName})</h2>
+
+          <table class="text-base table-auto border border-slate-400 mt-4">
+              <tr>
+                <th class="border border-slate-400">Target Time</th>
+                <th class="border border-slate-400">Expected Power Generation</th>
+              </tr>
+              <tr>
+                <td class="border border-slate-400">${getTimeFromDate(
+                  new Date(allForecasts[0].targetTime)
+                )}</td>
+                <td class="border border-slate-400">${
+                  Math.round(
+                    allForecasts[0].expectedPowerGenerationMegawatts * 100
+                  ) / 100
+                } MW</td>
+              </tr>
+              <tr>
+                <td class="border border-slate-400">${getTimeFromDate(
+                  new Date(allForecasts[1].targetTime)
+                )}</td>
+                <td class="border border-slate-400">${
+                  Math.round(
+                    allForecasts[1].expectedPowerGenerationMegawatts * 100
+                  ) / 100
+                } MW</td>
+              </tr>
+              <tr>
+                <td class="border border-slate-400">${getTimeFromDate(
+                  new Date(allForecasts[2].targetTime)
+                )}</td>
+                <td class="border border-slate-400">${
+                  Math.round(
+                    allForecasts[2].expectedPowerGenerationMegawatts * 100
+                  ) / 100
+                } MW</td>
+              </tr>
+          </table>
+        `
         )
         .openPopup();
     });
