@@ -1,6 +1,7 @@
 interface ISolarMap {
   gspregionData: GeoJsonObject;
   forecastData: object;
+  selectedTimeHorizon: number;
 }
 
 import { GeoJsonObject } from "geojson";
@@ -8,7 +9,7 @@ import { GeoJSON } from "react-leaflet";
 import { LeafletMouseEvent } from "leaflet";
 import * as d3 from "d3";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { forecastAccessor } from "./utils";
+import { getForecastAccessorForTimeHorizon } from "./utils";
 
 const SHADES_OF_YELLOW = {
   DEFAULT: "#FFC425",
@@ -24,7 +25,13 @@ const SHADES_OF_YELLOW = {
   "900": "#443100",
 };
 
-const SolarMap = ({ gspregionData, forecastData }: ISolarMap) => {
+const SolarMap = ({
+  gspregionData,
+  forecastData,
+  selectedTimeHorizon,
+}: ISolarMap) => {
+  const forecastAccessor =
+    getForecastAccessorForTimeHorizon(selectedTimeHorizon);
   const getForecastColorForGSP = (id) => {
     const colorScale = d3
       .scaleQuantize()

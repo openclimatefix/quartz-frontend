@@ -91,5 +91,23 @@ export const useUniqueId = (prefix = "") => {
   return [prefix, lastId].join("-");
 };
 
-export const forecastAccessor = (d) =>
+const forecastAccessor0 = (d) =>
   d.forecastValues[0].expectedPowerGenerationMegawatts;
+const forecastAccessor1 = (d) =>
+  d.forecastValues[1].expectedPowerGenerationMegawatts;
+const forecastAccessor2 = (d) =>
+  d.forecastValues[2].expectedPowerGenerationMegawatts;
+export const getForecastAccessorForTimeHorizon = (selectedTimeHorizon) => {
+  switch (selectedTimeHorizon) {
+    case 0:
+      return forecastAccessor0;
+    case 1:
+      return forecastAccessor1;
+    case 2:
+      return forecastAccessor2;
+  }
+};
+
+export const classNames = (...classes: string[]) => {
+  return classes.filter(Boolean).join(" ");
+};
