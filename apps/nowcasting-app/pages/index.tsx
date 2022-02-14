@@ -9,6 +9,7 @@ import Layout from "../components/layout";
 import Chart from "../components/chart";
 import TimeHorizonSelector from "../components/TimeHorizonSelector";
 import { useState } from "react";
+import GSPOrNationalSelector from "../components/gsp-or-national-selector";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -25,6 +26,8 @@ const DynamicSolarMapWithNoSSR = dynamic(
 
 export default function Home() {
   const [selectedTimeHorizon, setSelectedTimeHorizon] = useState(0);
+  const [showGSPForecast, setShowGSPForecast] = useState(false);
+
   const { data: forecastData, error: forecastError } = useSWR(
     `${API_PREFIX}/forecasts/GB/pv/gsp`,
     fetcher
@@ -46,9 +49,20 @@ export default function Home() {
           <title>Nowcasting App</title>
         </Head>
 
-        <main className="py-24">
+        <main className="py-20">
           {gspregionData && forecastData && (
             <>
+              <div className="flex justify-center w-full gap-6">
+                <GSPOrNationalSelector
+                  showGSPForecast={showGSPForecast}
+                  setShowGSPForecast={setShowGSPForecast}
+                />
+                <TimeHorizonSelector
+                  selectedTimeHorizon={selectedTimeHorizon}
+                  setSelectedTimeHorizon={setSelectedTimeHorizon}
+                  targetTimes={forecastData.forecasts[0].forecastValues}
+                />
+              </div>
               <div className="my-6">
                 <DynamicSolarMapWithNoSSR
                   gspregionData={
@@ -56,15 +70,14 @@ export default function Home() {
                     IS_LOCAL_REQ ? gspregionData : JSON.parse(gspregionData)
                   }
                   // TODO: don't pop last element once NATIONAL fc not in GSP
-                  forecastData={forecastData.forecasts.slice(0, -1)}
+                  forecastDataGSP={forecastData.forecasts.slice(0, -1)}
+                  forecastDataNational={
+                    forecastData.forecasts[forecastData.forecasts.length - 1]
+                  }
                   selectedTimeHorizon={selectedTimeHorizon}
+                  showGSPForecast={showGSPForecast}
                 />
               </div>
-              <TimeHorizonSelector
-                selectedTimeHorizon={selectedTimeHorizon}
-                setSelectedTimeHorizon={setSelectedTimeHorizon}
-                targetTimes={forecastData.forecasts[0].forecastValues}
-              />
             </>
           )}
 
@@ -79,9 +92,6 @@ export default function Home() {
                   selectedTimeHorizon={selectedTimeHorizon}
                 />
               </div>
-              {/* <pre className="p-2 rounded-md bg-slate-800 text-slate-200">
-                <code>{JSON.stringify(forecastData, null, 2)}</code>
-              </pre> */}
             </>
           )}
         </main>
