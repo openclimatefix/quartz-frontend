@@ -34,7 +34,7 @@ const Navbar = ({ environment }: INavbar) => {
                   className={classNames(
                     environment === "local"
                       ? "bg-danube-500 text-white"
-                      : "text-gray-900 hover:bg-gray-50 hover:text-gray-900",
+                      : "text-gray-900",
                     "py-2 px-3 inline-flex items-center text-sm font-medium"
                   )}
                 >
