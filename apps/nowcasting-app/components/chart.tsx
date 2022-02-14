@@ -1,19 +1,20 @@
 import { useRef } from "react";
 import * as d3 from "d3";
 
-import { useChartDimensions } from "./utils";
+import { getForecastAccessorForTimeHorizon, useChartDimensions } from "./utils";
 
 interface IChart {
   data: any;
+  selectedTimeHorizon: number;
 }
 
 // const ChartContext = createContext();
 // export const useDimensionsContext = () => useContext(ChartContext);
 
-const Chart = ({ data }: IChart) => {
+const Chart = ({ data, selectedTimeHorizon }: IChart) => {
   const gspAccessor = (d) => d.location.gspId;
-  const forecastAccessor = (d) =>
-    d.forecastValues[0].expectedPowerGenerationMegawatts;
+  const forecastAccessor =
+    getForecastAccessorForTimeHorizon(selectedTimeHorizon);
 
   const [ref, dms] = useChartDimensions({});
 
@@ -55,7 +56,7 @@ const Chart = ({ data }: IChart) => {
       {/* <ChartContext.Provider value={dms}> */}
       <svg width={dms.width} height={dms.height}>
         <g transform={`translate(${dms.marginLeft}, ${dms.marginTop})`}>
-          <path fill="none" stroke="red" d={line} />
+          <path fill="none" stroke="#468AC9" strokeWidth="2" d={line} />
           <g
             className="xAxis"
             ref={xAxisRef}

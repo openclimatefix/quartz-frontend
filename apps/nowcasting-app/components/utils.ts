@@ -90,3 +90,33 @@ export const useUniqueId = (prefix = "") => {
   lastId++;
   return [prefix, lastId].join("-");
 };
+
+export const allForecastsAccessor = (d) => d.forecastValues;
+const forecastAccessor0 = (d) =>
+  d.forecastValues[0].expectedPowerGenerationMegawatts;
+const forecastAccessor1 = (d) =>
+  d.forecastValues[1].expectedPowerGenerationMegawatts;
+const forecastAccessor2 = (d) =>
+  d.forecastValues[2].expectedPowerGenerationMegawatts;
+export const getForecastAccessorForTimeHorizon = (selectedTimeHorizon) => {
+  switch (selectedTimeHorizon) {
+    case 0:
+      return forecastAccessor0;
+    case 1:
+      return forecastAccessor1;
+    case 2:
+      return forecastAccessor2;
+  }
+};
+
+export const classNames = (...classes: string[]) => {
+  return classes.filter(Boolean).join(" ");
+};
+
+/**
+ * @param date Date object
+ * @returns HH:MM representation of the date, as string
+ */
+export const getTimeFromDate = (date: Date) => {
+  return date.toTimeString().split(" ")[0].slice(0, -3);
+};
