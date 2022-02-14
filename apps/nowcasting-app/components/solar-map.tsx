@@ -8,7 +8,7 @@ interface ISolarMap {
 
 import { GeoJsonObject } from "geojson";
 import { GeoJSON } from "react-leaflet";
-import { LeafletMouseEvent } from "leaflet";
+import { LeafletMouseEvent, GeoJSON as LeafletGeoJSON } from "leaflet";
 import * as d3 from "d3";
 import { MapContainer, TileLayer } from "react-leaflet";
 
@@ -18,6 +18,7 @@ import {
   getTimeFromDate,
 } from "./utils";
 import nationalRegionData from "../data/dummy-res/national-region.json";
+import { useEffect, useRef } from "react";
 
 const SHADES_OF_YELLOW = {
   DEFAULT: "#FFC425",
@@ -78,10 +79,12 @@ const SolarMap = ({
       gsp_id: gspId,
       region_name: regionName,
       gsp_name: gspName,
-      label,
     } = feature.properties || {};
+
+    const isGSPForecast = feature.type !== "GeometryCollection";
+
     const allForecasts = allForecastsAccessor(
-      showGSPForecast ? forecastDataGSP[gspId] : forecastDataNational
+      isGSPForecast ? forecastDataGSP[gspId] : forecastDataNational
     );
 
     layer.on("mouseover", function (e: LeafletMouseEvent) {
@@ -89,8 +92,8 @@ const SolarMap = ({
         .bindPopup(
           `
           <h2 class="text-xl font-bold">${
-            showGSPForecast ? regionName : "National-GB"
-          }${showGSPForecast ? ` (${gspName})` : ""}</h2>
+            isGSPForecast ? regionName : "National-GB"
+          }${isGSPForecast ? ` (${gspName})` : ""}</h2>
 
           <table class="text-base table-auto border border-slate-400 mt-4">
               <tr>
@@ -108,6 +111,16 @@ const SolarMap = ({
   };
 
   const addColorToEachGSP = (feature) => {
+    // Handle National Forecast being displayed
+    if (feature.geometry.type === "GeometryCollection") {
+      return {
+        fillColor: SHADES_OF_YELLOW.DEFAULT,
+        fillOpacity: 1,
+        color: "white",
+        weight: 1,
+      };
+    }
+
     return {
       fillColor: getForecastColorForGSP(feature.properties.gsp_id),
       fillOpacity: 1,
@@ -115,6 +128,16 @@ const SolarMap = ({
       weight: 1,
     };
   };
+
+  // Workaround for GeoJSON layer not updating on changing data
+  const forecastData = showGSPForecast ? gspregionData : nationalRegionData;
+  const geoJsonLayerRef = useRef<LeafletGeoJSON | null>(null);
+  useEffect(() => {
+    const layer = geoJsonLayerRef.current;
+    if (layer) {
+      layer.clearLayers().addData(forecastData);
+    }
+  }, [forecastData]);
 
   return (
     <MapContainer
@@ -128,9 +151,10 @@ const SolarMap = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <GeoJSON
-        data={showGSPForecast ? gspregionData : nationalRegionData}
+        ref={geoJsonLayerRef}
+        data={forecastData}
         onEachFeature={addPopupToEachGSP}
-        style={showGSPForecast && addColorToEachGSP}
+        style={addColorToEachGSP}
       />
     </MapContainer>
   );
