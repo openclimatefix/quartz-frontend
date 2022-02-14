@@ -1,7 +1,9 @@
 interface ISolarMap {
   gspregionData: GeoJsonObject;
-  forecastData: object;
+  forecastDataGSP: object;
+  forecastDataNational: object;
   selectedTimeHorizon: number;
+  showGSPForecast: boolean;
 }
 
 import { GeoJsonObject } from "geojson";
@@ -9,11 +11,13 @@ import { GeoJSON } from "react-leaflet";
 import { LeafletMouseEvent } from "leaflet";
 import * as d3 from "d3";
 import { MapContainer, TileLayer } from "react-leaflet";
+
 import {
   getForecastAccessorForTimeHorizon,
   allForecastsAccessor,
   getTimeFromDate,
 } from "./utils";
+import nationalRegionData from "../data/dummy-res/national-region.json";
 
 const SHADES_OF_YELLOW = {
   DEFAULT: "#FFC425",
@@ -31,15 +35,17 @@ const SHADES_OF_YELLOW = {
 
 const SolarMap = ({
   gspregionData,
-  forecastData,
+  forecastDataGSP,
+  forecastDataNational,
   selectedTimeHorizon,
+  showGSPForecast,
 }: ISolarMap) => {
   const forecastAccessor =
     getForecastAccessorForTimeHorizon(selectedTimeHorizon);
   const getForecastColorForGSP = (id) => {
     const colorScale = d3
       .scaleQuantize()
-      .domain(d3.extent(forecastData, forecastAccessor))
+      .domain(d3.extent(forecastDataGSP, forecastAccessor))
       .range([
         SHADES_OF_YELLOW["100"],
         SHADES_OF_YELLOW["300"],
@@ -48,7 +54,23 @@ const SolarMap = ({
         SHADES_OF_YELLOW["900"],
       ]);
 
-    return colorScale(forecastAccessor(forecastData[id]));
+    return colorScale(forecastAccessor(forecastDataGSP[id]));
+  };
+
+  const generateTableRow = ({
+    targetTime,
+    expectedPowerGenerationMegawatts,
+  }) => {
+    return `
+        <tr>
+          <td class="border border-slate-400 p-1">${getTimeFromDate(
+            new Date(targetTime)
+          )}</td>
+          <td class="border border-slate-400 p-1">${
+            Math.round(expectedPowerGenerationMegawatts * 100) / 100
+          } MW</td>
+        </tr>
+      `;
   };
 
   const addPopupToEachGSP = (feature, layer) => {
@@ -56,50 +78,28 @@ const SolarMap = ({
       gsp_id: gspId,
       region_name: regionName,
       gsp_name: gspName,
-    } = feature.properties;
-    const allForecasts = allForecastsAccessor(forecastData[gspId]);
+      label,
+    } = feature.properties || {};
+    const allForecasts = allForecastsAccessor(
+      showGSPForecast ? forecastDataGSP[gspId] : forecastDataNational
+    );
 
     layer.on("mouseover", function (e: LeafletMouseEvent) {
       layer
         .bindPopup(
           `
-          <h2 class="text-xl font-bold">${regionName} (${gspName})</h2>
+          <h2 class="text-xl font-bold">${
+            showGSPForecast ? regionName : "National-GB"
+          }${showGSPForecast ? ` (${gspName})` : ""}</h2>
 
           <table class="text-base table-auto border border-slate-400 mt-4">
               <tr>
-                <th class="border border-slate-400">Target Time</th>
-                <th class="border border-slate-400">Expected Power Generation</th>
+                <th class="border border-slate-400 p-1">Target Time</th>
+                <th class="border border-slate-400 p-1">Expected Power Generation</th>
               </tr>
-              <tr>
-                <td class="border border-slate-400">${getTimeFromDate(
-                  new Date(allForecasts[0].targetTime)
-                )}</td>
-                <td class="border border-slate-400">${
-                  Math.round(
-                    allForecasts[0].expectedPowerGenerationMegawatts * 100
-                  ) / 100
-                } MW</td>
-              </tr>
-              <tr>
-                <td class="border border-slate-400">${getTimeFromDate(
-                  new Date(allForecasts[1].targetTime)
-                )}</td>
-                <td class="border border-slate-400">${
-                  Math.round(
-                    allForecasts[1].expectedPowerGenerationMegawatts * 100
-                  ) / 100
-                } MW</td>
-              </tr>
-              <tr>
-                <td class="border border-slate-400">${getTimeFromDate(
-                  new Date(allForecasts[2].targetTime)
-                )}</td>
-                <td class="border border-slate-400">${
-                  Math.round(
-                    allForecasts[2].expectedPowerGenerationMegawatts * 100
-                  ) / 100
-                } MW</td>
-              </tr>
+              ${generateTableRow(allForecasts[0])}
+              ${generateTableRow(allForecasts[1])}
+              ${generateTableRow(allForecasts[2])}
           </table>
         `
         )
@@ -128,9 +128,9 @@ const SolarMap = ({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <GeoJSON
-        data={gspregionData}
+        data={showGSPForecast ? gspregionData : nationalRegionData}
         onEachFeature={addPopupToEachGSP}
-        style={addColorToEachGSP}
+        style={showGSPForecast && addColorToEachGSP}
       />
     </MapContainer>
   );
