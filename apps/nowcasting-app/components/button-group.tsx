@@ -38,6 +38,7 @@ const ButtonGroup = ({ options }: IButtonGroup) => {
       {options.length >= 2 &&
         options.map(({ label, onClick, active }, index) => (
           <button
+            key={`button-${index}`}
             className={classNames(
               active ? ACTIVE_BUTTON_STYLES : INACTIVE_BUTTON_STYLES,
               index === 0 && FIRST_BUTTON_STYLES,
