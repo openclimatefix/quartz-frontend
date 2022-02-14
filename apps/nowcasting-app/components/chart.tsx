@@ -1,17 +1,20 @@
 import { useRef } from "react";
 import * as d3 from "d3";
 
-import { forecastAccessor, useChartDimensions } from "./utils";
+import { getForecastAccessorForTimeHorizon, useChartDimensions } from "./utils";
 
 interface IChart {
   data: any;
+  selectedTimeHorizon: number;
 }
 
 // const ChartContext = createContext();
 // export const useDimensionsContext = () => useContext(ChartContext);
 
-const Chart = ({ data }: IChart) => {
+const Chart = ({ data, selectedTimeHorizon }: IChart) => {
   const gspAccessor = (d) => d.location.gspId;
+  const forecastAccessor =
+    getForecastAccessorForTimeHorizon(selectedTimeHorizon);
 
   const [ref, dms] = useChartDimensions({});
 
