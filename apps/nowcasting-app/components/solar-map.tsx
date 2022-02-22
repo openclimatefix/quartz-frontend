@@ -41,6 +41,7 @@ const SolarMap = ({
   selectedTimeHorizon,
   showGSPForecast,
 }: ISolarMap) => {
+  const getForecastDataByGSPId = (gspId) => forecastDataGSP[gspId - 1];
   const forecastAccessor =
     getForecastAccessorForTimeHorizon(selectedTimeHorizon);
   const getForecastColorForGSP = (id) => {
@@ -55,7 +56,7 @@ const SolarMap = ({
         SHADES_OF_YELLOW["900"],
       ]);
 
-    return colorScale(forecastAccessor(forecastDataGSP[id]));
+    return colorScale(forecastAccessor(getForecastDataByGSPId(id)));
   };
 
   const generateTableRow = ({
@@ -84,7 +85,7 @@ const SolarMap = ({
     const isGSPForecast = feature.type !== "GeometryCollection";
 
     const allForecasts = allForecastsAccessor(
-      isGSPForecast ? forecastDataGSP[gspId] : forecastDataNational
+      isGSPForecast ? getForecastDataByGSPId(gspId) : forecastDataNational
     );
 
     layer.on("mouseover", function (e: LeafletMouseEvent) {
