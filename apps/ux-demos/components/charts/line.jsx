@@ -45,8 +45,8 @@ const MyResponsiveLine = ({
     yFormat=" >-.2f"
     axisTop={null}
     axisRight={null}
-    axisBottom={null}
-    axisLeft={null}
+    // axisBottom={null}
+    // axisLeft={null}
     axisBottom={{
       orient: "bottom",
       tickSize: 5,

@@ -1,9 +1,6 @@
 interface ISolarMap {
-  gspregionData: GeoJsonObject;
-  // forecastDataGSP: object;
-  forecastDataNational: object;
-  selectedTimeHorizon: number;
-  showGSPForecast: boolean;
+  mapHeight?: string;
+  circles?: boolean;
 }
 
 // import React, { useRef } from "react";
@@ -14,11 +11,11 @@ import { LeafletMouseEvent, GeoJSON as LeafletGeoJSON } from "leaflet";
 import * as d3 from "d3";
 import { MapContainer, TileLayer } from "react-leaflet";
 
-import {
-  getForecastAccessorForTimeHorizon,
-  allForecastsAccessor,
-  getTimeFromDate,
-} from "./utils";
+// import {
+//   getForecastAccessorForTimeHorizon,
+//   allForecastsAccessor,
+//   getTimeFromDate,
+// } from "./utils";
 
 import { useEffect, useRef } from "react";
 
@@ -40,10 +37,6 @@ const SHADES_OF_YELLOW = {
 };
 
 const SolarMap = ({
-  // gspregionData,
-  // forecastDataGSP,
-  forecastDataNational,
-  selectedTimeHorizon,
   mapHeight = "calc(100vh - 2rem - 1rem)",
   circles = false,
 }: ISolarMap) => {
@@ -60,57 +53,6 @@ const SolarMap = ({
     return colorScale(getForecastDataByGSPId(getForecastDataByGSPId(id)));
   };
 
-  const generateTableRow = ({
-    targetTime,
-    expectedPowerGenerationMegawatts,
-  }) => {
-    return `
-        <tr>
-          <td class="border border-slate-400 p-1">${getTimeFromDate(
-            new Date(targetTime)
-          )}</td>
-          <td class="border border-slate-400 p-1">${
-            Math.round(expectedPowerGenerationMegawatts * 100) / 100
-          } MW</td>
-        </tr>
-      `;
-  };
-
-  const addPopupToEachGSP = (feature, layer) => {
-    const {
-      gsp_id: gspId,
-      region_name: regionName,
-      gsp_name: gspName,
-    } = feature.properties || {};
-
-    const isGSPForecast = feature.type !== "GeometryCollection";
-
-    const allForecasts = allForecastsAccessor(
-      isGSPForecast ? getForecastDataByGSPId(gspId) : forecastDataNational
-    );
-
-    layer.on("mouseover", function (e: LeafletMouseEvent) {
-      layer
-        .bindPopup(
-          `
-          <h2 class="text-xl font-bold">${
-            isGSPForecast ? regionName : "National-GB"
-          }${isGSPForecast ? ` (${gspName})` : ""}</h2>
-
-          <table class="text-base table-auto border border-slate-400 mt-4">
-              <tr>
-                <th class="border border-slate-400 p-1">Target Time</th>
-                <th class="border border-slate-400 p-1">Expected Power Generation</th>
-              </tr>
-              ${generateTableRow(allForecasts[0])}
-              ${generateTableRow(allForecasts[1])}
-              ${generateTableRow(allForecasts[2])}
-          </table>
-        `
-        )
-        .openPopup();
-    });
-  };
 
   const addColorToEachGSP = (feature) => {
     return {
@@ -153,8 +95,9 @@ const SolarMap = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {circles ? (
-          randomCoords.map((coord) => (
+          randomCoords.map((coord, i) => (
             <Circle
+              key={i}
               center={coord}
               pathOptions={{ fillColor: "blue" }}
               radius={10000}
@@ -163,6 +106,7 @@ const SolarMap = ({
         ) : (
           <GeoJSON
             // ref={geoJsonLayerRef}
+            // @ts-ignore
             data={gspRegionData}
             // onEachFeature={addPopupToEachGSP}
             style={addColorToEachGSP}
