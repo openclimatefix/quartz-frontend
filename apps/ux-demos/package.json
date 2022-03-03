@@ -9,9 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@nivo/core": "^0.79.0",
+    "@nivo/line": "^0.79.1",
+    "leaflet": "^1.7.1",
     "next": "12.1.0",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-leaflet": "^3.2.5",
+    "recharts": "^2.1.9"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.2",
