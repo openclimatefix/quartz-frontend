@@ -1,0 +1,4517 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 0 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 1 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 2 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 3 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 4 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 5 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 6 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 7 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 40, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 21, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 76, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 25, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 14, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 73, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 91, "timeStep": 8 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 35, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 5, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 97, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 37, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 76, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 10, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 9 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 53, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 10, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 28, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 9, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 12, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 91, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 61, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 29, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 10 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 91, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 79, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 73, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 76, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 52, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 82, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 30, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 34, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 88, "timeStep": 11 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 28, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 64, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 72, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 75, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 34, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 9, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 45, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 76, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 27, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 50, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 29, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 12 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 74, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 92, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 27, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 77, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 40, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 71, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 21, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 88, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 13 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 18, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 68, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 50, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 9, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 84, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 91, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 86, "timeStep": 14 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 49, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 88, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 71, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 65, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 91, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 68, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 89, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 33, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 15, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 15 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 94, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 5, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 41, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 60, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 14, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 27, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 59, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 16 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 39, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 59, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 55, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 84, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 41, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 82, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 24, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 10, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 99, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 22, "timeStep": 17 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 28, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 2, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 56, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 33, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 28, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 2, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 4, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 73, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 41, "timeStep": 18 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 13, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 12, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 92, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 3, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 46, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 92, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 18, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 49, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 86, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 19 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 51, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 3, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 89, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 43, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 60, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 60, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 16, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 20 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 52, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 7, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 82, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 29, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 67, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 67, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 24, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 67, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 71, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 21 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 53, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 21, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 73, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 97, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 58, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 3, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 22 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 73, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 41, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 22, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 71, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 49, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 86, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 23, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 62, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 98, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 37, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 52, "timeStep": 23 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 61, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 62, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 23, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 83, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 65, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 54, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 60, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 24 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 55, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 41, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 9, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 97, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 43, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 92, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 28, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 26, "timeStep": 25 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 26, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 33, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 78, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 68, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 47, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 5, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 32, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 75, "timeStep": 26 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 32, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 37, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 94, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 99, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 59, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 74, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 40, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 26, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 62, "timeStep": 27 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 84, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 79, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 40, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 7, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 7, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 78, "timeStep": 28 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 89, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 88, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 86, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 14, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 81, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 61, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 95, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 53, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 15, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 18, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 3, "timeStep": 29 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 86, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 37, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 3, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 97, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 45, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 23, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 61, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 30 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 39, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 70, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 76, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 75, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 55, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 3, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 10, "timeStep": 31 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 82, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 31, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 7, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 52, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 98, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 39, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 10, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 27, "timeStep": 32 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 78, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 39, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 13, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 35, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 91, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 33 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 54, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 59, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 87, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 35, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 33, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 72, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 34, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 22, "timeStep": 34 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 12, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 84, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 70, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 92, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 1, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 54, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 75, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 46, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 79, "timeStep": 35 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 7, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 38, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 15, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 76, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 49, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 58, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 50, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 55, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 95, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 62, "timeStep": 36 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 69, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 98, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 43, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 55, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 75, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 75, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 54, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 37 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 48, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 57, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 21, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 29, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 56, "timeStep": 38 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 59, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 34, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 25, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 67, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 30, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 41, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 20, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 39 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 79, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 10, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 47, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 84, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 95, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 36, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 22, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 44, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 5, "timeStep": 40 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 68, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 82, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 52, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 21, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 7, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 6, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 43, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 78, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 67, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 73, "timeStep": 41 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 90, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 85, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 47, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 68, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 11, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 32, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 80, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 66, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 23, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 55, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 63, "timeStep": 42 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 52, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 86, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 93, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 16, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 47, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 65, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 8, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 19, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 42, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 46, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 72, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 96, "timeStep": 43 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 44 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 45 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.076171875, 55.658996099428364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.515869140625, 54.7943516039205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.9558105468749999, 54.25238930276849]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.373046875, 53.553362785528094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.6042480468749999, 53.08082737207479]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.504638671875, 52.53627304145948]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.406494140625, 52.38901106223458]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.13134765625, 51.72702815704774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.10986328125, 51.24128576954669]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.32861328125, 56.30434864830831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.18603515625, 57.302789656350086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "solarGeneration": 0, "timeStep": 46 },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.1416015625, 57.24339368551155]
+      }
+    }
+  ]
+}
