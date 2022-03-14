@@ -1,23 +1,13 @@
 import { NextPage } from "next";
-import React, { useRef, useEffect, useState } from "react";
-import mapboxgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+import React, { useState } from "react";
+import Map from "../components/map";
 
 import fakeMapData from "../data/fake-map.json";
-
-mapboxgl.accessToken =
-  "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
 
 const PV_MIN = 0;
 const PV_MAX = 100;
 
 const MapboxPage: NextPage = () => {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const [lng, setLng] = useState(-2.547855);
-  const [lat, setLat] = useState(55.00366);
-  const [zoom, setZoom] = useState(5.5);
-
   const [selectedTimeStep, setSelectedTimeStep] = useState(0);
 
   const timeSteps = [
@@ -70,40 +60,14 @@ const MapboxPage: NextPage = () => {
     "23:30",
   ];
 
-  useEffect(() => {
-    if (map.current) return; // initialize map only once
-
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/dark-v10",
-      center: [lng, lat],
-      zoom: zoom,
-    });
-  });
-
-  useEffect(() => {
-    if (!map.current) return; // wait for map to initialize
-
-    map.current.on("move", () => {
-      setLng(map.current.getCenter().lng.toFixed(4));
-      setLat(map.current.getCenter().lat.toFixed(4));
-      setZoom(map.current.getZoom().toFixed(2));
-    });
-
-    map.current.on("load", () => {
-      addPVData();
-    });
-  });
-
-  const filterBy = (timeStep) => {
+  const filterBy = (map, timeStep) => {
     if (!map.current) return; // wait for map to initialize
 
     const filters = ["==", "timeStep", timeStep];
     map.current.setFilter("pvgeneration-circles", filters);
-    // map.current.setFilter("pvgeneration-labels", filters);
   };
 
-  const addPVData = () => {
+  const addPVData = (map) => {
     map.current.addSource("pvgeneration", {
       type: "geojson",
       data: fakeMapData,
@@ -136,59 +100,39 @@ const MapboxPage: NextPage = () => {
       },
     });
 
-    // map.current.addLayer({
-    //   id: "pvgeneration-labels",
-    //   type: "symbol",
-    //   source: "pvgeneration",
-    //   layout: {
-    //     "text-field": ["concat", ["to-string", ["get", "mag"]], "m"],
-    //     "text-font": ["Open Sans Bold", "Arial Unicode MS Bold"],
-    //     "text-size": 12,
-    //   },
-    //   paint: {
-    //     "text-color": "rgba(0,0,0,0.5)",
-    //   },
-    // });
-
-    // Set filter to first month of the year
-    // 0 = January
-    filterBy(0);
+    filterBy(map, 0);
   };
 
   return (
-    <div className="relative h-screen">
-      <div className="absolute top-0 left-0 z-10 px-2 py-3 m-3 font-mono text-white bg-gray-600 rounded">
-        <div>
-          Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-        </div>
-        <div className="pt-2 mt-2 border-t border-white">
-          <h2 className="font-bold">Solar Generation Data by Site</h2>
-          <label id="timeStep"></label>
-          <input
-            id="slider"
-            type="range"
-            min="0"
-            max="46"
-            step="1"
-            value={selectedTimeStep}
-            className="w-full mt-3"
-            onChange={(e) => {
-              const timeStep = parseInt(e.target.value, 10);
-              filterBy(timeStep);
-              setSelectedTimeStep(timeStep);
-            }}
-          />
-          <div>
-            Time: <span>{timeSteps[selectedTimeStep]}</span>
-          </div>
-        </div>
-        <div className="pt-4 my-2 border-t border-white">
-          <div className="h-3 max-w-xs mb-2 bg-red-200 bg-gradient-to-r from-yellow-500 to-red-500"></div>
-          {/* <div>Magnitude (m)</div> */}
-        </div>
-      </div>
-      <div ref={mapContainer} className="h-full" />
-      <div className="map-overlay top"></div>
+    <div className="h-[80vh]">
+      <Map
+        loadDataOverlay={addPVData}
+        controlOverlay={(map) => {
+          return (
+            <div className="pt-2 mt-2 border-t border-white">
+              <h2 className="font-bold">Solar Generation Data by Site</h2>
+              <label id="timeStep"></label>
+              <input
+                id="slider"
+                type="range"
+                min="0"
+                max="46"
+                step="1"
+                value={selectedTimeStep}
+                className="w-full mt-3"
+                onChange={(e) => {
+                  const timeStep = parseInt(e.target.value, 10);
+                  filterBy(map, timeStep);
+                  setSelectedTimeStep(timeStep);
+                }}
+              />
+              <div>
+                Time: <span>{timeSteps[selectedTimeStep]}</span>
+              </div>
+            </div>
+          );
+        }}
+      />
     </div>
   );
 };

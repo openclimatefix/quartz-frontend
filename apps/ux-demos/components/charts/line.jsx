@@ -29,8 +29,8 @@ const MyResponsiveLine = ({
       {
         axis: "x",
         value: timeOfInterest,
-        lineStyle: { stroke: "#b0413e", strokeWidth: 2 },
-        legend: "biggest error",
+        lineStyle: { stroke: "#b0413e", strokeWidth: 6 },
+        legend: "Time",
       },
     ]}
     margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
