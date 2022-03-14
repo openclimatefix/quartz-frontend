@@ -15,7 +15,7 @@ const Map = ({ loadDataOverlay, controlOverlay }: IMap) => {
   const map = useRef(null);
   const [lng, setLng] = useState(-2.547855);
   const [lat, setLat] = useState(55.00366);
-  const [zoom, setZoom] = useState(5.5);
+  const [zoom, setZoom] = useState(5.3);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once

@@ -21,7 +21,8 @@ const MyResponsiveLine = dynamic(() => import("../components/charts/line"), {
 });
 
 const Vis1MapPage: NextPage = () => {
-  const [selectedTimeStep, setSelectedTimeStep] = useState(0);
+  const INITIAL_TIME_STEP = 23;
+  const [selectedTimeStep, setSelectedTimeStep] = useState(INITIAL_TIME_STEP);
 
   const timeSteps = [
     "00:30",
@@ -113,7 +114,7 @@ const Vis1MapPage: NextPage = () => {
       },
     });
 
-    filterBy(map, 0);
+    filterBy(map, INITIAL_TIME_STEP);
   };
 
   return (
