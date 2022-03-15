@@ -68,7 +68,7 @@ const DataAttribution = ({ datasets = [] }: IDataAttribution) => {
                       <div className="absolute inset-0 px-4 sm:px-6">
                         {datasets.map(
                           ({ title, sourceName, sourceUrl, isPublic }, i) => (
-                            <div className="mb-6">
+                            <div className="mb-6" key={title}>
                               <h2 className="text-lg">
                                 Dataset #{i + 1}: {title}
                               </h2>

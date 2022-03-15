@@ -5,18 +5,11 @@ import DataAttribution from "../components/data-attribution";
 import Layout from "../components/layout";
 import Map from "../components/map";
 
-// import fakeMapData from "../data/fake-map.json";
-import pvMapData from "../data/pv/2021-06-10.json";
+import pvMapData from "../data/pv/generation-2021-06-10.json";
+import pvLiveGenerationData from "../data/pv/pvlive-2021-06-10.json";
 
-const PV_MIN = 0;
-const PV_MAX = 3000;
-
-/**
-
-- Leftmost map of GB from Jack's video ("HRV Satellite & PV")
-- As big as possible
- * 
- */
+const PV_GENERATION_MIN = 0;
+const PV_GENERATION_MAX = 3000;
 
 const MyResponsiveLine = dynamic(() => import("../components/charts/line"), {
   ssr: false,
@@ -99,9 +92,9 @@ const Vis1MapPage: NextPage = () => {
           "interpolate",
           ["linear"],
           ["get", "solarGeneration"],
-          PV_MIN,
+          PV_GENERATION_MIN,
           "#eab308",
-          PV_MAX,
+          PV_GENERATION_MAX,
           "#ef4444",
         ],
         "circle-opacity": 0.75,
@@ -109,9 +102,9 @@ const Vis1MapPage: NextPage = () => {
           "interpolate",
           ["linear"],
           ["get", "solarGeneration"],
-          PV_MIN,
+          PV_GENERATION_MIN,
           0,
-          PV_MAX,
+          PV_GENERATION_MAX,
           30,
         ],
       },
@@ -206,7 +199,7 @@ const Vis1MapPage: NextPage = () => {
         </div>
         <div className="border-t border-black h-60">
           <MyResponsiveLine
-            // TODO: replace with pv forecast and actual
+            // TODO: replace with real pv forecast
             timeOfInterest={timeSteps[selectedTimeStep]}
             data={[
               {
@@ -264,59 +257,7 @@ const Vis1MapPage: NextPage = () => {
                   { x: "23:30", y: 0 },
                 ],
               },
-              {
-                id: "Generation (PVLive)",
-                color: "red",
-                data: [
-                  { x: "23:30", y: 0.0808 },
-                  { x: "23:00", y: 0.0808 },
-                  { x: "22:30", y: 0.0808 },
-                  { x: "22:00", y: 0.0808 },
-                  { x: "21:30", y: 0.436 },
-                  { x: "21:00", y: 0.56 },
-                  { x: "20:30", y: 9.44 },
-                  { x: "20:00", y: 76.4 },
-                  { x: "19:30", y: 339.0 },
-                  { x: "19:00", y: 540.0 },
-                  { x: "18:30", y: 869.0 },
-                  { x: "18:00", y: 1330.0 },
-                  { x: "17:30", y: 1800.0 },
-                  { x: "17:00", y: 2080.0 },
-                  { x: "16:30", y: 2740.0 },
-                  { x: "16:00", y: 3180.0 },
-                  { x: "15:30", y: 3470.0 },
-                  { x: "15:00", y: 3800.0 },
-                  { x: "14:30", y: 3910.0 },
-                  { x: "14:00", y: 3970.0 },
-                  { x: "13:30", y: 4140.0 },
-                  { x: "13:00", y: 4190.0 },
-                  { x: "12:30", y: 4540.0 },
-                  { x: "12:00", y: 4660.0 },
-                  { x: "11:30", y: 4310.0 },
-                  { x: "11:00", y: 3560.0 },
-                  { x: "10:30", y: 3290.0 },
-                  { x: "10:00", y: 3180.0 },
-                  { x: "09:30", y: 3360.0 },
-                  { x: "09:00", y: 3210.0 },
-                  { x: "08:30", y: 2740.0 },
-                  { x: "08:00", y: 2270.0 },
-                  { x: "07:30", y: 1800.0 },
-                  { x: "07:00", y: 1440.0 },
-                  { x: "06:30", y: 1010.0 },
-                  { x: "06:00", y: 652.0 },
-                  { x: "05:30", y: 381.0 },
-                  { x: "05:00", y: 162.0 },
-                  { x: "04:30", y: 32.5 },
-                  { x: "04:00", y: 2.52 },
-                  { x: "03:30", y: 0.0 },
-                  { x: "03:00", y: 0.0 },
-                  { x: "02:30", y: 0.0 },
-                  { x: "02:00", y: 0.0 },
-                  { x: "01:30", y: 0.0 },
-                  { x: "01:00", y: 0.0 },
-                  { x: "00:30", y: 0.0 },
-                ],
-              },
+              pvLiveGenerationData,
             ]}
           />
         </div>
