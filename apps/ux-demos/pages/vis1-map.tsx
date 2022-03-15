@@ -1,13 +1,15 @@
 import { NextPage } from "next";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import DataAttribution from "../components/data-attribution";
 import Layout from "../components/layout";
 import Map from "../components/map";
 
-import fakeMapData from "../data/fake-map.json";
+// import fakeMapData from "../data/fake-map.json";
+import pvMapData from "../data/pv/2021-06-10.json";
 
 const PV_MIN = 0;
-const PV_MAX = 100;
+const PV_MAX = 3000;
 
 /**
 
@@ -77,14 +79,15 @@ const Vis1MapPage: NextPage = () => {
   const filterBy = (map, timeStep) => {
     if (!map.current) return; // wait for map to initialize
 
-    const filters = ["==", "timeStep", timeStep];
+    const filters = ["==", "time", timeStep];
     map.current.setFilter("pvgeneration-circles", filters);
+    setSelectedTimeStep(timeStep);
   };
 
   const addPVData = (map) => {
     map.current.addSource("pvgeneration", {
       type: "geojson",
-      data: fakeMapData,
+      data: pvMapData,
     });
 
     map.current.addLayer({
@@ -119,6 +122,30 @@ const Vis1MapPage: NextPage = () => {
 
   return (
     <Layout>
+      <DataAttribution
+        datasets={[
+          {
+            title: "PV Generation",
+            sourceName: "PV_Live, Sheffield Solar",
+            sourceUrl: "https://www.solar.sheffield.ac.uk/pvlive/",
+            displayedWhere: "Line Chart",
+            isPublic: true,
+          },
+          {
+            title: "PV Forecast",
+            sourceName: "National Grid ESO",
+            displayedWhere: "Line Chart",
+            isPublic: false,
+          },
+          {
+            title: "PV Generation by Site (Obfuscated)",
+            sourceName: "Passiv",
+            sourceUrl: "https://huggingface.co/datasets/openclimatefix/uk_pv",
+            displayedWhere: "Map",
+            isPublic: true,
+          },
+        ]}
+      />
       <div className="flex flex-col h-full">
         <div className="flex-grow">
           <Map
@@ -139,11 +166,38 @@ const Vis1MapPage: NextPage = () => {
                     onChange={(e) => {
                       const timeStep = parseInt(e.target.value, 10);
                       filterBy(map, timeStep);
-                      setSelectedTimeStep(timeStep);
                     }}
                   />
-                  <div>
-                    Time: <span>{timeSteps[selectedTimeStep]}</span>
+                  <div className="flex">
+                    <div className="flex-grow">
+                      Time: <span>{timeSteps[selectedTimeStep]}</span>
+                    </div>
+                    <div className="">
+                      <button
+                        className="px-2 py-1 mr-1 border-2 border-white"
+                        onClick={() => {
+                          // Decrement timeStep or go back to max
+                          if (selectedTimeStep === 0) {
+                            return filterBy(map, timeSteps.length - 1);
+                          }
+                          filterBy(map, selectedTimeStep - 1);
+                        }}
+                      >
+                        &lt;
+                      </button>
+                      <button
+                        className="px-2 py-1 border-2 border-white"
+                        onClick={() => {
+                          // Incrememnt timeStep or go back to 0
+                          if (selectedTimeStep === timeSteps.length - 1) {
+                            return filterBy(map, 0);
+                          }
+                          filterBy(map, selectedTimeStep + 1);
+                        }}
+                      >
+                        &gt;
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -158,7 +212,7 @@ const Vis1MapPage: NextPage = () => {
               {
                 // PV_GSP_ASL_20210610002152
                 // 14010326
-                id: "ngeso-pv-forecast",
+                id: "Forecast (NG-ESO)",
                 color: "black",
                 data: [
                   { x: "00:30", y: 0 },
@@ -211,7 +265,7 @@ const Vis1MapPage: NextPage = () => {
                 ],
               },
               {
-                id: "pvlive-actual",
+                id: "Generation (PVLive)",
                 color: "red",
                 data: [
                   { x: "23:30", y: 0.0808 },

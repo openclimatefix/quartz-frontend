@@ -50,7 +50,7 @@ const Map = ({ loadDataOverlay, controlOverlay }: IMap) => {
         </div>
         {controlOverlay(map)}
         <div className="pt-4 my-2 border-t border-white">
-          <div className="h-3 max-w-xs mb-2 bg-red-200 bg-gradient-to-r from-yellow-500 to-red-500"></div>
+          <div className="h-3 mb-2 bg-red-200 bg-gradient-to-r from-yellow-500 to-red-500"></div>
         </div>
       </div>
       <div ref={mapContainer} className="h-full" />
