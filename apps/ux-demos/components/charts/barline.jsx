@@ -940,13 +940,13 @@ const BarLineChart = () => {
     "#EA526F",
     "#468AC9",
     "#8DC77B",
-    "#A5D297",
+    "#643173",
     "#A13D63",
     "#351E29",
   ];
   const GENERATION = [
-    { key: "Oil", fill: COLORS[0] },
-    { key: "Coal", fill: COLORS[0] },
+    // { key: "Oil", fill: COLORS[0] },
+    // { key: "Coal", fill: COLORS[0] },
     { key: "Nuclear", fill: COLORS[1] },
     { key: "Wind", fill: COLORS[2] },
     { key: "Pumped Storage", fill: COLORS[3] },
@@ -963,6 +963,51 @@ const BarLineChart = () => {
     { key: "SOLAR", fill: "#FFC425" },
   ];
 
+  /** Ensures that the legend is ordered in the same way as the stacked items */
+  const renderLegend = ({ payload }) => (
+    <ul className="flex">
+      {payload.map((entry, index) => (
+        <li key={`item-${index}`} className="mr-2">
+          <span
+            className="inline-block w-3 h-3 mr-1"
+            style={{ backgroundColor: entry.color }}
+          ></span>
+          {entry.value}
+        </li>
+      ))}
+    </ul>
+  );
+
+  function prettyPrintNumberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  const renderTooltip = ({ payload, label }) => {
+    const reversedPayload = [].concat(payload).reverse();
+
+    return (
+      <div className="p-2 bg-white border-2 border-black shadow">
+        <p className="mb-1 text-lg font-bold">Time: {label}</p>
+        <ul className="">
+          {reversedPayload.map((entry, index) => (
+            <li
+              key={`item-${index}`}
+              className={`p-1 ${
+                (entry.name.startsWith("INT") ||
+                  entry.name.startsWith("Bio") ||
+                  entry.name.startsWith("Other")) &&
+                "text-white"
+              }`}
+              style={{ backgroundColor: entry.color }}
+            >
+              {entry.name}: {prettyPrintNumberWithCommas(entry.value)} MW
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart
@@ -978,14 +1023,21 @@ const BarLineChart = () => {
       >
         <CartesianGrid stroke="#f5f5f5" />
         <XAxis dataKey="time" scale="band" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        {/* <Area type="monotone" dataKey="amt" fill="#8884d8" stroke="#8884d8" /> */}
-        {/* <Bar dataKey="pv" barSize={20} fill="#413ea0" /> */}
+        <YAxis
+          tickFormatter={(val, i) => prettyPrintNumberWithCommas(val) + " MW"}
+        />
+        <Tooltip content={renderTooltip} />
+        <Legend content={renderLegend} />
 
         {GENERATION.map(({ key, fill }) => (
-          <Bar dataKey={key} key={key} stackId="a" fill={fill} />
+          <Bar
+            dataKey={key}
+            key={key}
+            stackId="a"
+            fill={fill}
+            stroke="white"
+            strokeWidth={2}
+          />
         ))}
         <Line
           type="monotone"
@@ -993,7 +1045,6 @@ const BarLineChart = () => {
           stroke="#ff7300"
           strokeWidth={10}
         />
-        {/* <Scatter dataKey="cnt" fill="red" /> */}
       </ComposedChart>
     </ResponsiveContainer>
   );
