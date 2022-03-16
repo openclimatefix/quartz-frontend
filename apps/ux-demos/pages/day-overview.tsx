@@ -9,21 +9,18 @@ const DayOverviewPage: NextPage = () => {
         <Link href="/vis1-map">
           <a className="flex border border-black cursor-pointer hover:bg-gray-200">
             <div className="w-full my-auto text-center">
-              <h2 className="text-4xl">Forecasts for Individual PV Systems</h2>
-              <p className="pt-2 text-lg">
-                Output by PV system, combined with forecast error.
-              </p>
+              <h2 className="text-4xl">Solar Generation Data by Site</h2>
             </div>
           </a>
         </Link>
         <Link href="/vis2-map">
           <a className="flex border border-black cursor-pointer hover:bg-gray-200">
             <div className="w-full my-auto text-center">
-              <h2 className="text-4xl">Forecast Error Grouped by GSP</h2>
+              <h2 className="text-4xl">Biggest Forecast Error by GSP</h2>
             </div>
           </a>
         </Link>
-        <Link href="/vis4-bar">
+        <Link href="/vis3-bar">
           <a className="flex border border-black cursor-pointer hover:bg-gray-200">
             <div className="w-full my-auto text-center">
               <h2 className="text-4xl">Generation Mix with Demand</h2>

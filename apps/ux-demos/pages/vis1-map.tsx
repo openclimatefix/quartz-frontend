@@ -114,7 +114,7 @@ const Vis1MapPage: NextPage = () => {
   };
 
   return (
-    <Layout>
+    <Layout title="Solar Generation Data by Site">
       <DataAttribution
         datasets={[
           {

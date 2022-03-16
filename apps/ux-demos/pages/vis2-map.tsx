@@ -99,7 +99,7 @@ const Vis2MapPage: NextPage = () => {
 
   return (
     <>
-      <Layout>
+      <Layout title="Biggest Forecast Error by GSP">
         <DataAttribution
           datasets={[
             {
