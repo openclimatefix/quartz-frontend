@@ -44,14 +44,8 @@ const Map = ({ loadDataOverlay, controlOverlay }: IMap) => {
 
   return (
     <div className="relative h-full">
-      <div className="absolute top-0 left-0 z-10 px-2 py-3 m-3 font-mono text-white bg-gray-600 rounded">
-        <div>
-          Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-        </div>
+      <div className="absolute top-0 left-0 z-10 px-2 py-3 m-3 font-mono text-white bg-gray-600 rounded min-w-[20rem]">
         {controlOverlay(map)}
-        <div className="pt-4 my-2 border-t border-white">
-          <div className="h-3 mb-2 bg-red-200 bg-gradient-to-r from-yellow-500 to-red-500"></div>
-        </div>
       </div>
       <div ref={mapContainer} className="h-full" />
       <div className="map-overlay top"></div>

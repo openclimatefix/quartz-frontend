@@ -145,7 +145,7 @@ const Vis1MapPage: NextPage = () => {
             loadDataOverlay={addPVData}
             controlOverlay={(map) => {
               return (
-                <div className="pt-2 mt-2 border-t border-white">
+                <>
                   <h2 className="font-bold">Solar Generation Data by Site</h2>
                   <label id="timeStep"></label>
                   <input
@@ -167,7 +167,7 @@ const Vis1MapPage: NextPage = () => {
                     </div>
                     <div className="">
                       <button
-                        className="px-2 py-1 mr-1 border-2 border-white"
+                        className="px-2 py-1 mr-1 border-2 border-white select-none"
                         onClick={() => {
                           // Decrement timeStep or go back to max
                           if (selectedTimeStep === 0) {
@@ -179,7 +179,7 @@ const Vis1MapPage: NextPage = () => {
                         &lt;
                       </button>
                       <button
-                        className="px-2 py-1 border-2 border-white"
+                        className="px-2 py-1 border-2 border-white select-none"
                         onClick={() => {
                           // Incrememnt timeStep or go back to 0
                           if (selectedTimeStep === timeSteps.length - 1) {
@@ -192,7 +192,10 @@ const Vis1MapPage: NextPage = () => {
                       </button>
                     </div>
                   </div>
-                </div>
+                  <div className="pt-4 my-2 border-t border-white">
+                    <div className="h-3 mb-2 bg-red-200 bg-gradient-to-r from-yellow-500 to-red-500"></div>
+                  </div>
+                </>
               );
             }}
           />
