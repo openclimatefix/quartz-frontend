@@ -6,6 +6,7 @@ interface IDataAttribution {
     displayedWhere: string;
     isPublic: boolean;
   }[];
+  style?: "white" | "black";
 }
 
 import { Fragment, useState } from "react";
@@ -13,14 +14,21 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XIcon } from "@heroicons/react/outline";
 import { QuestionMarkCircleIcon } from "@heroicons/react/outline";
 
-const DataAttribution = ({ datasets = [] }: IDataAttribution) => {
+const DataAttribution = ({
+  datasets = [],
+  style = "white",
+}: IDataAttribution) => {
   const [open, setOpen] = useState(false);
 
   return (
     <>
       <button
         type="button"
-        className="fixed z-10 inline-flex items-center p-2 text-white border border-transparent rounded-full shadow-sm hover:text-black top-2 right-2 hover:bg-white"
+        className={`fixed z-10 inline-flex items-center p-2 border border-transparent rounded-full shadow-sm top-2 right-2  ${
+          style === "white"
+            ? "text-white hover:bg-white hover:text-black"
+            : "text-black hover:bg-black hover:text-white"
+        }`}
         onClick={() => setOpen(true)}
       >
         <QuestionMarkCircleIcon className="w-6 h-6" aria-hidden="true" />
