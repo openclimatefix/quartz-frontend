@@ -19,18 +19,21 @@ const MyResponsiveLine = ({
         value: sunriseTime,
         lineStyle: { stroke: "#b0413e", strokeWidth: 2 },
         legend: "sunrise",
+        textStyle: { fill: "#b0413e" },
       },
       {
         axis: "x",
         value: sunsetTime,
         lineStyle: { stroke: "#b0413e", strokeWidth: 2 },
         legend: "sunset",
+        textStyle: { fill: "#b0413e" },
       },
       {
         axis: "x",
         value: timeOfInterest,
         lineStyle: { stroke: "#b0413e", strokeWidth: 6 },
         legend: "Time",
+        textStyle: { fill: "#b0413e" },
       },
     ]}
     margin={{ top: 20, right: 20, bottom: 40, left: 50 }}
@@ -79,7 +82,11 @@ const MyResponsiveLine = ({
           fontSize: 16,
         },
       },
+      background: "#191a1a",
+      textColor: "white",
     }}
+    enableGridX={false}
+    enableGridY={false}
     legends={[
       {
         anchor: "top-left",
