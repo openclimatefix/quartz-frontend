@@ -88,16 +88,16 @@ const Vis1MapPage: NextPage = () => {
       type: "circle",
       source: "pvgeneration",
       paint: {
-        "circle-color": [
+        "circle-color": "#eab308",
+        "circle-opacity": [
           "interpolate",
           ["linear"],
           ["get", "solarGeneration"],
           PV_GENERATION_MIN,
-          "#eab308",
+          0,
           PV_GENERATION_MAX,
-          "#ef4444",
+          0.75,
         ],
-        "circle-opacity": 0.75,
         "circle-radius": [
           "interpolate",
           ["linear"],
@@ -193,7 +193,7 @@ const Vis1MapPage: NextPage = () => {
                     </div>
                   </div>
                   <div className="pt-4 my-2 border-t border-white">
-                    <div className="h-3 mb-2 bg-red-200 bg-gradient-to-r from-yellow-500 to-red-500"></div>
+                    <div className="h-3 mb-2 bg-gradient-to-r from-transparent to-yellow-500"></div>
                   </div>
                 </>
               );
