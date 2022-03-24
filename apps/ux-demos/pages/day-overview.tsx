@@ -13,17 +13,35 @@ const DayOverviewPage: NextPage = () => {
             </div>
           </a>
         </Link>
-        <Link href="/vis2-map">
+        <Link href="/vis1-bar-only">
           <a className="flex border border-black cursor-pointer hover:bg-gray-200">
             <div className="w-full my-auto text-center">
-              <h2 className="text-4xl">Biggest Forecast Error by GSP</h2>
+              <h2 className="text-4xl">National Forecast vs Actual</h2>
+              <p>LINE CHART ONLY</p>
             </div>
           </a>
         </Link>
+
         <Link href="/vis3-bar">
           <a className="flex border border-black cursor-pointer hover:bg-gray-200">
             <div className="w-full my-auto text-center">
               <h2 className="text-4xl">Generation Mix with Demand</h2>
+            </div>
+          </a>
+        </Link>
+        <Link href="/vis2-map-poly">
+          <a className="flex border border-black cursor-pointer hover:bg-gray-200">
+            <div className="w-full my-auto text-center">
+              <h2 className="text-4xl">Various Forecast Metrics by GSP</h2>
+              <p>POLYGONS</p>
+            </div>
+          </a>
+        </Link>
+        <Link href="/vis2-map-circ">
+          <a className="flex border border-black cursor-pointer hover:bg-gray-200">
+            <div className="w-full my-auto text-center">
+              <h2 className="text-4xl">Various Forecast Metrics by GSP</h2>
+              <p>CIRCLES</p>
             </div>
           </a>
         </Link>

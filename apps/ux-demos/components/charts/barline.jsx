@@ -31,6 +31,7 @@ const data = [
     INTNEM: 686,
     SOLAR: 0,
     DEMAND: 22229,
+    FORECAST: 0,
   },
   {
     time: "00:30",
@@ -51,6 +52,7 @@ const data = [
     INTNEM: 686,
     SOLAR: 0,
     DEMAND: 22141,
+    FORECAST: 0,
   },
   {
     time: "01:00",
@@ -71,6 +73,7 @@ const data = [
     INTNEM: 688,
     SOLAR: 0,
     DEMAND: 21781,
+    FORECAST: 0,
   },
   {
     time: "01:30",
@@ -91,6 +94,7 @@ const data = [
     INTNEM: 688,
     SOLAR: 0,
     DEMAND: 21719,
+    FORECAST: 0,
   },
   {
     time: "02:00",
@@ -111,6 +115,7 @@ const data = [
     INTNEM: 686,
     SOLAR: 0,
     DEMAND: 21651,
+    FORECAST: 0,
   },
   {
     time: "02:30",
@@ -131,6 +136,7 @@ const data = [
     INTNEM: 686,
     SOLAR: 0,
     DEMAND: 21419,
+    FORECAST: 0,
   },
   {
     time: "03:00",
@@ -151,6 +157,7 @@ const data = [
     INTNEM: 638,
     SOLAR: 0,
     DEMAND: 21787,
+    FORECAST: 0,
   },
   {
     time: "03:30",
@@ -171,6 +178,7 @@ const data = [
     INTNEM: 638,
     SOLAR: 0.000266,
     DEMAND: 21667,
+    FORECAST: 1,
   },
   {
     time: "04:00",
@@ -191,6 +199,7 @@ const data = [
     INTNEM: 682,
     SOLAR: 2.79,
     DEMAND: 21609,
+    FORECAST: 42,
   },
   {
     time: "04:30",
@@ -211,6 +220,7 @@ const data = [
     INTNEM: 682,
     SOLAR: 34.5,
     DEMAND: 21460,
+    FORECAST: 95,
   },
   {
     time: "05:00",
@@ -231,6 +241,7 @@ const data = [
     INTNEM: 706,
     SOLAR: 168,
     DEMAND: 22104,
+    FORECAST: 202,
   },
   {
     time: "05:30",
@@ -251,6 +262,7 @@ const data = [
     INTNEM: 708,
     SOLAR: 392,
     DEMAND: 24055,
+    FORECAST: 372,
   },
   {
     time: "06:00",
@@ -271,6 +283,7 @@ const data = [
     INTNEM: 872,
     SOLAR: 669,
     DEMAND: 26009,
+    FORECAST: 549,
   },
   {
     time: "06:30",
@@ -291,6 +304,7 @@ const data = [
     INTNEM: 872,
     SOLAR: 1030,
     DEMAND: 28003,
+    FORECAST: 811,
   },
   {
     time: "07:00",
@@ -311,6 +325,7 @@ const data = [
     INTNEM: 924,
     SOLAR: 1470,
     DEMAND: 28875,
+    FORECAST: 1356,
   },
   {
     time: "07:30",
@@ -331,6 +346,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 1830,
     DEMAND: 29759,
+    FORECAST: 1791,
   },
   {
     time: "08:00",
@@ -351,6 +367,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 2300,
     DEMAND: 29807,
+    FORECAST: 2292,
   },
   {
     time: "08:30",
@@ -371,6 +388,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 2780,
     DEMAND: 30135,
+    FORECAST: 2903,
   },
   {
     time: "09:00",
@@ -391,6 +409,7 @@ const data = [
     INTNEM: 952,
     SOLAR: 3260,
     DEMAND: 30118,
+    FORECAST: 3566,
   },
   {
     time: "09:30",
@@ -411,6 +430,7 @@ const data = [
     INTNEM: 952,
     SOLAR: 3410,
     DEMAND: 29787,
+    FORECAST: 4238,
   },
   {
     time: "10:00",
@@ -431,6 +451,7 @@ const data = [
     INTNEM: 952,
     SOLAR: 3220,
     DEMAND: 30045,
+    FORECAST: 4678,
   },
   {
     time: "10:30",
@@ -451,6 +472,7 @@ const data = [
     INTNEM: 952,
     SOLAR: 3320,
     DEMAND: 29581,
+    FORECAST: 5198,
   },
   {
     time: "11:00",
@@ -471,6 +493,7 @@ const data = [
     INTNEM: 950,
     SOLAR: 3600,
     DEMAND: 29373,
+    FORECAST: 4904,
   },
   {
     time: "11:30",
@@ -491,6 +514,7 @@ const data = [
     INTNEM: 950,
     SOLAR: 4360,
     DEMAND: 29206,
+    FORECAST: 5118,
   },
   {
     time: "12:00",
@@ -511,6 +535,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 4710,
     DEMAND: 29107,
+    FORECAST: 4400,
   },
   {
     time: "12:30",
@@ -531,6 +556,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 4590,
     DEMAND: 28910,
+    FORECAST: 4253,
   },
   {
     time: "13:00",
@@ -551,6 +577,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 4240,
     DEMAND: 28394,
+    FORECAST: 3685,
   },
   {
     time: "13:30",
@@ -571,6 +598,7 @@ const data = [
     INTNEM: 926,
     SOLAR: 4190,
     DEMAND: 28400,
+    FORECAST: 3682,
   },
   {
     time: "14:00",
@@ -591,6 +619,7 @@ const data = [
     INTNEM: 908,
     SOLAR: 4020,
     DEMAND: 28318,
+    FORECAST: 4404,
   },
   {
     time: "14:30",
@@ -611,6 +640,7 @@ const data = [
     INTNEM: 908,
     SOLAR: 3960,
     DEMAND: 28472,
+    FORECAST: 3959,
   },
   {
     time: "15:00",
@@ -631,6 +661,7 @@ const data = [
     INTNEM: 938,
     SOLAR: 3840,
     DEMAND: 29024,
+    FORECAST: 3452,
   },
   {
     time: "15:30",
@@ -651,6 +682,7 @@ const data = [
     INTNEM: 938,
     SOLAR: 3520,
     DEMAND: 29367,
+    FORECAST: 3116,
   },
   {
     time: "16:00",
@@ -671,6 +703,7 @@ const data = [
     INTNEM: 998,
     SOLAR: 3220,
     DEMAND: 29821,
+    FORECAST: 2952,
   },
   {
     time: "16:30",
@@ -691,6 +724,7 @@ const data = [
     INTNEM: 998,
     SOLAR: 2790,
     DEMAND: 30387,
+    FORECAST: 2483,
   },
   {
     time: "17:00",
@@ -711,6 +745,7 @@ const data = [
     INTNEM: 974,
     SOLAR: 2120,
     DEMAND: 30694,
+    FORECAST: 1835,
   },
   {
     time: "17:30",
@@ -731,6 +766,7 @@ const data = [
     INTNEM: 974,
     SOLAR: 1830,
     DEMAND: 30706,
+    FORECAST: 1341,
   },
   {
     time: "18:00",
@@ -751,6 +787,7 @@ const data = [
     INTNEM: 940,
     SOLAR: 1360,
     DEMAND: 30572,
+    FORECAST: 997,
   },
   {
     time: "18:30",
@@ -771,6 +808,7 @@ const data = [
     INTNEM: 938,
     SOLAR: 888,
     DEMAND: 30379,
+    FORECAST: 641,
   },
   {
     time: "19:00",
@@ -791,6 +829,7 @@ const data = [
     INTNEM: 768,
     SOLAR: 552,
     DEMAND: 30176,
+    FORECAST: 392,
   },
   {
     time: "19:30",
@@ -811,6 +850,7 @@ const data = [
     INTNEM: 764,
     SOLAR: 349,
     DEMAND: 29319,
+    FORECAST: 211,
   },
   {
     time: "20:00",
@@ -831,6 +871,7 @@ const data = [
     INTNEM: 516,
     SOLAR: 79.4,
     DEMAND: 29201,
+    FORECAST: 114,
   },
   {
     time: "20:30",
@@ -851,6 +892,7 @@ const data = [
     INTNEM: 512,
     SOLAR: 10.8,
     DEMAND: 28401,
+    FORECAST: 15,
   },
   {
     time: "21:00",
@@ -871,6 +913,7 @@ const data = [
     INTNEM: 576,
     SOLAR: 0.904,
     DEMAND: 27517,
+    FORECAST: 0,
   },
   {
     time: "21:30",
@@ -891,6 +934,7 @@ const data = [
     INTNEM: 578,
     SOLAR: 0.749,
     DEMAND: 26597,
+    FORECAST: 0,
   },
   {
     time: "22:00",
@@ -911,6 +955,7 @@ const data = [
     INTNEM: 680,
     SOLAR: 0,
     DEMAND: 25004,
+    FORECAST: 0,
   },
   {
     time: "22:30",
@@ -931,8 +976,32 @@ const data = [
     INTNEM: 680,
     SOLAR: 0,
     DEMAND: 23899,
+    FORECAST: 0,
   },
 ];
+const refinedData = data.map((el) => {
+  return {
+    ...el,
+    FORECAST:
+      el.FORECAST +
+      (el.Oil +
+        el["Combined Cycle Gas Turbines"] +
+        el.Coal +
+        el.Nuclear +
+        el.Wind +
+        el["Pumped Storage"] +
+        el.Hydro +
+        el["Open Cycle Gas Turbines"] +
+        el.Biomass +
+        el.Other +
+        el.INTFR +
+        el.INTIRL +
+        el.INTED +
+        el.INTEW +
+        el.INTNEM),
+  };
+});
+
 const BarLineChart = () => {
   const COLORS = [
     "#14120E",
@@ -1013,7 +1082,7 @@ const BarLineChart = () => {
       <ComposedChart
         width={500}
         height={400}
-        data={data}
+        data={refinedData}
         margin={{
           top: 20,
           right: 20,
@@ -1044,6 +1113,13 @@ const BarLineChart = () => {
           dataKey="DEMAND"
           stroke="#ff7300"
           strokeWidth={10}
+        />
+        <Line
+          type="monotone"
+          dataKey="FORECAST"
+          stroke="red"
+          strokeWidth={10}
+          strokeDasharray="3 3"
         />
       </ComposedChart>
     </ResponsiveContainer>
