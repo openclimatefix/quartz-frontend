@@ -1,5 +1,4 @@
 import { NextPage } from "next";
-import dynamic from "next/dynamic";
 import { useState } from "react";
 import RemixLine from "../components/charts/remix-line";
 import DataAttribution from "../components/data-attribution";
@@ -7,14 +6,9 @@ import Layout from "../components/layout";
 import Map from "../components/map";
 
 import pvMapData from "../data/pv/generation-2021-06-10.json";
-import pvLiveGenerationData from "../data/pv/pvlive-2021-06-10.json";
 
 const PV_GENERATION_MIN = 0;
 const PV_GENERATION_MAX = 3000;
-
-const MyResponsiveLine = dynamic(() => import("../components/charts/line"), {
-  ssr: false,
-});
 
 const Vis1MapPage: NextPage = () => {
   const INITIAL_TIME_STEP = 23;
