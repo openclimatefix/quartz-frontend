@@ -4,6 +4,7 @@ import { useState } from "react";
 import DataAttribution from "../components/data-attribution";
 import Layout from "../components/layout";
 import Map from "../components/map";
+import RemixLine from "../components/charts/remix-line";
 
 import pvMapData from "../data/pv/generation-2021-06-10.json";
 import pvLiveGenerationData from "../data/pv/pvlive-2021-06-10.json";
@@ -204,6 +205,12 @@ const Vis1MapPage: NextPage = () => {
                 },
                 pvLiveGenerationData,
               ]}
+            />
+          </div>
+          <div className="mt-24 border-t border-white h-96">
+            <RemixLine
+              timeOfInterest={timeSteps[selectedTimeStep]}
+              timeSteps={timeSteps}
             />
           </div>
         </div>
