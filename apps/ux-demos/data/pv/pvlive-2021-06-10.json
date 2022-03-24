@@ -1,6 +1,6 @@
 {
   "id": "Generation (PVLive)",
-  "color": "red",
+  "color": "#eab308",
   "data": [
     { "x": "23:30", "y": 0.0 },
     { "x": "23:00", "y": 0.0 },

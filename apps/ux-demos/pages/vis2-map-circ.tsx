@@ -16,6 +16,7 @@ const SELECTED_SRC_VALUES = {
   ACTUAL: "ACTUAL",
   FORECAST: "FORECAST",
   DELTA: "DELTA",
+  DELTA_ABS: "DELTA_ABS",
 };
 
 // const MyResponsiveLine = dynamic(() => import("../components/charts/line"), {
@@ -83,6 +84,7 @@ const Vis1MapPage: NextPage = () => {
       ACTUAL: "ocfPVLiveActual",
       FORECAST: "ocfNGESOForecast",
       DELTA: "ocfDelta",
+      DELTA_ABS: "ocfDeltaAbs",
     }[selectedSrc];
   };
 
@@ -163,23 +165,6 @@ const Vis1MapPage: NextPage = () => {
       },
       paint: getPaintPropsForFCActual(SELECTED_SRC_VALUES.ACTUAL),
     });
-    map.current.addLayer({
-      id: "pverrorbygsp-actual-labels",
-      type: "symbol",
-      source: "pverrorbygsp",
-      layout: {
-        // Make the layer visible by default.
-        visibility: "visible",
-        "text-field": ["get", "ocfPVLiveActual"],
-        "text-variable-anchor": ["top", "bottom", "left", "right"],
-        "text-radial-offset": 0.5,
-        "text-justify": "auto",
-      },
-      paint: {
-        "text-color": "white",
-      },
-      // paint: getPaintPropsForFCActual(SELECTED_SRC_VALUES.ACTUAL),
-    });
 
     map.current.addLayer({
       id: "pverrorbygsp-forecast",
@@ -216,16 +201,33 @@ const Vis1MapPage: NextPage = () => {
         "circle-radius": [
           "interpolate",
           ["linear"],
-          ["get", "ocfDelta"],
-          -0.00000000000001,
-          30,
+          ["get", "ocfDeltaAbs"],
           0,
-          30, // 0, ie transparent
-          0.000000000000001,
-          30,
+          0,
+          1,
+          20,
+          d3.max(getAllDataValuesForSelectedSrc(SELECTED_SRC_VALUES.DELTA_ABS)),
+          60,
         ],
         "circle-opacity": 0.75,
       },
+    });
+    map.current.addLayer({
+      id: "pverrorbygsp-delta-labels",
+      type: "symbol",
+      source: "pverrorbygsp",
+      layout: {
+        // Make the layer visible by default.
+        visibility: "none",
+        "text-field": ["get", "ocfDelta"],
+        "text-variable-anchor": ["top", "bottom", "left", "right"],
+        "text-radial-offset": 0,
+        "text-justify": "auto",
+      },
+      paint: {
+        "text-color": "white",
+      },
+      // paint: getPaintPropsForFCActual(SELECTED_SRC_VALUES.ACTUAL),
     });
 
     filterBy(map, INITIAL_TIME_STEP);
@@ -327,11 +329,6 @@ const Vis1MapPage: NextPage = () => {
                           "visibility",
                           "visible"
                         );
-                        map.current.setLayoutProperty(
-                          "pverrorbygsp-actual-labels",
-                          "visibility",
-                          "visible"
-                        );
 
                         // HIDE OTHER TWO
                         map.current.setLayoutProperty(
@@ -341,6 +338,11 @@ const Vis1MapPage: NextPage = () => {
                         );
                         map.current.setLayoutProperty(
                           "pverrorbygsp-delta",
+                          "visibility",
+                          "none"
+                        );
+                        map.current.setLayoutProperty(
+                          "pverrorbygsp-delta-labels",
                           "visibility",
                           "none"
                         );
@@ -369,12 +371,12 @@ const Vis1MapPage: NextPage = () => {
                           "none"
                         );
                         map.current.setLayoutProperty(
-                          "pverrorbygsp-actual-labels",
+                          "pverrorbygsp-delta",
                           "visibility",
                           "none"
                         );
                         map.current.setLayoutProperty(
-                          "pverrorbygsp-delta",
+                          "pverrorbygsp-delta-labels",
                           "visibility",
                           "none"
                         );
@@ -395,15 +397,15 @@ const Vis1MapPage: NextPage = () => {
                           "visibility",
                           "visible"
                         );
+                        map.current.setLayoutProperty(
+                          "pverrorbygsp-delta-labels",
+                          "visibility",
+                          "visible"
+                        );
 
                         // HIDE OTHER TWO
                         map.current.setLayoutProperty(
                           "pverrorbygsp-actual",
-                          "visibility",
-                          "none"
-                        );
-                        map.current.setLayoutProperty(
-                          "pverrorbygsp-actual-labels",
                           "visibility",
                           "none"
                         );

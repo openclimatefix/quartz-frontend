@@ -25,7 +25,9 @@ const MyResponsiveLine = ({
   if (hideAfterTOI) {
     // We need to set every value after `timeOfInterest` to 0
     data = [
-      setDatasetValsToZeroAfterTOI(data[0], timeSteps, timeOfInterest),
+      // setDatasetValsToZeroAfterTOI(data[0], timeSteps, timeOfInterest),
+      data[0],
+      // data[1],
       setDatasetValsToZeroAfterTOI(data[1], timeSteps, timeOfInterest),
     ];
   }
@@ -33,6 +35,7 @@ const MyResponsiveLine = ({
   return (
     <ResponsiveLine
       data={data}
+      colors={["#FFC425", "#867DCC"]}
       markers={[
         {
           axis: "x",

@@ -31,6 +31,8 @@ export default function handler(req, res) {
         const ocfPVLiveActual = pvliveDataSelected[gspShape.properties.gsp_id];
         const ocfNGESOForecast =
           ngesoDataSelected[gspShape.properties.gsp_name];
+        const ocfDelta = ocfNGESOForecast - ocfPVLiveActual;
+
         return {
           type: "Feature",
           properties: {
@@ -38,7 +40,8 @@ export default function handler(req, res) {
             ocfTime: time,
             ocfPVLiveActual,
             ocfNGESOForecast,
-            ocfDelta: ocfNGESOForecast - ocfPVLiveActual,
+            ocfDelta,
+            ocfDeltaAbs: Math.abs(ocfDelta),
           },
           geometry: {
             type: "Point",
@@ -64,6 +67,7 @@ export default function handler(req, res) {
         ocfPVLiveActual,
         ocfNGESOForecast,
         ocfDelta: ocfNGESOForecast - ocfPVLiveActual,
+        ocfDeltaAbs: Math.abs(ocfNGESOForecast - ocfPVLiveActual),
 
         centroidLat: gspShape.properties.centroid_lat,
         centroidLon: gspShape.properties.centroid_lon,

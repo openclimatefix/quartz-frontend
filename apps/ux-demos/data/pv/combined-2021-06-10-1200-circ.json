@@ -8,7 +8,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 89,
         "ocfNGESOForecast": 115,
-        "ocfDelta": 26
+        "ocfDelta": 26,
+        "ocfDeltaAbs": 26
       },
       "geometry": {
         "type": "Point",
@@ -22,7 +23,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 40,
         "ocfNGESOForecast": 46,
-        "ocfDelta": 6
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -36,7 +38,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 16,
         "ocfNGESOForecast": 42,
-        "ocfDelta": 26
+        "ocfDelta": 26,
+        "ocfDeltaAbs": 26
       },
       "geometry": {
         "type": "Point",
@@ -50,7 +53,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 85,
         "ocfNGESOForecast": 108,
-        "ocfDelta": 23
+        "ocfDelta": 23,
+        "ocfDeltaAbs": 23
       },
       "geometry": {
         "type": "Point",
@@ -64,7 +68,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 27,
         "ocfNGESOForecast": 42,
-        "ocfDelta": 15
+        "ocfDelta": 15,
+        "ocfDeltaAbs": 15
       },
       "geometry": {
         "type": "Point",
@@ -78,7 +83,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 67,
         "ocfNGESOForecast": 84,
-        "ocfDelta": 17
+        "ocfDelta": 17,
+        "ocfDeltaAbs": 17
       },
       "geometry": {
         "type": "Point",
@@ -92,7 +98,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 17,
-        "ocfDelta": 6
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -106,7 +113,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 32,
         "ocfNGESOForecast": 38,
-        "ocfDelta": 6
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -120,7 +128,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 94,
         "ocfNGESOForecast": 87,
-        "ocfDelta": -7
+        "ocfDelta": -7,
+        "ocfDeltaAbs": 7
       },
       "geometry": {
         "type": "Point",
@@ -134,7 +143,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 101,
         "ocfNGESOForecast": 99,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -148,7 +158,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 28,
         "ocfNGESOForecast": 17,
-        "ocfDelta": -11
+        "ocfDelta": -11,
+        "ocfDeltaAbs": 11
       },
       "geometry": {
         "type": "Point",
@@ -162,7 +173,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -176,7 +188,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -190,7 +203,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 10,
-        "ocfDelta": -12
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
       },
       "geometry": {
         "type": "Point",
@@ -204,7 +218,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 56,
         "ocfNGESOForecast": 13,
-        "ocfDelta": -43
+        "ocfDelta": -43,
+        "ocfDeltaAbs": 43
       },
       "geometry": {
         "type": "Point",
@@ -218,7 +233,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 13,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -12
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
       },
       "geometry": {
         "type": "Point",
@@ -232,7 +248,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -246,7 +263,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -260,7 +278,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -274,7 +293,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 9,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -288,7 +308,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -302,7 +323,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -316,7 +338,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -330,7 +353,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -344,7 +368,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -358,7 +383,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -372,7 +398,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 17,
         "ocfNGESOForecast": 28,
-        "ocfDelta": 11
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
       },
       "geometry": {
         "type": "Point",
@@ -386,7 +413,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -400,7 +428,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -414,7 +443,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -428,7 +458,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -442,7 +473,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -456,7 +488,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 3,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -470,7 +503,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -484,7 +518,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -498,7 +533,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 8,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -512,7 +548,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -526,7 +563,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -540,7 +578,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -554,7 +593,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 14,
         "ocfNGESOForecast": 16,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -568,7 +608,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -582,7 +623,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -596,7 +638,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -610,7 +653,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 24,
-        "ocfDelta": -12
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
       },
       "geometry": {
         "type": "Point",
@@ -624,7 +668,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -638,7 +683,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 25,
         "ocfNGESOForecast": 34,
-        "ocfDelta": 9
+        "ocfDelta": 9,
+        "ocfDeltaAbs": 9
       },
       "geometry": {
         "type": "Point",
@@ -652,7 +698,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -666,7 +713,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -680,7 +728,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 12,
-        "ocfDelta": 8
+        "ocfDelta": 8,
+        "ocfDeltaAbs": 8
       },
       "geometry": {
         "type": "Point",
@@ -694,7 +743,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -708,7 +758,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -722,7 +773,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -736,7 +788,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -4
+        "ocfDelta": -4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -750,7 +803,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 74,
         "ocfNGESOForecast": 57,
-        "ocfDelta": -17
+        "ocfDelta": -17,
+        "ocfDeltaAbs": 17
       },
       "geometry": {
         "type": "Point",
@@ -764,7 +818,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 37,
         "ocfNGESOForecast": 67,
-        "ocfDelta": 30
+        "ocfDelta": 30,
+        "ocfDeltaAbs": 30
       },
       "geometry": {
         "type": "Point",
@@ -778,7 +833,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 112,
         "ocfNGESOForecast": 131,
-        "ocfDelta": 19
+        "ocfDelta": 19,
+        "ocfDeltaAbs": 19
       },
       "geometry": {
         "type": "Point",
@@ -792,7 +848,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 129,
         "ocfNGESOForecast": 97,
-        "ocfDelta": -32
+        "ocfDelta": -32,
+        "ocfDeltaAbs": 32
       },
       "geometry": {
         "type": "Point",
@@ -806,7 +863,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -820,7 +878,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -834,7 +893,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 16,
         "ocfNGESOForecast": 15,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -848,7 +908,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -862,7 +923,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -876,7 +938,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 9,
         "ocfNGESOForecast": 6,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -890,7 +953,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -904,7 +968,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 74,
         "ocfNGESOForecast": 58,
-        "ocfDelta": -16
+        "ocfDelta": -16,
+        "ocfDeltaAbs": 16
       },
       "geometry": {
         "type": "Point",
@@ -918,7 +983,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 22,
-        "ocfDelta": 11
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
       },
       "geometry": {
         "type": "Point",
@@ -932,7 +998,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 8,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -946,7 +1013,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 31,
         "ocfNGESOForecast": 25,
-        "ocfDelta": -6
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -960,7 +1028,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 11,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -974,7 +1043,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 5,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -988,7 +1058,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1002,7 +1073,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 5,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1016,7 +1088,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 21,
         "ocfNGESOForecast": 13,
-        "ocfDelta": -8
+        "ocfDelta": -8,
+        "ocfDeltaAbs": 8
       },
       "geometry": {
         "type": "Point",
@@ -1030,7 +1103,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1044,7 +1118,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 9,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -1058,7 +1133,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1072,7 +1148,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1086,7 +1163,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 5,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1100,7 +1178,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 6,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1114,7 +1193,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1128,7 +1208,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -5
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
       },
       "geometry": {
         "type": "Point",
@@ -1142,7 +1223,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1156,7 +1238,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -5
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
       },
       "geometry": {
         "type": "Point",
@@ -1170,7 +1253,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 3,
-        "ocfDelta": -7
+        "ocfDelta": -7,
+        "ocfDeltaAbs": 7
       },
       "geometry": {
         "type": "Point",
@@ -1184,7 +1268,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 32,
         "ocfNGESOForecast": 27,
-        "ocfDelta": -5
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
       },
       "geometry": {
         "type": "Point",
@@ -1198,7 +1283,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -1212,7 +1298,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1226,7 +1313,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -8
+        "ocfDelta": -8,
+        "ocfDeltaAbs": 8
       },
       "geometry": {
         "type": "Point",
@@ -1240,7 +1328,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1254,7 +1343,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -10
+        "ocfDelta": -10,
+        "ocfDeltaAbs": 10
       },
       "geometry": {
         "type": "Point",
@@ -1268,7 +1358,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 6,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1282,7 +1373,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1296,7 +1388,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1310,7 +1403,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 24,
         "ocfNGESOForecast": 33,
-        "ocfDelta": 9
+        "ocfDelta": 9,
+        "ocfDeltaAbs": 9
       },
       "geometry": {
         "type": "Point",
@@ -1324,7 +1418,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 33,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1338,7 +1433,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 15,
         "ocfNGESOForecast": 13,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -1352,7 +1448,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 31,
         "ocfNGESOForecast": 40,
-        "ocfDelta": 9
+        "ocfDelta": 9,
+        "ocfDeltaAbs": 9
       },
       "geometry": {
         "type": "Point",
@@ -1366,7 +1463,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 26,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -1380,7 +1478,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 72,
         "ocfNGESOForecast": 27,
-        "ocfDelta": -45
+        "ocfDelta": -45,
+        "ocfDeltaAbs": 45
       },
       "geometry": {
         "type": "Point",
@@ -1394,7 +1493,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 98,
         "ocfNGESOForecast": 69,
-        "ocfDelta": -29
+        "ocfDelta": -29,
+        "ocfDeltaAbs": 29
       },
       "geometry": {
         "type": "Point",
@@ -1408,7 +1508,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 66,
         "ocfNGESOForecast": 115,
-        "ocfDelta": 49
+        "ocfDelta": 49,
+        "ocfDeltaAbs": 49
       },
       "geometry": {
         "type": "Point",
@@ -1422,7 +1523,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 45,
         "ocfNGESOForecast": 35,
-        "ocfDelta": -10
+        "ocfDelta": -10,
+        "ocfDeltaAbs": 10
       },
       "geometry": {
         "type": "Point",
@@ -1436,7 +1538,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 50,
         "ocfNGESOForecast": 40,
-        "ocfDelta": -10
+        "ocfDelta": -10,
+        "ocfDeltaAbs": 10
       },
       "geometry": {
         "type": "Point",
@@ -1450,7 +1553,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 33,
         "ocfNGESOForecast": 21,
-        "ocfDelta": -12
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
       },
       "geometry": {
         "type": "Point",
@@ -1464,7 +1568,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 4,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -1478,7 +1583,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 78,
         "ocfNGESOForecast": 44,
-        "ocfDelta": -34
+        "ocfDelta": -34,
+        "ocfDeltaAbs": 34
       },
       "geometry": {
         "type": "Point",
@@ -1492,7 +1598,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 37,
         "ocfNGESOForecast": 41,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -1506,7 +1613,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 35,
         "ocfNGESOForecast": 32,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1520,7 +1628,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 34,
         "ocfNGESOForecast": 25,
-        "ocfDelta": -9
+        "ocfDelta": -9,
+        "ocfDeltaAbs": 9
       },
       "geometry": {
         "type": "Point",
@@ -1534,7 +1643,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 86,
-        "ocfDelta": 50
+        "ocfDelta": 50,
+        "ocfDeltaAbs": 50
       },
       "geometry": {
         "type": "Point",
@@ -1548,7 +1658,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 18,
         "ocfNGESOForecast": 12,
-        "ocfDelta": -6
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -1562,7 +1673,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1576,7 +1688,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 33,
         "ocfNGESOForecast": 30,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1590,7 +1703,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1604,7 +1718,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 44,
         "ocfNGESOForecast": 38,
-        "ocfDelta": -6
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -1618,7 +1733,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 57,
         "ocfNGESOForecast": 68,
-        "ocfDelta": 11
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
       },
       "geometry": {
         "type": "Point",
@@ -1632,7 +1748,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 58,
         "ocfNGESOForecast": 55,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1646,7 +1763,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 76,
         "ocfNGESOForecast": 35,
-        "ocfDelta": -41
+        "ocfDelta": -41,
+        "ocfDeltaAbs": 41
       },
       "geometry": {
         "type": "Point",
@@ -1660,7 +1778,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 70,
         "ocfNGESOForecast": 51,
-        "ocfDelta": -19
+        "ocfDelta": -19,
+        "ocfDeltaAbs": 19
       },
       "geometry": {
         "type": "Point",
@@ -1674,7 +1793,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 103,
         "ocfNGESOForecast": 131,
-        "ocfDelta": 28
+        "ocfDelta": 28,
+        "ocfDeltaAbs": 28
       },
       "geometry": {
         "type": "Point",
@@ -1688,7 +1808,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 23,
         "ocfNGESOForecast": 21,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -1702,7 +1823,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 155,
         "ocfNGESOForecast": 123,
-        "ocfDelta": -32
+        "ocfDelta": -32,
+        "ocfDeltaAbs": 32
       },
       "geometry": {
         "type": "Point",
@@ -1716,7 +1838,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 67,
         "ocfNGESOForecast": 108,
-        "ocfDelta": 41
+        "ocfDelta": 41,
+        "ocfDeltaAbs": 41
       },
       "geometry": {
         "type": "Point",
@@ -1730,7 +1853,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1744,7 +1868,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1758,7 +1883,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1772,7 +1898,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1786,7 +1913,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 21,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1800,7 +1928,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1814,7 +1943,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 16,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -1828,7 +1958,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1842,7 +1973,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 24,
         "ocfNGESOForecast": 22,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -1856,7 +1988,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 38,
         "ocfNGESOForecast": 42,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -1870,7 +2003,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 14,
         "ocfNGESOForecast": 20,
-        "ocfDelta": 6
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -1884,7 +2018,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1898,7 +2033,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 13,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1912,7 +2048,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 25,
         "ocfNGESOForecast": 44,
-        "ocfDelta": 19
+        "ocfDelta": 19,
+        "ocfDeltaAbs": 19
       },
       "geometry": {
         "type": "Point",
@@ -1926,7 +2063,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 90,
         "ocfNGESOForecast": 74,
-        "ocfDelta": -16
+        "ocfDelta": -16,
+        "ocfDeltaAbs": 16
       },
       "geometry": {
         "type": "Point",
@@ -1940,7 +2078,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 19,
         "ocfNGESOForecast": 18,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -1954,7 +2093,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1968,7 +2108,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 13,
         "ocfNGESOForecast": 16,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -1982,7 +2123,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -1996,7 +2138,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2010,7 +2153,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2024,7 +2168,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2038,7 +2183,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 54,
         "ocfNGESOForecast": 53,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2052,7 +2198,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2066,7 +2213,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 44,
         "ocfNGESOForecast": 55,
-        "ocfDelta": 11
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
       },
       "geometry": {
         "type": "Point",
@@ -2080,7 +2228,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 10,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -2094,7 +2243,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 10,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -2108,7 +2258,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 17,
         "ocfNGESOForecast": 19,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -2122,7 +2273,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2136,7 +2288,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 6,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2150,7 +2303,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2164,7 +2318,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 12,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -2178,7 +2333,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2192,7 +2348,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -2
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -2206,7 +2363,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2220,7 +2378,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -2234,7 +2393,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 4,
-        "ocfDelta": -4
+        "ocfDelta": -4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -2248,7 +2408,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 8,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -2262,7 +2423,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2276,7 +2438,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 13,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2290,7 +2453,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2304,7 +2468,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2318,7 +2483,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2332,7 +2498,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2346,7 +2513,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2360,7 +2528,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2374,7 +2543,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2388,7 +2558,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2402,7 +2573,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -2416,7 +2588,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2430,7 +2603,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2444,7 +2618,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2458,7 +2633,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2472,7 +2648,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2486,7 +2663,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2500,7 +2678,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2514,7 +2693,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2528,7 +2708,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2542,7 +2723,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2556,7 +2738,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2570,7 +2753,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2584,7 +2768,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2598,7 +2783,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2612,7 +2798,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2626,7 +2813,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2640,7 +2828,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2654,7 +2843,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2668,7 +2858,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2682,7 +2873,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2696,7 +2888,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 6,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -2710,7 +2903,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2724,7 +2918,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2738,7 +2933,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 6,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -2752,7 +2948,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2766,7 +2963,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2780,7 +2978,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2794,7 +2993,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2808,7 +3008,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2822,7 +3023,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2836,7 +3038,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2850,7 +3053,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2864,7 +3068,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2878,7 +3083,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2892,7 +3098,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2906,7 +3113,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2920,7 +3128,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2934,7 +3143,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2948,7 +3158,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -2962,7 +3173,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2976,7 +3188,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -2990,7 +3203,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3004,7 +3218,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3018,7 +3233,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3032,7 +3248,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 6,
-        "ocfDelta": -4
+        "ocfDelta": -4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -3046,7 +3263,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3060,7 +3278,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3074,7 +3293,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3088,7 +3308,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3102,7 +3323,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3116,7 +3338,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3130,7 +3353,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3144,7 +3368,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -3158,7 +3383,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3172,7 +3398,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3186,7 +3413,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3200,7 +3428,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3214,7 +3443,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3228,7 +3458,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3242,7 +3473,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3256,7 +3488,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3270,7 +3503,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3284,7 +3518,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3298,7 +3533,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3312,7 +3548,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3326,7 +3563,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3340,7 +3578,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3354,7 +3593,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3368,7 +3608,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3382,7 +3623,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3396,7 +3638,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3410,7 +3653,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3424,7 +3668,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3438,7 +3683,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3452,7 +3698,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3466,7 +3713,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3480,7 +3728,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 5,
-        "ocfDelta": 5
+        "ocfDelta": 5,
+        "ocfDeltaAbs": 5
       },
       "geometry": {
         "type": "Point",
@@ -3494,7 +3743,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3508,7 +3758,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3522,7 +3773,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3536,7 +3788,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3550,7 +3803,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3564,7 +3818,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3578,7 +3833,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3592,7 +3848,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3606,7 +3863,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3620,7 +3878,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3634,7 +3893,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3648,7 +3908,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3662,7 +3923,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3676,7 +3938,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3690,7 +3953,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3704,7 +3968,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -3718,7 +3983,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3732,7 +3998,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3746,7 +4013,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3760,7 +4028,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3774,7 +4043,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3788,7 +4058,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": null,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3802,7 +4073,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3816,7 +4088,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3830,7 +4103,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3844,7 +4118,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3858,7 +4133,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3872,7 +4148,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3886,7 +4163,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3900,7 +4178,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3914,7 +4193,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3928,7 +4208,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3942,7 +4223,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3956,7 +4238,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3970,7 +4253,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -3984,7 +4268,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -3998,7 +4283,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4012,7 +4298,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4026,7 +4313,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4040,7 +4328,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 56,
         "ocfNGESOForecast": 31,
-        "ocfDelta": -25
+        "ocfDelta": -25,
+        "ocfDeltaAbs": 25
       },
       "geometry": {
         "type": "Point",
@@ -4054,7 +4343,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4068,7 +4358,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 5,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4082,7 +4373,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -4096,7 +4388,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4110,7 +4403,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 24,
-        "ocfDelta": 2
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
       },
       "geometry": {
         "type": "Point",
@@ -4124,7 +4418,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 6,
-        "ocfDelta": -6
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -4138,7 +4433,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4152,7 +4448,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 36,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4166,7 +4463,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4180,7 +4478,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 6,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4194,7 +4493,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 26,
         "ocfNGESOForecast": 21,
-        "ocfDelta": -5
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
       },
       "geometry": {
         "type": "Point",
@@ -4208,7 +4508,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 9,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4222,7 +4523,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4236,7 +4538,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4250,7 +4553,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4264,7 +4568,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4278,7 +4583,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 1
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4292,7 +4598,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 4,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -4306,7 +4613,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 30,
         "ocfNGESOForecast": 13,
-        "ocfDelta": -17
+        "ocfDelta": -17,
+        "ocfDeltaAbs": 17
       },
       "geometry": {
         "type": "Point",
@@ -4320,7 +4628,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -3
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -4334,7 +4643,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4348,7 +4658,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4362,7 +4673,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 11,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -4376,7 +4688,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4390,7 +4703,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4404,7 +4718,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4418,7 +4733,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4432,7 +4748,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4446,7 +4763,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4460,7 +4778,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 23,
         "ocfNGESOForecast": 23,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4474,7 +4793,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4488,7 +4808,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 96,
         "ocfNGESOForecast": 139,
-        "ocfDelta": 43
+        "ocfDelta": 43,
+        "ocfDeltaAbs": 43
       },
       "geometry": {
         "type": "Point",
@@ -4502,7 +4823,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 42,
         "ocfNGESOForecast": 36,
-        "ocfDelta": -6
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -4516,7 +4838,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 41,
         "ocfNGESOForecast": null,
-        "ocfDelta": -41
+        "ocfDelta": -41,
+        "ocfDeltaAbs": 41
       },
       "geometry": {
         "type": "Point",
@@ -4530,7 +4853,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 198,
         "ocfNGESOForecast": 191,
-        "ocfDelta": -7
+        "ocfDelta": -7,
+        "ocfDeltaAbs": 7
       },
       "geometry": {
         "type": "Point",
@@ -4544,7 +4868,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 122,
         "ocfNGESOForecast": 77,
-        "ocfDelta": -45
+        "ocfDelta": -45,
+        "ocfDeltaAbs": 45
       },
       "geometry": {
         "type": "Point",
@@ -4558,7 +4883,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 59,
         "ocfNGESOForecast": 37,
-        "ocfDelta": -22
+        "ocfDelta": -22,
+        "ocfDeltaAbs": 22
       },
       "geometry": {
         "type": "Point",
@@ -4572,7 +4898,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -6
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
       },
       "geometry": {
         "type": "Point",
@@ -4586,7 +4913,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 0,
-        "ocfDelta": -8
+        "ocfDelta": -8,
+        "ocfDeltaAbs": 8
       },
       "geometry": {
         "type": "Point",
@@ -4600,7 +4928,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 21,
         "ocfNGESOForecast": 2,
-        "ocfDelta": -19
+        "ocfDelta": -19,
+        "ocfDeltaAbs": 19
       },
       "geometry": {
         "type": "Point",
@@ -4614,7 +4943,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 14,
-        "ocfDelta": 4
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
       },
       "geometry": {
         "type": "Point",
@@ -4628,7 +4958,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4642,7 +4973,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4656,7 +4988,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": null,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4670,7 +5003,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 136,
         "ocfNGESOForecast": 151,
-        "ocfDelta": 15
+        "ocfDelta": 15,
+        "ocfDeltaAbs": 15
       },
       "geometry": {
         "type": "Point",
@@ -4684,7 +5018,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 7,
-        "ocfDelta": -1
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
       },
       "geometry": {
         "type": "Point",
@@ -4698,7 +5033,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 9,
         "ocfNGESOForecast": 12,
-        "ocfDelta": 3
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
       },
       "geometry": {
         "type": "Point",
@@ -4712,7 +5048,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",
@@ -4726,7 +5063,8 @@
         "ocfTime": "2021-06-10T12:00",
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
-        "ocfDelta": 0
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
       },
       "geometry": {
         "type": "Point",

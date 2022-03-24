@@ -10,6 +10,7 @@
         "ocfPVLiveActual": 89,
         "ocfNGESOForecast": 115,
         "ocfDelta": 26,
+        "ocfDeltaAbs": 26,
         "centroidLat": 51.75946379678268,
         "centroidLon": -1.293056127663066
       },
@@ -1208,6 +1209,7 @@
         "ocfPVLiveActual": 40,
         "ocfNGESOForecast": 46,
         "ocfDelta": 6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 52.03246445103723,
         "centroidLon": -0.951795402042344
       },
@@ -2498,6 +2500,7 @@
         "ocfPVLiveActual": 16,
         "ocfNGESOForecast": 42,
         "ocfDelta": 26,
+        "ocfDeltaAbs": 26,
         "centroidLat": 52.649532371838454,
         "centroidLon": -1.239884019483621
       },
@@ -2553,6 +2556,7 @@
         "ocfPVLiveActual": 85,
         "ocfNGESOForecast": 108,
         "ocfDelta": 23,
+        "ocfDeltaAbs": 23,
         "centroidLat": 52.463676844437785,
         "centroidLon": -0.768000897549411
       },
@@ -3247,6 +3251,7 @@
         "ocfPVLiveActual": 27,
         "ocfNGESOForecast": 42,
         "ocfDelta": 15,
+        "ocfDeltaAbs": 15,
         "centroidLat": 52.81202529506736,
         "centroidLon": -1.113209329948719
       },
@@ -3334,6 +3339,7 @@
         "ocfPVLiveActual": 67,
         "ocfNGESOForecast": 84,
         "ocfDelta": 17,
+        "ocfDeltaAbs": 17,
         "centroidLat": 53.158813839240516,
         "centroidLon": -0.848486874189989
       },
@@ -3818,6 +3824,7 @@
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 17,
         "ocfDelta": 6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 52.961671028052,
         "centroidLon": -1.085556925938734
       },
@@ -3865,6 +3872,7 @@
         "ocfPVLiveActual": 32,
         "ocfNGESOForecast": 38,
         "ocfDelta": 6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 53.23362489233952,
         "centroidLon": -0.50817859122674
       },
@@ -4220,6 +4228,7 @@
         "ocfPVLiveActual": 94,
         "ocfNGESOForecast": 87,
         "ocfDelta": -7,
+        "ocfDeltaAbs": 7,
         "centroidLat": 51.169088338432715,
         "centroidLon": -2.840456558866689
       },
@@ -4329,6 +4338,7 @@
         "ocfPVLiveActual": 101,
         "ocfNGESOForecast": 99,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 51.662037754622474,
         "centroidLon": -1.80554608399303
       },
@@ -4777,6 +4787,7 @@
         "ocfPVLiveActual": 28,
         "ocfNGESOForecast": 17,
         "ocfDelta": -11,
+        "ocfDeltaAbs": 11,
         "centroidLat": 51.071343911985636,
         "centroidLon": -3.378614973115235
       },
@@ -4936,6 +4947,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 53.68231970978269,
         "centroidLon": -0.897601461267476
       },
@@ -4973,6 +4985,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 53.77432420175637,
         "centroidLon": -0.881496428756757
       },
@@ -5108,6 +5121,7 @@
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 10,
         "ocfDelta": -12,
+        "ocfDeltaAbs": 12,
         "centroidLat": 53.59019928639557,
         "centroidLon": -0.194469624221242
       },
@@ -5298,6 +5312,7 @@
         "ocfPVLiveActual": 56,
         "ocfNGESOForecast": 13,
         "ocfDelta": -43,
+        "ocfDeltaAbs": 43,
         "centroidLat": 53.4607194955668,
         "centroidLon": -0.379704009436243
       },
@@ -6295,6 +6310,7 @@
         "ocfPVLiveActual": 13,
         "ocfNGESOForecast": 1,
         "ocfDelta": -12,
+        "ocfDeltaAbs": 12,
         "centroidLat": 54.23309587773618,
         "centroidLon": -0.807618632243179
       },
@@ -7046,6 +7062,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.512791901586915,
         "centroidLon": 0.102004546679233
       },
@@ -7151,6 +7168,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.512791901586915,
         "centroidLon": 0.102004546679233
       },
@@ -7256,6 +7274,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.423344699096816,
         "centroidLon": -0.026608287100356
       },
@@ -7402,6 +7421,7 @@
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 9,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 51.26155886887658,
         "centroidLon": -0.049519306453095
       },
@@ -7650,6 +7670,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.67904614443716,
         "centroidLon": -0.019713171801849
       },
@@ -7813,6 +7834,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.528561894439754,
         "centroidLon": -0.103864168979184
       },
@@ -7865,6 +7887,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.491888924268935,
         "centroidLon": -0.314772546255847
       },
@@ -7969,6 +7992,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.56502144228736,
         "centroidLon": -0.037921426590947
       },
@@ -8056,6 +8080,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.56502144228736,
         "centroidLon": -0.037921426590947
       },
@@ -8143,6 +8168,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.4430169409299,
         "centroidLon": 0.126330425589138
       },
@@ -8322,6 +8348,7 @@
         "ocfPVLiveActual": 17,
         "ocfNGESOForecast": 28,
         "ocfDelta": 11,
+        "ocfDeltaAbs": 11,
         "centroidLat": 51.283188538810634,
         "centroidLon": 0.334529747875669
       },
@@ -8391,6 +8418,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.605580033679054,
         "centroidLon": 0.059404487155154
       },
@@ -8559,6 +8587,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.512672133265795,
         "centroidLon": -0.154444763919084
       },
@@ -8590,6 +8619,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.61531375418765,
         "centroidLon": -0.081890059369497
       },
@@ -8721,6 +8751,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.499988807179065,
         "centroidLon": 0.017311989864069
       },
@@ -8748,6 +8779,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.50239143961845,
         "centroidLon": -0.240963155424546
       },
@@ -8881,6 +8913,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 3,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.430167788541624,
         "centroidLon": -0.199138988373674
       },
@@ -9121,6 +9154,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.430167788541624,
         "centroidLon": -0.199138988373674
       },
@@ -9361,6 +9395,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.389385489126255,
         "centroidLon": -3.127389380936425
       },
@@ -9540,6 +9575,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 8,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.31369667780381,
         "centroidLon": -2.46419087566744
       },
@@ -9931,6 +9967,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.520898507796296,
         "centroidLon": -2.885136482054573
       },
@@ -10114,6 +10151,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.54398214918342,
         "centroidLon": -2.680671971055231
       },
@@ -10193,6 +10231,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.46473343351581,
         "centroidLon": -2.959528979066842
       },
@@ -10253,6 +10292,7 @@
         "ocfPVLiveActual": 14,
         "ocfNGESOForecast": 16,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 53.78318507299992,
         "centroidLon": -2.696867531135474
       },
@@ -10281,6 +10321,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.78318507299992,
         "centroidLon": -2.696867531135474
       },
@@ -10309,6 +10350,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.42601518716169,
         "centroidLon": -2.75359964896487
       },
@@ -10374,6 +10416,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.604370599049055,
         "centroidLon": -2.867376604820891
       },
@@ -10526,6 +10569,7 @@
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 24,
         "ocfDelta": -12,
+        "ocfDeltaAbs": 12,
         "centroidLat": 50.72812693436384,
         "centroidLon": -2.477300542937826
       },
@@ -10677,6 +10721,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 0,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 55.14157629080153,
         "centroidLon": -2.325017567685413
       },
@@ -11160,6 +11205,7 @@
         "ocfPVLiveActual": 25,
         "ocfNGESOForecast": 34,
         "ocfDelta": 9,
+        "ocfDeltaAbs": 9,
         "centroidLat": 53.12543921386139,
         "centroidLon": -2.58994710237309
       },
@@ -11909,6 +11955,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.547903467990366,
         "centroidLon": -3.030895240171077
       },
@@ -12017,6 +12064,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.619164812309684,
         "centroidLon": -3.616665603012111
       },
@@ -12051,6 +12099,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 12,
         "ocfDelta": 8,
+        "ocfDeltaAbs": 8,
         "centroidLat": 51.50461369107392,
         "centroidLon": -3.624218074866751
       },
@@ -12159,6 +12208,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.620846194792136,
         "centroidLon": -1.203258467243979
       },
@@ -12213,6 +12263,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.42256883112209,
         "centroidLon": -1.352139703744865
       },
@@ -12241,6 +12292,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 52.76903790626901,
         "centroidLon": -3.794252883789842
       },
@@ -12502,6 +12554,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 0,
         "ocfDelta": -4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 55.0278675300341,
         "centroidLon": -1.526810502417361
       },
@@ -12594,6 +12647,7 @@
         "ocfPVLiveActual": 74,
         "ocfNGESOForecast": 57,
         "ocfDelta": -17,
+        "ocfDeltaAbs": 17,
         "centroidLat": 53.06600126854594,
         "centroidLon": -0.238813210545467
       },
@@ -13037,6 +13091,7 @@
         "ocfPVLiveActual": 37,
         "ocfNGESOForecast": 67,
         "ocfDelta": 30,
+        "ocfDeltaAbs": 30,
         "centroidLat": 51.9223280089682,
         "centroidLon": 0.613297685081918
       },
@@ -13079,6 +13134,7 @@
         "ocfPVLiveActual": 112,
         "ocfNGESOForecast": 131,
         "ocfDelta": 19,
+        "ocfDeltaAbs": 19,
         "centroidLat": 52.33528373843847,
         "centroidLon": 0.395927550158384
       },
@@ -13106,6 +13162,7 @@
         "ocfPVLiveActual": 129,
         "ocfNGESOForecast": 97,
         "ocfDelta": -32,
+        "ocfDeltaAbs": 32,
         "centroidLat": 52.319620391553855,
         "centroidLon": -0.248311802362689
       },
@@ -13806,6 +13863,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 2,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 51.54531428147358,
         "centroidLon": -0.585719993531306
       },
@@ -14068,6 +14126,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.5355803444153,
         "centroidLon": -0.458642452110783
       },
@@ -14163,6 +14222,7 @@
         "ocfPVLiveActual": 16,
         "ocfNGESOForecast": 15,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.334322092018844,
         "centroidLon": 0.554173203012327
       },
@@ -14226,6 +14286,7 @@
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 2,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 51.4351799569023,
         "centroidLon": -0.482917681289868
       },
@@ -14375,6 +14436,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.531865354257064,
         "centroidLon": -0.189879610466475
       },
@@ -14438,6 +14500,7 @@
         "ocfPVLiveActual": 9,
         "ocfNGESOForecast": 6,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 51.65632472334336,
         "centroidLon": -0.20417557238701
       },
@@ -14652,6 +14715,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.49373844339528,
         "centroidLon": -0.406464148287295
       },
@@ -14692,6 +14756,7 @@
         "ocfPVLiveActual": 74,
         "ocfNGESOForecast": 58,
         "ocfDelta": -16,
+        "ocfDeltaAbs": 16,
         "centroidLat": 51.97974856677432,
         "centroidLon": 0.141108731923048
       },
@@ -14719,6 +14784,7 @@
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 22,
         "ocfDelta": 11,
+        "ocfDeltaAbs": 11,
         "centroidLat": 51.62767965837845,
         "centroidLon": 0.672648160308476
       },
@@ -14875,6 +14941,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 8,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.781770977527714,
         "centroidLon": 0.022616859034038
       },
@@ -14901,6 +14968,7 @@
         "ocfPVLiveActual": 31,
         "ocfNGESOForecast": 25,
         "ocfDelta": -6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 51.964398827188,
         "centroidLon": -0.534093066077771
       },
@@ -15343,6 +15411,7 @@
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 11,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.639164551504784,
         "centroidLon": 0.288205828318346
       },
@@ -15431,6 +15500,7 @@
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 5,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 51.669833373131546,
         "centroidLon": -0.444932377178344
       },
@@ -15638,6 +15708,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.49717320234295,
         "centroidLon": 0.250953699446208
       },
@@ -15732,6 +15803,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 5,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 51.25548032500319,
         "centroidLon": -0.514843880467435
       },
@@ -16155,6 +16227,7 @@
         "ocfPVLiveActual": 21,
         "ocfNGESOForecast": 13,
         "ocfDelta": -8,
+        "ocfDeltaAbs": 8,
         "centroidLat": 51.94190467220285,
         "centroidLon": -0.223441641817913
       },
@@ -16182,6 +16255,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.39877976259698,
         "centroidLon": -2.1201333891346
       },
@@ -16207,6 +16281,7 @@
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 9,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 53.5876383884485,
         "centroidLon": -2.415797951386242
       },
@@ -16234,6 +16309,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.5876383884485,
         "centroidLon": -2.415797951386242
       },
@@ -16261,6 +16337,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.26516886888638,
         "centroidLon": -2.074477006077082
       },
@@ -16685,6 +16762,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 5,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.40184270204656,
         "centroidLon": -2.26797586485969
       },
@@ -16815,6 +16893,7 @@
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 6,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.468823555505736,
         "centroidLon": -1.95994928418575
       },
@@ -16933,6 +17012,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.53655583240413,
         "centroidLon": -2.162298731689458
       },
@@ -16959,6 +17039,7 @@
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 0,
         "ocfDelta": -5,
+        "ocfDeltaAbs": 5,
         "centroidLat": 55.166068091638195,
         "centroidLon": -1.707481877530924
       },
@@ -17033,6 +17114,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 54.68724637105906,
         "centroidLon": -1.309168123216457
       },
@@ -17128,6 +17210,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 1,
         "ocfDelta": -5,
+        "ocfDeltaAbs": 5,
         "centroidLat": 54.816740765816604,
         "centroidLon": -1.403421446777499
       },
@@ -17211,6 +17294,7 @@
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 3,
         "ocfDelta": -7,
+        "ocfDeltaAbs": 7,
         "centroidLat": 54.53785186182901,
         "centroidLon": -1.030869829614445
       },
@@ -17321,6 +17405,7 @@
         "ocfPVLiveActual": 32,
         "ocfNGESOForecast": 27,
         "ocfDelta": -5,
+        "ocfDeltaAbs": 5,
         "centroidLat": 54.37011060220709,
         "centroidLon": -1.62492413006989
       },
@@ -17558,6 +17643,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 0,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 54.88715832541847,
         "centroidLon": -1.433846711812483
       },
@@ -17589,6 +17675,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.985755395713184,
         "centroidLon": -1.441249410595184
       },
@@ -17661,6 +17748,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 0,
         "ocfDelta": -8,
+        "ocfDeltaAbs": 8,
         "centroidLat": 54.641968971555784,
         "centroidLon": -1.936931552676537
       },
@@ -17960,6 +18048,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.0278675300341,
         "centroidLon": -1.526810502417361
       },
@@ -18052,6 +18141,7 @@
         "ocfPVLiveActual": 11,
         "ocfNGESOForecast": 1,
         "ocfDelta": -10,
+        "ocfDeltaAbs": 10,
         "centroidLat": 54.93693155609387,
         "centroidLon": -1.480020395625597
       },
@@ -18146,6 +18236,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 6,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.416857425403514,
         "centroidLon": -2.600484997028271
       },
@@ -18381,6 +18472,7 @@
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 7,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.91253134351893,
         "centroidLon": -2.339624562447323
       },
@@ -18534,6 +18626,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.65616660171578,
         "centroidLon": -2.204665440884738
       },
@@ -18623,6 +18716,7 @@
         "ocfPVLiveActual": 24,
         "ocfNGESOForecast": 33,
         "ocfDelta": 9,
+        "ocfDeltaAbs": 9,
         "centroidLat": 52.97330350423853,
         "centroidLon": -2.169607015721676
       },
@@ -20206,6 +20300,7 @@
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 33,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 52.83729437979574,
         "centroidLon": -3.145573172553834
       },
@@ -21242,6 +21337,7 @@
         "ocfPVLiveActual": 15,
         "ocfNGESOForecast": 13,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 53.10465152189922,
         "centroidLon": -4.222939543474268
       },
@@ -21766,6 +21862,7 @@
         "ocfPVLiveActual": 31,
         "ocfNGESOForecast": 40,
         "ocfDelta": 9,
+        "ocfDeltaAbs": 9,
         "centroidLat": 50.96631323800428,
         "centroidLon": -0.187000110628783
       },
@@ -22341,6 +22438,7 @@
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 26,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 50.929354812274376,
         "centroidLon": -1.242368004633945
       },
@@ -22398,6 +22496,7 @@
         "ocfPVLiveActual": 72,
         "ocfNGESOForecast": 27,
         "ocfDelta": -45,
+        "ocfDeltaAbs": 45,
         "centroidLat": 50.70914530626964,
         "centroidLon": -1.334090481662179
       },
@@ -22651,6 +22750,7 @@
         "ocfPVLiveActual": 98,
         "ocfNGESOForecast": 69,
         "ocfDelta": -29,
+        "ocfDeltaAbs": 29,
         "centroidLat": 51.2253446250227,
         "centroidLon": -0.880631277140779
       },
@@ -23369,6 +23469,7 @@
         "ocfPVLiveActual": 66,
         "ocfNGESOForecast": 115,
         "ocfDelta": 49,
+        "ocfDeltaAbs": 49,
         "centroidLat": 50.86102523863152,
         "centroidLon": -0.876819602962084
       },
@@ -23791,6 +23892,7 @@
         "ocfPVLiveActual": 45,
         "ocfNGESOForecast": 35,
         "ocfDelta": -10,
+        "ocfDeltaAbs": 10,
         "centroidLat": 50.96187749712552,
         "centroidLon": 0.38294276128624
       },
@@ -23936,6 +24038,7 @@
         "ocfPVLiveActual": 50,
         "ocfNGESOForecast": 40,
         "ocfDelta": -10,
+        "ocfDeltaAbs": 10,
         "centroidLat": 51.042738453757764,
         "centroidLon": -1.438500371519473
       },
@@ -24001,6 +24104,7 @@
         "ocfPVLiveActual": 33,
         "ocfNGESOForecast": 21,
         "ocfDelta": -12,
+        "ocfDeltaAbs": 12,
         "centroidLat": 51.43408665203536,
         "centroidLon": -3.344801570671476
       },
@@ -24166,6 +24270,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 4,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 51.52031139787966,
         "centroidLon": -3.14176085785645
       },
@@ -24233,6 +24338,7 @@
         "ocfPVLiveActual": 78,
         "ocfNGESOForecast": 44,
         "ocfDelta": -34,
+        "ocfDeltaAbs": 34,
         "centroidLat": 51.654998018360715,
         "centroidLon": -2.319798258754816
       },
@@ -26361,6 +26467,7 @@
         "ocfPVLiveActual": 37,
         "ocfNGESOForecast": 41,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 51.828377937713995,
         "centroidLon": -4.942378413611524
       },
@@ -27097,6 +27204,7 @@
         "ocfPVLiveActual": 35,
         "ocfNGESOForecast": 32,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 52.065437935041025,
         "centroidLon": -3.296990010947436
       },
@@ -28139,6 +28247,7 @@
         "ocfPVLiveActual": 34,
         "ocfNGESOForecast": 25,
         "ocfDelta": -9,
+        "ocfDeltaAbs": 9,
         "centroidLat": 51.30199783918675,
         "centroidLon": -2.632984443623741
       },
@@ -28443,6 +28552,7 @@
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 86,
         "ocfDelta": 50,
+        "ocfDeltaAbs": 50,
         "centroidLat": 51.93262994256094,
         "centroidLon": -4.074713038351358
       },
@@ -29067,6 +29177,7 @@
         "ocfPVLiveActual": 18,
         "ocfNGESOForecast": 12,
         "ocfDelta": -6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 51.63692354407627,
         "centroidLon": -3.353717387915828
       },
@@ -29129,6 +29240,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.63692354407627,
         "centroidLon": -3.353717387915828
       },
@@ -29191,6 +29303,7 @@
         "ocfPVLiveActual": 33,
         "ocfNGESOForecast": 30,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 51.68046147460781,
         "centroidLon": -2.886757588916717
       },
@@ -29640,6 +29753,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.68046147460781,
         "centroidLon": -2.886757588916717
       },
@@ -30089,6 +30203,7 @@
         "ocfPVLiveActual": 44,
         "ocfNGESOForecast": 38,
         "ocfDelta": -6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 51.864316327536145,
         "centroidLon": -2.306817831585469
       },
@@ -30480,6 +30595,7 @@
         "ocfPVLiveActual": 57,
         "ocfNGESOForecast": 68,
         "ocfDelta": 11,
+        "ocfDeltaAbs": 11,
         "centroidLat": 50.43160670467244,
         "centroidLon": -3.77175754203919
       },
@@ -30872,6 +30988,7 @@
         "ocfPVLiveActual": 58,
         "ocfNGESOForecast": 55,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 50.889238533207035,
         "centroidLon": -4.106628316568638
       },
@@ -31313,6 +31430,7 @@
         "ocfPVLiveActual": 76,
         "ocfNGESOForecast": 35,
         "ocfDelta": -41,
+        "ocfDeltaAbs": 41,
         "centroidLat": 50.82488863458333,
         "centroidLon": -2.865311560457324
       },
@@ -31479,6 +31597,7 @@
         "ocfPVLiveActual": 70,
         "ocfNGESOForecast": 51,
         "ocfDelta": -19,
+        "ocfDeltaAbs": 19,
         "centroidLat": 50.81603545813524,
         "centroidLon": -3.472479072962402
       },
@@ -31593,6 +31712,7 @@
         "ocfPVLiveActual": 103,
         "ocfNGESOForecast": 131,
         "ocfDelta": 28,
+        "ocfDeltaAbs": 28,
         "centroidLat": 50.32418991150241,
         "centroidLon": -5.052651566550838
       },
@@ -32987,6 +33107,7 @@
         "ocfPVLiveActual": 23,
         "ocfNGESOForecast": 21,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 50.47596519593701,
         "centroidLon": -4.309934162259435
       },
@@ -33154,6 +33275,7 @@
         "ocfPVLiveActual": 155,
         "ocfNGESOForecast": 123,
         "ocfDelta": -32,
+        "ocfDeltaAbs": 32,
         "centroidLat": 50.89652052323724,
         "centroidLon": -1.979332210772483
       },
@@ -33428,6 +33550,7 @@
         "ocfPVLiveActual": 67,
         "ocfNGESOForecast": 108,
         "ocfDelta": 41,
+        "ocfDeltaAbs": 41,
         "centroidLat": 53.17542308952809,
         "centroidLon": -1.335211729445673
       },
@@ -34147,6 +34270,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.320844855428376,
         "centroidLon": -1.520682020076358
       },
@@ -34370,6 +34494,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.40772521874182,
         "centroidLon": -1.569306026848973
       },
@@ -34465,6 +34590,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.35595575281229,
         "centroidLon": -1.505430224044629
       },
@@ -34603,6 +34729,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.37741905675202,
         "centroidLon": -1.471383637037171
       },
@@ -34636,6 +34763,7 @@
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 21,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.54842221760289,
         "centroidLon": -1.103304932635455
       },
@@ -34864,6 +34992,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.40395986032183,
         "centroidLon": -1.201906508701169
       },
@@ -35269,6 +35398,7 @@
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 16,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 53.49849798691661,
         "centroidLon": -1.578517280552477
       },
@@ -35474,6 +35604,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.42121430400719,
         "centroidLon": -1.406480902500037
       },
@@ -35514,6 +35645,7 @@
         "ocfPVLiveActual": 24,
         "ocfNGESOForecast": 22,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 52.284907364154634,
         "centroidLon": -1.536697051897552
       },
@@ -36290,6 +36422,7 @@
         "ocfPVLiveActual": 38,
         "ocfNGESOForecast": 42,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 52.222784435387304,
         "centroidLon": -2.649027471738286
       },
@@ -37330,6 +37463,7 @@
         "ocfPVLiveActual": 14,
         "ocfNGESOForecast": 20,
         "ocfDelta": 6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 52.725306404731114,
         "centroidLon": -2.132368984499323
       },
@@ -37370,6 +37504,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 4,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 52.591169992722655,
         "centroidLon": -1.912789007036637
       },
@@ -37401,6 +37536,7 @@
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 13,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 52.38392231174624,
         "centroidLon": -1.270881465264573
       },
@@ -37547,6 +37683,7 @@
         "ocfPVLiveActual": 25,
         "ocfNGESOForecast": 44,
         "ocfDelta": 19,
+        "ocfDeltaAbs": 19,
         "centroidLat": 52.790026029721005,
         "centroidLon": -1.607505627845878
       },
@@ -37694,6 +37831,7 @@
         "ocfPVLiveActual": 90,
         "ocfNGESOForecast": 74,
         "ocfDelta": -16,
+        "ocfDeltaAbs": 16,
         "centroidLat": 52.10446146084431,
         "centroidLon": -1.831839527713341
       },
@@ -39059,6 +39197,7 @@
         "ocfPVLiveActual": 19,
         "ocfNGESOForecast": 18,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 52.59942493318637,
         "centroidLon": -2.527188236755314
       },
@@ -39107,6 +39246,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 4,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 52.420229444216886,
         "centroidLon": -2.011955772151706
       },
@@ -39137,6 +39277,7 @@
         "ocfPVLiveActual": 13,
         "ocfNGESOForecast": 16,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 52.61363537309623,
         "centroidLon": -1.635973845706095
       },
@@ -39466,6 +39607,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 52.536358173819295,
         "centroidLon": -2.048094517640457
       },
@@ -39493,6 +39635,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 52.488824475578674,
         "centroidLon": -2.042037357271927
       },
@@ -39519,6 +39662,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 52.53949206706988,
         "centroidLon": -2.209385658419776
       },
@@ -39552,6 +39696,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 4,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 52.75758543789831,
         "centroidLon": -1.906550495982588
       },
@@ -39684,6 +39829,7 @@
         "ocfPVLiveActual": 54,
         "ocfNGESOForecast": 53,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 52.66203542872323,
         "centroidLon": -2.830556938659019
       },
@@ -40759,6 +40905,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 4,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 52.588060988071966,
         "centroidLon": -2.073325914053805
       },
@@ -40792,6 +40939,7 @@
         "ocfPVLiveActual": 44,
         "ocfNGESOForecast": 55,
         "ocfDelta": 11,
+        "ocfDeltaAbs": 11,
         "centroidLat": 53.01647188082366,
         "centroidLon": -1.593803783364908
       },
@@ -41701,6 +41849,7 @@
         "ocfPVLiveActual": 7,
         "ocfNGESOForecast": 10,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 53.96860721627796,
         "centroidLon": -1.948391051372557
       },
@@ -42180,6 +42329,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 10,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 53.64713211798345,
         "centroidLon": -1.858701568547026
       },
@@ -42406,6 +42556,7 @@
         "ocfPVLiveActual": 17,
         "ocfNGESOForecast": 19,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 53.81903918560386,
         "centroidLon": -1.317370858073303
       },
@@ -42793,6 +42944,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.66190159619685,
         "centroidLon": -1.286259958818385
       },
@@ -42866,6 +43018,7 @@
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 6,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.7953175631884,
         "centroidLon": -1.589987889433573
       },
@@ -42932,6 +43085,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.004359960249836,
         "centroidLon": -1.195150757052163
       },
@@ -43152,6 +43306,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 12,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 53.74747582929218,
         "centroidLon": -1.625243869521412
       },
@@ -43300,6 +43455,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.730037451330205,
         "centroidLon": -3.321470586099061
       },
@@ -43329,6 +43485,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 2,
         "ocfDelta": -2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 57.56213500456808,
         "centroidLon": -2.512671498903219
       },
@@ -43468,6 +43625,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 0,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 58.5630687399375,
         "centroidLon": -3.196053370432908
       },
@@ -44115,6 +44273,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 4,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 56.10633747952638,
         "centroidLon": -3.952503875278776
       },
@@ -44288,6 +44447,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 4,
         "ocfDelta": -4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 59.2729968138531,
         "centroidLon": -2.786289878039247
       },
@@ -46065,6 +46225,7 @@
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 8,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 56.30622833681198,
         "centroidLon": -3.335009610177445
       },
@@ -46279,6 +46440,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.73023205130315,
         "centroidLon": -4.242989788833527
       },
@@ -46357,6 +46519,7 @@
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 13,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.58027661658924,
         "centroidLon": -2.660383599200696
       },
@@ -46453,6 +46616,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.84588133256654,
         "centroidLon": -6.913415462514261
       },
@@ -49122,6 +49286,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.45278802649507,
         "centroidLon": -4.581244014545915
       },
@@ -49196,6 +49361,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.99805502373743,
         "centroidLon": -3.775842241561831
       },
@@ -49221,6 +49387,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.84450144780511,
         "centroidLon": -3.699744693176522
       },
@@ -49249,6 +49416,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.45577051744067,
         "centroidLon": -4.505984362350087
       },
@@ -49276,6 +49444,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.74923729886572,
         "centroidLon": -2.082084138313887
       },
@@ -49550,6 +49719,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.16533655264514,
         "centroidLon": -3.659115598971451
       },
@@ -49578,6 +49748,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.988725015528296,
         "centroidLon": -3.862488835915241
       },
@@ -49605,6 +49776,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 3,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 56.31542252004696,
         "centroidLon": -3.863684154940929
       },
@@ -49963,6 +50135,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.87783338650807,
         "centroidLon": -4.381327928099219
       },
@@ -49990,6 +50163,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.796644052175225,
         "centroidLon": -2.582304805615209
       },
@@ -50080,6 +50254,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.155671713714916,
         "centroidLon": -5.840480944294178
       },
@@ -52073,6 +52248,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 58.11704102923493,
         "centroidLon": -3.948398652032758
       },
@@ -52299,6 +52475,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.93188949088055,
         "centroidLon": -3.446087200678754
       },
@@ -52326,6 +52503,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.44495768626423,
         "centroidLon": -3.563293240145245
       },
@@ -52436,6 +52614,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.91987251750577,
         "centroidLon": -4.180931749757048
       },
@@ -52480,6 +52659,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.66811901845733,
         "centroidLon": -5.773318207992649
       },
@@ -53894,6 +54074,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.735085247344315,
         "centroidLon": -3.925521537028839
       },
@@ -53920,6 +54101,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 58.26358127859611,
         "centroidLon": -4.883024999983347
       },
@@ -54470,6 +54652,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.225480631840945,
         "centroidLon": -5.133600220088384
       },
@@ -54497,6 +54680,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.17395551795204,
         "centroidLon": -3.206061731488236
       },
@@ -54735,6 +54919,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.522374924707364,
         "centroidLon": -3.10626717600971
       },
@@ -54789,6 +54974,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.855621219676934,
         "centroidLon": -4.235379627690977
       },
@@ -54815,6 +55001,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.13539496920075,
         "centroidLon": -2.094550349666295
       },
@@ -54844,6 +55031,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.82672207688387,
         "centroidLon": -4.140075143896475
       },
@@ -54871,6 +55059,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.89881662946774,
         "centroidLon": -2.89811026209954
       },
@@ -54979,6 +55168,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.3470980009601,
         "centroidLon": -4.298998049037056
       },
@@ -55009,6 +55199,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.08644416991804,
         "centroidLon": -2.207950037247509
       },
@@ -55036,6 +55227,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.9758172489231,
         "centroidLon": -3.989137464580738
       },
@@ -55066,6 +55258,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 6,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 56.33887877304671,
         "centroidLon": -2.93795428625376
       },
@@ -55215,6 +55408,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.70115143266822,
         "centroidLon": -3.317175992992085
       },
@@ -55243,6 +55437,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.87558839877854,
         "centroidLon": -4.701408949399245
       },
@@ -55271,6 +55466,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 6,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 56.145655332253035,
         "centroidLon": -3.749711345842463
       },
@@ -55396,6 +55592,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.953598838483735,
         "centroidLon": -3.213423158474818
       },
@@ -55421,6 +55618,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 58.45818898752116,
         "centroidLon": -3.904303497800298
       },
@@ -55630,6 +55828,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.96382600088424,
         "centroidLon": -4.345352710325757
       },
@@ -55660,6 +55859,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.88299355145699,
         "centroidLon": -3.585831854185989
       },
@@ -55687,6 +55887,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.47802445253074,
         "centroidLon": -2.977017361542778
       },
@@ -55719,6 +55920,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.948541292641835,
         "centroidLon": -2.598410318217036
       },
@@ -55985,6 +56187,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 58.27087197386873,
         "centroidLon": -3.514323969097937
       },
@@ -56089,6 +56292,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.09020279120023,
         "centroidLon": -3.499410590176355
       },
@@ -56210,6 +56414,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.933646842525654,
         "centroidLon": -5.021657245510216
       },
@@ -56500,6 +56705,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.25437620216473,
         "centroidLon": -6.451943141480262
       },
@@ -57347,6 +57553,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.300767748610035,
         "centroidLon": -2.196557709769749
       },
@@ -57373,6 +57580,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.77207831958034,
         "centroidLon": -4.212955528696447
       },
@@ -57399,6 +57607,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.60481727260461,
         "centroidLon": -4.169875997804267
       },
@@ -57426,6 +57635,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.931430803097925,
         "centroidLon": -4.095715062548768
       },
@@ -57550,6 +57760,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.624456480643246,
         "centroidLon": -2.370079246723385
       },
@@ -57748,6 +57959,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.791041654403706,
         "centroidLon": -4.466397510345378
       },
@@ -57773,6 +57985,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.52250684358878,
         "centroidLon": -3.344462442715938
       },
@@ -57887,6 +58100,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.92455628143477,
         "centroidLon": -4.473801529567734
       },
@@ -57913,6 +58127,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.36187406579189,
         "centroidLon": -4.810331294358257
       },
@@ -57938,6 +58153,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.93914043260142,
         "centroidLon": -2.356857388146094
       },
@@ -58046,6 +58262,7 @@
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 6,
         "ocfDelta": -4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 60.24613325482288,
         "centroidLon": -1.215226023843392
       },
@@ -59369,6 +59586,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.07292878620676,
         "centroidLon": -4.629616556115917
       },
@@ -59396,6 +59614,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.88593921258887,
         "centroidLon": -5.272376871420071
       },
@@ -59421,6 +59640,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.64904849972523,
         "centroidLon": -2.77554214396693
       },
@@ -59447,6 +59667,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.73399470715099,
         "centroidLon": -4.306356900308038
       },
@@ -59474,6 +59695,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.53799268390496,
         "centroidLon": -2.995839354820048
       },
@@ -59501,6 +59723,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.09396016054086,
         "centroidLon": -3.265017805720319
       },
@@ -59548,6 +59771,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 54.939593521626946,
         "centroidLon": -4.901581162027024
       },
@@ -60060,6 +60284,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 3,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 56.263425121710775,
         "centroidLon": -3.209503910303867
       },
@@ -60145,6 +60370,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.909772668005466,
         "centroidLon": -3.244930176573394
       },
@@ -60172,6 +60398,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.84844729645367,
         "centroidLon": -4.326908825662867
       },
@@ -60198,6 +60425,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.71541550361647,
         "centroidLon": -5.071547976057981
       },
@@ -60352,6 +60580,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.82766040538016,
         "centroidLon": -4.299178690213339
       },
@@ -60378,6 +60607,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.36552346619127,
         "centroidLon": -2.85809702212243
       },
@@ -60573,6 +60803,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.04143452668772,
         "centroidLon": -4.74392577813811
       },
@@ -60705,6 +60936,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.76625206660952,
         "centroidLon": -4.857548010317204
       },
@@ -60816,6 +61048,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.03461657742484,
         "centroidLon": -3.38088050515795
       },
@@ -60843,6 +61076,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 2,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.32135616400068,
         "centroidLon": -4.205373267783674
       },
@@ -60994,6 +61228,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.81160821237363,
         "centroidLon": -4.551560878993413
       },
@@ -61021,6 +61256,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.709559248510075,
         "centroidLon": -3.147524335872974
       },
@@ -61051,6 +61287,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.479494238237955,
         "centroidLon": -2.96425056631426
       },
@@ -61144,6 +61381,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.4098963218067,
         "centroidLon": -4.374501744637186
       },
@@ -61169,6 +61407,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.96016303508714,
         "centroidLon": -4.280561843709984
       },
@@ -61212,6 +61451,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.58755331733106,
         "centroidLon": -4.367920645010433
       },
@@ -61238,6 +61478,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.62581186176402,
         "centroidLon": -4.5182920724948
       },
@@ -61267,6 +61508,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.686908318316355,
         "centroidLon": -4.661768265668205
       },
@@ -61330,6 +61572,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.688344400966564,
         "centroidLon": -4.873949364551192
       },
@@ -61359,6 +61602,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 7,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.25055562276647,
         "centroidLon": -2.439270683318403
       },
@@ -61386,6 +61630,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 58.212996897203425,
         "centroidLon": -4.339168978620899
       },
@@ -61417,6 +61662,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.217170430188396,
         "centroidLon": -2.948989479725432
       },
@@ -61520,6 +61766,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.523168079200516,
         "centroidLon": -3.791366540582247
       },
@@ -61549,6 +61796,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.68511316008245,
         "centroidLon": -3.470876797983977
       },
@@ -61575,6 +61823,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 5,
         "ocfDelta": 5,
+        "ocfDeltaAbs": 5,
         "centroidLat": 56.75694500855888,
         "centroidLon": -2.922022116096812
       },
@@ -61603,6 +61852,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.593790102803936,
         "centroidLon": -3.04443282718943
       },
@@ -61629,6 +61879,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.250967536891395,
         "centroidLon": -4.69551013441245
       },
@@ -61759,6 +62010,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.51266337141528,
         "centroidLon": -2.880607025976539
       },
@@ -61812,6 +62064,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.54907327529128,
         "centroidLon": -3.83642760700815
       },
@@ -62026,6 +62279,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.84406216117664,
         "centroidLon": -3.905618363856313
       },
@@ -62052,6 +62306,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.96313047546662,
         "centroidLon": -4.453093744535259
       },
@@ -62250,6 +62505,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.81252960145184,
         "centroidLon": -4.421325999651339
       },
@@ -62277,6 +62533,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.87512267746626,
         "centroidLon": -4.325903820525028
       },
@@ -62303,6 +62560,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.419890432430954,
         "centroidLon": -1.897801874872387
       },
@@ -62412,6 +62670,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.24751250954562,
         "centroidLon": -2.099139175430038
       },
@@ -62437,6 +62696,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.50921786283079,
         "centroidLon": -1.831885111292962
       },
@@ -62488,6 +62748,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.11877487427588,
         "centroidLon": -5.603048698853346
       },
@@ -63240,6 +63501,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.93443483038654,
         "centroidLon": -4.232262771394137
       },
@@ -63273,6 +63535,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.92452948421745,
         "centroidLon": -3.093950169153183
       },
@@ -63346,6 +63609,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.772966869955134,
         "centroidLon": -4.443305482619124
       },
@@ -63373,6 +63637,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 4,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 56.120125210031446,
         "centroidLon": -3.174495893862214
       },
@@ -63418,6 +63683,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.16552563255317,
         "centroidLon": -3.121697119518553
       },
@@ -63456,6 +63722,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.078783117204445,
         "centroidLon": -2.109800426016621
       },
@@ -63529,6 +63796,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.88641764151731,
         "centroidLon": -4.454219725485015
       },
@@ -63556,6 +63824,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.96994005554969,
         "centroidLon": -3.180608340183608
       },
@@ -63613,6 +63882,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.952656483807296,
         "centroidLon": -3.32470828331671
       },
@@ -63639,6 +63909,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": null,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.243798387286844,
         "centroidLon": -4.629715246017911
       },
@@ -63785,6 +64056,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.934928329771076,
         "centroidLon": -4.837906980722988
       },
@@ -63894,6 +64166,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.564746180492314,
         "centroidLon": -1.899385987975214
       },
@@ -63957,6 +64230,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.290960849368076,
         "centroidLon": -4.156327065728046
       },
@@ -64038,6 +64312,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.82634068038182,
         "centroidLon": -4.258055932629225
       },
@@ -64066,6 +64341,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.63794527916957,
         "centroidLon": -4.057228857559889
       },
@@ -64094,6 +64370,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.96162410299914,
         "centroidLon": -4.567883901366232
       },
@@ -64130,6 +64407,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.53232101866287,
         "centroidLon": -2.132881719984774
       },
@@ -64185,6 +64463,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.12866200920523,
         "centroidLon": -2.884610422875488
       },
@@ -64214,6 +64493,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.501992218107645,
         "centroidLon": -5.449303502251996
       },
@@ -64349,6 +64629,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.98261662239942,
         "centroidLon": -3.266230974277781
       },
@@ -64407,6 +64688,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.991170886140765,
         "centroidLon": -4.037940993031332
       },
@@ -64527,6 +64809,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.78446904119242,
         "centroidLon": -3.963679839590702
       },
@@ -64556,6 +64839,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.86398748742636,
         "centroidLon": -4.268232476403763
       },
@@ -64581,6 +64865,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 56.19348437613052,
         "centroidLon": -3.315397080880051
       },
@@ -64710,6 +64995,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.91501980648661,
         "centroidLon": -3.202449463288099
       },
@@ -64735,6 +65021,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 1,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 57.25528939359485,
         "centroidLon": -2.045365478572317
       },
@@ -64794,6 +65081,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 57.157428668988715,
         "centroidLon": -2.161829898546285
       },
@@ -64820,6 +65108,7 @@
         "ocfPVLiveActual": 56,
         "ocfNGESOForecast": 31,
         "ocfDelta": -25,
+        "ocfDeltaAbs": 25,
         "centroidLat": 51.34883649056183,
         "centroidLon": -1.396506197107049
       },
@@ -64890,6 +65179,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 2,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.48234782608281,
         "centroidLon": -0.065164641238203
       },
@@ -64916,6 +65206,7 @@
         "ocfPVLiveActual": 4,
         "ocfNGESOForecast": 5,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.21818230138792,
         "centroidLon": -2.905451327756774
       },
@@ -64942,6 +65233,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 55.443649551760245,
         "centroidLon": -1.841772493574786
       },
@@ -65395,6 +65687,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 53.41281218979502,
         "centroidLon": -1.452025944055003
       },
@@ -65433,6 +65726,7 @@
         "ocfPVLiveActual": 22,
         "ocfNGESOForecast": 24,
         "ocfDelta": 2,
+        "ocfDeltaAbs": 2,
         "centroidLat": 51.08070927646094,
         "centroidLon": 0.905265835032322
       },
@@ -65539,6 +65833,7 @@
         "ocfPVLiveActual": 12,
         "ocfNGESOForecast": 6,
         "ocfDelta": -6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 51.29013868795014,
         "centroidLon": -0.315416097944162
       },
@@ -65813,6 +66108,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 2,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 51.704744711302524,
         "centroidLon": -0.328615519938995
       },
@@ -65860,6 +66156,7 @@
         "ocfPVLiveActual": 36,
         "ocfNGESOForecast": 36,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.28434062972886,
         "centroidLon": 0.749332435679999
       },
@@ -65926,6 +66223,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.506915765305386,
         "centroidLon": 0.41078739672114
       },
@@ -65988,6 +66286,7 @@
         "ocfPVLiveActual": 5,
         "ocfNGESOForecast": 6,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 53.469733259498426,
         "centroidLon": -2.483050821003983
       },
@@ -66134,6 +66433,7 @@
         "ocfPVLiveActual": 26,
         "ocfNGESOForecast": 21,
         "ocfDelta": -5,
+        "ocfDeltaAbs": 5,
         "centroidLat": 53.20958640820045,
         "centroidLon": -3.300036669404651
       },
@@ -66225,6 +66525,7 @@
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 9,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 52.4633858891294,
         "centroidLon": -1.842772744858425
       },
@@ -66309,6 +66610,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.84673220024486,
         "centroidLon": -4.015364108862796
       },
@@ -66335,6 +66637,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.771171716713845,
         "centroidLon": -4.380827741006621
       },
@@ -66363,6 +66666,7 @@
         "ocfPVLiveActual": 2,
         "ocfNGESOForecast": 3,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.16992725024047,
         "centroidLon": -3.628359256453497
       },
@@ -66504,6 +66808,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.037533507928295,
         "centroidLon": -3.658554142677154
       },
@@ -66539,6 +66844,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 1,
         "ocfDelta": 1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 55.95544889885689,
         "centroidLon": -4.415620776902439
       },
@@ -66575,6 +66881,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 4,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 55.683142263303104,
         "centroidLon": -4.78835117605315
       },
@@ -66655,6 +66962,7 @@
         "ocfPVLiveActual": 30,
         "ocfNGESOForecast": 13,
         "ocfDelta": -17,
+        "ocfDeltaAbs": 17,
         "centroidLat": 53.93923267019956,
         "centroidLon": -0.484322156673126
       },
@@ -67293,6 +67601,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 0,
         "ocfDelta": -3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 53.708002951811906,
         "centroidLon": -0.078997974583745
       },
@@ -67474,6 +67783,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.46098102843381,
         "centroidLon": 0.216180910572771
       },
@@ -67560,6 +67870,7 @@
         "ocfPVLiveActual": 3,
         "ocfNGESOForecast": 3,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.31189781530243,
         "centroidLon": 0.164439321984192
       },
@@ -67782,6 +68093,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 11,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 53.877865777954824,
         "centroidLon": -3.001136326807168
       },
@@ -68011,6 +68323,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.55101692183358,
         "centroidLon": -0.253054301272224
       },
@@ -68173,6 +68486,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.55101692183358,
         "centroidLon": -0.253054301272224
       },
@@ -68335,6 +68649,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.53222405412202,
         "centroidLon": -0.317414148155423
       },
@@ -68499,6 +68814,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.53222405412202,
         "centroidLon": -0.317414148155423
       },
@@ -68663,6 +68979,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.53222405412202,
         "centroidLon": -0.317414148155423
       },
@@ -68827,6 +69144,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.53222405412202,
         "centroidLon": -0.317414148155423
       },
@@ -68991,6 +69309,7 @@
         "ocfPVLiveActual": 23,
         "ocfNGESOForecast": 23,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.77656565630591,
         "centroidLon": -0.807369032335413
       },
@@ -69848,6 +70167,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 51.60699169169069,
         "centroidLon": -0.707970526248462
       },
@@ -69913,6 +70233,7 @@
         "ocfPVLiveActual": 96,
         "ocfNGESOForecast": 139,
         "ocfDelta": 43,
+        "ocfDeltaAbs": 43,
         "centroidLat": 52.10336939647964,
         "centroidLon": 1.077618858147902
       },
@@ -70181,6 +70502,7 @@
         "ocfPVLiveActual": 42,
         "ocfNGESOForecast": 36,
         "ocfDelta": -6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 51.26650369747854,
         "centroidLon": 1.096304970857787
       },
@@ -70272,6 +70594,7 @@
         "ocfPVLiveActual": 41,
         "ocfNGESOForecast": null,
         "ocfDelta": -41,
+        "ocfDeltaAbs": 41,
         "centroidLat": 51.257465031867326,
         "centroidLon": 1.316798179447738
       },
@@ -70447,6 +70770,7 @@
         "ocfPVLiveActual": 198,
         "ocfNGESOForecast": 191,
         "ocfDelta": -7,
+        "ocfDeltaAbs": 7,
         "centroidLat": 52.60742259239446,
         "centroidLon": 1.251578619294671
       },
@@ -70648,6 +70972,7 @@
         "ocfPVLiveActual": 122,
         "ocfNGESOForecast": 77,
         "ocfDelta": -45,
+        "ocfDeltaAbs": 45,
         "centroidLat": 52.69756554781271,
         "centroidLon": 0.363180173225692
       },
@@ -70984,6 +71309,7 @@
         "ocfPVLiveActual": 59,
         "ocfNGESOForecast": 37,
         "ocfDelta": -22,
+        "ocfDeltaAbs": 22,
         "centroidLat": 52.83424893423729,
         "centroidLon": -0.14570593763546
       },
@@ -71530,6 +71856,7 @@
         "ocfPVLiveActual": 6,
         "ocfNGESOForecast": 0,
         "ocfDelta": -6,
+        "ocfDeltaAbs": 6,
         "centroidLat": 55.01854372821069,
         "centroidLon": -1.720414768087983
       },
@@ -71574,6 +71901,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 0,
         "ocfDelta": -8,
+        "ocfDeltaAbs": 8,
         "centroidLat": 54.95808956749794,
         "centroidLon": -1.911714134573868
       },
@@ -71624,6 +71952,7 @@
         "ocfPVLiveActual": 21,
         "ocfNGESOForecast": 2,
         "ocfDelta": -19,
+        "ocfDeltaAbs": 19,
         "centroidLat": 54.77541099818122,
         "centroidLon": -3.035605562109205
       },
@@ -72444,6 +72773,7 @@
         "ocfPVLiveActual": 10,
         "ocfNGESOForecast": 14,
         "ocfDelta": 4,
+        "ocfDeltaAbs": 4,
         "centroidLat": 54.2225318302682,
         "centroidLon": -3.06894443236764
       },
@@ -72823,6 +73153,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 54.2225318302682,
         "centroidLon": -3.06894443236764
       },
@@ -73202,6 +73533,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.29984234136923,
         "centroidLon": -4.877510295010663
       },
@@ -73227,6 +73559,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": null,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 56.30357413023753,
         "centroidLon": -5.022295473864712
       },
@@ -73253,6 +73586,7 @@
         "ocfPVLiveActual": 136,
         "ocfNGESOForecast": 151,
         "ocfDelta": 15,
+        "ocfDeltaAbs": 15,
         "centroidLat": 51.38063505273976,
         "centroidLon": -2.363659396857367
       },
@@ -73660,6 +73994,7 @@
         "ocfPVLiveActual": 8,
         "ocfNGESOForecast": 7,
         "ocfDelta": -1,
+        "ocfDeltaAbs": 1,
         "centroidLat": 54.124253436627406,
         "centroidLon": -1.456351091004275
       },
@@ -73971,6 +74306,7 @@
         "ocfPVLiveActual": 9,
         "ocfNGESOForecast": 12,
         "ocfDelta": 3,
+        "ocfDeltaAbs": 3,
         "centroidLat": 53.23711527546091,
         "centroidLon": -4.501750322176288
       },
@@ -74389,6 +74725,7 @@
         "ocfPVLiveActual": 1,
         "ocfNGESOForecast": 1,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.827572126898474,
         "centroidLon": -4.212479342807007
       },
@@ -74415,6 +74752,7 @@
         "ocfPVLiveActual": 0,
         "ocfNGESOForecast": 0,
         "ocfDelta": 0,
+        "ocfDeltaAbs": 0,
         "centroidLat": 55.86748372836659,
         "centroidLon": -4.288434243148657
       },

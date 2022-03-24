@@ -1006,12 +1006,12 @@ const BarLineChart = () => {
   const COLORS = [
     "#14120E",
     "#9597E4",
-    "#EA526F",
+    "#351E29",
     "#468AC9",
     "#8DC77B",
     "#643173",
     "#A13D63",
-    "#351E29",
+    "#EA526F",
   ];
   const GENERATION = [
     // { key: "Oil", fill: COLORS[0] },
@@ -1111,13 +1111,13 @@ const BarLineChart = () => {
         <Line
           type="monotone"
           dataKey="DEMAND"
-          stroke="#ff7300"
+          stroke="#201335"
           strokeWidth={10}
         />
         <Line
           type="monotone"
           dataKey="FORECAST"
-          stroke="red"
+          stroke="#867DCC"
           strokeWidth={10}
           strokeDasharray="3 3"
         />
