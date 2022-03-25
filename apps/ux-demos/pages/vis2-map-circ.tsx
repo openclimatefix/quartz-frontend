@@ -6,12 +6,9 @@ import Layout from "../components/layout";
 import Map from "../components/map";
 
 import * as d3 from "d3";
+import { useRouter } from "next/router";
+import useSWR from "swr";
 
-import pvMapData from "../data/pv/combined-2021-06-10-1200-circ.json";
-// import pvLiveGenerationData from "../data/pv/pvlive-2021-06-10.json";
-
-const PV_GENERATION_MIN = 0;
-const PV_GENERATION_MAX = 3000;
 const SELECTED_SRC_VALUES = {
   ACTUAL: "ACTUAL",
   FORECAST: "FORECAST",
@@ -19,15 +16,28 @@ const SELECTED_SRC_VALUES = {
   DELTA_ABS: "DELTA_ABS",
 };
 
-// const MyResponsiveLine = dynamic(() => import("../components/charts/line"), {
-//   ssr: false,
-// });
-
 const Vis1MapPage: NextPage = () => {
   const INITIAL_TIME_STEP = 23;
   const [selectedTimeStep, setSelectedTimeStep] = useState(INITIAL_TIME_STEP);
 
   const [selectedSrc, setSelectedSrc] = useState(SELECTED_SRC_VALUES.ACTUAL);
+
+  // Add support for dynamic data
+  const router = useRouter();
+  const date = router.query.date || "2021-06-10";
+  console.log(date);
+
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  // http://localhost:3000/api/gsp?time=2021-06-10T12:00&shape=circ
+  const { data: pvMapData, error } = useSWR(
+    `/api/gsp?time=${date}T12:00&shape=circ`,
+    fetcher
+  );
+
+  if (error) return <div>failed to load</div>;
+  if (!pvMapData) return <div>loading...</div>;
+
+  // Continue as normal below
 
   const timeSteps = [
     "00:30",

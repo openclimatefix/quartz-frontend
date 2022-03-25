@@ -11,31 +11,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import tempMixInputData from "../../data/pv/temp-mix.json";
-
-// THIS IS WHAT WE WOULD WANT
-// const data = [
-//   {
-//     time: "00:00",
-//     GENERATION: 0,
-//     FORECAST: 0,
-//   },
-// ];
-
-const getGenerationDataFromMixInput = (time) => {
-  return tempMixInputData[1].data.filter((obj) => {
-    return obj.x === time;
-  })[0].y;
-};
-
-const data = tempMixInputData[0].data.map((dateForecast) => {
-  return {
-    time: dateForecast.x,
-    FORECAST: dateForecast.y,
-    GENERATION: getGenerationDataFromMixInput(dateForecast.x),
-  };
-});
-
 const setDatasetValsToZeroAfterTOI = (dataset, timeSteps, timeOfInterest) => {
   const toiIndex = timeSteps.indexOf(timeOfInterest);
 
@@ -52,7 +27,15 @@ const setDatasetValsToZeroAfterTOI = (dataset, timeSteps, timeOfInterest) => {
   });
 };
 
-const RemixLine = ({ timeOfInterest, timeSteps }) => {
+// THIS IS WHAT WE WOULD WANT
+// const data = [
+//   {
+//     time: "00:00",
+//     GENERATION: 0,
+//     FORECAST: 0,
+//   },
+// ];
+const RemixLine = ({ timeOfInterest, timeSteps, data }) => {
   const preppedData = setDatasetValsToZeroAfterTOI(
     data,
     timeSteps,

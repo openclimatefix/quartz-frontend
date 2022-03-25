@@ -1,24 +1,30 @@
 import { NextPage } from "next";
-import dynamic from "next/dynamic";
 import { useState } from "react";
 import DataAttribution from "../components/data-attribution";
 import Layout from "../components/layout";
-import Map from "../components/map";
 import RemixLine from "../components/charts/remix-line";
-
-import pvMapData from "../data/pv/generation-2021-06-10.json";
-import pvLiveGenerationData from "../data/pv/pvlive-2021-06-10.json";
-
-const PV_GENERATION_MIN = 0;
-const PV_GENERATION_MAX = 3000;
-
-const MyResponsiveLine = dynamic(() => import("../components/charts/line"), {
-  ssr: false,
-});
+import { useRouter } from "next/router";
+import useSWR from "swr";
 
 const Vis1MapPage: NextPage = () => {
   const INITIAL_TIME_STEP = 23;
   const [selectedTimeStep, setSelectedTimeStep] = useState(INITIAL_TIME_STEP);
+
+  // Add support for dynamic data
+  const router = useRouter();
+  const date = router.query.date || "2021-06-10";
+  console.log(date);
+
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+  const { data: generationForecastData, error } = useSWR(
+    `/api/generation-forecast?date=${date}`,
+    fetcher
+  );
+
+  if (error) return <div>failed to load</div>;
+  if (!generationForecastData) return <div>loading...</div>;
+
+  // Continue as normal below
 
   const timeSteps = [
     "00:30",
@@ -151,6 +157,7 @@ const Vis1MapPage: NextPage = () => {
             <RemixLine
               timeOfInterest={timeSteps[selectedTimeStep]}
               timeSteps={timeSteps}
+              data={generationForecastData}
             />
           </div>
         </div>
