@@ -20,7 +20,7 @@ export default function Home() {
 
       <main className="max-w-5xl py-20 mx-auto bg-gray-100">
         {DATES_OF_INTEREST.map((date) => (
-          <div>
+          <div key={date}>
             <h2 className="mt-20 mb-4 text-4xl font-bold">
               {date === "2021-06-10"
                 ? "2021-06-10 (REAL DATA)"

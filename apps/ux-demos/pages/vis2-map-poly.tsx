@@ -30,6 +30,7 @@ const Vis1MapPage: NextPage = () => {
   const date = router.query.date || "2021-06-10";
   console.log(date);
 
+  //@ts-ignore
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   // http://localhost:3000/api/gsp?time=2021-06-10T12:00&shape=circ
   const { data: pvMapData, error } = useSWR(

@@ -19,6 +19,7 @@ const Vis1MapPage: NextPage = () => {
   const date = router.query.date || "2021-06-10";
   console.log(date);
 
+  //@ts-ignore
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data: generationForecastData, error } = useSWR(
     `/api/generation-forecast?date=${date}`,
