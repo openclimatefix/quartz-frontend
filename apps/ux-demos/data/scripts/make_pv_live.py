@@ -1,9 +1,12 @@
+"""
+Get truth solar generation per GSP from PVlive
+
+"""
 from pvlive_api import PVLive
 from datetime import datetime, timezone
 import pandas as pd
 import json
 import os
-
 
 # define function
 def get_data_and_save(date):
@@ -16,7 +19,7 @@ def get_data_and_save(date):
     # get data from pv live, for gsp 1 to 338 (inclusive)
     pv = PVLive()
     all_data = []
-    for gsp_id in range(1, 339):
+    for gsp_id in range(1, 10):
         print(gsp_id)
         data = pv.between(start=start, end=end, entity_type="gsp", entity_id=gsp_id, dataframe=True)
         all_data.append(data)
