@@ -201,7 +201,7 @@
   },
   {
     "time": "23:30",
-    "FORECAST": NaN,
+    "FORECAST": 0,
     "GENERATION": 0
   }
 ]
