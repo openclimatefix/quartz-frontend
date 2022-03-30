@@ -22,9 +22,9 @@ export default function Home() {
         {DATES_OF_INTEREST.map((date) => (
           <div key={date}>
             <h2 className="mt-20 mb-4 text-4xl font-bold">
-              {date === "2021-06-10"
-                ? "2021-06-10 (REAL DATA)"
-                : `${date} (FAKE)`}
+              {date === "2021-10-08"
+                ? `${date} (Fake DATA)`
+                : `${date} (Real)`}
             </h2>
             <ul className="pl-6 text-lg list-disc list-inside">
               <li>
