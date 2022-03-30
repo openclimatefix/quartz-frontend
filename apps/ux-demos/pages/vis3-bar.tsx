@@ -23,7 +23,7 @@ const Vis4BarPage: NextPage = () => {
   // Continue as normal below
 
   return (
-    <Layout title="Generation Mix with Demand">
+    <Layout title="Generation Mix with Demand" date={date}>
       <DataAttribution
         style="black"
         datasets={[
