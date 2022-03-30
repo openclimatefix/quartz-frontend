@@ -5,7 +5,7 @@ interface ILayout {
   title?: string;
 }
 
-const Layout = ({ children, title, date }: ILayout) => {
+const Layout = ({ children, title }: ILayout) => {
   return (
     <>
       <Head>
@@ -14,7 +14,7 @@ const Layout = ({ children, title, date }: ILayout) => {
       <div className="absolute inset-0 flex flex-col">
         <div className="flex-grow">{children}</div>
         <h1 className="py-2 text-2xl text-center text-white border-t border-white bg-mapbox-black">
-          {title && <>{title} | </>} {date}
+          {title && <>{title} | </>}
         </h1>
       </div>
     </>
