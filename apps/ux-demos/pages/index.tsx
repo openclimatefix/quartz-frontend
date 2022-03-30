@@ -3,11 +3,11 @@ import Link from "next/link";
 
 export default function Home() {
   const DATES_OF_INTEREST = [
-    "2021-10-08",
-    "2021-03-09",
-    "2021-03-05",
     "2020-08-07",
+    "2021-03-05",
+    "2021-03-09",
     "2021-06-10",
+    "2021-10-08",
   ]; // YYYY-MM-DD
 
   return (
