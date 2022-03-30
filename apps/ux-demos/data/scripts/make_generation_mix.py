@@ -5,11 +5,13 @@ Get data from Elexon BM reports
 1. FUELHH - gives generation mix
 2. B1630 - solar generation
 3. ROLSYSDEM - gives actual demand
-4. save file
+4. Get ESO forecast and add to forecast
+5. save file
 """
 from ElexonDataPortal import api
 import os
 import json
+import pandas as pd
 
 # setup elexon client
 client = api.Client()
@@ -55,7 +57,7 @@ def make_generation_mix(start_date, end_date):
         df_FUELHH[col] = df_FUELHH[col].astype(int)
 
     # make forecast by adding them up?
-    # TODO is this right?
+    # TODO is this right? no Need to add solar forecast
     df_FUELHH["FORECAST"] = df_FUELHH[variables_cols].sum(axis=1)
 
     # rename
@@ -124,8 +126,27 @@ def make_generation_mix(start_date, end_date):
     df_all["DEMAND"] = df_all["DEMAND"].astype(int)
     df_all["SOLAR"] = df_all["SOLAR"].astype(int)
 
+    # add solar to demand
+    df_all["DEMAND"] = df_all["DEMAND"] + df_all["SOLAR"]
+
     # ************
-    # 4. save file
+    # 4. load forecast from file
+    # ***********
+    filename = os.path.dirname(os.path.realpath(__file__)) + f"/../{start_date}/generation-forecast.json"
+    forecast_df = pd.read_json(filename)
+    forecast_df['time'] = pd.to_datetime(forecast_df['time'], format='%H:%M').dt.time
+    forecast_df.index = forecast_df['time']
+    forecast_df['SOLAR_FORECAST'] = forecast_df['FORECAST']
+    forecast_df = forecast_df[['SOLAR_FORECAST']]
+
+    df_all = df_all.join(forecast_df)
+    df_all = df_all.fillna(0)
+    df_all["FORECAST"] += df_all["SOLAR_FORECAST"]
+    df_all["FORECAST"] = df_all["FORECAST"].astype(int)
+    df_all.drop(columns=['SOLAR_FORECAST'],inplace=True)
+
+    # ************
+    # 5. save file
     # ***********
     data_dict = df_all.to_dict(orient="records")
 
@@ -138,6 +159,6 @@ def make_generation_mix(start_date, end_date):
 
 make_generation_mix("2020-08-07", "2020-08-08")
 make_generation_mix("2021-03-05", "2021-03-06")
-make_generation_mix("2021-03-09", "2021-03-09")
+make_generation_mix("2021-03-09", "2021-03-10")
 make_generation_mix("2021-06-10", "2021-06-11")
 make_generation_mix("2021-10-08", "2021-10-09")
