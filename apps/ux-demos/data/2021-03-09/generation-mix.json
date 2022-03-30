@@ -59,7 +59,7 @@
     "INTEW": 0,
     "INTNEM": 950,
     "SOLAR": 2,
-    "DEMAND": 27921,
+    "DEMAND": 27923,
     "FORECAST": 26713
   },
   {
@@ -80,7 +80,7 @@
     "INTEW": 0,
     "INTNEM": 950,
     "SOLAR": 1,
-    "DEMAND": 27288,
+    "DEMAND": 27289,
     "FORECAST": 26201
   },
   {
@@ -290,8 +290,8 @@
     "INTEW": 42,
     "INTNEM": 844,
     "SOLAR": 43,
-    "DEMAND": 31009,
-    "FORECAST": 32013
+    "DEMAND": 31052,
+    "FORECAST": 32027
   },
   {
     "time": "07:00",
@@ -311,8 +311,8 @@
     "INTEW": 0,
     "INTNEM": 898,
     "SOLAR": 403,
-    "DEMAND": 32900,
-    "FORECAST": 33186
+    "DEMAND": 33303,
+    "FORECAST": 33331
   },
   {
     "time": "07:30",
@@ -332,8 +332,8 @@
     "INTEW": 0,
     "INTNEM": 900,
     "SOLAR": 1040,
-    "DEMAND": 34314,
-    "FORECAST": 33891
+    "DEMAND": 35354,
+    "FORECAST": 34257
   },
   {
     "time": "08:00",
@@ -353,8 +353,8 @@
     "INTEW": 0,
     "INTNEM": 1000,
     "SOLAR": 1780,
-    "DEMAND": 35064,
-    "FORECAST": 34502
+    "DEMAND": 36844,
+    "FORECAST": 35203
   },
   {
     "time": "08:30",
@@ -374,8 +374,8 @@
     "INTEW": 0,
     "INTNEM": 1000,
     "SOLAR": 2490,
-    "DEMAND": 35260,
-    "FORECAST": 34284
+    "DEMAND": 37750,
+    "FORECAST": 35361
   },
   {
     "time": "09:00",
@@ -395,8 +395,8 @@
     "INTEW": 0,
     "INTNEM": 1000,
     "SOLAR": 3190,
-    "DEMAND": 35289,
-    "FORECAST": 33975
+    "DEMAND": 38479,
+    "FORECAST": 35461
   },
   {
     "time": "09:30",
@@ -416,8 +416,8 @@
     "INTEW": 0,
     "INTNEM": 1000,
     "SOLAR": 4000,
-    "DEMAND": 34780,
-    "FORECAST": 33196
+    "DEMAND": 38780,
+    "FORECAST": 35504
   },
   {
     "time": "10:00",
@@ -437,8 +437,8 @@
     "INTEW": 0,
     "INTNEM": 912,
     "SOLAR": 4750,
-    "DEMAND": 33977,
-    "FORECAST": 32485
+    "DEMAND": 38727,
+    "FORECAST": 35577
   },
   {
     "time": "10:30",
@@ -458,8 +458,8 @@
     "INTEW": 0,
     "INTNEM": 912,
     "SOLAR": 5390,
-    "DEMAND": 32949,
-    "FORECAST": 31545
+    "DEMAND": 38339,
+    "FORECAST": 35326
   },
   {
     "time": "11:00",
@@ -479,8 +479,8 @@
     "INTEW": 72,
     "INTNEM": 650,
     "SOLAR": 5770,
-    "DEMAND": 32152,
-    "FORECAST": 31070
+    "DEMAND": 37922,
+    "FORECAST": 35177
   },
   {
     "time": "11:30",
@@ -500,8 +500,8 @@
     "INTEW": 212,
     "INTNEM": 648,
     "SOLAR": 5810,
-    "DEMAND": 31664,
-    "FORECAST": 30564
+    "DEMAND": 37474,
+    "FORECAST": 35371
   },
   {
     "time": "12:00",
@@ -521,8 +521,8 @@
     "INTEW": 362,
     "INTNEM": 586,
     "SOLAR": 5690,
-    "DEMAND": 32002,
-    "FORECAST": 31467
+    "DEMAND": 37692,
+    "FORECAST": 36404
   },
   {
     "time": "12:30",
@@ -542,8 +542,8 @@
     "INTEW": 494,
     "INTNEM": 584,
     "SOLAR": 5410,
-    "DEMAND": 31979,
-    "FORECAST": 31149
+    "DEMAND": 37389,
+    "FORECAST": 35995
   },
   {
     "time": "13:00",
@@ -563,8 +563,8 @@
     "INTEW": 504,
     "INTNEM": 396,
     "SOLAR": 4960,
-    "DEMAND": 31535,
-    "FORECAST": 31153
+    "DEMAND": 36495,
+    "FORECAST": 36041
   },
   {
     "time": "13:30",
@@ -584,8 +584,8 @@
     "INTEW": 504,
     "INTNEM": 396,
     "SOLAR": 4410,
-    "DEMAND": 31602,
-    "FORECAST": 31008
+    "DEMAND": 36012,
+    "FORECAST": 35661
   },
   {
     "time": "14:00",
@@ -605,8 +605,8 @@
     "INTEW": 504,
     "INTNEM": 272,
     "SOLAR": 3890,
-    "DEMAND": 31556,
-    "FORECAST": 31922
+    "DEMAND": 35446,
+    "FORECAST": 36377
   },
   {
     "time": "14:30",
@@ -626,8 +626,8 @@
     "INTEW": 504,
     "INTNEM": 272,
     "SOLAR": 3120,
-    "DEMAND": 32078,
-    "FORECAST": 32236
+    "DEMAND": 35198,
+    "FORECAST": 36238
   },
   {
     "time": "15:00",
@@ -647,8 +647,8 @@
     "INTEW": 504,
     "INTNEM": 394,
     "SOLAR": 2490,
-    "DEMAND": 32406,
-    "FORECAST": 32964
+    "DEMAND": 34896,
+    "FORECAST": 36957
   },
   {
     "time": "15:30",
@@ -668,8 +668,8 @@
     "INTEW": 504,
     "INTNEM": 394,
     "SOLAR": 1790,
-    "DEMAND": 33316,
-    "FORECAST": 33992
+    "DEMAND": 35106,
+    "FORECAST": 37323
   },
   {
     "time": "16:00",
@@ -689,8 +689,8 @@
     "INTEW": 504,
     "INTNEM": 418,
     "SOLAR": 1170,
-    "DEMAND": 34533,
-    "FORECAST": 34850
+    "DEMAND": 35703,
+    "FORECAST": 37389
   },
   {
     "time": "16:30",
@@ -710,8 +710,8 @@
     "INTEW": 504,
     "INTNEM": 418,
     "SOLAR": 620,
-    "DEMAND": 35231,
-    "FORECAST": 36136
+    "DEMAND": 35851,
+    "FORECAST": 37786
   },
   {
     "time": "17:00",
@@ -731,8 +731,8 @@
     "INTEW": 504,
     "INTNEM": 302,
     "SOLAR": 211,
-    "DEMAND": 36820,
-    "FORECAST": 37431
+    "DEMAND": 37031,
+    "FORECAST": 38412
   },
   {
     "time": "17:30",
@@ -752,8 +752,8 @@
     "INTEW": 504,
     "INTNEM": 300,
     "SOLAR": 17,
-    "DEMAND": 38400,
-    "FORECAST": 39285
+    "DEMAND": 38417,
+    "FORECAST": 39683
   },
   {
     "time": "18:00",
@@ -773,8 +773,8 @@
     "INTEW": 504,
     "INTNEM": 364,
     "SOLAR": 6,
-    "DEMAND": 40131,
-    "FORECAST": 40313
+    "DEMAND": 40137,
+    "FORECAST": 40381
   },
   {
     "time": "18:30",
@@ -794,7 +794,7 @@
     "INTEW": 504,
     "INTNEM": 364,
     "SOLAR": 3,
-    "DEMAND": 40941,
+    "DEMAND": 40944,
     "FORECAST": 40205
   },
   {
@@ -836,7 +836,7 @@
     "INTEW": 504,
     "INTNEM": 294,
     "SOLAR": 1,
-    "DEMAND": 38586,
+    "DEMAND": 38587,
     "FORECAST": 37072
   },
   {
