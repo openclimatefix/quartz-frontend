@@ -17,7 +17,7 @@ const Vis1MapPage: NextPage = () => {
   // Add support for dynamic data
   const router = useRouter();
   const date = router.query.date || "2021-06-10";
-  console.log(date);
+  const bearing = router.query.noRotate ? 0 : 90;
 
   //@ts-ignore
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
@@ -159,6 +159,7 @@ const Vis1MapPage: NextPage = () => {
         <div className="flex-grow">
           <Map
             loadDataOverlay={addPVData}
+            bearing={bearing}
             controlOverlay={(map) => {
               return (
                 <>

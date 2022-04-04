@@ -1,6 +1,7 @@
 interface IMap {
   loadDataOverlay: any;
   controlOverlay: any;
+  bearing?: number;
 }
 
 import mapboxgl from "mapbox-gl";
@@ -10,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
 
-const Map = ({ loadDataOverlay, controlOverlay }: IMap) => {
+const Map = ({ loadDataOverlay, controlOverlay, bearing = 90 }: IMap) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng, setLng] = useState(-2.547855);
@@ -25,7 +26,7 @@ const Map = ({ loadDataOverlay, controlOverlay }: IMap) => {
       style: "mapbox://styles/mapbox/dark-v10",
       center: [lng, lat],
       zoom: zoom,
-      bearing: 90,
+      bearing,
     });
   });
 
