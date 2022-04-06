@@ -78,9 +78,12 @@ def make_generation_passiv(date):
     pv_metadata['system_id'] = pv_metadata.index.astype(int)
     pv_power_df['system_id'] = pv_power_df['system_id'].astype(int)
     pv_power_df = pv_power_df.join(pv_metadata, on='system_id',lsuffix='_l')
-    
+
     # round data
     pv_power_df['solarGeneration'] = pv_power_df['solarGeneration'].round().astype(int)
+    # pv_power_df['latitude'] = pv_power_df['latitude'].round(4)
+    # pv_power_df['latitude'] = pv_power_df['latitude'].round(4)
+
     # make geo pandas
     gdf = gpd.GeoDataFrame(
         pv_power_df, geometry=gpd.points_from_xy(pv_power_df.longitude, pv_power_df.latitude))
