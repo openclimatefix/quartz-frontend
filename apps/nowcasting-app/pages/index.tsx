@@ -65,10 +65,7 @@ export default function Home() {
               </div>
               <div className="my-6">
                 <DynamicSolarMapWithNoSSR
-                  gspregionData={
-                    // TODO(nowcasting_infrastructure#35): Remove parse once fixed
-                    IS_LOCAL_REQ ? gspregionData : JSON.parse(gspregionData)
-                  }
+                  gspregionData={gspregionData}
                   // TODO: don't pop last element once NATIONAL fc not in GSP
                   forecastDataGSP={forecastData.forecasts.slice(0, -1)}
                   forecastDataNational={
