@@ -12,6 +12,12 @@ yarn install
 yarn dev
 ```
 
+```
+npm install ../../packages/nowcasting-tsconfig ../../packages/nowcasting-ui
+npm install
+npm run dev
+```
+
 ## Environment Variables
 
 The following environment variables need to be populated:

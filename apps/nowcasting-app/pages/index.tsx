@@ -29,11 +29,11 @@ export default function Home() {
   const [showGSPForecast, setShowGSPForecast] = useState(true);
 
   const { data: forecastData, error: forecastError } = useSWR(
-    `${API_PREFIX}/forecasts/GB/pv/gsp`,
+    `${API_PREFIX}/GB/solar/gsp/forecast/all`,
     fetcher
   );
   const { data: gspregionData, error: gspregionError } = useSWR(
-    `${API_PREFIX}/forecasts/GB/pv/gsp_boundaries`,
+    `${API_PREFIX}/GB/solar/gsp/gsp_boundaries`,
     fetcher
   );
 
