@@ -67,9 +67,9 @@ export default function Home() {
                 <DynamicSolarMapWithNoSSR
                   gspregionData={gspregionData}
                   // TODO: don't pop last element once NATIONAL fc not in GSP
-                  forecastDataGSP={forecastData.forecasts.slice(0, -1)}
+                  forecastDataGSP={forecastData.forecasts.slice(1, -1)}
                   forecastDataNational={
-                    forecastData.forecasts[forecastData.forecasts.length - 1]
+                    forecastData.forecasts[0]
                   }
                   selectedTimeHorizon={selectedTimeHorizon}
                   showGSPForecast={showGSPForecast}
