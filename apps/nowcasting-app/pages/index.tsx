@@ -29,11 +29,11 @@ export default function Home() {
   const [showGSPForecast, setShowGSPForecast] = useState(true);
 
   const { data: forecastData, error: forecastError } = useSWR(
-    `${API_PREFIX}/forecasts/GB/pv/gsp`,
+    `${API_PREFIX}/GB/solar/gsp/forecast/all`,
     fetcher
   );
   const { data: gspregionData, error: gspregionError } = useSWR(
-    `${API_PREFIX}/forecasts/GB/pv/gsp_boundaries`,
+    `${API_PREFIX}/GB/solar/gsp/gsp_boundaries`,
     fetcher
   );
 
@@ -65,14 +65,11 @@ export default function Home() {
               </div>
               <div className="my-6">
                 <DynamicSolarMapWithNoSSR
-                  gspregionData={
-                    // TODO(nowcasting_infrastructure#35): Remove parse once fixed
-                    IS_LOCAL_REQ ? gspregionData : JSON.parse(gspregionData)
-                  }
+                  gspregionData={gspregionData}
                   // TODO: don't pop last element once NATIONAL fc not in GSP
-                  forecastDataGSP={forecastData.forecasts.slice(0, -1)}
+                  forecastDataGSP={forecastData.forecasts.slice(1, -1)}
                   forecastDataNational={
-                    forecastData.forecasts[forecastData.forecasts.length - 1]
+                    forecastData.forecasts[0]
                   }
                   selectedTimeHorizon={selectedTimeHorizon}
                   showGSPForecast={showGSPForecast}
