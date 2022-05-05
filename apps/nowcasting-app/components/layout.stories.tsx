@@ -6,7 +6,7 @@ export default {
 };
 
 export const LayoutComponent = () => (
-  <Layout>
+  <Layout environment="local">
     <h1>Hello</h1>
   </Layout>
 );
