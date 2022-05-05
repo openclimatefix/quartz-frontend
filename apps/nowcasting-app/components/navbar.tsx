@@ -30,7 +30,7 @@ const Navbar = ({}: INavbar) => {
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               {/* Profile dropdown */}
-              <Menu as="div" className="relative ml-3">
+              <Menu as="div" className="relative z-20 ml-3">
                 <div>
                   <Menu.Button className="flex text-sm bg-white rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">
                     <span className="sr-only">Open user menu</span>
