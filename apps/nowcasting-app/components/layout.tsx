@@ -5,17 +5,16 @@ import Navbar from "./navbar";
 
 interface ILayout {
   children: React.ReactNode;
-  environment: "local" | "development";
 }
 
-const Layout = ({ children, environment }: ILayout) => {
+const Layout = ({ children }: ILayout) => {
   return (
     <>
       <Head>
         <title>Nowcasting App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Navbar environment={environment} />
+      <Navbar />
       <main>{children}</main>
       <Footer />
     </>

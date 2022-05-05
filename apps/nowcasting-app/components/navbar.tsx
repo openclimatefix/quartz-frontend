@@ -4,11 +4,9 @@ import { useUser } from "@auth0/nextjs-auth0";
 
 import { classNames } from "./utils";
 
-interface INavbar {
-  environment: "local" | "development";
-}
+interface INavbar {}
 
-const Navbar = ({ environment }: INavbar) => {
+const Navbar = ({}: INavbar) => {
   const { user } = useUser();
 
   return (
@@ -28,18 +26,6 @@ const Navbar = ({ environment }: INavbar) => {
                   src="https://nowcasting.io/nowcasting.svg"
                   alt="Nowcasting Logo"
                 />
-              </div>
-              <div className="hidden py-2 sm:ml-6 sm:flex sm:space-x-8">
-                <div
-                  className={classNames(
-                    environment === "local"
-                      ? "bg-danube-500 text-white"
-                      : "text-gray-900",
-                    "py-2 px-3 inline-flex items-center text-sm font-medium"
-                  )}
-                >
-                  Environment: {environment}
-                </div>
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
