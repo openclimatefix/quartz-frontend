@@ -46,3 +46,13 @@ yarn dev
 ```
 
 Open [http://localhost:3002](http://localhost:3002) with your browser to see the result.
+
+## Deployment
+
+The app gets automatically deployed to Vercel, on each push to the `main` branch.
+
+## Storybook
+
+```bash
+yarn run storybook
+```
