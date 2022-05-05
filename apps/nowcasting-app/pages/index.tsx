@@ -3,6 +3,8 @@ import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import useSWR from "swr";
 
 import Layout from "../components/layout";
+import Map from "../components/map";
+import ButtonGroup from "../components/button-group";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -22,12 +24,23 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="container min-h-screen">
+      <div>
         <Head>
           <title>Nowcasting App</title>
         </Head>
 
-        <main className="py-20">
+        <main className="pb-20">
+          <div className="w-full h-screen mb-20">
+            <Map
+              loadDataOverlay={() => {}}
+              controlOverlay={(map) => (
+                <>
+                  <ButtonGroup />
+                </>
+              )}
+            />
+          </div>
+
           <h1>
             Fetching real data from{" "}
             <a href={API_PREFIX} className="hover:underline">
