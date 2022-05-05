@@ -1,0 +1,5075 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 1,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 89,
+        "ocfNGESOForecast": 115,
+        "ocfDelta": 26,
+        "ocfDeltaAbs": 26
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.293056127663066, 51.75946379678268]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 2,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 40,
+        "ocfNGESOForecast": 46,
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.951795402042344, 52.03246445103723]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 3,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 16,
+        "ocfNGESOForecast": 42,
+        "ocfDelta": 26,
+        "ocfDeltaAbs": 26
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.239884019483621, 52.649532371838454]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 4,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 85,
+        "ocfNGESOForecast": 108,
+        "ocfDelta": 23,
+        "ocfDeltaAbs": 23
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.768000897549411, 52.463676844437785]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 5,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 27,
+        "ocfNGESOForecast": 42,
+        "ocfDelta": 15,
+        "ocfDeltaAbs": 15
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.113209329948719, 52.81202529506736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 6,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 67,
+        "ocfNGESOForecast": 84,
+        "ocfDelta": 17,
+        "ocfDeltaAbs": 17
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.848486874189989, 53.158813839240516]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 7,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 11,
+        "ocfNGESOForecast": 17,
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.085556925938734, 52.961671028052]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 8,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 32,
+        "ocfNGESOForecast": 38,
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.50817859122674, 53.23362489233952]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 9,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 94,
+        "ocfNGESOForecast": 87,
+        "ocfDelta": -7,
+        "ocfDeltaAbs": 7
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.840456558866689, 51.169088338432715]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 10,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 101,
+        "ocfNGESOForecast": 99,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.80554608399303, 51.662037754622474]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 11,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 28,
+        "ocfNGESOForecast": 17,
+        "ocfDelta": -11,
+        "ocfDeltaAbs": 11
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.378614973115235, 51.071343911985636]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 12,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.897601461267476, 53.68231970978269]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 13,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.881496428756757, 53.77432420175637]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 14,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 22,
+        "ocfNGESOForecast": 10,
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.194469624221242, 53.59019928639557]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 15,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 56,
+        "ocfNGESOForecast": 13,
+        "ocfDelta": -43,
+        "ocfDeltaAbs": 43
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.379704009436243, 53.4607194955668]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 16,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 13,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.807618632243179, 54.23309587773618]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 17,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.102004546679233, 51.512791901586915]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 18,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.102004546679233, 51.512791901586915]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 19,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.026608287100356, 51.423344699096816]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 20,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 11,
+        "ocfNGESOForecast": 9,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.049519306453095, 51.26155886887658]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 21,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.019713171801849, 51.67904614443716]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 22,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.103864168979184, 51.528561894439754]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 23,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.314772546255847, 51.491888924268935]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 24,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.037921426590947, 51.56502144228736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 25,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.037921426590947, 51.56502144228736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 26,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.126330425589138, 51.4430169409299]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 27,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 17,
+        "ocfNGESOForecast": 28,
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.334529747875669, 51.283188538810634]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 28,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.059404487155154, 51.605580033679054]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 29,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.154444763919084, 51.512672133265795]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 30,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.081890059369497, 51.61531375418765]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 31,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.017311989864069, 51.499988807179065]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 32,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.240963155424546, 51.50239143961845]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 33,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.199138988373674, 51.430167788541624]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 34,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.199138988373674, 51.430167788541624]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 35,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.127389380936425, 53.389385489126255]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 36,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 8,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.46419087566744, 53.31369667780381]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 37,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.885136482054573, 53.520898507796296]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 38,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.680671971055231, 53.54398214918342]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 39,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.959528979066842, 53.46473343351581]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 40,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 14,
+        "ocfNGESOForecast": 16,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.696867531135474, 53.78318507299992]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 41,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.696867531135474, 53.78318507299992]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 42,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.75359964896487, 53.42601518716169]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 43,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.867376604820891, 53.604370599049055]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 44,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 36,
+        "ocfNGESOForecast": 24,
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.477300542937826, 50.72812693436384]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 45,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.325017567685413, 55.14157629080153]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 46,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 25,
+        "ocfNGESOForecast": 34,
+        "ocfDelta": 9,
+        "ocfDeltaAbs": 9
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.58994710237309, 53.12543921386139]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 47,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.030895240171077, 51.547903467990366]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 48,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.616665603012111, 51.619164812309684]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 49,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 12,
+        "ocfDelta": 8,
+        "ocfDeltaAbs": 8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.624218074866751, 51.50461369107392]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 50,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.203258467243979, 54.620846194792136]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 51,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.352139703744865, 53.42256883112209]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 52,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.794252883789842, 52.76903790626901]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 53,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.526810502417361, 55.0278675300341]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 54,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 74,
+        "ocfNGESOForecast": 57,
+        "ocfDelta": -17,
+        "ocfDeltaAbs": 17
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.238813210545467, 53.06600126854594]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 55,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 37,
+        "ocfNGESOForecast": 67,
+        "ocfDelta": 30,
+        "ocfDeltaAbs": 30
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.613297685081918, 51.9223280089682]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 56,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 112,
+        "ocfNGESOForecast": 131,
+        "ocfDelta": 19,
+        "ocfDeltaAbs": 19
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.395927550158384, 52.33528373843847]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 57,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 129,
+        "ocfNGESOForecast": 97,
+        "ocfDelta": -32,
+        "ocfDeltaAbs": 32
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.248311802362689, 52.319620391553855]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 58,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.585719993531306, 51.54531428147358]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 59,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.458642452110783, 51.5355803444153]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 60,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 16,
+        "ocfNGESOForecast": 15,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.554173203012327, 51.334322092018844]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 61,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 5,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.482917681289868, 51.4351799569023]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 62,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.189879610466475, 51.531865354257064]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 63,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 9,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.20417557238701, 51.65632472334336]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 64,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.406464148287295, 51.49373844339528]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 65,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 74,
+        "ocfNGESOForecast": 58,
+        "ocfDelta": -16,
+        "ocfDeltaAbs": 16
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.141108731923048, 51.97974856677432]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 66,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 11,
+        "ocfNGESOForecast": 22,
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.672648160308476, 51.62767965837845]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 67,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 8,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.022616859034038, 51.781770977527714]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 68,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 31,
+        "ocfNGESOForecast": 25,
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.534093066077771, 51.964398827188]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 69,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 11,
+        "ocfNGESOForecast": 11,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.288205828318346, 51.639164551504784]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 70,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 7,
+        "ocfNGESOForecast": 5,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.444932377178344, 51.669833373131546]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 71,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.250953699446208, 51.49717320234295]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 72,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 5,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.514843880467435, 51.25548032500319]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 73,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 21,
+        "ocfNGESOForecast": 13,
+        "ocfDelta": -8,
+        "ocfDeltaAbs": 8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.223441641817913, 51.94190467220285]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 74,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.1201333891346, 53.39877976259698]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 75,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 7,
+        "ocfNGESOForecast": 9,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.415797951386242, 53.5876383884485]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 76,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.415797951386242, 53.5876383884485]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 77,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.074477006077082, 53.26516886888638]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 78,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 5,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.26797586485969, 53.40184270204656]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 79,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 5,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.95994928418575, 53.468823555505736]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 80,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.162298731689458, 53.53655583240413]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 81,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 5,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.707481877530924, 55.166068091638195]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 82,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.309168123216457, 54.68724637105906]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 83,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.403421446777499, 54.816740765816604]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 84,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 10,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": -7,
+        "ocfDeltaAbs": 7
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.030869829614445, 54.53785186182901]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 85,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 32,
+        "ocfNGESOForecast": 27,
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.62492413006989, 54.37011060220709]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 86,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.433846711812483, 54.88715832541847]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 87,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.441249410595184, 54.985755395713184]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 88,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -8,
+        "ocfDeltaAbs": 8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.936931552676537, 54.641968971555784]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 89,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.526810502417361, 55.0278675300341]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 90,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 11,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -10,
+        "ocfDeltaAbs": 10
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.480020395625597, 54.93693155609387]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 91,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.600484997028271, 54.416857425403514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 92,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 7,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.339624562447323, 53.91253134351893]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 93,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.204665440884738, 53.65616660171578]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 94,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 24,
+        "ocfNGESOForecast": 33,
+        "ocfDelta": 9,
+        "ocfDeltaAbs": 9
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.169607015721676, 52.97330350423853]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 95,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 36,
+        "ocfNGESOForecast": 33,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.145573172553834, 52.83729437979574]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 96,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 15,
+        "ocfNGESOForecast": 13,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.222939543474268, 53.10465152189922]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 97,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 31,
+        "ocfNGESOForecast": 40,
+        "ocfDelta": 9,
+        "ocfDeltaAbs": 9
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.187000110628783, 50.96631323800428]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 98,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 22,
+        "ocfNGESOForecast": 26,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.242368004633945, 50.929354812274376]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 99,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 72,
+        "ocfNGESOForecast": 27,
+        "ocfDelta": -45,
+        "ocfDeltaAbs": 45
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.334090481662179, 50.70914530626964]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 100,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 98,
+        "ocfNGESOForecast": 69,
+        "ocfDelta": -29,
+        "ocfDeltaAbs": 29
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.880631277140779, 51.2253446250227]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 101,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 66,
+        "ocfNGESOForecast": 115,
+        "ocfDelta": 49,
+        "ocfDeltaAbs": 49
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.876819602962084, 50.86102523863152]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 102,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 45,
+        "ocfNGESOForecast": 35,
+        "ocfDelta": -10,
+        "ocfDeltaAbs": 10
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.38294276128624, 50.96187749712552]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 103,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 50,
+        "ocfNGESOForecast": 40,
+        "ocfDelta": -10,
+        "ocfDeltaAbs": 10
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.438500371519473, 51.042738453757764]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 104,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 33,
+        "ocfNGESOForecast": 21,
+        "ocfDelta": -12,
+        "ocfDeltaAbs": 12
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.344801570671476, 51.43408665203536]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 105,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.14176085785645, 51.52031139787966]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 106,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 78,
+        "ocfNGESOForecast": 44,
+        "ocfDelta": -34,
+        "ocfDeltaAbs": 34
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.319798258754816, 51.654998018360715]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 107,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 37,
+        "ocfNGESOForecast": 41,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.942378413611524, 51.828377937713995]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 108,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 35,
+        "ocfNGESOForecast": 32,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.296990010947436, 52.065437935041025]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 109,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 34,
+        "ocfNGESOForecast": 25,
+        "ocfDelta": -9,
+        "ocfDeltaAbs": 9
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.632984443623741, 51.30199783918675]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 110,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 36,
+        "ocfNGESOForecast": 86,
+        "ocfDelta": 50,
+        "ocfDeltaAbs": 50
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.074713038351358, 51.93262994256094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 111,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 18,
+        "ocfNGESOForecast": 12,
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.353717387915828, 51.63692354407627]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 112,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.353717387915828, 51.63692354407627]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 113,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 33,
+        "ocfNGESOForecast": 30,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.886757588916717, 51.68046147460781]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 114,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.886757588916717, 51.68046147460781]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 115,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 44,
+        "ocfNGESOForecast": 38,
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.306817831585469, 51.864316327536145]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 116,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 57,
+        "ocfNGESOForecast": 68,
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.77175754203919, 50.43160670467244]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 117,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 58,
+        "ocfNGESOForecast": 55,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.106628316568638, 50.889238533207035]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 118,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 76,
+        "ocfNGESOForecast": 35,
+        "ocfDelta": -41,
+        "ocfDeltaAbs": 41
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.865311560457324, 50.82488863458333]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 119,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 70,
+        "ocfNGESOForecast": 51,
+        "ocfDelta": -19,
+        "ocfDeltaAbs": 19
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.472479072962402, 50.81603545813524]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 120,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 103,
+        "ocfNGESOForecast": 131,
+        "ocfDelta": 28,
+        "ocfDeltaAbs": 28
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.052651566550838, 50.32418991150241]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 121,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 23,
+        "ocfNGESOForecast": 21,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.309934162259435, 50.47596519593701]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 122,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 155,
+        "ocfNGESOForecast": 123,
+        "ocfDelta": -32,
+        "ocfDeltaAbs": 32
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.979332210772483, 50.89652052323724]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 123,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 67,
+        "ocfNGESOForecast": 108,
+        "ocfDelta": 41,
+        "ocfDeltaAbs": 41
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.335211729445673, 53.17542308952809]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 124,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.520682020076358, 53.320844855428376]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 125,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.569306026848973, 53.40772521874182]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 126,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.505430224044629, 53.35595575281229]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 127,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.471383637037171, 53.37741905675202]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 128,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 22,
+        "ocfNGESOForecast": 21,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.103304932635455, 53.54842221760289]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 129,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.201906508701169, 53.40395986032183]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 130,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 12,
+        "ocfNGESOForecast": 16,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.578517280552477, 53.49849798691661]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 131,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.406480902500037, 53.42121430400719]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 132,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 24,
+        "ocfNGESOForecast": 22,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.536697051897552, 52.284907364154634]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 133,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 38,
+        "ocfNGESOForecast": 42,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.649027471738286, 52.222784435387304]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 134,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 14,
+        "ocfNGESOForecast": 20,
+        "ocfDelta": 6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.132368984499323, 52.725306404731114]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 135,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.912789007036637, 52.591169992722655]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 136,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 12,
+        "ocfNGESOForecast": 13,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.270881465264573, 52.38392231174624]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 137,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 25,
+        "ocfNGESOForecast": 44,
+        "ocfDelta": 19,
+        "ocfDeltaAbs": 19
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.607505627845878, 52.790026029721005]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 138,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 90,
+        "ocfNGESOForecast": 74,
+        "ocfDelta": -16,
+        "ocfDeltaAbs": 16
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.831839527713341, 52.10446146084431]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 139,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 19,
+        "ocfNGESOForecast": 18,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.527188236755314, 52.59942493318637]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 140,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.011955772151706, 52.420229444216886]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 141,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 13,
+        "ocfNGESOForecast": 16,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.635973845706095, 52.61363537309623]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 142,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.048094517640457, 52.536358173819295]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 143,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.042037357271927, 52.488824475578674]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 144,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.209385658419776, 52.53949206706988]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 145,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.906550495982588, 52.75758543789831]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 146,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 54,
+        "ocfNGESOForecast": 53,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.830556938659019, 52.66203542872323]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 147,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.073325914053805, 52.588060988071966]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 148,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 44,
+        "ocfNGESOForecast": 55,
+        "ocfDelta": 11,
+        "ocfDeltaAbs": 11
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.593803783364908, 53.01647188082366]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 149,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 7,
+        "ocfNGESOForecast": 10,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.948391051372557, 53.96860721627796]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 150,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 10,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.858701568547026, 53.64713211798345]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 151,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 17,
+        "ocfNGESOForecast": 19,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.317370858073303, 53.81903918560386]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 152,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.286259958818385, 53.66190159619685]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 153,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 5,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.589987889433573, 53.7953175631884]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 154,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.195150757052163, 54.004359960249836]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 155,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 12,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.625243869521412, 53.74747582929218]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 156,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.321470586099061, 56.730037451330205]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 157,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.512671498903219, 57.56213500456808]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 158,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.196053370432908, 58.5630687399375]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 159,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.952503875278776, 56.10633747952638]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 160,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": -4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.786289878039247, 59.2729968138531]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 161,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 5,
+        "ocfNGESOForecast": 8,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.335009610177445, 56.30622833681198]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 162,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.242989788833527, 57.73023205130315]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 163,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 12,
+        "ocfNGESOForecast": 13,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.660383599200696, 56.58027661658924]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 164,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-6.913415462514261, 57.84588133256654]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 165,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.581244014545915, 55.45278802649507]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 166,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.775842241561831, 55.99805502373743]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 167,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.699744693176522, 55.84450144780511]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 168,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.505984362350087, 57.45577051744067]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 169,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.082084138313887, 55.74923729886572]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 170,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.659115598971451, 57.16533655264514]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 171,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.862488835915241, 55.988725015528296]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 172,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.863684154940929, 56.31542252004696]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 173,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.381327928099219, 55.87783338650807]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 174,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.582304805615209, 56.796644052175225]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 175,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.840480944294178, 57.155671713714916]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 176,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.948398652032758, 58.11704102923493]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 177,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.446087200678754, 55.93188949088055]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 178,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.563293240145245, 56.44495768626423]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 179,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.180931749757048, 55.91987251750577]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 180,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.773318207992649, 55.66811901845733]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 181,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.925521537028839, 55.735085247344315]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 182,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.883024999983347, 58.26358127859611]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 183,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.133600220088384, 57.225480631840945]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 184,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.206061731488236, 55.17395551795204]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 185,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.10626717600971, 56.522374924707364]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 186,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.235379627690977, 55.855621219676934]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 187,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.094550349666295, 57.13539496920075]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 188,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.140075143896475, 55.82672207688387]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 189,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.89811026209954, 55.89881662946774]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 190,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.298998049037056, 55.3470980009601]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 191,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.207950037247509, 57.08644416991804]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 192,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.989137464580738, 55.9758172489231]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 193,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.93795428625376, 56.33887877304671]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 194,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.317175992992085, 55.70115143266822]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 195,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.701408949399245, 55.87558839877854]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 196,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.749711345842463, 56.145655332253035]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 197,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.213423158474818, 55.953598838483735]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 198,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.904303497800298, 58.45818898752116]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 199,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.345352710325757, 55.96382600088424]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 200,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.585831854185989, 55.88299355145699]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 201,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.977017361542778, 56.47802445253074]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 202,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.598410318217036, 55.948541292641835]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 203,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.514323969097937, 58.27087197386873]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 204,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.499410590176355, 56.09020279120023]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 205,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.021657245510216, 55.933646842525654]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 206,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-6.451943141480262, 57.25437620216473]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 207,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.196557709769749, 57.300767748610035]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 208,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.212955528696447, 55.77207831958034]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 209,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.169875997804267, 55.60481727260461]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 210,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.095715062548768, 55.931430803097925]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 211,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.370079246723385, 55.624456480643246]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 212,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.466397510345378, 55.791041654403706]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 213,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.344462442715938, 57.52250684358878]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 214,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.473801529567734, 55.92455628143477]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 215,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.810331294358257, 57.36187406579189]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 216,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.356857388146094, 56.93914043260142]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 217,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 10,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": -4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.215226023843392, 60.24613325482288]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 218,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.629616556115917, 57.07292878620676]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 219,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.272376871420071, 56.88593921258887]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 220,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.77554214396693, 55.64904849972523]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 221,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.306356900308038, 55.73399470715099]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 222,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.995839354820048, 56.53799268390496]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 223,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.265017805720319, 56.09396016054086]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 224,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.901581162027024, 54.939593521626946]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 225,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.209503910303867, 56.263425121710775]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 226,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.244930176573394, 55.909772668005466]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 227,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.326908825662867, 55.84844729645367]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 228,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.071547976057981, 57.71541550361647]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 229,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.299178690213339, 55.82766040538016]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 230,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.85809702212243, 55.36552346619127]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 231,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.74392577813811, 56.04143452668772]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 232,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.857548010317204, 55.76625206660952]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 233,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.38088050515795, 56.03461657742484]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 234,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.205373267783674, 57.32135616400068]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 235,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.551560878993413, 55.81160821237363]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 236,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.147524335872974, 55.709559248510075]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 237,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.96425056631426, 57.479494238237955]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 238,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.374501744637186, 56.4098963218067]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 239,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.280561843709984, 55.96016303508714]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 240,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.367920645010433, 55.58755331733106]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 241,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.5182920724948, 55.62581186176402]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 242,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.661768265668205, 55.686908318316355]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 243,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.873949364551192, 56.688344400966564]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 244,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.439270683318403, 57.25055562276647]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 245,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.339168978620899, 58.212996897203425]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 246,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.948989479725432, 56.217170430188396]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 247,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.791366540582247, 55.523168079200516]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 248,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.470876797983977, 55.68511316008245]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 249,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 5,
+        "ocfDelta": 5,
+        "ocfDeltaAbs": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.922022116096812, 56.75694500855888]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 250,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.04443282718943, 56.593790102803936]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 251,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.69551013441245, 55.250967536891395]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 252,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.880607025976539, 56.51266337141528]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 253,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.83642760700815, 57.54907327529128]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 254,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.905618363856313, 55.84406216117664]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 255,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.453093744535259, 54.96313047546662]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 256,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.421325999651339, 55.81252960145184]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 257,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.325903820525028, 55.87512267746626]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 258,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.897801874872387, 57.419890432430954]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 259,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.099139175430038, 57.24751250954562]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 260,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.831885111292962, 57.50921786283079]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 261,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.603048698853346, 56.11877487427588]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 262,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.232262771394137, 55.93443483038654]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 263,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.093950169153183, 55.92452948421745]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 264,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.443305482619124, 56.772966869955134]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 265,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.174495893862214, 56.120125210031446]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 266,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.121697119518553, 56.16552563255317]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 267,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.109800426016621, 57.078783117204445]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 268,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.454219725485015, 57.88641764151731]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 269,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.180608340183608, 55.96994005554969]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 270,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.32470828331671, 55.952656483807296]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 271,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": null,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.629715246017911, 56.243798387286844]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 272,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.837906980722988, 55.934928329771076]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 273,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.899385987975214, 57.564746180492314]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 274,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.156327065728046, 56.290960849368076]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 275,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.258055932629225, 55.82634068038182]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 276,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.057228857559889, 55.63794527916957]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 277,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.567883901366232, 55.96162410299914]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 278,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.132881719984774, 57.53232101866287]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 279,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.884610422875488, 57.12866200920523]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 280,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.449303502251996, 56.501992218107645]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 281,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.266230974277781, 55.98261662239942]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 282,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.037940993031332, 54.991170886140765]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 283,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.963679839590702, 56.78446904119242]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 284,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.268232476403763, 55.86398748742636]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 285,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.315397080880051, 56.19348437613052]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 286,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.202449463288099, 55.91501980648661]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 287,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.045365478572317, 57.25528939359485]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 288,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.161829898546285, 57.157428668988715]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 289,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 56,
+        "ocfNGESOForecast": 31,
+        "ocfDelta": -25,
+        "ocfDeltaAbs": 25
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.396506197107049, 51.34883649056183]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 290,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.065164641238203, 51.48234782608281]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 291,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 4,
+        "ocfNGESOForecast": 5,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.905451327756774, 53.21818230138792]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 292,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.841772493574786, 55.443649551760245]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 293,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.452025944055003, 53.41281218979502]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 294,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 22,
+        "ocfNGESOForecast": 24,
+        "ocfDelta": 2,
+        "ocfDeltaAbs": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.905265835032322, 51.08070927646094]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 295,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 12,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.315416097944162, 51.29013868795014]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 296,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.328615519938995, 51.704744711302524]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 297,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 36,
+        "ocfNGESOForecast": 36,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.749332435679999, 51.28434062972886]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 298,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.41078739672114, 51.506915765305386]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 299,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 5,
+        "ocfNGESOForecast": 6,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.483050821003983, 53.469733259498426]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 300,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 26,
+        "ocfNGESOForecast": 21,
+        "ocfDelta": -5,
+        "ocfDeltaAbs": 5
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.300036669404651, 53.20958640820045]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 301,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 10,
+        "ocfNGESOForecast": 9,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.842772744858425, 52.4633858891294]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 302,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.015364108862796, 55.84673220024486]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 303,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.380827741006621, 55.771171716713845]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 304,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 2,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.628359256453497, 55.16992725024047]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 305,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.658554142677154, 56.037533507928295]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 306,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.415620776902439, 55.95544889885689]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 307,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 4,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.78835117605315, 55.683142263303104]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 308,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 30,
+        "ocfNGESOForecast": 13,
+        "ocfDelta": -17,
+        "ocfDeltaAbs": 17
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.484322156673126, 53.93923267019956]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 309,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.078997974583745, 53.708002951811906]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 310,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.216180910572771, 51.46098102843381]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 311,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 3,
+        "ocfNGESOForecast": 3,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.164439321984192, 51.31189781530243]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 312,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 11,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.001136326807168, 53.877865777954824]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 313,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.253054301272224, 51.55101692183358]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 314,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.253054301272224, 51.55101692183358]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 315,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.317414148155423, 51.53222405412202]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 316,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.317414148155423, 51.53222405412202]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 317,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.317414148155423, 51.53222405412202]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 318,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.317414148155423, 51.53222405412202]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 319,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 23,
+        "ocfNGESOForecast": 23,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.807369032335413, 51.77656565630591]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 320,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.707970526248462, 51.60699169169069]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 321,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 96,
+        "ocfNGESOForecast": 139,
+        "ocfDelta": 43,
+        "ocfDeltaAbs": 43
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.077618858147902, 52.10336939647964]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 322,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 42,
+        "ocfNGESOForecast": 36,
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.096304970857787, 51.26650369747854]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 323,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 41,
+        "ocfNGESOForecast": null,
+        "ocfDelta": -41,
+        "ocfDeltaAbs": 41
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.316798179447738, 51.257465031867326]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 324,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 198,
+        "ocfNGESOForecast": 191,
+        "ocfDelta": -7,
+        "ocfDeltaAbs": 7
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [1.251578619294671, 52.60742259239446]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 325,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 122,
+        "ocfNGESOForecast": 77,
+        "ocfDelta": -45,
+        "ocfDeltaAbs": 45
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [0.363180173225692, 52.69756554781271]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 326,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 59,
+        "ocfNGESOForecast": 37,
+        "ocfDelta": -22,
+        "ocfDeltaAbs": 22
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.14570593763546, 52.83424893423729]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 327,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 6,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -6,
+        "ocfDeltaAbs": 6
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.720414768087983, 55.01854372821069]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 328,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": -8,
+        "ocfDeltaAbs": 8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.911714134573868, 54.95808956749794]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 329,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 21,
+        "ocfNGESOForecast": 2,
+        "ocfDelta": -19,
+        "ocfDeltaAbs": 19
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.035605562109205, 54.77541099818122]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 330,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 10,
+        "ocfNGESOForecast": 14,
+        "ocfDelta": 4,
+        "ocfDeltaAbs": 4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.06894443236764, 54.2225318302682]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 331,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.06894443236764, 54.2225318302682]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 332,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.877510295010663, 56.29984234136923]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 333,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": null,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-5.022295473864712, 56.30357413023753]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 334,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 136,
+        "ocfNGESOForecast": 151,
+        "ocfDelta": 15,
+        "ocfDeltaAbs": 15
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-2.363659396857367, 51.38063505273976]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 335,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 8,
+        "ocfNGESOForecast": 7,
+        "ocfDelta": -1,
+        "ocfDeltaAbs": 1
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-1.456351091004275, 54.124253436627406]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 336,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 9,
+        "ocfNGESOForecast": 12,
+        "ocfDelta": 3,
+        "ocfDeltaAbs": 3
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.501750322176288, 53.23711527546091]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 337,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 1,
+        "ocfNGESOForecast": 1,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.212479342807007, 55.827572126898474]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "gspId": 338,
+        "ocfTime": "2021-06-10T12:00",
+        "ocfPVLiveActual": 0,
+        "ocfNGESOForecast": 0,
+        "ocfDelta": 0,
+        "ocfDeltaAbs": 0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-4.288434243148657, 55.86748372836659]
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@openclimatefix/ux-demos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@nivo/core": "^0.79.0",
+    "@nivo/line": "^0.79.1",
+    "d3": "^7.3.0",
+    "leaflet": "^1.7.1",
+    "mapbox-gl": "^2.7.0",
+    "next": "12.1.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-leaflet": "^3.2.5",
+    "recharts": "^2.1.9"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.2",
+    "eslint": "8.10.0",
+    "eslint-config-next": "12.1.0",
+    "postcss": "^8.4.7",
+    "tailwindcss": "^3.0.23"
+  }
+}

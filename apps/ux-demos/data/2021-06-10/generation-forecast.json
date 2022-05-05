@@ -1,0 +1,207 @@
+[
+  {
+    "time": "03:30",
+    "FORECAST": 2,
+    "GENERATION": 0
+  },
+  {
+    "time": "04:00",
+    "FORECAST": 51,
+    "GENERATION": 3
+  },
+  {
+    "time": "04:30",
+    "FORECAST": 110,
+    "GENERATION": 34
+  },
+  {
+    "time": "05:00",
+    "FORECAST": 217,
+    "GENERATION": 168
+  },
+  {
+    "time": "05:30",
+    "FORECAST": 389,
+    "GENERATION": 392
+  },
+  {
+    "time": "06:00",
+    "FORECAST": 567,
+    "GENERATION": 669
+  },
+  {
+    "time": "06:30",
+    "FORECAST": 830,
+    "GENERATION": 1030
+  },
+  {
+    "time": "07:00",
+    "FORECAST": 1369,
+    "GENERATION": 1470
+  },
+  {
+    "time": "07:30",
+    "FORECAST": 1803,
+    "GENERATION": 1830
+  },
+  {
+    "time": "08:00",
+    "FORECAST": 2301,
+    "GENERATION": 2300
+  },
+  {
+    "time": "08:30",
+    "FORECAST": 2912,
+    "GENERATION": 2780
+  },
+  {
+    "time": "09:00",
+    "FORECAST": 3564,
+    "GENERATION": 3260
+  },
+  {
+    "time": "09:30",
+    "FORECAST": 4240,
+    "GENERATION": 3410
+  },
+  {
+    "time": "10:00",
+    "FORECAST": 4684,
+    "GENERATION": 3220
+  },
+  {
+    "time": "10:30",
+    "FORECAST": 5199,
+    "GENERATION": 3320
+  },
+  {
+    "time": "11:00",
+    "FORECAST": 4907,
+    "GENERATION": 3600
+  },
+  {
+    "time": "11:30",
+    "FORECAST": 5119,
+    "GENERATION": 4360
+  },
+  {
+    "time": "12:00",
+    "FORECAST": 4405,
+    "GENERATION": 4710
+  },
+  {
+    "time": "12:30",
+    "FORECAST": 4255,
+    "GENERATION": 4590
+  },
+  {
+    "time": "13:00",
+    "FORECAST": 3689,
+    "GENERATION": 4240
+  },
+  {
+    "time": "13:30",
+    "FORECAST": 3686,
+    "GENERATION": 4190
+  },
+  {
+    "time": "14:00",
+    "FORECAST": 4406,
+    "GENERATION": 4020
+  },
+  {
+    "time": "14:30",
+    "FORECAST": 3964,
+    "GENERATION": 3960
+  },
+  {
+    "time": "15:00",
+    "FORECAST": 3455,
+    "GENERATION": 3840
+  },
+  {
+    "time": "15:30",
+    "FORECAST": 3118,
+    "GENERATION": 3520
+  },
+  {
+    "time": "16:00",
+    "FORECAST": 2964,
+    "GENERATION": 3220
+  },
+  {
+    "time": "16:30",
+    "FORECAST": 2492,
+    "GENERATION": 2790
+  },
+  {
+    "time": "17:00",
+    "FORECAST": 1847,
+    "GENERATION": 2120
+  },
+  {
+    "time": "17:30",
+    "FORECAST": 1355,
+    "GENERATION": 1830
+  },
+  {
+    "time": "18:00",
+    "FORECAST": 1018,
+    "GENERATION": 1360
+  },
+  {
+    "time": "18:30",
+    "FORECAST": 669,
+    "GENERATION": 888
+  },
+  {
+    "time": "19:00",
+    "FORECAST": 411,
+    "GENERATION": 552
+  },
+  {
+    "time": "19:30",
+    "FORECAST": 230,
+    "GENERATION": 349
+  },
+  {
+    "time": "20:00",
+    "FORECAST": 128,
+    "GENERATION": 79
+  },
+  {
+    "time": "20:30",
+    "FORECAST": 24,
+    "GENERATION": 11
+  },
+  {
+    "time": "21:00",
+    "FORECAST": 2,
+    "GENERATION": 1
+  },
+  {
+    "time": "21:30",
+    "FORECAST": 0,
+    "GENERATION": 1
+  },
+  {
+    "time": "22:00",
+    "FORECAST": 0,
+    "GENERATION": 0
+  },
+  {
+    "time": "22:30",
+    "FORECAST": 0,
+    "GENERATION": 0
+  },
+  {
+    "time": "23:00",
+    "FORECAST": 0,
+    "GENERATION": 0
+  },
+  {
+    "time": "23:30",
+    "FORECAST": 0,
+    "GENERATION": 0
+  }
+]
