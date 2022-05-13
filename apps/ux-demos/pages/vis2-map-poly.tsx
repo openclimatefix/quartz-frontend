@@ -126,12 +126,16 @@ const Vis1MapPage: NextPage = () => {
     const allActualValues = getAllDataValuesForSelectedSrc(
       SELECTED_SRC_VALUES.ACTUAL
     );
+
+    console.log("+++", getVariableNameFromSelectedSrc(SELECTED_SRC_VALUES.ACTUAL))
     const allFCValues = getAllDataValuesForSelectedSrc(
       SELECTED_SRC_VALUES.FORECAST
     );
+    console.log("allFCValues", allFCValues);
+
 
     const extent = d3.extent([...allActualValues, ...allFCValues]);
-    console.log(extent);
+    console.log("extent", extent);
     return {
       "fill-color": "#eab308",
       "fill-opacity": [

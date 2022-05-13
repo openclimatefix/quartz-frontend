@@ -34,7 +34,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 90 }: IMap) => {
       zoom: zoom,
       bearing,
     });
-  });
+  }, []);
 
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
