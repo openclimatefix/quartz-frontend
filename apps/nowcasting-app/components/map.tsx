@@ -48,6 +48,13 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
     map.current.on("load", () => {
       loadDataOverlay(map);
     });
+
+    // Indecated that data source updates every 5 minutes
+    // map.current.on("sourcedata", (event) => {
+    //   if(event.isSourceLoaded && event.sourceCacheId && event.source.data){
+    //     console.log('A data event occurred.', event);
+    //   }
+    // });
   });
 
   return (
