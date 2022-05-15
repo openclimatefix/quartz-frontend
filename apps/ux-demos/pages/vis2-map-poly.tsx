@@ -126,14 +126,12 @@ const Vis1MapPage: NextPage = () => {
     const allActualValues = getAllDataValuesForSelectedSrc(
       SELECTED_SRC_VALUES.ACTUAL
     );
-
-    console.log("+++", getVariableNameFromSelectedSrc(SELECTED_SRC_VALUES.ACTUAL))
     const allFCValues = getAllDataValuesForSelectedSrc(
       SELECTED_SRC_VALUES.FORECAST
     );
 
     const extent = d3.extent([...allActualValues, ...allFCValues]);
-    console.log("extent", extent);
+    console.log(extent);
     return {
       "fill-color": "#eab308",
       "fill-opacity": [
@@ -155,8 +153,6 @@ const Vis1MapPage: NextPage = () => {
     // map.current.setFilter("pvgeneration-circles", filters);
     // setSelectedTimeStep(timeStep);
   };
-
-  console.log("pvMapData", pvMapData);
 
   const addPVData = (map) => {
     map.current.addSource("pverrorbygsp", {
