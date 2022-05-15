@@ -18,7 +18,9 @@ export default function Home() {
 
   const { data: forecastData, error: forecastError } = useSWR(
     `${API_PREFIX}/GB/solar/gsp/forecast/all`,
-    fetcher
+    fetcher,
+    // every 5 minutes
+    { refreshInterval: 300000 }
   );
   
   if (forecastError) {
