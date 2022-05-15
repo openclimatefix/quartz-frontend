@@ -1,5 +1,4 @@
 import Head from "next/head";
-import {useEffect, useState} from "react";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import useSWR from "swr";
 
@@ -28,59 +27,56 @@ export default function Home() {
   }
   if (!forecastData) return <div>loading...</div>;
 
-  console.log("forecastData", forecastData);
- 
-  const getPaintPropsForFC = () => {
-    if (!forecastData.forecasts) {
-      return;
-    }
+  const filteredForcastData = forecastData?.forecasts?.slice(1);
 
-    const allValues = forecastData?.forecasts?.map((item, index) => {
+  const forecastGeoJson = {
+    ...gspShapeData,
+    features: gspShapeData.features.map((featureObj, index) => (
+      {
+        ...featureObj,
+        properties: {
+          ...featureObj.properties,
+          expectedPowerGenerationMegawatts: Math.floor(filteredForcastData[index].forecastValues[0].expectedPowerGenerationMegawatts)
+        }
+      }
+    ))
+  };
+
+  const getPaintPropsForFC = () => {
+    const allValues = filteredForcastData.map((item) => {
       return Math.floor(item.forecastValues[0].expectedPowerGenerationMegawatts);
     })
    
-    console.log("allValues", allValues);
     const extent = d3.extent([...allValues]);
-    console.log("extent", extent);
-    return {
+
+    return {     
       "fill-color": "#eab308",
       "fill-opacity": 
       [
         "interpolate",
-        ["exponential", 1],
-        ["get", "expectedPowerGenerationMegawatts"],
+        ["linear"],
+        ['get', 'expectedPowerGenerationMegawatts'],
         extent[0],
         0,
         extent[1],
-        0.9,
+        1,
       ],
     };
   };
 
   const addFCData = (map) => {
-    map.current.addSource("pverrorbygsp", {
+    map.current.addSource("latestPV", {
       type: "geojson",
-      data: gspShapeData
+      data: forecastGeoJson
     });
 
     map.current.addLayer({
-      id: "pverrorbygsp-forecast",
+      id: "latestPV-forecast",
       type: "fill",
-      source: "pverrorbygsp",
+      source: "latestPV",
       layout: {visibility: "visible"},
       paint: getPaintPropsForFC(),
     });
-
-    // map.current.addLayer({
-    //   'id': 'pverrorbygsp',
-    //   'type': 'fill',
-    //   'source': 'pverrorbygsp', // reference the data source
-    //   'layout':  {visibility: "visible"},
-    //   'paint': {
-    //     'fill-color': '#0080ff', // blue color fill
-    //     'fill-opacity': 0.5
-    //     }
-    // });
   };
 
   return (
@@ -89,8 +85,7 @@ export default function Home() {
         <Head>
           <title>Nowcasting App</title>
         </Head>
-
-        <main className="pb-20">
+        <main>
           <div className="w-full h-screen mb-20">
             <Map
               loadDataOverlay={addFCData}
@@ -101,17 +96,6 @@ export default function Home() {
               )}
             />
           </div>
-
-          <h1>
-            Fetching real data from{" "}
-            <a href={API_PREFIX} className="hover:underline">
-              {API_PREFIX}
-            </a>
-            :
-          </h1>
-          <pre className="p-2 mt-4 text-white bg-gray-800 rounded-md">
-            <code>{JSON.stringify(forecastData, null, 2)}</code>
-          </pre>
         </main>
       </div>
     </Layout>

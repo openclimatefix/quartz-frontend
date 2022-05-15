@@ -131,8 +131,6 @@ const Vis1MapPage: NextPage = () => {
     const allFCValues = getAllDataValuesForSelectedSrc(
       SELECTED_SRC_VALUES.FORECAST
     );
-    console.log("allFCValues", allFCValues);
-
 
     const extent = d3.extent([...allActualValues, ...allFCValues]);
     console.log("extent", extent);
@@ -157,6 +155,8 @@ const Vis1MapPage: NextPage = () => {
     // map.current.setFilter("pvgeneration-circles", filters);
     // setSelectedTimeStep(timeStep);
   };
+
+  console.log("pvMapData", pvMapData);
 
   const addPVData = (map) => {
     map.current.addSource("pverrorbygsp", {
