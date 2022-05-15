@@ -14,6 +14,9 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 
 const API_PREFIX = "http://nowcasting-api-development.eu-west-1.elasticbeanstalk.com/v0";
 
+// Assuming first item in the array is the latest
+const latestForecastValue = 0;
+
 export default function Home() {
 
   const { data: forecastData, error: forecastError } = useSWR(
@@ -38,7 +41,7 @@ export default function Home() {
         ...featureObj,
         properties: {
           ...featureObj.properties,
-          expectedPowerGenerationMegawatts: Math.floor(filteredForcastData[index].forecastValues[0].expectedPowerGenerationMegawatts)
+          expectedPowerGenerationMegawatts: Math.floor(filteredForcastData[index].forecastValues[latestForecastValue].expectedPowerGenerationMegawatts)
         }
       }
     ))
@@ -46,7 +49,7 @@ export default function Home() {
 
   const getPaintPropsForFC = () => {
     const allValues = filteredForcastData.map((item) => {
-      return Math.floor(item.forecastValues[0].expectedPowerGenerationMegawatts);
+      return Math.floor(item.forecastValues[latestForecastValue].expectedPowerGenerationMegawatts);
     })
    
     const extent = d3.extent([...allValues]);
