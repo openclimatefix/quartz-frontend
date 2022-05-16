@@ -20,7 +20,10 @@ const PvLatestMap = () => {
     `${API_PREFIX}/GB/solar/gsp/forecast/all`,
     fetcher, 
     {
-      onSuccess: () => setForecastLoading(false),
+      onSuccess: () => {
+        setForecastError(false);
+        setForecastLoading(false);
+      },
       onError: (err) => setForecastError(err)
     }
   );
@@ -89,7 +92,6 @@ const PvLatestMap = () => {
       }
       // every 5 minutes
     }, 300000);
-    // }
   };
 
   return (
