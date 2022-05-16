@@ -2,7 +2,7 @@ import useSWR from "swr";
 import { useState } from "react";
 
 import { FaildStateMap, LoadStateMap, Map } from "./";
-import { API_PREFIX, maxPowerGenerated } from "../../constant";
+import { API_PREFIX, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
 
@@ -54,7 +54,7 @@ const PvLatestMap = () => {
         // on value 0 the opacity will be 0
         0, 0,
         // on value maximum the opacity will be 1
-        maxPowerGenerated, 1,
+        MAX_POWER_GENERATED, 1,
       ],
     }
   );
