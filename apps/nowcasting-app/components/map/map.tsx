@@ -57,7 +57,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
     //     console.log('A data event occurred.', event);
     //   }
     // });
-  });
+  }, [map]);
 
   return (
     <div className="relative h-full">
