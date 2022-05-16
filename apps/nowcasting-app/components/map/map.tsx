@@ -34,6 +34,8 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
       zoom,
       bearing,
     });
+
+    map.current.addControl(new mapboxgl.NavigationControl({showCompass: false}));
   }, []);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
       setZoom(map.current.getZoom().toFixed(2));
     });
 
-    map.current.on("load", () => {
+    map.current.on("load", (event) => {
       loadDataOverlay(map);
     });
 
