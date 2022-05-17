@@ -4,11 +4,11 @@ type ForecastHeaderProps = { pv: number };
 
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pv }) => {
   return (
-    <div id="x" className="grid grid-cols-3 mt-6">
-      <div className="bg-white text-black text-lg md:text-2xl font-black col-span-2 p-4 flex items-center">
+    <div id="x" className="flex mt-6">
+      <div className="bg-white text-black text-2xl font-black flex-[2] p-4 items-center">
         National Solar PV Forecast
       </div>
-      <div className="p-2 ">
+      <div className="p-2 flex-[1]">
         <p className="text-2xl font-black text-center">
           {pv}
           <span className="text-mapbox-black-300">GW</span>

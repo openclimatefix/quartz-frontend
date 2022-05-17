@@ -1,30 +1,53 @@
-import { FC, useState } from "react";
-import RemixLine from "./RemixLine";
+import { FC } from "react";
+import RemixLine, { ChartData } from "./RemixLine";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
+
+const formatISODateString = (date: string) => date.slice(0, 16);
 
 function get30MinNow() {
   const date = new Date();
   const minites = date.getMinutes();
   if (minites <= 30) {
-    c(minites);
     date.setHours(date.getHours());
     date.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
   } else {
     date.setHours(date.getHours() + 1);
     date.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
   }
-  return date;
+  return formatISODateString(date.toISOString());
 }
-const PvRemixChart: FC<{ date?: string }> = (props) => {
-  const [selectedTimeStep, setSelectedTimeStep] = useState(
-    get30MinNow().toISOString()
-  );
+const getForecastChatData = (
+  selectedDateTime: string,
+  fr?: {
+    targetTime: string;
+    expectedPowerGenerationMegawatts: number;
+  }
+) => {
+  if (!fr) return {};
 
+  if (
+    new Date(fr.targetTime).getTime() >=
+    new Date(selectedDateTime + ":00.000Z").getTime()
+  )
+    return {
+      FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+    };
+  else
+    return {
+      PAST_FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+    };
+};
+const fetcher = (url) => {
   //@ts-ignore
-  const fetcher = (...args) => fetch(...args).then((res) => res.json());
-
+  return fetch(url, { mode: "no-cors", method: "GET" }).then((res) =>
+    res.json()
+  );
+};
+const PvRemixChart: FC<{ date?: string }> = (props) => {
+  //TODO: modve to a global state
+  const selectedDateTime = get30MinNow();
   const { data: nationalForecastData, error } = useSWR<
     {
       targetTime: string;
@@ -38,7 +61,6 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       regime: "in-day" | "day-after";
     }[]
   >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0`, fetcher);
-
   if (error || error2) return <div>failed to load</div>;
   if (!nationalForecastData || !pvRealData) return <div>loading...</div>;
 
@@ -47,32 +69,24 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     return acc;
   }, {});
 
-  const pvRealChartData = pvRealData.map((pr) => {
+  const pvRealChartData: ChartData[] = pvRealData.map((pr) => {
     let fc = ForecastDataMap[pr.datetimeUtc] || undefined;
     if (fc) delete ForecastDataMap[pr.datetimeUtc];
-    const data = {
-      time: pr.datetimeUtc.slice(11, 16),
-      datetimeUtc: pr.datetimeUtc,
-      FORECAST:
-        fc?.expectedPowerGenerationMegawatts &&
-        Math.round(fc?.expectedPowerGenerationMegawatts),
-      GENERATION: undefined,
-      GENERATION_UPDATED: undefined,
+    const data: ChartData = {
+      datetimeUtc: formatISODateString(pr.datetimeUtc),
+      ...getForecastChatData(selectedDateTime, fc),
     };
     const GENERATION = Math.round(pr.solarGenerationKw / 1000);
     if (pr.regime === "day-after") data.GENERATION_UPDATED = GENERATION;
     else data.GENERATION = GENERATION;
     return data;
   });
+
   Object.keys(ForecastDataMap).forEach((key) => {
+    const fr = ForecastDataMap[key];
     pvRealChartData.push({
-      time: ForecastDataMap[key].targetTime.slice(11, 16),
-      datetimeUtc: ForecastDataMap[key].targetTime,
-      FORECAST: Math.round(
-        ForecastDataMap[key].expectedPowerGenerationMegawatts
-      ),
-      GENERATION: undefined,
-      GENERATION_UPDATED: undefined,
+      datetimeUtc: formatISODateString(fr.targetTime),
+      ...getForecastChatData(selectedDateTime, fr),
     });
   });
 
@@ -81,8 +95,8 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <ForecastHeader
         pv={pvRealData && pvRealData[0].solarGenerationKw / 1000000}
       ></ForecastHeader>
-      <div className="border-t border-black h-60 bg-mapbox-black">
-        <RemixLine timeOfInterest={selectedTimeStep} data={pvRealChartData} />
+      <div className="border-t border-black h-60 mt-8 ">
+        <RemixLine timeOfInterest={selectedDateTime} data={pvRealChartData} />
       </div>
     </>
   );
