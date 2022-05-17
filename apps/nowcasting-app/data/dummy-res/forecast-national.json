@@ -1,0 +1,44 @@
+{
+  "location": {
+    "label": "National-GB",
+    "gspId": 0,
+    "gspName": "National",
+    "gspGroup": "National",
+    "regionName": "National",
+    "installedCapacityMw": 13080,
+    "rmMode": true
+  },
+  "model": {
+    "name": "nwp_simple_trained",
+    "version": "0.2.6"
+  },
+  "forecastCreationTime": "2022-05-16T15:17:14.365652+00:00",
+  "forecastValues": [
+    {
+      "targetTime": "2022-05-16T15:00:00+00:00",
+      "expectedPowerGenerationMegawatts": 4100.974823751889,
+      "expectedPowerGenerationNormalized": null
+    },
+    {
+      "targetTime": "2022-05-16T15:30:00+00:00",
+      "expectedPowerGenerationMegawatts": 3592.123422929909,
+      "expectedPowerGenerationNormalized": null
+    },
+    {
+      "targetTime": "2022-05-16T16:00:00+00:00",
+      "expectedPowerGenerationMegawatts": 2946.782566247605,
+      "expectedPowerGenerationNormalized": null
+    },
+    {
+      "targetTime": "2022-05-16T16:30:00+00:00",
+      "expectedPowerGenerationMegawatts": 2278.728253770793,
+      "expectedPowerGenerationNormalized": null
+    }
+  ],
+  "inputDataLastUpdated": {
+    "gsp": "2022-05-16T15:10:38.359579+00:00",
+    "nwp": "2022-05-16T14:35:04.669840+00:00",
+    "pv": "2022-05-16T15:17:19.108875+00:00",
+    "satellite": "2022-05-16T15:15:08.804389+00:00"
+  }
+}
