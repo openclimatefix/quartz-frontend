@@ -35,7 +35,8 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
       bearing,
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl({showCompass: false}));
+    const nav = new mapboxgl.NavigationControl({showCompass: false})
+    map.current.addControl(nav, 'bottom-right');
   }, []);
 
   useEffect(() => {
