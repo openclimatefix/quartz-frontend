@@ -5,21 +5,23 @@ const ButtonGroup = ({}: IButtonGroup) => {
     <span className="relative z-0 inline-flex shadow-sm">
       <button
         type="button"
-        className="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+        className="relative inline-flex items-center px-3 py-1 text-sm font-medium text-white bg-black disabled:cursor-not-allowed hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
       >
-        PV Forecast
+        PV FORECAST
       </button>
       <button
         type="button"
-        className="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+        disabled
+        className="relative inline-flex items-center px-3 py-1 ml-px text-sm font-medium text-white bg-black disabled:cursor-not-allowed hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
       >
-        Solar Sites
+        SOLAR SITES
       </button>
       <button
         type="button"
-        className="relative inline-flex items-center px-4 py-2 -ml-px text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+        disabled
+        className="relative inline-flex items-center px-3 py-1 ml-px text-sm font-medium text-white bg-black disabled:cursor-not-allowed hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
       >
-        Delta
+        DELTA
       </button>
     </span>
   );
