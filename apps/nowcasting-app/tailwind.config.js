@@ -23,6 +23,7 @@ module.exports = {
       colors: {
         "mapbox-black": {
           DEFAULT: "#191a1a",
+          300: "#A9A9A9",
           500: "#6C6C6C",
           900: "#191a1a",
         },
