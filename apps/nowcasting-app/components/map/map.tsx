@@ -15,14 +15,14 @@ mapboxgl.accessToken =
  * Mapbox wrapper.
  * @param loadDataOverlay Function that gets called to load the data.
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
- * @param bearing Rotation of the map. Defaults to 90 degrees, i.e. flipped on it's side
+ * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map = ({ loadDataOverlay, controlOverlay, bearing = 90 }: IMap) => {
+const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-2.547855);
-  const [lat, setLat] = useState(55.00366);
-  const [zoom, setZoom] = useState(5.8);
+  const [lng, setLng] = useState(-2.31756010);
+  const [lat, setLat] = useState(52.40534432);
+  const [zoom, setZoom] = useState(5.6);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -31,10 +31,12 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 90 }: IMap) => {
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/dark-v10",
       center: [lng, lat],
-      zoom: zoom,
+      zoom,
       bearing,
     });
-  });
+
+    map.current.addControl(new mapboxgl.NavigationControl({showCompass: false}));
+  }, []);
 
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
@@ -45,10 +47,11 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 90 }: IMap) => {
       setZoom(map.current.getZoom().toFixed(2));
     });
 
-    map.current.on("load", () => {
+    map.current.on("load", (event) => {
       loadDataOverlay(map);
     });
-  });
+
+  }, [map]);
 
   return (
     <div className="relative h-full">
