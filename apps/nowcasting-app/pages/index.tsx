@@ -8,14 +8,15 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="h-full grid grid-cols-9">
-        <SideLayout className="col-span-4">chart</SideLayout>
-        <div className="w-full h-full mb-20 col-span-5">
+      <div className="h-full flex">
+        <SideLayout className="flex-[4]">chart</SideLayout>
+        <div className="w-full h-full mb-20 flex-[5]">
         <PvLatestMap />
         </div>
       </div>
     </Layout>
   );
 }
+
 
 export const getServerSideProps = withPageAuthRequired();
