@@ -12,18 +12,13 @@ const Navbar = ({}: INavbar) => {
   return (
     <>
       <Disclosure as="nav" className="bg-white shadow">
-        <div className="px-2 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl  bg-black px-4">
           <div className="relative flex justify-between h-16">
-            <div className="flex items-center justify-center flex-1 sm:items-stretch sm:justify-start">
+            <div className="flex flex-1 items-stretch justify-start">
               <div className="flex items-center flex-shrink-0">
                 <img
-                  className="block w-auto h-7 lg:hidden"
-                  src="https://nowcasting.io/nowcasting.svg"
-                  alt="Nowcasting Logo"
-                />
-                <img
-                  className="hidden w-auto h-7 lg:block"
-                  src="https://nowcasting.io/nowcasting.svg"
+                  className="block w-auto h-7 "
+                  src="/NOWCASTING_Secondary-white.svg"
                   alt="Nowcasting Logo"
                 />
               </div>
