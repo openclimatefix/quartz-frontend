@@ -21,6 +21,11 @@ module.exports = {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
       colors: {
+        "mapbox-black": {
+          DEFAULT: "#191a1a",
+          500: "#6C6C6C",
+          900: "#191a1a",
+        },
         danube: {
           DEFAULT: "#468AC9",
           50: "#D4E4F2",
