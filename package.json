@@ -1,6 +1,9 @@
 {
   "name": "@openclimatefix/nowcasting",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=14 <16"
+  },
   "private": true,
   "repository": "git@github.com:openclimatefix/nowcasting.git",
   "workspaces": [
