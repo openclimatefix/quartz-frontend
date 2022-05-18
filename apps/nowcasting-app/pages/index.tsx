@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <Layout>
       <div className="h-full flex">
-        <SideLayout className="flex-[4]">chart</SideLayout>
+        {/* <SideLayout className="flex-[4]">chart</SideLayout> */}
         <div className="w-full h-full mb-20 flex-[5]">
         <PvLatestMap />
         </div>
