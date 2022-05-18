@@ -1,10 +1,12 @@
 import useSWR from "swr";
 import { useState } from "react";
 
-import { FaildStateMap, LoadStateMap, Map } from "./";
+import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
+import { ActiveUnit } from "./types";
 import { API_PREFIX, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
+
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -15,6 +17,7 @@ const latestForecastValue = 0;
 const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
+  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MV);
 
   const { data: initForecastData, mutate } = useSWR(
     `${API_PREFIX}/GB/solar/gsp/forecast/all`,
@@ -107,7 +110,10 @@ const PvLatestMap = () => {
       <Map
         loadDataOverlay={addFCData}
         controlOverlay={(map) => (
-          <ButtonGroup />
+          <>
+            <ButtonGroup />
+            <MeasuringUnit activeUnit={activeUnit} setActiveUnit={setActiveUnit} />
+          </>
         )}
       />                  
     )        
