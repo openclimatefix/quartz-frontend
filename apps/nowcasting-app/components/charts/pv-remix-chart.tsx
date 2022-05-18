@@ -95,7 +95,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <ForecastHeader
         pv={pvRealData && pvRealData[0].solarGenerationKw / 1000000}
       ></ForecastHeader>
-      <div className="border-t border-black h-60 mt-8 ">
+      <div className=" h-60 mt-8 ">
         <RemixLine timeOfInterest={selectedDateTime} data={pvRealChartData} />
       </div>
     </>

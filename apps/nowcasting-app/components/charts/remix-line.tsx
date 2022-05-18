@@ -2,29 +2,14 @@ import React from "react";
 import {
   ComposedChart,
   Line,
-  Label,
+  CartesianGrid,
+  CartesianAxis,
   XAxis,
   YAxis,
   ReferenceLine,
-  Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 
-const setDatasetValsToZeroAfterTOI = (dataset, timeSteps, timeOfInterest) => {
-  const toiIndex = timeSteps.indexOf(timeOfInterest);
-  return dataset.map((data, index) => {
-    const MAGIC_NUMBER = 5; // don't ask me why...
-    if (index < toiIndex - MAGIC_NUMBER) {
-      return data;
-    } else {
-      return {
-        ...data,
-        GENERATION: undefined,
-      };
-    }
-  });
-};
 export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
@@ -36,7 +21,41 @@ type RemixLineProps = {
   timeOfInterest: string;
   data: ChartData[];
 };
-
+const CustomizedLabel = (props) => {
+  const {
+    value,
+    offset,
+    viewBox: { x },
+  } = props;
+  const yy = 230;
+  return (
+    <g>
+      <line
+        stroke="white"
+        stroke-width="1"
+        stroke-dasharray="3 3"
+        fill="none"
+        fill-opacity="1"
+        x1={x}
+        y1={yy - 50}
+        x2={x}
+        y2={yy}
+      ></line>
+      <rect
+        x={x - 28}
+        y={yy}
+        width="58"
+        height="30"
+        offset={offset}
+        fill="white"
+        textAnchor="middle"
+      ></rect>
+      <text x={x + 1} y={yy + 21} id="time-now" text-anchor="middle">
+        {value}
+      </text>
+    </g>
+  );
+};
 const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
   const preppedData = data.sort((a, b) =>
     a.datetimeUtc.localeCompare(b.datetimeUtc)
@@ -48,7 +67,6 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
   function prettyPrintXdate(x) {
     return x.slice(11, 16);
   }
-
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart
@@ -76,14 +94,17 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           tick={{ fill: "white" }}
           tickLine={false}
         />
-
+        <CartesianGrid />
+        <CartesianAxis />
         <ReferenceLine
           x={timeOfInterest}
           stroke="white"
           strokeWidth={1}
           strokeDasharray="3 3"
           label={
-            <Label value={prettyPrintXdate(timeOfInterest)} fill={"white"} />
+            <CustomizedLabel
+              value={prettyPrintXdate(timeOfInterest)}
+            ></CustomizedLabel>
           }
         />
 
@@ -98,9 +119,9 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           type="monotone"
           dataKey="FORECAST"
           dot={false}
-          strokeDasharray="4 4"
+          strokeDasharray="7 7"
           stroke="#FFC425" //yellow
-          strokeWidth={4}
+          strokeWidth={3}
         />
         <Line
           type="monotone"

@@ -11,7 +11,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pv }) => {
       <div className="p-2 flex-[1]">
         <p className="text-2xl font-black text-center">
           {pv}
-          <span className="text-mapbox-black-300">GW</span>
+          <span className=" ml-2 text-mapbox-black-300">GW</span>
         </p>
         <p className="text-mapbox-black-300 text-center">generation</p>
       </div>
