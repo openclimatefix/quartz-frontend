@@ -1,5 +1,5 @@
 import { FC } from "react";
-import RemixLine, { ChartData } from "./RemixLine";
+import RemixLine, { ChartData } from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
