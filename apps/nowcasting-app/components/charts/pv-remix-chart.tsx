@@ -10,13 +10,7 @@ import useFormatChartData, {
 } from "./use-format-chart-data";
 
 const axiosFetcher = (url) => {
-  return axios(url, {
-    // mode: "no-cors",
-    headers: {
-      Accept: "*/*",
-      "Content-Type": "application/json",
-    },
-  }).then(async (res) => {
+  return axios(url).then(async (res) => {
     return res.data;
   });
 };
@@ -30,25 +24,35 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       expectedPowerGenerationMegawatts: number;
     }[]
   >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher);
-  const { data: pvRealData, error: error2 } = useSWR<
+  const { data: pvRealDataIn, error: error2 } = useSWR<
     {
       datetimeUtc: string;
       solarGenerationKw: number;
-      regime: "in-day" | "day-after";
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/`, axiosFetcher);
+  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=in-day`, axiosFetcher);
+  const { data: pvRealDataAfter, error: error3 } = useSWR<
+    {
+      datetimeUtc: string;
+      solarGenerationKw: number;
+    }[]
+  >(
+    `${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=day-after`,
+    axiosFetcher
+  );
 
   const chartData = useFormatChartData({
     nationalForecastData,
-    pvRealData,
+    pvRealDataIn,
+    pvRealDataAfter,
     selectedTime,
   });
 
-  if (error || error2) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealData) return <div>loading...</div>;
+  if (error || error2 || error3) return <div>failed to load</div>;
+  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
+    return <div>loading...</div>;
 
   const latestPvGenerationInGW =
-    pvRealData && pvRealData[0].solarGenerationKw / 1000000;
+    pvRealDataAfter && pvRealDataAfter[0].solarGenerationKw / 1000000;
   return (
     <>
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>

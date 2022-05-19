@@ -34,51 +34,83 @@ const getForecastChartData = (
 };
 const useFormatChartData = ({
   nationalForecastData,
-  pvRealData,
+  pvRealDataAfter,
+  pvRealDataIn,
   selectedTime,
 }: {
   nationalForecastData?: {
     targetTime: string;
     expectedPowerGenerationMegawatts: number;
   }[];
-  pvRealData?: {
+  pvRealDataAfter?: {
     datetimeUtc: string;
     solarGenerationKw: number;
-    regime: "in-day" | "day-after";
+  }[];
+  pvRealDataIn?: {
+    datetimeUtc: string;
+    solarGenerationKw: number;
   }[];
   selectedTime?: string;
 }) => {
   const data = useMemo(() => {
-    if (nationalForecastData && pvRealData && selectedTime) {
-      const ForecastDataMap = nationalForecastData.reduce((acc, curr, i) => {
-        acc[curr.targetTime] = curr;
-        return acc;
-      }, {});
+    if (
+      nationalForecastData &&
+      pvRealDataAfter &&
+      pvRealDataIn &&
+      selectedTime
+    ) {
+      const chartMap: Record<string, ChartData> = {};
 
-      const chartData: ChartData[] = pvRealData.map((pr) => {
-        let fc = ForecastDataMap[pr.datetimeUtc] || undefined;
-        if (fc) delete ForecastDataMap[pr.datetimeUtc];
-        const data: ChartData = {
-          datetimeUtc: formatISODateString(pr.datetimeUtc),
-          ...getForecastChartData(selectedTime, fc),
-        };
-        const GENERATION = Math.round(pr.solarGenerationKw / 1000);
-        if (pr.regime === "day-after") data.GENERATION_UPDATED = GENERATION;
-        else data.GENERATION = GENERATION;
-        return data;
-      });
+      const addDataToMap = (
+        dataPoint: any,
+        getDatetimeUtc: (dp: any) => string,
+        getPvdata: (dp: any) => Partial<ChartData>
+      ) => {
+        const pvData = getPvdata(dataPoint);
+        const datetimeUtc = getDatetimeUtc(dataPoint);
+        if (chartMap[datetimeUtc]) {
+          chartMap[datetimeUtc] = {
+            ...chartMap[datetimeUtc],
+            ...pvData,
+          };
+        } else {
+          chartMap[datetimeUtc] = {
+            datetimeUtc: formatISODateString(datetimeUtc),
+            ...pvData,
+          };
+        }
+      };
 
-      Object.keys(ForecastDataMap).forEach((key) => {
-        const fr = ForecastDataMap[key];
-        chartData.push({
-          datetimeUtc: formatISODateString(fr.targetTime),
-          ...getForecastChartData(selectedTime, fr),
-        });
-      });
-      return chartData;
+      pvRealDataAfter.forEach((pva) =>
+        addDataToMap(
+          pva,
+          (db) => db.datetimeUtc,
+          (db) => ({
+            GENERATION_UPDATED: Math.round(db.solarGenerationKw / 1000),
+          })
+        )
+      );
+      pvRealDataIn.forEach((pvIn) =>
+        addDataToMap(
+          pvIn,
+          (db) => db.datetimeUtc,
+          (db) => ({
+            GENERATION: Math.round(db.solarGenerationKw / 1000),
+          })
+        )
+      );
+      nationalForecastData.forEach((fc) =>
+        addDataToMap(
+          fc,
+          (db) => db.targetTime,
+          (db) => getForecastChartData(selectedTime, db)
+        )
+      );
+
+      return Object.values(chartMap);
     }
     return [];
-  }, [nationalForecastData, pvRealData, selectedTime]);
+  }, [nationalForecastData, pvRealDataIn, pvRealDataAfter, selectedTime]);
   return data;
 };
 
