@@ -52,6 +52,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   return (
     <>
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
+
       <div className=" h-60 mt-8 ">
         <RemixLine timeOfInterest={selectedTime} data={chartData} />
       </div>

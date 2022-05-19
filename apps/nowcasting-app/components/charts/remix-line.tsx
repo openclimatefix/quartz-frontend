@@ -3,7 +3,6 @@ import {
   ComposedChart,
   Line,
   CartesianGrid,
-  CartesianAxis,
   XAxis,
   YAxis,
   ReferenceLine,
@@ -115,6 +114,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           dot={false}
           stroke="#FFC425" //yellow
           strokeWidth={4}
+          connectNulls={true}
         />
         <Line
           type="monotone"
@@ -123,12 +123,14 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           strokeDasharray="7 7"
           stroke="#FFC425" //yellow
           strokeWidth={3}
+          connectNulls={true}
         />
         <Line
           type="monotone"
           dataKey="GENERATION"
           strokeWidth={0}
           dot={{ fill: "black" }}
+          connectNulls={true}
         />
         <Line
           type="monotone"
@@ -136,6 +138,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           stroke="black"
           strokeWidth={3}
           dot={false}
+          connectNulls={true}
         />
       </ComposedChart>
     </ResponsiveContainer>

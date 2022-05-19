@@ -13,11 +13,19 @@ const getForecastChartData = (
   if (!fr) return {};
 
   if (
-    new Date(fr.targetTime).getTime() >=
+    new Date(fr.targetTime).getTime() >
     new Date(selectedTime + ":00.000Z").getTime()
   )
     return {
       FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+    };
+  else if (
+    new Date(fr.targetTime).getTime() ===
+    new Date(selectedTime + ":00.000Z").getTime()
+  )
+    return {
+      FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+      PAST_FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
     };
   else
     return {
