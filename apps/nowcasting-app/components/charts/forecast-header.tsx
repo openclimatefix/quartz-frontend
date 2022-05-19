@@ -1,6 +1,6 @@
 import React from "react";
 
-type ForecastHeaderProps = { pv: number };
+type ForecastHeaderProps = { pv: string };
 
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pv }) => {
   return (

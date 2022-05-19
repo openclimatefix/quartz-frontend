@@ -34,6 +34,7 @@ const toolTipColors = {
 type RemixLineProps = {
   timeOfInterest: string;
   data: ChartData[];
+  setTimeOfInterest: (t: string) => void;
 };
 const CustomizedLabel = (props) => {
   const {
@@ -69,7 +70,11 @@ const CustomizedLabel = (props) => {
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
+const RemixLine: React.FC<RemixLineProps> = ({
+  timeOfInterest,
+  data,
+  setTimeOfInterest,
+}) => {
   const preppedData = data.sort((a, b) =>
     a.datetimeUtc.localeCompare(b.datetimeUtc)
   );
@@ -93,6 +98,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           bottom: 20,
           left: 20,
         }}
+        onClick={(e) => e.activeLabel && setTimeOfInterest(e.activeLabel)}
       >
         <CartesianGrid
           verticalFill={["#545454", "#6C6C6C"]}

@@ -14,7 +14,9 @@ const axiosFetcher = (url) => {
   });
 };
 const PvRemixChart: FC<{ date?: string }> = (props) => {
-  const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [selectedISOTime, setSelectedISOTime] = useGlobalState(
+    "selectedISOTime"
+  );
   const selectedTime = formatISODateString(selectedISOTime);
   const { data: nationalForecastData, error } = useSWR<
     {
@@ -63,14 +65,19 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       (fc) =>
         formatISODateString(fc.targetTime) ===
         formatISODateString(selectedISOTime)
-    ).expectedPowerGenerationMegawatts || 0) / 1000
+    )?.expectedPowerGenerationMegawatts || 0) / 1000
   ).toFixed(3);
+
   return (
     <>
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
 
       <div className=" h-60 mt-8 ">
-        <RemixLine timeOfInterest={selectedTime} data={chartData} />
+        <RemixLine
+          timeOfInterest={selectedTime}
+          setTimeOfInterest={(time) => setSelectedISOTime(time + ":00.000Z")}
+          data={chartData}
+        />
       </div>
     </>
   );
