@@ -32,10 +32,10 @@ const CustomizedLabel = (props) => {
     <g>
       <line
         stroke="white"
-        stroke-width="1"
-        stroke-dasharray="3 3"
+        strokeWidth="1"
+        strokeDasharray="3 3"
         fill="none"
-        fill-opacity="1"
+        fillOpacity="1"
         x1={x}
         y1={yy - 50}
         x2={x}
@@ -48,9 +48,8 @@ const CustomizedLabel = (props) => {
         height="30"
         offset={offset}
         fill="white"
-        textAnchor="middle"
       ></rect>
-      <text x={x + 1} y={yy + 21} id="time-now" text-anchor="middle">
+      <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle">
         {value}
       </text>
     </g>
@@ -80,7 +79,6 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           left: 20,
         }}
       >
-        {/* <CartesianGrid stroke="#f5f5f5" /> */}
         <XAxis
           dataKey="datetimeUtc"
           tickFormatter={prettyPrintXdate}
@@ -88,14 +86,17 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           tick={{ fill: "white" }}
           tickLine={true}
           interval={11}
+          padding={{ left: -4.5 }}
         />
         <YAxis
           tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
           tick={{ fill: "white" }}
           tickLine={false}
         />
-        <CartesianGrid />
-        <CartesianAxis />
+        <CartesianGrid
+          verticalFill={["#545454", "#6C6C6C"]}
+          fillOpacity={0.5}
+        />
         <ReferenceLine
           x={timeOfInterest}
           stroke="white"
