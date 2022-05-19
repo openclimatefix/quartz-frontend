@@ -7,7 +7,9 @@ import {
   YAxis,
   ReferenceLine,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
+import { formatISODateStringHuman } from "../utils";
 
 export type ChartData = {
   GENERATION_UPDATED?: number;
@@ -15,6 +17,19 @@ export type ChartData = {
   FORECAST?: number;
   PAST_FORECAST?: number;
   datetimeUtc: string; // "2022-05-16T15:00",
+};
+
+const toolTiplabels = {
+  GENERATION_UPDATED: "PV Live initial estimate",
+  GENERATION: "PV Live updated",
+  FORECAST: "OFC Forecast",
+  PAST_FORECAST: "OFC Forecast",
+};
+const toolTipColors = {
+  GENERATION_UPDATED: "#24292E",
+  GENERATION: "#24292E",
+  FORECAST: "#FFC425",
+  PAST_FORECAST: "#FFC425",
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -65,6 +80,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
   function prettyPrintXdate(x) {
     return x.slice(11, 16);
   }
+
   return (
     <ResponsiveContainer width="100%" height="100%">
       <ComposedChart
@@ -135,6 +151,35 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           stroke="black"
           strokeWidth={3}
           dot={false}
+        />
+        <Tooltip
+          content={({ payload, label }) => {
+            const data = payload[0]?.payload;
+            if (!data) return <div></div>;
+            return (
+              <div className="p-2 bg-white shadow">
+                <p className="mb-2 text-black">
+                  {formatISODateStringHuman(data?.datetimeUtc)}
+                </p>
+                <ul className="">
+                  {Object.entries(data)
+                    .reverse()
+                    .map(([name, value]) => {
+                      if (name === "datetimeUtc") return null;
+                      return (
+                        <li
+                          key={`item-${name}`}
+                          style={{ color: toolTipColors[name] }}
+                        >
+                          {toolTiplabels[name]}:{" "}
+                          {prettyPrintYNumberWithCommas(value)} MW
+                        </li>
+                      );
+                    })}
+                </ul>
+              </div>
+            );
+          }}
         />
       </ComposedChart>
     </ResponsiveContainer>
