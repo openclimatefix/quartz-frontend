@@ -14,7 +14,6 @@ const axiosFetcher = (url) => {
   });
 };
 const PvRemixChart: FC<{ date?: string }> = (props) => {
-  //TODO: modve to a global state
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime);
   const { data: nationalForecastData, error } = useSWR<
@@ -22,13 +21,19 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       targetTime: string;
       expectedPowerGenerationMegawatts: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher);
+  >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5, // 5min
+  });
+
   const { data: pvRealDataIn, error: error2 } = useSWR<
     {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=in-day`, axiosFetcher);
+  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=in-day`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5, // 5min
+  });
+
   const { data: pvRealDataAfter, error: error3 } = useSWR<
     {
       datetimeUtc: string;
@@ -36,7 +41,10 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     }[]
   >(
     `${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=day-after`,
-    axiosFetcher
+    axiosFetcher,
+    {
+      refreshInterval: 60 * 1000 * 5, // 5min
+    }
   );
 
   const chartData = useFormatChartData({
@@ -50,8 +58,13 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
     return <div>loading...</div>;
 
-  const latestPvGenerationInGW =
-    pvRealDataAfter && pvRealDataAfter[0].solarGenerationKw / 1000000;
+  const latestPvGenerationInGW = (
+    (nationalForecastData.find(
+      (fc) =>
+        formatISODateString(fc.targetTime) ===
+        formatISODateString(selectedISOTime)
+    ).expectedPowerGenerationMegawatts || 0) / 1000
+  ).toFixed(3);
   return (
     <>
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
