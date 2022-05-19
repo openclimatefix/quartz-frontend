@@ -1,6 +1,6 @@
 import { createGlobalState } from "react-hooks-global-state";
 
-function get30MinNow() {
+export function get30MinNow() {
   const date = new Date();
   const minites = date.getMinutes();
   if (minites <= 30) {

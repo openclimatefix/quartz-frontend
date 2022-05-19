@@ -1,8 +1,8 @@
 import { useMemo } from "react";
+import { formatISODateString } from "../utils";
 import { ChartData } from "./remix-line";
 
 //sperate paste forcaste from furute forcast (ie: after selectedTime)
-export const formatISODateString = (date: string) => date.slice(0, 16);
 const getForecastChartData = (
   selectedTime: string,
   fr?: {

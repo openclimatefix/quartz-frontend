@@ -5,9 +5,8 @@ import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import axios from "axios";
 import useGlobalState from "../globalState";
-import useFormatChartData, {
-  formatISODateString,
-} from "./use-format-chart-data";
+import useFormatChartData from "./use-format-chart-data";
+import { formatISODateString } from "../utils";
 
 const axiosFetcher = (url) => {
   return axios(url).then(async (res) => {
