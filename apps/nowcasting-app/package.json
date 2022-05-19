@@ -14,6 +14,7 @@
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
     "@sentry/nextjs": "^6.19.7",
+    "axios": "^0.27.2",
     "mapbox-gl": "^2.8.2",
     "next": "^12.0.7",
     "react": "^17.0.2",

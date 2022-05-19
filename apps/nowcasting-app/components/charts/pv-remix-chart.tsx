@@ -3,7 +3,7 @@ import RemixLine, { ChartData } from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
-
+import axios from "axios";
 const formatISODateString = (date: string) => date.slice(0, 16);
 
 function get30MinNow() {
@@ -40,10 +40,15 @@ const getForecastChatData = (
     };
 };
 const fetcher = (url) => {
-  //@ts-ignore
-  return fetch(url, { mode: "no-cors", method: "GET" }).then((res) =>
-    res.json()
-  );
+  return axios(url, {
+    // mode: "no-cors",
+    headers: {
+      Accept: "*/*",
+      "Content-Type": "application/json",
+    },
+  }).then(async (res) => {
+    return res.data;
+  });
 };
 const PvRemixChart: FC<{ date?: string }> = (props) => {
   //TODO: modve to a global state
@@ -60,7 +65,8 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       solarGenerationKw: number;
       regime: "in-day" | "day-after";
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0`, fetcher);
+  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/`, fetcher);
+
   if (error || error2) return <div>failed to load</div>;
   if (!nationalForecastData || !pvRealData) return <div>loading...</div>;
 
