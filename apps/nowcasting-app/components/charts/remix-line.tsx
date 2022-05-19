@@ -78,6 +78,10 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           left: 20,
         }}
       >
+        <CartesianGrid
+          verticalFill={["#545454", "#6C6C6C"]}
+          fillOpacity={0.5}
+        />
         <XAxis
           dataKey="datetimeUtc"
           tickFormatter={prettyPrintXdate}
@@ -85,17 +89,13 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data }) => {
           tick={{ fill: "white" }}
           tickLine={true}
           interval={11}
-          padding={{ left: -4.5 }}
         />
         <YAxis
           tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
           tick={{ fill: "white" }}
           tickLine={false}
         />
-        <CartesianGrid
-          verticalFill={["#545454", "#6C6C6C"]}
-          fillOpacity={0.5}
-        />
+
         <ReferenceLine
           x={timeOfInterest}
           stroke="white"
