@@ -98,7 +98,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
           bottom: 20,
           left: 20,
         }}
-        onClick={(e) => e.activeLabel && setTimeOfInterest(e.activeLabel)}
+        onClick={(e?: { activeLabel?: string }) =>
+          e?.activeLabel && setTimeOfInterest(e.activeLabel)
+        }
       >
         <CartesianGrid
           verticalFill={["#545454", "#6C6C6C"]}
