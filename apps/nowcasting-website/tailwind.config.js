@@ -1,32 +1,26 @@
-const defaultTheme = require("tailwindcss/defaultTheme");
-
 module.exports = {
-  purge: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
-  darkMode: false, // or 'media' or 'class'
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["Inter var", ...defaultTheme.fontFamily.sans],
-      },
-    },
-    colors: {
-      yellow: {
-        DEFAULT: "#FFC425",
-        50: "#FFFFFF",
-        100: "#FFFBF1",
-        200: "#FFEDBE",
-        300: "#FFE08B",
-        400: "#FFD258",
-        500: "#FFC425",
-        600: "#F1B000",
-        700: "#BE8B00",
-        800: "#8B6500",
-        900: "#584000",
+      colors: {
+        goldenrod: {
+          DEFAULT: "#FFC629",
+          50: "#FFF7E1",
+          100: "#FFF1CC",
+          200: "#FFE7A3",
+          300: "#FFDC7B",
+          400: "#FFD152",
+          500: "#FFC629",
+          600: "#F0B000",
+          700: "#B88700",
+          800: "#805E00",
+          900: "#483500",
+        },
       },
     },
   },
-  variants: {
-    extend: {},
-  },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")],
 };
