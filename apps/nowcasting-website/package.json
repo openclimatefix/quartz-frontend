@@ -18,7 +18,8 @@
     "prom-client": "^14.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "tailwindcss": "^2.2.16"
+    "tailwindcss": "^2.2.16",
+    "turbo": "^1.0.26"
   },
   "devDependencies": {
     "@openclimatefix/nowcasting-tsconfig": "*",
