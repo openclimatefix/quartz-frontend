@@ -75,7 +75,10 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>NOWCASTING - A Better Way to Think about Solar</title>
+        <title>
+          NOWCASTING - The intuition of a meteorologist with the speed of a
+          machine
+        </title>
         <meta name="description" content={taglineText} />
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
