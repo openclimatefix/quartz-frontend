@@ -24,18 +24,25 @@ const PvLatestMap = () => {
   const [isNormalized, setIsNormalized] = useState(false);
   const [selectedData, setSelectedData] = useState<SelectedData>(SelectedData.expectedPowerGenerationMegawatts);
 
+  const forecastUrl = (type) => `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${type}`;
+
   const { data: initForecastData } = useSWR(() =>
-    `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${isNormalized}`,
+    forecastUrl(isNormalized),
     fetcher, 
     {
       onSuccess: (data) => {
-        istoggled ? setupdatedForeCastData(data): null;
-        console.log("sucess");
-        setForecastError(false);
-        istoggled ? setIsToggleLoading(false) : setForecastLoading(false);
+        if(istoggled) {
+          setupdatedForeCastData(data);
+          setIsToggleLoading(false);
+          setIsToggled(false);
+        }else {
+          setForecastError(false);
+          setForecastLoading(false);
+        } 
       },
       onError: (err) => setForecastError(err),
       // revalidateOnMount: false
+      refreshInterval: 30000
     }
   );
 
@@ -49,11 +56,13 @@ const PvLatestMap = () => {
           activeUnit === ActiveUnit.percentage
             ? SelectedData.expectedPowerGenerationNormalized
             : SelectedData.expectedPowerGenerationMegawatts,
-          );
+        );
       }
     })()
    
   }, [activeUnit]);
+
+  useEffect(() => console.log("first Render"), []);
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean) => ([
     "interpolate", ["linear"],
@@ -94,7 +103,7 @@ const PvLatestMap = () => {
     }
   )};
 
-  const updateFCData = (map) => {
+  const updateFCDataType = (map) => {
       const { forecastGeoJson } = generateGeoJsonForecastData(updatedForeCastData);
       map.current.getSource('latestPV').setData(forecastGeoJson);
       map.current.setPaintProperty('latestPV-forecast', "fill-opacity", getFillOpacity(selectedData, isNormalized));
@@ -116,20 +125,20 @@ const PvLatestMap = () => {
       paint: getPaintPropsForFC(),
     });
 
-    // const updateSource = setInterval(async () => {
+    // const updateSource = setInterval(async (type) => {
     //   try {
-    //     const updatedForecastData = await mutate(
-    //       `${API_PREFIX}/GB/solar/gsp/forecast/all`,
+    //     const latestForecastData = await mutate(
+    //       forecastUrl(type),
     //     );
   
-    //     // console.log("sucess");
-    //     const {forecastGeoJson} = generateGeoJsonForecastData(updatedForecastData);
+    //     console.log("update", map.current.getPaintProperty('latestPV-forecast', "fill-opacity"));
+    //     const {forecastGeoJson} = generateGeoJsonForecastData(latestForecastData);
     //     map.current.getSource('latestPV').setData(forecastGeoJson);
     //   } catch {
     //     if (updateSource) clearInterval(updateSource);
     //   }
     //   // every 5 minutes
-    // }, 300000);
+    // }, 30000);
   };
 
   return (
@@ -144,7 +153,6 @@ const PvLatestMap = () => {
     : (
       <Map
         loadDataOverlay={addFCData}
-        // updateFCData={updateFCData}
         controlOverlay={(map: MutableRefObject<any>) => (
           <>
             <ButtonGroup />
@@ -155,7 +163,7 @@ const PvLatestMap = () => {
               foreCastData={updatedForeCastData}
               isLoading={isToggleLoading}
               setIsLoading={setIsToggleLoading}
-              updateFCData={updateFCData}
+              updateFCData={updateFCDataType}
             />
           </>
         )}

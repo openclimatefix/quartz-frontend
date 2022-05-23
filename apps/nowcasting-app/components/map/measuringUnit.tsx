@@ -1,5 +1,5 @@
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from "react";
-import { ActiveUnit, SelectedData } from "./types";
+import { ActiveUnit } from "./types";
 
 const MeasuringUnit = (
   { map, activeUnit, setActiveUnit, updateFCData, isLoading, setIsLoading, foreCastData } :
