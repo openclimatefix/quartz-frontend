@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import {
   ComposedChart,
   Line,
@@ -19,13 +19,13 @@ export type ChartData = {
   datetimeUtc: string; // "2022-05-16T15:00",
 };
 
-const toolTiplabels = {
+const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live initial estimate",
   GENERATION: "PV Live updated",
   FORECAST: "OFC Forecast",
   PAST_FORECAST: "OFC Forecast",
 };
-const toolTipColors = {
+const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "#24292E",
   GENERATION: "#24292E",
   FORECAST: "#FFC425",
@@ -36,12 +36,7 @@ type RemixLineProps = {
   data: ChartData[];
   setTimeOfInterest: (t: string) => void;
 };
-const CustomizedLabel = (props) => {
-  const {
-    value,
-    offset,
-    viewBox: { x },
-  } = props;
+const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   const yy = 230;
   return (
     <g>
@@ -79,10 +74,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
     a.datetimeUtc.localeCompare(b.datetimeUtc)
   );
   /** Ensures that the legend is ordered in the same way as the stacked items */
-  function prettyPrintYNumberWithCommas(x) {
+  function prettyPrintYNumberWithCommas(x: string | number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-  function prettyPrintXdate(x) {
+  function prettyPrintXdate(x: string) {
     return x.slice(11, 16);
   }
 
@@ -182,7 +177,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           style={{ color: toolTipColors[name] }}
                         >
                           {toolTiplabels[name]}:{" "}
-                          {prettyPrintYNumberWithCommas(value)} MW
+                          {prettyPrintYNumberWithCommas(value as string)} MW
                         </li>
                       );
                     })}

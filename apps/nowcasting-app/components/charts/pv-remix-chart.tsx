@@ -8,7 +8,7 @@ import useGlobalState from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../utils";
 
-const axiosFetcher = (url) => {
+const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
     return res.data;
   });
@@ -17,7 +17,9 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState(
     "selectedISOTime"
   );
-  const selectedTime = formatISODateString(selectedISOTime);
+  const selectedTime = formatISODateString(
+    selectedISOTime || new Date().toISOString()
+  );
   const { data: nationalForecastData, error } = useSWR<
     {
       targetTime: string;
@@ -64,7 +66,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     (nationalForecastData.find(
       (fc) =>
         formatISODateString(fc.targetTime) ===
-        formatISODateString(selectedISOTime)
+        formatISODateString(selectedISOTime || new Date().toISOString())
     )?.expectedPowerGenerationMegawatts || 0) / 1000
   ).toFixed(3);
 

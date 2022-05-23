@@ -18,34 +18,35 @@ mapboxgl.accessToken =
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
 const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const map = useRef<mapboxgl.Map>();
   const [lng, setLng] = useState(-2.3175601);
   const [lat, setLat] = useState(52.40534432);
   const [zoom, setZoom] = useState(5.6);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
+    if (mapContainer.current) {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/dark-v10",
+        center: [lng, lat],
+        zoom,
+        bearing,
+      });
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/dark-v10",
-      center: [lng, lat],
-      zoom,
-      bearing,
-    });
-
-    const nav = new mapboxgl.NavigationControl({ showCompass: false });
-    map.current.addControl(nav, "bottom-right");
+      const nav = new mapboxgl.NavigationControl({ showCompass: false });
+      map.current.addControl(nav, "bottom-right");
+    }
   }, []);
 
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
 
     map.current.on("move", () => {
-      setLng(map.current.getCenter().lng.toFixed(4));
-      setLat(map.current.getCenter().lat.toFixed(4));
-      setZoom(map.current.getZoom().toFixed(2));
+      setLng(Number(map.current?.getCenter().lng.toFixed(4)));
+      setLat(Number(map.current?.getCenter().lat.toFixed(4)));
+      setZoom(Number(map.current?.getZoom().toFixed(2)));
     });
 
     map.current.on("load", (event) => {

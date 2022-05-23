@@ -3,7 +3,7 @@ import { UserProvider } from "@auth0/nextjs-auth0";
 
 import "../styles/globals.css";
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps }: any) {
   return (
     <UserProvider>
       <Component {...pageProps} />
