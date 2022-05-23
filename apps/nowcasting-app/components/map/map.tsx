@@ -1,6 +1,7 @@
 interface IMap {
   loadDataOverlay: any;
   controlOverlay: any;
+  updateFCData?: any;
   bearing?: number;
 }
 
@@ -17,12 +18,12 @@ mapboxgl.accessToken =
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
+const Map = ({ loadDataOverlay, controlOverlay, updateFCData, bearing = 0 }: IMap) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng, setLng] = useState(-2.31756010);
-  const [lat, setLat] = useState(52.40534432);
-  const [zoom, setZoom] = useState(5.6);
+  const [lat, setLat] = useState(54.70534432);
+  const [zoom, setZoom] = useState(5);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -50,6 +51,13 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
 
     map.current.on("load", (event) => {
       loadDataOverlay(map);
+    });
+
+    // Indecated that data source updates every
+    map.current.on("sourcedata", (event) => {
+      if(event.isSourceLoaded && event.sourceCacheId && event.source.data){
+        console.log('A data event occurred.', event.source.data.features);
+      }
     });
 
   }, [map]);
