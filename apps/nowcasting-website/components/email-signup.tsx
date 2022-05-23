@@ -58,6 +58,7 @@ const EmailSignup = ({}: IEmailSignup) => {
         <a
           href="https://www.iubenda.com/privacy-policy/92003532"
           target="_blank"
+          rel="noreferrer"
           className="font-medium text-gray-900 underline"
         >
           Privacy Policy

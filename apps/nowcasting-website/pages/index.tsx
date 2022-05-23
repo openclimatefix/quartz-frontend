@@ -193,7 +193,7 @@ const Home: NextPage = () => {
               meteorologists are not available to most teams and with machine
               learning, it should be possible to automate these intuitions.
             </p>
-            <p>It needn't be like this.</p>
+            <p>It needn&apos;t be like this.</p>
           </div>
         </div>
       </section>
