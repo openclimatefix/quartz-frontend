@@ -311,13 +311,13 @@ const Home: NextPage = () => {
             <figure>
               <img
                 className="w-full rounded-lg"
-                src="/nowcasting-app.png"
+                src="/chart.svg"
                 alt=""
                 width={1310}
                 height={873}
               />
               <figcaption className="text-center">
-                Screenshot of the NOWCASTING application.
+                Datamodel of the NOWCASTING application.
               </figcaption>
             </figure>
             <p>
