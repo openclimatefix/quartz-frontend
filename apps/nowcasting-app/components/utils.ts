@@ -120,3 +120,19 @@ export const classNames = (...classes: string[]) => {
 export const getTimeFromDate = (date: Date) => {
   return date.toTimeString().split(" ")[0].slice(0, -3);
 };
+export const formatISODateString = (date?: string, human?: boolean) => {
+  const dateid = date?.slice(0, 16);
+  return dateid;
+};
+
+export const formatISODateStringHuman = (date?: string) => {
+  const d = new Date(date);
+  return d
+    .toLocaleString("kw-GB", {
+      timeZoneName: "short",
+      timeZone: "UTC",
+    })
+    .slice(0, 17)
+    .replace(",", "")
+    .replace(/:$/, "");
+};

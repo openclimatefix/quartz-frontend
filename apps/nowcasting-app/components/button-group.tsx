@@ -1,8 +1,10 @@
-interface IButtonGroup {}
+interface IButtonGroup {
+  rightString: string;
+}
 
-const ButtonGroup = ({}: IButtonGroup) => {
+const ButtonGroup = ({ rightString }: IButtonGroup) => {
   return (
-    <span className="relative z-0 inline-flex shadow-sm">
+    <span className="relative z-0 w-full inline-flex shadow-sm">
       <button
         type="button"
         className="relative inline-flex items-center px-3 py-1 text-sm font-medium text-black bg-amber-400 disabled:cursor-not-allowed hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
@@ -23,6 +25,9 @@ const ButtonGroup = ({}: IButtonGroup) => {
       >
         DELTA
       </button>
+      <div className="absolute right-5 top-0 items-center px-3 py-1 ml-px text-md font-medium text-white bg-mapbox-black ">
+        {rightString}
+      </div>
     </span>
   );
 };
