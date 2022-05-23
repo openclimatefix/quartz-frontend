@@ -132,5 +132,7 @@ export const formatISODateStringHuman = (date?: string) => {
       timeZoneName: "short",
       timeZone: "UTC",
     })
-    .slice(0, 17);
+    .slice(0, 17)
+    .replace(",", "")
+    .replace(/:$/, "");
 };
