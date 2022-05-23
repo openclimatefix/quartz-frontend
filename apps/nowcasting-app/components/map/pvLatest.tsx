@@ -1,11 +1,11 @@
 import useSWR from "swr";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { FaildStateMap, LoadStateMap, Map } from "./";
 import { API_PREFIX, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
-import useGlobalState, { get30MinNow } from "../globalState";
+import useGlobalState from "../globalState";
 import { formatISODateStringHuman } from "../utils";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
@@ -14,26 +14,10 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 // Assuming first item in the array is the latest
 const latestForecastValue = 0;
 
-const useAndUpdateSelectedTime = () => {
-  const [selectedISOTime, setSelectedISOTime] = useGlobalState(
-    "selectedISOTime"
-  );
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const time30MinNow = get30MinNow();
-      setSelectedISOTime(time30MinNow);
-    }, 1000 * 60);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-  return selectedISOTime;
-};
-
 const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
-  const selectedISOTime = useAndUpdateSelectedTime();
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { data: initForecastData, mutate } = useSWR(
     `${API_PREFIX}/GB/solar/gsp/forecast/all`,
     fetcher,
