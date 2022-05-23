@@ -22,7 +22,7 @@ const useAndUpdateSelectedTime = () => {
     const interval = setInterval(() => {
       const time30MinNow = get30MinNow();
       setSelectedISOTime(time30MinNow);
-    }, 3000);
+    }, 1000 * 60);
     return () => {
       clearInterval(interval);
     };
