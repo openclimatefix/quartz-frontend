@@ -19,6 +19,7 @@ const PvLatestMap = () => {
   const [forecastError, setForecastError] = useState<any>(false);
   const [updatedForeCastData, setupdatedForeCastData] = useState(null);
   const [istoggled, setIsToggled] = useState(false);
+  const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MV);
   const [isNormalized, setIsNormalized] = useState(false);
   const [selectedData, setSelectedData] = useState<SelectedData>(SelectedData.expectedPowerGenerationMegawatts);
@@ -31,7 +32,7 @@ const PvLatestMap = () => {
         istoggled ? setupdatedForeCastData(data): null;
         console.log("sucess");
         setForecastError(false);
-        setForecastLoading(false);
+        istoggled ? setIsToggleLoading(false) : setForecastLoading(false);
       },
       onError: (err) => setForecastError(err),
       // revalidateOnMount: false
@@ -49,22 +50,10 @@ const PvLatestMap = () => {
             ? SelectedData.expectedPowerGenerationNormalized
             : SelectedData.expectedPowerGenerationMegawatts,
           );
-          // const updatedForecastData = await mutate(
-          //   `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${activeUnit === ActiveUnit.percentage}`,
-          // );
-          // setupdatedForeCastData(updatedForecastData);
       }
     })()
    
   }, [activeUnit]);
-
-  // useEffect(() => {
-  //   setupdatedForeCastData(initForecastData);
-
-  //   // if(isNormalized !== (activeUnit === ActiveUnit.percentage)){
-  //   //   setupdatedForeCastData(initForecastData);
-  //   // }
-  // }, [istoggled]);
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean) => ([
     "interpolate", ["linear"],
@@ -160,13 +149,13 @@ const PvLatestMap = () => {
           <>
             <ButtonGroup />
             <MeasuringUnit
+              map={map}
               activeUnit={activeUnit}
               setActiveUnit={setActiveUnit}
-              map={map}
               foreCastData={updatedForeCastData}
-              // loading={forecastLoading}
+              isLoading={isToggleLoading}
+              setIsLoading={setIsToggleLoading}
               updateFCData={updateFCData}
-              getFillOpacity={getFillOpacity}
             />
           </>
         )}

@@ -1,49 +1,29 @@
 import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from "react";
-import { mutate } from "swr";
-import { API_PREFIX } from "../../constant";
 import { ActiveUnit, SelectedData } from "./types";
 
 const MeasuringUnit = (
-  { map, updateFCData, getFillOpacity, loading, setActiveUnit, activeUnit, foreCastData } :
+  { map, activeUnit, setActiveUnit, updateFCData, isLoading, setIsLoading, foreCastData } :
   {
-    activeUnit?: ActiveUnit;
-    setActiveUnit?: Dispatch<SetStateAction<ActiveUnit>>;
-    map?: MutableRefObject<any>;
-    updateFCData?: (map: any, isNormalized: boolean, selectedData: string) => Promise<void>;
-    getFillOpacity?: (data: string, percentage: boolean) => (string | number | any[])[];
-    loading?: boolean;
+    map: MutableRefObject<any>;
+    activeUnit: ActiveUnit;
+    setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
+    updateFCData: (map: any) => void;
+    isLoading: boolean;
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    foreCastData: any;
   }
 ) => {
-  const [isLoading, setIsLoading] = useState(false);
-  // const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.percentage);
 
   useEffect(() => {
     if(foreCastData) {
       updateFCData(map);
-      console.log("====", map.current.getPaintProperty('latestPV-forecast', "fill-opacity"));
     }
-
   }, [foreCastData])
 
   const onToggle = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>, unit: ActiveUnit) => {
     event.preventDefault();
     setIsLoading(true);
     setActiveUnit(unit);
-
-    // const isNormalized = unit === ActiveUnit.percentage;
-    // const selectedDataName = isNormalized
-    // ? SelectedData.expectedPowerGenerationNormalized
-    // : SelectedData.expectedPowerGenerationMegawatts;
-
-    // await updateFCData(map, isNormalized, selectedDataName);
-    // map.current.setPaintProperty('latestPV-forecast', "fill-opacity", getFillOpacity(selectedDataName, isNormalized));
-    // map.current.setLayoutProperty(
-    //   "pverrorbygsp-delta-labels",
-    //   "visibility",
-    //   "none"
-    // );
-    console.log("====", map.current.getPaintProperty('latestPV-forecast', "fill-opacity"));
-    setIsLoading(false);
   }
 
   return (
