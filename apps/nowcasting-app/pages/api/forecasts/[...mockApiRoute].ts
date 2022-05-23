@@ -10,18 +10,18 @@ import fc_all from "../../../data/dummy-res/fc-all.json";
 
 function handler(req: NextApiRequest, res: NextApiResponse) {
   const { mockApiRoute } = req.query;
-  
+
   if ((mockApiRoute as string[]).join("/") === "GB/pv/gsp") {
     res.status(200).json(gbPvGSPJson);
   } else if ((mockApiRoute as string[]).join("/") === "GB/pv/gsp_boundaries") {
     res.status(200).json(gspRegions);
-  }else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/national") {
+  } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/national") {
     res.status(200).json(forecastNat);
-  }else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/truth/one_gsp/0") {
+  } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/truth/one_gsp/0") {
     res.status(200).json(truthAll);
-  }else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/latest/0") {
+  } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/latest/0") {
     res.status(200).json(fc_0);
-  }else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/all") {
+  } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/all") {
     res.status(200).json(fc_all);
   } else {
     res.status(400).json({ type: "error", message: "Bad request" });

@@ -51,28 +51,15 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
         x2={x}
         y2={yy}
       ></line>
-      <rect
-        x={x - 28}
-        y={yy}
-        width="58"
-        height="30"
-        offset={offset}
-        fill="white"
-      ></rect>
+      <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill="white"></rect>
       <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle">
         {value}
       </text>
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({
-  timeOfInterest,
-  data,
-  setTimeOfInterest,
-}) => {
-  const preppedData = data.sort((a, b) =>
-    a.datetimeUtc.localeCompare(b.datetimeUtc)
-  );
+const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest }) => {
+  const preppedData = data.sort((a, b) => a.datetimeUtc.localeCompare(b.datetimeUtc));
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -97,10 +84,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           e?.activeLabel && setTimeOfInterest(e.activeLabel)
         }
       >
-        <CartesianGrid
-          verticalFill={["#545454", "#6C6C6C"]}
-          fillOpacity={0.5}
-        />
+        <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
         <XAxis
           dataKey="datetimeUtc"
           tickFormatter={prettyPrintXdate}
@@ -120,11 +104,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           stroke="white"
           strokeWidth={1}
           strokeDasharray="3 3"
-          label={
-            <CustomizedLabel
-              value={prettyPrintXdate(timeOfInterest)}
-            ></CustomizedLabel>
-          }
+          label={<CustomizedLabel value={prettyPrintXdate(timeOfInterest)}></CustomizedLabel>}
         />
 
         <Line
@@ -163,21 +143,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (!data) return <div></div>;
             return (
               <div className="p-2 bg-white shadow">
-                <p className="mb-2 text-black">
-                  {formatISODateStringHuman(data?.datetimeUtc)}
-                </p>
+                <p className="mb-2 text-black">{formatISODateStringHuman(data?.datetimeUtc)}</p>
                 <ul className="">
                   {Object.entries(data)
                     .reverse()
                     .map(([name, value]) => {
                       if (name === "datetimeUtc") return null;
                       return (
-                        <li
-                          key={`item-${name}`}
-                          style={{ color: toolTipColors[name] }}
-                        >
-                          {toolTiplabels[name]}:{" "}
-                          {prettyPrintYNumberWithCommas(value as string)} MW
+                        <li key={`item-${name}`} style={{ color: toolTipColors[name] }}>
+                          {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)} MW
                         </li>
                       );
                     })}

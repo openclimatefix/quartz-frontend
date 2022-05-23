@@ -1,13 +1,8 @@
 export const allForecastsAccessor = (d: any) => d.forecastValues;
-const forecastAccessor0 = (d: any) =>
-  d.forecastValues[0].expectedPowerGenerationMegawatts;
-const forecastAccessor1 = (d: any) =>
-  d.forecastValues[1].expectedPowerGenerationMegawatts;
-const forecastAccessor2 = (d: any) =>
-  d.forecastValues[2].expectedPowerGenerationMegawatts;
-export const getForecastAccessorForTimeHorizon = (
-  selectedTimeHorizon: number
-) => {
+const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
+const forecastAccessor1 = (d: any) => d.forecastValues[1].expectedPowerGenerationMegawatts;
+const forecastAccessor2 = (d: any) => d.forecastValues[2].expectedPowerGenerationMegawatts;
+export const getForecastAccessorForTimeHorizon = (selectedTimeHorizon: number) => {
   switch (selectedTimeHorizon) {
     case 0:
       return forecastAccessor0;

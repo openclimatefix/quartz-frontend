@@ -14,12 +14,8 @@ const axiosFetcher = (url: string) => {
   });
 };
 const PvRemixChart: FC<{ date?: string }> = (props) => {
-  const [selectedISOTime, setSelectedISOTime] = useGlobalState(
-    "selectedISOTime"
-  );
-  const selectedTime = formatISODateString(
-    selectedISOTime || new Date().toISOString()
-  );
+  const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<
     {
       targetTime: string;
@@ -43,13 +39,9 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(
-    `${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=day-after`,
-    axiosFetcher,
-    {
-      refreshInterval: 60 * 1000 * 5, // 5min
-    }
-  );
+  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=day-after`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5, // 5min
+  });
 
   const chartData = useFormatChartData({
     nationalForecastData,
@@ -59,14 +51,13 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
-    return <div>loading...</div>;
+  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter) return <div>loading...</div>;
 
   const latestPvGenerationInGW = (
     (nationalForecastData.find(
       (fc) =>
         formatISODateString(fc.targetTime) ===
-        formatISODateString(selectedISOTime || new Date().toISOString())
+        formatISODateString(selectedISOTime || new Date().toISOString()),
     )?.expectedPowerGenerationMegawatts || 0) / 1000
   ).toFixed(3);
 

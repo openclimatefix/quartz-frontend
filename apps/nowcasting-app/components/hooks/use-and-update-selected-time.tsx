@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import useGlobalState, { get30MinNow } from "../globalState";
 
 const useAndUpdateSelectedTime = () => {
-  const [selectedISOTime, setSelectedISOTime] = useGlobalState(
-    "selectedISOTime"
-  );
+  const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   useEffect(() => {
     const interval = setInterval(() => {
       const time30MinNow = get30MinNow();

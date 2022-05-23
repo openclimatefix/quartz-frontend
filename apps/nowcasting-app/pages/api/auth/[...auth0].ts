@@ -8,5 +8,5 @@ export default withSentry(
         returnTo: "/logout",
       });
     },
-  })
+  }),
 );

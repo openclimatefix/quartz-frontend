@@ -29,15 +29,13 @@ const PvLatestMap = () => {
         setForecastLoading(false);
       },
       onError: (err) => setForecastError(err),
-    }
+    },
   );
 
   const generateGeoJsonForecastData = (forecastData: FcAllResData) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
-    const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<
-      GeoJSON.Geometry
-    >;
+    const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     const forecastGeoJson = {
       ...gspShapeDatat,
       features: gspShapeDatat.features.map((featureObj, index) => ({
@@ -46,7 +44,7 @@ const PvLatestMap = () => {
           ...featureObj.properties,
           expectedPowerGenerationMegawatts: Math.round(
             filteredForcastData[index].forecastValues[latestForecastValue]
-              .expectedPowerGenerationMegawatts
+              .expectedPowerGenerationMegawatts,
           ),
         },
       })),
@@ -88,17 +86,11 @@ const PvLatestMap = () => {
 
     const updateSource = setInterval(async () => {
       try {
-        const updatedForecastData = await mutate(
-          `${API_PREFIX}/GB/solar/gsp/forecast/all`
-        );
+        const updatedForecastData = await mutate(`${API_PREFIX}/GB/solar/gsp/forecast/all`);
 
         // console.log("sucess");
-        const { forecastGeoJson } = generateGeoJsonForecastData(
-          updatedForecastData
-        );
-        (map.current.getSource("latestPV") as mapboxgl.GeoJSONSource).setData(
-          forecastGeoJson
-        );
+        const { forecastGeoJson } = generateGeoJsonForecastData(updatedForecastData);
+        (map.current.getSource("latestPV") as mapboxgl.GeoJSONSource).setData(forecastGeoJson);
       } catch {
         if (updateSource) clearInterval(updateSource);
       }
@@ -110,17 +102,13 @@ const PvLatestMap = () => {
     <FaildStateMap error="Failed to load" />
   ) : forecastLoading ? (
     <LoadStateMap>
-      <ButtonGroup
-        rightString={formatISODateStringHuman(selectedISOTime || "")}
-      />
+      <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
     </LoadStateMap>
   ) : (
     <Map
       loadDataOverlay={addFCData}
       controlOverlay={() => (
-        <ButtonGroup
-          rightString={formatISODateStringHuman(selectedISOTime || "")}
-        />
+        <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
       )}
     />
   );
