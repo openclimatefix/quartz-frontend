@@ -20,7 +20,7 @@ mapboxgl.accessToken =
 const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-2.31756010);
+  const [lng, setLng] = useState(-2.3175601);
   const [lat, setLat] = useState(52.40534432);
   const [zoom, setZoom] = useState(5.6);
 
@@ -35,8 +35,8 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
       bearing,
     });
 
-    const nav = new mapboxgl.NavigationControl({showCompass: false})
-    map.current.addControl(nav, 'bottom-right');
+    const nav = new mapboxgl.NavigationControl({ showCompass: false });
+    map.current.addControl(nav, "bottom-right");
   }, []);
 
   useEffect(() => {
@@ -51,12 +51,11 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
     map.current.on("load", (event) => {
       loadDataOverlay(map);
     });
-
   }, [map]);
 
   return (
     <div className="relative h-full">
-      <div className="absolute top-0 left-0 z-10 px-2 py-3 m-3 min-w-[20rem]">
+      <div className="absolute top-0 left-0 z-10 px-2 py-3 m-3 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>
       <div ref={mapContainer} className="h-full" />
