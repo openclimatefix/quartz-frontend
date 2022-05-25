@@ -34,7 +34,7 @@ const toolTipColors: Record<string, string> = {
 type RemixLineProps = {
   timeOfInterest: string;
   data: ChartData[];
-  setTimeOfInterest: (t: string) => void;
+  setTimeOfInterest?: (t: string) => void;
 };
 const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   const yy = 230;
@@ -81,7 +81,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           left: 20,
         }}
         onClick={(e?: { activeLabel?: string }) =>
-          e?.activeLabel && setTimeOfInterest(e.activeLabel)
+          setTimeOfInterest && e?.activeLabel && setTimeOfInterest(e.activeLabel)
         }
       >
         <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />

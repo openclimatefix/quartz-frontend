@@ -27,14 +27,15 @@ const getForecastChartData = (
     };
 };
 const useFormatChartData = ({
-  nationalForecastData,
+  forecastData,
   pvRealDataAfter,
   pvRealDataIn,
   selectedTime,
 }: {
-  nationalForecastData?: {
+  forecastData?: {
     targetTime: string;
     expectedPowerGenerationMegawatts: number;
+    expectedPowerGenerationNormalized?: number | null;
   }[];
   pvRealDataAfter?: {
     datetimeUtc: string;
@@ -47,7 +48,7 @@ const useFormatChartData = ({
   selectedTime?: string;
 }) => {
   const data = useMemo(() => {
-    if (nationalForecastData && pvRealDataAfter && pvRealDataIn && selectedTime) {
+    if (forecastData && pvRealDataAfter && pvRealDataIn && selectedTime) {
       const chartMap: Record<string, ChartData> = {};
 
       const addDataToMap = (
@@ -88,7 +89,7 @@ const useFormatChartData = ({
           }),
         ),
       );
-      nationalForecastData.forEach((fc) =>
+      forecastData.forEach((fc) =>
         addDataToMap(
           fc,
           (db) => db.targetTime,
@@ -99,7 +100,7 @@ const useFormatChartData = ({
       return Object.values(chartMap);
     }
     return [];
-  }, [nationalForecastData, pvRealDataIn, pvRealDataAfter, selectedTime]);
+  }, [forecastData, pvRealDataIn, pvRealDataAfter, selectedTime]);
   return data;
 };
 
