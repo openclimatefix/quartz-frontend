@@ -4,6 +4,7 @@ import useFormatChartData from "../use-format-chart-data";
 import { formatISODateString } from "../../utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
+import Spinner from "../../spinner";
 
 const GspPvRemixChart: FC<{ gspId: number; selectedTime: string; close: () => void }> = ({
   gspId,
@@ -21,7 +22,7 @@ const GspPvRemixChart: FC<{ gspId: number; selectedTime: string; close: () => vo
     selectedTime,
   });
   if (errors.length) return <div>failed to load</div>;
-  if (!fcAll || !pvRealDataIn || !pvRealDataAfter) return <div>loading...</div>;
+  if (!fcAll || !pvRealDataIn || !pvRealDataAfter) return <Spinner></Spinner>;
   const forcastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) ||
     ({} as any);
