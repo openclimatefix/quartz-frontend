@@ -10,8 +10,8 @@ const navItems = [
     href: "#challenge",
   },
   {
-    name: "Benefits",
-    href: "#benefits",
+    name: "Solution",
+    href: "#solution",
   },
   {
     name: "Technical",
@@ -20,6 +20,10 @@ const navItems = [
   {
     name: "Open Source",
     href: "#open-source",
+  },
+  {
+    name: "Open Climate Fix",
+    href: "https://openclimatefix.org",
   },
 ];
 

@@ -4,7 +4,7 @@ const EmailSignup = ({}: IEmailSignup) => {
   return (
     <>
       <p className="text-base font-medium text-gray-900">
-        Sign up to get notified when it&apos;s ready.
+        Sign up to be notified when it&apos;s released.
       </p>
       <form
         action="https://openclimatefix.us20.list-manage.com/subscribe/post?u=ceb017fe32f0a4620227fda8a&amp;id=b88570c490"
