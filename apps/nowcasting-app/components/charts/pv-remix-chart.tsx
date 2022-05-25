@@ -15,7 +15,7 @@ const axiosFetcher = (url: string) => {
   });
 };
 const PvRemixChart: FC<{ date?: string }> = (props) => {
-  const [gspId, setGspId] = useState<number | null>(1);
+  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<
@@ -67,13 +67,13 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <div className=" h-60 mt-8 ">
         <RemixLine timeOfInterest={selectedTime} data={chartData} />
       </div>
-      {gspId && (
+      {clickedGspId && (
         <GspPvRemixChart
           close={() => {
-            setGspId(null);
+            setClickedGspId(undefined);
           }}
           selectedTime={selectedTime}
-          gspId={gspId}
+          gspId={clickedGspId}
         ></GspPvRemixChart>
       )}
     </>

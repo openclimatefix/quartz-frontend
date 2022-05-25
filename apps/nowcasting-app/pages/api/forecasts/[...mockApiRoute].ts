@@ -17,7 +17,7 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
     res.status(200).json(gspRegions);
   } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/national") {
     res.status(200).json(forecastNat);
-  } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/truth/one_gsp/0") {
+  } else if ((mockApiRoute as string[]).join("/").startsWith("GB/solar/gsp/truth/one_gsp")) {
     res.status(200).json(truthAll);
   } else if ((mockApiRoute as string[]).join("/") === "GB/solar/gsp/forecast/latest/0") {
     res.status(200).json(fc_0);
