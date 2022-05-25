@@ -20,7 +20,7 @@ const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { data: initForecastData, mutate } = useSWR(
+  const { data: initForecastData, mutate } = useSWR<FcAllResData>(
     `${API_PREFIX}/GB/solar/gsp/forecast/all`,
     fetcher,
     {
@@ -32,7 +32,7 @@ const PvLatestMap = () => {
     },
   );
 
-  const generateGeoJsonForecastData = (forecastData: FcAllResData) => {
+  const generateGeoJsonForecastData = (forecastData?: FcAllResData) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
     const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
@@ -42,10 +42,13 @@ const PvLatestMap = () => {
         ...featureObj,
         properties: {
           ...featureObj.properties,
-          expectedPowerGenerationMegawatts: Math.round(
-            filteredForcastData[index].forecastValues[latestForecastValue]
-              .expectedPowerGenerationMegawatts,
-          ),
+          expectedPowerGenerationMegawatts:
+            filteredForcastData &&
+            filteredForcastData[index] &&
+            Math.round(
+              filteredForcastData[index].forecastValues[latestForecastValue]
+                .expectedPowerGenerationMegawatts,
+            ),
         },
       })),
     };
@@ -86,7 +89,7 @@ const PvLatestMap = () => {
 
     const updateSource = setInterval(async () => {
       try {
-        const updatedForecastData = await mutate(`${API_PREFIX}/GB/solar/gsp/forecast/all`);
+        const updatedForecastData = await mutate(`${API_PREFIX}/GB/solar/gsp/forecast/all` as any);
 
         // console.log("sucess");
         const { forecastGeoJson } = generateGeoJsonForecastData(updatedForecastData);
