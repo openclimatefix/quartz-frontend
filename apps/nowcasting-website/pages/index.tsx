@@ -10,6 +10,7 @@ import {
 
 import NavBar from "../components/nav-bar";
 import EmailSignup from "../components/email-signup";
+import Users from "../components/users";
 
 const Home: NextPage = () => {
   const taglineText =
@@ -101,8 +102,8 @@ const Home: NextPage = () => {
                     </span>
                   </h1>
                   <p className="mt-6 text-xl text-gray-500">{taglineText}</p>
-                  <div className="mt-6 prose">
-                    NOWCASTING from{" "}
+                  <div className="mt-6 mb-4 prose">
+                    {/* NOWCASTING from{" "}
                     <a href="https://openclimatefix.org">Open Climate Fix</a>{" "}
                     is:
                     <ul>
@@ -111,16 +112,10 @@ const Home: NextPage = () => {
                       <li>Highly accurate</li>
                       <li>Open source</li>
                       <li>Probabilistic</li>
-                    </ul>
+                    </ul> */}
                     NOWCASTING solution is for:
-                    <ul>
-                      <li>Grid operators</li>
-                      <li>Solar farms</li>
-                      <li>Electricity Traders</li>
-                      <li>Battery operators</li>
-                      <li>Smart Homes</li>
-                    </ul>
                   </div>
+                  <Users />
                 </div>
                 <div className="mt-12">
                   <EmailSignup />
@@ -169,7 +164,7 @@ const Home: NextPage = () => {
               <div className="relative pl-4 -mr-40 sm:mx-auto sm:max-w-3xl sm:px-0 lg:max-w-none lg:h-full lg:pl-12">
                 <img
                   className="w-full rounded-md shadow-xl ring-1 ring-black ring-opacity-5 lg:h-full lg:w-auto lg:max-w-none"
-                  src="/solarpanels.jpg"
+                  src="/panels.png"
                   alt=""
                 />
               </div>
@@ -177,6 +172,8 @@ const Home: NextPage = () => {
           </div>
         </div>
       </div>
+
+      <div className="w-full h-6 bg-goldenrod-500" />
 
       <section
         id="challenge"
@@ -224,6 +221,8 @@ const Home: NextPage = () => {
         </div>
       </section>
 
+      <div className="w-full h-6 bg-goldenrod-500" />
+
       <section id="solution" className="py-12 pt-24 bg-white">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="lg:text-center">
@@ -256,26 +255,6 @@ const Home: NextPage = () => {
                 European and global locations from 2023.
               </li>
             </ul>
-            <h3>Benefits</h3>
-          </div>
-          <div className="mx-auto max-w-[98ch] mt-8">
-            <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-              {benefits.map((feature) => (
-                <div key={feature.name} className="relative">
-                  <dt>
-                    <div className="absolute flex items-center justify-center w-12 h-12 text-black rounded-md bg-goldenrod-500">
-                      <feature.icon className="w-6 h-6" aria-hidden="true" />
-                    </div>
-                    <p className="ml-16 text-lg font-medium leading-6 text-gray-900">
-                      {feature.name}
-                    </p>
-                  </dt>
-                  <dd className="mt-2 ml-16 text-base text-gray-500">
-                    {feature.description}
-                  </dd>
-                </div>
-              ))}
-            </dl>
           </div>
           <div className="mx-auto mt-24 prose prose-lg text-gray-500">
             <h3>Ready to use</h3>
@@ -303,6 +282,43 @@ const Home: NextPage = () => {
           </div>
         </div>
       </section>
+
+      <div className="w-full h-6 bg-goldenrod-500" />
+
+      <section id="benefits" className="py-12 pt-24 bg-white">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
+              Benefits
+            </h2>
+            {/* <p className="max-w-2xl mt-4 text-xl text-gray-500 lg:mx-auto">
+                Lorem ipsum dolor sit amet consect adipisicing elit. Possimus
+                magnam voluptatum cupiditate veritatis in accusamus quisquam.
+              </p> */}
+          </div>
+          <div className="mx-auto max-w-[98ch] mt-8">
+            <dl className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+              {benefits.map((feature) => (
+                <div key={feature.name} className="relative">
+                  <dt>
+                    <div className="absolute flex items-center justify-center w-12 h-12 text-black rounded-md bg-goldenrod-500">
+                      <feature.icon className="w-6 h-6" aria-hidden="true" />
+                    </div>
+                    <p className="ml-16 text-lg font-medium leading-6 text-gray-900">
+                      {feature.name}
+                    </p>
+                  </dt>
+                  <dd className="mt-2 ml-16 text-base text-gray-500">
+                    {feature.description}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </section>
+
+      <div className="w-full h-6 bg-goldenrod-500" />
 
       <section
         id="technical"
@@ -357,6 +373,8 @@ const Home: NextPage = () => {
           </div>
         </div>
       </section>
+
+      <div className="w-full h-6 bg-goldenrod-500" />
 
       <section
         id="open-source"

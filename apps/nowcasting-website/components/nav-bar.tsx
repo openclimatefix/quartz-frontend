@@ -14,6 +14,10 @@ const navItems = [
     href: "#solution",
   },
   {
+    name: "Benefits",
+    href: "#benefits",
+  },
+  {
     name: "Technical",
     href: "#technical",
   },
