@@ -2,6 +2,7 @@ import Head from "next/head";
 
 interface ILayout {
   children: React.ReactNode;
+  environment?: string;
 }
 
 const Layout = ({ children }: ILayout) => {

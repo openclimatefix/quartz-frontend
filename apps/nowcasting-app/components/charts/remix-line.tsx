@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FC } from "react";
 import {
   ComposedChart,
   Line,
@@ -19,13 +19,13 @@ export type ChartData = {
   datetimeUtc: string; // "2022-05-16T15:00",
 };
 
-const toolTiplabels = {
+const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live initial estimate",
   GENERATION: "PV Live updated",
   FORECAST: "OFC Forecast",
   PAST_FORECAST: "OFC Forecast",
 };
-const toolTipColors = {
+const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "#24292E",
   GENERATION: "#24292E",
   FORECAST: "#FFC425",
@@ -36,12 +36,7 @@ type RemixLineProps = {
   data: ChartData[];
   setTimeOfInterest: (t: string) => void;
 };
-const CustomizedLabel = (props) => {
-  const {
-    value,
-    offset,
-    viewBox: { x },
-  } = props;
+const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   const yy = 230;
   return (
     <g>
@@ -56,33 +51,20 @@ const CustomizedLabel = (props) => {
         x2={x}
         y2={yy}
       ></line>
-      <rect
-        x={x - 28}
-        y={yy}
-        width="58"
-        height="30"
-        offset={offset}
-        fill="white"
-      ></rect>
+      <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill="white"></rect>
       <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle">
         {value}
       </text>
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({
-  timeOfInterest,
-  data,
-  setTimeOfInterest,
-}) => {
-  const preppedData = data.sort((a, b) =>
-    a.datetimeUtc.localeCompare(b.datetimeUtc)
-  );
+const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest }) => {
+  const preppedData = data.sort((a, b) => a.datetimeUtc.localeCompare(b.datetimeUtc));
   /** Ensures that the legend is ordered in the same way as the stacked items */
-  function prettyPrintYNumberWithCommas(x) {
+  function prettyPrintYNumberWithCommas(x: string | number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-  function prettyPrintXdate(x) {
+  function prettyPrintXdate(x: string) {
     return x.slice(11, 16);
   }
 
@@ -102,10 +84,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           e?.activeLabel && setTimeOfInterest(e.activeLabel)
         }
       >
-        <CartesianGrid
-          verticalFill={["#545454", "#6C6C6C"]}
-          fillOpacity={0.5}
-        />
+        <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
         <XAxis
           dataKey="datetimeUtc"
           tickFormatter={prettyPrintXdate}
@@ -125,11 +104,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           stroke="white"
           strokeWidth={1}
           strokeDasharray="3 3"
-          label={
-            <CustomizedLabel
-              value={prettyPrintXdate(timeOfInterest)}
-            ></CustomizedLabel>
-          }
+          label={<CustomizedLabel value={prettyPrintXdate(timeOfInterest)}></CustomizedLabel>}
         />
 
         <Line
@@ -168,21 +143,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (!data) return <div></div>;
             return (
               <div className="p-2 bg-white shadow">
-                <p className="mb-2 text-black">
-                  {formatISODateStringHuman(data?.datetimeUtc)}
-                </p>
+                <p className="mb-2 text-black">{formatISODateStringHuman(data?.datetimeUtc)}</p>
                 <ul className="">
                   {Object.entries(data)
                     .reverse()
                     .map(([name, value]) => {
                       if (name === "datetimeUtc") return null;
                       return (
-                        <li
-                          key={`item-${name}`}
-                          style={{ color: toolTipColors[name] }}
-                        >
-                          {toolTiplabels[name]}:{" "}
-                          {prettyPrintYNumberWithCommas(value)} MW
+                        <li key={`item-${name}`} style={{ color: toolTipColors[name] }}>
+                          {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)} MW
                         </li>
                       );
                     })}
