@@ -30,7 +30,7 @@ const EmailSignup = ({}: IEmailSignup) => {
         <div className="mt-4 sm:mt-0 sm:ml-3">
           <button
             type="submit"
-            className="block w-full px-5 py-3 text-base font-medium border border-transparent rounded-md shadow bg-goldenrod-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
+            className="block w-full px-5 py-3 text-base font-medium border border-transparent rounded-md shadow bg-ocf-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
           >
             Notify me
           </button>

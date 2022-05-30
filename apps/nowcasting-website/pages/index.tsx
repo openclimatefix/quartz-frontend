@@ -173,7 +173,7 @@ const Home: NextPage = () => {
         </div>
       </div>
 
-      <div className="w-full h-6 bg-goldenrod-500" />
+      <div className="w-full h-6 bg-ocf-yellow-500" />
 
       <section
         id="challenge"
@@ -221,7 +221,7 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-goldenrod-500" />
+      <div className="w-full h-6 bg-ocf-yellow-500" />
 
       <section id="solution" className="py-12 pt-24 bg-white">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -283,7 +283,7 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-goldenrod-500" />
+      <div className="w-full h-6 bg-ocf-yellow-500" />
 
       <section id="benefits" className="py-12 pt-24 bg-white">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -301,7 +301,7 @@ const Home: NextPage = () => {
               {benefits.map((feature) => (
                 <div key={feature.name} className="relative">
                   <dt>
-                    <div className="absolute flex items-center justify-center w-12 h-12 text-black rounded-md bg-goldenrod-500">
+                    <div className="absolute flex items-center justify-center w-12 h-12 text-black rounded-md bg-ocf-yellow-500">
                       <feature.icon className="w-6 h-6" aria-hidden="true" />
                     </div>
                     <p className="ml-16 text-lg font-medium leading-6 text-gray-900">
@@ -318,7 +318,7 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-goldenrod-500" />
+      <div className="w-full h-6 bg-ocf-yellow-500" />
 
       <section
         id="technical"
@@ -374,7 +374,7 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-goldenrod-500" />
+      <div className="w-full h-6 bg-ocf-yellow-500" />
 
       <section
         id="open-source"
