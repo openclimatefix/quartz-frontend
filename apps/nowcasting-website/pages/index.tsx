@@ -13,8 +13,6 @@ import EmailSignup from "../components/email-signup";
 import Users from "../components/users";
 
 const Home: NextPage = () => {
-  const taglineText =
-    "The intuition of a meteorologist with the speed of a machine. Forecasting solar energy generation from minutes to hours ahead.";
   const footerNavigation = [
     {
       name: "Twitter",
@@ -80,7 +78,12 @@ const Home: NextPage = () => {
           NOWCASTING - The intuition of a meteorologist with the speed of a
           machine
         </title>
-        <meta name="description" content={taglineText} />
+        <meta
+          name="description"
+          content={
+            "The intuition of a meteorologist with the speed of a machine. Forecasting solar energy generation from minutes to hours ahead."
+          }
+        />
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </Head>
@@ -101,7 +104,15 @@ const Home: NextPage = () => {
                       Solar NOWCASTING
                     </span>
                   </h1>
-                  <p className="mt-6 text-xl text-gray-500">{taglineText}</p>
+                  <p className="mt-6 text-xl text-gray-500">
+                    The intuition of a meteorologist with the speed of a
+                    machine.
+                  </p>
+                  <p className="mt-2 text-xl text-gray-500">
+                    Forecasting solar energy generation from minutes to hours
+                    ahead.
+                  </p>
+
                   <div className="mt-6 mb-4 prose">
                     {/* NOWCASTING from{" "}
                     <a href="https://openclimatefix.org">Open Climate Fix</a>{" "}
