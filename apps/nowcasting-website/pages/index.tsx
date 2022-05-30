@@ -200,7 +200,7 @@ const Home: NextPage = () => {
               electricity generation globally by 2040.
             </p> */}
           </div>
-          <div className="mx-auto mt-6 prose prose-lg text-gray-500 prose-indigo">
+          <div className="mx-auto mt-6 prose prose-lg text-justify text-gray-500 prose-indigo">
             <blockquote>
               Solar generation is forecast to be the largest source of
               electricity generation globally by 2040.
@@ -267,7 +267,7 @@ const Home: NextPage = () => {
               </li>
             </ul>
           </div>
-          <div className="mx-auto mt-24 prose prose-lg text-gray-500">
+          <div className="mx-auto mt-24 prose prose-lg text-justify text-gray-500">
             <h3>Ready to use</h3>
             <p>
               Open Climate Fix manages this torrent of data with a robust data
@@ -341,7 +341,7 @@ const Home: NextPage = () => {
               Technical
             </h2>
           </div>
-          <div className="mx-auto mt-6 prose prose-lg text-gray-500 prose-indigo">
+          <div className="mx-auto mt-6 prose prose-lg text-justify text-gray-500 prose-indigo">
             <p>
               Open Climate Fix observed that the gap in short term forecasting
               of clouds is filled at present through meteorologists - their
@@ -397,7 +397,7 @@ const Home: NextPage = () => {
               Open Source
             </h2>
           </div>
-          <div className="mx-auto mt-6 prose prose-lg text-gray-500 prose-indigo">
+          <div className="mx-auto mt-6 prose prose-lg text-justify text-gray-500 prose-indigo">
             <p>
               Open Climate Fix is building our model completely out in the open!
               We are actively building collaborations, working with contributors
