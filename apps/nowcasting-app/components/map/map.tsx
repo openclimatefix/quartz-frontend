@@ -7,6 +7,7 @@ interface IMap {
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
+import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
@@ -20,9 +21,12 @@ mapboxgl.accessToken =
 const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
+  const [isMapReady, setIsMapReady] = useState(false);
   const [lng, setLng] = useState(-2.3175601);
   const [lat, setLat] = useState(52.40534432);
   const [zoom, setZoom] = useState(5.6);
+
+  useUpdateMapStateOnClick({ map: map.current, isMapReady });
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -37,6 +41,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });
       map.current.addControl(nav, "bottom-right");
+      map.current.on("load", () => setIsMapReady(true));
     }
   }, []);
 

@@ -86,6 +86,17 @@ const PvLatestMap = () => {
       layout: { visibility: "visible" },
       paint: getPaintPropsForFC(),
     });
+    map.current.addLayer({
+      id: "latestPV-forecast-borders",
+      type: "line",
+      source: "latestPV",
+      layout: {},
+      paint: {
+        "line-color": "#ffffff",
+        "line-width": 4,
+        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0],
+      },
+    });
 
     const updateSource = setInterval(async () => {
       try {
