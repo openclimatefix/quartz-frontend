@@ -146,12 +146,12 @@ const Home: NextPage = () => {
         </div>
       </div>
 
-      <div className="w-full h-6 bg-ocf-yellow-500" />
-
-      <section
+      <div
         id="challenge"
-        className="relative py-16 pt-24 overflow-hidden bg-white"
-      >
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="relative py-16 pt-24 overflow-hidden bg-white">
         <div className="relative px-4 sm:px-6 lg:px-8">
           <div className="mx-auto text-lg max-w-prose">
             <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
@@ -194,9 +194,12 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-ocf-yellow-500" />
+      <div
+        id="solution"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
 
-      <section id="solution" className="py-12 pt-24 bg-white">
+      <section className="py-12 pt-24 bg-white">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="lg:text-center">
             <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
@@ -256,9 +259,12 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-ocf-yellow-500" />
+      <div
+        id="benefits"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
 
-      <section id="benefits" className="py-12 pt-24 bg-white">
+      <section className="py-12 pt-24 bg-white">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="lg:text-center">
             <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
@@ -273,12 +279,12 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-ocf-yellow-500" />
-
-      <section
+      <div
         id="technical"
-        className="relative py-16 pt-24 overflow-hidden bg-white"
-      >
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="relative py-16 pt-24 overflow-hidden bg-white">
         <div className="relative px-4 sm:px-6 lg:px-8">
           <div className="mx-auto text-lg max-w-prose">
             <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
@@ -329,12 +335,12 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      <div className="w-full h-6 bg-ocf-yellow-500" />
-
-      <section
+      <div
         id="open-source"
-        className="relative py-16 pt-24 overflow-hidden bg-white"
-      >
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="relative py-16 pt-24 overflow-hidden bg-white">
         <div className="relative px-4 sm:px-6 lg:px-8">
           <div className="mx-auto text-lg max-w-prose">
             <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
