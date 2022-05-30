@@ -23,7 +23,7 @@ const users = [
   },
   {
     name: "Smart Homes",
-    icon: "home-automation",
+    icon: "eco-house",
     className: "",
   },
 ];
