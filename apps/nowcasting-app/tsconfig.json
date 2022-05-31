@@ -2,9 +2,10 @@
   "exclude": ["node_modules"],
   "extends": "@openclimatefix/nowcasting-tsconfig/nextjs.json",
   "compilerOptions": {
-    "rootDir": "src",
+    "rootDir": null,
     "outDir": "dist",
-    "incremental": true
+    "incremental": true,
+    "strict": true,
   },
-  "include": ["src", "next-env.d.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts"]
 }

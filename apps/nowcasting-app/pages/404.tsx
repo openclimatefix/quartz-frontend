@@ -32,10 +32,7 @@ const NotFoundPage: NextPage = () => {
                 Sorry, we couldn’t find the page you’re looking for.
               </p>
               <div className="mt-6">
-                <a
-                  href="/"
-                  className="text-base font-medium text-danube-600 hover:text-danube-500"
-                >
+                <a href="/" className="text-base font-medium text-danube-600 hover:text-danube-500">
                   Go back home<span aria-hidden="true"> &rarr;</span>
                 </a>
               </div>

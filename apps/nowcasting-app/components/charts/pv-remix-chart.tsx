@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import RemixLine, { ChartData } from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
@@ -7,17 +7,17 @@ import axios from "axios";
 import useGlobalState from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../utils";
+import GspPvRemixChart from "./gsp-pv-remix-chart";
 
-const axiosFetcher = (url) => {
+const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
     return res.data;
   });
 };
 const PvRemixChart: FC<{ date?: string }> = (props) => {
-  const [selectedISOTime, setSelectedISOTime] = useGlobalState(
-    "selectedISOTime"
-  );
-  const selectedTime = formatISODateString(selectedISOTime);
+  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
+  const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<
     {
       targetTime: string;
@@ -41,31 +41,23 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(
-    `${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=day-after`,
-    axiosFetcher,
-    {
-      refreshInterval: 60 * 1000 * 5, // 5min
-    }
-  );
+  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=day-after`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5, // 5min
+  });
 
   const chartData = useFormatChartData({
-    nationalForecastData,
+    forecastData: nationalForecastData,
     pvRealDataIn,
     pvRealDataAfter,
     selectedTime,
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
-    return <div>loading...</div>;
+  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter) return <div>loading...</div>;
 
   const latestPvGenerationInGW = (
-    (nationalForecastData.find(
-      (fc) =>
-        formatISODateString(fc.targetTime) ===
-        formatISODateString(selectedISOTime)
-    )?.expectedPowerGenerationMegawatts || 0) / 1000
+    (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
+      ?.expectedPowerGenerationMegawatts || 0) / 1000
   ).toFixed(3);
 
   return (
@@ -73,12 +65,17 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
 
       <div className=" h-60 mt-8 ">
-        <RemixLine
-          timeOfInterest={selectedTime}
-          setTimeOfInterest={(time) => setSelectedISOTime(time + ":00.000Z")}
-          data={chartData}
-        />
+        <RemixLine timeOfInterest={selectedTime} data={chartData} />
       </div>
+      {clickedGspId && (
+        <GspPvRemixChart
+          close={() => {
+            setClickedGspId(undefined);
+          }}
+          selectedTime={selectedTime}
+          gspId={clickedGspId}
+        ></GspPvRemixChart>
+      )}
     </>
   );
 };
