@@ -1,10 +1,13 @@
 import type { NextPage } from "next";
-import Head from "next/head";
 import { SVGProps } from "react";
+import Head from "next/head";
+
+import NavBar from "../components/nav-bar";
+import EmailSignup from "../components/email-signup";
+import Users from "../components/users";
+import Benefits from "../components/benefits";
 
 const Home: NextPage = () => {
-  const taglineText =
-    "Forecasting solar power production is hard - but it doesn't need to be! Get reliable forecasts, powered by cutting-edge Machine Learning.";
   const footerNavigation = [
     {
       name: "Twitter",
@@ -28,28 +31,44 @@ const Home: NextPage = () => {
         </svg>
       ),
     },
+    {
+      name: "Linkedin",
+      href: "https://www.linkedin.com/company/open-climate-fix",
+      icon: (props: SVGProps<SVGSVGElement>) => (
+        <svg viewBox="0 0 382 382" {...props}>
+          <path
+            xmlns="http://www.w3.org/2000/svg"
+            d="M347.445,0H34.555C15.471,0,0,15.471,0,34.555v312.889C0,366.529,15.471,382,34.555,382h312.889  C366.529,382,382,366.529,382,347.444V34.555C382,15.471,366.529,0,347.445,0z M118.207,329.844c0,5.554-4.502,10.056-10.056,10.056  H65.345c-5.554,0-10.056-4.502-10.056-10.056V150.403c0-5.554,4.502-10.056,10.056-10.056h42.806  c5.554,0,10.056,4.502,10.056,10.056V329.844z M86.748,123.432c-22.459,0-40.666-18.207-40.666-40.666S64.289,42.1,86.748,42.1  s40.666,18.207,40.666,40.666S109.208,123.432,86.748,123.432z M341.91,330.654c0,5.106-4.14,9.246-9.246,9.246H286.73  c-5.106,0-9.246-4.14-9.246-9.246v-84.168c0-12.556,3.683-55.021-32.813-55.021c-28.309,0-34.051,29.066-35.204,42.11v97.079  c0,5.106-4.139,9.246-9.246,9.246h-44.426c-5.106,0-9.246-4.14-9.246-9.246V149.593c0-5.106,4.14-9.246,9.246-9.246h44.426  c5.106,0,9.246,4.14,9.246,9.246v15.655c10.497-15.753,26.097-27.912,59.312-27.912c73.552,0,73.131,68.716,73.131,106.472  L341.91,330.654L341.91,330.654z"
+            fill="currentColor"
+          />
+        </svg>
+      ),
+    },
   ];
 
   return (
     <>
       <Head>
-        <title>Nowcasting - A Better Way to Think about Solar</title>
-        <meta name="description" content={taglineText} />
+        <title>
+          NOWCASTING - The intuition of a meteorologist with the speed of a
+          machine
+        </title>
+        <meta
+          name="description"
+          content={
+            "The intuition of a meteorologist with the speed of a machine. Forecasting solar energy generation from minutes to hours ahead."
+          }
+        />
         <link rel="icon" href="/favicon.ico" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </Head>
+
+      <NavBar />
 
       <div className="pb-8 bg-white sm:pb-12 lg:pb-12">
         <div className="pt-8 overflow-hidden sm:pt-12 lg:relative lg:py-48">
           <div className="max-w-md px-4 mx-auto sm:max-w-3xl sm:px-6 lg:px-8 lg:max-w-7xl lg:grid lg:grid-cols-2 lg:gap-24">
             <div>
-              <div>
-                <img
-                  className="w-auto h-9"
-                  src="/nowcasting.svg"
-                  alt="Workflow"
-                />
-              </div>
               <div className="mt-20">
                 <div className="mt-6 sm:max-w-xl">
                   <h1 className="">
@@ -57,73 +76,35 @@ const Home: NextPage = () => {
                       Coming soon
                     </span>
                     <span className="block mt-1 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
-                      A better way to think about solar
+                      Solar NOWCASTING
                     </span>
                   </h1>
-                  <p className="mt-6 text-xl text-gray-500">{taglineText}</p>
+                  <p className="mt-6 text-xl text-gray-500">
+                    The intuition of a meteorologist with the speed of a
+                    machine.
+                  </p>
+                  <p className="mt-2 text-xl text-gray-500">
+                    Forecasting solar energy generation from minutes to hours
+                    ahead.
+                  </p>
+
+                  <div className="mt-6 mb-4 prose">
+                    {/* NOWCASTING from{" "}
+                    <a href="https://openclimatefix.org">Open Climate Fix</a>{" "}
+                    is:
+                    <ul>
+                      <li>Using cutting edge machine learning</li>
+                      <li>Continually rolling</li>
+                      <li>Highly accurate</li>
+                      <li>Open source</li>
+                      <li>Probabilistic</li>
+                    </ul> */}
+                    NOWCASTING solution is for:
+                  </div>
+                  <Users />
                 </div>
                 <div className="mt-12">
-                  <p className="text-base font-medium text-gray-900">
-                    Sign up to get notified when it’s ready.
-                  </p>
-                  <form
-                    action="https://openclimatefix.us20.list-manage.com/subscribe/post?u=ceb017fe32f0a4620227fda8a&amp;id=b88570c490"
-                    method="post"
-                    id="mc-embedded-subscribe-form"
-                    name="mc-embedded-subscribe-form"
-                    target="_blank"
-                    noValidate
-                    className="mt-3 sm:max-w-lg sm:w-full sm:flex"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <label htmlFor="mce-EMAIL" className="sr-only">
-                        Email address
-                      </label>
-                      <input
-                        id="mce-EMAIL"
-                        type="email"
-                        name="EMAIL"
-                        className="block w-full px-5 py-3 text-base text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                    <div className="mt-4 sm:mt-0 sm:ml-3">
-                      <button
-                        type="submit"
-                        className="block w-full px-5 py-3 text-base font-medium bg-yellow-500 border border-transparent rounded-md shadow hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:px-10"
-                      >
-                        Notify me
-                      </button>
-                    </div>
-                    {/* real people should not fill this in and expect good things - do not remove this or risk form bot signups */}
-                    <div className="absolute -left-96" aria-hidden="true">
-                      <input
-                        type="text"
-                        name="b_ceb017fe32f0a4620227fda8a_b88570c490"
-                        tabIndex={-1}
-                      />
-                    </div>
-                    <input
-                      type="checkbox"
-                      id="gdpr_58391"
-                      name="gdpr[58391]"
-                      value="Y"
-                      checked
-                      className="hidden"
-                      tabIndex={-1}
-                    />
-                  </form>
-                  <p className="mt-3 text-sm text-gray-500">
-                    We care about the protection of your data. Read our{" "}
-                    <a
-                      href="https://www.iubenda.com/privacy-policy/92003532"
-                      target="_blank"
-                      className="font-medium text-gray-900 underline"
-                    >
-                      Privacy Policy
-                    </a>
-                    .
-                  </p>
+                  <EmailSignup />
                 </div>
               </div>
             </div>
@@ -169,7 +150,7 @@ const Home: NextPage = () => {
               <div className="relative pl-4 -mr-40 sm:mx-auto sm:max-w-3xl sm:px-0 lg:max-w-none lg:h-full lg:pl-12">
                 <img
                   className="w-full rounded-md shadow-xl ring-1 ring-black ring-opacity-5 lg:h-full lg:w-auto lg:max-w-none"
-                  src="/solarpanels.jpg"
+                  src="/panels.png"
                   alt=""
                 />
               </div>
@@ -177,6 +158,245 @@ const Home: NextPage = () => {
           </div>
         </div>
       </div>
+
+      <div
+        id="challenge"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="relative py-16 pt-24 overflow-hidden bg-white">
+        <div className="relative px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto text-lg max-w-prose">
+            <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
+              Challenge
+            </h2>
+            {/* <p className="mt-8 text-xl leading-8 text-gray-500">
+              Solar generation is forecast to be the largest source of
+              electricity generation globally by 2040.
+            </p> */}
+          </div>
+          <div className="mx-auto mt-6 prose prose-lg text-justify text-gray-500 prose-indigo">
+            <blockquote>
+              Solar generation is forecast to be the largest source of
+              electricity generation globally by 2040.
+            </blockquote>
+            <p>
+              The rise of solar is creating challenges for electricity grid
+              operators and market participants alike. The energy generated by
+              solar panels changes rapidly as clouds move overhead and weather
+              forecasts struggle to predict clouds accurately.
+            </p>
+            <p>
+              As solar penetration increases, the uncertainty in solar
+              electricity forecasts is causing headaches not just for those with
+              solar assets but for anyone building a business or optimising
+              their electricity use.
+            </p>
+            <p>
+              Current forecast approaches use Numerical Weather Predictions,
+              which take several hours to compute. This leaves a “blind spot” in
+              forecasting short time horizons from a few minutes to hours ahead.
+              Experienced practitioners and meteorologists can fill this gap by
+              using satellite imagery and “human intelligence” to informally
+              improve the solar forecast. But this is not scalable as
+              meteorologists are not available to most teams and with machine
+              learning, it should be possible to automate these intuitions.
+            </p>
+            <p>It needn&apos;t be like this.</p>
+          </div>
+        </div>
+      </section>
+
+      <div
+        id="solution"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="py-12 pt-24 bg-white">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
+              Solution
+            </h2>
+            {/* <p className="max-w-2xl mt-4 text-xl text-gray-500 lg:mx-auto">
+                Lorem ipsum dolor sit amet consect adipisicing elit. Possimus
+                magnam voluptatum cupiditate veritatis in accusamus quisquam.
+              </p> */}
+          </div>
+
+          <div className="mx-auto mt-24 prose prose-lg text-gray-500">
+            <h3>NOWCASTING delivers</h3>
+            <ul role="list">
+              <li>
+                Forecasts for individual solar assets, regions or an entire
+                market.
+              </li>
+              <li>
+                Forecast horizons from now out to days ahead in five-minute
+                intervals.
+              </li>
+              <li>
+                Expected and tail event forecasts - highlighting worst-case
+                outcomes.
+              </li>
+              <li>
+                Geographical coverage is the UK initially and expanding to other
+                European and global locations from 2023.
+              </li>
+            </ul>
+          </div>
+          <div className="mx-auto mt-24 prose prose-lg text-justify text-gray-500">
+            <h3>Ready to use</h3>
+            <p>
+              Open Climate Fix manages this torrent of data with a robust data
+              pipeline to enable our customers to rely on the best forecasts,
+              without the need to download and wrestle with Gigabytes of
+              satellite and weather data. The machine learning prediction is
+              fast to run, delivering actionable information in minutes after a
+              new satellite image is recorded, and forecasts are available
+              through a user interface or automatically through an API.
+            </p>
+            <figure>
+              <img
+                className="w-full rounded-lg"
+                src="/nowcasting-app.png"
+                alt=""
+                width={1310}
+                height={873}
+              />
+              <figcaption className="text-center">
+                Screenshot of the NOWCASTING application.
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <div
+        id="benefits"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="py-12 pt-24 bg-white">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="lg:text-center">
+            <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
+              Benefits
+            </h2>
+            {/* <p className="max-w-2xl mt-4 text-xl text-gray-500 lg:mx-auto">
+                Lorem ipsum dolor sit amet consect adipisicing elit. Possimus
+                magnam voluptatum cupiditate veritatis in accusamus quisquam.
+              </p> */}
+          </div>
+          <Benefits />
+        </div>
+      </section>
+
+      <div
+        id="technical"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="relative py-16 pt-24 overflow-hidden bg-white">
+        <div className="relative px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto text-lg max-w-prose">
+            <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
+              Technical
+            </h2>
+          </div>
+          <div className="mx-auto mt-6 prose prose-lg text-justify text-gray-500 prose-indigo">
+            <p>
+              Open Climate Fix observed that the gap in short term forecasting
+              of clouds is filled at present through meteorologists - their
+              experience applied to satellite imagery - and real-time ground
+              sensors. What if we applied the latest in machine learning to all
+              the data sources available simultaneously, and developed a machine
+              intelligence to replicate or even surpass what is available today?
+            </p>
+            <p>
+              NOWCASTING takes in all the data - satellite imagery, Numerical
+              Weather Predictions, topographic and solar generation data - and
+              applies cutting edge deep learning techniques not before seen in
+              energy forecasting. These multimodal machine learning techniques
+              accept data natively from different input source types without
+              interpolation and have been only recently possible with advances
+              in computer hardware and techniques developed in the Natural
+              Language Processing field. Open Climate Fix has implemented these
+              techniques and applied them to solar energy, drawing on a breadth
+              of industry experience from Google Deepmind, NASA, wind
+              forecasting and the transmission system operator.
+            </p>
+            <figure>
+              <img
+                className="w-full rounded-lg"
+                src="/diagram.png"
+                alt=""
+                width={1310}
+                height={873}
+              />
+              <figcaption className="text-center">
+                Datamodel of the NOWCASTING application.
+              </figcaption>
+            </figure>
+            <p>
+              Through exhaustive experimentation and optimising of
+              architectures, Open Climate Fix has developed a best in class
+              forecasting framework for both deterministic and probabilistic
+              forecasts.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div
+        id="open-source"
+        className="w-full border-b-ocf-yellow-500 border-b-[1.5rem] pt-16"
+      />
+
+      <section className="relative py-16 pt-24 overflow-hidden bg-white">
+        <div className="relative px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto text-lg max-w-prose">
+            <h2 className="block mt-2 text-3xl font-extrabold leading-8 tracking-tight text-center text-gray-900 sm:text-4xl">
+              Open Source
+            </h2>
+          </div>
+          <div className="mx-auto mt-6 prose prose-lg text-justify text-gray-500 prose-indigo">
+            <p>
+              Open Climate Fix is building our model completely out in the open!
+              We are actively building collaborations, working with contributors
+              and not restricting the IP behind the model.
+            </p>
+            <p>
+              Why? It is becoming clear that open source software projects grow
+              faster, are more robust and are more responsive to their
+              users&apos; needs. Linux, Apache, and Python are leaders in their
+              fields. By having an open model which researchers or our clients
+              can build on and improve, we will develop a forecast which is
+              continually improving with the state-of-the-art.
+            </p>
+            <p>
+              So why buy an open service? Because NOWCASTING is much more than
+              the model. Open Climate Fix manages and procures the huge data
+              volumes involved; we keep the service available; we integrate the
+              latest update from the open-source model to give the best
+              forecast. Lastly, we can provide expert advice and tailor your use
+              of the product.
+            </p>
+            <p>
+              At Open Climate Fix our mission is to make managing PV power as
+              easy as possible. Going open source is going to help us achieve
+              that goal.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="email-signup"
+        className="relative px-4 py-16 mx-auto overflow-hidden bg-white max-w-prose"
+      >
+        <EmailSignup />
+      </section>
 
       <footer className="bg-white">
         <div className="px-4 py-12 mx-auto max-w-7xl sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
@@ -194,7 +414,7 @@ const Home: NextPage = () => {
           </div>
           <div className="mt-8 md:mt-0 md:order-1">
             <p className="text-base text-center text-gray-400">
-              &copy; 2021{" "}
+              &copy; 2022{" "}
               <a className="py-2" href="https://openclimatefix.org/">
                 Open Climate Fix
               </a>{" "}
