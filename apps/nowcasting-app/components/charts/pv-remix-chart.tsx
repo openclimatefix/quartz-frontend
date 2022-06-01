@@ -65,7 +65,11 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
 
       <div className=" h-60 mt-8 ">
-        <RemixLine timeOfInterest={selectedTime} data={chartData} />
+        <RemixLine
+          timeOfInterest={selectedTime}
+          setTimeOfInterest={(time) => setSelectedISOTime(time + ":00.000Z")}
+          data={chartData}
+        />
       </div>
       {clickedGspId && (
         <GspPvRemixChart
