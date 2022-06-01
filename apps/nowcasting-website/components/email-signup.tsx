@@ -8,7 +8,7 @@ const EmailSignup = ({}: IEmailSignup) => {
           href="https://xrl7e8hi84a.typeform.com/to/dJXWiJku"
           className="flex items-center justify-center w-full px-8 py-3 text-base font-medium text-black border border-transparent rounded-md bg-ocf-yellow-600 hover:bg-ocf-yellow-700 md:py-4 md:text-lg md:px-10"
         >
-          Get started
+          Find out more
         </a>
       </div>
       <p className="mt-3 text-sm text-center text-gray-500">
