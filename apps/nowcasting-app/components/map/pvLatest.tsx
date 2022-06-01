@@ -78,7 +78,17 @@ const PvLatestMap = () => {
       type: "geojson",
       data: forecastGeoJson,
     });
-
+    map.current.addLayer({
+      id: "latestPV-forecast-borders",
+      type: "line",
+      source: "latestPV",
+      layout: {},
+      paint: {
+        "line-color": "#ffffff",
+        "line-width": 0.6,
+        "line-opacity": 0.2,
+      },
+    });
     map.current.addLayer({
       id: "latestPV-forecast",
       type: "fill",
@@ -86,8 +96,9 @@ const PvLatestMap = () => {
       layout: { visibility: "visible" },
       paint: getPaintPropsForFC(),
     });
+
     map.current.addLayer({
-      id: "latestPV-forecast-borders",
+      id: "latestPV-forecast-select-borders",
       type: "line",
       source: "latestPV",
       layout: {},
