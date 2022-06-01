@@ -18,7 +18,7 @@ mapboxgl.accessToken =
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
+const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, forecastGeoJson }: IMap) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
@@ -27,6 +27,12 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
   const [zoom, setZoom] = useState(5.6);
 
   useUpdateMapStateOnClick({ map: map.current, isMapReady });
+  useEffect(() => {
+    const source = map.current?.getSource("latestPV") as unknown as
+      | mapboxgl.GeoJSONSource
+      | undefined;
+    source?.setData(forecastGeoJson);
+  }, [forecastGeoJson]);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once

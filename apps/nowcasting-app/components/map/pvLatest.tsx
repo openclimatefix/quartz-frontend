@@ -1,12 +1,12 @@
 import useSWR from "swr";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { FaildStateMap, LoadStateMap, Map } from "./";
 import { API_PREFIX, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
-import { formatISODateStringHuman } from "../utils";
+import { formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
 import mapboxgl, { FillPaint } from "mapbox-gl";
 
@@ -31,8 +31,17 @@ const PvLatestMap = () => {
       onError: (err) => setForecastError(err),
     },
   );
+  const selectedForcastValue = useMemo(() => {
+    if (!initForecastData || !selectedISOTime) return latestForecastValue;
 
-  const generateGeoJsonForecastData = (forecastData?: FcAllResData) => {
+    const index = initForecastData.forecasts[0].forecastValues.findIndex(
+      (fv) => formatISODateString(fv.targetTime) === formatISODateString(selectedISOTime),
+    );
+    if (index >= 0) return index;
+    return latestForecastValue;
+  }, [initForecastData, selectedISOTime]);
+
+  const generateGeoJsonForecastData = (forecastData?: FcAllResData, forecastIndex?: number) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
     const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
@@ -46,7 +55,7 @@ const PvLatestMap = () => {
             filteredForcastData &&
             filteredForcastData[index] &&
             Math.round(
-              filteredForcastData[index].forecastValues[latestForecastValue]
+              filteredForcastData[index].forecastValues[forecastIndex || 0]
                 .expectedPowerGenerationMegawatts,
             ),
         },
@@ -55,7 +64,9 @@ const PvLatestMap = () => {
 
     return { forecastGeoJson };
   };
-
+  const generatedGeoJsonForecastData = useMemo(() => {
+    return generateGeoJsonForecastData(initForecastData, selectedForcastValue);
+  }, [initForecastData, selectedForcastValue]);
   const getPaintPropsForFC = (): FillPaint => ({
     "fill-color": "#eab308",
     "fill-opacity": [
@@ -121,6 +132,7 @@ const PvLatestMap = () => {
   ) : (
     <Map
       loadDataOverlay={addFCData}
+      forecastGeoJson={generatedGeoJsonForecastData.forecastGeoJson}
       controlOverlay={() => (
         <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
       )}
