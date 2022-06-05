@@ -20,7 +20,7 @@ const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { data: initForecastData, mutate } = useSWR<FcAllResData>(
+  const { data: initForecastData } = useSWR<FcAllResData>(
     `${API_PREFIX}/GB/solar/gsp/forecast/all`,
     fetcher,
     {
@@ -29,6 +29,7 @@ const PvLatestMap = () => {
         setForecastLoading(false);
       },
       onError: (err) => setForecastError(err),
+      refreshInterval: 1000 * 60 * 5, // 5min,
     },
   );
   const selectedForcastValue = useMemo(() => {
@@ -108,19 +109,6 @@ const PvLatestMap = () => {
         "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0],
       },
     });
-
-    const updateSource = setInterval(async () => {
-      try {
-        const updatedForecastData = await mutate(`${API_PREFIX}/GB/solar/gsp/forecast/all` as any);
-
-        // console.log("sucess");
-        const { forecastGeoJson } = generateGeoJsonForecastData(updatedForecastData);
-        (map.current.getSource("latestPV") as mapboxgl.GeoJSONSource).setData(forecastGeoJson);
-      } catch {
-        if (updateSource) clearInterval(updateSource);
-      }
-      // every 5 minutes
-    }, 300000);
   };
 
   return forecastError ? (
@@ -132,7 +120,7 @@ const PvLatestMap = () => {
   ) : (
     <Map
       loadDataOverlay={addFCData}
-      forecastGeoJson={generatedGeoJsonForecastData.forecastGeoJson}
+      latestPVData={generatedGeoJsonForecastData.forecastGeoJson}
       controlOverlay={() => (
         <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
       )}
