@@ -8,6 +8,7 @@ import useGlobalState from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
+import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -17,6 +18,7 @@ const axiosFetcher = (url: string) => {
 const PvRemixChart: FC<{ date?: string }> = (props) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<
     {
@@ -63,11 +65,20 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   return (
     <>
       <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
-
-      <div className=" h-60 mt-8 ">
+      <button
+        type="button"
+        onClick={resetTime}
+        className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black h-full"
+      >
+        Reset Time
+      </button>
+      <div className="h-60">
         <RemixLine
           timeOfInterest={selectedTime}
-          setTimeOfInterest={(time) => setSelectedISOTime(time + ":00.000Z")}
+          setTimeOfInterest={(time) => {
+            stopTime();
+            setSelectedISOTime(time + ":00.000Z");
+          }}
           data={chartData}
         />
       </div>
