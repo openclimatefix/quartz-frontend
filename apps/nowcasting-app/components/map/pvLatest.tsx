@@ -21,7 +21,7 @@ const PvLatestMap = () => {
   const [forecastError, setForecastError] = useState<any>(false);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { data: initForecastData } = useSWR<FcAllResData>(
-    `${API_PREFIX}/GB/solar/gsp/forecast/all`,
+    `${API_PREFIX}/GB/solar/gsp/forecast/all?historic=true`,
     fetcher,
     {
       onSuccess: () => {
