@@ -11,7 +11,7 @@ const axiosFetcher = (url: string) => {
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
   const { data: fcAll, error: error1 } = useSWR<FcAllResData>(
-    `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=true`,
+    `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=true&historic=true`,
     axiosFetcher,
     {
       refreshInterval: t5min,
