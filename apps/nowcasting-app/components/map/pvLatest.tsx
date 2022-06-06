@@ -1,5 +1,5 @@
-import useSWR, { mutate } from "swr";
-import { MutableRefObject, useEffect, useState } from "react";
+import useSWR from "swr";
+import { MutableRefObject, useState } from "react";
 
 import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
@@ -35,12 +35,8 @@ const PvLatestMap = () => {
         setForecastLoading(false);
       },
       onError: (err) => setForecastError(err),
-      // revalidateOnMount: false
-      refreshInterval: 30000
     }
   );
-
-  useEffect(() => console.log("first Render"), []);
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean) => ([
     "interpolate", ["linear"],
@@ -103,21 +99,6 @@ const PvLatestMap = () => {
       layout: {visibility: "visible"},
       paint: getPaintPropsForFC(),
     });
-
-    // const updateSource = setInterval(async (type) => {
-    //   try {
-    //     const latestForecastData = await mutate(
-    //       forecastUrl(type),
-    //     );
-  
-    //     console.log("update", map.current.getPaintProperty('latestPV-forecast', "fill-opacity"));
-    //     const {forecastGeoJson} = generateGeoJsonForecastData(latestForecastData);
-    //     map.current.getSource('latestPV').setData(forecastGeoJson);
-    //   } catch {
-    //     if (updateSource) clearInterval(updateSource);
-    //   }
-    //   // every 5 minutes
-    // }, 30000);
   };
 
   return (
