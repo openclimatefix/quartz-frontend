@@ -34,7 +34,7 @@ const PvLatestMap = () => {
         setForecastError(false);
         setForecastLoading(false);
       },
-      onError: (err) => setForecastError(err),
+      onError: (err) => setForecastError(err)
     }
   );
 
@@ -58,9 +58,8 @@ const PvLatestMap = () => {
           ...featureObj,
           properties: {
             ...featureObj.properties,
-            [selectedDataName]: isNormalized 
-            ? filteredForcastData[index].forecastValues[latestForecastValue][selectedDataName]
-            : Math.round(filteredForcastData[index].forecastValues[latestForecastValue][selectedDataName])
+            expectedPowerGenerationNormalized: filteredForcastData[index].forecastValues[latestForecastValue].expectedPowerGenerationNormalized,
+            expectedPowerGenerationMegawatts: Math.round(filteredForcastData[index].forecastValues[latestForecastValue].expectedPowerGenerationMegawatts),
           }
         }
       ))
@@ -68,14 +67,6 @@ const PvLatestMap = () => {
 
     return {forecastGeoJson};
   }
-
-  const getPaintPropsForFC = () => {
-    return (
-    {   
-      "fill-color": "#eab308",
-      "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
-    }
-  )};
 
   const updateFCDataType = (map) => {
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
@@ -97,7 +88,10 @@ const PvLatestMap = () => {
       type: "fill",
       source: "latestPV",
       layout: {visibility: "visible"},
-      paint: getPaintPropsForFC(),
+      paint: {   
+        "fill-color": "#eab308",
+        "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
+      },
     });
   };
 
