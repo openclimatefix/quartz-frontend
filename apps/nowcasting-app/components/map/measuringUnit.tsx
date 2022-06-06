@@ -1,4 +1,4 @@
-import { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect } from "react";
 import { ActiveUnit } from "./types";
 
 const MeasuringUnit = (
@@ -15,7 +15,7 @@ const MeasuringUnit = (
 ) => {
 
   useEffect(() => {
-    if(foreCastData) {
+    if(foreCastData && isLoading) {
       updateFCData(map);
     }
   }, [foreCastData])
@@ -39,10 +39,10 @@ const MeasuringUnit = (
           %
         </button>
         <button
-          onClick={(event) => onToggle(event, ActiveUnit.MV)}
+          onClick={(event) => onToggle(event, ActiveUnit.MW)}
           disabled={isLoading}
           type="button"
-          className={`relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold  ${activeUnit === "MV"? "text-black bg-amber-400" : "text-white bg-black"} ${isLoading ? "cursor-wait": ""} hover:bg-amber-400`}
+          className={`relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold  ${activeUnit === "MW"? "text-black bg-amber-400" : "text-white bg-black"} ${isLoading ? "cursor-wait": ""} hover:bg-amber-400`}
         >
           MW
         </button>

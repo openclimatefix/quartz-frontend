@@ -1,5 +1,5 @@
 export enum ActiveUnit {
-  MV = "MV",
+  MW = "MW",
   percentage = "%",
 }
 

@@ -17,50 +17,28 @@ const latestForecastValue = 0;
 const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
-  const [updatedForeCastData, setupdatedForeCastData] = useState(null);
-  const [istoggled, setIsToggled] = useState(false);
   const [isToggleLoading, setIsToggleLoading] = useState(false);
-  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MV);
-  const [isNormalized, setIsNormalized] = useState(false);
-  const [selectedData, setSelectedData] = useState<SelectedData>(SelectedData.expectedPowerGenerationMegawatts);
+  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
 
   const forecastUrl = (type) => `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${type}`;
+  const isNormalized = activeUnit === ActiveUnit.percentage;
+  const selectedDataName = activeUnit === ActiveUnit.percentage
+  ? SelectedData.expectedPowerGenerationNormalized
+  : SelectedData.expectedPowerGenerationMegawatts;
 
   const { data: initForecastData } = useSWR(() =>
     forecastUrl(isNormalized),
     fetcher, 
     {
-      onSuccess: (data) => {
-        if(istoggled) {
-          setupdatedForeCastData(data);
-          setIsToggleLoading(false);
-          setIsToggled(false);
-        }else {
-          setForecastError(false);
-          setForecastLoading(false);
-        } 
+      onSuccess: () => {
+        setForecastError(false);
+        setForecastLoading(false);
       },
       onError: (err) => setForecastError(err),
       // revalidateOnMount: false
       refreshInterval: 30000
     }
   );
-
-  useEffect(() => {
-    (async () => {
-      //Skip first render
-      if(isNormalized !== (activeUnit === ActiveUnit.percentage)){
-        setIsToggled(true);
-        setIsNormalized(activeUnit === ActiveUnit.percentage);
-        setSelectedData(
-          activeUnit === ActiveUnit.percentage
-            ? SelectedData.expectedPowerGenerationNormalized
-            : SelectedData.expectedPowerGenerationMegawatts,
-        );
-      }
-    })()
-   
-  }, [activeUnit]);
 
   useEffect(() => console.log("first Render"), []);
 
@@ -84,9 +62,9 @@ const PvLatestMap = () => {
           ...featureObj,
           properties: {
             ...featureObj.properties,
-            [selectedData]: isNormalized 
-            ? filteredForcastData[index].forecastValues[latestForecastValue][selectedData]
-            : Math.round(filteredForcastData[index].forecastValues[latestForecastValue][selectedData])
+            [selectedDataName]: isNormalized 
+            ? filteredForcastData[index].forecastValues[latestForecastValue][selectedDataName]
+            : Math.round(filteredForcastData[index].forecastValues[latestForecastValue][selectedDataName])
           }
         }
       ))
@@ -99,14 +77,15 @@ const PvLatestMap = () => {
     return (
     {   
       "fill-color": "#eab308",
-      "fill-opacity": getFillOpacity(selectedData, isNormalized),
+      "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
     }
   )};
 
   const updateFCDataType = (map) => {
-      const { forecastGeoJson } = generateGeoJsonForecastData(updatedForeCastData);
-      map.current.getSource('latestPV').setData(forecastGeoJson);
-      map.current.setPaintProperty('latestPV-forecast', "fill-opacity", getFillOpacity(selectedData, isNormalized));
+    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
+    map.current.getSource('latestPV').setData(forecastGeoJson);
+    map.current.setPaintProperty('latestPV-forecast', "fill-opacity", getFillOpacity(selectedDataName, isNormalized));
+    setIsToggleLoading(false);
   }
 
   const addFCData = (map) => {
@@ -160,7 +139,7 @@ const PvLatestMap = () => {
               map={map}
               activeUnit={activeUnit}
               setActiveUnit={setActiveUnit}
-              foreCastData={updatedForeCastData}
+              foreCastData={initForecastData}
               isLoading={isToggleLoading}
               setIsLoading={setIsToggleLoading}
               updateFCData={updateFCDataType}
