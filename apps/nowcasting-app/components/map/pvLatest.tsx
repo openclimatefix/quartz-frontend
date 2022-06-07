@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { MutableRefObject, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
@@ -9,7 +9,7 @@ import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
 import { formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
-import mapboxgl, { FillPaint } from "mapbox-gl";
+import mapboxgl from "mapbox-gl";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -23,21 +23,26 @@ const PvLatestMap = () => {
   const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
 
-  const forecastUrl = (type) => `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${type}`;
+  const forecastUrl = (type: boolean) =>
+    `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${type}`;
   const isNormalized = activeUnit === ActiveUnit.percentage;
   const selectedDataName =
     activeUnit === ActiveUnit.percentage
       ? SelectedData.expectedPowerGenerationNormalized
       : SelectedData.expectedPowerGenerationMegawatts;
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { data: initForecastData } = useSWR(() => forecastUrl(isNormalized), fetcher, {
-    onSuccess: () => {
-      setForecastError(false);
-      setForecastLoading(false);
+  const { data: initForecastData } = useSWR<FcAllResData>(
+    () => forecastUrl(isNormalized),
+    fetcher,
+    {
+      onSuccess: () => {
+        setForecastError(false);
+        setForecastLoading(false);
+      },
+      onError: (err) => setForecastError(err),
+      refreshInterval: 1000 * 60 * 5, // 5min
     },
-    onError: (err) => setForecastError(err),
-    refreshInterval: 1000 * 60 * 5, // 5min
-  });
+  );
   const selectedForcastValue = useMemo(() => {
     if (!initForecastData || !selectedISOTime) return latestForecastValue;
 
@@ -88,7 +93,7 @@ const PvLatestMap = () => {
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(initForecastData, selectedForcastValue);
   }, [initForecastData, selectedForcastValue]);
-  const updateFCDataType = (map) => {
+  const updateFCDataType = (map: { current: mapboxgl.Map }) => {
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
     map.current.getSource("latestPV").setData(forecastGeoJson);
     map.current.setPaintProperty(
@@ -151,7 +156,7 @@ const PvLatestMap = () => {
     <Map
       loadDataOverlay={addFCData}
       latestPVData={generatedGeoJsonForecastData.forecastGeoJson}
-      controlOverlay={(map: MutableRefObject<any>) => (
+      controlOverlay={(map: mapboxgl.Map) => (
         <>
           <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
           <MeasuringUnit
