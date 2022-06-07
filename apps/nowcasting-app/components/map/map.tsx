@@ -1,13 +1,18 @@
-interface IMap {
-  loadDataOverlay: any;
-  controlOverlay: any;
-  bearing?: number;
-}
-
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
+
+interface IMap {
+  loadDataOverlay: any;
+  controlOverlay: any;
+  bearing?: number;
+  latestPVData:
+    | GeoJSON.Feature<GeoJSON.Geometry>
+    | GeoJSON.FeatureCollection<GeoJSON.Geometry>
+    | string
+    | undefined;
+}
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
@@ -18,7 +23,7 @@ mapboxgl.accessToken =
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
+const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, latestPVData }: IMap) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
@@ -27,6 +32,12 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0 }: IMap) => {
   const [zoom, setZoom] = useState(5.6);
 
   useUpdateMapStateOnClick({ map: map.current, isMapReady });
+  useEffect(() => {
+    const source = map.current?.getSource("latestPV") as unknown as
+      | mapboxgl.GeoJSONSource
+      | undefined;
+    if (latestPVData) source?.setData(latestPVData);
+  }, [latestPVData]);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once

@@ -1,12 +1,12 @@
 import useSWR from "swr";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { FaildStateMap, LoadStateMap, Map } from "./";
 import { API_PREFIX, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
-import { formatISODateStringHuman } from "../utils";
+import { formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
 import mapboxgl, { FillPaint } from "mapbox-gl";
 
@@ -20,8 +20,8 @@ const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { data: initForecastData, mutate } = useSWR<FcAllResData>(
-    `${API_PREFIX}/GB/solar/gsp/forecast/all`,
+  const { data: initForecastData } = useSWR<FcAllResData>(
+    `${API_PREFIX}/GB/solar/gsp/forecast/all?historic=true`,
     fetcher,
     {
       onSuccess: () => {
@@ -29,10 +29,20 @@ const PvLatestMap = () => {
         setForecastLoading(false);
       },
       onError: (err) => setForecastError(err),
+      refreshInterval: 1000 * 60 * 5, // 5min,
     },
   );
+  const selectedForcastValue = useMemo(() => {
+    if (!initForecastData || !selectedISOTime) return latestForecastValue;
 
-  const generateGeoJsonForecastData = (forecastData?: FcAllResData) => {
+    const index = initForecastData.forecasts[0].forecastValues.findIndex(
+      (fv) => formatISODateString(fv.targetTime) === formatISODateString(selectedISOTime),
+    );
+    if (index >= 0) return index;
+    return latestForecastValue;
+  }, [initForecastData, selectedISOTime]);
+
+  const generateGeoJsonForecastData = (forecastData?: FcAllResData, forecastIndex?: number) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
     const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
@@ -46,7 +56,7 @@ const PvLatestMap = () => {
             filteredForcastData &&
             filteredForcastData[index] &&
             Math.round(
-              filteredForcastData[index].forecastValues[latestForecastValue]
+              filteredForcastData[index].forecastValues[forecastIndex || latestForecastValue]
                 .expectedPowerGenerationMegawatts,
             ),
         },
@@ -55,7 +65,9 @@ const PvLatestMap = () => {
 
     return { forecastGeoJson };
   };
-
+  const generatedGeoJsonForecastData = useMemo(() => {
+    return generateGeoJsonForecastData(initForecastData, selectedForcastValue);
+  }, [initForecastData, selectedForcastValue]);
   const getPaintPropsForFC = (): FillPaint => ({
     "fill-color": "#eab308",
     "fill-opacity": [
@@ -108,19 +120,6 @@ const PvLatestMap = () => {
         "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0],
       },
     });
-
-    const updateSource = setInterval(async () => {
-      try {
-        const updatedForecastData = await mutate(`${API_PREFIX}/GB/solar/gsp/forecast/all` as any);
-
-        // console.log("sucess");
-        const { forecastGeoJson } = generateGeoJsonForecastData(updatedForecastData);
-        (map.current.getSource("latestPV") as mapboxgl.GeoJSONSource).setData(forecastGeoJson);
-      } catch {
-        if (updateSource) clearInterval(updateSource);
-      }
-      // every 5 minutes
-    }, 300000);
   };
 
   return forecastError ? (
@@ -132,6 +131,7 @@ const PvLatestMap = () => {
   ) : (
     <Map
       loadDataOverlay={addFCData}
+      latestPVData={generatedGeoJsonForecastData.forecastGeoJson}
       controlOverlay={() => (
         <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
       )}

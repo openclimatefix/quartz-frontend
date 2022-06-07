@@ -14719,7 +14719,7 @@
         },
         {
           "targetTime": "2022-05-17T13:00:00+00:00",
-          "expectedPowerGenerationMegawatts": 299.1674007842779,
+          "expectedPowerGenerationMegawatts": 0,
           "expectedPowerGenerationNormalized": null
         },
         {
