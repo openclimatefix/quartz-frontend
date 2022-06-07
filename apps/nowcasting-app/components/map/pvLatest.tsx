@@ -20,18 +20,17 @@ const latestForecastValue = 0;
 const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
-  const [isToggleLoading, setIsToggleLoading] = useState(false);
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
 
   const forecastUrl = (type: boolean) =>
-    `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=${type}`;
+    `${API_PREFIX}/GB/solar/gsp/forecast/all?historic=true&normalize=${type}`;
   const isNormalized = activeUnit === ActiveUnit.percentage;
   const selectedDataName =
     activeUnit === ActiveUnit.percentage
       ? SelectedData.expectedPowerGenerationNormalized
       : SelectedData.expectedPowerGenerationMegawatts;
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { data: initForecastData } = useSWR<FcAllResData>(
+  const { data: initForecastData, isValidating } = useSWR<FcAllResData>(
     () => forecastUrl(isNormalized),
     fetcher,
     {
@@ -52,6 +51,7 @@ const PvLatestMap = () => {
     if (index >= 0) return index;
     return latestForecastValue;
   }, [initForecastData, selectedISOTime]);
+
   const getFillOpacity = (selectedData: string, isNormalized: boolean) => [
     "interpolate",
     ["linear"],
@@ -63,29 +63,33 @@ const PvLatestMap = () => {
     isNormalized ? 1 : MAX_POWER_GENERATED,
     1,
   ];
-  const generateGeoJsonForecastData = (forecastData?: FcAllResData, forecastIndex?: number) => {
+  const generateGeoJsonForecastData = (
+    forecastData?: FcAllResData,
+    selectedForecastIndex?: number,
+  ) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
     const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     const forecastGeoJson = {
       ...gspShapeDatat,
-      features: gspShapeDatat.features.map((featureObj, index) => ({
-        ...featureObj,
-        properties: {
-          ...featureObj.properties,
-          expectedPowerGenerationMegawatts:
-            filteredForcastData &&
-            filteredForcastData[index] &&
-            Math.round(
-              filteredForcastData[index].forecastValues[forecastIndex || latestForecastValue]
-                .expectedPowerGenerationMegawatts,
+      features: gspShapeDatat.features.map((featureObj, index) => {
+        const selectedforecastValues =
+          filteredForcastData &&
+          filteredForcastData[index] &&
+          filteredForcastData[index].forecastValues[selectedForecastIndex || latestForecastValue];
+        return {
+          ...featureObj,
+          properties: {
+            ...featureObj.properties,
+            expectedPowerGenerationMegawatts: Math.round(
+              selectedforecastValues?.expectedPowerGenerationMegawatts || 0,
             ),
-          expectedPowerGenerationNormalized:
-            filteredForcastData &&
-            filteredForcastData[index].forecastValues[forecastIndex || latestForecastValue]
-              .expectedPowerGenerationNormalized,
-        },
-      })),
+
+            expectedPowerGenerationNormalized:
+              selectedforecastValues?.expectedPowerGenerationNormalized,
+          },
+        };
+      }),
     };
 
     return { forecastGeoJson };
@@ -93,17 +97,18 @@ const PvLatestMap = () => {
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(initForecastData, selectedForcastValue);
   }, [initForecastData, selectedForcastValue]);
-  const updateFCDataType = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
-    map.current.getSource("latestPV").setData(forecastGeoJson);
-    map.current.setPaintProperty(
-      "latestPV-forecast",
-      "fill-opacity",
-      getFillOpacity(selectedDataName, isNormalized),
-    );
-    setIsToggleLoading(false);
-  };
 
+  const updateMapData = (map: mapboxgl.Map) => {
+    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
+    if (generatedGeoJsonForecastData && source) {
+      source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+      map.setPaintProperty(
+        "latestPV-forecast",
+        "fill-opacity",
+        getFillOpacity(selectedDataName, isNormalized),
+      );
+    }
+  };
   const addFCData = (map: { current: mapboxgl.Map }) => {
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
 
@@ -155,18 +160,15 @@ const PvLatestMap = () => {
   ) : (
     <Map
       loadDataOverlay={addFCData}
+      updateData={{ newData: !!initForecastData, updateMapData }}
       latestPVData={generatedGeoJsonForecastData.forecastGeoJson}
-      controlOverlay={(map: mapboxgl.Map) => (
+      controlOverlay={(map: { current?: mapboxgl.Map }) => (
         <>
           <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
           <MeasuringUnit
-            map={map}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
-            foreCastData={initForecastData}
-            isLoading={isToggleLoading}
-            setIsLoading={setIsToggleLoading}
-            updateFCData={updateFCDataType}
+            isLoading={isValidating && !initForecastData}
           />
         </>
       )}

@@ -1,34 +1,19 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { ActiveUnit } from "./types";
 const MeasuringUnit = ({
-  map,
   activeUnit,
   setActiveUnit,
-  updateFCData,
   isLoading,
-  setIsLoading,
-  foreCastData,
 }: {
-  map: mapboxgl.Map;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
-  updateFCData: (map: any) => void;
   isLoading: boolean;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  foreCastData: any;
 }) => {
-  useEffect(() => {
-    if (foreCastData && isLoading) {
-      updateFCData(map);
-    }
-  }, [foreCastData]);
-
   const onToggle = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit,
   ) => {
     event.preventDefault();
-    setIsLoading(true);
     setActiveUnit(unit);
   };
 

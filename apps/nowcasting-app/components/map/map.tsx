@@ -12,6 +12,7 @@ interface IMap {
     | GeoJSON.FeatureCollection<GeoJSON.Geometry>
     | string
     | undefined;
+  updateData: { newData: boolean; updateMapData: (map: mapboxgl.Map) => void };
 }
 
 mapboxgl.accessToken =
@@ -23,7 +24,7 @@ mapboxgl.accessToken =
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, latestPVData }: IMap) => {
+const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, latestPVData, updateData }: IMap) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
@@ -33,11 +34,10 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, latestPVData }: IMa
 
   useUpdateMapStateOnClick({ map: map.current, isMapReady });
   useEffect(() => {
-    const source = map.current?.getSource("latestPV") as unknown as
-      | mapboxgl.GeoJSONSource
-      | undefined;
-    if (latestPVData) source?.setData(latestPVData);
-  }, [latestPVData]);
+    if (map.current && updateData.newData) {
+      updateData.updateMapData(map.current);
+    }
+  }, [updateData]);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
