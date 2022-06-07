@@ -36,7 +36,7 @@ const GspPvRemixChart: FC<{ gspId: number; selectedTime: string; close: () => vo
     <>
       <div className="bg-black">
         <ForecastHeaderGSP onClose={close} title={gspInfo?.regionName || ""}>
-          {pvPercentage}% |{" "}
+          {Math.round(pvPercentage)}% |{" "}
           {Math.round(forcastAtSelectedTime.expectedPowerGenerationMegawatts || 0)} /{" "}
           {gspInfo?.installedCapacityMw}
           <span className=" ml-2 font-bold">MW</span>
