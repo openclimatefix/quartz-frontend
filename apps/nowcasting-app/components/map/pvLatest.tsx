@@ -56,7 +56,7 @@ const PvLatestMap = () => {
             filteredForcastData &&
             filteredForcastData[index] &&
             Math.round(
-              filteredForcastData[index].forecastValues[forecastIndex || 0]
+              filteredForcastData[index].forecastValues[forecastIndex || latestForecastValue]
                 .expectedPowerGenerationMegawatts,
             ),
         },
