@@ -9,7 +9,7 @@ import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
 import { formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { Expression } from "mapbox-gl";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -52,7 +52,7 @@ const PvLatestMap = () => {
     return latestForecastValue;
   }, [initForecastData, selectedISOTime]);
 
-  const getFillOpacity = (selectedData: string, isNormalized: boolean) => [
+  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
     ["linear"],
     ["get", selectedData],
