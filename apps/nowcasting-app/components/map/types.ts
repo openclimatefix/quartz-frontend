@@ -5,5 +5,5 @@ export enum ActiveUnit {
 
 export enum SelectedData {
   expectedPowerGenerationNormalized = "expectedPowerGenerationNormalized",
-  expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts"
+  expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts",
 }
