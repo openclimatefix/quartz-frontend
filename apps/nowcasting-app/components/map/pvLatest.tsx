@@ -42,15 +42,6 @@ const PvLatestMap = () => {
       refreshInterval: 1000 * 60 * 5, // 5min
     },
   );
-  const selectedForcastValue = useMemo(() => {
-    if (!initForecastData || !selectedISOTime) return latestForecastValue;
-
-    const index = initForecastData.forecasts[0].forecastValues.findIndex(
-      (fv) => formatISODateString(fv.targetTime) === formatISODateString(selectedISOTime),
-    );
-    if (index >= 0) return index;
-    return latestForecastValue;
-  }, [initForecastData, selectedISOTime]);
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
@@ -63,30 +54,31 @@ const PvLatestMap = () => {
     isNormalized ? 1 : MAX_POWER_GENERATED,
     1,
   ];
-  const generateGeoJsonForecastData = (
-    forecastData?: FcAllResData,
-    selectedForecastIndex?: number,
-  ) => {
+
+  const generateGeoJsonForecastData = (forecastData?: FcAllResData, targetTime?: string) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
     const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     const forecastGeoJson = {
       ...gspShapeDatat,
       features: gspShapeDatat.features.map((featureObj, index) => {
-        const selectedforecastValues =
-          filteredForcastData &&
-          filteredForcastData[index] &&
-          filteredForcastData[index].forecastValues[selectedForecastIndex || latestForecastValue];
+        let selectedFCvalue = filteredForcastData
+          ? filteredForcastData[index]?.forecastValues[latestForecastValue]
+          : undefined;
+        if (targetTime)
+          selectedFCvalue =
+            filteredForcastData &&
+            filteredForcastData[index]?.forecastValues.find((fv, i) => {
+              return formatISODateString(fv.targetTime) === formatISODateString(targetTime);
+            });
         return {
           ...featureObj,
           properties: {
             ...featureObj.properties,
-            expectedPowerGenerationMegawatts: Math.round(
-              selectedforecastValues?.expectedPowerGenerationMegawatts || 0,
-            ),
-
+            expectedPowerGenerationMegawatts:
+              selectedFCvalue && Math.round(selectedFCvalue.expectedPowerGenerationMegawatts),
             expectedPowerGenerationNormalized:
-              selectedforecastValues?.expectedPowerGenerationNormalized,
+              selectedFCvalue && selectedFCvalue?.expectedPowerGenerationNormalized,
           },
         };
       }),
@@ -95,8 +87,8 @@ const PvLatestMap = () => {
     return { forecastGeoJson };
   };
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedForcastValue);
-  }, [initForecastData, selectedForcastValue]);
+    return generateGeoJsonForecastData(initForecastData, selectedISOTime);
+  }, [initForecastData, selectedISOTime]);
 
   const updateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
@@ -110,7 +102,7 @@ const PvLatestMap = () => {
     }
   };
   const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
+    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
     map.current.addSource("latestPV", {
       type: "geojson",
