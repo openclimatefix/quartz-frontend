@@ -1,12 +1,11 @@
 import React from "react";
-import PlatButton from "../play-button";
 
 type ForecastHeaderProps = { pv: string };
 
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pv, children }) => {
   return (
     <div className={"flex content-between flex-wrap mt-6  h-16"}>
-      <div className={`bg-white text-black text-2xl font-black  p-4  flex-[2]`}>
+      <div className={`bg-white text-black lg:text-2xl text-lg font-black  p-4  flex-[2]`}>
         National Solar PV Forecast
       </div>
       <div className="flex-[1] m-auto">
@@ -16,9 +15,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pv, children }) => {
         </p>
         <p className="text-mapbox-black-300 text-center">generation</p>
       </div>
-      <div className=" inline-flex items-center h-full">
-        <PlatButton></PlatButton>
-      </div>
+      <div className=" inline-flex items-center h-full">{children}</div>
     </div>
   );
 };

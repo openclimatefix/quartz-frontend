@@ -1,18 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 
 type UiProps = {
-  onClick: (isPlaying: boolean) => void;
+  onClick: () => void;
+  isPlaying: boolean;
 };
 
-const Ui: React.FC<UiProps> = ({ onClick }) => {
-  const [isPlaying, setIsPlaying] = useState(true);
+const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
   return (
     <button
       className="items-center px-3 text-lg m text-black bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400  h-full"
       style={{ width: "70px" }}
       onClick={() => {
-        onClick(isPlaying);
-        setIsPlaying(!isPlaying);
+        onClick();
       }}
     >
       {!isPlaying ? (
