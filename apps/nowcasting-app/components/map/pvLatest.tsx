@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { useMemo, useState } from "react";
+import mapboxgl, { Expression } from "mapbox-gl";
 
 import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
@@ -9,7 +10,6 @@ import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
 import { formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
-import mapboxgl, { Expression } from "mapbox-gl";
 
 const fetcher = (input: RequestInfo, init: RequestInit) =>
   fetch(input, init).then((res) => res.json());
@@ -21,15 +21,17 @@ const PvLatestMap = () => {
   const [forecastLoading, setForecastLoading] = useState(true);
   const [forecastError, setForecastError] = useState<any>(false);
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
 
-  const forecastUrl = (type: boolean) =>
-    `${API_PREFIX}/GB/solar/gsp/forecast/all?historic=true&normalize=${type}`;
   const isNormalized = activeUnit === ActiveUnit.percentage;
   const selectedDataName =
     activeUnit === ActiveUnit.percentage
       ? SelectedData.expectedPowerGenerationNormalized
       : SelectedData.expectedPowerGenerationMegawatts;
-  const [selectedISOTime] = useGlobalState("selectedISOTime");
+
+  const forecastUrl = (type: boolean) =>
+    `${API_PREFIX}/GB/solar/gsp/forecast/all?historic=true&normalize=${type}`;
+
   const { data: initForecastData, isValidating } = useSWR<FcAllResData>(
     () => forecastUrl(isNormalized),
     fetcher,
@@ -101,6 +103,7 @@ const PvLatestMap = () => {
       );
     }
   };
+
   const addFCData = (map: { current: mapboxgl.Map }) => {
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
@@ -108,17 +111,7 @@ const PvLatestMap = () => {
       type: "geojson",
       data: forecastGeoJson,
     });
-    map.current.addLayer({
-      id: "latestPV-forecast-borders",
-      type: "line",
-      source: "latestPV",
-      layout: {},
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 0.6,
-        "line-opacity": 0.2,
-      },
-    });
+
     map.current.addLayer({
       id: "latestPV-forecast",
       type: "fill",
@@ -131,10 +124,20 @@ const PvLatestMap = () => {
     });
 
     map.current.addLayer({
+      id: "latestPV-forecast-borders",
+      type: "line",
+      source: "latestPV",
+      paint: {
+        "line-color": "#ffffff",
+        "line-width": 0.6,
+        "line-opacity": 0.2,
+      },
+    });
+
+    map.current.addLayer({
       id: "latestPV-forecast-select-borders",
       type: "line",
       source: "latestPV",
-      layout: {},
       paint: {
         "line-color": "#ffffff",
         "line-width": 4,
