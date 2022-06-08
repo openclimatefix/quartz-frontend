@@ -64,15 +64,15 @@ const PvLatestMap = () => {
     const forecastGeoJson = {
       ...gspShapeDatat,
       features: gspShapeDatat.features.map((featureObj, index) => {
-        let selectedFCvalue = filteredForcastData
-          ? filteredForcastData[index]?.forecastValues[latestForecastValue]
-          : undefined;
-        if (targetTime)
-          selectedFCvalue =
-            filteredForcastData &&
-            filteredForcastData[index]?.forecastValues.find((fv, i) => {
-              return formatISODateString(fv.targetTime) === formatISODateString(targetTime);
-            });
+        const selectedFCvalue =
+          filteredForcastData && targetTime
+            ? filteredForcastData[index]?.forecastValues.find(
+                (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime),
+              )
+            : filteredForcastData
+            ? filteredForcastData[index]?.forecastValues[latestForecastValue]
+            : undefined;
+
         return {
           ...featureObj,
           properties: {
@@ -156,7 +156,6 @@ const PvLatestMap = () => {
     <Map
       loadDataOverlay={addFCData}
       updateData={{ newData: !!initForecastData, updateMapData }}
-      latestPVData={generatedGeoJsonForecastData.forecastGeoJson}
       controlOverlay={(map: { current?: mapboxgl.Map }) => (
         <>
           <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
