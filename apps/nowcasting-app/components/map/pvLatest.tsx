@@ -32,42 +32,39 @@ const PvLatestMap = () => {
       refreshInterval: 1000 * 60 * 5, // 5min,
     },
   );
-  const selectedForcastValue = useMemo(() => {
-    if (!initForecastData || !selectedISOTime) return latestForecastValue;
 
-    const index = initForecastData.forecasts[0].forecastValues.findIndex(
-      (fv) => formatISODateString(fv.targetTime) === formatISODateString(selectedISOTime),
-    );
-    if (index >= 0) return index;
-    return latestForecastValue;
-  }, [initForecastData, selectedISOTime]);
-
-  const generateGeoJsonForecastData = (forecastData?: FcAllResData, forecastIndex?: number) => {
+  const generateGeoJsonForecastData = (forecastData?: FcAllResData, targetTime?: string) => {
     // Exclude first item as it's not represting gsp area
     const filteredForcastData = forecastData?.forecasts?.slice(1);
     const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
     const forecastGeoJson = {
       ...gspShapeDatat,
-      features: gspShapeDatat.features.map((featureObj, index) => ({
-        ...featureObj,
-        properties: {
-          ...featureObj.properties,
-          expectedPowerGenerationMegawatts:
+      features: gspShapeDatat.features.map((featureObj, index) => {
+        let selectedFCvalue = filteredForcastData
+          ? filteredForcastData[index]?.forecastValues[latestForecastValue]
+          : undefined;
+        if (targetTime)
+          selectedFCvalue =
             filteredForcastData &&
-            filteredForcastData[index] &&
-            Math.round(
-              filteredForcastData[index].forecastValues[forecastIndex || latestForecastValue]
-                .expectedPowerGenerationMegawatts,
-            ),
-        },
-      })),
+            filteredForcastData[index]?.forecastValues.find((fv, i) => {
+              return formatISODateString(fv.targetTime) === formatISODateString(targetTime);
+            });
+        return {
+          ...featureObj,
+          properties: {
+            ...featureObj.properties,
+            expectedPowerGenerationMegawatts:
+              selectedFCvalue && Math.round(selectedFCvalue.expectedPowerGenerationMegawatts),
+          },
+        };
+      }),
     };
 
     return { forecastGeoJson };
   };
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedForcastValue);
-  }, [initForecastData, selectedForcastValue]);
+    return generateGeoJsonForecastData(initForecastData, selectedISOTime);
+  }, [initForecastData, selectedISOTime]);
   const getPaintPropsForFC = (): FillPaint => ({
     "fill-color": "#eab308",
     "fill-opacity": [
@@ -84,7 +81,7 @@ const PvLatestMap = () => {
   });
 
   const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData);
+    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
     map.current.addSource("latestPV", {
       type: "geojson",
