@@ -6,13 +6,14 @@ import Ui from "./ui";
 
 type PlatButtonProps = {
   endTime: string;
+  startTime: string;
 };
 const add30Minutes = (date: string) => {
   var d = new Date(date);
   d.setMinutes(d.getMinutes() + 30);
   return d.toISOString();
 };
-const PlatButton: React.FC<PlatButtonProps> = ({ endTime }) => {
+const PlatButton: React.FC<PlatButtonProps> = ({ endTime, startTime }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const { stopTime } = useStopAndResetTime();
@@ -28,8 +29,7 @@ const PlatButton: React.FC<PlatButtonProps> = ({ endTime }) => {
     intervalRef.current = setInterval(() => {
       setSelectedISOTime((selectedISOTime) => {
         if (formatISODateString(selectedISOTime || "") === formatISODateString(endTime)) {
-          pause();
-          return selectedISOTime;
+          return startTime;
         }
         return add30Minutes(selectedISOTime || "");
       });

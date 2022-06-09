@@ -4,7 +4,7 @@ import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import axios from "axios";
-import useGlobalState from "../globalState";
+import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
@@ -67,6 +67,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     <>
       <ForecastHeader pv={latestPvGenerationInGW}>
         <PlatButton
+          startTime={get30MinNow()}
           endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
         ></PlatButton>
       </ForecastHeader>
