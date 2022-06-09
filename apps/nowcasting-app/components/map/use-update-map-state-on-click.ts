@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import useGlobalState from "../globalState";
 
 type UseUpdateMapStateOnClickProps = {
