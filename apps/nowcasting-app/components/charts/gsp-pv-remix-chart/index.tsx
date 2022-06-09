@@ -6,11 +6,12 @@ import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
 import Spinner from "../../spinner";
 
-const GspPvRemixChart: FC<{ gspId: number; selectedTime: string; close: () => void }> = ({
-  gspId,
-  selectedTime,
-  close,
-}) => {
+const GspPvRemixChart: FC<{
+  gspId: number;
+  selectedTime: string;
+  close: () => void;
+  setTimeOfInterest: (t: string) => void;
+}> = ({ gspId, selectedTime, close, setTimeOfInterest }) => {
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
@@ -44,7 +45,11 @@ const GspPvRemixChart: FC<{ gspId: number; selectedTime: string; close: () => vo
       </div>
 
       <div className=" h-60 mt-8 ">
-        <RemixLine timeOfInterest={selectedTime} data={chartData} />
+        <RemixLine
+          setTimeOfInterest={setTimeOfInterest}
+          timeOfInterest={selectedTime}
+          data={chartData}
+        />
       </div>
     </>
   );
