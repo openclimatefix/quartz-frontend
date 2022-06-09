@@ -33,7 +33,7 @@ const PlatButton: React.FC<PlatButtonProps> = ({ endTime, startTime }) => {
         }
         return add30Minutes(selectedISOTime || "");
       });
-    }, 1000);
+    }, 2000);
   };
 
   return (
