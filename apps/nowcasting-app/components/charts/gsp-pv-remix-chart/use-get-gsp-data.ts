@@ -1,6 +1,6 @@
 import axios from "axios";
 import useSWR from "swr";
-import { API_PREFIX } from "../../../constant";
+import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData } from "../../types";
 
 const axiosFetcher = (url: string) => {
@@ -11,7 +11,7 @@ const axiosFetcher = (url: string) => {
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
   const { data: fcAll, error: error1 } = useSWR<FcAllResData>(
-    `${API_PREFIX}/GB/solar/gsp/forecast/all?normalize=true&historic=true`,
+    getAllForecastUrl(true, true),
     axiosFetcher,
     {
       refreshInterval: t5min,

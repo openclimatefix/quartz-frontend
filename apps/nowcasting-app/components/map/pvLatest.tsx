@@ -1,10 +1,12 @@
 import useSWR from "swr";
-import { useMemo, useState } from "react";
+import useSWRImmutable from "swr/immutable";
+
+import { useEffect, useMemo, useState } from "react";
 import mapboxgl, { Expression } from "mapbox-gl";
 
 import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
-import { API_PREFIX, MAX_POWER_GENERATED } from "../../constant";
+import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
@@ -16,10 +18,32 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 
 // Assuming first item in the array is the latest
 const latestForecastValue = 0;
+const useGetForecastsData = (isNormalized: boolean) => {
+  const [forecastLoading, setForecastLoading] = useState(true);
+  const bareForecastData = useSWRImmutable<FcAllResData>(
+    () => getAllForecastUrl(false, false),
+    fetcher,
+    {
+      onSuccess: () => {
+        setForecastLoading(false);
+      },
+    },
+  );
+
+  const allForecastData = useSWR<FcAllResData>(() => getAllForecastUrl(true, true), fetcher, {
+    refreshInterval: 1000 * 60 * 5, // 5min
+    isPaused: () => forecastLoading,
+  });
+  useEffect(() => {
+    if (!forecastLoading) {
+      allForecastData.mutate();
+    }
+  }, [forecastLoading]);
+  if (isNormalized) return allForecastData;
+  else return allForecastData.data ? allForecastData : bareForecastData;
+};
 
 const PvLatestMap = () => {
-  const [forecastLoading, setForecastLoading] = useState(true);
-  const [forecastError, setForecastError] = useState<any>(false);
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
@@ -29,26 +53,17 @@ const PvLatestMap = () => {
       ? SelectedData.expectedPowerGenerationNormalized
       : SelectedData.expectedPowerGenerationMegawatts;
 
-  const forecastUrl = (type: boolean) =>
-    `${API_PREFIX}/GB/solar/gsp/forecast/all?historic=true&normalize=${type}`;
-
-  const { data: initForecastData, isValidating } = useSWR<FcAllResData>(
-    () => forecastUrl(isNormalized),
-    fetcher,
-    {
-      onSuccess: () => {
-        setForecastError(false);
-        setForecastLoading(false);
-      },
-      onError: (err) => setForecastError(err),
-      refreshInterval: 1000 * 60 * 5, // 5min
-    },
-  );
+  const {
+    data: initForecastData,
+    isValidating,
+    error: forecastError,
+  } = useGetForecastsData(isNormalized);
+  const forecastLoading = false;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
     ["linear"],
-    ["get", selectedData],
+    ["to-number", ["get", selectedData]],
     // on value 0 the opacity will be 0
     0,
     0,
