@@ -4,7 +4,7 @@ import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import { formatISODateString } from "../utils";
 import Ui from "./ui";
 
-type PlatButtonProps = {
+type PlayButtonProps = {
   endTime: string;
   startTime: string;
 };
@@ -13,7 +13,7 @@ const add30Minutes = (date: string) => {
   d.setMinutes(d.getMinutes() + 30);
   return d.toISOString();
 };
-const PlatButton: React.FC<PlatButtonProps> = ({ endTime, startTime }) => {
+const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const { stopTime } = useStopAndResetTime();
@@ -46,4 +46,4 @@ const PlatButton: React.FC<PlatButtonProps> = ({ endTime, startTime }) => {
   );
 };
 
-export default PlatButton;
+export default PlayButton;
