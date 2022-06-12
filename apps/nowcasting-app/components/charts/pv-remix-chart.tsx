@@ -4,11 +4,12 @@ import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import axios from "axios";
-import useGlobalState from "../globalState";
+import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
+import PlatButton from "../play-button";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -64,7 +65,12 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
 
   return (
     <>
-      <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
+      <ForecastHeader pv={latestPvGenerationInGW}>
+        <PlatButton
+          startTime={get30MinNow()}
+          endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
+        ></PlatButton>
+      </ForecastHeader>
       <button
         type="button"
         onClick={resetTime}
