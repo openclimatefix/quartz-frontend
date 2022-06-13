@@ -20,11 +20,13 @@ const fetcher = (input: RequestInfo, init: RequestInit) =>
 const latestForecastValue = 0;
 const useGetForecastsData = (isNormalized: boolean) => {
   const [forecastLoading, setForecastLoading] = useState(true);
+  const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
   const bareForecastData = useSWRImmutable<FcAllResData>(
     () => getAllForecastUrl(false, false),
     fetcher,
     {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
         setForecastLoading(false);
       },
     },
