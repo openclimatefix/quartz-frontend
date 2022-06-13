@@ -62,7 +62,10 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
       ?.expectedPowerGenerationMegawatts || 0) / 1000
   ).toFixed(3);
-
+  const setSelectedTime = (time: string) => {
+    stopTime();
+    setSelectedISOTime(time + ":00.000Z");
+  };
   return (
     <>
       <ForecastHeader pv={latestPvGenerationInGW}>
@@ -81,10 +84,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <div className="h-60">
         <RemixLine
           timeOfInterest={selectedTime}
-          setTimeOfInterest={(time) => {
-            stopTime();
-            setSelectedISOTime(time + ":00.000Z");
-          }}
+          setTimeOfInterest={setSelectedTime}
           data={chartData}
         />
       </div>
@@ -93,6 +93,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
           close={() => {
             setClickedGspId(undefined);
           }}
+          setTimeOfInterest={setSelectedTime}
           selectedTime={selectedTime}
           gspId={clickedGspId}
         ></GspPvRemixChart>

@@ -57,15 +57,15 @@ const useFormatChartData = ({
         getPvdata: (dp: any) => Partial<ChartData>,
       ) => {
         const pvData = getPvdata(dataPoint);
-        const datetimeUtc = getDatetimeUtc(dataPoint);
-        if (chartMap[datetimeUtc]) {
-          chartMap[datetimeUtc] = {
-            ...chartMap[datetimeUtc],
+        const formatedDate = getDatetimeUtc(dataPoint);
+        if (chartMap[formatedDate]) {
+          chartMap[formatedDate] = {
+            ...chartMap[formatedDate],
             ...pvData,
           };
         } else {
-          chartMap[datetimeUtc] = {
-            datetimeUtc: formatISODateString(datetimeUtc),
+          chartMap[formatedDate] = {
+            formatedDate: formatISODateString(formatedDate),
             ...pvData,
           };
         }

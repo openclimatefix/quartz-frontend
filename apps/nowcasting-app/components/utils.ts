@@ -31,12 +31,12 @@ export const formatISODateString = (date: string) => {
 
 export const formatISODateStringHuman = (date: string) => {
   const d = new Date(date);
-  return d
-    .toLocaleString("kw-GB", {
-      timeZoneName: "short",
-      timeZone: "UTC",
-    })
-    .slice(0, 17)
-    .replace(",", "")
-    .replace(/:$/, "");
+  const day = d.getUTCDay();
+  const month = d.getUTCMonth() + 1;
+  const year = d.getFullYear();
+  const hours = d.getUTCHours();
+  const minutes = d.getUTCMinutes();
+  const hourss = hours < 10 ? `0${hours}` : hours;
+  const minutess = minutes < 10 ? `0${minutes}` : minutes;
+  return `${day}/${month}/${year} ${hourss}:${minutess}`;
 };
