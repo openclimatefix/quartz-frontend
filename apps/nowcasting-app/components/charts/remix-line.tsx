@@ -16,7 +16,7 @@ export type ChartData = {
   GENERATION?: number;
   FORECAST?: number;
   PAST_FORECAST?: number;
-  datetimeUtc: string; // "2022-05-16T15:00",
+  formatedDate: string; // "2022-05-16T15:00",
 };
 
 const toolTiplabels: Record<string, string> = {
@@ -59,7 +59,7 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   );
 };
 const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest }) => {
-  const preppedData = data.sort((a, b) => a.datetimeUtc.localeCompare(b.datetimeUtc));
+  const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -86,7 +86,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
       >
         <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
         <XAxis
-          dataKey="datetimeUtc"
+          dataKey="formatedDate"
           tickFormatter={prettyPrintXdate}
           scale="band"
           tick={{ fill: "white" }}
@@ -143,12 +143,14 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
             if (!data) return <div></div>;
             return (
               <div className="p-2 bg-white shadow">
-                <p className="mb-2 text-black">{formatISODateStringHuman(data?.datetimeUtc)}</p>
+                <p className="mb-2 text-black">
+                  {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}
+                </p>
                 <ul className="">
                   {Object.entries(data)
                     .reverse()
                     .map(([name, value]) => {
-                      if (name === "datetimeUtc") return null;
+                      if (name === "formatedDate") return null;
                       return (
                         <li key={`item-${name}`} style={{ color: toolTipColors[name] }}>
                           {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)} MW

@@ -4,11 +4,12 @@ import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import axios from "axios";
-import useGlobalState from "../globalState";
+import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
+import PlatButton from "../play-button";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -61,10 +62,18 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
       ?.expectedPowerGenerationMegawatts || 0) / 1000
   ).toFixed(3);
-
+  const setSelectedTime = (time: string) => {
+    stopTime();
+    setSelectedISOTime(time + ":00.000Z");
+  };
   return (
     <>
-      <ForecastHeader pv={latestPvGenerationInGW}></ForecastHeader>
+      <ForecastHeader pv={latestPvGenerationInGW}>
+        <PlatButton
+          startTime={get30MinNow()}
+          endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
+        ></PlatButton>
+      </ForecastHeader>
       <button
         type="button"
         onClick={resetTime}
@@ -75,10 +84,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       <div className="h-60">
         <RemixLine
           timeOfInterest={selectedTime}
-          setTimeOfInterest={(time) => {
-            stopTime();
-            setSelectedISOTime(time + ":00.000Z");
-          }}
+          setTimeOfInterest={setSelectedTime}
           data={chartData}
         />
       </div>
@@ -87,6 +93,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
           close={() => {
             setClickedGspId(undefined);
           }}
+          setTimeOfInterest={setSelectedTime}
           selectedTime={selectedTime}
           gspId={clickedGspId}
         ></GspPvRemixChart>

@@ -19,7 +19,6 @@ const MeasuringUnit = ({
 
   return (
     <div className="mt-1">
-      <p className="text-gray-400 inline-block text-sm mr-2">SHOWING:</p>
       <div className="inline-block">
         <button
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}

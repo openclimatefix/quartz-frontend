@@ -44,7 +44,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
 };
 
 const PvLatestMap = () => {
-  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
+  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.percentage);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
   const isNormalized = activeUnit === ActiveUnit.percentage;
