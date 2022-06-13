@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
+import { version } from "../package.json";
 
 import { classNames } from "./utils";
 
@@ -46,8 +47,13 @@ const Navbar = ({}: INavbar) => {
                   leaveTo="transform opacity-0 scale-95"
                 >
                   <Menu.Items className="absolute right-0 w-48 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div className="px-4 pt-3">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        Version {version.slice(0, 3)}
+                      </p>
+                    </div>
                     <div className="px-4 py-3">
-                      <p className="text-sm">Signed in as</p>
+                      <p className="text-sm text-gray-900">Signed in as</p>
                       <p className="text-sm font-medium text-gray-900 truncate">
                         {user && user.email}
                       </p>
