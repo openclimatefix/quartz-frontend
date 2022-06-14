@@ -15,11 +15,13 @@ export function get30MinNow() {
 type GlobalStateType = {
   selectedISOTime?: string;
   clickedGspId?: number;
+  forecastCreationTime?: string;
 };
 
 const { useGlobalState } = createGlobalState<GlobalStateType>({
   selectedISOTime: get30MinNow(),
   clickedGspId: undefined,
+  forecastCreationTime: undefined,
 });
 
 export default useGlobalState;

@@ -6,7 +6,7 @@ import ForecastHeader from "./forecast-header";
 import axios from "axios";
 import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { formatISODateString } from "../utils";
+import { formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
@@ -19,6 +19,7 @@ const axiosFetcher = (url: string) => {
 const PvRemixChart: FC<{ date?: string }> = (props) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<
@@ -67,38 +68,43 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <>
-      <ForecastHeader pv={latestPvGenerationInGW}>
-        <PlatButton
-          startTime={get30MinNow()}
-          endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
-        ></PlatButton>
-      </ForecastHeader>
-      <button
-        type="button"
-        onClick={resetTime}
-        className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black h-full"
-      >
-        Reset Time
-      </button>
-      <div className="h-60">
-        <RemixLine
-          timeOfInterest={selectedTime}
-          setTimeOfInterest={setSelectedTime}
-          data={chartData}
-        />
+    <div className="flex flex-col" style={{ minHeight: `calc(100vh - 70px)` }}>
+      <div className="flex-grow">
+        <ForecastHeader pv={latestPvGenerationInGW}>
+          <PlatButton
+            startTime={get30MinNow()}
+            endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
+          ></PlatButton>
+        </ForecastHeader>
+        <button
+          type="button"
+          onClick={resetTime}
+          className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black h-full"
+        >
+          Reset Time
+        </button>
+        <div className="h-60">
+          <RemixLine
+            timeOfInterest={selectedTime}
+            setTimeOfInterest={setSelectedTime}
+            data={chartData}
+          />
+        </div>
+        {clickedGspId && (
+          <GspPvRemixChart
+            close={() => {
+              setClickedGspId(undefined);
+            }}
+            setTimeOfInterest={setSelectedTime}
+            selectedTime={selectedTime}
+            gspId={clickedGspId}
+          ></GspPvRemixChart>
+        )}
       </div>
-      {clickedGspId && (
-        <GspPvRemixChart
-          close={() => {
-            setClickedGspId(undefined);
-          }}
-          setTimeOfInterest={setSelectedTime}
-          selectedTime={selectedTime}
-          gspId={clickedGspId}
-        ></GspPvRemixChart>
-      )}
-    </>
+      <footer className="text-mapbox-black-300 text-right text-xs px-3">
+        <p>OCF Forecast Creation Time: {formatISODateStringHuman(forecastCreationTime || "")}</p>
+      </footer>
+    </div>
   );
 };
 
