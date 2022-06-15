@@ -22,7 +22,6 @@ export const classNames = (...classes: string[]) => {
  * @returns HH:MM representation of the date, as string
  */
 export const getTimeFromDate = (date: Date) => {
-    const date_london_time = d.toLocaleTimeString("en-GB", {timeZone: 'Europe/London'}).slice(0,5)
   return date.toTimeString().split(" ")[0].slice(0, -3);
 };
 export const formatISODateString = (date: string) => {
