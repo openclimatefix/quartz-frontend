@@ -31,7 +31,7 @@ export const formatISODateString = (date: string) => {
 
 export const formatISODateStringHuman = (date: string) => {
   const d = new Date(date);
-  const day = d.getUTCDay();
+  const day = d.getUTCDate();
   const month = d.getUTCMonth() + 1;
   const year = d.getFullYear();
   const hours = d.getUTCHours();
