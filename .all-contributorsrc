@@ -13,6 +13,15 @@
       "contributions": [
         "projectManagement"
       ]
+    },
+    {
+      "login": "dlinah",
+      "name": "lina",
+      "avatar_url": "https://avatars.githubusercontent.com/u/24292074?v=4",
+      "profile": "https://github.com/dlinah",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
