@@ -133,7 +133,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           type="monotone"
           dataKey="FORECAST"
           dot={false}
-          strokeDasharray="7 7"
+          strokeDasharray="10 10"
           stroke="#FFC425" //yellow
           strokeWidth={3}
         />
