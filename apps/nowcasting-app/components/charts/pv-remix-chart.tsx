@@ -68,7 +68,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div className="flex flex-col" style={{ minHeight: `calc(100vh - 70px)` }}>
+    <div className="flex flex-col" style={{ minHeight: `calc(100vh - 110px)` }}>
       <div className="flex-grow">
         <ForecastHeader pv={latestPvGenerationInGW}>
           <PlatButton
