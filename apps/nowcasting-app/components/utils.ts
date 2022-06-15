@@ -22,21 +22,36 @@ export const classNames = (...classes: string[]) => {
  * @returns HH:MM representation of the date, as string
  */
 export const getTimeFromDate = (date: Date) => {
+    const date_london_time = d.toLocaleTimeString("en-GB", {timeZone: 'Europe/London'}).slice(0,5)
   return date.toTimeString().split(" ")[0].slice(0, -3);
 };
 export const formatISODateString = (date: string) => {
+   // Changes the ISO date string to Europe London time
+
   const dateid = date?.slice(0, 16);
-  return dateid;
+
+  const d = new Date(date);
+  const date_london_date_str = d.toLocaleDateString("en-GB", {timeZone: 'Europe/London'})
+  // make string in DD/MM/YYYY format
+  const date_london_time_str = d.toLocaleTimeString("en-GB", {timeZone: 'Europe/London'}).slice(0,5)
+  // make string in HH:MM format
+  const year = date_london_date_str.slice(6,10)
+  const month = date_london_date_str.slice(3,5)
+  const day = date_london_date_str.slice(0,2)
+
+  const london_datetime = `${year}-${month}-${day}T${date_london_time_str}`
+
+  return london_datetime
 };
 
 export const formatISODateStringHuman = (date: string) => {
-  const d = new Date(date);
-  const day = d.getUTCDay();
-  const month = d.getUTCMonth() + 1;
-  const year = d.getFullYear();
-  const hours = d.getUTCHours();
-  const minutes = d.getUTCMinutes();
-  const hourss = hours < 10 ? `0${hours}` : hours;
-  const minutess = minutes < 10 ? `0${minutes}` : minutes;
-  return `${day}/${month}/${year} ${hourss}:${minutess}`;
+    // Change date to nice human readable format.
+    // Note that this converts the string to Europe London Time
+    const d = new Date(date);
+    const date_london = d.toLocaleDateString("en-GB", {timeZone: 'Europe/London'});
+    const date_london_time = d.toLocaleTimeString("en-GB", {timeZone: 'Europe/London'}).slice(0,5);
+
+    // further formatting could be done to make it yyyy/mm/dd HH:DD
+    return `${date_london} ${date_london_time}`
 };
+
