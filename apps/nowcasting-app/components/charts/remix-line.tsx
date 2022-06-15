@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { formatISODateStringHuman } from "../utils";
+import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
 
 export type ChartData = {
   GENERATION_UPDATED?: number;
@@ -65,7 +65,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function prettyPrintXdate(x: string) {
-    return x.slice(11, 16);
+    return convertISODateStringToLondonTime(x);
   }
 
   return (
