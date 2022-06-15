@@ -65,7 +65,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function prettyPrintXdate(x: string) {
-    return convertISODateStringToLondonTime(x + ':00+00:00');
+    return convertISODateStringToLondonTime(x + ":00+00:00");
   }
 
   return (
