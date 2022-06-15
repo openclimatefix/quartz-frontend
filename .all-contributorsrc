@@ -40,6 +40,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "dantravers",
+      "name": "dantravers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/38562875?v=4",
+      "profile": "http://openclimatefix.org",
+      "contributions": [
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7,
