@@ -1,6 +1,6 @@
 # Solar Electricity Nowcasting
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This is a "meta-repository" for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project. See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to solar electricity nowcasting.
@@ -80,6 +80,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tr>
     <td align="center"><a href="http://tanner.me"><img src="https://avatars.githubusercontent.com/u/227?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Damien Tanner</b></sub></a><br /><a href="#projectManagement-dctanner" title="Project Management">📆</a></td>
     <td align="center"><a href="https://github.com/dlinah"><img src="https://avatars.githubusercontent.com/u/24292074?v=4?s=100" width="100px;" alt=""/><br /><sub><b>lina</b></sub></a><br /><a href="https://github.com/openclimatefix/nowcasting/commits?author=dlinah" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/Alaatohamy"><img src="https://avatars.githubusercontent.com/u/26000327?v=4?s=100" width="100px;" alt=""/><br /><sub><b>AlaaTohamy</b></sub></a><br /><a href="https://github.com/openclimatefix/nowcasting/commits?author=Alaatohamy" title="Code">💻</a></td>
   </tr>
 </table>
 
