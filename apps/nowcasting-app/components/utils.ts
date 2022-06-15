@@ -25,33 +25,34 @@ export const getTimeFromDate = (date: Date) => {
   return date.toTimeString().split(" ")[0].slice(0, -3);
 };
 export const formatISODateString = (date: string) => {
-   // Changes the ISO date string to Europe London time, and remove timezone and seconds
+  // Changes the ISO date string to Europe London time, and remove timezone and seconds
 
   const dateid = date?.slice(0, 16);
 
   const d = new Date(date);
-  const date_london_date_str = d.toLocaleDateString("en-GB", {timeZone: 'Europe/London'})
+  const date_london_date_str = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
   // make string in DD/MM/YYYY format
-  const date_london_time_str = d.toLocaleTimeString("en-GB", {timeZone: 'Europe/London'}).slice(0,5)
+  const date_london_time_str = d
+    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
+    .slice(0, 5);
   // make string in HH:MM format
-  const year = date_london_date_str.slice(6,10)
-  const month = date_london_date_str.slice(3,5)
-  const day = date_london_date_str.slice(0,2)
+  const year = date_london_date_str.slice(6, 10);
+  const month = date_london_date_str.slice(3, 5);
+  const day = date_london_date_str.slice(0, 2);
 
-  const london_datetime = `${year}-${month}-${day}T${date_london_time_str}`
+  const london_datetime = `${year}-${month}-${day}T${date_london_time_str}`;
 
-  return london_datetime
+  return london_datetime;
 };
 
 export const formatISODateStringHuman = (date: string) => {
-    // Change date to nice human readable format.
-    // Note that this converts the string to Europe London Time
-    // timezone and seconds are removed
-    const d = new Date(date);
-    const date_london = d.toLocaleDateString("en-GB", {timeZone: 'Europe/London'});
-    const date_london_time = d.toLocaleTimeString("en-GB", {timeZone: 'Europe/London'}).slice(0,5);
+  // Change date to nice human readable format.
+  // Note that this converts the string to Europe London Time
+  // timezone and seconds are removed
+  const d = new Date(date);
+  const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
+  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
 
-    // further formatting could be done to make it yyyy/mm/dd HH:MM
-    return `${date_london} ${date_london_time}`
+  // further formatting could be done to make it yyyy/mm/dd HH:MM
+  return `${date_london} ${date_london_time}`;
 };
-
