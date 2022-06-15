@@ -22,8 +22,8 @@ export type ChartData = {
 const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live initial estimate",
   GENERATION: "PV Live updated",
-  FORECAST: "OFC Forecast",
-  PAST_FORECAST: "OFC Forecast",
+  FORECAST: "OCF Forecast",
+  PAST_FORECAST: "OCF Forecast",
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "#24292E",
