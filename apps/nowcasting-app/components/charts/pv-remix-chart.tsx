@@ -10,6 +10,7 @@ import { formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
+import Spinner from "../spinner";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -57,7 +58,12 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter) return <div>loading...</div>;
+  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
+    return (
+      <div className="h-full flex">
+        <Spinner></Spinner>
+      </div>
+    );
 
   const latestPvGenerationInGW = (
     (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)

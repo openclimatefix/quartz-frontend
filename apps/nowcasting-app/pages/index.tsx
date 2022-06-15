@@ -14,7 +14,7 @@ export default function Home() {
         <SideLayout className="flex-[4]">
           <PvRemixChart />
         </SideLayout>
-        <div className="w-full h-full mb-20 flex-[5]">
+        <div className="w-full h-full flex-[5]">
           <PvLatestMap />
         </div>
       </div>
