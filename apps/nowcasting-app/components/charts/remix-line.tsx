@@ -60,7 +60,12 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest, is_national}) => {
+const RemixLine: React.FC<RemixLineProps> = ({
+  timeOfInterest,
+  data,
+  setTimeOfInterest,
+  is_national,
+}) => {
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
@@ -70,7 +75,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
     return convertISODateStringToLondonTime(x + ":00+00:00");
   }
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
-  var y_max = is_national === true ? MAX_NATIONAL_GENERATION_MW : 'auto'
+  var y_max = is_national === true ? MAX_NATIONAL_GENERATION_MW : "auto";
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -101,7 +106,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
           tick={{ fill: "white" }}
           tickLine={false}
-          domain={[0, y_max]} />
+          domain={[0, y_max]}
         />
 
         <ReferenceLine
