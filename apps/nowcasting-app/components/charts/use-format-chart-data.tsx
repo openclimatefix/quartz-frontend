@@ -51,7 +51,6 @@ const useFormatChartData = ({
   const data = useMemo(() => {
     if (forecastData && pvRealDataAfter && pvRealDataIn && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
-      console.log("********timeNow,sele********", timeNow, timeTrigger);
       const chartMap: Record<string, ChartData> = {};
 
       const addDataToMap = (
