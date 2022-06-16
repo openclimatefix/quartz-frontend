@@ -20,8 +20,8 @@ export type ChartData = {
 };
 
 const toolTiplabels: Record<string, string> = {
-  GENERATION_UPDATED: "PV Live initial estimate",
-  GENERATION: "PV Live updated",
+  GENERATION_UPDATED: "PV Live updated",
+  GENERATION: "PV Live initial estimate",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
 };
