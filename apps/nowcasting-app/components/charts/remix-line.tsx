@@ -144,7 +144,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
             return (
               <div className="p-2 bg-white shadow">
                 <p className="mb-2 text-black">
-                  {formatISODateStringHuman(data?.formatedDate + ":00+01:00")}
+                  {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}
                 </p>
                 <ul className="">
                   {Object.entries(data)
