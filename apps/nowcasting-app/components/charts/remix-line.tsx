@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
+import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 
 export type ChartData = {
   GENERATION_UPDATED?: number;
@@ -69,7 +70,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
     return convertISODateStringToLondonTime(x + ":00+00:00");
   }
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
-  var y_max = is_national === true ? 12000 : 'auto'
+  var y_max = is_national === true ? MAX_NATIONAL_GENERATION_MW : 'auto'
 
   return (
     <ResponsiveContainer width="100%" height="100%">
