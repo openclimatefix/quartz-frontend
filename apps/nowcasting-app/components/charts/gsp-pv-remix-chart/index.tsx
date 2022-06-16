@@ -49,6 +49,7 @@ const GspPvRemixChart: FC<{
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
           data={chartData}
+          is_national={false}
         />
       </div>
     </>
