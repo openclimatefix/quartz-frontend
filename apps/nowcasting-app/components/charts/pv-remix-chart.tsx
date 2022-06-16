@@ -88,6 +88,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
+            is_national={true}
           />
         </div>
         {clickedGspId && (
