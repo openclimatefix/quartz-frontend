@@ -20,7 +20,6 @@ const getForecastChartData = (
   else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
       FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
-      PAST_FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
     };
   else
     return {
