@@ -54,7 +54,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     forecastData: nationalForecastData,
     pvRealDataIn,
     pvRealDataAfter,
-    selectedTime,
+    timeTrigger: selectedTime,
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;

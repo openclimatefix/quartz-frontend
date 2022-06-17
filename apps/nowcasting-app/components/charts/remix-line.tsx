@@ -20,8 +20,8 @@ export type ChartData = {
 };
 
 const toolTiplabels: Record<string, string> = {
-  GENERATION_UPDATED: "PV Live initial estimate",
-  GENERATION: "PV Live updated",
+  GENERATION_UPDATED: "PV Live updated",
+  GENERATION: "PV Live initial estimate",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
 };
@@ -141,7 +141,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           type="monotone"
           dataKey="FORECAST"
           dot={false}
-          strokeDasharray="7 7"
+          strokeDasharray="10 10"
           stroke="#FFC425" //yellow
           strokeWidth={3}
         />
@@ -152,7 +152,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             return (
               <div className="p-2 bg-white shadow">
                 <p className="mb-2 text-black">
-                  {formatISODateStringHuman(data?.formatedDate + ":00+01:00")}
+                  {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}
                 </p>
                 <ul className="">
                   {Object.entries(data)
