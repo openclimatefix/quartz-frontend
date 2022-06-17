@@ -59,12 +59,7 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({
-  timeOfInterest,
-  data,
-  setTimeOfInterest,
-  yMax,
-}) => {
+const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest, yMax }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
