@@ -10,6 +10,7 @@ import { formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
+import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -88,6 +89,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
+            yMax={MAX_NATIONAL_GENERATION_MW}
           />
         </div>
         {clickedGspId && (
