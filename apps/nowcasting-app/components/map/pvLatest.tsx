@@ -35,6 +35,9 @@ const useGetForecastsData = (isNormalized: boolean) => {
   const allForecastData = useSWR<FcAllResData>(() => getAllForecastUrl(true, true), fetcher, {
     refreshInterval: 1000 * 60 * 5, // 5min
     isPaused: () => forecastLoading,
+    onSuccess: (data) => {
+        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+    }
   });
   useEffect(() => {
     if (!forecastLoading) {
