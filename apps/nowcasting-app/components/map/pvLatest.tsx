@@ -36,8 +36,8 @@ const useGetForecastsData = (isNormalized: boolean) => {
     refreshInterval: 1000 * 60 * 5, // 5min
     isPaused: () => forecastLoading,
     onSuccess: (data) => {
-        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-    }
+      setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+    },
   });
   useEffect(() => {
     if (!forecastLoading) {
