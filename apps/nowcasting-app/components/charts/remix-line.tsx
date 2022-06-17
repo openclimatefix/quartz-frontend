@@ -10,7 +10,6 @@ import {
   Tooltip,
 } from "recharts";
 import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
-import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 
 export type ChartData = {
   GENERATION_UPDATED?: number;
@@ -36,7 +35,7 @@ type RemixLineProps = {
   timeOfInterest: string;
   data: ChartData[];
   setTimeOfInterest?: (t: string) => void;
-  is_national: boolean;
+  yMax: number | string;
 };
 const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   const yy = 230;
@@ -64,8 +63,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
   timeOfInterest,
   data,
   setTimeOfInterest,
-  is_national,
+  yMax,
 }) => {
+  // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
@@ -74,8 +74,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
   function prettyPrintXdate(x: string) {
     return convertISODateStringToLondonTime(x + ":00+00:00");
   }
-  // Set the y max. If national then set to 12000, for gsp plot use 'auto'
-  var y_max = is_national === true ? MAX_NATIONAL_GENERATION_MW : "auto";
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -106,7 +104,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
           tick={{ fill: "white" }}
           tickLine={false}
-          domain={[0, y_max]}
+          domain={[0, yMax]}
         />
 
         <ReferenceLine
