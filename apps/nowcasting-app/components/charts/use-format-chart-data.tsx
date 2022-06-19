@@ -1,10 +1,11 @@
 import { useMemo } from "react";
+import { get30MinNow } from "../globalState";
 import { formatISODateString } from "../utils";
 import { ChartData } from "./remix-line";
 
 //sperate paste forcaste from furute forcast (ie: after selectedTime)
 const getForecastChartData = (
-  selectedTime: string,
+  timeNow: string,
   fr?: {
     targetTime: string;
     expectedPowerGenerationMegawatts: number;
@@ -12,14 +13,13 @@ const getForecastChartData = (
 ) => {
   if (!fr) return {};
 
-  if (new Date(fr.targetTime).getTime() > new Date(selectedTime + ":00.000Z").getTime())
+  if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
       FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
     };
-  else if (new Date(fr.targetTime).getTime() === new Date(selectedTime + ":00.000Z").getTime())
+  else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
       FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
-      PAST_FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
     };
   else
     return {
@@ -30,7 +30,7 @@ const useFormatChartData = ({
   forecastData,
   pvRealDataAfter,
   pvRealDataIn,
-  selectedTime,
+  timeTrigger,
 }: {
   forecastData?: {
     targetTime: string;
@@ -45,10 +45,11 @@ const useFormatChartData = ({
     datetimeUtc: string;
     solarGenerationKw: number;
   }[];
-  selectedTime?: string;
+  timeTrigger?: string;
 }) => {
   const data = useMemo(() => {
-    if (forecastData && pvRealDataAfter && pvRealDataIn && selectedTime) {
+    if (forecastData && pvRealDataAfter && pvRealDataIn && timeTrigger) {
+      const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};
 
       const addDataToMap = (
@@ -93,14 +94,15 @@ const useFormatChartData = ({
         addDataToMap(
           fc,
           (db) => db.targetTime,
-          (db) => getForecastChartData(selectedTime, db),
+          (db) => getForecastChartData(timeNow, db),
         ),
       );
 
       return Object.values(chartMap);
     }
     return [];
-  }, [forecastData, pvRealDataIn, pvRealDataAfter, selectedTime]);
+    // timeTrigger is used to trigger chart calculation when time changes
+  }, [forecastData, pvRealDataIn, pvRealDataAfter, timeTrigger]);
   return data;
 };
 

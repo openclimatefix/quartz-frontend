@@ -20,7 +20,7 @@ const GspPvRemixChart: FC<{
     forecastData: gspForecastData,
     pvRealDataIn,
     pvRealDataAfter,
-    selectedTime,
+    timeTrigger: selectedTime,
   });
   if (errors.length) return <div>failed to load</div>;
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
@@ -49,6 +49,7 @@ const GspPvRemixChart: FC<{
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
           data={chartData}
+          yMax="auto"
         />
       </div>
     </>

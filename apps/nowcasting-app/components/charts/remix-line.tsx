@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { formatISODateStringHuman } from "../utils";
+import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
 
 export type ChartData = {
   GENERATION_UPDATED?: number;
@@ -20,10 +20,10 @@ export type ChartData = {
 };
 
 const toolTiplabels: Record<string, string> = {
-  GENERATION_UPDATED: "PV Live initial estimate",
-  GENERATION: "PV Live updated",
-  FORECAST: "OFC Forecast",
-  PAST_FORECAST: "OFC Forecast",
+  GENERATION_UPDATED: "PV Live updated",
+  GENERATION: "PV Live initial estimate",
+  FORECAST: "OCF Forecast",
+  PAST_FORECAST: "OCF Forecast",
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "#24292E",
@@ -35,6 +35,7 @@ type RemixLineProps = {
   timeOfInterest: string;
   data: ChartData[];
   setTimeOfInterest?: (t: string) => void;
+  yMax: number | string;
 };
 const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   const yy = 230;
@@ -58,14 +59,15 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest }) => {
+const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest, yMax }) => {
+  // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function prettyPrintXdate(x: string) {
-    return x.slice(11, 16);
+    return convertISODateStringToLondonTime(x + ":00+00:00");
   }
 
   return (
@@ -97,6 +99,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
           tick={{ fill: "white" }}
           tickLine={false}
+          domain={[0, yMax]}
         />
 
         <ReferenceLine
@@ -133,7 +136,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           type="monotone"
           dataKey="FORECAST"
           dot={false}
-          strokeDasharray="7 7"
+          strokeDasharray="10 10"
           stroke="#FFC425" //yellow
           strokeWidth={3}
         />

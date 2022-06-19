@@ -18,6 +18,14 @@ export default function Home() {
           <PvLatestMap />
         </div>
       </div>
+      <a
+        className="bg-black text-white text-sm py-2 px-3"
+        href="https://docs.google.com/forms/d/e/1FAIpQLSf08XJPFwsNHxYiHUTV4g9CHWQzxAn0gSiAXXFkaI_3wjpNWw/viewform"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Give Feedback
+      </a>
     </Layout>
   );
 }

@@ -25,18 +25,29 @@ export const getTimeFromDate = (date: Date) => {
   return date.toTimeString().split(" ")[0].slice(0, -3);
 };
 export const formatISODateString = (date: string) => {
+  // remove timezone and seconds
+
   const dateid = date?.slice(0, 16);
   return dateid;
 };
+export const convertISODateStringToLondonTime = (date: string) => {
+  // Changes the ISO date string to Europe London time, and return time only
+  const d = new Date(date);
+  const date_london_time_str = d
+    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
+    .slice(0, 5);
+
+  return date_london_time_str;
+};
 
 export const formatISODateStringHuman = (date: string) => {
+  // Change date to nice human readable format.
+  // Note that this converts the string to Europe London Time
+  // timezone and seconds are removed
   const d = new Date(date);
-  const day = d.getUTCDate();
-  const month = d.getUTCMonth() + 1;
-  const year = d.getFullYear();
-  const hours = d.getUTCHours();
-  const minutes = d.getUTCMinutes();
-  const hourss = hours < 10 ? `0${hours}` : hours;
-  const minutess = minutes < 10 ? `0${minutes}` : minutes;
-  return `${day}/${month}/${year} ${hourss}:${minutess}`;
+  const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
+  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
+
+  // further formatting could be done to make it yyyy/mm/dd HH:MM
+  return `${date_london} ${date_london_time}`;
 };
