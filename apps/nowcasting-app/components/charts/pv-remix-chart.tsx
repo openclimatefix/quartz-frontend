@@ -1,5 +1,5 @@
-import { FC, useState } from "react";
-import RemixLine, { ChartData } from "./remix-line";
+import { FC } from "react";
+import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
@@ -10,11 +10,8 @@ import { formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
-<<<<<<< HEAD
 import Spinner from "../spinner";
-=======
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
->>>>>>> development
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
