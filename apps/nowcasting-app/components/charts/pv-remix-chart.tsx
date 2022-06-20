@@ -77,7 +77,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   return (
     <div
       className="flex flex-col overflow-y-scroll"
-      style={{ minHeight: `calc(100vh - 70px)`, maxHeight: `calc(100vh - 70px)` }}
+      style={{ minHeight: `calc(100vh - 110px)`, maxHeight: `calc(100vh - 110px)` }}
     >
       <div className="flex-grow mb-7">
         <ForecastHeader pv={latestPvGenerationInGW}>
