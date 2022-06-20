@@ -4,6 +4,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "../styles/globals.css";
 import { SWRConfig } from "swr";
 import { apiErrorMSGS } from "../constant";
+import * as Sentry from "@sentry/nextjs";
+import { AxiosError } from "axios";
 
 function MyApp({ Component, pageProps }: any) {
   return (
@@ -11,7 +13,15 @@ function MyApp({ Component, pageProps }: any) {
       <SWRConfig
         value={{
           provider: () => new Map(),
-          onError: (error, key) => {
+          onError: (error: AxiosError, key) => {
+            const isNetworkError = error.code === "ERR_NETWORK";
+            if (
+              !isNetworkError &&
+              error.response?.status !== 404 &&
+              error.response?.status !== 403
+            ) {
+              Sentry.captureException(error);
+            }
             const defaultMsg = "Error fetching data. Retrying now…";
             const errorMsg = apiErrorMSGS.find((e) => key.match(e.key))?.msg;
             toast(errorMsg || defaultMsg, {
