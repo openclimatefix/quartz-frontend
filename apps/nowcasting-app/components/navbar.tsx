@@ -49,7 +49,7 @@ const Navbar = ({}: INavbar) => {
                   <Menu.Items className="absolute right-0 w-48 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="px-4 pt-3">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        Version {version.slice(0, 3)}
+                        Version {version}
                       </p>
                     </div>
                     <div className="px-4 py-3">
