@@ -25,8 +25,8 @@ const GspPvRemixChart: FC<{
   if (errors.length) return <div>failed to load</div>;
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
     return (
-      <div className="m-auto w-full h-60 flex">
-        <Spinner></Spinner>
+      <div className="h-60 flex">
+        <Spinner />
       </div>
     );
   const forcastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
@@ -49,6 +49,7 @@ const GspPvRemixChart: FC<{
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
           data={chartData}
+          yMax="auto"
         />
       </div>
     </>

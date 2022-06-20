@@ -22,6 +22,7 @@ const Navbar = ({}: INavbar) => {
                   src="/NOWCASTING_Secondary-white.svg"
                   alt="Nowcasting Logo"
                 />
+                <div className="text-xl p-4">- Alpha Release</div>
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
@@ -49,7 +50,7 @@ const Navbar = ({}: INavbar) => {
                   <Menu.Items className="absolute right-0 w-48 py-1 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="px-4 pt-3">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        Version {version.slice(0, 3)}
+                        Version {version}
                       </p>
                     </div>
                     <div className="px-4 py-3">

@@ -1,5 +1,5 @@
-import { FC, useState } from "react";
-import RemixLine, { ChartData } from "./remix-line";
+import { FC } from "react";
+import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
@@ -10,6 +10,8 @@ import { formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
+import Spinner from "../spinner";
+import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -57,7 +59,12 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter) return <div>loading...</div>;
+  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
+    return (
+      <div className="h-full flex">
+        <Spinner></Spinner>
+      </div>
+    );
 
   const latestPvGenerationInGW = (
     (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
@@ -68,8 +75,11 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div className="flex flex-col" style={{ minHeight: `calc(100vh - 110px)` }}>
-      <div className="flex-grow">
+    <div
+      className="flex flex-col overflow-y-scroll"
+      style={{ minHeight: `calc(100vh - 110px)`, maxHeight: `calc(100vh - 110px)` }}
+    >
+      <div className="flex-grow mb-7">
         <ForecastHeader pv={latestPvGenerationInGW}>
           <PlatButton
             startTime={get30MinNow()}
@@ -88,6 +98,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
+            yMax={MAX_NATIONAL_GENERATION_MW}
           />
         </div>
         {clickedGspId && (
