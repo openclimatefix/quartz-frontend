@@ -1,13 +1,13 @@
-import { useEffect, useMemo } from "react";
+import { KeyboardEventHandler, useEffect, useMemo } from "react";
 import useGlobalState from "../globalState";
 import { addMinutesToISODate } from "../utils";
 
 const leftKey = "ArrowLeft";
 const rightKey = "ArrowRight";
-const useHotKeyControlChart = () => {
+const useGetTimeKeyControls = () => {
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
-  const handleKeyDown = useMemo(
-    () => (e: KeyboardEvent) => {
+  const handleKeyDown: KeyboardEventHandler<HTMLElement> = useMemo(
+    () => (e) => {
       if (e.key === leftKey) {
         setSelectedISOTime((selectedISOTime) => addMinutesToISODate(selectedISOTime || "", -30));
       } else if (e.key === rightKey) {
@@ -16,10 +16,6 @@ const useHotKeyControlChart = () => {
     },
     [],
   );
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  return handleKeyDown;
 };
-export default useHotKeyControlChart;
+export default useGetTimeKeyControls;

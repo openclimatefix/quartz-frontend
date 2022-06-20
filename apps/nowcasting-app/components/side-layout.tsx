@@ -1,16 +1,19 @@
 import React from "react";
-import Footer from "./footer";
+import useGetTimeKeyControls from "./hooks/use-get-time-key-controls";
 import Navbar from "./navbar";
 
 type SideLayoutProps = {
   className?: string;
 };
 
-const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
+const SideLayout: React.FC<SideLayoutProps> = ({ children, className, id }) => {
+  const keyControls = useGetTimeKeyControls();
   return (
     <div
+      onKeyDown={keyControls}
+      tabIndex={0}
       className={
-        "border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 	z-20 " +
+        " focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 	z-20 " +
         (className || "")
       }
     >
