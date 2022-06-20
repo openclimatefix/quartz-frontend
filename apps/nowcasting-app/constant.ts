@@ -10,32 +10,38 @@ export const getAllForecastUrl = (isNormalized: boolean, isHistoric: boolean) =>
 export const apiErrorMSGS = [
   {
     key: /\/GB\/solar\/gsp\/forecast\/all\??$/,
-    msg: "Error fetching initial data. Retrying now…",
+    getMsg: (key: string) => "Error fetching initial data. Retrying now…",
   },
   {
     key: /\/GB\/solar\/gsp\/forecast\/all\?historic=true&normalize=true$/,
-    msg: "Error fetching map data. Retrying now…",
+    getMsg: (key: string) => "Error fetching map data. Retrying now…",
   },
 
   {
     key: /\/GB\/solar\/gsp\/forecast\/latest\/0$/,
-    msg: "Error fetching national forcasts data. Retrying now…",
+    getMsg: (key: string) => "Error fetching national forecasts data. Retrying now…",
   },
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/0\/\?regime=in-day$/,
-    msg: 'Error fetching "NA-INDAY" data. Retrying now…',
+    getMsg: (key: string) => "Error fetching National PV Live initial estimate. Retrying. now ...",
   },
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/0\/\?regime=day-after$/,
-    msg: 'Error fetching "NA-DAYAFTER" data. Retrying now…',
+    getMsg: (key: string) => "Error fetching National PV Live updated. Retrying. now ...",
   },
 
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/\d+\/\?regime=in-day$/,
-    msg: 'Error fetching "GSP-INDAY" data. Retrying now…',
+    getMsg: (key: string) => {
+      const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
+      return `Error fetching GSP ${gspId} PV Live initial estimate. Retrying. now ...`;
+    },
   },
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/\d+\/\?regime=day-after$/,
-    msg: 'Error fetching "GSP-DAYAFTER" data. Retrying now…',
+    getMsg: (key: string) => {
+      const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
+      return `Error fetching GSP ${gspId} PV Live updated. Retrying. now ...`;
+    },
   },
 ];
