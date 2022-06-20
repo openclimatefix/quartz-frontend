@@ -5,9 +5,11 @@ import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
+import useHotKeyControlChart from "../components/hooks/use-hot-key-control-chart";
 
 export default function Home() {
   useAndUpdateSelectedTime();
+  useHotKeyControlChart();
   return (
     <Layout>
       <div className="h-full flex">
