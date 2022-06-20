@@ -61,7 +61,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
 
   return (
     <div className="relative h-full bg-mapbox-black-500">
-      <div className="absolute top-0 left-0 z-10 px-2 py-3 m-3 min-w-[20rem] w-full">
+      <div className="absolute top-0 left-0 z-10 p-6 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>
       <div ref={mapContainer} className="h-full" />
