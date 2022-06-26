@@ -12,6 +12,30 @@ import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
 import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import { FaExclamationCircle } from "@react-icons/all-files/fa/FaExclamationCircle";
+import Tooltip from "../tooltip";
+
+const chartInfo = (
+  <div className="w-full w-64 p-2 text-sm">
+    <ul className="list-none space-y-2">
+      <li>All datetimes are in Europe/London.</li>
+      <li>
+        Following PVLive{" "}
+        <a
+          className=" underline"
+          href="https://www.solar.sheffield.ac.uk/pvlive/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          ( link )
+        </a>
+        , datetimes show the end of the Settlement period. I.e 17:00 refers to solar generation
+        between 16:30 to 17:00.
+      </li>
+      <li>Charts units are in MW.</li>
+    </ul>
+  </div>
+);
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -112,8 +136,15 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
           ></GspPvRemixChart>
         )}
       </div>
-      <footer className="text-mapbox-black-300 text-right text-xs px-3">
-        <p>OCF Forecast Creation Time: {formatISODateStringHuman(forecastCreationTime || "")}</p>
+
+      <footer className="text-mapbox-black-300 text-right  px-3">
+        <Tooltip tip={chartInfo} className={"text-left"}>
+          <FaExclamationCircle className="m-2 " size={24} />
+        </Tooltip>
+
+        <p className="text-xs">
+          OCF Forecast Creation Time: {formatISODateStringHuman(forecastCreationTime || "")}
+        </p>
       </footer>
     </div>
   );
