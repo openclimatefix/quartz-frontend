@@ -6,7 +6,7 @@ type SideLayoutProps = {
   className?: string;
 };
 
-const SideLayout: React.FC<SideLayoutProps> = ({ children, className, id }) => {
+const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
   const keyControls = useGetTimeKeyControls();
   return (
     <div
