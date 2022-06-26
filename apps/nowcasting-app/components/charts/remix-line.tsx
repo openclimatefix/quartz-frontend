@@ -26,8 +26,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_FORECAST: "OCF Forecast",
 };
 const toolTipColors: Record<string, string> = {
-  GENERATION_UPDATED: "#24292E",
-  GENERATION: "#24292E",
+  GENERATION_UPDATED: "black",
+  GENERATION: "black",
   FORECAST: "#FFC425",
   PAST_FORECAST: "#FFC425",
 };
@@ -145,7 +145,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
             const data = payload && payload[0]?.payload;
             if (!data) return <div></div>;
             return (
-              <div className="p-2 bg-white shadow">
+              <div className="p-2 bg-white bg-opacity-80 shadow">
                 <p className="mb-2 text-black">
                   {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}
                 </p>
@@ -155,7 +155,11 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
                     .map(([name, value]) => {
                       if (name === "formatedDate") return null;
                       return (
-                        <li key={`item-${name}`} style={{ color: toolTipColors[name] }}>
+                        <li
+                          className="font-black"
+                          key={`item-${name}`}
+                          style={{ color: toolTipColors[name] }}
+                        >
                           {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)} MW
                         </li>
                       );
