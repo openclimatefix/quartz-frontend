@@ -23,25 +23,25 @@ export const apiErrorMSGS = [
   },
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/0\/\?regime=in-day$/,
-    getMsg: (key: string) => "Error fetching National PV Live initial estimate. Retrying. now ...",
+    getMsg: (key: string) => "Error fetching National PV Live initial estimate. Retrying now ...",
   },
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/0\/\?regime=day-after$/,
-    getMsg: (key: string) => "Error fetching National PV Live updated. Retrying. now ...",
+    getMsg: (key: string) => "Error fetching National PV Live updated. Retrying now ...",
   },
 
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/\d+\/\?regime=in-day$/,
     getMsg: (key: string) => {
       const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
-      return `Error fetching GSP ${gspId} PV Live initial estimate. Retrying. now ...`;
+      return `Error fetching GSP ${gspId} PV Live initial estimate. Retrying now ...`;
     },
   },
   {
     key: /\/GB\/solar\/gsp\/truth\/one_gsp\/\d+\/\?regime=day-after$/,
     getMsg: (key: string) => {
       const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
-      return `Error fetching GSP ${gspId} PV Live updated. Retrying. now ...`;
+      return `Error fetching GSP ${gspId} PV Live updated. Retrying now ...`;
     },
   },
 ];
