@@ -156,7 +156,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
                       if (name === "formatedDate") return null;
                       return (
                         <li
-                          className="font-black"
+                          className="font-bold"
                           key={`item-${name}`}
                           style={{ color: toolTipColors[name] }}
                         >
