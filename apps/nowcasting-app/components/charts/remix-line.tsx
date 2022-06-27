@@ -64,7 +64,9 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    const isSmallNumber = Number(x) < 10;
+    const roundedNumber = isSmallNumber ? Number(x).toFixed(2) : Math.round(Number(x));
+    return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function prettyPrintXdate(x: string) {
     return convertISODateStringToLondonTime(x + ":00+00:00");

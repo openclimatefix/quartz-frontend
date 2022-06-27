@@ -15,15 +15,15 @@ const getForecastChartData = (
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
-      FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+      FORECAST: fr.expectedPowerGenerationMegawatts,
     };
   else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+      FORECAST: fr.expectedPowerGenerationMegawatts,
     };
   else
     return {
-      PAST_FORECAST: Math.round(fr.expectedPowerGenerationMegawatts),
+      PAST_FORECAST: fr.expectedPowerGenerationMegawatts,
     };
 };
 const useFormatChartData = ({
@@ -77,7 +77,7 @@ const useFormatChartData = ({
           pva,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION_UPDATED: Math.round(db.solarGenerationKw / 1000),
+            GENERATION_UPDATED: db.solarGenerationKw / 1000,
           }),
         ),
       );
@@ -86,7 +86,7 @@ const useFormatChartData = ({
           pvIn,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION: Math.round(db.solarGenerationKw / 1000),
+            GENERATION: db.solarGenerationKw / 1000,
           }),
         ),
       );
