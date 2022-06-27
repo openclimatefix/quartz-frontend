@@ -36,7 +36,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       <div
         className={` bg-white text-black lg:text-xl md:text-lg text-sm font-black  p-4  flex-[2] `}
       >
-        National Solar PV Forecast
+        National Solar PV
       </div>
       <PVNumber pv={actualPV} subTitle={`${selectedTimeOnly} actual`} color="black" />
       <PVNumber pv={forcastPV} subTitle={`${selectedTimeOnly} forecast`} />

@@ -35,7 +35,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
     const selectetpvLive = pvLiveData.find(
       (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
     )?.solarGenerationKw;
-    const latestpvLive = pvLiveData[pvLiveData.length - 1].solarGenerationKw;
+    const latestpvLive = pvLiveData[0].solarGenerationKw;
     return KWtoGW(selectetpvUpdate || selectetpvLive || latestpvLive);
   }, [pvUpdatedData, pvLiveData, selectedTime]);
 
