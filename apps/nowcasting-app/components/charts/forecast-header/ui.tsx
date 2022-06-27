@@ -21,15 +21,15 @@ type ForecastHeaderProps = {
   forcastNextPV: string;
   forcastPV: string;
   actualPV: string;
-  selectedTime: string;
+  selectedTimeOnly: string;
 };
 
-const ForecastHeader: React.FC<ForecastHeaderProps> = ({
+const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forcastNextPV,
   forcastPV,
   actualPV,
   children,
-  selectedTime,
+  selectedTimeOnly,
 }) => {
   return (
     <div className={"flex content-between flex-wrap mt-6 h-auto"}>
@@ -38,12 +38,12 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       >
         National Solar PV Forecast
       </div>
-      <PVNumber pv={actualPV} subTitle={`${selectedTime} actual`} color="black" />
-      <PVNumber pv={forcastPV} subTitle={`${selectedTime} forecast`} />
+      <PVNumber pv={actualPV} subTitle={`${selectedTimeOnly} actual`} color="black" />
+      <PVNumber pv={forcastPV} subTitle={`${selectedTimeOnly} forecast`} />
       <PVNumber pv={forcastNextPV} subTitle="Forecast next" />
       <div className=" inline-flex items-center h-full m-auto">{children}</div>
     </div>
   );
 };
 
-export default ForecastHeader;
+export default ForecastHeaderUI;
