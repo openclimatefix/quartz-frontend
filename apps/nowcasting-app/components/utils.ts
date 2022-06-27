@@ -51,3 +51,10 @@ export const formatISODateStringHuman = (date: string) => {
   // further formatting could be done to make it yyyy/mm/dd HH:MM
   return `${date_london} ${date_london_time}`;
 };
+
+export const MWtoGW = (MW: number) => {
+  return (MW / 1000).toFixed(3);
+};
+export const KWtoGW = (MW: number) => {
+  return (MW / 1000 / 1000).toFixed(3);
+};

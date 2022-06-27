@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
@@ -6,12 +6,19 @@ import ForecastHeader from "./forecast-header";
 import axios from "axios";
 import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { formatISODateString, formatISODateStringHuman } from "../utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  formatISODateStringHuman,
+  KWtoGW,
+  MWtoGW,
+} from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
 import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import useTimeNow from "../hooks/use-time-now";
 
 const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
@@ -21,6 +28,7 @@ const axiosFetcher = (url: string) => {
 const PvRemixChart: FC<{ date?: string }> = (props) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const timeNow = useTimeNow();
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
@@ -58,6 +66,27 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     timeTrigger: selectedTime,
   });
 
+  const nextPvForecastInGW = MWtoGW(
+    nationalForecastData?.find((fc) => formatISODateString(fc.targetTime) === timeNow)
+      ?.expectedPowerGenerationMegawatts || 0,
+  );
+  const selectedPvForecastInGW = MWtoGW(
+    nationalForecastData?.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
+      ?.expectedPowerGenerationMegawatts || 0,
+  );
+  const selectedPvActualInGW = useMemo(() => {
+    if (pvRealDataAfter && pvRealDataIn && selectedTime) {
+      const selectetpvUpdate = pvRealDataAfter.find(
+        (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+      )?.solarGenerationKw;
+      const selectetpvLive = pvRealDataIn.find(
+        (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+      )?.solarGenerationKw;
+      const latestpvLive = pvRealDataIn[pvRealDataIn.length - 1].solarGenerationKw;
+      return KWtoGW(selectetpvUpdate || selectetpvLive || latestpvLive);
+    }
+    return "0";
+  }, [pvRealDataAfter, pvRealDataIn, selectedTime]);
   if (error || error2 || error3) return <div>failed to load</div>;
   if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
     return (
@@ -66,10 +95,6 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       </div>
     );
 
-  const latestPvGenerationInGW = (
-    (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
-      ?.expectedPowerGenerationMegawatts || 0) / 1000
-  ).toFixed(3);
   const setSelectedTime = (time: string) => {
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
@@ -80,7 +105,12 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       style={{ minHeight: `calc(100vh - 110px)`, maxHeight: `calc(100vh - 110px)` }}
     >
       <div className="flex-grow mb-7">
-        <ForecastHeader pv={latestPvGenerationInGW}>
+        <ForecastHeader
+          forcastNextPV={nextPvForecastInGW}
+          actualPV={selectedPvActualInGW}
+          forcastPV={selectedPvForecastInGW}
+          selectedTime={convertISODateStringToLondonTime(selectedTime)}
+        >
           <PlatButton
             startTime={get30MinNow()}
             endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
