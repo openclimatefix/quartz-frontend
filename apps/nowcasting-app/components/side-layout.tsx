@@ -1,5 +1,5 @@
 import React from "react";
-import useGetTimeKeyControls from "./hooks/use-get-time-key-controls";
+import Footer from "./footer";
 import Navbar from "./navbar";
 
 type SideLayoutProps = {
@@ -7,13 +7,10 @@ type SideLayoutProps = {
 };
 
 const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
-  const keyControls = useGetTimeKeyControls();
   return (
     <div
-      onKeyDown={keyControls}
-      tabIndex={0}
       className={
-        " focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 	z-20 " +
+        "focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 	z-20 " +
         (className || "")
       }
     >
