@@ -18,8 +18,8 @@ const GspPvRemixChart: FC<{
   const gspInfo = gspData?.location;
   const chartData = useFormatChartData({
     forecastData: gspForecastData,
-    pvRealDataIn,
-    pvRealDataAfter,
+    pvRealDayInData: pvRealDataIn,
+    pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,
   });
   if (errors.length) return <div>failed to load</div>;
