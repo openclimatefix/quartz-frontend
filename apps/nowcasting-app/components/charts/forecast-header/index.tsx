@@ -21,8 +21,9 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
 }) => {
   const timeNow = useTimeNow();
   const nextPvForecastInGW = MWtoGW(
-    pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === timeNow)
-      ?.expectedPowerGenerationMegawatts || 0,
+    pvForecastData?.find(
+      (fc) => formatISODateString(fc.targetTime) === formatISODateString(timeNow),
+    )?.expectedPowerGenerationMegawatts || 0,
   );
   const selectedPvForecastInGW = MWtoGW(
     pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
