@@ -27,14 +27,8 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
     )?.expectedPowerGenerationMegawatts || 0,
   );
 
-  // Get the next OCF forecast, for selected time
-  const selectedPvForecastInGW = MWtoGW(
-    pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
-      ?.expectedPowerGenerationMegawatts || 0,
-  );
-
-  // get the Actual pv
-  // TODO need to return the time of this last value and use in UI
+  // get the Actual pv value in GW
+  // Try to get it from the updated values, then try initial pv data, finally just take the first
   const selectedPvActualInGW = useMemo(() => {
     const selectetpvUpdate = pvUpdatedData.find(
       (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
@@ -46,12 +40,41 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
     return KWtoGW(selectetpvUpdate || selectetpvLive || latestpvLive);
   }, [pvUpdatedData, pvLiveData, selectedTime]);
 
+  // get pv time
+  // Try to get it from the updated values, then try initial pv data, finally just take the first
+  const selectedPvActualDatetime = useMemo(() => {
+    const selectetpvUpdate = pvUpdatedData.find(
+      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+    )?.datetimeUtc;
+    const selectetpvLive = pvLiveData.find(
+      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+    )?.datetimeUtc;
+    const latestpvLive = pvLiveData[0].datetimeUtc;
+    return selectetpvUpdate || selectetpvLive || latestpvLive;
+  }, [pvUpdatedData, pvLiveData, selectedTime]);
+
+  // if the select time is the same as timenow, then use the PV datetime, else use the select time
+  // This means that normally the forecast datetime is the same as pv,
+  // unless the selected time is the same as now.
+  // This is because the next OCF Forecast value shows that forecast already.
+  const pvForecastDatetime =
+    formatISODateString(timeNow) === selectedTime
+      ? formatISODateString(selectedPvActualDatetime)
+      : selectedTime;
+
+  // Get the next OCF forecast, for selected time
+  const selectedPvForecastInGW = MWtoGW(
+    pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === pvForecastDatetime)
+      ?.expectedPowerGenerationMegawatts || 0,
+  );
+
   return (
     <ForecastHeaderUI
       forcastNextPV={nextPvForecastInGW}
       actualPV={selectedPvActualInGW}
       forcastPV={selectedPvForecastInGW}
-      selectedTimeOnly={convertISODateStringToLondonTime(selectedTime + ':00.000Z')}
+      selectedTimeOnly={convertISODateStringToLondonTime(pvForecastDatetime + ":00.000Z")}
+      pvTimeOnly={convertISODateStringToLondonTime(selectedPvActualDatetime)}
     >
       <PlayButton
         startTime={get30MinNow()}

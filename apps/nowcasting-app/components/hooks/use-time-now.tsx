@@ -33,5 +33,4 @@ const useFloorTimeNow = () => {
   return timeNow;
 };
 
-
 export default useTimeNow;
