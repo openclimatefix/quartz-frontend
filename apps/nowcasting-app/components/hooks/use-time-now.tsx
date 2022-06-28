@@ -20,16 +20,9 @@ const useTimeNow = () => {
 const useFloorTimeNow = () => {
   // This get the Time now, but rounded down to the nearest 30 minutes.
   // TODO add return type.
-  const [timeNow, setTimeNow] = useGlobalState("timeFloorNow");
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const time30MinNow = getFloor30MinNow();
-      setTimeNow(time30MinNow);
-    }, 1000 * 60);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  const [timeNow, setTimeNow] = useGlobalState("timeNow");
+
+  timeNow.setMinutes(d.getMinutes() - 30);
   return timeNow;
 };
 
