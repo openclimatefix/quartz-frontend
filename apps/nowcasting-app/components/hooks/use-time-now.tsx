@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import useGlobalState, { get30MinNow, getFloor30MinNow } from "../globalState";
+import addMinutesToISODate from "../utils";
 
 const useTimeNow = () => {
   // This get the Time now, but rounded up to the nearest 30 minutes.
@@ -20,9 +21,9 @@ const useTimeNow = () => {
 const useFloorTimeNow = () => {
   // This get the Time now, but rounded down to the nearest 30 minutes.
   // TODO add return type.
-  const [timeNow, setTimeNow] = useGlobalState("timeNow");
+  const [timeNow, ] = useGlobalState("timeNow");
 
-  timeNow.setMinutes(d.getMinutes() - 30);
+  timeNow = addMinutesToISODate(timeNow,-30)
   return timeNow;
 };
 
