@@ -29,7 +29,7 @@ const chartInfo = (
         >
           PVLive
         </a>
-        , datetimes show the end of the Settlement period. For example 17:00 refers to solar
+        , datetimes show the end of the settlement period. For example 17:00 refers to solar
         generation between 16:30 to 17:00.
       </li>
       <li>The Y axis units are in MW, for the national and GSP plots. </li>
