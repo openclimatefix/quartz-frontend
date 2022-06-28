@@ -20,7 +20,7 @@ const chartInfo = (
     <ul className="list-none space-y-2">
       <li>All datetimes are in Europe/London timezone.</li>
       <li>
-        Following {" "}
+        Following{" "}
         <a
           className=" underline"
           href="https://www.solar.sheffield.ac.uk/pvlive/"
@@ -29,8 +29,8 @@ const chartInfo = (
         >
           PVLive
         </a>
-        , datetimes show the end of the Settlement period. For example 17:00 refers to solar generation
-        between 16:30 to 17:00.
+        , datetimes show the end of the Settlement period. For example 17:00 refers to solar
+        generation between 16:30 to 17:00.
       </li>
       <li>The Y axis units are in MW, for the national and GSP plots. </li>
     </ul>
