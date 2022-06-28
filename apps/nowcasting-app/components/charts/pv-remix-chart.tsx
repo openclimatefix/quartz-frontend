@@ -18,21 +18,21 @@ import Tooltip from "../tooltip";
 const chartInfo = (
   <div className="w-full w-64 p-2 text-sm">
     <ul className="list-none space-y-2">
-      <li>All datetimes are in Europe/London.</li>
+      <li>All datetimes are in Europe/London timezone.</li>
       <li>
-        Following PVLive{" "}
+        Following {" "}
         <a
           className=" underline"
           href="https://www.solar.sheffield.ac.uk/pvlive/"
           target="_blank"
           rel="noreferrer"
         >
-          ( link )
+          PVLive
         </a>
-        , datetimes show the end of the Settlement period. I.e 17:00 refers to solar generation
+        , datetimes show the end of the Settlement period. For example 17:00 refers to solar generation
         between 16:30 to 17:00.
       </li>
-      <li>Charts units are in MW.</li>
+      <li>The Y axis units are in MW, for the national and GSP plots. </li>
     </ul>
   </div>
 );
