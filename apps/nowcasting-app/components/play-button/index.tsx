@@ -1,18 +1,14 @@
 import React, { useRef, useState } from "react";
 import useGlobalState from "../globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import { formatISODateString } from "../utils";
+import { addMinutesToISODate, formatISODateString } from "../utils";
 import Ui from "./ui";
 
 type PlayButtonProps = {
   endTime: string;
   startTime: string;
 };
-const add30Minutes = (date: string) => {
-  var d = new Date(date);
-  d.setMinutes(d.getMinutes() + 30);
-  return d.toISOString();
-};
+
 const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -31,7 +27,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
         if (formatISODateString(selectedISOTime || "") === formatISODateString(endTime)) {
           return startTime;
         }
-        return add30Minutes(selectedISOTime || "");
+        return addMinutesToISODate(selectedISOTime || "", 30);
       });
     }, 2000);
   };

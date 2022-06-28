@@ -10,7 +10,7 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
   return (
     <div
       className={
-        "border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 	z-20 " +
+        "focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 	z-20 " +
         (className || "")
       }
     >

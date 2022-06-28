@@ -57,4 +57,10 @@ export const MWtoGW = (MW: number) => {
 };
 export const KWtoGW = (MW: number) => {
   return (MW / 1000 / 1000).toFixed(3);
+
+export const addMinutesToISODate = (date: string, munites: number) => {
+  var d = new Date(date);
+  d.setMinutes(d.getMinutes() + munites);
+  return d.toISOString();
+
 };
