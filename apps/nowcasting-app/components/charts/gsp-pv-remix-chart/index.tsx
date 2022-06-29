@@ -67,7 +67,7 @@ const GspPvRemixChart: FC<{
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
           data={chartData}
-          yMax={yMax}
+          yMax={yMax!}
         />
       </div>
     </>
