@@ -43,11 +43,13 @@ const GspPvRemixChart: FC<{
   var yMax = gspInfo?.installedCapacityMw;
 
   // lets round it up to the 'yMax_levels' so that the y major ticks look right.
-  for (var i = 0; i < yMax_levels.length; i++) {
-    var level = yMax_levels[i];
-    yMax = yMax < level ? level : yMax;
-    if (yMax === level) {
-      break;
+  if (typeof myVar !== undefined) {
+    for (var i = 0; i < yMax_levels.length; i++) {
+      var level = yMax_levels[i];
+      yMax = yMax < level ? level : yMax;
+      if (yMax === level) {
+        break;
+      }
     }
   }
 
