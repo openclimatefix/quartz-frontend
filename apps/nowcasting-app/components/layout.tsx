@@ -23,9 +23,7 @@ const Layout = ({ children }: ILayout) => {
       <main className="absolute inset-0 flex flex-col">
         {isValidating || solarStatus?.status === "ok" ? null : (
           <div className="blue text-white text-sm px-3 py-1" style={{ backgroundColor: "#48B0DF" }}>
-            <p>
-              {solarStatus?.message}
-            </p>
+            <p>{solarStatus?.message}</p>
           </div>
         )}
         {children}
