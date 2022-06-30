@@ -18,13 +18,4 @@ const useTimeNow = () => {
   return timeNow;
 };
 
-const useFloorTimeNow = () => {
-  // This get the Time now, but rounded down to the nearest 30 minutes.
-  // TODO add return type.
-  var [timeNow] = useGlobalState("timeNow");
-
-  timeNow = addMinutesToISODate(timeNow, -30);
-  return timeNow;
-};
-
 export default useTimeNow;
