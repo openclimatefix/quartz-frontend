@@ -3,10 +3,9 @@ import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
-import axios from "axios";
 import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { formatISODateString, formatISODateStringHuman } from "../utils";
+import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
@@ -37,11 +36,6 @@ const chartInfo = (
   </div>
 );
 
-const axiosFetcher = (url: string) => {
-  return axios(url).then(async (res) => {
-    return res.data;
-  });
-};
 const PvRemixChart: FC<{ date?: string }> = (props) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");

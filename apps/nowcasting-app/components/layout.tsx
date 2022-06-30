@@ -1,18 +1,12 @@
-import axios from "axios";
 import Head from "next/head";
 import useSWR from "swr";
 import { API_PREFIX } from "../constant";
+import { axiosFetcher } from "./utils";
 
 interface ILayout {
   children: React.ReactNode;
   environment?: string;
 }
-
-const axiosFetcher = (url: string) => {
-  return axios(url).then((res) => {
-    return res.data;
-  });
-};
 
 const Layout = ({ children }: ILayout) => {
   const { data: solarStatus, isValidating } = useSWR<{
@@ -26,7 +20,7 @@ const Layout = ({ children }: ILayout) => {
         <title>Solar PV Forecast</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="absolute inset-0 flex flex-col	">
+      <main className="absolute inset-0 flex flex-col">
         {isValidating || solarStatus?.status === "ok" ? null : (
           <div className="blue text-white text-sm px-3 py-1" style={{ backgroundColor: "#48B0DF" }}>
             <p>
@@ -36,7 +30,6 @@ const Layout = ({ children }: ILayout) => {
             </p>
           </div>
         )}
-
         {children}
       </main>
     </>
