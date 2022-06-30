@@ -6,13 +6,13 @@ import ForecastHeader from "./forecast-header";
 import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
 import {
+  axiosFetcher,
   convertISODateStringToLondonTime,
   formatISODateString,
   formatISODateStringHuman,
   KWtoGW,
   MWtoGW,
 } from "../utils";
-import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
