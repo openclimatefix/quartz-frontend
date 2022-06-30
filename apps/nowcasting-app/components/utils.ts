@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
 const forecastAccessor1 = (d: any) => d.forecastValues[1].expectedPowerGenerationMegawatts;
@@ -55,4 +57,10 @@ export const addMinutesToISODate = (date: string, munites: number) => {
   var d = new Date(date);
   d.setMinutes(d.getMinutes() + munites);
   return d.toISOString();
+};
+
+export const axiosFetcher = (url: string) => {
+  return axios(url).then(async (res) => {
+    return res.data;
+  });
 };

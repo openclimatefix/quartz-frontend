@@ -1,13 +1,8 @@
-import axios from "axios";
 import useSWR from "swr";
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData } from "../../types";
+import { axiosFetcher } from "../../utils";
 
-const axiosFetcher = (url: string) => {
-  return axios(url).then(async (res) => {
-    return res.data;
-  });
-};
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
   const { data: fcAll, error: error1 } = useSWR<FcAllResData>(
