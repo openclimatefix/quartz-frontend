@@ -1,16 +1,24 @@
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import useGlobalState, { get30MinNow } from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
+import {
+  axiosFetcher,
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  formatISODateStringHuman,
+  KWtoGW,
+  MWtoGW,
+} from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
 import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import useTimeNow from "../hooks/use-time-now";
 import { FaExclamationCircle } from "@react-icons/all-files/fa/FaExclamationCircle";
 import Tooltip from "../tooltip";
 
@@ -51,7 +59,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
 
-  const { data: pvRealDataIn, error: error2 } = useSWR<
+  const { data: pvRealDayInData, error: error2 } = useSWR<
     {
       datetimeUtc: string;
       solarGenerationKw: number;
@@ -60,7 +68,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
 
-  const { data: pvRealDataAfter, error: error3 } = useSWR<
+  const { data: pvRealDayAfterData, error: error3 } = useSWR<
     {
       datetimeUtc: string;
       solarGenerationKw: number;
@@ -71,23 +79,19 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    pvRealDataIn,
-    pvRealDataAfter,
+    pvRealDayInData,
+    pvRealDayAfterData,
     timeTrigger: selectedTime,
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDataIn || !pvRealDataAfter)
+  if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
       <div className="h-full flex">
         <Spinner></Spinner>
       </div>
     );
 
-  const latestPvGenerationInGW = (
-    (nationalForecastData.find((fc) => formatISODateString(fc.targetTime) === selectedTime)
-      ?.expectedPowerGenerationMegawatts || 0) / 1000
-  ).toFixed(3);
   const setSelectedTime = (time: string) => {
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
@@ -98,12 +102,12 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       style={{ minHeight: `calc(100vh - 110px)`, maxHeight: `calc(100vh - 110px)` }}
     >
       <div className="flex-grow mb-7">
-        <ForecastHeader pv={latestPvGenerationInGW}>
-          <PlatButton
-            startTime={get30MinNow()}
-            endTime={nationalForecastData[nationalForecastData.length - 1].targetTime}
-          ></PlatButton>
-        </ForecastHeader>
+        <ForecastHeader
+          pvForecastData={nationalForecastData}
+          pvUpdatedData={pvRealDayAfterData}
+          pvLiveData={pvRealDayInData}
+          selectedTime={selectedTime}
+        ></ForecastHeader>
         <button
           type="button"
           onClick={resetTime}

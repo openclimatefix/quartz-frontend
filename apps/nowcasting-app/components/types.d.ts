@@ -28,3 +28,12 @@ export type FcAllResData = {
     };
   }[];
 };
+type ForecastData = {
+  targetTime: string;
+  expectedPowerGenerationMegawatts: number;
+  expectedPowerGenerationNormalized?: number | null;
+}[];
+type PvRealData = {
+  datetimeUtc: string;
+  solarGenerationKw: number;
+}[];
