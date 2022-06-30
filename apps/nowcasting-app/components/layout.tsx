@@ -25,8 +25,6 @@ const Layout = ({ children }: ILayout) => {
           <div className="blue text-white text-sm px-3 py-1" style={{ backgroundColor: "#48B0DF" }}>
             <p>
               {solarStatus?.message}
-              Forecast has issues for regions in the North East of England from 12:00 20/6/22 We are
-              working on a fix.
             </p>
           </div>
         )}
