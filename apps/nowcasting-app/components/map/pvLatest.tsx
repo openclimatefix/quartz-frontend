@@ -10,15 +10,8 @@ import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
-import { formatISODateString, formatISODateStringHuman } from "../utils";
+import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
-import axios from "axios";
-
-const axiosFetcher = (url: string) => {
-  return axios(url).then(async (res) => {
-    return res.data;
-  });
-};
 
 // Assuming first item in the array is the latest
 const latestForecastValue = 0;
