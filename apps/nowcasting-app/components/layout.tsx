@@ -9,10 +9,10 @@ interface ILayout {
 }
 
 const Layout = ({ children }: ILayout) => {
-  const { data: solarStatus, isValidating } = useSWR<{
+  const { data: solarStatus } = useSWR<{
     status: string;
     message: string;
-  }>(`${API_PREFIX}/GB/solar/status`, axiosFetcher, {});
+  }>(`${API_PREFIX}/GB/solar/status`, axiosFetcher);
 
   return (
     <>
@@ -21,7 +21,7 @@ const Layout = ({ children }: ILayout) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="absolute inset-0 flex flex-col">
-        {isValidating || solarStatus?.status === "ok" ? null : (
+        {!solarStatus || solarStatus?.status === "ok" ? null : (
           <div className="blue text-white text-m px-4 py-2" style={{ backgroundColor: "#48B0DF" }}>
             <p>{solarStatus?.message}</p>
           </div>
