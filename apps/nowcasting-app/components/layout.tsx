@@ -12,7 +12,9 @@ const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useSWR<{
     status: string;
     message: string;
-  }>(`${API_PREFIX}/GB/solar/status`, axiosFetcher);
+  }>(`${API_PREFIX}/GB/solar/status`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5, // 5min
+  });
 
   return (
     <>
