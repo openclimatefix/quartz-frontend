@@ -40,7 +40,7 @@ const GspPvRemixChart: FC<{
   const pvPercentage = (forcastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   // set ymax to the installed capacity of the graph
-  var yMax = gspInfo?.installedCapacityMw || 100;
+  let yMax = gspInfo?.installedCapacityMw || 100;
 
   // lets round it up to the 'yMax_levels' so that the y major ticks look right.
   for (var i = 0; i < yMax_levels.length; i++) {
