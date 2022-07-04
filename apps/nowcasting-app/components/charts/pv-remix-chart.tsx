@@ -64,7 +64,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/truth/one_gsp/0/?regime=in-day`, axiosFetcher, {
+  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/0/?regime=in-day`, axiosFetcher, {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
 

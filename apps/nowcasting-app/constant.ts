@@ -22,23 +22,23 @@ export const apiErrorMSGS = [
     getMsg: (key: string) => "Error fetching national forecasts data. Retrying now…",
   },
   {
-    key: /\/GB\/solar\/gsp\/truth\/one_gsp\/0\/\?regime=in-day$/,
+    key: /\/GB\/solar\/gsp\/pvlive\/one_gsp\/0\/\?regime=in-day$/,
     getMsg: (key: string) => "Error fetching National PV Live initial estimate. Retrying now ...",
   },
   {
-    key: /\/GB\/solar\/gsp\/truth\/one_gsp\/0\/\?regime=day-after$/,
+    key: /\/GB\/solar\/gsp\/pvlive\/one_gsp\/0\/\?regime=day-after$/,
     getMsg: (key: string) => "Error fetching National PV Live updated. Retrying now ...",
   },
 
   {
-    key: /\/GB\/solar\/gsp\/truth\/one_gsp\/\d+\/\?regime=in-day$/,
+    key: /\/GB\/solar\/gsp\/pvlive\/one_gsp\/\d+\/\?regime=in-day$/,
     getMsg: (key: string) => {
       const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
       return `Error fetching GSP ${gspId} PV Live initial estimate. Retrying now ...`;
     },
   },
   {
-    key: /\/GB\/solar\/gsp\/truth\/one_gsp\/\d+\/\?regime=day-after$/,
+    key: /\/GB\/solar\/gsp\/pvlive\/one_gsp\/\d+\/\?regime=day-after$/,
     getMsg: (key: string) => {
       const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
       return `Error fetching GSP ${gspId} PV Live updated. Retrying now ...`;
