@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useGlobalState, { get30MinNow, getFloor30MinNow } from "../globalState";
+import useGlobalState, { get30MinNow } from "../globalState";
 import { addMinutesToISODate } from "../utils";
 
 const useTimeNow = () => {
