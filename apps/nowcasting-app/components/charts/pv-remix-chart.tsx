@@ -21,6 +21,7 @@ import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useTimeNow from "../hooks/use-time-now";
 import { FaExclamationCircle } from "@react-icons/all-files/fa/FaExclamationCircle";
 import Tooltip from "../tooltip";
+import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 
 const chartInfo = (
   <div className="w-full w-64 p-2 text-sm">
@@ -58,6 +59,12 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher, {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
+
+  const chartLimits = nationalForecastData && {
+    start: nationalForecastData[0].targetTime,
+    end: nationalForecastData[nationalForecastData.length - 1].targetTime,
+  };
+  useHotKeyControlChart(chartLimits);
 
   const { data: pvRealDayInData, error: error2 } = useSWR<
     {
