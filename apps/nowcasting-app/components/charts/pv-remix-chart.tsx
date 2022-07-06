@@ -97,10 +97,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div
-      className="flex flex-col overflow-y-scroll"
-      style={{ minHeight: `calc(100vh - 110px)`, maxHeight: `calc(100vh - 110px)` }}
-    >
+    <div className="flex flex-col overflow-y-scroll h-full">
       <div className="flex-grow mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
@@ -111,7 +108,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
         <button
           type="button"
           onClick={resetTime}
-          className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black h-full"
+          className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
         >
           Reset Time
         </button>
