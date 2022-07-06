@@ -1,17 +1,27 @@
 import { useEffect, useMemo } from "react";
 import useGlobalState from "../globalState";
-import { addMinutesToISODate } from "../utils";
+import { addMinutesToISODate, formatISODateString } from "../utils";
 
 const leftKey = "ArrowLeft";
 const rightKey = "ArrowRight";
-const useHotKeyControlChart = () => {
+const useHotKeyControlChart = (limits?: { start: string; end: string }) => {
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const handleKeyDown = useMemo(
     () => (e: KeyboardEvent) => {
       if (e.key === leftKey) {
-        setSelectedISOTime((selectedISOTime) => addMinutesToISODate(selectedISOTime || "", -30));
+        setSelectedISOTime((selectedISOTime) => {
+          if (
+            formatISODateString(selectedISOTime || "") === formatISODateString(limits?.start || "")
+          )
+            return selectedISOTime;
+          return addMinutesToISODate(selectedISOTime || "", -30);
+        });
       } else if (e.key === rightKey) {
-        setSelectedISOTime((selectedISOTime) => addMinutesToISODate(selectedISOTime || "", 30));
+        setSelectedISOTime((selectedISOTime) => {
+          if (formatISODateString(selectedISOTime || "") === formatISODateString(limits?.end || ""))
+            return selectedISOTime;
+          return addMinutesToISODate(selectedISOTime || "", 30);
+        });
       }
     },
     [],
