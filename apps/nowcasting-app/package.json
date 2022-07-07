@@ -1,6 +1,6 @@
 {
   "name": "@openclimatefix/nowcasting-app",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
@@ -14,6 +14,7 @@
     "@auth0/nextjs-auth0": "^1.8.0",
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
+    "@react-icons/all-files": "^4.1.0",
     "@sentry/nextjs": "^6.19.7",
     "axios": "^0.27.2",
     "mapbox-gl": "^2.8.2",
@@ -21,6 +22,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-hooks-global-state": "^1.0.2",
+    "react-toastify": "^9.0.4",
     "rechart": "^0.0.1",
     "resize-observer-polyfill": "^1.5.1",
     "turbo": "^1.0.26"
@@ -56,7 +58,9 @@
       "next",
       "prettier"
     ],
-    "plugins":["prettier"],
+    "plugins": [
+      "prettier"
+    ],
     "rules": {
       "@next/next/no-img-element": "off",
       "prettier/prettier": "error"

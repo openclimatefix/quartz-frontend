@@ -6,6 +6,11 @@ import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
 import Spinner from "../../spinner";
 
+// We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
+// If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
+// So, we round these up to the following numbers
+const yMax_levels = [3, 9, 20, 45, 60, 100, 200, 300, 450, 600];
+
 const GspPvRemixChart: FC<{
   gspId: number;
   selectedTime: string;
@@ -18,8 +23,8 @@ const GspPvRemixChart: FC<{
   const gspInfo = gspData?.location;
   const chartData = useFormatChartData({
     forecastData: gspForecastData,
-    pvRealDataIn,
-    pvRealDataAfter,
+    pvRealDayInData: pvRealDataIn,
+    pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,
   });
   if (errors.length) return <div>failed to load</div>;
@@ -33,6 +38,19 @@ const GspPvRemixChart: FC<{
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) ||
     ({} as any);
   const pvPercentage = (forcastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
+
+  // set ymax to the installed capacity of the graph
+  let yMax = gspInfo?.installedCapacityMw || 100;
+
+  // lets round it up to the 'yMax_levels' so that the y major ticks look right.
+  for (var i = 0; i < yMax_levels.length; i++) {
+    var level = yMax_levels[i];
+    yMax = yMax < level ? level : yMax;
+    if (yMax === level) {
+      break;
+    }
+  }
+
   return (
     <>
       <div className="bg-black">
@@ -49,7 +67,7 @@ const GspPvRemixChart: FC<{
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
           data={chartData}
-          yMax="auto"
+          yMax={yMax!}
         />
       </div>
     </>

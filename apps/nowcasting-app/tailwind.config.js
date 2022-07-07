@@ -24,6 +24,9 @@ module.exports = {
           500: "#6C6C6C",
           900: "#191a1a",
         },
+        blue: {
+          DEFAULT: "#48B0DF",
+        },
         danube: {
           DEFAULT: "#468AC9",
           50: "#D4E4F2",

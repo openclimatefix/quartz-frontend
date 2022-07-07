@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
 const forecastAccessor1 = (d: any) => d.forecastValues[1].expectedPowerGenerationMegawatts;
@@ -50,4 +52,23 @@ export const formatISODateStringHuman = (date: string) => {
 
   // further formatting could be done to make it yyyy/mm/dd HH:MM
   return `${date_london} ${date_london_time}`;
+};
+
+export const MWtoGW = (MW: number) => {
+  return (MW / 1000).toFixed(3);
+};
+export const KWtoGW = (MW: number) => {
+  return (MW / 1000 / 1000).toFixed(3);
+};
+
+export const addMinutesToISODate = (date: string, munites: number) => {
+  var d = new Date(date);
+  d.setMinutes(d.getMinutes() + munites);
+  return d.toISOString();
+};
+
+export const axiosFetcher = (url: string) => {
+  return axios(url).then(async (res) => {
+    return res.data;
+  });
 };

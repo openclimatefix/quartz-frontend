@@ -10,11 +10,8 @@ import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp-regions.json";
 import useGlobalState from "../globalState";
-import { formatISODateString, formatISODateStringHuman } from "../utils";
+import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
-
-const fetcher = (input: RequestInfo, init: RequestInit) =>
-  fetch(input, init).then((res) => res.json());
 
 // Assuming first item in the array is the latest
 const latestForecastValue = 0;
@@ -23,7 +20,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
   const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
   const bareForecastData = useSWRImmutable<FcAllResData>(
     () => getAllForecastUrl(false, false),
-    fetcher,
+    axiosFetcher,
     {
       onSuccess: (data) => {
         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
@@ -32,7 +29,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
     },
   );
 
-  const allForecastData = useSWR<FcAllResData>(() => getAllForecastUrl(true, true), fetcher, {
+  const allForecastData = useSWR<FcAllResData>(() => getAllForecastUrl(true, true), axiosFetcher, {
     refreshInterval: 1000 * 60 * 5, // 5min
     isPaused: () => forecastLoading,
     onSuccess: (data) => {

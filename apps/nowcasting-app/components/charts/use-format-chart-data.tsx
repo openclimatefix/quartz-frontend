@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { get30MinNow } from "../globalState";
+import { ForecastData, PvRealData } from "../types";
 import { formatISODateString } from "../utils";
 import { ChartData } from "./remix-line";
 
@@ -28,27 +29,17 @@ const getForecastChartData = (
 };
 const useFormatChartData = ({
   forecastData,
-  pvRealDataAfter,
-  pvRealDataIn,
+  pvRealDayAfterData,
+  pvRealDayInData,
   timeTrigger,
 }: {
-  forecastData?: {
-    targetTime: string;
-    expectedPowerGenerationMegawatts: number;
-    expectedPowerGenerationNormalized?: number | null;
-  }[];
-  pvRealDataAfter?: {
-    datetimeUtc: string;
-    solarGenerationKw: number;
-  }[];
-  pvRealDataIn?: {
-    datetimeUtc: string;
-    solarGenerationKw: number;
-  }[];
+  forecastData?: ForecastData;
+  pvRealDayAfterData?: PvRealData;
+  pvRealDayInData?: PvRealData;
   timeTrigger?: string;
 }) => {
   const data = useMemo(() => {
-    if (forecastData && pvRealDataAfter && pvRealDataIn && timeTrigger) {
+    if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};
 
@@ -72,7 +63,7 @@ const useFormatChartData = ({
         }
       };
 
-      pvRealDataAfter.forEach((pva) =>
+      pvRealDayAfterData.forEach((pva) =>
         addDataToMap(
           pva,
           (db) => db.datetimeUtc,
@@ -81,7 +72,7 @@ const useFormatChartData = ({
           }),
         ),
       );
-      pvRealDataIn.forEach((pvIn) =>
+      pvRealDayInData.forEach((pvIn) =>
         addDataToMap(
           pvIn,
           (db) => db.datetimeUtc,
@@ -102,7 +93,7 @@ const useFormatChartData = ({
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
-  }, [forecastData, pvRealDataIn, pvRealDataAfter, timeTrigger]);
+  }, [forecastData, pvRealDayInData, pvRealDayAfterData, timeTrigger]);
   return data;
 };
 
