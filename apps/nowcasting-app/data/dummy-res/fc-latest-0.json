@@ -1,267 +1,442 @@
 [
   {
-    "targetTime": "2022-05-16T11:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 5099.360846892626,
+    "targetTime": "2022-07-06T00:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T12:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 5593.130405881984,
+    "targetTime": "2022-07-06T00:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T12:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 5506.382318674065,
+    "targetTime": "2022-07-06T01:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T13:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 5829.583415392116,
+    "targetTime": "2022-07-06T01:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T13:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 5290.965327479633,
+    "targetTime": "2022-07-06T02:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T14:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 5223.432613822112,
+    "targetTime": "2022-07-06T02:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T14:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 5116.690332919759,
+    "targetTime": "2022-07-06T05:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 432.92863824189595,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T15:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 4100.974823751889,
+    "targetTime": "2022-07-06T05:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 261.5927431791971,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T15:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 4165.323049316226,
+    "targetTime": "2022-07-06T06:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 514.5182952202175,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T16:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 3180.5080741187867,
+    "targetTime": "2022-07-06T06:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 898.8553287547505,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T16:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 3180.5080741187867,
+    "targetTime": "2022-07-06T07:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 1241.436810016459,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T17:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 2112.3471316493783,
+    "targetTime": "2022-07-06T07:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 1678.2031741432586,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T17:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 2190.9953143181547,
+    "targetTime": "2022-07-06T08:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 2181.574776586821,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T18:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 985.9099541163203,
+    "targetTime": "2022-07-06T08:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 3364.234022674157,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T18:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 986.8490599348787,
+    "targetTime": "2022-07-06T09:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 3861.645474929028,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T19:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 587.4997250890432,
+    "targetTime": "2022-07-06T09:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4184.976428904775,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T19:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 587.4997250890432,
+    "targetTime": "2022-07-06T10:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 4048.665055121086,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T20:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T10:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4306.595990082211,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T20:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T11:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 4660.011744473338,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T21:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T11:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 5071.2143164421295,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T21:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T12:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 4585.914028537427,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T22:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T12:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4400.808418274286,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T22:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T13:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 4199.990699812426,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T23:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T13:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4338.125920662328,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-16T23:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T14:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 4298.083717159238,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T00:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 370.9177590862443,
+    "targetTime": "2022-07-06T14:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4379.841914470853,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T00:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T15:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 3898.6869480349237,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T01:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T15:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 3675.856837655776,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T01:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T16:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 3228.770942191271,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T02:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T16:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 2621.8042853392662,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T02:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 308.05791006703583,
+    "targetTime": "2022-07-06T17:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 2170.5463982250244,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T03:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 552.3405808786439,
+    "targetTime": "2022-07-06T17:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 2012.920258643515,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T03:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 545.7760020908908,
+    "targetTime": "2022-07-06T18:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 1215.4526843291628,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T04:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 580.5265449516506,
+    "targetTime": "2022-07-06T18:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 707.8070161659379,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T04:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 580.5265449516506,
+    "targetTime": "2022-07-06T19:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 446.6700553897761,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T05:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 899.7416311002888,
+    "targetTime": "2022-07-06T19:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 277.29992422165515,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T05:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 897.1101979868117,
+    "targetTime": "2022-07-06T20:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 28.781812689392165,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T06:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 1365.4854267107378,
+    "targetTime": "2022-07-06T20:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0.22433777398705965,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T06:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 1417.3081341856455,
+    "targetTime": "2022-07-06T21:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T07:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 3689.031707127958,
+    "targetTime": "2022-07-06T21:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T07:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 3689.031707127958,
+    "targetTime": "2022-07-06T22:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T08:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 5494.139641737881,
+    "targetTime": "2022-07-06T22:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T08:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 5518.9659827145515,
+    "targetTime": "2022-07-06T23:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T09:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 6824.180367360496,
+    "targetTime": "2022-07-06T23:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T09:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 6824.180367360496,
+    "targetTime": "2022-07-07T00:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T10:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 7583.85221754635,
+    "targetTime": "2022-07-07T00:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T10:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 7268.473649619208,
+    "targetTime": "2022-07-07T01:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T11:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 7425.5099331086685,
+    "targetTime": "2022-07-07T01:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T11:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 7365.149817913692,
+    "targetTime": "2022-07-07T02:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T12:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 6855.590019573973,
+    "targetTime": "2022-07-07T02:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T12:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 6414.222188296845,
+    "targetTime": "2022-07-07T03:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T13:00:00+00:00",
-    "expectedPowerGenerationMegawatts": 5783.333112430347,
+    "targetTime": "2022-07-07T03:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   },
   {
-    "targetTime": "2022-05-17T13:30:00+00:00",
-    "expectedPowerGenerationMegawatts": 5039.5094073754135,
+    "targetTime": "2022-07-07T05:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 420.0257495504561,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T05:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 231.01327571192834,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T06:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 250.3428112535787,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T06:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 549.0718408002854,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T07:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 881.4833133515854,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T07:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 1314.3514806939327,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T08:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 1766.856363339197,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T08:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 2329.0235763325936,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T09:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 2793.623538840648,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T09:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 3405.4102939588633,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T10:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 3762.26979097671,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T10:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4182.871093188299,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T11:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 4353.115650606325,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T11:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4784.263585065534,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T12:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 5693.425600802831,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T12:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 5929.191448957639,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T13:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 6229.496865093135,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T13:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 6779.974331441833,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T14:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 6763.661756515844,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T14:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 6614.690291876285,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T15:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 5910.934688828241,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T15:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 5682.830438757672,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T16:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 5129.113412662237,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T16:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 4328.867747058492,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T17:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 3470.4807488417364,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T17:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 2503.539461426852,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T18:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 1661.8246128065468,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T18:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 971.9220305749525,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T19:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 601.6181122250035,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T19:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 325.1623396421716,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T20:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 102.98230803239821,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T20:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 3.0854301127436474,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T21:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0.037904266161972115,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T21:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T22:00:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": null
+  },
+  {
+    "targetTime": "2022-07-07T22:30:00+00:00",
+    "expectedPowerGenerationMegawatts": 0,
     "expectedPowerGenerationNormalized": null
   }
 ]
