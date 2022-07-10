@@ -15,7 +15,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", ...defaultTheme.fontFamily.sans],
+        sans: ["system-ui", ...defaultTheme.fontFamily.sans],
       },
       colors: {
         "mapbox-black": {

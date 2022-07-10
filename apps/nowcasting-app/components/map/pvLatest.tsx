@@ -120,49 +120,49 @@ const PvLatestMap = () => {
       );
     }
   };
+  const addFCData = initForecastData
+    ? (map: { current: mapboxgl.Map }) => {
+        const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
-  const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
+        map.current.addSource("latestPV", {
+          type: "geojson",
+          data: forecastGeoJson,
+        });
 
-    map.current.addSource("latestPV", {
-      type: "geojson",
-      data: forecastGeoJson,
-    });
+        map.current.addLayer({
+          id: "latestPV-forecast",
+          type: "fill",
+          source: "latestPV",
+          layout: { visibility: "visible" },
+          paint: {
+            "fill-color": "#eab308",
+            "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
+          },
+        });
 
-    map.current.addLayer({
-      id: "latestPV-forecast",
-      type: "fill",
-      source: "latestPV",
-      layout: { visibility: "visible" },
-      paint: {
-        "fill-color": "#eab308",
-        "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
-      },
-    });
+        map.current.addLayer({
+          id: "latestPV-forecast-borders",
+          type: "line",
+          source: "latestPV",
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 0.6,
+            "line-opacity": 0.2,
+          },
+        });
 
-    map.current.addLayer({
-      id: "latestPV-forecast-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 0.6,
-        "line-opacity": 0.2,
-      },
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast-select-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 4,
-        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0],
-      },
-    });
-  };
-
+        map.current.addLayer({
+          id: "latestPV-forecast-select-borders",
+          type: "line",
+          source: "latestPV",
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 4,
+            "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0],
+          },
+        });
+      }
+    : undefined;
   return forecastError ? (
     <FaildStateMap error="Failed to load" />
   ) : forecastLoading ? (
