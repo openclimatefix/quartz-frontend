@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { useUser } from "@auth0/nextjs-auth0";
+import { useUser } from "../components/auth0";
 import pkg from "../package.json";
 import { classNames } from "./utils";
 const { version } = pkg;

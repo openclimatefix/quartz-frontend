@@ -1,5 +1,5 @@
 import type { AppProps } from "next/app";
-import { UserProvider } from "@auth0/nextjs-auth0";
+import { UserProvider } from "../components/auth0";
 import { ToastContainer, toast } from "react-toastify";
 import "../styles/globals.css";
 import { SWRConfig } from "swr";

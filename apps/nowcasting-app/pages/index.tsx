@@ -1,4 +1,4 @@
-import { withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { withPageAuthRequired } from "../components/auth0";
 import Layout from "../components/layout";
 import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
