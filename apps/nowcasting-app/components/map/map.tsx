@@ -1,11 +1,17 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";
-import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
+
+interface IMap {
+  loadDataOverlay: any;
+  controlOverlay: any;
+  bearing?: number;
+  updateData: { newData: boolean; updateMapData: (map: mapboxgl.Map) => void };
+}
 
 /**
  * Mapbox wrapper.
@@ -17,6 +23,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
+  const [isSourceLoaded, setIsSourceLoaded] = useState(false);
   const [lng, setLng] = useState(-2.3175601);
   const [lat, setLat] = useState(54.70534432);
   const [zoom, setZoom] = useState(5);
@@ -54,14 +61,23 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
       setLat(Number(map.current?.getCenter().lat.toFixed(4)));
       setZoom(Number(map.current?.getZoom().toFixed(2)));
     });
-
-    map.current.on("load", (event) => {
-      loadDataOverlay(map);
+    map.current.on("sourcedata", (e) => {
+      if (e.sourceId === "latestPV" && e.sourceCacheId === "other:latestPV") {
+        setIsSourceLoaded(e.isSourceLoaded && (e.source as any).data);
+      }
     });
   }, [map]);
 
+  useEffect(() => {
+    if (loadDataOverlay && map.current)
+      map.current.on("load", (event) => {
+        loadDataOverlay(map);
+      });
+  }, [loadDataOverlay]);
+
   return (
     <div className="relative h-full bg-mapbox-black-500">
+      {isSourceLoaded && <span data-e2e="map-loaded"></span>}
       <div className="absolute top-0 left-0 z-10 p-6 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>

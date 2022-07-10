@@ -119,7 +119,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
         >
           Reset Time
         </button>
-        <div className="h-60">
+        <div className="h-60" data-e2e="main-chart">
           <RemixLine
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}

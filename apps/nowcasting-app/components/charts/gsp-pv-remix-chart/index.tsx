@@ -62,7 +62,7 @@ const GspPvRemixChart: FC<{
         </ForecastHeaderGSP>
       </div>
 
-      <div className=" h-60 mt-8 ">
+      <div className=" h-60 mt-8 " data-e2e="gsp-chart">
         <RemixLine
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
