@@ -7,7 +7,6 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 const moduleExports = {
   // Your existing module.exports
-  trailingSlash: true,
 };
 
 const sentryWebpackPluginOptions = {
