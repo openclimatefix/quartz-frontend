@@ -41,9 +41,9 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   return (
     <div className={"flex content-between flex-wrap mt-6 h-auto"}>
       <div
-        className={` bg-white text-black lg:text-xl md:text-lg text-sm font-black  p-4  flex-[2] `}
+        className={` bg-white text-black lg:text-2xl md:text-lg text-sm font-black  p-4  flex-[2] `}
       >
-        National Solar PV
+        National
       </div>
       <PVNumber pv={actualPV} subTitle={`${pvTimeOnly} PVLive`} color="black" />
       <PVNumber pv={forcastPV} subTitle={`${selectedTimeOnly} Forecast`} />
