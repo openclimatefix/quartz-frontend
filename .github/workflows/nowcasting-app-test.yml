@@ -1,0 +1,38 @@
+name: Nowcasting App Tests
+on:
+  push:
+    paths:
+      - 'apps/nowcasting-app/**'
+jobs:
+  test:
+    name: cypress test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: End-to-end tests (Cypress)
+        id: cypress
+        uses: cypress-io/github-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          DB_LOG: false
+          NEXT_PUBLIC_ENV_NAME: test
+        with:
+          working-directory: apps/nowcasting-app
+          build: yarn build
+          start: yarn start:test
+          wait-on: http://localhost:3002
+          browser: electron
+          install-command: yarn install --frozen-lockfile --silent 
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: apps/nowcasting-app/cypress/videos/*
