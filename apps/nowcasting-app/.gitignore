@@ -37,3 +37,7 @@ yarn-error.log*
 .sentryclirc
 
 **/screenshots/*
+**/__image_snapshots__/*.actual.*
+**/__image_snapshots__/*.diff.*
+cypress/videos
+cypress/screenshots

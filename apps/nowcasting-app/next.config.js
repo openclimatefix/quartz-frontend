@@ -17,6 +17,10 @@ const sentryWebpackPluginOptions = {
   //   urlPrefix, include, ignore
 
   silent: true, // Suppresses all logs
+  dryRun:
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_SENTRY_DSN === undefined ||
+    process.env.NEXT_PUBLIC_ENV_NAME === "test",
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options.
 };
