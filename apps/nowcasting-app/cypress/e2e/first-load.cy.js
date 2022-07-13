@@ -3,6 +3,6 @@ const elements = {
   mapLoaded: "[data-e2e=map-loaded]",
 };
 it("Match Image Snapshot - whole page", () => {
-  cy.visit("/").get(elements.mapLoaded, { timeout: 20000 }).should("exist");
+  cy.visit("/").get(elements.mapLoaded, { timeout: 20000 }).should("exist").wait(1000);
   cy.document().toMatchImageSnapshot();
 });
