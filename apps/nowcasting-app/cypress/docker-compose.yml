@@ -1,0 +1,9 @@
+version: "3"
+services:
+  cypress:
+    container_name: cypress
+    build: .
+    image: cypress:10.3.0-electron
+    command: "run --headless -C /app/cypress/cypress.config.js"
+    volumes:
+      - .:/app/cypress
