@@ -8,8 +8,8 @@
     "start:test": "cross-env NEXT_PUBLIC_ENV_NAME=test next start -p 3002",
     "build": "next build",
     "start": "next start",
-    "cypress:open": "cypress open --browser electron",
-    "cypress:headless": "cypress run --headless --browser electron",
+    "cypress:open": "cypress open --browser electron -C ./cypress/cypress.config.js",
+    "cypress:headless": "cypress run --headless --browser electron -C ./cypress/cypress.config.js",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "lint": "next lint"

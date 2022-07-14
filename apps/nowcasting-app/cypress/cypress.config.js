@@ -1,14 +1,14 @@
-import { defineConfig } from "cypress";
-import { initPlugin } from "cypress-plugin-snapshots/plugin";
+const { defineConfig } = require("cypress");
+const { initPlugin } = require("cypress-plugin-snapshots/plugin");
 
-export default defineConfig({
+module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       initPlugin(on, config);
       return config;
       // implement node event listeners here
     },
-    baseUrl: "http://localhost:3002",
+    baseUrl: process.env.BASE_URL || "http://localhost:3002",
     nodeVersion: "system",
     watchForFileChanges: false,
     defaultCommandTimeout: 10000,
