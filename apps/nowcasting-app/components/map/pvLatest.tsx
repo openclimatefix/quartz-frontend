@@ -8,7 +8,7 @@ import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
-import gspShapeData from "../../data/gsp-regions.json";
+import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../globalState";
 import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
