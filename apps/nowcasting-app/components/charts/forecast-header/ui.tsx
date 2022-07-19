@@ -1,12 +1,13 @@
 import React from "react";
 
-const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string }> = ({
+const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string; dataE2e?: string }> = ({
   pv,
   subTitle,
   color = "#FFC425",
+  dataE2e,
 }) => {
   return (
-    <div className="flex-[1] m-auto">
+    <div className="flex-[1] m-auto" data-e2e={dataE2e}>
       <div className="m-2">
         <p
           className={`lg:text-xl md:text-lg text-sm font-bold text-center text-${color}`}
@@ -39,15 +40,23 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextTimeOnly,
 }) => {
   return (
-    <div className={"flex content-between flex-wrap mt-6 h-auto"}>
+    <div className={"flex content-between flex-wrap mt-6 h-auto"} data-e2e="NF-header">
       <div
         className={` bg-white text-black lg:text-xl md:text-lg text-sm font-black  p-4  flex-[2] `}
       >
         National Solar PV
       </div>
-      <PVNumber pv={actualPV} subTitle={`${pvTimeOnly} PVLive`} color="black" />
-      <PVNumber pv={forcastPV} subTitle={`${selectedTimeOnly} Forecast`} />
-      <PVNumber pv={forcastNextPV} subTitle={`${forecastNextTimeOnly} Forecast`} />
+      <PVNumber dataE2e="actual-pv" pv={actualPV} subTitle={`${pvTimeOnly} PVLive`} color="black" />
+      <PVNumber
+        dataE2e="selected-forecast-pv"
+        pv={forcastPV}
+        subTitle={`${selectedTimeOnly} Forecast`}
+      />
+      <PVNumber
+        dataE2e="next-forecast-pv"
+        pv={forcastNextPV}
+        subTitle={`${forecastNextTimeOnly} Forecast`}
+      />
       <div className=" inline-flex items-center h-full m-auto">{children}</div>
     </div>
   );

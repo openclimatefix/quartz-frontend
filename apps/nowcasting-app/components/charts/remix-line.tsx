@@ -36,8 +36,9 @@ type RemixLineProps = {
   data: ChartData[];
   setTimeOfInterest?: (t: string) => void;
   yMax: number | string;
+  id?: string;
 };
-const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
+const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x }, dataE2e }) => {
   const yy = 230;
   return (
     <g>
@@ -53,13 +54,19 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
         y2={yy}
       ></line>
       <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill="white"></rect>
-      <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle">
+      <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle" data-e2e={dataE2e}>
         {value}
       </text>
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest, yMax }) => {
+const RemixLine: React.FC<RemixLineProps> = ({
+  timeOfInterest,
+  data,
+  setTimeOfInterest,
+  yMax,
+  id,
+}) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
@@ -107,7 +114,12 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           stroke="white"
           strokeWidth={1}
           strokeDasharray="3 3"
-          label={<CustomizedLabel value={prettyPrintXdate(timeOfInterest)}></CustomizedLabel>}
+          label={
+            <CustomizedLabel
+              dataE2e={id + "-reference"}
+              value={prettyPrintXdate(timeOfInterest)}
+            ></CustomizedLabel>
+          }
         />
 
         <Line

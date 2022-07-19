@@ -12,6 +12,7 @@ const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
       onClick={() => {
         onClick();
       }}
+      data-e2e={isPlaying ? "pause-button" : "play-button"}
     >
       {!isPlaying ? (
         <svg viewBox="0 0 24 24" fill="currentColor" height="3rem" width="3rem">

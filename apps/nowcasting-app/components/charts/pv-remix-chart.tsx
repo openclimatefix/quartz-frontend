@@ -117,6 +117,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
         <button
           type="button"
           onClick={resetTime}
+          data-e2e="reset-time-button"
           className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
         >
           Reset Time

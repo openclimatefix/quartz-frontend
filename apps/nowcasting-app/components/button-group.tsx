@@ -25,7 +25,10 @@ const ButtonGroup = ({ rightString }: IButtonGroup) => {
       >
         DELTA
       </button>
-      <div className="absolute right-5 top-0 items-center px-3 py-1 ml-px text-md font-medium text-white bg-mapbox-black ">
+      <div
+        data-e2e="header-map-time"
+        className="absolute right-5 top-0 items-center px-3 py-1 ml-px text-md font-medium text-white bg-mapbox-black "
+      >
         {rightString}
       </div>
     </span>
