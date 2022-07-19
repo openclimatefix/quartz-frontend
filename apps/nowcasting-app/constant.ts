@@ -48,3 +48,4 @@ export const apiErrorMSGS = [
     },
   },
 ];
+export const playInterval = 2000;

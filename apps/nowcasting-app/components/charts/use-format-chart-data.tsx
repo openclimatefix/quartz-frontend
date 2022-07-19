@@ -1,7 +1,6 @@
 import { useMemo } from "react";
-import { get30MinNow } from "../globalState";
 import { ForecastData, PvRealData } from "../types";
-import { formatISODateString } from "../utils";
+import { formatISODateString, get30MinNow } from "../utils";
 import { ChartData } from "./remix-line";
 
 //sperate paste forcaste from furute forcast (ie: after selectedTime)
