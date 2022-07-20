@@ -1,4 +1,4 @@
-import { playInterval } from "../../constant";
+import { playInterval } from "../support/helpers";
 import elements from "../support/elements";
 
 describe("Charts", () => {
@@ -33,7 +33,10 @@ describe("Charts", () => {
       cy.get(elements.GSPFPvValues).should("have.text", "64% | 16 / 25MW");
     });
     it("should look correct", () => {
-      cy.get(elements.GSPFChart).scrollIntoView().toMatchImageSnapshot({ name: "gspf-chart" });
+      cy.get(elements.GSPFChart)
+        .scrollIntoView()
+        .wait(1000)
+        .toMatchImageSnapshot({ name: "gspf-chart" });
     });
 
     it("close button should close the chart", () => {
