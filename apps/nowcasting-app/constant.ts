@@ -1,6 +1,6 @@
 export const API_PREFIX =
   process.env.NEXT_PUBLIC_ENV_NAME === "test"
-    ? "/api/forecasts"
+    ? "/api/forecasts-test"
     : "https://api-dev.nowcasting.io/v0";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
