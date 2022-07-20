@@ -19,7 +19,11 @@ import "cypress-plugin-snapshots/commands";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
-beforeEach(() => {
-  // Reset the db with the default seed data before each test
-  return cy.clock(1657202400000, ["Date"]);
+before(function () {
+  // set app time to time within dummy date range
+  return cy.clock(1657202700000, ["Date"]);
+});
+beforeEach(function () {
+  // set app time to time within dummy date range
+  return cy.clock(1657202700000, ["Date"]);
 });
