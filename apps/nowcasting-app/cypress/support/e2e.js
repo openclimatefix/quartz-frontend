@@ -21,9 +21,11 @@ import "cypress-plugin-snapshots/commands";
 // require('./commands')
 before(function () {
   // set app time to time within dummy date range
+  if (this.clock) this.clock.restore();
   return cy.clock(1657202700000, ["Date"]);
 });
 beforeEach(function () {
   // set app time to time within dummy date range
+  if (this.clock) this.clock.restore();
   return cy.clock(1657202700000, ["Date"]);
 });

@@ -2,10 +2,10 @@ import { playInterval } from "../support/helpers";
 import elements from "../support/elements";
 
 describe("Charts", () => {
-  before(() => {
+  before("loadApp", () => {
     cy.loadApp();
   });
-  beforeEach(() => {
+  beforeEach("show gsp chart", () => {
     // open GSPF if cloesd
     cy.get(elements.GSPFChart)
       .should((_) => {})
@@ -44,42 +44,68 @@ describe("Charts", () => {
       cy.get(elements.GSPFChart).should("not.exist");
     });
   });
-  describe("play/pause/reset button", () => {
-    it("hit play button and time should change", function () {
-      cy.window().then((win) => {
-        const now = win.window.Date.now();
-        cy.clock(now);
+  describe.only("play/pause/reset button", () => {
+    beforeEach("reset time", () => {
+      cy.get(elements.pauseButton)
+        .should((_) => {})
+        .then(($el) => {
+          if ($el.length) {
+            $el.trigger("click");
+          }
+          return;
+        });
+      cy.get(elements.resetTimeButton).click();
+    });
+    // putting in a separate describe block to avoid clock hell
+    describe.only("play", () => {
+      it("hit play button and time should change", function () {
+        cy.window().then((win) => {
+          const now = win.window.Date.now();
 
-        cy.get(elements.playButton).click();
-        cy.tick(playInterval);
-        cy.checkIfTimeUpdatedInUi(now, 30);
+          if (this.clock) this.clock.restore();
+          cy.clock(now);
+
+          cy.get(elements.playButton).click();
+          cy.tick(playInterval);
+          cy.checkIfTimeUpdatedInUi(now, 30);
+        });
       });
     });
-    it("hit pause button and time should not change", function () {
-      cy.window().then(function (win) {
-        const now = win.window.Date.now();
-        cy.clock(now);
+    describe.only("pause", () => {
+      it("hit pause button and time should not change", function () {
+        cy.window().then((win) => {
+          const now = win.window.Date.now();
+          if (this.clock) this.clock.restore();
+          cy.clock(now);
 
-        //hit pause button
-        cy.get(elements.pauseButton).click();
-        // pass sometime
-        cy.tick(playInterval * 4);
+          // play first
+          cy.get(elements.playButton).click();
+          cy.tick(playInterval);
 
-        cy.checkIfTimeUpdatedInUi(now, 30);
+          //hit pause button
+          cy.get(elements.pauseButton).click();
+          // pass sometime
+          cy.tick(playInterval * 4);
+
+          cy.checkIfTimeUpdatedInUi(now, 30);
+        });
       });
     });
-    it(" reset button should reset time", function () {
-      cy.window().then(function (win) {
-        const now = win.window.Date.now();
-        cy.clock(now);
-        cy.checkIfTimeUpdatedInUi(now, 30);
+    describe.only("reset", () => {
+      it(" reset button should reset time", function () {
+        cy.window().then((win) => {
+          const now = win.window.Date.now();
+          if (this.clock) this.clock.restore();
+          cy.clock(now);
 
-        //hit pause button
-        cy.get(elements.resetTimeButton).click();
-        // pass sometime
-        cy.tick(playInterval * 4);
+          // play first
+          cy.get(elements.playButton).click();
+          cy.tick(playInterval);
+          cy.checkIfTimeUpdatedInUi(now, 30);
 
-        cy.checkIfTimeUpdatedInUi(now);
+          cy.get(elements.resetTimeButton).click();
+          cy.checkIfTimeUpdatedInUi(now);
+        });
       });
     });
   });
