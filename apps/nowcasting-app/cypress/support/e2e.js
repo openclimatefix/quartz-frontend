@@ -16,16 +16,19 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 import "cypress-plugin-snapshots/commands";
+import { now } from "./helpers";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 before(function () {
   // set app time to time within dummy date range
   if (this.clock) this.clock.restore();
-  return cy.clock(1657202700000, ["Date"]);
+
+  return cy.clock(now, ["Date"]);
 });
 beforeEach(function () {
   // set app time to time within dummy date range
   if (this.clock) this.clock.restore();
-  return cy.clock(1657202700000, ["Date"]);
+
+  return cy.clock(now, ["Date"]);
 });

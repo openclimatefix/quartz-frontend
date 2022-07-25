@@ -52,3 +52,4 @@ export const getTimeFormats = (date, addMinutes) => {
 };
 
 export const playInterval = 2000;
+export const now = 1657202700000;
