@@ -59,11 +59,14 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
   >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher, {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
-
-  const chartLimits = nationalForecastData && {
-    start: nationalForecastData[0].targetTime,
-    end: nationalForecastData[nationalForecastData.length - 1].targetTime,
-  };
+  const chartLimits = useMemo(
+    () =>
+      nationalForecastData && {
+        start: nationalForecastData[0].targetTime,
+        end: nationalForecastData[nationalForecastData.length - 1].targetTime,
+      },
+    [nationalForecastData],
+  );
   useHotKeyControlChart(chartLimits);
 
   const { data: pvRealDayInData, error: error2 } = useSWR<
