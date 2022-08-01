@@ -3,16 +3,9 @@ import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
-import useGlobalState, { get30MinNow } from "../globalState";
+import useGlobalState from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import {
-  axiosFetcher,
-  convertISODateStringToLondonTime,
-  formatISODateString,
-  formatISODateStringHuman,
-  KWtoGW,
-  MWtoGW,
-} from "../utils";
+import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlatButton from "../play-button";
@@ -48,6 +41,7 @@ const chartInfo = (
 const PvRemixChart: FC<{ date?: string }> = (props) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
@@ -115,15 +109,11 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
           pvLiveData={pvRealDayInData}
           selectedTime={selectedTime}
         ></ForecastHeader>
-        <button
-          type="button"
-          onClick={resetTime}
-          className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black"
-        >
-          Reset Time
-        </button>
-        <div className="h-60">
+
+        <div className="h-60 mt-4 mb-10">
           <RemixLine
+            resetTime={resetTime}
+            timeNow={formatISODateString(timeNow)}
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
@@ -138,6 +128,8 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
             setTimeOfInterest={setSelectedTime}
             selectedTime={selectedTime}
             gspId={clickedGspId}
+            timeNow={formatISODateString(timeNow)}
+            resetTime={resetTime}
           ></GspPvRemixChart>
         )}
       </div>

@@ -37,9 +37,10 @@ type RemixLineProps = {
   data: ChartData[];
   setTimeOfInterest?: (t: string) => void;
   yMax: number | string;
+  timeNow: string;
+  resetTime?: () => void;
 };
-
-const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
+const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x }, className, onClick }) => {
   const yy = 230;
   return (
     <g>
@@ -54,14 +55,23 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
         x2={x}
         y2={yy}
       ></line>
-      <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill="white"></rect>
-      <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle">
-        {value}
-      </text>
+      <g className={`fill-white ${className || ""}`} onClick={onClick}>
+        <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill={"inherit"}></rect>
+        <text x={x + 1} y={yy + 21} fill="black" id="time-now" textAnchor="middle">
+          {value}
+        </text>
+      </g>
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest, yMax }) => {
+const RemixLine: React.FC<RemixLineProps> = ({
+  timeOfInterest,
+  data,
+  setTimeOfInterest,
+  yMax,
+  timeNow,
+  resetTime,
+}) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
@@ -104,6 +114,19 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
           domain={[0, yMax]}
         />
 
+        <ReferenceLine
+          x={timeNow}
+          stroke="white"
+          strokeWidth={1}
+          strokeDasharray="3 3"
+          label={
+            <CustomizedLabel
+              className="hover:fill-amber-400   fill-mapbox-black-300 cursor-pointer"
+              value={"NOW"}
+              onClick={resetTime}
+            ></CustomizedLabel>
+          }
+        />
         <ReferenceLine
           x={timeOfInterest}
           stroke="white"
