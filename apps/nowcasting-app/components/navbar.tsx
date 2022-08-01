@@ -16,14 +16,19 @@ const Navbar = ({}: INavbar) => {
         <div className="mx-auto max-w-7xl  bg-black px-4">
           <div className="relative flex justify-between h-16">
             <div className="flex flex-1 items-stretch justify-start">
-              <div className="flex items-center flex-shrink-0">
+              <a
+                href="https://nowcasting.io/"
+                target="_blank"
+                className="flex items-center flex-shrink-0"
+                rel="noreferrer"
+              >
                 <img
                   className="block w-auto h-7 "
                   src="/NOWCASTING_Secondary-white.svg"
                   alt="Nowcasting Logo"
                 />
                 <div className="text-xl p-4">- Alpha Release</div>
-              </div>
+              </a>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               {/* Profile dropdown */}
