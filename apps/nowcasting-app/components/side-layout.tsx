@@ -18,9 +18,15 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
 
       <div className="relative h-full">
         {children}
-        <div className="absolute bottom-0 bg-mapbox-black p-2 z-10" style={{ right: "-120px" }}>
+        <a
+          className="absolute bottom-0 bg-mapbox-black p-2 z-10"
+          style={{ right: "-120px" }}
+          href="https://www.openclimatefix.org/"
+          target="_blank"
+          rel="noreferrer"
+        >
           <img src="/OCF_icon_wht.svg" alt="ofc" width={100} />
-        </div>
+        </a>
       </div>
     </div>
   );

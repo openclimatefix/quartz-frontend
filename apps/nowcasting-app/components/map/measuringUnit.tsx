@@ -21,16 +21,6 @@ const MeasuringUnit = ({
     <div className="mt-1">
       <div className="inline-block">
         <button
-          onClick={(event) => onToggle(event, ActiveUnit.percentage)}
-          disabled={isLoading}
-          type="button"
-          className={`relative inline-flex items-center px-3 py-1 text-sm font-extrabold ${
-            activeUnit === "%" ? "text-black bg-amber-400" : "text-white bg-black"
-          }  ${isLoading ? "cursor-wait" : ""} hover:bg-amber-400`}
-        >
-          %
-        </button>
-        <button
           onClick={(event) => onToggle(event, ActiveUnit.MW)}
           disabled={isLoading}
           type="button"
@@ -39,6 +29,16 @@ const MeasuringUnit = ({
           } ${isLoading ? "cursor-wait" : ""} hover:bg-amber-400`}
         >
           MW
+        </button>
+        <button
+          onClick={(event) => onToggle(event, ActiveUnit.percentage)}
+          disabled={isLoading}
+          type="button"
+          className={`relative inline-flex items-center px-3 py-1 text-sm font-extrabold ${
+            activeUnit === "%" ? "text-black bg-amber-400" : "text-white bg-black"
+          }  ${isLoading ? "cursor-wait" : ""} hover:bg-amber-400`}
+        >
+          %
         </button>
       </div>
     </div>

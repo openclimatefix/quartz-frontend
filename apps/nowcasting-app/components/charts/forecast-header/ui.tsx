@@ -7,7 +7,7 @@ const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string }> = ({
 }) => {
   return (
     <div className="flex-[1] m-auto">
-      <div className="m-2">
+      <div className="">
         <p
           className={`lg:text-xl md:text-lg text-sm font-bold text-center text-${color}`}
           style={{ color: color }}
@@ -41,7 +41,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   return (
     <div className={"flex content-between flex-wrap mt-6 h-auto"}>
       <div
-        className={` bg-white text-black lg:text-2xl md:text-lg text-sm font-black  p-4  flex-[2] `}
+        className={` bg-white text-black lg:text-2xl md:text-lg text-sm font-black  p-4 py-2  flex-[2] `}
       >
         National
       </div>

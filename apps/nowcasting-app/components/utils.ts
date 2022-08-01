@@ -55,10 +55,10 @@ export const formatISODateStringHuman = (date: string) => {
 };
 
 export const MWtoGW = (MW: number) => {
-  return (MW / 1000).toFixed(3);
+  return (MW / 1000).toFixed(1);
 };
 export const KWtoGW = (MW: number) => {
-  return (MW / 1000 / 1000).toFixed(3);
+  return (MW / 1000 / 1000).toFixed(1);
 };
 
 export const addMinutesToISODate = (date: string, munites: number) => {
