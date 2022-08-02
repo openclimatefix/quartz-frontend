@@ -12,7 +12,7 @@ const Navbar = ({}: INavbar) => {
 
   return (
     <>
-      <Disclosure as="nav" className="bg-white shadow">
+      <Disclosure as="nav" className="bg-black shadow">
         <div className="mx-auto max-w-7xl  bg-black px-4">
           <div className="relative flex justify-between h-16">
             <div className="flex flex-1 items-stretch justify-start">
