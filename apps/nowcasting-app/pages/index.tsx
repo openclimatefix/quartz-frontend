@@ -18,7 +18,6 @@ const OCFlogo = () => (
 );
 export default function Home() {
   useAndUpdateSelectedTime();
-  const [open, setOpen] = useState(false);
 
   return (
     <Layout>
@@ -28,17 +27,10 @@ export default function Home() {
           <OCFlogo />
         </div>
 
-        <div
-          id="side-bar"
-          className={`h-full absolute overflow-y-hidden z-20 `}
-          style={{ width: open ? "90%" : "44%" }}
-        >
-          <SideLayout className={`w-full`}>
-            <PvRemixChart />
-          </SideLayout>
-        </div>
+        <SideLayout>
+          <PvRemixChart />
+        </SideLayout>
       </div>
-      <button onClick={() => setOpen((o) => !o)}>open</button>
       <a
         className="bg-black text-white text-sm py-2 px-3"
         href="https://docs.google.com/forms/d/e/1FAIpQLSf08XJPFwsNHxYiHUTV4g9CHWQzxAn0gSiAXXFkaI_3wjpNWw/viewform"
