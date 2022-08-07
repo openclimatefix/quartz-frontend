@@ -1,3 +1,4 @@
-it("load page successfully", () => {
-  cy.visit("/");
+it("Match Image Snapshot - whole page", () => {
+  cy.loadApp();
+  cy.document().toMatchImageSnapshot();
 });
