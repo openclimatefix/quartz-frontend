@@ -1,4 +1,9 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
+const consistentLocalFontForVisualTest = "sans-serif";
+
+// use a local font for visual tests , because downloading a font from the internet is slow and does not always get applied on first load
+const fontFamily =
+  process.env.NEXT_PUBLIC_ENV_NAME === "test" ? consistentLocalFontForVisualTest : "Inter";
 
 module.exports = {
   content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
@@ -15,7 +20,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["system-ui", ...defaultTheme.fontFamily.sans],
+        sans: [fontFamily, ...defaultTheme.fontFamily.sans],
       },
       colors: {
         "mapbox-black": {

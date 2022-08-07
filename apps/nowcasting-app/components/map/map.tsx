@@ -45,6 +45,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
         zoom,
         bearing,
         keyboard: false,
+        testMode: process.env.NEXT_PUBLIC_ENV_NAME === "test",
       });
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });

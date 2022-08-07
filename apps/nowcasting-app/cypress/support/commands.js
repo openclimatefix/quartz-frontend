@@ -1,4 +1,8 @@
 /// <reference types="cypress" />
+
+import elements from "./elements";
+import { getTimeFormats } from "./helpers";
+
 // ***********************************************
 // This example commands.ts shows you how to
 // create various custom commands and overwrite
@@ -35,4 +39,21 @@
 //     }
 //   }
 // }
+Cypress.Commands.add("loadApp", () => {
+  return cy.visit("/").get(elements.mapLoaded, { timeout: 20000 }).should("exist").wait(1000);
+});
+
+// parmas:
+// date: number // utc iso date
+// addMinutes: number // number of minute to be added to `date`
+// should: "equal"|"not-equal" // compare date to ui
+
+Cypress.Commands.add("checkIfTimeUpdatedInUi", (date, addMinutes, should) => {
+  const updatedTimes = getTimeFormats(new Date(date), addMinutes);
+  const verb = should === "equal" ? "contain" : "not.contain";
+  cy.get(elements.nationalTimeReference).should(verb, updatedTimes.londonTime);
+  cy.get(elements.gspTimeReference).should(verb, updatedTimes.londonTime);
+  cy.get(elements.headerMapTime).should(verb, updatedTimes.londonDateTime);
+});
+
 export {};
