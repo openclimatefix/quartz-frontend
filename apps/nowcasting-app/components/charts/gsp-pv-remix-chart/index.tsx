@@ -52,7 +52,7 @@ const GspPvRemixChart: FC<{
   }
 
   return (
-    <>
+    <div data-e2e="GSPF-chart">
       <div className="bg-black">
         <ForecastHeaderGSP onClose={close} title={gspInfo?.regionName || ""}>
           {Math.round(pvPercentage)}% |{" "}
@@ -64,13 +64,14 @@ const GspPvRemixChart: FC<{
 
       <div className=" h-60 mt-8 " data-e2e="gsp-chart">
         <RemixLine
+          id="gsp"
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
           data={chartData}
           yMax={yMax!}
         />
       </div>
-    </>
+    </div>
   );
 };
 

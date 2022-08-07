@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { get30MinNow } from "../../globalState";
+import { get30MinNow } from "../../utils";
 import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";

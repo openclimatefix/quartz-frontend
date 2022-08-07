@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { playInterval } from "../../constant";
 import useGlobalState from "../globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import { addMinutesToISODate, formatISODateString } from "../utils";
@@ -29,7 +30,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
         }
         return addMinutesToISODate(selectedISOTime || "", 30);
       });
-    }, 2000);
+    }, playInterval);
   };
 
   return (

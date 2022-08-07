@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import useGlobalState, { get30MinNow } from "../globalState";
+import useGlobalState from "../globalState";
+import { get30MinNow } from "../utils";
 
 let intervals: any[] = [];
 const clearIntervals = () => {

@@ -21,6 +21,7 @@ const MeasuringUnit = ({
     <div className="mt-1">
       <div className="inline-block">
         <button
+          data-e2e="MW-button"
           onClick={(event) => onToggle(event, ActiveUnit.MW)}
           disabled={isLoading}
           type="button"
@@ -31,6 +32,7 @@ const MeasuringUnit = ({
           MW
         </button>
         <button
+          data-e2e="percentage-button"
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}
           disabled={isLoading}
           type="button"
