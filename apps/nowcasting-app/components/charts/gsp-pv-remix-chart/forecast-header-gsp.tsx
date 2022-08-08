@@ -13,7 +13,8 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({ title, children, 
     >
       <div
         data-e2e="title"
-        className={`bg-white text-black text-2xl font-black  p-4 py-2  flex-[1]`}
+        className={`bg-white text-black text-2xl font-black  p-4 py-2  flex-[1] `}
+        style={{ height: "inherit" }}
       >
         {title}
       </div>

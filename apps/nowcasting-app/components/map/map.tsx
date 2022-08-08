@@ -62,19 +62,17 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
       setLat(Number(map.current?.getCenter().lat.toFixed(4)));
       setZoom(Number(map.current?.getZoom().toFixed(2)));
     });
+
+    map.current.on("load", (event) => {
+      loadDataOverlay(map);
+    });
     map.current.on("sourcedata", (e) => {
-      if (e.sourceId === "latestPV" && e.sourceCacheId === "other:latestPV") {
+      const isPvDataLoaded = (e.source as any)?.data?.status === "loaded";
+      if (e.sourceId === "latestPV" && e.sourceCacheId === "other:latestPV" && isPvDataLoaded) {
         setIsSourceLoaded(e.isSourceLoaded && (e.source as any).data);
       }
     });
   }, [map]);
-
-  useEffect(() => {
-    if (loadDataOverlay && map.current)
-      map.current.on("load", (event) => {
-        loadDataOverlay(map);
-      });
-  }, [loadDataOverlay]);
 
   return (
     <div className="relative h-full bg-mapbox-black-500">
