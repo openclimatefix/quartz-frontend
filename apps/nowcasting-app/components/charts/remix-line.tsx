@@ -40,14 +40,21 @@ type RemixLineProps = {
   timeNow: string;
   resetTime?: () => void;
 };
-const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x }, className, onClick }) => {
+const CustomizedLabel: FC<any> = ({
+  value,
+  offset,
+  viewBox: { x },
+  className,
+  solidLine,
+  onClick,
+}) => {
   const yy = 230;
   return (
     <g>
       <line
         stroke="white"
-        strokeWidth="1"
-        strokeDasharray="3 3"
+        strokeWidth={solidLine ? "2" : "1"}
+        strokeDasharray={solidLine ? "" : "3 3"}
         fill="none"
         fillOpacity="1"
         x1={x}
@@ -114,27 +121,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
           domain={[0, yMax]}
         />
 
-        <ReferenceLine
-          x={timeNow}
-          stroke="white"
-          strokeWidth={1}
-          strokeDasharray="3 3"
-          label={
-            <CustomizedLabel
-              className="hover:fill-amber-400   fill-mapbox-black-300 cursor-pointer"
-              value={"NOW"}
-              onClick={resetTime}
-            ></CustomizedLabel>
-          }
-        />
-        <ReferenceLine
-          x={timeOfInterest}
-          stroke="white"
-          strokeWidth={1}
-          strokeDasharray="3 3"
-          label={<CustomizedLabel value={prettyPrintXdate(timeOfInterest)}></CustomizedLabel>}
-        />
-
         <Line
           type="monotone"
           dataKey="GENERATION"
@@ -164,6 +150,32 @@ const RemixLine: React.FC<RemixLineProps> = ({
           strokeDasharray="10 10"
           stroke={yellow} //yellow
           strokeWidth={3}
+        />
+        <ReferenceLine
+          x={timeOfInterest}
+          stroke="white"
+          strokeWidth={2}
+          label={
+            <CustomizedLabel
+              className={timeNow !== timeOfInterest ? "hidden" : ""}
+              value={prettyPrintXdate(timeOfInterest)}
+              solidLine={true}
+            ></CustomizedLabel>
+          }
+        />
+        <ReferenceLine
+          x={timeNow}
+          stroke="white"
+          strokeWidth={1}
+          strokeDasharray="3 3"
+          className={timeNow !== timeOfInterest ? "" : "hidden"}
+          label={
+            <CustomizedLabel
+              className="fill-amber-400    cursor-pointer"
+              value={"NOW"}
+              onClick={resetTime}
+            ></CustomizedLabel>
+          }
         />
         <Tooltip
           content={({ payload, label }) => {
