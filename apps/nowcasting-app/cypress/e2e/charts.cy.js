@@ -20,9 +20,9 @@ describe("Charts", () => {
 
   describe("National Forecast Header", () => {
     it("should have correct title", () => {
-      cy.get(elements.NFActualPv).should("contain", "7.210");
-      cy.get(elements.NFNextForecastPv).should("contain", "6.615");
-      cy.get(elements.NFSelectedForecastPv).should("contain", "6.764");
+      cy.get(elements.NFActualPv).should("contain", "7.2");
+      cy.get(elements.NFNextForecastPv).should("contain", "6.6");
+      cy.get(elements.NFSelectedForecastPv).should("contain", "6.8");
     });
   });
   describe("GSPF Chart", () => {
@@ -128,7 +128,7 @@ describe("Charts", () => {
           .type("{rightarrow}")
           .type("{rightarrow}")
           .type("{rightarrow}");
-        cy.checkIfTimeUpdatedInUi(new Date(lastchartTime).getTime());
+        cy.checkIfTimeUpdatedInUi(new Date(lastchartTime).getTime(), null, "equal");
       });
     });
   });
