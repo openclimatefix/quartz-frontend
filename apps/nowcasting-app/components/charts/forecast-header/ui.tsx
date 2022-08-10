@@ -1,9 +1,11 @@
 import React from "react";
+import { theme } from "../../../tailwind.config";
+const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string }> = ({
   pv,
   subTitle,
-  color = "#FFC425",
+  color = yellow,
 }) => {
   return (
     <div className="flex-[1] m-auto">
