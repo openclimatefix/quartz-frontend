@@ -118,7 +118,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
         <button
           type="button"
           onClick={resetTime}
-          className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
+          className="font-bold block mt-8 items-center px-3 ml-auto text-md text-black  bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black"
         >
           Reset Time
         </button>
@@ -142,7 +142,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
         )}
       </div>
 
-      <footer className="text-mapbox-black-300 text-right  px-3">
+      <footer className="text-ocf-gray-700 text-right  px-3">
         <Tooltip tip={chartInfo} className={"text-left"}>
           <FaExclamationCircle className="m-2 " size={24} />
         </Tooltip>

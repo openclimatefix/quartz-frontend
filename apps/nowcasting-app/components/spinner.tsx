@@ -6,7 +6,7 @@ const Spinner: React.FC<SpinnerProps> = ({}) => {
   return (
     <svg
       role="status"
-      className="w-8 h-8 mr-2 text-mapbox-black-300 m-auto self-center animate-spin dark:text-gray-600 fill-white"
+      className="w-8 h-8 mr-2 text-ocf-gray-700 m-auto self-center animate-spin dark:text-gray-600 fill-white"
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
