@@ -12,6 +12,8 @@ import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../globalState";
 import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
+import { theme } from "../../tailwind.config";
+const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 // Assuming first item in the array is the latest
 const latestForecastValue = 0;
@@ -135,7 +137,7 @@ const PvLatestMap = () => {
       source: "latestPV",
       layout: { visibility: "visible" },
       paint: {
-        "fill-color": "#eab308",
+        "fill-color": yellow,
         "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
       },
     });

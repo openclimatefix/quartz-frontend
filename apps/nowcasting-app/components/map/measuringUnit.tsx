@@ -25,8 +25,8 @@ const MeasuringUnit = ({
           disabled={isLoading}
           type="button"
           className={`relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold  ${
-            activeUnit === "MW" ? "text-black bg-amber-400" : "text-white bg-black"
-          } ${isLoading ? "cursor-wait" : ""} hover:bg-amber-400`}
+            activeUnit === "MW" ? "text-black bg-ocf-yellow" : "text-white bg-black"
+          } ${isLoading ? "cursor-wait" : ""} hover:bg-ocf-yellow`}
         >
           MW
         </button>
@@ -35,8 +35,8 @@ const MeasuringUnit = ({
           disabled={isLoading}
           type="button"
           className={`relative inline-flex items-center px-3 py-1 text-sm font-extrabold ${
-            activeUnit === "%" ? "text-black bg-amber-400" : "text-white bg-black"
-          }  ${isLoading ? "cursor-wait" : ""} hover:bg-amber-400`}
+            activeUnit === "%" ? "text-black bg-ocf-yellow" : "text-white bg-black"
+          }  ${isLoading ? "cursor-wait" : ""} hover:bg-ocf-yellow`}
         >
           %
         </button>
