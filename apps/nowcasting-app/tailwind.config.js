@@ -74,6 +74,7 @@ module.exports = {
           DEFAULT: "#191a1a",
           300: "#A9A9A9",
           500: "#6C6C6C",
+          700: "#343332",
           900: "#191a1a",
         },
         "ocf-black": {
