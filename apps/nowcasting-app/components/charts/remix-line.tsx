@@ -172,7 +172,8 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
                               key={`item-${name}`}
                               style={{ color: toolTipColors[name] }}
                             >
-                              {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)} MW
+                              {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)}{" "}
+                              MW
                             </li>
                           );
                         })}

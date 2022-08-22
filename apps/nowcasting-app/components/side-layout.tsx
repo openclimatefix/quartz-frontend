@@ -13,7 +13,6 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
         (className || "")
       }
     >
-
       <div className="relative h-full">
         {children}
         <a
