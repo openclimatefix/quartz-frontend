@@ -10,7 +10,8 @@ import {
   Tooltip,
 } from "recharts";
 import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
-
+import { theme } from "../../tailwind.config";
+const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
@@ -28,8 +29,8 @@ const toolTiplabels: Record<string, string> = {
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "black",
   GENERATION: "black",
-  FORECAST: "#FFC425",
-  PAST_FORECAST: "#FFC425",
+  FORECAST: yellow,
+  PAST_FORECAST: yellow,
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -37,6 +38,7 @@ type RemixLineProps = {
   setTimeOfInterest?: (t: string) => void;
   yMax: number | string;
 };
+
 const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
   const yy = 230;
   return (
@@ -139,7 +141,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
               type="monotone"
               dataKey="PAST_FORECAST"
               dot={false}
-              stroke="#FFC425" //yellow
+              stroke={yellow} //yellow
               strokeWidth={4}
             />
             <Line
@@ -147,7 +149,7 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
               dataKey="FORECAST"
               dot={false}
               strokeDasharray="10 10"
-              stroke="#FFC425" //yellow
+              stroke={yellow} //yellow
               strokeWidth={3}
             />
             <Tooltip
