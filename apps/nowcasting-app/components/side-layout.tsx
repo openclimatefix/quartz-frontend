@@ -1,6 +1,5 @@
 import React from "react";
 import Footer from "./footer";
-import Navbar from "./navbar";
 
 type SideLayoutProps = {
   className?: string;
@@ -14,8 +13,6 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
         (className || "")
       }
     >
-      <Navbar />
-
       <div className="relative h-full">
         {children}
         <a
