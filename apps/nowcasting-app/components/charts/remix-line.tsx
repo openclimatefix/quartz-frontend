@@ -37,16 +37,24 @@ type RemixLineProps = {
   data: ChartData[];
   setTimeOfInterest?: (t: string) => void;
   yMax: number | string;
+  timeNow: string;
+  resetTime?: () => void;
 };
-
-const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
+const CustomizedLabel: FC<any> = ({
+  value,
+  offset,
+  viewBox: { x },
+  className,
+  solidLine,
+  onClick,
+}) => {
   const yy = 230;
   return (
     <g>
       <line
         stroke="white"
-        strokeWidth="1"
-        strokeDasharray="3 3"
+        strokeWidth={solidLine ? "2" : "1"}
+        strokeDasharray={solidLine ? "" : "3 3"}
         fill="none"
         fillOpacity="1"
         x1={x}
@@ -54,14 +62,23 @@ const CustomizedLabel: FC<any> = ({ value, offset, viewBox: { x } }) => {
         x2={x}
         y2={yy}
       ></line>
-      <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill="white"></rect>
-      <text x={x + 1} y={yy + 21} id="time-now" textAnchor="middle">
-        {value}
-      </text>
+      <g className={`fill-white ${className || ""}`} onClick={onClick}>
+        <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill={"inherit"}></rect>
+        <text x={x + 1} y={yy + 21} fill="black" id="time-now" textAnchor="middle">
+          {value}
+        </text>
+      </g>
     </g>
   );
 };
-const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfInterest, yMax }) => {
+const RemixLine: React.FC<RemixLineProps> = ({
+  timeOfInterest,
+  data,
+  setTimeOfInterest,
+  yMax,
+  timeNow,
+  resetTime,
+}) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
   /** Ensures that the legend is ordered in the same way as the stacked items */
@@ -117,9 +134,28 @@ const RemixLine: React.FC<RemixLineProps> = ({ timeOfInterest, data, setTimeOfIn
             <ReferenceLine
               x={timeOfInterest}
               stroke="white"
+              strokeWidth={2}
+              label={
+                <CustomizedLabel
+                  className={timeNow !== timeOfInterest ? "hidden" : ""}
+                  value={prettyPrintXdate(timeOfInterest)}
+                  solidLine={true}
+                ></CustomizedLabel>
+              }
+            />
+            <ReferenceLine
+              x={timeNow}
+              stroke="white"
               strokeWidth={1}
               strokeDasharray="3 3"
-              label={<CustomizedLabel value={prettyPrintXdate(timeOfInterest)}></CustomizedLabel>}
+              className={timeNow !== timeOfInterest ? "" : "hidden"}
+              label={
+                <CustomizedLabel
+                  className="fill-amber-400    cursor-pointer"
+                  value={"NOW"}
+                  onClick={resetTime}
+                ></CustomizedLabel>
+              }
             />
 
             <Line

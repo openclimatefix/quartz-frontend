@@ -16,7 +16,9 @@ const GspPvRemixChart: FC<{
   selectedTime: string;
   close: () => void;
   setTimeOfInterest: (t: string) => void;
-}> = ({ gspId, selectedTime, close, setTimeOfInterest }) => {
+  timeNow: string;
+  resetTime: () => void;
+}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime }) => {
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
@@ -68,6 +70,8 @@ const GspPvRemixChart: FC<{
           timeOfInterest={selectedTime}
           data={chartData}
           yMax={yMax!}
+          timeNow={timeNow}
+          resetTime={resetTime}
         />
       </div>
     </>

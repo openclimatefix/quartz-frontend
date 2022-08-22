@@ -15,9 +15,9 @@ const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string }> = ({
           style={{ color: color }}
         >
           {pv}
-          <span className=" ml-2 text-ocf-gray-700">GW</span>
+          <span className=" ml-2 text-white">GW</span>
         </p>
-        <p className="text-ocf-gray-700 whitespace-pre text-center ">{subTitle}</p>
+        <p className="text-white whitespace-pre text-center ">{subTitle}</p>
       </div>
     </div>
   );
