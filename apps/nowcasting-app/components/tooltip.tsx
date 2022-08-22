@@ -11,7 +11,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, tip, position = "left", cla
     if (position === "middle") return "";
   };
   return (
-    <div className={`relative flex flex-col items-center group ml-auto w-fit ${className || ""}`}>
+    <div className={`relative flex flex-col items-center group w-fit ${className || ""}`}>
       {children}
       <div className="absolute flex flex-col items-center hidden mb-8 group-hover:flex">
         <span

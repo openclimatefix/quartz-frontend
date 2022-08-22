@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Navbar from "../navbar";
 import ExpandButton from "./expand-button";
+import SideFooter from "./side-footer";
 
 type SideLayoutProps = {
   className?: string;
@@ -16,9 +16,8 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
           (className || "")
         }
       >
-        <Navbar />
-
         <div className="relative h-full  overflow-y-scroll">{children}</div>
+        <SideFooter />
       </div>
       <div className="absolute bottom-12 -right-5">
         <ExpandButton isOpen={isOpen} onClick={() => setIsOpen((o) => !o)} />
