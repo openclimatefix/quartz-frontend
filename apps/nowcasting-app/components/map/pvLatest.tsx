@@ -12,7 +12,23 @@ import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../globalState";
 import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
+import { theme } from "../../tailwind.config";
+const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
+const getRoundedPv = (pv: number, round: boolean) => {
+  if (!round) return Math.round(pv);
+  // round To: 0, 100, 200, 300, 400, 500
+  return Math.round(pv / 100) * 100;
+};
+const getRoundedPvPercent = (per: number, round: boolean) => {
+  if (!round) return per;
+  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
+  let rounded = Math.round(per * 10);
+  if (rounded % 2) {
+    if (per * 10 > rounded) return (rounded + 1) / 10;
+    else return (rounded - 1) / 10;
+  } else return rounded / 10;
+};
 // Assuming first item in the array is the latest
 const latestForecastValue = 0;
 const useGetForecastsData = (isNormalized: boolean) => {
@@ -47,6 +63,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
 
 const PvLatestMap = () => {
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
+  const [round, setRound] = useState(false);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
   const isNormalized = activeUnit === ActiveUnit.percentage;
@@ -95,9 +112,11 @@ const PvLatestMap = () => {
           properties: {
             ...featureObj.properties,
             expectedPowerGenerationMegawatts:
-              selectedFCvalue && Math.round(selectedFCvalue.expectedPowerGenerationMegawatts),
+              selectedFCvalue &&
+              getRoundedPv(selectedFCvalue.expectedPowerGenerationMegawatts, round),
             expectedPowerGenerationNormalized:
-              selectedFCvalue && selectedFCvalue?.expectedPowerGenerationNormalized,
+              selectedFCvalue &&
+              getRoundedPvPercent(selectedFCvalue?.expectedPowerGenerationNormalized || 0, round),
           },
         };
       }),
@@ -107,7 +126,7 @@ const PvLatestMap = () => {
   };
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(initForecastData, selectedISOTime);
-  }, [initForecastData, selectedISOTime]);
+  }, [initForecastData, selectedISOTime, round]);
 
   const updateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
@@ -135,7 +154,7 @@ const PvLatestMap = () => {
       source: "latestPV",
       layout: { visibility: "visible" },
       paint: {
-        "fill-color": "#eab308",
+        "fill-color": yellow,
         "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
       },
     });
@@ -176,6 +195,16 @@ const PvLatestMap = () => {
       controlOverlay={(map: { current?: mapboxgl.Map }) => (
         <>
           <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+          <div className="inline-block">
+            <button
+              className={`relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold  ${
+                round ? "text-black bg-amber-400" : "text-white bg-black"
+              } hover:bg-amber-4`}
+              onClick={() => setRound((r) => !r)}
+            >
+              round
+            </button>
+          </div>
           <MeasuringUnit
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
