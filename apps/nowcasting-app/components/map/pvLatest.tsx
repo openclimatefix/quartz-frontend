@@ -13,6 +13,7 @@ import useGlobalState from "../globalState";
 import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
 import { FcAllResData } from "../types";
 import { theme } from "../../tailwind.config";
+import ColorGuideBar from "./color-guide-bar";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean) => {
@@ -212,7 +213,9 @@ const PvLatestMap = () => {
           />
         </>
       )}
-    />
+    >
+      <ColorGuideBar unit={activeUnit} />
+    </Map>
   );
 };
 
