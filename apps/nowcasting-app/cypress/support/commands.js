@@ -51,8 +51,6 @@ Cypress.Commands.add("loadApp", () => {
 Cypress.Commands.add("checkIfTimeUpdatedInUi", (date, addMinutes, should) => {
   const updatedTimes = getTimeFormats(new Date(date), addMinutes);
   const verb = should === "equal" ? "contain" : "not.contain";
-  cy.get(elements.nationalTimeReference).should(verb, updatedTimes.londonTime);
-  cy.get(elements.gspTimeReference).should(verb, updatedTimes.londonTime);
   cy.get(elements.headerMapTime).should(verb, updatedTimes.londonDateTime);
 });
 

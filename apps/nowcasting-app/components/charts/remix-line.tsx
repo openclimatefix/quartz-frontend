@@ -149,7 +149,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 <CustomizedLabel
                   className={timeNow !== timeOfInterest ? "hidden" : ""}
                   value={prettyPrintXdate(timeOfInterest)}
-                  dataE2e={id + "-reference"}
                   solidLine={true}
                 ></CustomizedLabel>
               }
@@ -159,12 +158,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke="white"
               strokeWidth={1}
               strokeDasharray="3 3"
-              className={timeNow !== timeOfInterest ? "" : "hidden"}
+              className={timeNow !== timeOfInterest ? "" : " invisible"}
               label={
                 <CustomizedLabel
                   className="fill-amber-400    cursor-pointer"
                   value={"NOW"}
-                  dataE2e={id + "-now"}
+                  dataE2e={id + "-now-refrence"}
                   onClick={resetTime}
                 ></CustomizedLabel>
               }

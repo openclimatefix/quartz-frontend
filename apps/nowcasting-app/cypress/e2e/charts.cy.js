@@ -29,8 +29,11 @@ describe("Charts", () => {
     it("should be visible", () => {
       cy.get(elements.GSPFChart).should("be.visible");
     });
+    it("should have title", () => {
+      cy.get(elements.GSPFTitle).should("have.text", "Fiddlers Ferry");
+    });
     it("should have correct headers values", () => {
-      cy.get(elements.GSPFPvValues).should("have.text", "46% | 50 / 108MW");
+      cy.get(elements.GSPFPvValues).should("have.text", "64% | 15 / 24MW");
     });
     it("should look correct", () => {
       cy.get(elements.GSPFChart)
@@ -44,8 +47,10 @@ describe("Charts", () => {
       cy.get(elements.GSPFChart).should("not.exist");
     });
   });
-  describe("play/pause/reset button", () => {
+
+  describe.only("play/pause/reset button", () => {
     beforeEach("reset time", () => {
+      // pause if playing
       cy.get(elements.pauseButton, { timeout: 1000 })
         .should((_) => {})
         .then(($el) => {
@@ -54,7 +59,8 @@ describe("Charts", () => {
           }
           return;
         });
-      cy.get(elements.resetTimeButton).click();
+      //reset time in now tag is visible
+      cy.get(elements.resetTimeButton).click({ force: true });
     });
     // putting in a separate describe block to avoid clock hell
     describe("play", () => {
@@ -76,22 +82,22 @@ describe("Charts", () => {
 
         //hit pause button
         cy.get(elements.pauseButton).click();
-        cy.get(elements.nationalTimeReference).then(($el) => {
+        cy.get(elements.headerMapTime).then(($el) => {
           const prevTime = $el.text();
           cy.wait(playInterval * 2);
-          cy.get(elements.nationalTimeReference).should("contain", prevTime);
+          cy.get(elements.headerMapTime).should("contain", prevTime);
         });
       });
     });
     describe("reset", () => {
       it(" reset button should reset time", function () {
-        cy.get(elements.nationalTimeReference).then(($el) => {
+        cy.get(elements.headerMapTime).then(($el) => {
           const prevTime = $el.text();
           cy.get(elements.playButton).click();
           cy.wait(playInterval * 2);
           cy.get(elements.pauseButton).click();
           cy.get(elements.resetTimeButton).click();
-          cy.get(elements.nationalTimeReference).should("contain", prevTime);
+          cy.get(elements.headerMapTime).should("contain", prevTime);
         });
       });
     });
@@ -101,9 +107,9 @@ describe("Charts", () => {
       cy.window().then((win) => {
         const now = win.window.Date.now();
         cy.get("body").type("{rightarrow}");
-        cy.checkIfTimeUpdatedInUi(now, 30);
+        cy.checkIfTimeUpdatedInUi(now, 30, "equal");
         cy.get("body").type("{leftarrow}");
-        cy.checkIfTimeUpdatedInUi(now);
+        cy.checkIfTimeUpdatedInUi(now, null, "equal");
       });
     });
     it("should not go out of range", function () {
