@@ -9,12 +9,11 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({ title, children, 
   return (
     <div
       data-e2e="GSPF-header"
-      className={"flex content-between flex-wrap mt-6 bg-amber-400 bg-opacity-60 h-12"}
+      className={"flex content-between flex-wrap mt-6 bg-ocf-yellow bg-opacity-60 h-12"}
     >
       <div
         data-e2e="title"
-        className={`bg-white text-black text-2xl font-black  p-4 py-2  flex-[1] `}
-        style={{ height: "inherit" }}
+        className={`bg-white text-black text-2xl font-black  p-4 py-2  flex-[1]`}
       >
         {title}
       </div>
@@ -27,7 +26,7 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({ title, children, 
         data-e2e="close-button"
         type="button"
         onClick={onClose}
-        className="font-bold inline-flex items-center  px-3 ml-2 text-lg m text-black bg-amber-400  hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black h-full"
+        className="font-bold inline-flex items-center  px-3 ml-2 text-lg m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black h-full"
       >
         Close
       </button>

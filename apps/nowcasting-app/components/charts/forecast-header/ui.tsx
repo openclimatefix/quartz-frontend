@@ -1,10 +1,12 @@
 import React from "react";
+import { theme } from "../../../tailwind.config";
+const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string; dataE2e?: string }> = ({
   pv,
   subTitle,
-  color = "#FFC425",
   dataE2e,
+  color = yellow,
 }) => {
   return (
     <div className="flex-[1] m-auto" data-e2e={dataE2e}>
@@ -14,9 +16,9 @@ const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string; dataE2e
           style={{ color: color }}
         >
           {pv}
-          <span className=" ml-2 text-mapbox-black-300">GW</span>
+          <span className=" ml-2 text-white">GW</span>
         </p>
-        <p className="text-mapbox-black-300 whitespace-pre text-center ">{subTitle}</p>
+        <p className="text-white whitespace-pre text-center ">{subTitle}</p>
       </div>
     </div>
   );
