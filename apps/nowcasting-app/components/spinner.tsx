@@ -1,3 +1,7 @@
+/*
+Spinner icon when data is loading
+*/
+
 import React from "react";
 
 type SpinnerProps = {};

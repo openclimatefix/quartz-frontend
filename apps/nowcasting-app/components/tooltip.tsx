@@ -1,3 +1,7 @@
+/*
+Tool tip style
+*/
+
 type TooltipProps = {
   tip: string | React.ReactNode;
   position?: "left" | "right" | "middle";

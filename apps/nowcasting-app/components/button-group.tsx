@@ -1,3 +1,11 @@
+/*
+Contains button that are on top of the map
+1. PV forecast
+2. Solar Sites (not working)
+3. Delta view (not working)
+*/
+
+
 interface IButtonGroup {
   rightString: string;
 }

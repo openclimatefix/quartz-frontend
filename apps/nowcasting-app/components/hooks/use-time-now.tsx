@@ -1,3 +1,7 @@
+/*
+Gets the time now, rounded to the nearest 30 mins
+*/
+
 import { useEffect } from "react";
 import useGlobalState, { get30MinNow } from "../globalState";
 import { addMinutesToISODate } from "../utils";

@@ -1,3 +1,9 @@
+/*
+Data types
+- FcAllResData: List of Forecast object
+- ForecastData: List of forecast forecast
+- PvRealData: PVLive Solar generation data
+*/
 export type FcAllResData = {
   type: "FeatureCollection";
   forecasts: {

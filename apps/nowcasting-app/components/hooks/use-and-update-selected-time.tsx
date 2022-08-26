@@ -1,3 +1,7 @@
+/*
+Update selected time
+*/
+
 import { useEffect } from "react";
 import useGlobalState, { get30MinNow } from "../globalState";
 

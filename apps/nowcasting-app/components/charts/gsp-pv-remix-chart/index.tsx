@@ -1,3 +1,7 @@
+/*
+Main object creating the GSP chart
+*/
+
 import { FC } from "react";
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";

@@ -1,3 +1,6 @@
+/*
+Gets the Chart data from OCF API and plots of National and GSP map
+*/
 import { FC, useMemo } from "react";
 import RemixLine from "./remix-line";
 import useSWR from "swr";

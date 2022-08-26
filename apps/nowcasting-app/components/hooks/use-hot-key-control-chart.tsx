@@ -1,3 +1,7 @@
+/*
+Hote keys to move selected time on the map
+*/
+
 import { useEffect, useMemo } from "react";
 import useGlobalState from "../globalState";
 import { addMinutesToISODate, formatISODateString } from "../utils";

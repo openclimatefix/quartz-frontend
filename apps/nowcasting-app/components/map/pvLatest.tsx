@@ -1,3 +1,8 @@
+/*
+Main class for adding data to the map.
+- Pulling data from API
+- Generate GeoJSON for the map
+*/
 import useSWR from "swr";
 import useSWRImmutable from "swr/immutable";
 

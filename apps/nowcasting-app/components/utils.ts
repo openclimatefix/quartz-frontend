@@ -1,3 +1,14 @@
+/*
+General utils functions
+- getTimeFromDate: get the time from a datetime
+- formatISODateString: Format into ISO
+- convertISODateStringToLondonTime: Convert ISO Date string to London time
+- formatISODateStringHuman: Format ISO string so it is human readable
+- MWtoGW: Change MWs to GW
+- KWtoGW: Change KWs to GW
+- addMinutesToISODate: Add minutes to an ISO Date
+*/
+
 import axios from "axios";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;

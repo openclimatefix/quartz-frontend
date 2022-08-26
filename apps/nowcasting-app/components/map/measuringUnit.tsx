@@ -1,3 +1,6 @@
+/*
+Allow to switch between MW and %
+*/
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { ActiveUnit } from "./types";
 const MeasuringUnit = ({

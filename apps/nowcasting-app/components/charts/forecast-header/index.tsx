@@ -1,3 +1,7 @@
+/*
+Makes the headers ontop of the national and gsp chart
+*/
+
 import React, { useMemo } from "react";
 import { get30MinNow } from "../../globalState";
 import useTimeNow from "../../hooks/use-time-now";

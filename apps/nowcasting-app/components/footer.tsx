@@ -1,3 +1,6 @@
+/*
+Footer class - need to check if this is used any more # ODO
+*/
 export default function Footer() {
   return (
     <footer className=" p-4 bg-black h-fit">

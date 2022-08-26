@@ -1,3 +1,7 @@
+/*
+Extra data shown on GSP map
+*/
+
 import React from "react";
 
 type ForecastHeaderGSPProps = {

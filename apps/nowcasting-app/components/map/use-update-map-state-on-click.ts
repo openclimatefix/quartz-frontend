@@ -1,3 +1,7 @@
+/*
+Method to update the GSP ID when clicking on the map
+*/
+
 import { useEffect, useRef } from "react";
 import useGlobalState from "../globalState";
 

@@ -1,3 +1,7 @@
+/*
+Define the map object
+*/
+
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useEffect, useRef, useState } from "react";

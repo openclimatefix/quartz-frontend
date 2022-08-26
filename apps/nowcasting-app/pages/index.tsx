@@ -1,3 +1,9 @@
+/*
+This is the map layout for the app. It contains
+1. The map
+2. The Charts for national and each GSP
+*/
+
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import Layout from "../components/layout";
 import { PvLatestMap } from "../components/map";

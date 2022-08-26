@@ -1,3 +1,7 @@
+/*
+Data types for the map
+*/
+
 export enum ActiveUnit {
   MW = "MW",
   percentage = "%",

@@ -1,3 +1,6 @@
+/*
+Note sure this is used #TODO check
+*/
 import Layout from "./layout";
 
 export default {

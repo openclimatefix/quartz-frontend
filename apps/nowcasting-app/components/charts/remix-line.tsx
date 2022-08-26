@@ -1,3 +1,7 @@
+/*
+Style of Chart for National and/ or GSP chart
+*/
+
 import React, { FC } from "react";
 import {
   ComposedChart,

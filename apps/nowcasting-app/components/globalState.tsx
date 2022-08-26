@@ -1,3 +1,11 @@
+/*
+Global state of the App. It contains
+1. timeNow: The time now (rounded to 30 mins)
+2. selectedISOTime: The selected time
+3. clickedGspId: The GSP which has been selected
+4. forecastCreationTime: The creation time of the current forecast
+*/
+
 import { createGlobalState } from "react-hooks-global-state";
 
 export function get30MinNow() {

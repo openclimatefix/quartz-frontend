@@ -1,3 +1,9 @@
+/*
+Layout which includes
+1. website title
+2. website favicon
+3. warning / error message
+*/
 import Head from "next/head";
 import useSWR from "swr";
 import { API_PREFIX } from "../constant";

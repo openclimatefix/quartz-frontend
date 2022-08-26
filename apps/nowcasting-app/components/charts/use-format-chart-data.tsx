@@ -1,3 +1,7 @@
+/*
+Adds data to PV data to map
+*/
+
 import { useMemo } from "react";
 import { get30MinNow } from "../globalState";
 import { ForecastData, PvRealData } from "../types";

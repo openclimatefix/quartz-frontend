@@ -1,3 +1,6 @@
+/*
+The play button which moves through the differnet target times
+*/
 import React, { useRef, useState } from "react";
 import useGlobalState from "../globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";

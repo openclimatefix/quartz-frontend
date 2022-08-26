@@ -1,3 +1,7 @@
+/*
+Header on top of charts
+*/
+
 import React from "react";
 import { theme } from "../../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;

@@ -1,3 +1,6 @@
+/*
+Pulls data for GSP chart
+*/
 import useSWR from "swr";
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData } from "../../types";

@@ -1,3 +1,6 @@
+/*
+Content and style for the log out page
+*/
 import { NextPage } from "next";
 import Head from "next/head";
 

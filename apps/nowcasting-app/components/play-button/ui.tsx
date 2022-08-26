@@ -1,3 +1,6 @@
+/*
+Style of Play button
+*/
 import React from "react";
 
 type UiProps = {
