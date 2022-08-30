@@ -43,14 +43,29 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
         </a>
       </div>
       <div className="grow text-center inline-flex px-2 gap-5 items-center">
-        <a href="#" target="_blank" rel="noreferrer">
+        <a
+          href="https://openclimatefix.notion.site/openclimatefix/Nowcasting-Documentation-0d718915650e4f098470d695aa3494bf"
+          target="_blank"
+          rel="noreferrer"
+        >
           Docs
         </a>
         <Tooltip tip={chartInfo(forecastCreationTime)} position="right" className={"text-left"}>
           Data
         </Tooltip>
         <Tooltip
-          tip={"For help, please email OCF at ops@openclimatefix.org"}
+          tip={
+            <div
+              onClick={() => {
+                var copyText = "ops@openclimatefix.org";
+                navigator.clipboard.writeText(copyText);
+              }}
+              className="cursor-pointer"
+              title="Copy Email to Clipboard"
+            >
+              For help, please email OCF at <span>ops@openclimatefix.org</span>
+            </div>
+          }
           position="right"
           className={"text-left"}
         >
