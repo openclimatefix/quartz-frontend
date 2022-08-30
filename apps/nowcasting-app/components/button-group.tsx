@@ -5,7 +5,6 @@ Contains button that are on top of the map
 3. Delta view (not working)
 */
 
-
 interface IButtonGroup {
   rightString: string;
 }
