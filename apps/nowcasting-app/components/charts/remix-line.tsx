@@ -27,8 +27,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_FORECAST: "OCF Forecast",
 };
 const toolTipColors: Record<string, string> = {
-  GENERATION_UPDATED: "black",
-  GENERATION: "black",
+  GENERATION_UPDATED: "white",
+  GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
 };
@@ -193,8 +193,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const data = payload && payload[0]?.payload;
                 if (!data) return <div></div>;
                 return (
-                  <div className="p-2 bg-white bg-opacity-80 shadow">
-                    <p className="mb-2 text-black">
+                  <div className="p-2 bg-mapbox-black bg-opacity-70 shadow">
+                    <p className="mb-2 text-white">
                       {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}
                     </p>
                     <ul className="">
