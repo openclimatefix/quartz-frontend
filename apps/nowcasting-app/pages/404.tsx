@@ -2,7 +2,6 @@
 This contains content and style and for the 404 page
 */
 
-
 import { NextPage } from "next";
 import Head from "next/head";
 import Footer from "../components/footer";
