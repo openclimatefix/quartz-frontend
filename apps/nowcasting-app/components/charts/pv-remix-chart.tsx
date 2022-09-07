@@ -5,14 +5,26 @@ import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import useGlobalState from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
+import { axiosFetcher, formatISODateString } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
+import { LegendLineGraphIcon } from "../icons";
 
-const PvRemixChart: FC<{ date?: string }> = (props) => {
+const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> = ({
+  iconClasses,
+  label,
+  dashed,
+}) => (
+  <div className="flex items-center">
+    <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
+    <span className="uppercase pl-1">{label}</span>
+  </div>
+);
+
+const PvRemixChart: FC<{ date?: string }> = () => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
@@ -75,7 +87,7 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col flex-1 mb-12">
       <div className="flex-grow mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
@@ -106,6 +118,14 @@ const PvRemixChart: FC<{ date?: string }> = (props) => {
             resetTime={resetTime}
           ></GspPvRemixChart>
         )}
+      </div>
+      <div className="flex-0 px-3 text-[11px] tracking-wider text-ocf-gray-300 py-2 bg-ocf-gray-800">
+        <div className="flex justify-around">
+          <LegendItem iconClasses={"text-ocf-yellow"} label={"Actual"} />
+          <LegendItem iconClasses={"text-ocf-black"} label={"Live 24 hr"} />
+          <LegendItem iconClasses={"text-ocf-black"} dashed label={"Live 30 min"} />
+          <LegendItem iconClasses={"text-ocf-yellow"} dashed label={"Forecast"} />
+        </div>
       </div>
     </div>
   );

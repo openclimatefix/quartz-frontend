@@ -16,10 +16,10 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
           (className || "")
         }
       >
-        <div className="relative h-full  overflow-y-scroll">{children}</div>
+        <div className="relative h-full flex flex-col overflow-y-scroll">{children}</div>
         <SideFooter />
       </div>
-      <div className="absolute bottom-12 -right-5">
+      <div className="absolute bottom-16 -right-5 h-10 mb-[3px]">
         <ExpandButton isOpen={isOpen} onClick={() => setIsOpen((o) => !o)} />
       </div>
     </div>
