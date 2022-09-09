@@ -67,6 +67,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "rachel-labri-tipton",
+      "name": "rachel tipton",
+      "avatar_url": "https://avatars.githubusercontent.com/u/86949265?v=4",
+      "profile": "https://github.com/rachel-labri-tipton",
+      "contributions": [
+        "review"
+      ]
     }
   ],
   "contributorsPerLine": 7,
