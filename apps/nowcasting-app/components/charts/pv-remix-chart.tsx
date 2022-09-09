@@ -121,10 +121,10 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       </div>
       <div className="flex-0 px-3 text-[11px] tracking-wider text-ocf-gray-300 py-2 bg-ocf-gray-800">
         <div className="flex justify-around">
-          <LegendItem iconClasses={"text-ocf-yellow"} label={"Actual"} />
-          <LegendItem iconClasses={"text-ocf-black"} label={"Live 24 hr"} />
-          <LegendItem iconClasses={"text-ocf-black"} dashed label={"Live 30 min"} />
-          <LegendItem iconClasses={"text-ocf-yellow"} dashed label={"Forecast"} />
+          <LegendItem iconClasses={"text-ocf-black"} dashed label={"PV live initial estimate"} />
+          <LegendItem iconClasses={"text-ocf-black"} label={"PV live updated"} />
+          <LegendItem iconClasses={"text-ocf-yellow"} dashed label={"OCF Forecast"} />
+          <LegendItem iconClasses={"text-ocf-yellow"} label={"OCF Final Forecast"} />
         </div>
       </div>
     </div>
