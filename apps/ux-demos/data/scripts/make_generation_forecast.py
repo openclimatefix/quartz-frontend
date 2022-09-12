@@ -51,7 +51,7 @@ def make_generation_forecast(date):
         eso_pv_forecasts_selected_df["forecast_date_time"] + eso_pv_forecasts_selected_df["step"]
     )
 
-    # sort values 
+    # sort values
     eso_pv_forecasts_selected_df = eso_pv_forecasts_selected_df.sort_values(
         ["target_time", "forecast_date_time"]
     ).drop_duplicates(subset="target_time", keep="first")
@@ -84,7 +84,7 @@ def make_generation_forecast(date):
 
     # sort
     all_df = all_df.sort_values(by='time')
-    
+
     # ******************
     # 3. save to json
     # ******************
@@ -105,8 +105,3 @@ make_generation_forecast(datetime(2021,3,5))
 make_generation_forecast(datetime(2021,3,9))
 make_generation_forecast(datetime(2021,6,10))
 make_generation_forecast(datetime(2021,10,8))
-
-
-
-
-

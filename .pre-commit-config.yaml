@@ -1,0 +1,25 @@
+default_language_version:
+  python: python3
+
+ci:
+  skip: []
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+      # list of supported hooks: https://pre-commit.com/hooks.html
+      - id: check-yaml
+      - id: check-merge-conflict
+      - id: check-json
+
+  # eslint checks
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: "v8.23.1"
+    hooks:
+      - id: eslint
+        additional_dependencies:
+          [eslint, eslint-plugin-prettier, eslint-config-prettier]
+        args: ["--ext", ".js,.jsx,.ts,.tsx", "--fix"]
+        files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
+        types: [file]
