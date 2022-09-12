@@ -19,7 +19,13 @@ repos:
     hooks:
       - id: eslint
         additional_dependencies:
-          [eslint, eslint-plugin-prettier, eslint-config-prettier, eslint-config-next]
+          - eslint@8.10.0
+          - eslint-loader@1.6.1
+          - eslint-plugin-react@6.10.3
+          - babel-eslint@6.1.2
+          - eslint-plugin-prettier
+          - eslint-config-prettier
+          - eslint-config-next
         args: ["--ext", ".js,.jsx,.ts,.tsx", "--fix"]
         files: \.[jt]sx?$ # *.js, *.jsx, *.ts and *.tsx
         types: [file]
