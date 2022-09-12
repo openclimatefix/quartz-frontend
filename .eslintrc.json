@@ -12,7 +12,8 @@
     "babelOptions": {
       "babelrc": false,
       "configFile": false
-    }
+    },
+    "presets": ["next/babel"]
   },
   "rules": {
     "@next/next/no-img-element": "off",
