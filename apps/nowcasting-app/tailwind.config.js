@@ -148,7 +148,7 @@ module.exports = {
           900: "#132C28"
         },
         "ocf-teal": {
-          DEFAULT: "#70C2B6",
+          DEFAULT: "#7BCDF3",
           50: "#F1F9F8",
           100: "#E2F3F0",
           200: "#C6E7E2",

@@ -12,10 +12,13 @@ import {
 import { convertISODateStringToLondonTime, formatISODateStringHumanNumbersOnly } from "../utils";
 import { theme } from "../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const blue = theme.extend.colors["ocf-teal"].DEFAULT;
 export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
   FORECAST?: number;
+  "4HR_FORECAST"?: number;
+  "4HR_PAST_FORECAST"?: number;
   PAST_FORECAST?: number;
   formatedDate: string; // "2022-05-16T15:00",
 };
@@ -162,6 +165,23 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <Line
               type="monotone"
+              dataKey="4HR_FORECAST"
+              dot={false}
+              strokeDasharray="5 5"
+              strokeDashoffset={3}
+              stroke={blue} // blue
+              strokeWidth={3}
+            />
+            <Line
+              type="monotone"
+              dataKey="4HR_PAST_FORECAST"
+              dot={false}
+              // strokeDasharray="10 10"
+              stroke={blue} // blue
+              strokeWidth={3}
+            />
+            <Line
+              type="monotone"
               dataKey="GENERATION"
               dot={false}
               stroke="black"
@@ -186,7 +206,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               type="monotone"
               dataKey="FORECAST"
               dot={false}
-              strokeDasharray="10 10"
+              strokeDasharray="5 5"
               stroke={yellow} //yellow
               strokeWidth={3}
             />
