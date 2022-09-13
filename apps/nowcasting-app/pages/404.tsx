@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import Head from "next/head";
 import Footer from "../components/footer";
+import Link from "next/link";
 
 const NotFoundPage: NextPage = () => {
   return (
@@ -11,14 +12,14 @@ const NotFoundPage: NextPage = () => {
       <div className="flex flex-col min-h-screen pt-16">
         <main className="flex flex-col justify-center flex-grow w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-center flex-shrink-0">
-            <a href="/" className="inline-flex">
+            <Link href="/" className="inline-flex">
               <span className="sr-only">Workflow</span>
               <img
                 className="w-auto h-12"
                 src="https://nowcasting.io/nowcasting.svg"
                 alt="Nowcasting Logo"
               />
-            </a>
+            </Link>
           </div>
           <div className="py-16">
             <div className="text-center">
@@ -32,9 +33,12 @@ const NotFoundPage: NextPage = () => {
                 Sorry, we couldn’t find the page you’re looking for.
               </p>
               <div className="mt-6">
-                <a href="/" className="text-base font-medium text-danube-600 hover:text-danube-500">
+                <Link
+                  href="/"
+                  className="text-base font-medium text-danube-600 hover:text-danube-500"
+                >
                   Go back home<span aria-hidden="true"> &rarr;</span>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

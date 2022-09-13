@@ -4,19 +4,22 @@
   "private": true,
   "repository": "git@github.com:openclimatefix/nowcasting.git",
   "scripts": {
-    "pre-commit": "pre-commit run --all-files"
+    "pre-commit": "pre-commit run --all-files",
+    "prepare": "husky install"
   },
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "devDependencies": {
-    "turbo": "^1.0.26",
-    "eslint": "8.10.0",
     "@babel/eslint-parser": "^7.18.9",
+    "eslint": "8.10.0",
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-prettier": "^4.2.1"
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": ">=6",
+    "lint-staged": ">=10",
+    "turbo": "^1.0.26"
   },
   "turbo": {
     "baseBranch": "origin/main",
@@ -56,5 +59,8 @@
         "cache": false
       }
     }
+  },
+  "lint-staged": {
+    "**/*.(t|j)(s|sx)": "eslint --cache --fix"
   }
 }
