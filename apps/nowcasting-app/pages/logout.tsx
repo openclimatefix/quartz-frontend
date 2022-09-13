@@ -88,7 +88,9 @@ const LogoutPage: NextPage = () => {
                   href="/"
                   className="text-base font-medium text-danube-600 hover:text-danube-500"
                 >
-                  Or log in again<span aria-hidden="true"> &rarr;</span>
+                  <div>
+                    Or log in again<span aria-hidden="true"> &rarr;</span>
+                  </div>
                 </Link>
               </div>
             </div>

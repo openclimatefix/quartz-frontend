@@ -13,12 +13,14 @@ const NotFoundPage: NextPage = () => {
         <main className="flex flex-col justify-center flex-grow w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="flex justify-center flex-shrink-0">
             <Link href="/" className="inline-flex">
-              <span className="sr-only">Workflow</span>
-              <img
-                className="w-auto h-12"
-                src="https://nowcasting.io/nowcasting.svg"
-                alt="Nowcasting Logo"
-              />
+              <div>
+                <span className="sr-only">Workflow</span>
+                <img
+                  className="w-auto h-12"
+                  src="https://nowcasting.io/nowcasting.svg"
+                  alt="Nowcasting Logo"
+                />
+              </div>
             </Link>
           </div>
           <div className="py-16">
@@ -37,7 +39,9 @@ const NotFoundPage: NextPage = () => {
                   href="/"
                   className="text-base font-medium text-danube-600 hover:text-danube-500"
                 >
-                  Go back home<span aria-hidden="true"> &rarr;</span>
+                  <div>
+                    Go back home<span aria-hidden="true"> &rarr;</span>
+                  </div>
                 </Link>
               </div>
             </div>
