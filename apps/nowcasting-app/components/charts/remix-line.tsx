@@ -9,7 +9,12 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
-import { convertISODateStringToLondonTime, formatISODateStringHumanNumbersOnly } from "../utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateStringHuman,
+  formatISODateStringHumanNumbersOnly,
+  getRounded4HoursAgoString,
+} from "../utils";
 import { theme } from "../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const blue = theme.extend.colors["ocf-teal"].DEFAULT;
@@ -17,9 +22,9 @@ export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
   FORECAST?: number;
+  PAST_FORECAST?: number;
   "4HR_FORECAST"?: number;
   "4HR_PAST_FORECAST"?: number;
-  PAST_FORECAST?: number;
   formatedDate: string; // "2022-05-16T15:00",
 };
 
@@ -27,13 +32,17 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live updated",
   GENERATION: "PV Live estimate",
   FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast"
+  PAST_FORECAST: "OCF Forecast",
+  "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  "4HR_PAST_FORECAST": "OCF 4hr Forecast"
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
   FORECAST: yellow,
-  PAST_FORECAST: yellow
+  PAST_FORECAST: yellow,
+  "4HR_FORECAST": blue,
+  "4HR_PAST_FORECAST": blue
 };
 type RemixLineProps = {
   timeOfInterest: string;

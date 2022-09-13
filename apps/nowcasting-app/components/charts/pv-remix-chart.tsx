@@ -5,7 +5,7 @@ import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import useGlobalState from "../globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { axiosFetcher, convertISODateStringToLondonTime, formatISODateString } from "../utils";
+import { axiosFetcher, getRounded4HoursAgoString, formatISODateString } from "../utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../spinner";
@@ -97,10 +97,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  const fourHoursAgo = new Date();
-  fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
-  fourHoursAgo.setMinutes(0);
-  const fourHoursAgoString = convertISODateStringToLondonTime(fourHoursAgo.toISOString());
+  const fourHoursAgo = getRounded4HoursAgoString();
   return (
     <div className="flex flex-col flex-1 mt-12 mb-1">
       <div className="flex-grow mb-7">
@@ -146,7 +143,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             <LegendItem
               iconClasses={"text-ocf-teal"}
               dashed
-              label={`OCF ${fourHoursAgoString} Forecast`}
+              label={`OCF ${fourHoursAgo} Forecast`}
             />
             <LegendItem iconClasses={"text-ocf-teal"} label={"OCF 4 Hr Forecast"} />
           </div>
