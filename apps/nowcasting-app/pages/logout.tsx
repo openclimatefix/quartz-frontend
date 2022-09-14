@@ -4,6 +4,7 @@ import Head from "next/head";
 import { ChevronRightIcon } from "@heroicons/react/solid";
 import { SupportIcon, BookOpenIcon, ViewListIcon } from "@heroicons/react/outline";
 import Footer from "../components/footer";
+import Link from "next/link";
 
 const links = [
   {
@@ -83,9 +84,14 @@ const LogoutPage: NextPage = () => {
                 ))}
               </ul>
               <div className="mt-8">
-                <a href="/" className="text-base font-medium text-danube-600 hover:text-danube-500">
-                  Or log in again<span aria-hidden="true"> &rarr;</span>
-                </a>
+                <Link
+                  href="/"
+                  className="text-base font-medium text-danube-600 hover:text-danube-500"
+                >
+                  <div>
+                    Or log in again<span aria-hidden="true"> &rarr;</span>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>

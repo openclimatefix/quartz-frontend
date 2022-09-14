@@ -10,7 +10,7 @@ class MyDocument extends Document {
             rel="stylesheet"
           />
           <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-          <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+          <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
         </Head>
         <body className="h-full">
           <Main />

@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "prettier"
+  ],
+  "plugins": [
+    "prettier"
+  ],
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": {
+      "babelrc": false,
+      "configFile": false
+    },
+    "presets": ["next/babel"]
+  },
+  "rules": {
+    "@next/next/no-img-element": "off",
+    "prettier/prettier": "error"
+  }
+}

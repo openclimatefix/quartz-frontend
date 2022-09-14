@@ -3,6 +3,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
 import pkg from "../../../package.json";
 import { classNames } from "../../utils";
+import Link from "next/link";
 const { version } = pkg;
 
 interface IProfileDropDown {}
@@ -38,7 +39,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
           <div className="w-full border-t border-gray-300" />
           <Menu.Item>
             {({ active }) => (
-              <a
+              <Link
                 href="/api/auth/logout"
                 className={classNames(
                   active ? "bg-gray-100" : "",
@@ -46,7 +47,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 )}
               >
                 Sign out
-              </a>
+              </Link>
             )}
           </Menu.Item>
         </Menu.Items>
