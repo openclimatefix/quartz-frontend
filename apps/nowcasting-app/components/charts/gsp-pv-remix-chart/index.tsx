@@ -29,10 +29,10 @@ const GspPvRemixChart: FC<{
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,
   });
-  if (errors.length) return <div>failed to load</div>;
+  if (errors.length) return <div>failed to load</div>; 
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
     return (
-      <div className="h-60 flex">
+      <div className="h-60  flex">
         <Spinner />
       </div>
     );
