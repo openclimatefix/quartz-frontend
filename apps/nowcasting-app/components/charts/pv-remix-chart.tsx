@@ -119,7 +119,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
           ></GspPvRemixChart>
         )}
       </div>
-      <div className="flex-0 px-3 text-[11px] tracking-wider text-ocf-gray-300 py-2 bg-ocf-gray-800">
+      <div className="flex-0 px-3 text-[12px] tracking-wider text-ocf-gray-300 py-2 bg-mapbox-black-500">
         <div className="flex justify-around">
           <LegendItem iconClasses={"text-ocf-black"} dashed label={"PV live initial estimate"} />
           <LegendItem iconClasses={"text-ocf-black"} label={"PV live updated"} />
