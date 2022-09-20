@@ -36,7 +36,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       targetTime: string;
       expectedPowerGenerationMegawatts: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/national/forecast/`, axiosFetcher, {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
   const chartLimits = useMemo(
@@ -54,7 +54,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/0/?regime=in-day`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/national/pvlive/?regime=in-day`, axiosFetcher, {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
 
@@ -63,7 +63,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/0/?regime=day-after`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/national/pvlive/?regime=day-after`, axiosFetcher, {
     refreshInterval: 60 * 1000 * 5, // 5min
   });
 

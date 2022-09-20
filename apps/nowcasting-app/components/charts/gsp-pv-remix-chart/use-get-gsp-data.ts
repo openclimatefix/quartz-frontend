@@ -18,7 +18,7 @@ const useGetGspData = (gspId: number) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/${gspId}/?regime=in-day`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}/?regime=in-day`, axiosFetcher, {
     refreshInterval: t5min,
   });
 
@@ -27,7 +27,7 @@ const useGetGspData = (gspId: number) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/${gspId}/?regime=day-after`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}/?regime=day-after`, axiosFetcher, {
     refreshInterval: t5min,
   });
   return {
