@@ -33,14 +33,14 @@ export const apiErrorMSGS = [
   {
     key: /\/solar\/GB\/gsp\/pvlive\/\d+\/\?regime=in-day$/,
     getMsg: (key: string) => {
-      const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
+      const gspId = (key.match(/(\d+)/) || [])[1];
       return `Error fetching GSP ${gspId} PV Live initial estimate. Retrying now ...`;
     },
   },
   {
     key: /\/solar\/GB\/gsp\/pvlive\/\d+\/\?regime=day-after$/,
     getMsg: (key: string) => {
-      const gspId = (key.match(/one_gsp\/(\d+)/) || [])[1];
+      const gspId = (key.match(/(\d+)/) || [])[1];
       return `Error fetching GSP ${gspId} PV Live updated. Retrying now ...`;
     },
   },
