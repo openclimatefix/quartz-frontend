@@ -30,7 +30,8 @@
     "turbo": "^1.0.26"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.0",
+    "@babel/core": "^7.19.1",
+    "@babel/eslint-parser": "^7.19.1",
     "@openclimatefix/nowcasting-tsconfig": "*",
     "@storybook/addon-actions": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.22",
@@ -47,6 +48,7 @@
     "autoprefixer": "^10.4.7",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
+    "eslint": "^8.23.1",
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",

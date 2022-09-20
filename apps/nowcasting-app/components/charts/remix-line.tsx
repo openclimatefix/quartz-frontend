@@ -22,7 +22,7 @@ export type ChartData = {
 
 const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live updated",
-  GENERATION: "PV Live initial estimate",
+  GENERATION: "PV Live estimate",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
 };
@@ -194,9 +194,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 if (!data) return <div></div>;
                 return (
                   <div className="p-2 bg-mapbox-black bg-opacity-70 shadow">
-                    <p className="mb-2 text-white">
-                      {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}
-                    </p>
                     <ul className="">
                       {Object.entries(data)
                         .reverse()
@@ -204,15 +201,26 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           if (name === "formatedDate") return null;
                           return (
                             <li
-                              className="font-bold"
+                              className="font-sans, text-left flex"
                               key={`item-${name}`}
                               style={{ color: toolTipColors[name] }}
                             >
-                              {toolTiplabels[name]}: {prettyPrintYNumberWithCommas(value as string)}{" "}
-                              MW
+                              <div>
+                                {toolTiplabels[name]}:{" "}
+                                <span className="font-serif text-sm ml-7">
+                                  {" "}
+                                  {prettyPrintYNumberWithCommas(value as string)}{" "}
+                                </span>
+                              </div>
                             </li>
                           );
                         })}
+                      <li className="pt-2 text-left text-sm text-white font-serif flex-wrap">
+                        <div>
+                          {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}{" "}
+                          <span className="text-right font-serif ml-10">MW</span>
+                        </div>
+                      </li>
                     </ul>
                   </div>
                 );
