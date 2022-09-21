@@ -27,7 +27,6 @@ const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> =
 type Forecast = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
-
 };
 
 type NationalForecast = {
@@ -42,7 +41,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<Forecast>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false`,
     axiosFetcher,
     {
       refreshInterval: 60 * 1000 * 5, // 5min
@@ -52,12 +51,13 @@ const PvRemixChart: FC<{ date?: string }> = () => {
   const chartLimits = useMemo(
     () =>
       nationalForecastData && {
-        start: nationalForecastData.forecastValues[0].targetTime,
-        end: nationalForecastData.forecastValues[nationalForecastData.forecastValues.length - 1].targetTime,
+        start: nationalForecastData[0].targetTime,
+        end: nationalForecastData[nationalForecastData.length - 1].targetTime,
       },
     [nationalForecastData]
   );
   useHotKeyControlChart(chartLimits);
+  console.log(nationalForecastData)
 
   const { data: pvRealDayInData, error: error2 } = useSWR<
     {
