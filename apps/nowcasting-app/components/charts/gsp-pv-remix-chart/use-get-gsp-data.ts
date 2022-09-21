@@ -9,8 +9,8 @@ const useGetGspData = (gspId: number) => {
     getAllForecastUrl(true, true),
     axiosFetcher,
     {
-      refreshInterval: t5min,
-    },
+      refreshInterval: t5min
+    }
   );
 
   const { data: pvRealDataIn, error: error2 } = useSWR<
@@ -19,7 +19,7 @@ const useGetGspData = (gspId: number) => {
       solarGenerationKw: number;
     }[]
   >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`, axiosFetcher, {
-    refreshInterval: t5min,
+    refreshInterval: t5min
   });
 
   const { data: pvRealDataAfter, error: error3 } = useSWR<
@@ -28,13 +28,13 @@ const useGetGspData = (gspId: number) => {
       solarGenerationKw: number;
     }[]
   >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`, axiosFetcher, {
-    refreshInterval: t5min,
+    refreshInterval: t5min
   });
   return {
     errors: [error1, error2, error3].filter((e) => !!e),
     fcAll,
     pvRealDataIn,
-    pvRealDataAfter,
+    pvRealDataAfter
   };
 };
 export default useGetGspData;

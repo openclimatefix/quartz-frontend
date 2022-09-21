@@ -7,7 +7,7 @@ import {
   YAxis,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip,
+  Tooltip
 } from "recharts";
 import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
 import { theme } from "../../tailwind.config";
@@ -24,13 +24,13 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live updated",
   GENERATION: "PV Live initial estimate",
   FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast",
+  PAST_FORECAST: "OCF Forecast"
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
   FORECAST: yellow,
-  PAST_FORECAST: yellow,
+  PAST_FORECAST: yellow
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -46,7 +46,7 @@ const CustomizedLabel: FC<any> = ({
   viewBox: { x },
   className,
   solidLine,
-  onClick,
+  onClick
 }) => {
   const yy = 230;
   return (
@@ -77,7 +77,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   setTimeOfInterest,
   yMax,
   timeNow,
-  resetTime,
+  resetTime
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
@@ -97,7 +97,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          top: 0,
+          top: 0
         }}
       >
         <ResponsiveContainer>
@@ -109,7 +109,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               top: 20,
               right: 20,
               bottom: 20,
-              left: 20,
+              left: 20
             }}
             onClick={(e?: { activeLabel?: string }) =>
               setTimeOfInterest && e?.activeLabel && setTimeOfInterest(e.activeLabel)

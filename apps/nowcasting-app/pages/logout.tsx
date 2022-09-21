@@ -11,20 +11,20 @@ const links = [
     title: "Documentation",
     description: "Learn how to integrate our tools with your app",
     icon: BookOpenIcon,
-    url: "#",
+    url: "#"
   },
   {
     title: "API Reference",
     description: "A complete API reference for our library",
     icon: ViewListIcon,
-    url: "https://api.nowcasting.io/docs",
+    url: "https://api.nowcasting.io/docs"
   },
   {
     title: "Support",
     description: "Get help with any problems you encounter",
     icon: SupportIcon,
-    url: "#",
-  },
+    url: "#"
+  }
 ];
 
 const LogoutPage: NextPage = () => {

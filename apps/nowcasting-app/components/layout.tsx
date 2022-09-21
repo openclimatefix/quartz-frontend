@@ -13,7 +13,7 @@ const Layout = ({ children }: ILayout) => {
     status: string;
     message: string;
   }>(`${API_PREFIX}/solar/GB/status`, axiosFetcher, {
-    refreshInterval: 60 * 1000 * 5, // 5min
+    refreshInterval: 60 * 1000 * 5 // 5min
   });
 
   return (
