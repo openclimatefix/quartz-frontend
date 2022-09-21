@@ -45,7 +45,7 @@ const useFormatChartData = ({
   timeTrigger?: string;
 }) => {
   const data = useMemo(() => {
-    if (forecastData && fourHourData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
+    if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};
 
@@ -94,13 +94,15 @@ const useFormatChartData = ({
           (db) => getForecastChartData(timeNow, db)
         ),
       );
-      fourHourData.forEach((fc) =>
-        addDataToMap(
-          fc,
-          (db) => db.targetTime,
-          (db) => getForecastChartData(timeNow, db, 240),
-        ),
-      );
+      if (fourHourData) {
+        fourHourData.forEach((fc) =>
+          addDataToMap(
+            fc,
+            (db) => db.targetTime,
+            (db) => getForecastChartData(timeNow, db, 240),
+          ),
+        );
+      }
 
       return Object.values(chartMap);
     }

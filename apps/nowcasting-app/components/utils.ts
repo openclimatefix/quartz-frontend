@@ -89,7 +89,11 @@ export const addMinutesToISODate = (date: string, munites: number) => {
 export const getRounded4HoursAgoString = () => {
   const fourHoursAgo = new Date();
   fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
-  fourHoursAgo.setMinutes(0);
+  if (fourHoursAgo.getMinutes() < 30) {
+    fourHoursAgo.setMinutes(0);
+  } else {
+    fourHoursAgo.setMinutes(30);
+  }
   return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
 };
 
