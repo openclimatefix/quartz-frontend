@@ -5,7 +5,7 @@ const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string }> = ({
   pv,
   subTitle,
-  color = yellow,
+  color = yellow
 }) => {
   return (
     <div className="flex-[1] m-auto">
@@ -38,7 +38,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   children,
   selectedTimeOnly,
   pvTimeOnly,
-  forecastNextTimeOnly,
+  forecastNextTimeOnly
 }) => {
   return (
     <div className={"flex content-between flex-wrap mt-6 h-auto"}>

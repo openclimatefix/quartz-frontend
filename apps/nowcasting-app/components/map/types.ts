@@ -1,11 +1,11 @@
 export enum ActiveUnit {
   MW = "MW",
-  percentage = "%",
+  percentage = "%"
 }
 
 export enum SelectedData {
   expectedPowerGenerationNormalized = "expectedPowerGenerationNormalized",
-  expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts",
+  expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts"
 }
 
 export interface IMap {

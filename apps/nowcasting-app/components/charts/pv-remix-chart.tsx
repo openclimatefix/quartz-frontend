@@ -12,11 +12,12 @@ import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { LegendLineGraphIcon } from "../icons";
+import { ForecastData } from "../types";
 
 const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> = ({
   iconClasses,
   label,
-  dashed,
+  dashed
 }) => (
   <div className="flex items-center">
     <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
@@ -31,21 +32,21 @@ const PvRemixChart: FC<{ date?: string }> = () => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const { data: nationalForecastData, error } = useSWR<
+  const { data: nationalForecastData, error } = useSWR<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
+    axiosFetcher,
     {
-      targetTime: string;
-      expectedPowerGenerationMegawatts: number;
-    }[]
-  >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0`, axiosFetcher, {
-    refreshInterval: 60 * 1000 * 5, // 5min
-  });
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
   const chartLimits = useMemo(
     () =>
       nationalForecastData && {
         start: nationalForecastData[0].targetTime,
-        end: nationalForecastData[nationalForecastData.length - 1].targetTime,
+        end: nationalForecastData[nationalForecastData.length - 1].targetTime
       },
-    [nationalForecastData],
+    [nationalForecastData]
   );
   useHotKeyControlChart(chartLimits);
 
@@ -54,8 +55,8 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/0/?regime=in-day`, axiosFetcher, {
-    refreshInterval: 60 * 1000 * 5, // 5min
+  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5 // 5min
   });
 
   const { data: pvRealDayAfterData, error: error3 } = useSWR<
@@ -63,15 +64,15 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/GB/solar/gsp/pvlive/one_gsp/0/?regime=day-after`, axiosFetcher, {
-    refreshInterval: 60 * 1000 * 5, // 5min
+  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcher, {
+    refreshInterval: 60 * 1000 * 5 // 5min
   });
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
     pvRealDayInData,
     pvRealDayAfterData,
-    timeTrigger: selectedTime,
+    timeTrigger: selectedTime
   });
 
   if (error || error2 || error3) return <div>failed to load</div>;

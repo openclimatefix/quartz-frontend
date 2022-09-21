@@ -37,7 +37,7 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
         center: [lng, lat],
         zoom,
         bearing,
-        keyboard: false,
+        keyboard: false
       });
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });

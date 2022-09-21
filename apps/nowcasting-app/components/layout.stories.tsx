@@ -2,7 +2,7 @@ import Layout from "./layout";
 
 export default {
   title: "Components/Layout",
-  component: Layout as any,
+  component: Layout as any
 };
 
 export const LayoutComponent = () => (
