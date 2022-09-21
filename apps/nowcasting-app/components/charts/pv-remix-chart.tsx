@@ -41,7 +41,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<Forecast>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false`,
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
     axiosFetcher,
     {
       refreshInterval: 60 * 1000 * 5, // 5min
