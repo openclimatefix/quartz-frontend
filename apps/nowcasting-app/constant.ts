@@ -3,7 +3,7 @@ export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
 
 export const getAllForecastUrl = (isNormalized: boolean, isHistoric: boolean) =>
-  `${API_PREFIX}/solar/GB/gsp/forecast/all?${isHistoric ? "historic=true" : ""}${
+  `${API_PREFIX}/solar/GB/gsp/forecast/all/?${isHistoric ? "historic=true" : ""}${
     isNormalized ? "&normalize=true" : ""
   }`;
 
@@ -22,23 +22,23 @@ export const apiErrorMSGS = [
     getMsg: (key: string) => "Error fetching national forecasts data. Retrying now…",
   },
   {
-    key: /\/solar\/GB\/national\/pvlive\/\?regime=in-day$/,
+    key: /\/solar\/GB\/national\/pvlive\/?regime=in-day$/,
     getMsg: (key: string) => "Error fetching National PV Live initial estimate. Retrying now ...",
   },
   {
-    key: /\/solar\/GB\/national\/pvlive\/0\/\?regime=day-after$/,
+    key: /\/solar\/GB\/national\/pvlive\/?regime=day-after$/,
     getMsg: (key: string) => "Error fetching National PV Live updated. Retrying now ...",
   },
 
   {
-    key: /\/solar\/GB\/gsp\/pvlive\/\d+\/\?regime=in-day$/,
+    key: /\/solar\/GB\/gsp\/pvlive\/\d+\/?regime=in-day$/,
     getMsg: (key: string) => {
       const gspId = (key.match(/(\d+)/) || [])[1];
-      return `Error fetching GSP ${gspId} PV Live initial estimate. Retrying now ...`;
+      return `Error fetching the GSP ${gspId} PV Live initial estimate. Retrying now ...`;
     },
   },
   {
-    key: /\/solar\/GB\/gsp\/pvlive\/\d+\/\?regime=day-after$/,
+    key: /\/solar\/GB\/gsp\/pvlive\/\d+\/?regime=day-after$/,
     getMsg: (key: string) => {
       const gspId = (key.match(/(\d+)/) || [])[1];
       return `Error fetching GSP ${gspId} PV Live updated. Retrying now ...`;
