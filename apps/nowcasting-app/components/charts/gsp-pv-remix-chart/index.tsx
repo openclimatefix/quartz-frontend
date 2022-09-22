@@ -27,7 +27,7 @@ const GspPvRemixChart: FC<{
     forecastData: gspForecastData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
-    timeTrigger: selectedTime,
+    timeTrigger: selectedTime
   });
   if (errors.length) return <div>failed to load</div>;
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)

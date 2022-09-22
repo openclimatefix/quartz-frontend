@@ -5,8 +5,8 @@ export default withSentry(
   handleAuth({
     async logout(req, res) {
       await handleLogout(req, res, {
-        returnTo: "/logout",
+        returnTo: "/logout"
       });
-    },
-  }),
+    }
+  })
 );

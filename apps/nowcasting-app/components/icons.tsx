@@ -7,7 +7,7 @@ type LegendLineGraphIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashed = false,
+  dashed = false
 }) => (
   <svg
     className={className}

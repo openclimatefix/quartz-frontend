@@ -24,7 +24,7 @@ const useHotKeyControlChart = (limits?: { start: string; end: string }) => {
         });
       }
     },
-    [limits],
+    [limits]
   );
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);

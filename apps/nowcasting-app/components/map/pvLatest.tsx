@@ -42,8 +42,8 @@ const useGetForecastsData = (isNormalized: boolean) => {
       onSuccess: (data) => {
         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
         setForecastLoading(false);
-      },
-    },
+      }
+    }
   );
 
   const allForecastData = useSWR<FcAllResData>(() => getAllForecastUrl(true, true), axiosFetcher, {
@@ -51,7 +51,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
     isPaused: () => forecastLoading,
     onSuccess: (data) => {
       setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-    },
+    }
   });
   useEffect(() => {
     if (!forecastLoading) {
@@ -75,7 +75,7 @@ const PvLatestMap = () => {
   const {
     data: initForecastData,
     isValidating,
-    error: forecastError,
+    error: forecastError
   } = useGetForecastsData(isNormalized);
   const forecastLoading = false;
 
@@ -88,7 +88,7 @@ const PvLatestMap = () => {
     0,
     // on value maximum the opacity will be 1
     isNormalized ? 1 : MAX_POWER_GENERATED,
-    1,
+    1
   ];
 
   const generateGeoJsonForecastData = (forecastData?: FcAllResData, targetTime?: string) => {
@@ -101,7 +101,7 @@ const PvLatestMap = () => {
         const selectedFCvalue =
           filteredForcastData && targetTime
             ? filteredForcastData[index]?.forecastValues.find(
-                (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime),
+                (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
               )
             : filteredForcastData
             ? filteredForcastData[index]?.forecastValues[latestForecastValue]
@@ -115,10 +115,10 @@ const PvLatestMap = () => {
               selectedFCvalue && getRoundedPv(selectedFCvalue.expectedPowerGenerationMegawatts),
             expectedPowerGenerationNormalized:
               selectedFCvalue &&
-              getRoundedPvPercent(selectedFCvalue?.expectedPowerGenerationNormalized || 0),
-          },
+              getRoundedPvPercent(selectedFCvalue?.expectedPowerGenerationNormalized || 0)
+          }
         };
-      }),
+      })
     };
 
     return { forecastGeoJson };
@@ -134,7 +134,7 @@ const PvLatestMap = () => {
       map.setPaintProperty(
         "latestPV-forecast",
         "fill-opacity",
-        getFillOpacity(selectedDataName, isNormalized),
+        getFillOpacity(selectedDataName, isNormalized)
       );
     }
   };
@@ -144,7 +144,7 @@ const PvLatestMap = () => {
 
     map.current.addSource("latestPV", {
       type: "geojson",
-      data: forecastGeoJson,
+      data: forecastGeoJson
     });
 
     map.current.addLayer({
@@ -154,8 +154,8 @@ const PvLatestMap = () => {
       layout: { visibility: "visible" },
       paint: {
         "fill-color": yellow,
-        "fill-opacity": getFillOpacity(selectedDataName, isNormalized),
-      },
+        "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
+      }
     });
 
     map.current.addLayer({
@@ -165,8 +165,8 @@ const PvLatestMap = () => {
       paint: {
         "line-color": "#ffffff",
         "line-width": 0.6,
-        "line-opacity": 0.2,
-      },
+        "line-opacity": 0.2
+      }
     });
 
     map.current.addLayer({
@@ -176,8 +176,8 @@ const PvLatestMap = () => {
       paint: {
         "line-color": "#ffffff",
         "line-width": 4,
-        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0],
-      },
+        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+      }
     });
   };
 

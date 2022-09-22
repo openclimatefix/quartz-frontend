@@ -14,7 +14,7 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     if (clickedGspIdRef.current) {
       map?.setFeatureState(
         { source: "latestPV", id: clickedGspIdRef.current - 1 },
-        { click: false },
+        { click: false }
       );
     }
 

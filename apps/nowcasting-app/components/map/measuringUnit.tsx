@@ -3,7 +3,7 @@ import { ActiveUnit } from "./types";
 const MeasuringUnit = ({
   activeUnit,
   setActiveUnit,
-  isLoading,
+  isLoading
 }: {
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
@@ -11,7 +11,7 @@ const MeasuringUnit = ({
 }) => {
   const onToggle = async (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    unit: ActiveUnit,
+    unit: ActiveUnit
   ) => {
     event.preventDefault();
     setActiveUnit(unit);
