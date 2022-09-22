@@ -205,9 +205,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               key={`item-${name}`}
                               style={{ color: toolTipColors[name] }}
                             >
-                              <div className={`flex justify-between lg-font-bold`}>
-                                <div>{toolTiplabels[name]}:{" "}</div>
-                                <div className="font-serif text-sm ml-7">
+                              <div className={`flex justify-between`}>
+                                <div className={`font-extrabold`}>{toolTiplabels[name]}:{" "}</div>
+                                <div className="font-serif font-extrabold text-sm ml-7">
                                   {" "}
                                   {prettyPrintYNumberWithCommas(value as string)}{" "}
                                 </div>
@@ -215,11 +215,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             </li>
                           );
                         })}
-                      <li className={`flex justify-between pt-2 text-sm text-white font-serif`}>
+                      <li className={`flex justify-between pt-4 text-sm text-white font-serif`}>
                         <div>
                           {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}{" "}
                           </div>
-                        <div className={`font-serif`}>MW</div>
+                        <div>MW</div>
                       </li>
                     </ul>
                   </div>

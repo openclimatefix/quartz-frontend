@@ -17,7 +17,7 @@ module.exports = {
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["ui-monospace", ...defaultTheme.fontFamily.mono],
-        serif: ["Fira Code", ...defaultTheme.fontFamily.serif],
+        serif: ["Source Code Pro", ...defaultTheme.fontFamily.serif],
       },
       colors: {
         amber: {
