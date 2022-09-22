@@ -57,10 +57,6 @@ export const formatISODateStringHuman = (date: string) => {
     year: 'numeric',
     timeZone: 'Europe/London'
   });
-  // const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
-
-  // further formatting could be done to make it yyyy/mm/dd HH:MM
-  // return `${date_london} ${date_london_time}`;
   return `${date_london}`;
 };
 
