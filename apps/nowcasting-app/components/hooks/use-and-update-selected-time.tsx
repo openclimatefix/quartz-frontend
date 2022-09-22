@@ -12,7 +12,7 @@ const useAndUpdateSelectedTime = () => {
       setInterval(() => {
         const time30MinNow = get30MinNow();
         setSelectedISOTime(time30MinNow);
-      }, 1000 * 60),
+      }, 1000 * 60)
     );
     return () => {
       clearIntervals();
@@ -30,7 +30,7 @@ export const useStopAndResetTime = () => {
       setInterval(() => {
         const time30MinNow = get30MinNow();
         setSelectedISOTime(time30MinNow);
-      }, 1000 * 60),
+      }, 1000 * 60)
     );
   };
   return { stopTime, resetTime };

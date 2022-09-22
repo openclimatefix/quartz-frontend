@@ -17,7 +17,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   pvUpdatedData,
   pvLiveData,
   pvForecastData,
-  selectedTime,
+  selectedTime
 }) => {
   const timeNow = useTimeNow();
 
@@ -34,17 +34,17 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   // Get the next OCF forecast, for now (or future)
   const nextPvForecastInGW = MWtoGW(
     pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === futurePvForecastDatetime)
-      ?.expectedPowerGenerationMegawatts || 0,
+      ?.expectedPowerGenerationMegawatts || 0
   );
 
   // get the Actual pv value in GW
   // Try to get it from the updated values, then try initial pv data, finally just take the first
   const selectedPvActualInGW = useMemo(() => {
     const selectetpvUpdate = pvUpdatedData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
     )?.solarGenerationKw;
     const selectetpvLive = pvLiveData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
     )?.solarGenerationKw;
     const latestpvLive = pvLiveData[0].solarGenerationKw;
     return KWtoGW(selectetpvUpdate || selectetpvLive || latestpvLive);
@@ -54,10 +54,10 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   // Try to get it from the updated values, then try initial pv data, finally just take the first
   const selectedPvActualDatetime = useMemo(() => {
     const selectetpvUpdate = pvUpdatedData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
     )?.datetimeUtc;
     const selectetpvLive = pvLiveData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime,
+      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
     )?.datetimeUtc;
     const latestpvLive = pvLiveData[0].datetimeUtc;
     return selectetpvUpdate || selectetpvLive || latestpvLive;
@@ -70,7 +70,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   // for the selected time in the past, or the last PV value time
   const selectedPvForecastInGW = MWtoGW(
     pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === pvForecastDatetime)
-      ?.expectedPowerGenerationMegawatts || 0,
+      ?.expectedPowerGenerationMegawatts || 0
   );
 
   return (

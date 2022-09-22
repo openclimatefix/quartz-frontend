@@ -10,8 +10,8 @@ module.exports = {
         sm: "2rem",
         lg: "4rem",
         xl: "5rem",
-        "2xl": "6rem",
-      },
+        "2xl": "6rem"
+      }
     },
     extend: {
       fontFamily: {
@@ -31,7 +31,7 @@ module.exports = {
           600: "#FFC11B",
           700: "#E2A400",
           800: "#AA7B00",
-          900: "#725300",
+          900: "#725300"
         },
         "ocf-yellow": {
           DEFAULT: "#FFD053",
@@ -44,7 +44,7 @@ module.exports = {
           600: "#FFC11B",
           700: "#E2A400",
           800: "#AA7B00",
-          900: "#725300",
+          900: "#725300"
         },
         "ocf-orange": {
           DEFAULT: "#FFAC5F",
@@ -57,7 +57,7 @@ module.exports = {
           600: "#FF8F27",
           700: "#EE7200",
           800: "#B65700",
-          900: "#7E3C00",
+          900: "#7E3C00"
         },
         "ocf-gray": {
           DEFAULT: "#E4E4E4",
@@ -70,14 +70,14 @@ module.exports = {
           600: "#C8C8C8",
           700: "#ACACAC",
           800: "#909090",
-          900: "#747474",
+          900: "#747474"
         },
         "mapbox-black": {
           DEFAULT: "#191a1a",
           300: "#A9A9A9",
           500: "#6C6C6C",
           700: "#343332",
-          900: "#191a1a",
+          900: "#191a1a"
         },
         "ocf-black": {
           DEFAULT: "#14120E",
@@ -90,7 +90,7 @@ module.exports = {
           600: "#000000",
           700: "#000000",
           800: "#000000",
-          900: "#000000",
+          900: "#000000"
         },
         "ocf-blue": {
           DEFAULT: "#48B0DF",
@@ -103,7 +103,7 @@ module.exports = {
           600: "#2497CB",
           700: "#1B749C",
           800: "#13506C",
-          900: "#0B2D3C",
+          900: "#0B2D3C"
         },
         "ocf-green": {
           DEFAULT: "#63BCAF",
@@ -116,7 +116,7 @@ module.exports = {
           600: "#45A294",
           700: "#357A70",
           800: "#24534C",
-          900: "#132C28",
+          900: "#132C28"
         },
         "ocf-teal": {
           DEFAULT: "#70C2B6",
@@ -129,10 +129,10 @@ module.exports = {
           600: "#4BAFA0",
           700: "#3A887C",
           800: "#296158",
-          900: "#183934",
-        },
-      },
-    },
+          900: "#183934"
+        }
+      }
+    }
   },
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")],
-}
+  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")]
+};
