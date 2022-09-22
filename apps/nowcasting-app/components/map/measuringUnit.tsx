@@ -18,13 +18,13 @@ const MeasuringUnit = ({
   };
 
   return (
-    <div className="mt-1 flex justify-items-end">
+    <div className="mt-2 flex justify-end mr-0">
       <div className="inline-block">
         <button
           onClick={(event) => onToggle(event, ActiveUnit.MW)}
           disabled={isLoading}
           type="button"
-          className={`relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold  ${
+          className={`relative w-12inline-flex items-center px-3 py-2 mx-1 ml-px text-sm font-extrabold  ${
             activeUnit === "MW" ? "text-black bg-ocf-yellow" : "text-white bg-black"
           } ${isLoading ? "cursor-wait" : ""} hover:bg-ocf-yellow`}
         >
@@ -34,7 +34,7 @@ const MeasuringUnit = ({
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}
           disabled={isLoading}
           type="button"
-          className={`relative inline-flex items-center px-3 py-1 text-sm font-extrabold ${
+          className={`relative inline-flex items-center px-4 py-2 ml-1 mr-px text-sm font-extrabold ${
             activeUnit === "%" ? "text-black bg-ocf-yellow" : "text-white bg-black"
           }  ${isLoading ? "cursor-wait" : ""} hover:bg-ocf-yellow`}
         >
