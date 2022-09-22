@@ -201,25 +201,25 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           if (name === "formatedDate") return null;
                           return (
                             <li
-                              className="font-sans, text-left flex"
+                              className={`font-sans`}
                               key={`item-${name}`}
                               style={{ color: toolTipColors[name] }}
                             >
-                              <div>
-                                {toolTiplabels[name]}:{" "}
-                                <span className="font-serif text-sm ml-7">
+                              <div className={`flex justify-between lg-font-bold`}>
+                                <div>{toolTiplabels[name]}:{" "}</div>
+                                <div className="font-serif text-sm ml-7">
                                   {" "}
                                   {prettyPrintYNumberWithCommas(value as string)}{" "}
-                                </span>
+                                </div>
                               </div>
                             </li>
                           );
                         })}
-                      <li className="pt-2 text-left text-sm text-white font-serif flex-wrap">
+                      <li className={`flex justify-between pt-2 text-sm text-white font-serif`}>
                         <div>
                           {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}{" "}
-                          <span className="text-right font-serif ml-10">MW</span>
-                        </div>
+                          </div>
+                        <div className={`font-serif`}>MW</div>
                       </li>
                     </ul>
                   </div>

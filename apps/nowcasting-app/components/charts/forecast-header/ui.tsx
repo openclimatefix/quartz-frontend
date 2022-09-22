@@ -43,7 +43,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   return (
     <div className={"flex content-between flex-wrap mt-6 h-auto"}>
       <div
-        className={` bg-white text-black lg:text-2xl md:text-lg text-sm font-black  p-4 py-2  flex-[2] `}
+        className={`bg-white text-black lg:text-2xl md:text-lg text-sm font-black p-4 py-2 flex-[2]`}
       >
         National Solar PV <span className={`text-base text-ocf-gray-900 ml-2`}>GW</span>
       </div>
