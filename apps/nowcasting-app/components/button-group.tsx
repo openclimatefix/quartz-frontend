@@ -25,7 +25,7 @@ const ButtonGroup = ({ rightString }: IButtonGroup) => {
       >
         DELTA
       </button>
-      <div className="absolute right-5 top-0 items-center px-3 py-1 ml-px text-md font-medium text-white bg-ocf-black ">
+       <div className="absolute left-0 top-0 items-center px-3 py-1 ml-px text-md font-bold text-black bg-white">
         {rightString}
       </div>
     </span>

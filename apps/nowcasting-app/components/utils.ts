@@ -42,16 +42,28 @@ export const convertISODateStringToLondonTime = (date: string) => {
   return date_london_time_str;
 };
 
+
 export const formatISODateStringHuman = (date: string) => {
   // Change date to nice human readable format.
   // Note that this converts the string to Europe London Time
   // timezone and seconds are removed
+
   const d = new Date(date);
-  const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
-  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
+  
+  const options = {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/London'
+  };
+  
+  const date_london = d.toLocaleString("en-GB", options);
+  // const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
 
   // further formatting could be done to make it yyyy/mm/dd HH:MM
-  return `${date_london} ${date_london_time}`;
+  // return `${date_london} ${date_london_time}`;
+  return `${date_london}`;
 };
 
 export const MWtoGW = (MW: number) => {

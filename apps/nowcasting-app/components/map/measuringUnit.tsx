@@ -18,7 +18,7 @@ const MeasuringUnit = ({
   };
 
   return (
-    <div className="mt-1">
+    <div className="mt-1 flex justify-items-end">
       <div className="inline-block">
         <button
           onClick={(event) => onToggle(event, ActiveUnit.MW)}
