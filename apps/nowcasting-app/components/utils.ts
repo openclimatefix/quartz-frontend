@@ -50,15 +50,13 @@ export const formatISODateStringHuman = (date: string) => {
 
   const d = new Date(date);
   
-  const options = {
+  const date_london = d.toLocaleString("en-GB", {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
     timeZone: 'Europe/London'
-  };
-  
-  const date_london = d.toLocaleString("en-GB", options);
+  });
   // const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
 
   // further formatting could be done to make it yyyy/mm/dd HH:MM
