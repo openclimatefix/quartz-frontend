@@ -31,7 +31,7 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
 
   return (
-    <footer className="text-white text-right px-2 bg-black flex absolute bottom-0 w-full p-1 text-sm ">
+    <footer className="text-white text-right px-2 bg-black flex absolute top-0 w-full p-1 text-sm ">
       <div className="p-1 items-center inline-flex">
         <a
           className="flex h-6 w-auto mr-2"
