@@ -194,21 +194,24 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 if (!data) return <div></div>;
 
                 return (
-                  <div className="p-2 bg-mapbox-black bg-opacity-70 shadow">
+                  <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
                     <ul className="">
                       {Object.entries(data)
                         .reverse()
                         .map(([name, value]) => {
                           if (name === "formatedDate") return null;
+                          const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
+                            ? "font-semibold"
+                            : "font-normal";
                           return (
                             <li
-                              className={`font-sans textClass`}
+                              className={`font-sans`}
                               key={`item-${name}`}
                               style={{ color: toolTipColors[name] }}
                             >
-                              <div className={`flex justify-between`}>
-                                <div className={`font-extrabold`}>{toolTiplabels[name]}: </div>
-                                <div className="font-serif font-extrabold text-sm ml-7">
+                              <div className={`flex justify-between ${textClass}`}>
+                                <div>{toolTiplabels[name]}: </div>
+                                <div className={`font-serif ml-7`}>
                                   {" "}
                                   {prettyPrintYNumberWithCommas(value as string)}{" "}
                                 </div>
