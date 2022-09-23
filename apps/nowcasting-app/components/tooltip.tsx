@@ -13,11 +13,11 @@ const Tooltip: React.FC<TooltipProps> = ({ children, tip, position = "left", cla
   return (
     <div className={`relative flex flex-col items-center group w-fit ${className || ""}`}>
       {children}
-      <div className="absolute flex flex-col items-center hidden mb-8 group-hover:flex">
+      <div className="absolute flex flex-col items-center hidden mt-8 group-hover:flex">
         <span
           className={`absolute ${getPositionClass(
             position
-          )} bottom-0 w-auto mb-1 z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-ocf-black shadow-lg`}
+          )} top-0 w-auto mb-1 z-10 p-2 text-xs leading-none text-white whitespace-no-wrap bg-ocf-black shadow-lg`}
         >
           {tip}
         </span>

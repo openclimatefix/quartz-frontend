@@ -88,7 +88,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div className="flex flex-col flex-1 mb-12">
+    <div className="flex flex-col flex-1 mt-12 mb-1">
       <div className="flex-grow mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}

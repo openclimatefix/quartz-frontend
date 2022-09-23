@@ -1,7 +1,9 @@
 import useGlobalState from "../../globalState";
 import Tooltip from "../../tooltip";
-import { formatISODateStringHuman } from "../../utils";
+import { classNames, formatISODateStringHuman } from "../../utils";
 import ProfileDropDown from "./profile-dropdown";
+import { OCFlogo } from "../../logo";
+import Link from "next/link";
 
 const chartInfo = (forecastCreationTime?: string) => (
   <div className="w-full w-64 p-2 text-sm">
@@ -31,7 +33,7 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
 
   return (
-    <footer className="text-white text-right px-2 bg-black flex absolute bottom-0 w-full p-1 text-sm ">
+    <footer className="text-white text-right px-2 bg-black flex absolute top-0 w-full p-1 text-sm items-center">
       <div className="p-1 items-center inline-flex">
         <a
           className="flex h-6 w-auto mr-2"
@@ -79,6 +81,7 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
           Feedback
         </a>
       </div>
+      <OCFlogo />
       <div className="py-1">
         <ProfileDropDown />
       </div>
