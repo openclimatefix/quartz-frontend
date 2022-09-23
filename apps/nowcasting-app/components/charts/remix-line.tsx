@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
-import { convertISODateStringToLondonTime, formatISODateStringHuman } from "../utils";
+import { convertISODateStringToLondonTime, formatISODateStringHumanNumbersOnly } from "../utils";
 import { theme } from "../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 export type ChartData = {
@@ -217,7 +217,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         })}
                       <li className={`flex justify-between pt-4 text-sm text-white font-serif`}>
                         <div>
-                          {formatISODateStringHuman(data?.formatedDate + ":00+00:00")}{" "}
+                          {formatISODateStringHumanNumbersOnly(data?.formatedDate + ":00+00:00")}{" "}
                           </div>
                         <div>MW</div>
                       </li>
