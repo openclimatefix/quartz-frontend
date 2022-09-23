@@ -6,21 +6,41 @@ type ColorGuideBarProps = { unit: ActiveUnit };
 const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
   const values = useMemo(() => {
     if (unit === ActiveUnit.MW) {
-      return [500, 400, 300, 200, 100, 0];
+      return [
+        { value: "0-100", opacity: 20 },
+        { value: "100-200", opacity: 40 },
+        { value: "200-300", opacity: 60 },
+        { value: "300-400", opacity: 80 },
+        { value: "400+", opacity: 100 }
+      ];
     } else {
-      return ["100%", "80%", "60%", "40%", "20%", "0%"];
+      return [
+        { value: "0-10", opacity: 20 },
+        { value: "10-30", opacity: 40 },
+        { value: "30-50", opacity: 60 },
+        { value: "50-70", opacity: 80 },
+        { value: "70+", opacity: 100 }
+      ];
     }
   }, [unit]);
+  let unitText = unit === ActiveUnit.MW ? "MW" : "%";
   return (
-    <div className="flex w-8 h-96 bg-mapbox-black-700  absolute right-3 top-1/4 z-20 ">
-      <div className="flex flex-col justify-between w-0 h-full text-white relative items-end text-xs">
-        {values.map((value) => (
-          <div key={value} className=" mr-1">
-            {value}-
+    <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">
+      <div className="flex justify-between h-full text-ocf-black-600 font-bold relative items-end text-sm">
+        {values.map((value, index) => (
+          <div
+            key={value.value}
+            className={`px-3 py-[1px] bg-ocf-yellow/${value.opacity} whitespace-nowrap ${
+              index !== 0 ? "border-l border-ocf-black-600" : ""
+            }`}
+          >
+            {value.value}
+            {index === 0 && (
+              <span className="font-normal text-ocf-black-500 text-xs ml-1">{unitText}</span>
+            )}
           </div>
         ))}
       </div>
-      <div className=" h-full w-full bg-gradient-to-b from-ocf-yellow  to-transparent "></div>
     </div>
   );
 };
