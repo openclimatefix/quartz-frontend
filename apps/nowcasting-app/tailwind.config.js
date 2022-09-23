@@ -2,6 +2,20 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 
 module.exports = {
   content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
+  safelist: [
+    "bg-ocf-yellow",
+    "bg-ocf-yellow/5",
+    "bg-ocf-yellow/10",
+    "bg-ocf-yellow/20",
+    "bg-ocf-yellow/30",
+    "bg-ocf-yellow/40",
+    "bg-ocf-yellow/50",
+    "bg-ocf-yellow/60",
+    "bg-ocf-yellow/70",
+    "bg-ocf-yellow/80",
+    "bg-ocf-yellow/90",
+    "bg-ocf-yellow/100"
+  ],
   theme: {
     container: {
       center: true,
