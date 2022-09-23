@@ -192,6 +192,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
                 if (!data) return <div></div>;
+
                 return (
                   <div className="p-2 bg-mapbox-black bg-opacity-70 shadow">
                     <ul className="">
@@ -201,7 +202,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           if (name === "formatedDate") return null;
                           return (
                             <li
-                              className={`font-sans`}
+                              className={`font-sans textClass`}
                               key={`item-${name}`}
                               style={{ color: toolTipColors[name] }}
                             >
