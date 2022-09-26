@@ -1,4 +1,4 @@
-export const API_PREFIX = "https://api-dev.nowcasting.io/v0";
+export const API_PREFIX = "https://api-pro.nowcasting.io/v0";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
 
