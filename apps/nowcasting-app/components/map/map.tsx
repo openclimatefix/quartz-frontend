@@ -1,6 +1,6 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 
@@ -13,7 +13,7 @@ mapboxgl.accessToken =
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap) => {
+const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData, children }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
@@ -37,7 +37,7 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
         center: [lng, lat],
         zoom,
         bearing,
-        keyboard: false,
+        keyboard: false
       });
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });
@@ -61,12 +61,12 @@ const Map = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData }: IMap)
   }, [map]);
 
   return (
-    <div className="relative h-full bg-mapbox-black-500">
+    <div className="relative h-full bg-ocf-gray-900">
       <div className="absolute top-0 left-0 z-10 p-6 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>
       <div ref={mapContainer} className="h-full" />
-      <div className="map-overlay top"></div>
+      <div className="map-overlay top">{children}</div>
     </div>
   );
 };

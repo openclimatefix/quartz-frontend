@@ -4,26 +4,27 @@ import Head from "next/head";
 import { ChevronRightIcon } from "@heroicons/react/solid";
 import { SupportIcon, BookOpenIcon, ViewListIcon } from "@heroicons/react/outline";
 import Footer from "../components/footer";
+import Link from "next/link";
 
 const links = [
   {
     title: "Documentation",
     description: "Learn how to integrate our tools with your app",
     icon: BookOpenIcon,
-    url: "#",
+    url: "#"
   },
   {
     title: "API Reference",
     description: "A complete API reference for our library",
     icon: ViewListIcon,
-    url: "https://api.nowcasting.io/docs",
+    url: "https://api.nowcasting.io/docs"
   },
   {
     title: "Support",
     description: "Get help with any problems you encounter",
     icon: SupportIcon,
-    url: "#",
-  },
+    url: "#"
+  }
 ];
 
 const LogoutPage: NextPage = () => {
@@ -83,9 +84,14 @@ const LogoutPage: NextPage = () => {
                 ))}
               </ul>
               <div className="mt-8">
-                <a href="/" className="text-base font-medium text-danube-600 hover:text-danube-500">
-                  Or log in again<span aria-hidden="true"> &rarr;</span>
-                </a>
+                <Link
+                  href="/"
+                  className="text-base font-medium text-danube-600 hover:text-danube-500"
+                >
+                  <div>
+                    Or log in again<span aria-hidden="true"> &rarr;</span>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>

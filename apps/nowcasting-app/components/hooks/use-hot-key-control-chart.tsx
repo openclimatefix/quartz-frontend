@@ -24,12 +24,12 @@ const useHotKeyControlChart = (limits?: { start: string; end: string }) => {
         });
       }
     },
-    [],
+    [limits]
   );
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [handleKeyDown]);
 };
 export default useHotKeyControlChart;

@@ -497,7 +497,7 @@ const Vis1MapPage: NextPage = () => {
               },
               pvLiveGenerationData,
             ]}
-          /> 
+          />
         </div>*/}
       </div>
     </Layout>

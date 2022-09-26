@@ -46,7 +46,26 @@ export const formatISODateStringHuman = (date: string) => {
   // Change date to nice human readable format.
   // Note that this converts the string to Europe London Time
   // timezone and seconds are removed
+
   const d = new Date(date);
+
+  const date_london = d.toLocaleString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/London"
+  });
+  return `${date_london}`;
+};
+
+export const formatISODateStringHumanNumbersOnly = (date: string) => {
+  // Change date to nice human readable format.
+  // Note that this converts the string to Europe London Time
+  // timezone and seconds are removed
+
+  const d = new Date(date);
+
   const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
   const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
 
@@ -55,10 +74,10 @@ export const formatISODateStringHuman = (date: string) => {
 };
 
 export const MWtoGW = (MW: number) => {
-  return (MW / 1000).toFixed(3);
+  return (MW / 1000).toFixed(1);
 };
 export const KWtoGW = (MW: number) => {
-  return (MW / 1000 / 1000).toFixed(3);
+  return (MW / 1000 / 1000).toFixed(1);
 };
 
 export const addMinutesToISODate = (date: string, munites: number) => {

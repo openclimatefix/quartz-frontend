@@ -4,28 +4,28 @@ interface IButtonGroup {
 
 const ButtonGroup = ({ rightString }: IButtonGroup) => {
   return (
-    <span className="relative z-0 w-full inline-flex shadow-sm">
+    <span className="relative z-0 w-full flex justify-end shadow-sm mx-0">
       <button
         type="button"
-        className="relative inline-flex items-center px-3 py-1 text-sm font-extrabold text-black bg-amber-400 disabled:cursor-not-allowed hover:bg-amber-400 focus:z-10 focus:bg-amber-400 focus:text-black"
+        className="relative w-32 items-center px-3 py-2 text-sm mx-2 font-extrabold text-black bg-ocf-yellow disabled:cursor-not-allowed hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black"
       >
         PV FORECAST
       </button>
       <button
         type="button"
         disabled
-        className="relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold text-white bg-black disabled:cursor-not-allowed focus:z-10 focus:bg-amber-400 focus:text-black"
+        className="relative w-32 items-center px-3 py-2 mx-2 ml-px text-sm font-extrabold text-white bg-black disabled:cursor-not-allowed focus:z-10 focus:bg-ocf-yellow focus:text-black"
       >
         SOLAR SITES
       </button>
       <button
         type="button"
         disabled
-        className="relative inline-flex items-center px-3 py-1 ml-px text-sm font-extrabold text-white bg-black disabled:cursor-not-allowed focus:z-10 focus:bg-amber-400 focus:text-black"
+        className="relative w-32 items-center px-3 py-2 ml-px text-sm font-extrabold text-white bg-black disabled:cursor-not-allowed focus:z-10 focus:bg-ocf-yellow focus:text-black"
       >
         DELTA
       </button>
-      <div className="absolute right-5 top-0 items-center px-3 py-1 ml-px text-md font-medium text-white bg-mapbox-black ">
+      <div className="absolute left-0 top-0 items-center px-3 py-2 mx-1  ml-px text-lg font-extrabold text-black bg-white">
         {rightString}
       </div>
     </span>

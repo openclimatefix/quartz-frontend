@@ -27,9 +27,9 @@ function MyApp({ Component, pageProps }: any) {
             toast(errorMsg || defaultMsg, {
               type: "error",
               theme: "colored",
-              icon: false,
+              icon: false
             });
-          },
+          }
         }}
       >
         <ToastContainer position="top-left" autoClose={10000} limit={5} hideProgressBar={true} />

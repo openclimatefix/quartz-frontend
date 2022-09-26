@@ -53,7 +53,6 @@ const SolarMap = ({
     return colorScale(getForecastDataByGSPId(getForecastDataByGSPId(id)));
   };
 
-
   const addColorToEachGSP = (feature) => {
     return {
       fillColor: getForecastColorForGSP(feature.properties.gsp_id),

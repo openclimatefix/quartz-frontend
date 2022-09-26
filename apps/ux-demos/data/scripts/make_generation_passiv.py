@@ -38,42 +38,42 @@ def make_generation_passiv(date):
 
     with fsspec.open(filename, mode="rb") as file:
         file_bytes = file.read()
-    
+
     with io.BytesIO(file_bytes) as file:
         pv_power = xr.open_dataset(file, engine="h5netcdf")
         pv_power = pv_power.sel(datetime=slice(start, end))
         pv_power_df_raw = pv_power.to_dataframe()
     print('Loading data:done')
-    
+
     # ******************
     # 2. format power data
     # ******************
     print('Format data')
-    
+
     # resample to 30mins
     pv_power_df = pv_power_df_raw.resample('30Min').mean()
-    
+
     # format all columns into one i.e stack
     pv_power_df = pv_power_df.stack()
     pv_power_df = pv_power_df.reset_index()
     pv_power_df.index = pv_power_df['datetime']
     pv_power_df.rename(columns={'level_1': 'system_id',0:'solarGeneration'}, inplace=True)
-    
+
     # make SP
     pv_power_df['time'] = (pv_power_df['datetime'].dt.hour * 2 + pv_power_df['datetime'].dt.minute / 30 + 1).astype(int)
-    
+
     # ******************
     # 3. format metadata
     # ******************
     # format metadata
     pv_metadata = pv_metadata[['latitude','longitude']]
     systems_ids = [int(col) for col in pv_power_df_raw.columns]
-    
+
     # keep metadata systems ids with power data
     pv_system_ids = pv_metadata.index.intersection(systems_ids)
     pv_system_ids = np.sort(pv_system_ids)
     pv_metadata = pv_metadata.loc[pv_system_ids]
-    
+
     # format and join
     pv_metadata['system_id'] = pv_metadata.index.astype(int)
     pv_power_df['system_id'] = pv_power_df['system_id'].astype(int)
@@ -87,7 +87,7 @@ def make_generation_passiv(date):
     # make geo pandas
     gdf = gpd.GeoDataFrame(
         pv_power_df, geometry=gpd.points_from_xy(pv_power_df.longitude, pv_power_df.latitude))
-    
+
     gdf = gdf[['time','system_id','solarGeneration','geometry']]
     print('formating data:done')
 
@@ -100,7 +100,7 @@ def make_generation_passiv(date):
 
     with open(save_filename, "w") as text_file:
         text_file.write(gdf.to_json(indent=2, drop_id=True))
-        
+
 
 make_generation_passiv(datetime(2020, 8, 7))
 make_generation_passiv(datetime(2021, 3, 5))

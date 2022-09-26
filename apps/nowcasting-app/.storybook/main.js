@@ -3,7 +3,7 @@ module.exports = {
     "../stories/**/*.stories.mdx",
     "../stories/**/*.stories.@(js|jsx|ts|tsx)",
     "../components/**/*.stories.mdx",
-    "../components/**/*.stories.@(js|jsx|ts|tsx)",
+    "../components/**/*.stories.@(js|jsx|ts|tsx)"
   ],
   addons: [
     "@storybook/addon-links",
@@ -12,14 +12,14 @@ module.exports = {
       name: "@storybook/addon-postcss",
       options: {
         postcssLoaderOptions: {
-          implementation: require("postcss"),
-        },
-      },
-    },
+          implementation: require("postcss")
+        }
+      }
+    }
   ],
   framework: "@storybook/react",
   core: {
-    builder: "webpack5",
+    builder: "webpack5"
   },
-  typescript: { reactDocgen: false },
+  typescript: { reactDocgen: false }
 };

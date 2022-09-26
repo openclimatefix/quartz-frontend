@@ -17,7 +17,7 @@ const Vis4BarPage: NextPage = () => {
   // http://localhost:3000/api/gsp?time=2021-06-10T12:00&shape=circ
   const { data, error } = useSWR(`/api/generation-mix?date=${date}`, fetcher);
 
-  const title = `Generation Mix with Demand | ${date}`
+  const title = `Generation Mix with Demand | ${date}`;
 
   if (error) return <div>failed to load</div>;
   if (!data) return <div>loading...</div>;

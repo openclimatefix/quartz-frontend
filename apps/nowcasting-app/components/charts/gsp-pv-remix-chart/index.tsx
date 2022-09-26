@@ -9,14 +9,16 @@ import Spinner from "../../spinner";
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
 // So, we round these up to the following numbers
-const yMax_levels = [3, 9, 20, 45, 60, 100, 200, 300, 450, 600];
+const yMax_levels = [3, 9, 20, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450, 600];
 
 const GspPvRemixChart: FC<{
   gspId: number;
   selectedTime: string;
   close: () => void;
   setTimeOfInterest: (t: string) => void;
-}> = ({ gspId, selectedTime, close, setTimeOfInterest }) => {
+  timeNow: string;
+  resetTime: () => void;
+}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime }) => {
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
@@ -25,12 +27,12 @@ const GspPvRemixChart: FC<{
     forecastData: gspForecastData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
-    timeTrigger: selectedTime,
+    timeTrigger: selectedTime
   });
   if (errors.length) return <div>failed to load</div>;
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
     return (
-      <div className="h-60 flex">
+      <div className="h-60  flex">
         <Spinner />
       </div>
     );
@@ -68,6 +70,8 @@ const GspPvRemixChart: FC<{
           timeOfInterest={selectedTime}
           data={chartData}
           yMax={yMax!}
+          timeNow={timeNow}
+          resetTime={resetTime}
         />
       </div>
     </>
