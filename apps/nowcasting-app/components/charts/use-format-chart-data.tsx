@@ -70,7 +70,7 @@ const useFormatChartData = ({
           (db) => ({
             GENERATION_UPDATED: db.solarGenerationKw / 1000
           })
-        ),
+        )
       );
       pvRealDayInData.forEach((pvIn) =>
         addDataToMap(
@@ -78,7 +78,7 @@ const useFormatChartData = ({
           (db) => db.datetimeUtc,
           (db) => ({
             GENERATION: db.solarGenerationKw / 1000,
-          }),
+          })
         ),
       );
       forecastData.forEach((fc) =>
