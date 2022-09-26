@@ -7,19 +7,19 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
   const values = useMemo(() => {
     if (unit === ActiveUnit.MW) {
       return [
-        { value: "0-100", opacity: 20 },
-        { value: "100-200", opacity: 40 },
-        { value: "200-300", opacity: 60 },
-        { value: "300-400", opacity: 80 },
-        { value: "400+", opacity: 100 }
+        { value: "50-150", opacity: 20 },
+        { value: "150-250", opacity: 40 },
+        { value: "250-350", opacity: 60 },
+        { value: "350-450", opacity: 80 },
+        { value: "450+", opacity: 100 }
       ];
     } else {
       return [
-        { value: "0-10", opacity: 20 },
-        { value: "10-30", opacity: 40 },
-        { value: "30-50", opacity: 60 },
-        { value: "50-70", opacity: 80 },
-        { value: "70+", opacity: 100 }
+        { value: "10-30", opacity: 20 },
+        { value: "30-50", opacity: 40 },
+        { value: "50-70", opacity: 60 },
+        { value: "70-90", opacity: 80 },
+        { value: "90+", opacity: 100 }
       ];
     }
   }, [unit]);
