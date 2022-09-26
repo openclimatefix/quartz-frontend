@@ -1,4 +1,5 @@
 import React from "react";
+import { CloseButtonIcon } from "../../icons";
 
 type ForecastHeaderGSPProps = {
   title: string;
@@ -17,12 +18,13 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({ title, children, 
       <div className="flex-[2] m-auto">
         <p className="text-lg text-center align-middle m-auto mx-2">{children}</p>
       </div>
+      <div></div>
       <button
         type="button"
         onClick={onClose}
-        className="font-bold inline-flex items-center px-3 ml-2 text-2xl m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black h-full"
+        className="font-bold items-center px-3 ml-2 text-2xl m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black h-full"
       >
-        <span className="material-symbols-outlined font-extrabold">close</span>
+        <CloseButtonIcon />
       </button>
     </div>
   );
