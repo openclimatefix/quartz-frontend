@@ -88,7 +88,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center"><a href="https://github.com/braddf"><img src="https://avatars.githubusercontent.com/u/41056982?v=4?s=100" width="100px;" alt=""/><br /><sub><b>braddf</b></sub></a><br /><a href="https://github.com/openclimatefix/nowcasting/commits?author=braddf" title="Code">💻</a></td>
     </tr>
     <tr>
-      <td align="center"><a href="https://github.com/rachel-labri-tipton"><img src="https://avatars.githubusercontent.com/u/86949265?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rachel tipton</b></sub></a><br /><a href="https://github.com/openclimatefix/nowcasting/pulls?q=is%3Apr+reviewed-by%3Arachel-labri-tipton" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center"><a href="https://github.com/rachel-labri-tipton"><img src="https://avatars.githubusercontent.com/u/86949265?v=4?s=100" width="100px;" alt=""/><br /><sub><b>rachel tipton</b></sub></a><br /><a href="https://github.com/openclimatefix/nowcasting/pulls?q=is%3Apr+reviewed-by%3Arachel-labri-tipton" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/openclimatefix/nowcasting/commits?author=rachel-labri-tipton" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
