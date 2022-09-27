@@ -9,7 +9,7 @@ import Spinner from "../../spinner";
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
 // So, we round these up to the following numbers
-const yMax_levels = [3, 9, 20, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450, 600];
+const yMax_levels = [3, 9, 20, 28, 36, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450, 600];
 
 const GspPvRemixChart: FC<{
   gspId: number;
