@@ -23,7 +23,11 @@ const chartInfo = (forecastCreationTime?: string) => (
         generation between 16:30 to 17:00.
       </li>
       <li>The Y axis units are in MW, for the national and GSP plots. </li>
-      <li> OCF Forecast Creation Time: {formatISODateStringHumanNumbersOnly(forecastCreationTime || "")}</li>
+      <li>
+        {" "}
+        OCF Forecast Creation Time:{" "}
+        {formatISODateStringHumanNumbersOnly(forecastCreationTime || "")}
+      </li>
     </ul>
   </div>
 );
