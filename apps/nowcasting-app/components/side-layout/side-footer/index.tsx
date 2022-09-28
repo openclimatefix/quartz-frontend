@@ -1,6 +1,6 @@
 import useGlobalState from "../../globalState";
 import Tooltip from "../../tooltip";
-import { classNames, formatISODateStringHuman } from "../../utils";
+import { classNames, formatISODateStringHumanNumbersOnly } from "../../utils";
 import ProfileDropDown from "./profile-dropdown";
 import { OCFlogo } from "../../logo";
 import Link from "next/link";
@@ -23,7 +23,11 @@ const chartInfo = (forecastCreationTime?: string) => (
         generation between 16:30 to 17:00.
       </li>
       <li>The Y axis units are in MW, for the national and GSP plots. </li>
-      <li> OCF Forecast Creation Time: {formatISODateStringHuman(forecastCreationTime || "")}</li>
+      <li>
+        {" "}
+        OCF Forecast Creation Time:{" "}
+        {formatISODateStringHumanNumbersOnly(forecastCreationTime || "")}
+      </li>
     </ul>
   </div>
 );
