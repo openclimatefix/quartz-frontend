@@ -92,9 +92,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
       <div className="flex-grow mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
-          pvUpdatedData={pvRealDayAfterData}
           pvLiveData={pvRealDayInData}
-          selectedTime={selectedTime}
         ></ForecastHeader>
 
         <div className="h-60 mt-4 mb-10">

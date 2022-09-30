@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { get30MinNow } from "../../globalState";
 import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
@@ -7,18 +7,11 @@ import { convertISODateStringToLondonTime, formatISODateString, KWtoGW, MWtoGW }
 import ForecastHeaderUI from "./ui";
 
 type ForecastHeaderProps = {
-  pvUpdatedData: PvRealData;
   pvLiveData: PvRealData;
   pvForecastData: ForecastData;
-  selectedTime: string;
 };
 
-const ForecastHeader: React.FC<ForecastHeaderProps> = ({
-  pvUpdatedData,
-  pvLiveData,
-  pvForecastData,
-  selectedTime
-}) => {
+const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pvLiveData, pvForecastData }) => {
   const timeNow = useTimeNow();
 
   // get the time for the OCF Forecast
