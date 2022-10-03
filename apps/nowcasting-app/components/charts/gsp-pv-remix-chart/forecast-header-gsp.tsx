@@ -22,7 +22,7 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({ title, children, 
       <button
         type="button"
         onClick={onClose}
-        className="font-bold items-center px-3 ml-2 text-2xl m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black h-full"
+        className="font-bold items-center px-3 ml-2 text-2xl m text-white bg-ocf-gray-900 hover:bg-ocf-gray-800 focus:z-10 focus:bg-ocf-gray-800 focus:text-black h-full"
       >
         <CloseButtonIcon />
       </button>

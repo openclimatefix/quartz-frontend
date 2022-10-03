@@ -8,7 +8,7 @@ type UiProps = {
 const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
   return (
     <button
-      className="items-center w-16 h-12 px-3 text-lg m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow "
+      className="items-center m-0 w-16 h-12 px-3 text-lg m text-white bg-ocf-gray-900  hover:bg-ocf-gray-800 focus:z-10 focus:bg-ocf-gray-800"
       onClick={() => {
         onClick();
       }}
