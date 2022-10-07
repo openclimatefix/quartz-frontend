@@ -37,7 +37,7 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
 
   return (
-    <footer className="text-white text-right px-2 bg-black flex absolute top-0 w-full p-1 text-sm items-center">
+    <header className="text-white text-right px-2 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center">
       <div className="p-1 items-center inline-flex">
         <a
           className="flex h-6 w-auto mr-2"
@@ -89,7 +89,7 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
       <div className="py-1">
         <ProfileDropDown />
       </div>
-    </footer>
+    </header>
   );
 };
 
