@@ -3,26 +3,35 @@ import { CloseButtonIcon } from "../../icons";
 
 type ForecastHeaderGSPProps = {
   title: string;
+  mwpercent: number;
   onClose?: () => void;
 };
 
-const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({ title, children, onClose }) => {
+const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
+  title,
+  mwpercent,
+  children,
+  onClose
+}) => {
   return (
-    <div id="x" className={"flex content-between flex-wrap mt-6 bg-ocf-yellow bg-opacity-60 h-12"}>
+    <div id="x" className={"flex content-between flex-wrap mt-6 bg-ocf-gray-800 h-12"}>
       <div
-        className={`bg-white text-black lg:text-2xl md:text-lg text-sm font-black  p-4 py-2  flex-[2]`}
+        className={`bg-ocf-gray-800 text-white lg:text-xl md:text-lg text-med font-black flex-[2] ml-5 m-auto py-2`}
       >
         {title}
-        <span className={`text-base text-ocf-gray-900 ml-5`}>MW</span>
       </div>
-      <div className="flex-[2] m-auto">
-        <p className="text-lg text-center align-middle m-auto mx-2">{children}</p>
+      <div className="flex flex-row justify-between flex-[1] m-auto px-5">
+        <div className="lg:text-lg md:text-lg pr-5">
+          <span className="font-semibold text-med text-ocf-yellow-500">{mwpercent}</span>
+          <span className="text-xs text-ocf-gray-300">%</span>
+        </div>
+        <div>{children}</div>
       </div>
       <div></div>
       <button
         type="button"
         onClick={onClose}
-        className="font-bold items-center px-3 ml-2 text-2xl m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow focus:text-black h-full"
+        className="font-bold items-center px-3 ml-2 text-2xl m text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-full"
       >
         <CloseButtonIcon />
       </button>
