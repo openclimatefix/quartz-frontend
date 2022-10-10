@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
-import useGlobalState from "../globalState";
-import { addMinutesToISODate, formatISODateString } from "../utils";
+import useGlobalState from "../helpers/globalState";
+import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
 
 const leftKey = "ArrowLeft";
 const rightKey = "ArrowRight";

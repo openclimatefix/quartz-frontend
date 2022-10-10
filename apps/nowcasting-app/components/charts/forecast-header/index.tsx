@@ -1,9 +1,14 @@
 import React from "react";
-import { get30MinNow } from "../../globalState";
+import { get30MinNow } from "../../helpers/globalState";
 import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
-import { convertISODateStringToLondonTime, formatISODateString, KWtoGW, MWtoGW } from "../../utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  KWtoGW,
+  MWtoGW
+} from "../../helpers/utils";
 import ForecastHeaderUI from "./ui";
 
 type ForecastHeaderProps = {

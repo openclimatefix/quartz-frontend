@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import Head from "next/head";
-import Footer from "../components/footer";
+import Footer from "../components/layout/footer";
 import Link from "next/link";
 
 const NotFoundPage: NextPage = () => {

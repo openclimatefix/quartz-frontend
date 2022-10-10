@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
 import pkg from "../../../package.json";
-import { classNames } from "../../utils";
+import { classNames } from "../../helpers/utils";
 import Link from "next/link";
 const { version } = pkg;
 

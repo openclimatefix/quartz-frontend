@@ -3,15 +3,15 @@ import RemixLine from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
-import useGlobalState from "../globalState";
+import useGlobalState from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { axiosFetcher, formatISODateString } from "../utils";
+import { axiosFetcher, formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import Spinner from "../spinner";
+import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { LegendLineGraphIcon } from "../icons";
+import { LegendLineGraphIcon } from "../icons/icons";
 import { ForecastData } from "../types";
 
 const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> = ({

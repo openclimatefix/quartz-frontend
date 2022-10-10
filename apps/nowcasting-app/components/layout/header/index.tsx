@@ -1,8 +1,8 @@
-import useGlobalState from "../../globalState";
+import useGlobalState from "../../helpers/globalState";
 import Tooltip from "../../tooltip";
-import { classNames, formatISODateStringHumanNumbersOnly } from "../../utils";
+import { classNames, formatISODateStringHumanNumbersOnly } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
-import { OCFlogo } from "../../logo";
+import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 
 const chartInfo = (forecastCreationTime?: string) => (
@@ -31,9 +31,9 @@ const chartInfo = (forecastCreationTime?: string) => (
     </ul>
   </div>
 );
-type SideFooterProps = {};
+type HeaderProps = {};
 
-const SideFooter: React.FC<SideFooterProps> = ({}) => {
+const Header: React.FC<HeaderProps> = ({}) => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
 
   return (
@@ -93,4 +93,4 @@ const SideFooter: React.FC<SideFooterProps> = ({}) => {
   );
 };
 
-export default SideFooter;
+export default Header;

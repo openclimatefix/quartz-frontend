@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import ExpandButton from "./expand-button";
-import SideFooter from "./side-footer";
 
 type SideLayoutProps = {
   className?: string;
