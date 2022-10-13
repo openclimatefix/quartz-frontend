@@ -69,7 +69,7 @@ const GspPvRemixChart: FC<{
           <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
             /{gspInfo?.installedCapacityMw}
           </span>
-          <span className="text-xs text-ocf-gray-300">MW</span>
+          <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
 

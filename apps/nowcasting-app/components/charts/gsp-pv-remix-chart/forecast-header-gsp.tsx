@@ -23,7 +23,7 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
       <div className="flex flex-row justify-between flex-[1] m-auto px-5">
         <div className="lg:text-lg md:text-lg pr-5">
           <span className="font-semibold text-med text-ocf-yellow-500">{mwpercent}</span>
-          <span className="text-xs text-ocf-gray-300">%</span>
+          <span className="text-xs text-ocf-gray-300"> %</span>
         </div>
         <div>{children}</div>
       </div>
