@@ -8,7 +8,7 @@ const PVNumber: React.FC<{ pv: string; time: string; color?: string }> = ({
   color = yellow
 }) => {
   return (
-    <div className="flex flex-col m-auto">
+    <div className="flex flex-col m-auto h-10">
       <div className="flex justify-items-start">
         <svg
           viewBox="0 0 32 32"
@@ -27,12 +27,9 @@ const PVNumber: React.FC<{ pv: string; time: string; color?: string }> = ({
         <p className="text-xs">{time}</p>
       </div>
       <div>
-        <p
-          className={`lg:text-xl md:text-lg text-sm font-semibold text-center text-${color}`}
-          style={{ color: color }}
-        >
+        <p className={`text-lg font-semibold text-center text-${color}`} style={{ color: color }}>
           {pv}
-          <span className="text-xs text-ocf-gray-300 font-normal">GW</span>
+          <span className="text-xs text-ocf-gray-300 font-normal"> GW</span>
         </p>
       </div>
     </div>
@@ -57,18 +54,20 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextTimeOnly
 }) => {
   return (
-    <>
+    <div className="flex content-between bg-ocf-gray-800 h-auto">
       <div className="text-white lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
-      <div>
-        <PVNumber pv={`${forcastPV}/${actualPV}`} time={`${pvTimeOnly}`} color="black" />
-      </div>
-      <div>
-        <PVNumber pv={forcastNextPV} time={`${forecastNextTimeOnly}`} color="ocf-yellow" />
+      <div className="flex justify-between flex-2 mt-1 px-5">
+        <div className="pr-10">
+          <PVNumber pv={`${forcastPV}/${actualPV}`} time={`${pvTimeOnly}`} color="black" />
+        </div>
+        <div>
+          <PVNumber pv={forcastNextPV} time={`${forecastNextTimeOnly}`} color="ocf-yellow" />
+        </div>
       </div>
       <div className="inline-flex h-full">{children}</div>
-    </>
+    </div>
   );
 };
 
