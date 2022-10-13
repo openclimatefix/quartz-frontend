@@ -58,11 +58,18 @@ const GspPvRemixChart: FC<{
   return (
     <>
       <div className="bg-black">
-        <ForecastHeaderGSP onClose={close} title={gspInfo?.regionName || ""}>
-          {Math.round(pvPercentage)}% |{" "}
-          {Math.round(forcastAtSelectedTime.expectedPowerGenerationMegawatts || 0)} /{" "}
-          {gspInfo?.installedCapacityMw}
-          <span className=" ml-2 font-bold">MW</span>
+        <ForecastHeaderGSP
+          onClose={close}
+          title={gspInfo?.regionName || ""}
+          mwpercent={Math.round(pvPercentage)}
+        >
+          <span className="font-semibold lg:text-lg md:text-lg text-med text-ocf-yellow-500">
+            {Math.round(forcastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+          </span>
+          <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
+            /{gspInfo?.installedCapacityMw}
+          </span>
+          <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
 
