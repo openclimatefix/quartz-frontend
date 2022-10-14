@@ -9,6 +9,10 @@ type CloseButtonIconProps = {
   className?: string;
 };
 
+type ClockIconProps = {
+  className?: string;
+};
+
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
   dashed = false
@@ -32,16 +36,33 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
 
 export const CloseButtonIcon: React.FC<CloseButtonIconProps> = ({ className }) => (
   <svg
-    className={className}
-    width="3rem"
-    height="3rem"
-    viewBox="0 0 16 16"
     xmlns="http://www.w3.org/2000/svg"
+    version="1.1"
+    width="2rem"
+    height="2rem"
+    viewBox="0 0 24 24"
   >
     <path
-      stroke="currentColor"
       strokeWidth={0.5}
-      d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"
+      d="M20.030 5.030l-1.061-1.061-6.97 6.97-6.97-6.97-1.061 1.061 6.97 6.97-6.97 6.97 1.061 1.061 6.97-6.97 6.97 6.97 1.061-1.061-6.97-6.97 6.97-6.97z"
+      fill="white"
+    />
+  </svg>
+);
+
+export const ClockIcon: React.FC<ClockIconProps> = ({ className }) => (
+  <svg
+    viewBox="0 0 32 32"
+    width="16"
+    height="16"
+    xmlns="http://www.w3.org/2000/svg"
+    fill-rule="evenodd"
+    fill="white"
+    clip-rule="evenodd"
+  >
+    <path
+      d="M12 0c6.623 0 12 5.377 12 12s-5.377 12-12 12-12-5.377-12-12 5.377-12 12-12zm0 1c6.071
+      0 11 4.929 11 11s-4.929 11-11 11-11-4.929-11-11 4.929-11 11-11zm0 11h6v1h-7v-9h1v8z"
     />
   </svg>
 );
