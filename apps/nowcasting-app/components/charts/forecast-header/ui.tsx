@@ -20,7 +20,7 @@ const ForecastWithActualPV: React.FC<{
       <div>
         <ForecastLabel
           tip={
-            <div className="w-32">
+            <div className="w-36">
               <p>{tip}</p>
             </div>
           }
@@ -51,7 +51,7 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
       </div>
       <ForecastLabel
         tip={
-          <div className="w-24">
+          <div className="w-22">
             <p>{tip}</p>
           </div>
         }
@@ -94,7 +94,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastWithActualPV
             forecast={`${forcastPV}`}
             pv={`${actualPV}`}
-            tip={`Nowcast / Actual PV`}
+            tip={`Nowcasting / Actual PV`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
           />
@@ -103,7 +103,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <NextForecast
             pv={forcastNextPV}
             time={`${forecastNextTimeOnly}`}
-            tip={`Next Nowcast`}
+            tip={`Nowcasting`}
             color="ocf-yellow"
           />
         </div>
