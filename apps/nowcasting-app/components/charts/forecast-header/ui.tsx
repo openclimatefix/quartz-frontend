@@ -1,23 +1,48 @@
 import React from "react";
 import { theme } from "../../../tailwind.config";
+import { ClockIcon } from "../../icons";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
-const PVNumber: React.FC<{ pv: string; subTitle: string; color?: string }> = ({
+const ForecastWithActualPV: React.FC<{
+  forecast: string;
+  pv: string;
+  time: string;
+  color?: string;
+}> = ({ forecast, pv, time, color = yellow }) => {
+  return (
+    <div className="flex flex-col m-auto h-10">
+      <div className="flex justify-items-start">
+        <ClockIcon />
+        <p className="text-xs">{time}</p>
+      </div>
+      <div>
+        <p className={`text-lg font-semibold text-center text-${color}`} style={{ color: color }}>
+          {forecast}
+          <span className="text-ocf-gray-300">/</span>
+          <span className="text-black">{pv}</span>
+          <span className="text-xs text-ocf-gray-300 font-normal"> GW</span>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+const NextForecast: React.FC<{ pv: string; time: string; color?: string }> = ({
   pv,
-  subTitle,
+  time,
   color = yellow
 }) => {
   return (
-    <div className="flex-[1] m-auto">
-      <div className="">
-        <p
-          className={`lg:text-xl md:text-lg text-sm font-bold text-center text-${color}`}
-          style={{ color: color }}
-        >
+    <div className="flex flex-col m-auto h-10">
+      <div className="flex justify-items-start">
+        <ClockIcon />
+        <p className="text-xs">{time}</p>
+      </div>
+      <div>
+        <p className={`text-lg font-semibold text-center text-${color}`} style={{ color: color }}>
           {pv}
-          <span className=" ml-2 text-white">GW</span>
+          <span className="text-xs text-ocf-gray-300 font-normal"> GW</span>
         </p>
-        <p className="text-white whitespace-pre text-center ">{subTitle}</p>
       </div>
     </div>
   );
@@ -41,16 +66,24 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextTimeOnly
 }) => {
   return (
-    <div className={"flex content-between flex-wrap mt-6 h-auto"}>
-      <div
-        className={`bg-white text-black lg:text-2xl md:text-lg text-sm font-black p-4 py-2 flex-[2]`}
-      >
-        National Solar PV <span className={`text-base text-ocf-gray-900 ml-2`}>MW</span>
+    <div className="flex content-between bg-ocf-gray-800 h-auto">
+      <div className="text-white lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
+        National
       </div>
-      <PVNumber pv={actualPV} subTitle={`${pvTimeOnly} PVLive`} color="black" />
-      <PVNumber pv={forcastPV} subTitle={`${selectedTimeOnly} Forecast`} />
-      <PVNumber pv={forcastNextPV} subTitle={`${forecastNextTimeOnly} Forecast`} />
-      <div className=" inline-flex items-center h-full m-auto">{children}</div>
+      <div className="flex justify-between flex-2 mt-1 px-5">
+        <div className="pr-10">
+          <ForecastWithActualPV
+            forecast={`${forcastPV}`}
+            pv={`${actualPV}`}
+            time={`${pvTimeOnly}`}
+            color="ocf-yellow"
+          />
+        </div>
+        <div>
+          <NextForecast pv={forcastNextPV} time={`${forecastNextTimeOnly}`} color="ocf-yellow" />
+        </div>
+      </div>
+      <div className="inline-flex h-full">{children}</div>
     </div>
   );
 };
