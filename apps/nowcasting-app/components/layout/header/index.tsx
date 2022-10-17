@@ -72,7 +72,7 @@ type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
   return (
     <header className="text-white text-right px-2 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center">
-      <div className="p-1 items-center inline-flex">
+      <div className="p-1 mt-1 items-end flex flex-col">
         <a
           className="flex h-6 w-auto mr-2"
           target="_blank"
@@ -81,6 +81,10 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
         >
           <img src="/NOWCASTING_Secondary-white.svg" alt="ofc" className="h-6 w-auto" />
         </a>
+        <div className="mr-[6px] flex items-center">
+          <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>
+          <OCFlogo />
+        </div>
       </div>
       <div className="grow text-center inline-flex px-8 gap-5 items-center">
         <Menu>
@@ -113,7 +117,6 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
           />
         </Menu>
       </div>
-      <OCFlogo />
       <div className="py-1">
         <ProfileDropDown />
       </div>
