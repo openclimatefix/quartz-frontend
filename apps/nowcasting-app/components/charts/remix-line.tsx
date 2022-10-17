@@ -164,6 +164,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               type="monotone"
               dataKey="GENERATION"
               dot={false}
+              hide={false}
               stroke="black"
               strokeWidth={5}
               strokeDasharray="5 5"
@@ -174,6 +175,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={3}
               stroke="black"
               dot={false}
+              hide={false}
             />
             <Line
               type="monotone"
@@ -181,6 +183,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               stroke={yellow} //yellow
               strokeWidth={4}
+              hide={false}
             />
             <Line
               type="monotone"
@@ -189,12 +192,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeDasharray="10 10"
               stroke={yellow} //yellow
               strokeWidth={3}
+              hide={false}
             />
             <Tooltip
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
                 if (!data) return <div></div>;
-
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
                     <ul className="">
