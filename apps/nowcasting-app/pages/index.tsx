@@ -6,20 +6,27 @@ import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useState } from "react";
 import Header from "../components/layout/header";
+import { VIEWS } from "../constant";
 
 export default function Home() {
   useAndUpdateSelectedTime();
+  const [view, setView] = useState<VIEWS>(VIEWS.FORECAST);
 
+  const currentView = (v: VIEWS) => v === view;
   return (
     <Layout>
       <div className="h-full relative pt-16">
-        <Header />
-        <div id="map-container" className="relative float-right h-full" style={{ width: "56%" }}>
+        <Header view={view} setView={setView} />
+        <div
+          id="map-container"
+          className={`relative float-right h-full ${currentView(VIEWS.FORECAST) ? "" : "hidden"}`}
+          style={{ width: "56%" }}
+        >
           <PvLatestMap />
         </div>
 
         <SideLayout>
-          <PvRemixChart />
+          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
         </SideLayout>
       </div>
     </Layout>

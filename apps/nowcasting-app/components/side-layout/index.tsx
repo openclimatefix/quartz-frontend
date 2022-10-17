@@ -8,11 +8,13 @@ type SideLayoutProps = {
 const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className={`h-full absolute  z-20 `} style={{ width: isOpen ? "90%" : "44%" }}>
+    <div
+      className={`h-full absolute  z-20 ${className || ""}`}
+      style={{ width: isOpen ? "90%" : "44%" }}
+    >
       <div
         className={
-          "focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20 " +
-          (className || "")
+          "focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20 "
         }
       >
         <div className="relative h-full flex flex-col overflow-y-scroll">{children}</div>

@@ -25,7 +25,7 @@ const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> =
   </div>
 );
 
-const PvRemixChart: FC<{ date?: string }> = () => {
+const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
@@ -88,7 +88,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div className="flex flex-col flex-1 mb-1">
+    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-grow mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}

@@ -1,6 +1,6 @@
 import React from "react";
 import { theme } from "../../../tailwind.config";
-import { ClockIcon } from "../../icons";
+import { ClockIcon } from "../../icons/icons";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const ForecastWithActualPV: React.FC<{
