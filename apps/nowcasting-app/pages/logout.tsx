@@ -3,7 +3,7 @@ import Head from "next/head";
 
 import { ChevronRightIcon } from "@heroicons/react/solid";
 import { SupportIcon, BookOpenIcon, ViewListIcon } from "@heroicons/react/outline";
-import Footer from "../components/footer";
+import Footer from "../components/layout/footer";
 import Link from "next/link";
 
 const links = [
