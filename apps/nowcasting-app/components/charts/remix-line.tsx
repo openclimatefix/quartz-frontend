@@ -13,7 +13,7 @@ import {
   convertISODateStringToLondonTime,
   formatISODateStringHuman,
   formatISODateStringHumanNumbersOnly,
-  getRounded4HoursAgoString,
+  getRounded4HoursAgoString
 } from "../utils";
 import { theme } from "../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;

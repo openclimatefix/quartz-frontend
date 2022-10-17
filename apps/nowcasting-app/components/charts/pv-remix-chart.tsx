@@ -12,7 +12,7 @@ import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { LegendLineGraphIcon } from "../icons";
-import { ForecastData } from "../types";
+import { ForecastData, ForecastValue } from "../types";
 
 const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> = ({
   iconClasses,
@@ -68,14 +68,13 @@ const PvRemixChart: FC<{ date?: string }> = () => {
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 
-  const { data: national4HourData, error: pv4HourError } = useSWR<
+  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+    `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+    axiosFetcher,
     {
-      targetTime: string;
-      expectedPowerGenerationMegawatts: number;
-    }[]
-  >(`${API_PREFIX}/GB/solar/gsp/forecast/latest/0?forecast_horizon_minutes=240`, axiosFetcher, {
-    refreshInterval: 60 * 1000 * 5, // 5min
-  });
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
