@@ -1,5 +1,6 @@
 import { FC, useMemo } from "react";
 import RemixLine from "./remix-line";
+import Line from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
@@ -21,7 +22,9 @@ const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> =
 }) => (
   <div className="flex items-center">
     <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-    <span className="uppercase pl-1">{label}</span>
+    <button>
+      <span className="uppercase pl-1">{label}</span>
+    </button>
   </div>
 );
 
@@ -131,6 +134,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
           <LegendItem iconClasses={"text-ocf-orange"} dashed label={"OCF 4hr Forecast"} />
           <LegendItem iconClasses={"text-ocf-orange"} label={"OCF 4hr Final Forecast"} />
         </div>
+        <div className="flex-3 flex-col"></div>
       </div>
     </div>
   );
