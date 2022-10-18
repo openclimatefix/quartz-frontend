@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip
 } from "recharts";
+import useGlobalState from "../globalState";
 import { convertISODateStringToLondonTime, formatISODateStringHumanNumbersOnly } from "../utils";
 import { theme } from "../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
@@ -39,6 +40,7 @@ type RemixLineProps = {
   yMax: number | string;
   timeNow: string;
   resetTime?: () => void;
+  isHidden: boolean;
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -77,7 +79,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   setTimeOfInterest,
   yMax,
   timeNow,
-  resetTime
+  resetTime,
+  isHidden
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
@@ -164,10 +167,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
               type="monotone"
               dataKey="GENERATION"
               dot={false}
-              hide={false}
               stroke="black"
               strokeWidth={5}
               strokeDasharray="5 5"
+              hide={isHidden}
             />
             <Line
               type="monotone"
@@ -175,7 +178,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={3}
               stroke="black"
               dot={false}
-              hide={false}
+              hide={isHidden}
             />
             <Line
               type="monotone"
@@ -183,7 +186,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               stroke={yellow} //yellow
               strokeWidth={4}
-              hide={false}
+              hide={isHidden}
             />
             <Line
               type="monotone"
@@ -192,12 +195,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeDasharray="10 10"
               stroke={yellow} //yellow
               strokeWidth={3}
-              hide={false}
+              hide={isHidden}
             />
             <Tooltip
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
                 if (!data) return <div></div>;
+
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
                     <ul className="">

@@ -19,13 +19,15 @@ type GlobalStateType = {
   timeNow: string;
   clickedGspId?: number;
   forecastCreationTime?: string;
+  hide: boolean;
 };
 
 const { useGlobalState } = createGlobalState<GlobalStateType>({
   selectedISOTime: get30MinNow(),
   timeNow: get30MinNow(),
   clickedGspId: undefined,
-  forecastCreationTime: undefined
+  forecastCreationTime: undefined,
+  hide: false
 });
 
 export default useGlobalState;
