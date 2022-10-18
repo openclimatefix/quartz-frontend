@@ -5,6 +5,7 @@ import { formatISODateString } from "../../utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
 import Spinner from "../../spinner";
+import useGlobalState from "../../globalState";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -20,8 +21,10 @@ const GspPvRemixChart: FC<{
   setTimeOfInterest: (t: string) => void;
   timeNow: string;
   resetTime: () => void;
+  isHidden: boolean;
 }> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime }) => {
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
+  const [isHidden, setIsHidden] = useGlobalState("hide");
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
@@ -81,6 +84,7 @@ const GspPvRemixChart: FC<{
           yMax={yMax!}
           timeNow={timeNow}
           resetTime={resetTime}
+          isHidden={isHidden}
         />
       </div>
     </>
