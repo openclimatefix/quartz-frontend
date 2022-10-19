@@ -178,7 +178,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={3}
               stroke="black"
               dot={false}
-              hide={isHidden}
+              hide={false}
             />
             <Line
               type="monotone"
@@ -186,7 +186,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               stroke={yellow} //yellow
               strokeWidth={4}
-              hide={isHidden}
+              hide={false}
             />
             <Line
               type="monotone"
@@ -195,7 +195,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeDasharray="10 10"
               stroke={yellow} //yellow
               strokeWidth={3}
-              hide={isHidden}
+              hide={false}
             />
             <Tooltip
               content={({ payload, label }) => {

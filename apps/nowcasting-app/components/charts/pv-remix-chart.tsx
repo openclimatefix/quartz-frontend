@@ -19,15 +19,20 @@ const LegendItem: FC<{
   iconClasses: string;
   label: string;
   dashed?: boolean;
-  dataKeys: string;
-  isHidden: boolean;
-}> = ({ iconClasses, label, dashed, dataKeys }) => {
+  dataKey: string;
+  onClick: void;
+}> = ({ iconClasses, label, dashed, dataKey }) => {
   const [isHidden, setIsHidden] = useGlobalState("hide");
   const hideLine = () => {
     setIsHidden(true);
   };
   const showLine = () => {
     setIsHidden(false);
+  };
+  const getDataKey = () => {
+    //write some code that checks that the dataKey for the corresponding line
+    //matches the dataKey on the Line in the Remix chart and then updates the status of
+    //the line
   };
 
   return (
@@ -163,12 +168,12 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             iconClasses={"text-ocf-yellow"}
             dashed
             label={"OCF Forecast"}
-            dataKeys={`PAST_FORECAST`}
+            dataKey={`PAST_FORECAST`}
           />
           <LegendItem
             iconClasses={"text-ocf-yellow"}
             label={"OCF Final Forecast"}
-            dataKeys={`FORECAST`}
+            dataKey={`FORECAST`}
           />
         </div>
         <div className="flex-3 flex-col">
