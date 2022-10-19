@@ -13,6 +13,10 @@ type ClockIconProps = {
   className?: string;
 };
 
+type InfoIconProps = {
+  className?: string;
+};
+
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
   dashed = false
@@ -63,6 +67,16 @@ export const ClockIcon: React.FC<ClockIconProps> = ({ className }) => (
     <path
       d="M12 0c6.623 0 12 5.377 12 12s-5.377 12-12 12-12-5.377-12-12 5.377-12 12-12zm0 1c6.071
       0 11 4.929 11 11s-4.929 11-11 11-11-4.929-11-11 4.929-11 11-11zm0 11h6v1h-7v-9h1v8z"
+    />
+  </svg>
+);
+
+export const InfoIcon: React.FC<InfoIconProps> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" height="25" width="25" viewBox="0 0 250 250" fill="white">
+    <path
+      d="M128,27.99963a100,100,0,1,0,100,100A100.11269,100.11269,0,0,0,128,27.99963Zm0,192a92,92,0,1,1,92-92A92.10478,92.10478,0,0,1,128,219 
+    99963Zm12-44a4.0002,4.0002,0,0,1-4,4h-8a4.0002,4.0002,0,0,1-4-4v-52h-4a4,4,0,0,1,0-8h8a4.0002,4.0002,0,0,1,4,4v52h4A4.0002,4.0002,0,0,1,140,
+    175.99963ZM122.34375,89.65686A8.00022,8.00022,0,1,1,136.001,83.99963v.002a8.00053,8.00053,0,0,1-13.65723,5.65527Z"
     />
   </svg>
 );

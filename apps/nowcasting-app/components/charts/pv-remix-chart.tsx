@@ -12,7 +12,7 @@ import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { LegendLineGraphIcon } from "../icons";
+import { InfoIcon, ClockIcon, LegendLineGraphIcon } from "../icons";
 import { ForecastData } from "../types";
 
 const LegendItem: FC<{
@@ -178,7 +178,9 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             dataKey={`4HR_PAST_FORECAST`}
           />
         </div>
-        <div className="flex-0 flex-col"></div>
+        <div className="flex-2 flex-col flex-start">
+          <InfoIcon />
+        </div>
       </div>
     </div>
   );
