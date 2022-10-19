@@ -20,34 +20,23 @@ const LegendItem: FC<{
   label: string;
   dashed?: boolean;
   dataKey: string;
-  onClick: void;
 }> = ({ iconClasses, label, dashed, dataKey }) => {
-  const [isHidden, setIsHidden] = useGlobalState("hide");
-  const hideLine = () => {
-    setIsHidden(true);
-  };
-  const showLine = () => {
-    setIsHidden(false);
-  };
-  const getDataKey = () => {
-    //write some code that checks that the dataKey for the corresponding line
-    //matches the dataKey on the Line in the Remix chart and then updates the status of
-    //the line
+  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
+  const isVisible = visibleLines.includes(dataKey);
+
+  const toggleLineVisibility = () => {
+    if (isVisible) {
+      setVisibleLines(visibleLines.filter((line) => line !== dataKey));
+    } else {
+      setVisibleLines([...visibleLines, dataKey]);
+    }
   };
 
   return (
     <div className="flex items-center">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button
-        onClick={() => {
-          isHidden ? showLine() : hideLine();
-        }}
-      >
-        {!isHidden ? (
-          <span className="uppercase font-extrabold pl-1">{label}</span>
-        ) : (
-          <span className="uppercase pl-1">{label}</span>
-        )}
+      <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
+        <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
       </button>
     </div>
   );
@@ -55,7 +44,7 @@ const LegendItem: FC<{
 
 const PvRemixChart: FC<{ date?: string }> = () => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
-  const [isHidden, setIsHidden] = useGlobalState("hide");
+  const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
@@ -132,7 +121,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             setTimeOfInterest={setSelectedTime}
             data={chartData}
             yMax={MAX_NATIONAL_GENERATION_MW}
-            isHidden={isHidden}
+            visibleLines={visibleLines}
           />
         </div>
         {clickedGspId && (
@@ -145,12 +134,12 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             gspId={clickedGspId}
             timeNow={formatISODateString(timeNow)}
             resetTime={resetTime}
-            isHidden={isHidden}
+            visibleLines={visibleLines}
           ></GspPvRemixChart>
         )}
       </div>
-      <div className="flex flex-row justify-around px-3 text-xs tracking-wider text-ocf-gray-300 py-2 bg-mapbox-black-500">
-        <div className="flex-3 flex-col">
+      <div className="flex flex-row justify-between px-8 text-xs tracking-wider text-ocf-gray-300 py-2 bg-mapbox-black-500 overflow-x-scroll">
+        <div className="flex-0 flex-col">
           <LegendItem
             iconClasses={"text-ocf-black"}
             dashed
@@ -163,24 +152,33 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             dataKey={`GENERATION_UPDATED`}
           />
         </div>
-        <div className="flex-3 flex-col">
+        <div className="flex-0 flex-col">
           <LegendItem
             iconClasses={"text-ocf-yellow"}
             dashed
             label={"OCF Forecast"}
-            dataKey={`PAST_FORECAST`}
+            dataKey={`FORECAST`}
           />
           <LegendItem
             iconClasses={"text-ocf-yellow"}
             label={"OCF Final Forecast"}
-            dataKey={`FORECAST`}
+            dataKey={`PAST_FORECAST`}
           />
         </div>
-        <div className="flex-3 flex-col">
-          <LegendItem iconClasses={"text-ocf-orange"} dashed label={"OCF 4hr Forecast"} />
-          <LegendItem iconClasses={"text-ocf-orange"} label={"OCF 4hr Final Forecast"} />
+        <div className="flex-0 flex-col">
+          <LegendItem
+            iconClasses={"text-ocf-orange"}
+            dashed
+            label={"OCF 4hr Forecast"}
+            dataKey={`4HR_FORECAST`}
+          />
+          <LegendItem
+            iconClasses={"text-ocf-orange"}
+            label={"OCF 4hr Final Forecast"}
+            dataKey={`4HR_PAST_FORECAST`}
+          />
         </div>
-        <div className="flex-3 flex-col"></div>
+        <div className="flex-0 flex-col"></div>
       </div>
     </div>
   );

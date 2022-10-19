@@ -21,10 +21,9 @@ const GspPvRemixChart: FC<{
   setTimeOfInterest: (t: string) => void;
   timeNow: string;
   resetTime: () => void;
-  isHidden: boolean;
-}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime }) => {
+  visibleLines: string[];
+}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
-  const [isHidden, setIsHidden] = useGlobalState("hide");
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
@@ -84,7 +83,7 @@ const GspPvRemixChart: FC<{
           yMax={yMax!}
           timeNow={timeNow}
           resetTime={resetTime}
-          isHidden={isHidden}
+          visibleLines={visibleLines}
         />
       </div>
     </>

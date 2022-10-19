@@ -40,7 +40,7 @@ type RemixLineProps = {
   yMax: number | string;
   timeNow: string;
   resetTime?: () => void;
-  isHidden: boolean;
+  visibleLines: string[];
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -80,7 +80,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   yMax,
   timeNow,
   resetTime,
-  isHidden
+  visibleLines
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
@@ -169,7 +169,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke="black"
               strokeWidth={5}
               strokeDasharray="5 5"
-              hide={isHidden}
+              hide={!visibleLines.includes("GENERATION")}
             />
             <Line
               type="monotone"
@@ -177,7 +177,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={3}
               stroke="black"
               dot={false}
-              hide={false}
+              hide={!visibleLines.includes("GENERATION_UPDATED")}
             />
             <Line
               type="monotone"
@@ -185,7 +185,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               stroke={yellow} //yellow
               strokeWidth={4}
-              hide={false}
+              hide={!visibleLines.includes("PAST_FORECAST")}
             />
             <Line
               type="monotone"
@@ -194,7 +194,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeDasharray="10 10"
               stroke={yellow} //yellow
               strokeWidth={3}
-              hide={false}
+              hide={!visibleLines.includes("FORECAST")}
             />
             <Tooltip
               content={({ payload, label }) => {
