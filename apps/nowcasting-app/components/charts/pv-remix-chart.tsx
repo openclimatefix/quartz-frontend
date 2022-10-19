@@ -178,7 +178,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
             dataKey={`4HR_PAST_FORECAST`}
           />
         </div>
-        <div className="flex-2 flex-col flex-start">
+        <div className="flex-0 flex-col flex-start">
           <InfoIcon />
         </div>
       </div>
