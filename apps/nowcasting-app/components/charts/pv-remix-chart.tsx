@@ -140,11 +140,11 @@ const PvRemixChart: FC<{ date?: string }> = () => {
           </div>
           <div className="flex-col">
             <LegendItem
-              iconClasses={"text-ocf-teal"}
+              iconClasses={"text-ocf-orange"}
               dashed
               label={`OCF ${fourHoursAgo} Forecast`}
             />
-            <LegendItem iconClasses={"text-ocf-teal"} label={"OCF 4 Hr Forecast"} />
+            <LegendItem iconClasses={"text-ocf-orange"} label={"OCF 4 Hr Forecast"} />
           </div>
         </div>
       </div>

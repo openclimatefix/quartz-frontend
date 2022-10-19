@@ -17,7 +17,7 @@ import {
 } from "../utils";
 import { theme } from "../../tailwind.config";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-const blue = theme.extend.colors["ocf-teal"].DEFAULT;
+const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
@@ -41,8 +41,8 @@ const toolTipColors: Record<string, string> = {
   GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
-  "4HR_FORECAST": blue,
-  "4HR_PAST_FORECAST": blue
+  "4HR_FORECAST": orange,
+  "4HR_PAST_FORECAST": orange
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -178,7 +178,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               strokeDasharray="5 5"
               strokeDashoffset={3}
-              stroke={blue} // blue
+              stroke={orange} // blue
               strokeWidth={3}
             />
             <Line
@@ -186,7 +186,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="4HR_PAST_FORECAST"
               dot={false}
               // strokeDasharray="10 10"
-              stroke={blue} // blue
+              stroke={orange} // blue
               strokeWidth={3}
             />
             <Line

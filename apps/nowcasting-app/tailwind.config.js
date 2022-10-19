@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     fontWeight: {
       hairline: 100,
-      'extra-light': 100,
+      "extra-light": 100,
       thin: 200,
       light: 300,
       normal: 400,
@@ -12,8 +12,8 @@ module.exports = {
       semibold: 600,
       bold: 700,
       extrabold: 800,
-      'extra-bold': 800,
-      black: 900,
+      "extra-bold": 800,
+      black: 900
     }
   },
   content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
@@ -75,7 +75,7 @@ module.exports = {
           800: "#AA7B00",
           900: "#725300"
         },
-        "ocf-orange": {
+        "ocf-dusty-orange": {
           DEFAULT: "#FFAC5F",
           50: "#FFFFFF",
           100: "#FFFFFF",
@@ -87,6 +87,20 @@ module.exports = {
           700: "#EE7200",
           800: "#B65700",
           900: "#7E3C00"
+        },
+        // DEFAULT is the brand colour, others are guesstimated shades
+        "ocf-orange": {
+          DEFAULT: "#FF9736",
+          50: "#fff1eb",
+          100: "#ffe1d1",
+          200: "#ffd5b8",
+          300: "#FEBF83",
+          400: "#FFC188",
+          500: "#ffac69",
+          600: "#FF9736",
+          700: "#e67c19",
+          800: "#e67802",
+          900: "#7d4500"
         },
         "ocf-gray": {
           DEFAULT: "#E4E4E4",
