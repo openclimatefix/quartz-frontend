@@ -162,7 +162,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 ></CustomizedLabel>
               }
             />
-
             <Line
               type="monotone"
               dataKey="GENERATION"
