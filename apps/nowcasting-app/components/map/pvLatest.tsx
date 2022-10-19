@@ -4,7 +4,7 @@ import useSWRImmutable from "swr/immutable";
 import { useEffect, useMemo, useState } from "react";
 import mapboxgl, { Expression } from "mapbox-gl";
 
-import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
+import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
@@ -14,6 +14,7 @@ import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../
 import { FcAllResData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
+import { FeatureCollection } from "geojson";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -91,20 +92,24 @@ const PvLatestMap = () => {
     1
   ];
 
-  const generateGeoJsonForecastData = (forecastData?: FcAllResData, targetTime?: string) => {
-    // Exclude first item as it's not represting gsp area
-    const filteredForcastData = forecastData?.forecasts?.slice(1);
-    const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+  const generateGeoJsonForecastData: (
+    forecastData?: FcAllResData,
+    targetTime?: string
+  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
+    // Exclude first item as it's not representing gsp area
+    const filteredForecastData = forecastData?.forecasts?.slice(1);
+    const gspShapeJson = gspShapeData as FeatureCollection;
     const forecastGeoJson = {
-      ...gspShapeDatat,
-      features: gspShapeDatat.features.map((featureObj, index) => {
-        const selectedFCvalue =
-          filteredForcastData && targetTime
-            ? filteredForcastData[index]?.forecastValues.find(
+      ...gspShapeData,
+      type: "FeatureCollection" as "FeatureCollection",
+      features: gspShapeJson.features.map((featureObj, index) => {
+        const selectedFCValue =
+          filteredForecastData && targetTime
+            ? filteredForecastData[index]?.forecastValues.find(
                 (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
               )
-            : filteredForcastData
-            ? filteredForcastData[index]?.forecastValues[latestForecastValue]
+            : filteredForecastData
+            ? filteredForecastData[index]?.forecastValues[latestForecastValue]
             : undefined;
 
         return {
@@ -112,10 +117,10 @@ const PvLatestMap = () => {
           properties: {
             ...featureObj.properties,
             expectedPowerGenerationMegawatts:
-              selectedFCvalue && getRoundedPv(selectedFCvalue.expectedPowerGenerationMegawatts),
+              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
             expectedPowerGenerationNormalized:
-              selectedFCvalue &&
-              getRoundedPvPercent(selectedFCvalue?.expectedPowerGenerationNormalized || 0)
+              selectedFCValue &&
+              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0)
           }
         };
       })
@@ -182,7 +187,7 @@ const PvLatestMap = () => {
   };
 
   return forecastError ? (
-    <FaildStateMap error="Failed to load" />
+    <FailedStateMap error="Failed to load" />
   ) : forecastLoading ? (
     <LoadStateMap>
       <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />

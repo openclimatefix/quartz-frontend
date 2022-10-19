@@ -38,10 +38,10 @@ const GspPvRemixChart: FC<{
         <Spinner />
       </div>
     );
-  const forcastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
+  const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) ||
     ({} as any);
-  const pvPercentage = (forcastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
+  const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
@@ -64,7 +64,7 @@ const GspPvRemixChart: FC<{
           mwpercent={Math.round(pvPercentage)}
         >
           <span className="font-semibold lg:text-lg md:text-lg text-med text-ocf-yellow-500">
-            {Math.round(forcastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
           </span>
           <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
             /{gspInfo?.installedCapacityMw}

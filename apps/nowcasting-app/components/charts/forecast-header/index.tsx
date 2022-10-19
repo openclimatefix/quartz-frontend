@@ -48,9 +48,9 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pvLiveData, pvForecastD
 
   return (
     <ForecastHeaderUI
-      forcastNextPV={nextPvForecastInGW}
+      forecastNextPV={nextPvForecastInGW}
       actualPV={selectedPvActualInGW}
-      forcastPV={selectedPvForecastInGW}
+      forecastPV={selectedPvForecastInGW}
       selectedTimeOnly={convertISODateStringToLondonTime(pvForecastDatetime + ":00.000Z")}
       pvTimeOnly={convertISODateStringToLondonTime(selectedPvActualDatetime)}
       forecastNextTimeOnly={futurePVForecastDatetimeLabel}

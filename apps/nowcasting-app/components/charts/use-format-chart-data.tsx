@@ -4,7 +4,7 @@ import { ForecastData, PvRealData } from "../types";
 import { formatISODateString } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 
-//sperate paste forcaste from furute forcast (ie: after selectedTime)
+//separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
   timeNow: string,
   fr?: {
