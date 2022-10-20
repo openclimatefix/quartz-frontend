@@ -52,13 +52,9 @@ const useGetForecastsData = (isNormalized: boolean) => {
     isPaused: () => forecastLoading,
     onSuccess: (data) => {
       setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-    }
-  });
-  useEffect(() => {
-    if (!forecastLoading) {
       allForecastData.mutate();
     }
-  }, [forecastLoading]);
+  });
   if (isNormalized) return allForecastData;
   else return allForecastData.data ? allForecastData : bareForecastData;
 };
@@ -68,10 +64,10 @@ const PvLatestMap = () => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
   const isNormalized = activeUnit === ActiveUnit.percentage;
-  const selectedDataName =
-    activeUnit === ActiveUnit.percentage
-      ? SelectedData.expectedPowerGenerationNormalized
-      : SelectedData.expectedPowerGenerationMegawatts;
+  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
+  if (activeUnit === ActiveUnit.percentage)
+    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
+  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
   const {
     data: initForecastData,
@@ -103,24 +99,28 @@ const PvLatestMap = () => {
       ...gspShapeData,
       type: "FeatureCollection" as "FeatureCollection",
       features: gspShapeJson.features.map((featureObj, index) => {
+        const forecastDatum = filteredForecastData && filteredForecastData[index];
         const selectedFCValue =
           filteredForecastData && targetTime
-            ? filteredForecastData[index]?.forecastValues.find(
+            ? forecastDatum?.forecastValues.find(
                 (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
               )
             : filteredForecastData
-            ? filteredForecastData[index]?.forecastValues[latestForecastValue]
+            ? forecastDatum?.forecastValues[latestForecastValue]
             : undefined;
 
         return {
           ...featureObj,
           properties: {
             ...featureObj.properties,
-            expectedPowerGenerationMegawatts:
+            [SelectedData.expectedPowerGenerationMegawatts]:
               selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
-            expectedPowerGenerationNormalized:
+            [SelectedData.expectedPowerGenerationNormalized]:
               selectedFCValue &&
-              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0)
+              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
+            [SelectedData.installedCapacityMw]: getRoundedPv(
+              forecastDatum?.location.installedCapacityMw || 0
+            )
           }
         };
       })

@@ -71,7 +71,7 @@ type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
   return (
-    <header className="text-white text-right px-2 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center">
+    <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center">
       <div className="p-1 mt-1 items-end flex flex-col">
         <a
           className="flex h-6 w-auto mr-2"
