@@ -47,16 +47,16 @@ const MeasuringUnit = ({
         >
           %
         </button>
-        <button
-          onClick={(event) => onToggle(event, ActiveUnit.capacity)}
-          disabled={isLoading}
-          type="button"
-          className={`${buttonClasses}  ${
-            activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"
-          } ${isLoading ? "cursor-wait" : ""}`}
-        >
-          Capacity
-        </button>
+        {/*<button*/}
+        {/*  onClick={(event) => onToggle(event, ActiveUnit.capacity)}*/}
+        {/*  disabled={isLoading}*/}
+        {/*  type="button"*/}
+        {/*  className={`${buttonClasses}  ${*/}
+        {/*    activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"*/}
+        {/*  } ${isLoading ? "cursor-wait" : ""}`}*/}
+        {/*>*/}
+        {/*  Capacity*/}
+        {/*</button>*/}
       </div>
     </div>
   );
