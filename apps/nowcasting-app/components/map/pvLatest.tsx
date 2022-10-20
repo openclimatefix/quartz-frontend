@@ -52,9 +52,14 @@ const useGetForecastsData = (isNormalized: boolean) => {
     isPaused: () => forecastLoading,
     onSuccess: (data) => {
       setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-      allForecastData.mutate();
     }
   });
+  useEffect(() => {
+    if (!forecastLoading) {
+      allForecastData.mutate();
+    }
+  }, [forecastLoading]);
+
   if (isNormalized) return allForecastData;
   else return allForecastData.data ? allForecastData : bareForecastData;
 };
