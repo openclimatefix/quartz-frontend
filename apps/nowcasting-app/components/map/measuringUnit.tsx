@@ -1,5 +1,6 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { ActiveUnit } from "./types";
+
 const MeasuringUnit = ({
   activeUnit,
   setActiveUnit,
@@ -16,17 +17,21 @@ const MeasuringUnit = ({
     event.preventDefault();
     setActiveUnit(unit);
   };
+  const buttonClasses =
+    "relative inline-flex items-center px-3 py-0.5 text-sm font-extrabold hover:bg-ocf-yellow border-gray-600";
 
   return (
-    <div className="mt-2 flex justify-end mr-0">
+    <div className="flex justify-end mr-0">
       <div className="inline-block">
         <button
           onClick={(event) => onToggle(event, ActiveUnit.MW)}
           disabled={isLoading}
           type="button"
-          className={`relative w-12inline-flex items-center px-3 py-2 mx-1 ml-px text-sm font-extrabold  ${
-            activeUnit === "MW" ? "text-black bg-ocf-yellow" : "text-white bg-black"
-          } ${isLoading ? "cursor-wait" : ""} hover:bg-ocf-yellow`}
+          className={`${buttonClasses}  ${
+            activeUnit === ActiveUnit.MW
+              ? "text-black bg-ocf-yellow"
+              : "text-white bg-black border-r"
+          } ${isLoading ? "cursor-wait" : ""}`}
         >
           MW
         </button>
@@ -34,12 +39,24 @@ const MeasuringUnit = ({
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}
           disabled={isLoading}
           type="button"
-          className={`relative inline-flex items-center px-4 py-2 ml-1 mr-px text-sm font-extrabold ${
-            activeUnit === "%" ? "text-black bg-ocf-yellow" : "text-white bg-black"
-          }  ${isLoading ? "cursor-wait" : ""} hover:bg-ocf-yellow`}
+          className={`${buttonClasses} ${
+            activeUnit === ActiveUnit.percentage
+              ? "text-black bg-ocf-yellow"
+              : "text-white bg-black border-r"
+          }  ${isLoading ? "cursor-wait" : ""}`}
         >
           %
         </button>
+        {/*<button*/}
+        {/*  onClick={(event) => onToggle(event, ActiveUnit.capacity)}*/}
+        {/*  disabled={isLoading}*/}
+        {/*  type="button"*/}
+        {/*  className={`${buttonClasses}  ${*/}
+        {/*    activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"*/}
+        {/*  } ${isLoading ? "cursor-wait" : ""}`}*/}
+        {/*>*/}
+        {/*  Capacity*/}
+        {/*</button>*/}
       </div>
     </div>
   );

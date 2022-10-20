@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
-import useGlobalState from "../globalState";
+import useGlobalState from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import { addMinutesToISODate, formatISODateString } from "../utils";
+import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
 import Ui from "./ui";
 
 type PlayButtonProps = {
