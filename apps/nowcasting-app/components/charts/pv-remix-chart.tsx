@@ -14,6 +14,8 @@ import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
 import { ForecastData, ForecastValue } from "../types";
+import Tooltip from "../tooltip";
+import { ChartInfo } from "../../ChartInfo";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -117,7 +119,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   const fourHoursAgo = getRounded4HoursAgoString();
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-grow mb-7">
+      <div className="flex-auto mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
@@ -148,48 +150,52 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
           ></GspPvRemixChart>
         )}
       </div>
-      <div className="flex flex-row justify-between px-8 text-xs tracking-wider text-ocf-gray-300 py-2 bg-mapbox-black-500 overflow-x-scroll">
-        <div className="flex-0 flex-col">
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            dashed
-            label={"PV live initial estimate"}
-            dataKey={`GENERATION`}
-          />
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            label={"PV live updated"}
-            dataKey={`GENERATION_UPDATED`}
-          />
+      <div className="flex flex-none flex-row px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
+        <div className="flex flex-1 justify-around overflow-x-scroll pb-3">
+          <div className="flex-initial flex-col">
+            <LegendItem
+              iconClasses={"text-ocf-black"}
+              dashed
+              label={"PV live initial estimate"}
+              dataKey={`GENERATION`}
+            />
+            <LegendItem
+              iconClasses={"text-ocf-black"}
+              label={"PV live updated"}
+              dataKey={`GENERATION_UPDATED`}
+            />
+          </div>
+          <div className="flex-initial flex-col">
+            <LegendItem
+              iconClasses={"text-ocf-yellow"}
+              dashed
+              label={"OCF Forecast"}
+              dataKey={`FORECAST`}
+            />
+            <LegendItem
+              iconClasses={"text-ocf-yellow"}
+              label={"OCF Final Forecast"}
+              dataKey={`PAST_FORECAST`}
+            />
+          </div>
+          <div className="flex-initial flex-col">
+            <LegendItem
+              iconClasses={"text-ocf-orange"}
+              dashed
+              label={`OCF ${fourHoursAgo} Forecast`}
+              dataKey={`4HR_FORECAST`}
+            />
+            <LegendItem
+              iconClasses={"text-ocf-orange"}
+              label={"OCF 4hr Forecast"}
+              dataKey={`4HR_PAST_FORECAST`}
+            />
+          </div>
         </div>
-        <div className="flex-0 flex-col">
-          <LegendItem
-            iconClasses={"text-ocf-yellow"}
-            dashed
-            label={"OCF Forecast"}
-            dataKey={`FORECAST`}
-          />
-          <LegendItem
-            iconClasses={"text-ocf-yellow"}
-            label={"OCF Final Forecast"}
-            dataKey={`PAST_FORECAST`}
-          />
-        </div>
-        <div className="flex-0 flex-col">
-          <LegendItem
-            iconClasses={"text-ocf-orange"}
-            dashed
-            label={`OCF ${fourHoursAgo} Forecast`}
-            dataKey={`4HR_FORECAST`}
-          />
-          <LegendItem
-            iconClasses={"text-ocf-orange"}
-            label={"OCF 4hr Forecast"}
-            dataKey={`4HR_PAST_FORECAST`}
-          />
-        </div>
-        <div className="flex-0 flex-col flex-start">
-          <InfoIcon />
+        <div className="flex-initial flex items-center pl-3 pb-3">
+          <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
+            <InfoIcon />
+          </Tooltip>
         </div>
       </div>
     </div>
