@@ -13,10 +13,10 @@ const ForecastWithActualPV: React.FC<{
 }> = ({ forecast, pv, time, tip, color = yellow }) => {
   return (
     <div className="flex flex-col m-auto h-10">
-      <div className="flex justify-items-start">
+      {/* <div className="flex justify-items-start">
         <ClockIcon />
         <p className="text-xs">{time}</p>
-      </div>
+      </div> */}
       <div>
         <ForecastLabel
           tip={
@@ -26,12 +26,16 @@ const ForecastWithActualPV: React.FC<{
           }
         >
           <p className={`text-lg font-semibold text-center text-${color}`} style={{ color: color }}>
-            {forecast}
-            <span className="text-ocf-gray-300">/</span>
             <span className="text-black">{pv}</span>
+            <span className="text-ocf-gray-300"> / </span>
+            {forecast}
             <span className="text-xs text-ocf-gray-300 font-normal"> GW</span>
           </p>
         </ForecastLabel>
+      </div>
+      <div className="flex justify-items-start">
+        <ClockIcon />
+        <p className="text-xs">{time}</p>
       </div>
     </div>
   );
@@ -45,10 +49,10 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
 }) => {
   return (
     <div className="flex flex-col m-auto h-10">
-      <div className="flex justify-items-start">
+      {/* <div className="flex justify-items-start">
         <ClockIcon />
         <p className="text-xs">{time}</p>
-      </div>
+      </div> */}
       <ForecastLabel
         tip={
           <div className="w-28">
@@ -63,6 +67,10 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
           </p>
         </div>
       </ForecastLabel>
+      <div className="flex justify-items-start">
+        <ClockIcon />
+        <p className="text-xs">{time}</p>
+      </div>
     </div>
   );
 };
@@ -94,7 +102,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastWithActualPV
             forecast={`${forecastPV}`}
             pv={`${actualPV}`}
-            tip={`OCF Forecast / PV Live`}
+            tip={`PV Live / OCF Forecast`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
           />

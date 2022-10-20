@@ -4,6 +4,7 @@ import useFormatChartData from "../use-format-chart-data";
 import { formatISODateString } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
+import useGlobalState from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
@@ -20,7 +21,8 @@ const GspPvRemixChart: FC<{
   setTimeOfInterest: (t: string) => void;
   timeNow: string;
   resetTime: () => void;
-}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime }) => {
+  visibleLines: string[];
+}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
@@ -81,6 +83,7 @@ const GspPvRemixChart: FC<{
           yMax={yMax!}
           timeNow={timeNow}
           resetTime={resetTime}
+          visibleLines={visibleLines}
         />
       </div>
     </>
