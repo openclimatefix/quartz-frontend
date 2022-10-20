@@ -4,15 +4,15 @@ import Line from "./remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
-import useGlobalState from "../globalState";
+import useGlobalState from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { axiosFetcher, formatISODateString } from "../utils";
+import { axiosFetcher, formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import Spinner from "../spinner";
+import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { InfoIcon, ClockIcon, LegendLineGraphIcon } from "../icons";
+import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
 import { ForecastData } from "../types";
 
 const LegendItem: FC<{
@@ -42,7 +42,7 @@ const LegendItem: FC<{
   );
 };
 
-const PvRemixChart: FC<{ date?: string }> = () => {
+const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -106,7 +106,7 @@ const PvRemixChart: FC<{ date?: string }> = () => {
     setSelectedISOTime(time + ":00.000Z");
   };
   return (
-    <div className="flex flex-col flex-1 mt-12 mb-1">
+    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-grow mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}

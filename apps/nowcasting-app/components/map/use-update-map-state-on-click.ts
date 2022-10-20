@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import useGlobalState from "../globalState";
+import useGlobalState from "../helpers/globalState";
 
 type UseUpdateMapStateOnClickProps = {
   map?: mapboxgl.Map;

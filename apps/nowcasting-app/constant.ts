@@ -45,3 +45,9 @@ export const apiErrorMSGS = [
     }
   }
 ];
+
+export enum VIEWS {
+  FORECAST = "FORECAST",
+  DELTA = "DELTA",
+  SOLAR_SITES = "SOLAR SITES"
+}
