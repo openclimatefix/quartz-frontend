@@ -1,35 +1,29 @@
-import React, { useMemo } from "react";
-import { get30MinNow } from "../../globalState";
+import React from "react";
+import { get30MinNow } from "../../helpers/globalState";
 import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
-import { convertISODateStringToLondonTime, formatISODateString, KWtoGW, MWtoGW } from "../../utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  KWtoGW,
+  MWtoGW
+} from "../../helpers/utils";
 import ForecastHeaderUI from "./ui";
 
 type ForecastHeaderProps = {
-  pvUpdatedData: PvRealData;
   pvLiveData: PvRealData;
   pvForecastData: ForecastData;
-  selectedTime: string;
 };
 
-const ForecastHeader: React.FC<ForecastHeaderProps> = ({
-  pvUpdatedData,
-  pvLiveData,
-  pvForecastData,
-  selectedTime
-}) => {
+const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pvLiveData, pvForecastData }) => {
   const timeNow = useTimeNow();
 
   // get the time for the OCF Forecast
-  // This should be the next Forecast if selected time is in the past,
-  // or the select time
-  const futurePvForecastDatetime =
-    formatISODateString(timeNow) >= selectedTime ? formatISODateString(timeNow) : selectedTime;
-  const futurePVForecastDatetimeLabel =
-    formatISODateString(timeNow) >= selectedTime
-      ? "Next"
-      : convertISODateStringToLondonTime(futurePvForecastDatetime + ":00.000Z");
+  const futurePvForecastDatetime = formatISODateString(timeNow);
+  const futurePVForecastDatetimeLabel = convertISODateStringToLondonTime(
+    futurePvForecastDatetime + ":00.000Z"
+  );
 
   // Get the next OCF forecast, for now (or future)
   const nextPvForecastInGW = MWtoGW(
@@ -38,36 +32,15 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   );
 
   // get the Actual pv value in GW
-  // Try to get it from the updated values, then try initial pv data, finally just take the first
-  const selectedPvActualInGW = useMemo(() => {
-    const selectetpvUpdate = pvUpdatedData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
-    )?.solarGenerationKw;
-    const selectetpvLive = pvLiveData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
-    )?.solarGenerationKw;
-    const latestpvLive = pvLiveData[0].solarGenerationKw;
-    return KWtoGW(selectetpvUpdate || selectetpvLive || latestpvLive);
-  }, [pvUpdatedData, pvLiveData, selectedTime]);
+  const selectedPvActualInGW = KWtoGW(pvLiveData[0].solarGenerationKw);
 
   // get pv time
-  // Try to get it from the updated values, then try initial pv data, finally just take the first
-  const selectedPvActualDatetime = useMemo(() => {
-    const selectetpvUpdate = pvUpdatedData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
-    )?.datetimeUtc;
-    const selectetpvLive = pvLiveData.find(
-      (pv) => formatISODateString(pv.datetimeUtc) === selectedTime
-    )?.datetimeUtc;
-    const latestpvLive = pvLiveData[0].datetimeUtc;
-    return selectetpvUpdate || selectetpvLive || latestpvLive;
-  }, [pvUpdatedData, pvLiveData, selectedTime]);
+  const selectedPvActualDatetime = pvLiveData[0].datetimeUtc;
 
   // Use the same time for the Forecast historic
   const pvForecastDatetime = formatISODateString(selectedPvActualDatetime);
 
-  // Get the next OCF forecast,
-  // for the selected time in the past, or the last PV value time
+  // Get the next OCF forecast for the last PV value time
   const selectedPvForecastInGW = MWtoGW(
     pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === pvForecastDatetime)
       ?.expectedPowerGenerationMegawatts || 0
@@ -75,9 +48,9 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
 
   return (
     <ForecastHeaderUI
-      forcastNextPV={nextPvForecastInGW}
+      forecastNextPV={nextPvForecastInGW}
       actualPV={selectedPvActualInGW}
-      forcastPV={selectedPvForecastInGW}
+      forecastPV={selectedPvForecastInGW}
       selectedTimeOnly={convertISODateStringToLondonTime(pvForecastDatetime + ":00.000Z")}
       pvTimeOnly={convertISODateStringToLondonTime(selectedPvActualDatetime)}
       forecastNextTimeOnly={futurePVForecastDatetimeLabel}

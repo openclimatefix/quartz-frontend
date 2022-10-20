@@ -1,15 +1,17 @@
 import { FC } from "react";
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
-import { formatISODateString } from "../../utils";
+import { formatISODateString } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
-import Spinner from "../../spinner";
+import Spinner from "../../icons/spinner";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
 // So, we round these up to the following numbers
-const yMax_levels = [3, 9, 20, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450, 600];
+const yMax_levels = [
+  3, 9, 20, 28, 36, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450, 600
+];
 
 const GspPvRemixChart: FC<{
   gspId: number;
@@ -36,10 +38,10 @@ const GspPvRemixChart: FC<{
         <Spinner />
       </div>
     );
-  const forcastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
+  const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) ||
     ({} as any);
-  const pvPercentage = (forcastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
+  const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
@@ -56,11 +58,18 @@ const GspPvRemixChart: FC<{
   return (
     <>
       <div className="bg-black">
-        <ForecastHeaderGSP onClose={close} title={gspInfo?.regionName || ""}>
-          {Math.round(pvPercentage)}% |{" "}
-          {Math.round(forcastAtSelectedTime.expectedPowerGenerationMegawatts || 0)} /{" "}
-          {gspInfo?.installedCapacityMw}
-          <span className=" ml-2 font-bold">MW</span>
+        <ForecastHeaderGSP
+          onClose={close}
+          title={gspInfo?.regionName || ""}
+          mwpercent={Math.round(pvPercentage)}
+        >
+          <span className="font-semibold lg:text-lg md:text-lg text-med text-ocf-yellow-500">
+            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+          </span>
+          <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
+            /{gspInfo?.installedCapacityMw}
+          </span>
+          <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
 

@@ -1,4 +1,4 @@
-export const API_PREFIX = "https://api-pro.nowcasting.io/v0";
+export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.nowcasting.io/v0";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
 
@@ -45,3 +45,9 @@ export const apiErrorMSGS = [
     }
   }
 ];
+
+export enum VIEWS {
+  FORECAST = "FORECAST",
+  DELTA = "DELTA",
+  SOLAR_SITES = "SOLAR SITES"
+}

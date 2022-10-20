@@ -1,7 +1,7 @@
 import Head from "next/head";
 import useSWR from "swr";
-import { API_PREFIX } from "../constant";
-import { axiosFetcher } from "./utils";
+import { API_PREFIX } from "../../constant";
+import { axiosFetcher } from "../helpers/utils";
 
 interface ILayout {
   children: React.ReactNode;

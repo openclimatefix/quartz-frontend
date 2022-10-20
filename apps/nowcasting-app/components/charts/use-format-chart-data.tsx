@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import { get30MinNow } from "../globalState";
+import { get30MinNow } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
-import { formatISODateString } from "../utils";
+import { formatISODateString } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 
-//sperate paste forcaste from furute forcast (ie: after selectedTime)
+//separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
   timeNow: string,
   fr?: {
