@@ -4,16 +4,17 @@ import useSWRImmutable from "swr/immutable";
 import { useEffect, useMemo, useState } from "react";
 import mapboxgl, { Expression } from "mapbox-gl";
 
-import { FaildStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
+import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
-import useGlobalState from "../globalState";
-import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../utils";
+import useGlobalState from "../helpers/globalState";
+import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import { FcAllResData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
+import { FeatureCollection } from "geojson";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -51,13 +52,9 @@ const useGetForecastsData = (isNormalized: boolean) => {
     isPaused: () => forecastLoading,
     onSuccess: (data) => {
       setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-    }
-  });
-  useEffect(() => {
-    if (!forecastLoading) {
       allForecastData.mutate();
     }
-  }, [forecastLoading]);
+  });
   if (isNormalized) return allForecastData;
   else return allForecastData.data ? allForecastData : bareForecastData;
 };
@@ -67,10 +64,10 @@ const PvLatestMap = () => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
   const isNormalized = activeUnit === ActiveUnit.percentage;
-  const selectedDataName =
-    activeUnit === ActiveUnit.percentage
-      ? SelectedData.expectedPowerGenerationNormalized
-      : SelectedData.expectedPowerGenerationMegawatts;
+  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
+  if (activeUnit === ActiveUnit.percentage)
+    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
+  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
   const {
     data: initForecastData,
@@ -91,31 +88,39 @@ const PvLatestMap = () => {
     1
   ];
 
-  const generateGeoJsonForecastData = (forecastData?: FcAllResData, targetTime?: string) => {
-    // Exclude first item as it's not represting gsp area
-    const filteredForcastData = forecastData?.forecasts?.slice(1);
-    const gspShapeDatat = gspShapeData as GeoJSON.FeatureCollection<GeoJSON.Geometry>;
+  const generateGeoJsonForecastData: (
+    forecastData?: FcAllResData,
+    targetTime?: string
+  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
+    // Exclude first item as it's not representing gsp area
+    const filteredForecastData = forecastData?.forecasts?.slice(1);
+    const gspShapeJson = gspShapeData as FeatureCollection;
     const forecastGeoJson = {
-      ...gspShapeDatat,
-      features: gspShapeDatat.features.map((featureObj, index) => {
-        const selectedFCvalue =
-          filteredForcastData && targetTime
-            ? filteredForcastData[index]?.forecastValues.find(
+      ...gspShapeData,
+      type: "FeatureCollection" as "FeatureCollection",
+      features: gspShapeJson.features.map((featureObj, index) => {
+        const forecastDatum = filteredForecastData && filteredForecastData[index];
+        const selectedFCValue =
+          filteredForecastData && targetTime
+            ? forecastDatum?.forecastValues.find(
                 (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
               )
-            : filteredForcastData
-            ? filteredForcastData[index]?.forecastValues[latestForecastValue]
+            : filteredForecastData
+            ? forecastDatum?.forecastValues[latestForecastValue]
             : undefined;
 
         return {
           ...featureObj,
           properties: {
             ...featureObj.properties,
-            expectedPowerGenerationMegawatts:
-              selectedFCvalue && getRoundedPv(selectedFCvalue.expectedPowerGenerationMegawatts),
-            expectedPowerGenerationNormalized:
-              selectedFCvalue &&
-              getRoundedPvPercent(selectedFCvalue?.expectedPowerGenerationNormalized || 0)
+            [SelectedData.expectedPowerGenerationMegawatts]:
+              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
+            [SelectedData.expectedPowerGenerationNormalized]:
+              selectedFCValue &&
+              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
+            [SelectedData.installedCapacityMw]: getRoundedPv(
+              forecastDatum?.location.installedCapacityMw || 0
+            )
           }
         };
       })
@@ -182,7 +187,7 @@ const PvLatestMap = () => {
   };
 
   return forecastError ? (
-    <FaildStateMap error="Failed to load" />
+    <FailedStateMap error="Failed to load" />
   ) : forecastLoading ? (
     <LoadStateMap>
       <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />

@@ -1,10 +1,11 @@
 import { FC } from "react";
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
-import { formatISODateString } from "../../utils";
+import { formatISODateString } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
-import Spinner from "../../spinner";
+import useGlobalState from "../../helpers/globalState";
+import Spinner from "../../icons/spinner";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -20,7 +21,8 @@ const GspPvRemixChart: FC<{
   setTimeOfInterest: (t: string) => void;
   timeNow: string;
   resetTime: () => void;
-}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime }) => {
+  visibleLines: string[];
+}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
   const { errors, gsp4HourData, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
@@ -42,10 +44,10 @@ const GspPvRemixChart: FC<{
         <Spinner />
       </div>
     );
-  const forcastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
+  const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) ||
     ({} as any);
-  const pvPercentage = (forcastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
+  const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
@@ -68,7 +70,7 @@ const GspPvRemixChart: FC<{
           mwpercent={Math.round(pvPercentage)}
         >
           <span className="font-semibold lg:text-lg md:text-lg text-med text-ocf-yellow-500">
-            {Math.round(forcastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
           </span>
           <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
             /{gspInfo?.installedCapacityMw}
@@ -85,6 +87,7 @@ const GspPvRemixChart: FC<{
           yMax={yMax!}
           timeNow={timeNow}
           resetTime={resetTime}
+          visibleLines={visibleLines}
         />
       </div>
     </>

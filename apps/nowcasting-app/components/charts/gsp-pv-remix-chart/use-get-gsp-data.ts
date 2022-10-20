@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData, ForecastValue } from "../../types";
-import { axiosFetcher } from "../../utils";
+import { axiosFetcher } from "../../helpers/utils";
 
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {

@@ -7,16 +7,25 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
   const values = useMemo(() => {
     if (unit === ActiveUnit.MW) {
       return [
-        { value: "0-50", opacity: 10, textColor: "ocf-gray-300" },
+        { value: "0-50", opacity: 3, textColor: "ocf-gray-300" },
         { value: "50-150", opacity: 20, textColor: "ocf-gray-300" },
         { value: "150-250", opacity: 40, textColor: "ocf-gray-300" },
         { value: "250-350", opacity: 60, textColor: "black" },
         { value: "350-450", opacity: 80, textColor: "black" },
         { value: "450+", opacity: 100, textColor: "black" }
       ];
+    } else if (unit === ActiveUnit.capacity) {
+      return [
+        { value: "0-100", opacity: 3, textColor: "ocf-gray-300" },
+        { value: "100-200", opacity: 20, textColor: "ocf-gray-300" },
+        { value: "200-300", opacity: 40, textColor: "ocf-gray-300" },
+        { value: "300-400", opacity: 60, textColor: "black" },
+        { value: "400-500", opacity: 80, textColor: "black" },
+        { value: "500+", opacity: 100, textColor: "black" }
+      ];
     } else {
       return [
-        { value: "0-10", opacity: 10, textColor: "ocf-gray-300" },
+        { value: "0-10", opacity: 3, textColor: "ocf-gray-300" },
         { value: "10-30", opacity: 20, textColor: "ocf-gray-300" },
         { value: "30-50", opacity: 40, textColor: "ocf-gray-300" },
         { value: "50-70", opacity: 60, textColor: "black" },
@@ -26,6 +35,9 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
     }
   }, [unit]);
   let unitText = unit === ActiveUnit.MW ? "MW" : "%";
+  if (unit === ActiveUnit.capacity) {
+    unitText = "MW";
+  }
   return (
     <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">
       <div className="flex justify-between h-full text-ocf-black-600 font-bold relative items-end text-sm">
