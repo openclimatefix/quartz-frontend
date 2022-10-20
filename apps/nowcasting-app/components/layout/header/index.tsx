@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { VIEWS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
+import { ExternalLinkIcon } from "../../icons/icons";
 
 type HeaderLinkProps = {
   url: string;
@@ -29,14 +30,16 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
     disabled
       ? "text-gray-500 cursor-not-allowed"
       : "text-white cursor-pointer hover:text-ocf-yellow-400",
-    "block px-4 py-2 font-semibold text-sm"
+    "flex px-4 py-2 font-semibold text-sm"
   );
 
+  // Denotes external link for styling
   if (url.includes("http")) {
     return (
       <Menu.Item>
         <a href={url} className={computedClasses} target="_blank" rel="noreferrer">
           {text}
+          <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] self-center text-white" />
         </a>
       </Menu.Item>
     );
