@@ -51,18 +51,18 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
 );
 
 export const ClockIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    viewBox="0 0 32 32"
-    width="16"
-    height="16"
-    xmlns="http://www.w3.org/2000/svg"
-    fill-rule="evenodd"
-    fill="white"
-    clip-rule="evenodd"
-  >
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
-      d="M12 0c6.623 0 12 5.377 12 12s-5.377 12-12 12-12-5.377-12-12 5.377-12 12-12zm0 1c6.071
-      0 11 4.929 11 11s-4.929 11-11 11-11-4.929-11-11 4.929-11 11-11zm0 11h6v1h-7v-9h1v8z"
+      d="M7 12.3743C9.96813 12.3743 12.3743 9.96813 12.3743 7C12.3743 4.03187 9.96813 1.62573 7 1.62573C4.03187 1.62573 1.62573 4.03187 1.62573 7C1.62573 9.96813 4.03187 12.3743 7 12.3743Z"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M7 3.77545V7.00001L9.14971 8.07487"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

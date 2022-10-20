@@ -15,11 +15,7 @@ export type FcAllResData = {
       version: string;
     };
     forecastCreationTime: string;
-    forecastValues: {
-      targetTime: string;
-      expectedPowerGenerationMegawatts: number;
-      expectedPowerGenerationNormalized: null;
-    }[];
+    forecastValues: ForecastValue[];
     inputDataLastUpdated: {
       gsp: string;
       nwp: string;
@@ -27,6 +23,11 @@ export type FcAllResData = {
       satellite: string;
     };
   }[];
+};
+type ForecastValue = {
+  targetTime: string;
+  expectedPowerGenerationMegawatts: number;
+  expectedPowerGenerationNormalized: null;
 };
 type ForecastData = {
   targetTime: string;

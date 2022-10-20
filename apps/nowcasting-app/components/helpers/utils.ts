@@ -86,6 +86,17 @@ export const addMinutesToISODate = (date: string, munites: number) => {
   return d.toISOString();
 };
 
+export const getRounded4HoursAgoString = () => {
+  const fourHoursAgo = new Date();
+  fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
+  if (fourHoursAgo.getMinutes() < 30) {
+    fourHoursAgo.setMinutes(0);
+  } else {
+    fourHoursAgo.setMinutes(30);
+  }
+  return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
+};
+
 export const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
     return res.data;

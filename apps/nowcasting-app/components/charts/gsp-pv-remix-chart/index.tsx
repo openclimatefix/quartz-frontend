@@ -23,17 +23,21 @@ const GspPvRemixChart: FC<{
   resetTime: () => void;
   visibleLines: string[];
 }> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
-  const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
+  const { errors, gsp4HourData, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
   const chartData = useFormatChartData({
     forecastData: gspForecastData,
+    fourHourData: gsp4HourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime
   });
-  if (errors.length) return <div>failed to load</div>;
+  if (errors.length) {
+    console.log(errors);
+    return <div>failed to load</div>;
+  }
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
     return (
       <div className="h-60  flex">

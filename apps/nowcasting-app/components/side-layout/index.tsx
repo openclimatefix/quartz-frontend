@@ -9,7 +9,7 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div
-      className={`h-full absolute  z-20 ${className || ""}`}
+      className={`h-full pt-16 absolute top-0 left-0 z-20 ${className || ""}`}
       style={{ width: isOpen ? "90%" : "44%" }}
     >
       <div

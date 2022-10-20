@@ -8,14 +8,20 @@ type UiProps = {
 const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
   return (
     <button
-      className="items-center w-12 h-12 text-lg m text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow "
+      className="items-center w-14 h-14 text-lg text-black bg-ocf-yellow  hover:bg-ocf-yellow focus:z-10 focus:bg-ocf-yellow "
       onClick={() => {
         onClick();
       }}
     >
       {!isPlaying ? (
-        <svg viewBox="0 0 20 24" fill="currentColor" height="3rem" width="3rem">
-          <path d="M7 6v12l10-6z" />
+        <svg
+          width="3.5rem"
+          height="3.5rem"
+          viewBox="0 0 42 42"
+          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M13.75 10.5V31.5L31.25 21L13.75 10.5Z" fill="black" />
         </svg>
       ) : (
         <svg fill="none" viewBox="0 0 22 24" height="3rem" width="3rem">
