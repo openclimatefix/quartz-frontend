@@ -14,7 +14,7 @@ import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { LegendLineGraphIcon } from "../icons/icons";
 import { ForecastData } from "../types";
 
-const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean }> = ({
+const LegendItem: FC<{ iconClasses: string; label: string; dashed?: boolean; dataKey: string }> = ({
   iconClasses,
   label,
   dashed
@@ -89,7 +89,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   };
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-grow mb-7">
+      <div className="flex-auto mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
@@ -118,12 +118,30 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
           ></GspPvRemixChart>
         )}
       </div>
-      <div className="flex-0 px-3 text-[12px] tracking-wider text-ocf-gray-300 py-2 bg-mapbox-black-500">
-        <div className="flex justify-around">
-          <LegendItem iconClasses={"text-ocf-black"} dashed label={"PV live initial estimate"} />
-          <LegendItem iconClasses={"text-ocf-black"} label={"PV live updated"} />
-          <LegendItem iconClasses={"text-ocf-yellow"} dashed label={"OCF Forecast"} />
-          <LegendItem iconClasses={"text-ocf-yellow"} label={"OCF Final Forecast"} />
+      <div className="flex flex-none flex-row px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
+        <div className="flex flex-1 justify-around overflow-x-scroll pb-3">
+          <LegendItem
+            iconClasses={"text-ocf-black"}
+            dashed
+            label={"PV live initial estimate"}
+            dataKey={`GENERATION`}
+          />
+          <LegendItem
+            iconClasses={"text-ocf-black"}
+            label={"PV live updated"}
+            dataKey={`GENERATION_UPDATED`}
+          />
+          <LegendItem
+            iconClasses={"text-ocf-yellow"}
+            dashed
+            label={"OCF Forecast"}
+            dataKey={`FORECAST`}
+          />
+          <LegendItem
+            iconClasses={"text-ocf-yellow"}
+            label={"OCF Final Forecast"}
+            dataKey={`PAST_FORECAST`}
+          />
         </div>
       </div>
     </div>

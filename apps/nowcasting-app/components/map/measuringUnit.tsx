@@ -42,7 +42,8 @@ const MeasuringUnit = ({
           className={`${buttonClasses} ${
             activeUnit === ActiveUnit.percentage
               ? "text-black bg-ocf-yellow"
-              : "text-white bg-black border-r"
+              : "text-white bg-black"
+            // : "text-white bg-black border-r"
           }  ${isLoading ? "cursor-wait" : ""}`}
         >
           %
