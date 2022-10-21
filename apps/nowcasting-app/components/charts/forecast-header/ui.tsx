@@ -110,7 +110,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastWithActualPV
             forecast={`${forecastPV}`}
             pv={`${actualPV}`}
-            tip={`PV Live / OCF Forecast`}
+            tip={`OCF Forecast / PV Live`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
           />
