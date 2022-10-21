@@ -59,7 +59,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
       allForecastData.mutate();
     }
   }, [forecastLoading]);
-  
+
   if (isNormalized) return allForecastData;
   else return allForecastData.data ? allForecastData : bareForecastData;
 };
