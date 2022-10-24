@@ -5,7 +5,7 @@ import { formatISODateStringHumanNumbersOnly } from "./components/helpers/utils"
 export const ChartInfo: React.FC = () => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   return (
-    <div className="w-full w-64 p-2 text-sm">
+    <div className="w-full w-72 p-2 text-sm">
       <ul className="list-none space-y-2">
         <li>All datetimes are in Europe/London timezone.</li>
         <li>
@@ -18,10 +18,11 @@ export const ChartInfo: React.FC = () => {
           >
             PVLive
           </a>
-          , datetimes show the end of the settlement period. For example 17:00 refers to solar
+          , datetimes show the end of the settlement period. For example, 17:00 refers to solar
           generation between 16:30 to 17:00.
         </li>
         <li>The Y axis units are in MW, for the national and GSP plots.</li>
+        <br />
         <li>
           {" "}
           OCF Forecast Creation Time:{" "}
