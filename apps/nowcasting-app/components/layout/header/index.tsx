@@ -39,7 +39,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
       <Menu.Item>
         <a href={url} className={computedClasses} target="_blank" rel="noreferrer">
           {text}
-          <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] self-center text-white" />
+          <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] self-center text-inherit" />
         </a>
       </Menu.Item>
     );
@@ -74,7 +74,7 @@ type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
   return (
-    <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center">
+    <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center z-30">
       <div className="p-1 mt-1 items-end flex flex-col">
         <a
           className="flex h-6 w-auto mr-2"
