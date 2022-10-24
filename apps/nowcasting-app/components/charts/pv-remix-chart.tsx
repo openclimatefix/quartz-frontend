@@ -117,6 +117,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     setSelectedISOTime(time + ":00.000Z");
   };
   const fourHoursAgo = getRounded4HoursAgoString();
+  const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
@@ -151,8 +152,8 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
         )}
       </div>
       <div className="flex flex-none flex-row px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-        <div className="flex flex-1 justify-around overflow-x-scroll pb-3">
-          <div className="flex-initial flex-col">
+        <div className="flex flex-1 flex-col xl:flex-row justify-around overflow-x-scroll pb-3">
+          <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
               dashed
@@ -165,7 +166,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`GENERATION_UPDATED`}
             />
           </div>
-          <div className="flex-initial flex-col">
+          <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-yellow"}
               dashed
@@ -178,7 +179,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          <div className="flex-initial flex-col">
+          <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-orange"}
               dashed
