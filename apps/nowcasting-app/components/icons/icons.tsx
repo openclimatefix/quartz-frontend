@@ -85,21 +85,21 @@ export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
     <g clipPath="url(#clip0_166_5158)">
       <path
         d="M6 4.33333V6.33333C6 6.51014 5.92976 6.67971 5.80474 6.80474C5.67971 6.92976 5.51014 7 5.33333 7H1.66667C1.48986 7 1.32029 6.92976 1.19526 6.80474C1.07024 6.67971 1 6.51014 1 6.33333V2.66667C1 2.48986 1.07024 2.32029 1.19526 2.19526C1.32029 2.07024 1.48986 2 1.66667 2H3.66667"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M5 1H7V3"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M3.3335 4.66667L7.00016 1"
-        stroke="white"
+        stroke="currentColor"
         strokeWidth="1"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -107,7 +107,7 @@ export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
     </g>
     <defs>
       <clipPath id="clip0_166_5158">
-        <rect width="8" height="8" fill="white" />
+        <rect width="8" height="8" fill="currentColor" />
       </clipPath>
     </defs>
   </svg>
