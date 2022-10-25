@@ -20,15 +20,15 @@ const getForecastChartData = (
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: Math.round(fr.expectedPowerGenerationMegawatts)
+      [futureKey]: fr.expectedPowerGenerationMegawatts
     };
   else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: Math.round(fr.expectedPowerGenerationMegawatts)
+      [futureKey]: fr.expectedPowerGenerationMegawatts
     };
   else
     return {
-      [pastKey]: Math.round(fr.expectedPowerGenerationMegawatts)
+      [pastKey]: fr.expectedPowerGenerationMegawatts
     };
 };
 const useFormatChartData = ({
