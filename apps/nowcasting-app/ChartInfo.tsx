@@ -23,11 +23,8 @@ export const ChartInfo: React.FC = () => {
         </li>
         <li>The Y axis units are in MW, for the national and GSP plots.</li>
         <br />
-        <li>
-          {" "}
-          OCF Forecast Creation Time:{" "}
-          {formatISODateStringHumanNumbersOnly(forecastCreationTime || "")}
-        </li>
+        <li> OCF Forecast Creation Time: </li>
+        <li>{formatISODateStringHumanNumbersOnly(forecastCreationTime || "")}</li>
       </ul>
     </div>
   );

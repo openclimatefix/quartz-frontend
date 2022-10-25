@@ -41,7 +41,7 @@ const Tooltip: React.FC<TooltipProps> = ({
     >
       {position !== "top" && children}
       <div
-        className={`absolute flex flex-col items-center hidden mt-8 group-hover:flex ${containerPositionClass}`}
+        className={`absolute flex flex-col items-center hidden mt-8 group-hover:flex w-fit ${containerPositionClass}`}
       >
         <span
           className={`absolute ${tipPositionClass} w-auto mb-1 z-30 p-2 text-xs leading-none text-white whitespace-no-wrap bg-ocf-black shadow-lg`}
