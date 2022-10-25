@@ -73,7 +73,8 @@ const GspPvRemixChart: FC<{
             {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
           </span>
           <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
-            /{gspInfo?.installedCapacityMw}
+            {" "}
+            / {gspInfo?.installedCapacityMw}
           </span>
           <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
