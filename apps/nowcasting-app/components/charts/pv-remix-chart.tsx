@@ -6,7 +6,7 @@ import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import useGlobalState from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
-import { axiosFetcher, getRounded4HoursAgoString, formatISODateString } from "../helpers/utils";
+import { getRounded4HoursAgoString, formatISODateString, axiosFetcherAuth } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
@@ -54,7 +54,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const { data: nationalForecastData, error } = useSWR<ForecastData>(
     `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
-    axiosFetcher,
+    axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
@@ -75,7 +75,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 
@@ -84,13 +84,13 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 
   const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
     `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-    axiosFetcher,
+    axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
