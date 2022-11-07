@@ -31,16 +31,17 @@ const useGetGspData = (gspId: number) => {
     refreshInterval: t5min
   });
 
-  const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-    axiosFetcher,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+  // NB: when commenting the 4hour route back in, add pv4HourError to the errors listed below
+  // const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  //   `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+  //   axiosFetcher,
+  //   {
+  //     refreshInterval: 60 * 1000 * 5 // 5min
+  //   }
+  // );
 
   return {
-    errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
+    errors: [fcAllError, pvRealInDat, pvRealDayAfter].filter((e) => !!e),
     fcAll,
     // gsp4HourData,
     pvRealDataIn,

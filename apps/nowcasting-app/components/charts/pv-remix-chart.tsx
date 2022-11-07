@@ -88,13 +88,13 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 
-  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-    axiosFetcher,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+  // const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  //   `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+  //   axiosFetcher,
+  //   {
+  //     refreshInterval: 60 * 1000 * 5 // 5min
+  //   }
+  // );
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
@@ -104,8 +104,9 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     timeTrigger: selectedTime
   });
 
-  if (error || error2 || error3 || pv4HourError) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData || !national4HourData)
+  // when commenting 4hour forecast back in, add pv4HourError to the list of errors to line 108 and "!national4HourData" to line 109
+  if (error || error2 || error3) return <div>failed to load</div>;
+  if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
       <div className="h-full flex">
         <Spinner></Spinner>
