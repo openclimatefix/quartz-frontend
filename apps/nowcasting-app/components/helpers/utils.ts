@@ -106,9 +106,6 @@ export const axiosFetcherAuth = async (url: string) => {
   const response = await fetch("/api/get_token");
   const { accessToken } = await response.json();
 
-  console.log(url);
-  console.log(accessToken);
-
   return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } }).then(async (res) => {
     return res.data;
   });

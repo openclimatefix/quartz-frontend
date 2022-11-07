@@ -31,7 +31,7 @@ export default withSentry(
         await handleLogin(req, res, {
           authorizationParams: {
             redirect_uri: redirectUri,
-            audience: "https://nowcasting-api-eu-auth0.com/"
+            audience: "https://nowcasting-api-eu-auth0.com/" // TODO: Make this an env variable
           },
           returnTo: returnTo
         });
