@@ -42,7 +42,7 @@ const useGetGspData = (gspId: number) => {
   return {
     errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
     fcAll,
-    gsp4HourData,
+    // gsp4HourData,
     pvRealDataIn,
     pvRealDataAfter
   };

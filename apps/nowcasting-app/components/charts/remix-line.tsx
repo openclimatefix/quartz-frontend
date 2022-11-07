@@ -23,8 +23,8 @@ export type ChartData = {
   GENERATION?: number;
   FORECAST?: number;
   PAST_FORECAST?: number;
-  "4HR_FORECAST"?: number;
-  "4HR_PAST_FORECAST"?: number;
+  // "4HR_FORECAST"?: number;
+  // "4HR_PAST_FORECAST"?: number;
   formatedDate: string; // "2022-05-16T15:00",
 };
 
@@ -32,17 +32,17 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live updated",
   GENERATION: "PV Live estimate",
   FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast",
-  "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
-  "4HR_PAST_FORECAST": "OCF 4hr Forecast"
+  PAST_FORECAST: "OCF Forecast"
+  // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  // "4HR_PAST_FORECAST": "OCF 4hr Forecast"
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
   FORECAST: yellow,
-  PAST_FORECAST: yellow,
-  "4HR_FORECAST": orange,
-  "4HR_PAST_FORECAST": orange
+  PAST_FORECAST: yellow
+  // "4HR_FORECAST": orange,
+  // "4HR_PAST_FORECAST": orange
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -174,7 +174,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             />
 
-            <Line
+            {/* <Line
               type="monotone"
               dataKey="4HR_FORECAST"
               dot={false}
@@ -192,7 +192,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={orange} // blue
               strokeWidth={3}
               hide={!visibleLines.includes("4HR_PAST_FORECAST")}
-            />
+            /> */}
             <Line
               type="monotone"
               dataKey="GENERATION"

@@ -98,7 +98,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    fourHourData: national4HourData,
+    // fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
@@ -116,7 +116,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  const fourHoursAgo = getRounded4HoursAgoString();
+  // const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
@@ -179,7 +179,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          <div className={legendItemContainerClasses}>
+          {/* <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-orange"}
               dashed
@@ -191,7 +191,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               label={"OCF 4hr Forecast"}
               dataKey={`4HR_PAST_FORECAST`}
             />
-          </div>
+          </div> */}
         </div>
         <div className="flex-initial flex items-center pl-3 pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
