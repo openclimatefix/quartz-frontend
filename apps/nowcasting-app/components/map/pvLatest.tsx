@@ -41,7 +41,7 @@ const useGetForecastsData = (isNormalized: boolean) => {
     axiosFetcherAuth,
     {
       onSuccess: (data) => {
-        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+        if (data.forecasts?.length) setForecastCreationTime(data.forecasts[0].forecastCreationTime);
         setForecastLoading(false);
       }
     }
