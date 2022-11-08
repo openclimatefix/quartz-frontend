@@ -48,7 +48,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         >
           {tip}
         </span>
-        <div className="w-3 h-3 -mt-[6px] rotate-45 bg-ocf-black"></div>
+        <div className="w-3 h-4 -mt-[6px] rotate-45 bg-ocf-black"></div>
       </div>
       {position === "top" && children}
     </div>
