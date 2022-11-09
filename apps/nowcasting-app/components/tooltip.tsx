@@ -30,7 +30,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       tipPositionClass = "top-0";
       break;
     case "top":
-      containerPositionClass = "bottom-7 right-2";
+      containerPositionClass = "bottom-2 right-2";
       tipPositionClass = "-right-2 bottom-0";
   }
   return (
@@ -48,7 +48,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         >
           {tip}
         </span>
-        <div className="w-3 h-4 -mt-[6px] rotate-45 bg-ocf-black"></div>
+        <div className="w-3 h-5 -mt-[6px] rotate-45 bg-ocf-black"></div>
       </div>
       {position === "top" && children}
     </div>

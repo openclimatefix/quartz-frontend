@@ -118,7 +118,8 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     setSelectedISOTime(time + ":00.000Z");
   };
   // const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
+  // const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
+  const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
@@ -152,8 +153,8 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
           ></GspPvRemixChart>
         )}
       </div>
-      <div className="flex flex-none flex-row px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-        <div className="flex flex-1 flex-col xl:flex-row justify-around overflow-x-scroll pb-3">
+      <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
+        <div className="flex flex-row pb-3 overflow-x-auto">
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
@@ -194,7 +195,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
             />
           </div> */}
         </div>
-        <div className="flex-initial flex items-center pl-3 pb-3">
+        <div className="flex-initial flex items-center pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
             <InfoIcon />
           </Tooltip>
