@@ -1,4 +1,6 @@
 import axios from "axios";
+import { API_PREFIX } from "../../constant";
+import { NextApiRequest, NextApiResponse } from "next";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
@@ -97,6 +99,19 @@ export const getRounded4HoursAgoString = () => {
   return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
 };
 
+//this is the function I set up that would pass the accessToken from get_token.ts into the Authorization
+//header or the request to the API.
+
+export const axiosFetcherAuth = async (url: string) => {
+  const response = await fetch("/api/get_token");
+  const { accessToken } = await response.json();
+
+  return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } }).then(async (res) => {
+    return res.data;
+  });
+};
+
+// this is the previous fetcher
 export const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
     return res.data;
