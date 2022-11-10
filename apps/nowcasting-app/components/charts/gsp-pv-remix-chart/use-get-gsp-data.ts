@@ -31,13 +31,13 @@ const useGetGspData = (gspId: number) => {
     refreshInterval: t5min
   });
 
-  const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+  // const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  //   `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+  //   axiosFetcherAuth,
+  //   {
+  //     refreshInterval: 60 * 1000 * 5 // 5min
+  //   }
+  // );
 
   return {
     errors: [fcAllError, pvRealInDat, pvRealDayAfter].filter((e) => !!e),
