@@ -1,7 +1,7 @@
 import Head from "next/head";
 import useSWR from "swr";
 import { API_PREFIX } from "../../constant";
-import { axiosFetcher } from "../helpers/utils";
+import { axiosFetcher, axiosFetcherAuth } from "../helpers/utils";
 
 interface ILayout {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useSWR<{
     status: string;
     message: string;
-  }>(`${API_PREFIX}/solar/GB/status`, axiosFetcher, {
+  }>(`${API_PREFIX}/solar/GB/status`, axiosFetcherAuth, {
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 

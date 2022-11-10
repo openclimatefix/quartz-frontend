@@ -10,7 +10,7 @@ import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
-import { axiosFetcher, formatISODateString, formatISODateStringHuman } from "../helpers/utils";
+import { axiosFetcherAuth, formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import { FcAllResData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
@@ -38,22 +38,26 @@ const useGetForecastsData = (isNormalized: boolean) => {
   const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
   const bareForecastData = useSWRImmutable<FcAllResData>(
     () => getAllForecastUrl(false, false),
-    axiosFetcher,
+    axiosFetcherAuth,
     {
       onSuccess: (data) => {
-        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+        if (data.forecasts?.length) setForecastCreationTime(data.forecasts[0].forecastCreationTime);
         setForecastLoading(false);
       }
     }
   );
 
-  const allForecastData = useSWR<FcAllResData>(() => getAllForecastUrl(true, true), axiosFetcher, {
-    refreshInterval: 1000 * 60 * 5, // 5min
-    isPaused: () => forecastLoading,
-    onSuccess: (data) => {
-      setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+  const allForecastData = useSWR<FcAllResData>(
+    () => getAllForecastUrl(true, true),
+    axiosFetcherAuth,
+    {
+      refreshInterval: 1000 * 60 * 5, // 5min
+      isPaused: () => forecastLoading,
+      onSuccess: (data) => {
+        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+      }
     }
-  });
+  );
   useEffect(() => {
     if (!forecastLoading) {
       allForecastData.mutate();
