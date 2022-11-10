@@ -29,7 +29,7 @@ const GspPvRemixChart: FC<{
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
   const chartData = useFormatChartData({
-    // forecastData: gspForecastData,
+    forecastData: gspForecastData,
     // fourHourData: gsp4HourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
