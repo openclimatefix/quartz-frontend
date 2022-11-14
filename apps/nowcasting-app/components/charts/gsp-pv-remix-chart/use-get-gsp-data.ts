@@ -47,11 +47,11 @@ const useGetGspData = (gspId: number) => {
   //     pv4HourError = dataResponse.error;
   //   }
   // }
-
+  // add pv4HourError here
   return {
-    errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
+    errors: [fcAllError, pvRealInDat, pvRealDayAfter].filter((e) => !!e),
     fcAll,
-    gsp4HourData,
+    // gsp4HourData,
     pvRealDataIn,
     pvRealDataAfter
   };
