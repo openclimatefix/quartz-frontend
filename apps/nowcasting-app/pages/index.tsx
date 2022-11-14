@@ -6,6 +6,8 @@ import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useState } from "react";
 import Header from "../components/layout/header";
+import ForecastHeader from "../components/charts/forecast-header";
+import DeltaViewComponent from "../components/charts/delta-view/delta-view-chart";
 import { VIEWS } from "../constant";
 
 export default function Home() {
@@ -27,6 +29,7 @@ export default function Home() {
 
         <SideLayout>
           <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
+          <DeltaViewComponent className={currentView(VIEWS.DELTA) ? "" : "hidden"} />
         </SideLayout>
       </div>
     </Layout>

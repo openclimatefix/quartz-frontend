@@ -31,18 +31,27 @@ const useGetGspData = (gspId: number) => {
     refreshInterval: t5min
   });
 
-  // const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-  //   `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
+  // let gsp4HourData: ForecastValue[] = [];
+  // let pv4HourError;
+  // if (process.env.NEXT_PUBLIC_4H_VIEW === "true") {
+  //   const dataResponse = useSWR<ForecastValue[]>(
+  //     `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+  //     axiosFetcherAuth,
+  //     {
+  //       refreshInterval: 60 * 1000 * 5 // 5min
+  //     }
+  //   );
+  //   if (dataResponse.data) {
+  //     gsp4HourData = dataResponse.data;
+  //   } else {
+  //     pv4HourError = dataResponse.error;
   //   }
-  // );
+  // }
 
   return {
-    errors: [fcAllError, pvRealInDat, pvRealDayAfter].filter((e) => !!e),
+    errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
     fcAll,
-    // gsp4HourData,
+    gsp4HourData,
     pvRealDataIn,
     pvRealDataAfter
   };

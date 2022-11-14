@@ -30,7 +30,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       tipPositionClass = "top-0";
       break;
     case "top":
-      containerPositionClass = "bottom-2 right-2";
+      containerPositionClass = "bottom-7 right-2";
       tipPositionClass = "-right-2 bottom-0";
   }
   return (
@@ -40,14 +40,14 @@ const Tooltip: React.FC<TooltipProps> = ({
     >
       {position !== "top" && children}
       <div
-        className={`absolute flex flex-col items-center hidden mt-8 group-hover:flex w-fit w-64 ${containerPositionClass}`}
+        className={`absolute flex flex-col items-center hidden mt-6 group-hover:flex w-fit w-64 ${containerPositionClass}`}
       >
         <span
           className={`absolute ${tipPositionClass} w-auto mb-1 z-30 p-2 text-xs leading-none text-white whitespace-no-wrap bg-ocf-black shadow-lg`}
         >
           {tip}
         </span>
-        <div className="w-3 h-5 -mt-[6px] rotate-45 bg-ocf-black"></div>
+        <div className="w-3 h-5 -mt-[6px] rotate-45 bg-ocf-black hidden"></div>
       </div>
       {position === "top" && children}
     </div>

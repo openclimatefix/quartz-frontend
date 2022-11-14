@@ -33,7 +33,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
       >
         <Menu.Items className="absolute right-0 top-12 w-48 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <Menu.Item>
-            <div className="px-4 t-3p text-ocf-black-600 text-right">
+            <div className="px-4 pt-2 text-ocf-black-600 text-right">
               <Tooltip tip={<ChartInfo />} position="left" className={"text-right"} fullWidth>
                 Data
               </Tooltip>

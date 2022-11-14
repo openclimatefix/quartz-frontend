@@ -23,8 +23,8 @@ export type ChartData = {
   GENERATION?: number;
   FORECAST?: number;
   PAST_FORECAST?: number;
-  // "4HR_FORECAST"?: number;
-  // "4HR_PAST_FORECAST"?: number;
+  "4HR_FORECAST"?: number;
+  "4HR_PAST_FORECAST"?: number;
   formatedDate: string; // "2022-05-16T15:00",
 };
 
@@ -32,17 +32,17 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live updated",
   GENERATION: "PV Live estimate",
   FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast"
-  // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
-  // "4HR_PAST_FORECAST": "OCF 4hr Forecast"
+  PAST_FORECAST: "OCF Forecast",
+  "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  "4HR_PAST_FORECAST": "OCF 4hr Forecast"
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
   FORECAST: yellow,
-  PAST_FORECAST: yellow
-  // "4HR_FORECAST": orange,
-  // "4HR_PAST_FORECAST": orange
+  PAST_FORECAST: yellow,
+  "4HR_FORECAST": orange,
+  "4HR_PAST_FORECAST": orange
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -95,6 +95,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
+  const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     const isSmallNumber = Number(x) < 10;
@@ -173,26 +174,30 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 ></CustomizedLabel>
               }
             />
-
-            {/* <Line
-              type="monotone"
-              dataKey="4HR_FORECAST"
-              dot={false}
-              strokeDasharray="5 5"
-              strokeDashoffset={3}
-              stroke={orange} // blue
-              strokeWidth={3}
-              hide={!visibleLines.includes("4HR_FORECAST")}
-            />
-            <Line
-              type="monotone"
-              dataKey="4HR_PAST_FORECAST"
-              dot={false}
-              // strokeDasharray="10 10"
-              stroke={orange} // blue
-              strokeWidth={3}
-              hide={!visibleLines.includes("4HR_PAST_FORECAST")}
-            /> */}
+            {show4hView && (
+              <>
+                <Line
+                  type="monotone"
+                  dataKey="4HR_FORECAST"
+                  dot={false}
+                  strokeDasharray="5 5"
+                  strokeDashoffset={3}
+                  stroke={orange} // blue
+                  strokeWidth={3}
+                  hide={!visibleLines.includes("4HR_FORECAST")}
+                />
+                ;
+                <Line
+                  type="monotone"
+                  dataKey="4HR_PAST_FORECAST"
+                  dot={false}
+                  // strokeDasharray="10 10"
+                  stroke={orange} // blue
+                  strokeWidth={3}
+                  hide={!visibleLines.includes("4HR_PAST_FORECAST")}
+                />
+              </>
+            )}
             <Line
               type="monotone"
               dataKey="GENERATION"

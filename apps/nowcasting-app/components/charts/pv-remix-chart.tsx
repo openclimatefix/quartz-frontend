@@ -45,6 +45,7 @@ const LegendItem: FC<{
 };
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+  const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -98,7 +99,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    // fourHourData: national4HourData,
+    fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
@@ -117,7 +118,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  // const fourHoursAgo = getRounded4HoursAgoString();
+  const fourHoursAgo = getRounded4HoursAgoString();
   // const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
@@ -154,7 +155,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
         )}
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
-        <div className="flex flex-row pb-3 overflow-x-auto">
+        <div className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto`}>
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
@@ -181,19 +182,21 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          {/* <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              dashed
-              label={`OCF ${fourHoursAgo} Forecast`}
-              dataKey={`4HR_FORECAST`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              label={"OCF 4hr Forecast"}
-              dataKey={`4HR_PAST_FORECAST`}
-            />
-          </div> */}
+          {show4hView && (
+            <div className={legendItemContainerClasses}>
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                dashed
+                label={`OCF ${fourHoursAgo} Forecast`}
+                dataKey={`4HR_FORECAST`}
+              />
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                label={"OCF 4hr Forecast"}
+                dataKey={`4HR_PAST_FORECAST`}
+              />
+            </div>
+          )}
         </div>
         <div className="flex-initial flex items-center pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
