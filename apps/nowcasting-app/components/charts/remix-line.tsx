@@ -16,6 +16,7 @@ import {
   getRounded4HoursAgoString
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
+import useGlobalState from "../helpers/globalState";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 export type ChartData = {
@@ -95,7 +96,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
-  const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+  // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+  const show4hView = useGlobalState("show4HourForecast");
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     const isSmallNumber = Number(x) < 10;

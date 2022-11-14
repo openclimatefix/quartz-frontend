@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData, ForecastValue } from "../../types";
-import { axiosFetcher, axiosFetcherAuth } from "../../helpers/utils";
+import { axiosFetcherAuth } from "../../helpers/utils";
 
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
@@ -47,7 +47,7 @@ const useGetGspData = (gspId: number) => {
   //     pv4HourError = dataResponse.error;
   //   }
   // }
-  // add pv4HourError here
+
   return {
     errors: [fcAllError, pvRealInDat, pvRealDayAfter].filter((e) => !!e),
     fcAll,

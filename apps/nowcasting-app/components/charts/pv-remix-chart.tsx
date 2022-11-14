@@ -45,7 +45,8 @@ const LegendItem: FC<{
 };
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
-  const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+  // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+  const show4hView = useGlobalState("show4HourForecast");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
