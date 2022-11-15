@@ -23,13 +23,14 @@ const GspPvRemixChart: FC<{
   resetTime: () => void;
   visibleLines: string[];
 }> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
-  const { errors, fcAll, pvRealDataAfter, pvRealDataIn, gsp4HourData } = useGetGspData(gspId);
+  // add gsp4HourData back in here when working on global state variable for show4hView
+  const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
   const chartData = useFormatChartData({
     forecastData: gspForecastData,
-    fourHourData: gsp4HourData,
+    // fourHourData: gsp4HourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime
