@@ -46,7 +46,7 @@ const LegendItem: FC<{
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
   // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
-  const show4hView = useGlobalState("show4HourForecast");
+  // const show4hView = useGlobalState("show4HourForecast");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -90,17 +90,17 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 
-  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+  // const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  //   `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+  //   axiosFetcherAuth,
+  //   {
+  //     refreshInterval: 60 * 1000 * 5 // 5min
+  //   }
+  // );
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    fourHourData: national4HourData,
+    // fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
@@ -183,7 +183,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          {show4hView && (
+          {/* {show4hView && (
             <div className={legendItemContainerClasses}>
               <LegendItem
                 iconClasses={"text-ocf-orange"}
@@ -197,7 +197,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
                 dataKey={`4HR_PAST_FORECAST`}
               />
             </div>
-          )}
+          )} */}
         </div>
         <div className="flex-initial flex items-center pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>

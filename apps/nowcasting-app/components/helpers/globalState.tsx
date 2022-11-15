@@ -29,7 +29,7 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   clickedGspId: undefined,
   forecastCreationTime: undefined,
   visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
-  show4HourForecast: true
+  show4HourForecast: undefined
 });
 
 export default useGlobalState;
