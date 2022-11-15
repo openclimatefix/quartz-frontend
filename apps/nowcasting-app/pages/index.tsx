@@ -20,14 +20,14 @@ export default function Home() {
         <Header view={view} setView={setView} />
         <div
           id="map-container"
-          className={`relative float-right h-full ${currentView(VIEWS.FORECAST) ? "" : "hidden"}`}
+          className={`relative float-right h-full ${currentView(VIEWS.FORECAST)}`}
           style={{ width: "56%" }}
         >
           <PvLatestMap />
         </div>
 
         <SideLayout>
-          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
+          <PvRemixChart className={`${currentView(VIEWS.FORECAST)}`} />
         </SideLayout>
       </div>
     </Layout>
