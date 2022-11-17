@@ -28,7 +28,7 @@ export default function Home() {
 
         <SideLayout>
           <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
-          <DeltaViewMainComponent className={currentView(VIEWS.DELTA) ? "" : "hidden"}/>
+          <DeltaViewMainComponent className={currentView(VIEWS.DELTA) ? "" : "hidden"} />
         </SideLayout>
       </div>
     </Layout>
