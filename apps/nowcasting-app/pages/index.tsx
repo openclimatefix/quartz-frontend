@@ -7,6 +7,7 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import React, { useState } from "react";
 import Header from "../components/layout/header";
 import { VIEWS } from "../constant";
+import DeltaViewMainComponent from "../components/charts/delta-view/delta-view-large-component";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -27,6 +28,7 @@ export default function Home() {
 
         <SideLayout>
           <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
+          <DeltaViewMainComponent className={currentView(VIEWS.DELTA) ? "" : "hidden"}/>
         </SideLayout>
       </div>
     </Layout>
