@@ -51,7 +51,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
       <Menu.Item>
         <a
           className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "")}
-          onClick={() => setViewFunc(view)}
+          // onClick={() => setViewFunc(view)}
         >
           {text}
         </a>

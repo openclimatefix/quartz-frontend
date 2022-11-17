@@ -25,6 +25,7 @@ const LegendItem: FC<{
 }> = ({ iconClasses, label, dashed, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
+  const [show4hView, setShow4hView] = useGlobalState("show4hView");
 
   const toggleLineVisibility = () => {
     if (isVisible) {
@@ -34,11 +35,22 @@ const LegendItem: FC<{
     }
   };
 
+  const toggle4HourForecastVisibility = () => {
+    if (show4hView === false) {
+      setShow4hView(true);
+    } else {
+      setShow4hView(false);
+    }
+  };
+
   return (
     <div className="flex items-center">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
       <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
         <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
+      </button>
+      <button className="text-left pl-1 max-w-full w-44" onClick={toggle4HourForecastVisibility}>
+        Toggle Four hour
       </button>
     </div>
   );
@@ -46,7 +58,7 @@ const LegendItem: FC<{
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
   // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
-  // const show4hView = useGlobalState("show4HourForecast");
+  const show4hView = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -90,24 +102,26 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 
-  // const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-  //   `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
+  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+    show4hView
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      : null,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    // fourHourData: national4HourData,
+    fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
   });
 
   // when commenting 4hour forecast back in, add pv4HourError to the list of errors to line 108 and "!national4HourData" to line 109
-  if (error || error2 || error3) return <div>failed to load</div>;
+  if (error || error2 || error3 || pv4HourError) return <div>failed to load</div>;
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
       <div className="h-full flex">
@@ -183,7 +197,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          {/* {show4hView && (
+          {show4hView && (
             <div className={legendItemContainerClasses}>
               <LegendItem
                 iconClasses={"text-ocf-orange"}
@@ -197,7 +211,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
                 dataKey={`4HR_PAST_FORECAST`}
               />
             </div>
-          )} */}
+          )}
         </div>
         <div className="flex-initial flex items-center pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>

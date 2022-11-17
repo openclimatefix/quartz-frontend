@@ -85,7 +85,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
           </div>
 
           <div className="w-full border-t border-gray-300" />
-
+          <Menu.Item></Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <div
