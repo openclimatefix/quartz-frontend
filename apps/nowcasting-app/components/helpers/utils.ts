@@ -119,3 +119,26 @@ export const axiosFetcher = (url: string) => {
     return res.data;
   });
 };
+
+// round it up to the 'yMax_levels' so that the y major ticks look right.
+export const getRoundedTickBoundary = (
+  yMax: number,
+  yMax_levels: number[],
+  positive: boolean = true
+) => {
+  for (let i = 0; i < yMax_levels.length; i++) {
+    let level = yMax_levels[i];
+    if (positive) {
+      yMax = yMax < level ? level : yMax;
+      if (yMax === level) {
+        break;
+      }
+    } else {
+      yMax = yMax > level ? level : yMax;
+      if (yMax === level) {
+        break;
+      }
+    }
+  }
+  return yMax;
+};

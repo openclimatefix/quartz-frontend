@@ -1,7 +1,7 @@
 import { FC } from "react";
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
-import { formatISODateString } from "../../helpers/utils";
+import { formatISODateString, getRoundedTickBoundary } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
 import useGlobalState from "../../helpers/globalState";
@@ -22,7 +22,17 @@ const GspPvRemixChart: FC<{
   timeNow: string;
   resetTime: () => void;
   visibleLines: string[];
-}> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
+  deltaView?: boolean;
+}> = ({
+  gspId,
+  selectedTime,
+  close,
+  setTimeOfInterest,
+  timeNow,
+  resetTime,
+  visibleLines,
+  deltaView = false
+}) => {
   //when adding 4hour forecast data back in, add gsp4HourData to list in line 27
   const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
@@ -33,7 +43,8 @@ const GspPvRemixChart: FC<{
     // fourHourData: gsp4HourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
-    timeTrigger: selectedTime
+    timeTrigger: selectedTime,
+    delta: deltaView
   });
   if (errors.length) {
     console.log(errors);
@@ -53,14 +64,7 @@ const GspPvRemixChart: FC<{
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
 
-  // lets round it up to the 'yMax_levels' so that the y major ticks look right.
-  for (var i = 0; i < yMax_levels.length; i++) {
-    var level = yMax_levels[i];
-    yMax = yMax < level ? level : yMax;
-    if (yMax === level) {
-      break;
-    }
-  }
+  yMax = getRoundedTickBoundary(yMax, yMax_levels);
 
   return (
     <>
@@ -90,6 +94,8 @@ const GspPvRemixChart: FC<{
           timeNow={timeNow}
           resetTime={resetTime}
           visibleLines={visibleLines}
+          deltaView={deltaView}
+          deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
         />
       </div>
     </>

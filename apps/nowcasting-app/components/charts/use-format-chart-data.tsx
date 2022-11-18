@@ -31,22 +31,32 @@ const getForecastChartData = (
       [pastKey]: fr.expectedPowerGenerationMegawatts
     };
 };
+const getDelta: (datum: ChartData) => number = (datum) => {
+  if (datum.PAST_FORECAST !== undefined) {
+    if (datum.GENERATION_UPDATED !== undefined) {
+      return Number(datum.PAST_FORECAST) - Number(datum.GENERATION_UPDATED);
+    } else if (datum.GENERATION !== undefined) {
+      return Number(datum.PAST_FORECAST) - Number(datum.GENERATION);
+    }
+  }
+  return 0;
+};
 const useFormatChartData = ({
   forecastData,
   fourHourData,
   pvRealDayAfterData,
   pvRealDayInData,
-  timeTrigger
+  timeTrigger,
+  delta = false
 }: {
   forecastData?: ForecastData;
   fourHourData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
+  delta?: boolean;
 }) => {
   const data = useMemo(() => {
-    console.log("forecastData", forecastData);
-    console.log("fourHourData", fourHourData);
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};
@@ -104,6 +114,13 @@ const useFormatChartData = ({
             (db) => getForecastChartData(timeNow, db, 240)
           )
         );
+      }
+      if (delta) {
+        for (const chartDatum in chartMap) {
+          if (typeof chartMap[chartDatum] === "object") {
+            chartMap[chartDatum].DELTA = getDelta(chartMap[chartDatum]);
+          }
+        }
       }
 
       return Object.values(chartMap);

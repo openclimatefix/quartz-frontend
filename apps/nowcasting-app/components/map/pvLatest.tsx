@@ -1,7 +1,6 @@
-import useSWR from "swr";
-import useSWRImmutable from "swr/immutable";
+import { SWRResponse } from "swr";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { Dispatch, SetStateAction, useMemo } from "react";
 import mapboxgl, { Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
@@ -10,7 +9,7 @@ import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
-import { axiosFetcherAuth, formatISODateString, formatISODateStringHuman } from "../helpers/utils";
+import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import { FcAllResData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
@@ -31,47 +30,21 @@ const getRoundedPvPercent = (per: number, round: boolean = true) => {
     else return (rounded - 1) / 10;
   } else return rounded / 10;
 };
-// Assuming first item in the array is the latest
-const latestForecastValue = 0;
-const useGetForecastsData = (isNormalized: boolean) => {
-  const [forecastLoading, setForecastLoading] = useState(true);
-  const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
-  const bareForecastData = useSWRImmutable<FcAllResData>(
-    () => getAllForecastUrl(false, false),
-    axiosFetcherAuth,
-    {
-      onSuccess: (data) => {
-        if (data.forecasts?.length) setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-        setForecastLoading(false);
-      }
-    }
-  );
 
-  const allForecastData = useSWR<FcAllResData>(
-    () => getAllForecastUrl(true, true),
-    axiosFetcherAuth,
-    {
-      refreshInterval: 1000 * 60 * 5, // 5min
-      isPaused: () => forecastLoading,
-      onSuccess: (data) => {
-        setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-      }
-    }
-  );
-  useEffect(() => {
-    if (!forecastLoading) {
-      allForecastData.mutate();
-    }
-  }, [forecastLoading]);
-
-  if (isNormalized) return allForecastData;
-  else return allForecastData.data ? allForecastData : bareForecastData;
+type PvLatestMapProps = {
+  getForecastsData: (isNormalized: boolean) => SWRResponse<FcAllResData, any>;
+  activeUnit: ActiveUnit;
+  setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
-const PvLatestMap = () => {
-  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
+const PvLatestMap: React.FC<PvLatestMapProps> = ({
+  getForecastsData,
+  activeUnit,
+  setActiveUnit
+}) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
+  const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
   let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
   if (activeUnit === ActiveUnit.percentage)
@@ -82,7 +55,7 @@ const PvLatestMap = () => {
     data: initForecastData,
     isValidating,
     error: forecastError
-  } = useGetForecastsData(isNormalized);
+  } = getForecastsData(isNormalized);
   const forecastLoading = false;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
