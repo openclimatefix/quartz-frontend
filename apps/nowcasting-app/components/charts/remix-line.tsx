@@ -187,7 +187,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   strokeWidth={3}
                   hide={!visibleLines.includes("4HR_FORECAST")}
                 />
-                ;
                 <Line
                   type="monotone"
                   dataKey="4HR_PAST_FORECAST"

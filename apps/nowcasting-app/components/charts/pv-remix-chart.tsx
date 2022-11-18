@@ -46,7 +46,6 @@ const LegendItem: FC<{
 };
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
-  // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -122,7 +121,6 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     setSelectedISOTime(time + ":00.000Z");
   };
   const fourHoursAgo = getRounded4HoursAgoString();
-  // const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>

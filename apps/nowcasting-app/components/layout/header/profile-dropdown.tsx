@@ -14,13 +14,6 @@ interface IProfileDropDown {}
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [show4hView, setShow4hView] = useGlobalState("show4hView");
-  const toggle4HourForecastVisibility = () => {
-    if (show4hView === false) {
-      setShow4hView(true);
-    } else {
-      setShow4hView(false);
-    }
-  };
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -101,10 +94,10 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 )}
               >
                 <button
-                  onClick={toggle4HourForecastVisibility}
+                  onClick={() => setShow4hView(!show4hView)}
                   className="ml-3 text-sx  font-medium text-ocf-black-300 dark:text-gray-300"
                 >
-                  {show4hView ? "Hide 4-hour forecast" : "Show 4-hour forecast"}
+                  {`${show4hView ? "Hide" : "Show"} 4-hour forecast`}
                 </button>
               </div>
             )}
