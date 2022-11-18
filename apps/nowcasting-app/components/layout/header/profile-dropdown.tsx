@@ -104,7 +104,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                   onClick={toggle4HourForecastVisibility}
                   className="ml-3 text-sm  font-medium text-ocf-black-300 dark:text-gray-300"
                 >
-                  {show4hView ? "Hide four-hour " : "Show Four Hour View"}
+                  {show4hView ? "Hide four-hour view" : "Show four-hour view"}
                 </button>
               </div>
             )}

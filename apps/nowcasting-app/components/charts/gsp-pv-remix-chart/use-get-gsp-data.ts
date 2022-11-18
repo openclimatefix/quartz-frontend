@@ -6,7 +6,7 @@ import { axiosFetcherAuth } from "../../helpers/utils";
 
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
-  const show4hView = useGlobalState("show4hView");
+  const [show4hView] = useGlobalState("show4hView");
   const { data: fcAll, error: fcAllError } = useSWR<FcAllResData>(
     getAllForecastUrl(true, true),
     axiosFetcherAuth,
