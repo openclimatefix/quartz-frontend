@@ -25,7 +25,7 @@ const LegendItem: FC<{
 }> = ({ iconClasses, label, dashed, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
-  const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const [show4hView] = useGlobalState("show4hView");
 
   const toggleLineVisibility = () => {
     if (isVisible) {
@@ -35,22 +35,11 @@ const LegendItem: FC<{
     }
   };
 
-  const toggle4HourForecastVisibility = () => {
-    if (show4hView === false) {
-      setShow4hView(true);
-    } else {
-      setShow4hView(false);
-    }
-  };
-
   return (
     <div className="flex items-center">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
       <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
         <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
-      </button>
-      <button className="text-left pl-1 max-w-full w-44" onClick={toggle4HourForecastVisibility}>
-        Toggle Four hour
       </button>
     </div>
   );
@@ -58,7 +47,7 @@ const LegendItem: FC<{
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
   // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
-  const show4hView = useGlobalState("show4hView");
+  const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -120,7 +109,6 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     timeTrigger: selectedTime
   });
 
-  // when commenting 4hour forecast back in, add pv4HourError to the list of errors to line 108 and "!national4HourData" to line 109
   if (error || error2 || error3 || pv4HourError) return <div>failed to load</div>;
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (

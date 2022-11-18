@@ -13,6 +13,14 @@ interface IProfileDropDown {}
 
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
+  const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const toggle4HourForecastVisibility = () => {
+    if (show4hView === false) {
+      setShow4hView(true);
+    } else {
+      setShow4hView(false);
+    }
+  };
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -83,9 +91,24 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
             <p className="text-xs text-ocf-black-300">Signed in as</p>
             <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
           </div>
-
           <div className="w-full border-t border-gray-300" />
-          <Menu.Item></Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <div
+                className={classNames(
+                  active ? "bg-gray-100" : "",
+                  "block px-4 py-2 text-sm text-gray-700"
+                )}
+              >
+                <button
+                  onClick={toggle4HourForecastVisibility}
+                  className="ml-3 text-sm  font-medium text-ocf-black-300 dark:text-gray-300"
+                >
+                  {show4hView ? "Hide four-hour " : "Show Four Hour View"}
+                </button>
+              </div>
+            )}
+          </Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <div

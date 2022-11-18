@@ -96,8 +96,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
-  // const show4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
-  const show4hView = useGlobalState("show4hView");
+  const [show4hView] = useGlobalState("show4hView");
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     const isSmallNumber = Number(x) < 10;

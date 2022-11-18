@@ -6,6 +6,7 @@ import { Menu } from "@headlessui/react";
 import { VIEWS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
+import useGlobalState from "../../helpers/globalState";
 
 type HeaderLinkProps = {
   url: string;
