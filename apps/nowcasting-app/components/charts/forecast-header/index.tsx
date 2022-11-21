@@ -10,13 +10,19 @@ import {
   MWtoGW
 } from "../../helpers/utils";
 import ForecastHeaderUI from "./ui";
+import DeltaForecastHeaderUI from "../delta-view/delta-header-ui";
 
 type ForecastHeaderProps = {
   pvLiveData: PvRealData;
   pvForecastData: ForecastData;
+  deltaview: boolean;
 };
 
-const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pvLiveData, pvForecastData }) => {
+const ForecastHeader: React.FC<ForecastHeaderProps> = ({
+  pvLiveData,
+  pvForecastData,
+  deltaview
+}) => {
   const timeNow = useTimeNow();
 
   // get the time for the OCF Forecast
@@ -45,6 +51,22 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({ pvLiveData, pvForecastD
     pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === pvForecastDatetime)
       ?.expectedPowerGenerationMegawatts || 0
   );
+
+  const calculatedDelta = -2.31;
+
+  if (deltaview === true) {
+    return (
+      <DeltaForecastHeaderUI
+        deltaValue={calculatedDelta}
+        forecastNextPV={nextPvForecastInGW}
+        actualPV={selectedPvActualInGW}
+        forecastPV={selectedPvForecastInGW}
+        selectedTimeOnly={convertISODateStringToLondonTime(pvForecastDatetime + ":00.000Z")}
+        pvTimeOnly={convertISODateStringToLondonTime(selectedPvActualDatetime)}
+        forecastNextTimeOnly={futurePVForecastDatetimeLabel}
+      ></DeltaForecastHeaderUI>
+    );
+  }
 
   return (
     <ForecastHeaderUI

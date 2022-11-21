@@ -125,11 +125,14 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   // const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
+    //Add in the Delta forecast header here
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
+          deltaview={true}
+          //figure out something where we can put deltaview{true}
         ></ForecastHeader>
 
         <div className="h-60 mt-4 mb-10">

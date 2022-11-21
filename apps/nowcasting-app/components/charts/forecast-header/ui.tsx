@@ -82,6 +82,7 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
     </div>
   );
 };
+
 type ForecastHeaderProps = {
   forecastNextPV: string;
   forecastPV: string;
