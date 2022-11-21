@@ -6,6 +6,7 @@ import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useState } from "react";
 import Header from "../components/layout/header";
+import ForecastHeader from "../components/charts/forecast-header";
 import DeltaViewComponent from "../components/charts/delta-view/delta-view-chart";
 import { getAllForecastUrl, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
@@ -64,7 +65,7 @@ export default function Home() {
         <Header view={view} setView={setView} />
         <div
           id="map-container"
-          className={`relative float-right h-full ${currentView(VIEWS.FORECAST) ? "" : "hidden"}`}
+          className={`relative float-right h-full ${currentView(VIEWS.FORECAST)}`}
           style={{ width: "56%" }}
         >
           <PvLatestMap

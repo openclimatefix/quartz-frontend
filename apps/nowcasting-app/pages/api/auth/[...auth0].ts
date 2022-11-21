@@ -31,7 +31,9 @@ export default withSentry(
         await handleLogin(req, res, {
           authorizationParams: {
             redirect_uri: redirectUri,
-            audience: "https://nowcasting-api-eu-auth0.com/" // TODO: Make this an env variable
+            audience: "https://nowcasting-api-eu-auth0.com/", // TODO: Make this an env variable,
+            scope: "openid profile email offline_access",
+            useRefreshTokens: true
           },
           returnTo: returnTo
         });

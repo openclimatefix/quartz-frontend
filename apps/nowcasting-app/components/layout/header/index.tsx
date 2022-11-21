@@ -6,6 +6,7 @@ import { Menu } from "@headlessui/react";
 import { VIEWS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
+import useGlobalState from "../../helpers/globalState";
 
 type HeaderLinkProps = {
   url: string;
@@ -51,7 +52,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
       <Menu.Item>
         <a
           className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "")}
-          onClick={() => setViewFunc(view)}
+          // onClick={() => setViewFunc(view)}
         >
           {text}
         </a>
