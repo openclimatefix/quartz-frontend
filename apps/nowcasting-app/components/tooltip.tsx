@@ -35,20 +35,19 @@ const Tooltip: React.FC<TooltipProps> = ({
   }
   return (
     <div
-      className={`relative flex flex-col z-50 group ${
-        fullWidth ? "w-full" : "w-fit items-center"
-      } ${className || ""}`}
+      className={`relative flex flex-col group ${fullWidth ? "w-full" : "w-fit items-center"} 
+      ${className || ""}`}
     >
       {position !== "top" && children}
       <div
-        className={`absolute flex flex-col items-center hidden mt-8 group-hover:flex ${containerPositionClass}`}
+        className={`absolute flex flex-col items-center hidden mt-6 group-hover:flex w-fit w-64 ${containerPositionClass}`}
       >
         <span
           className={`absolute ${tipPositionClass} w-auto mb-1 z-30 p-2 text-xs leading-none text-white whitespace-no-wrap bg-ocf-black shadow-lg`}
         >
           {tip}
         </span>
-        <div className="w-3 h-3 -mt-[6px] rotate-45 bg-ocf-black"></div>
+        <div className="w-3 h-5 -mt-[6px] rotate-45 bg-ocf-black hidden"></div>
       </div>
       {position === "top" && children}
     </div>

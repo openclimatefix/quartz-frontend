@@ -20,15 +20,15 @@ const getForecastChartData = (
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: Math.round(fr.expectedPowerGenerationMegawatts)
+      [futureKey]: fr.expectedPowerGenerationMegawatts
     };
   else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: Math.round(fr.expectedPowerGenerationMegawatts)
+      [futureKey]: fr.expectedPowerGenerationMegawatts
     };
   else
     return {
-      [pastKey]: Math.round(fr.expectedPowerGenerationMegawatts)
+      [pastKey]: fr.expectedPowerGenerationMegawatts
     };
 };
 const useFormatChartData = ({
@@ -45,8 +45,6 @@ const useFormatChartData = ({
   timeTrigger?: string;
 }) => {
   const data = useMemo(() => {
-    console.log("forecastData", forecastData);
-    console.log("fourHourData", fourHourData);
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};

@@ -23,7 +23,7 @@ const GspPvRemixChart: FC<{
   resetTime: () => void;
   visibleLines: string[];
 }> = ({ gspId, selectedTime, close, setTimeOfInterest, timeNow, resetTime, visibleLines }) => {
-  const { errors, gsp4HourData, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
+  const { errors, fcAll, pvRealDataAfter, pvRealDataIn, gsp4HourData } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
@@ -73,7 +73,8 @@ const GspPvRemixChart: FC<{
             {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
           </span>
           <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
-            /{gspInfo?.installedCapacityMw}
+            {" "}
+            / {gspInfo?.installedCapacityMw}
           </span>
           <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>

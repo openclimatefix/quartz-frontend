@@ -20,10 +20,10 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
       >
         {title}
       </div>
-      <div className="flex flex-row justify-between flex-[1] m-auto px-5">
-        <div className="lg:text-lg md:text-lg pr-5">
-          <span className="font-semibold text-med text-ocf-yellow-500">{mwpercent}</span>
-          <span className="text-xs text-ocf-gray-300"> %</span>
+      <div className="flex flex-row justify-between flex-initial m-auto px-6">
+        <div className="lg:text-lg md:text-lg pr-8">
+          <span className="font-semibold text-med text-ocf-yellow-500 pr-0.5">{mwpercent}</span>
+          <span className="text-xs text-ocf-gray-300">%</span>
         </div>
         <div>{children}</div>
       </div>
@@ -31,7 +31,7 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
       <button
         type="button"
         onClick={onClose}
-        className="font-bold items-center px-3 ml-2 text-2xl m text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-full"
+        className="font-bold items-center px-3 text-2xl border-l-2 border-mapbox-black-500 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-full"
       >
         <CloseButtonIcon />
       </button>

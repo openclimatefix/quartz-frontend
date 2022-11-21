@@ -10,7 +10,7 @@ import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
-import { formatISODateString, formatISODateStringHuman, axiosFetcherAuth } from "../helpers/utils";
+import { axiosFetcherAuth, formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import { FcAllResData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";

@@ -39,7 +39,7 @@ const MeasuringUnit = ({
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}
           disabled={isLoading}
           type="button"
-          className={`${buttonClasses} ${
+          className={`${buttonClasses} px-5 ${
             activeUnit === ActiveUnit.percentage
               ? "text-black bg-ocf-yellow"
               : "text-white bg-black border-r"
