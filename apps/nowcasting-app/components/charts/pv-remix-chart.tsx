@@ -126,6 +126,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
+          deltaview={false}
         ></ForecastHeader>
 
         <div className="h-60 mt-4 mb-10">

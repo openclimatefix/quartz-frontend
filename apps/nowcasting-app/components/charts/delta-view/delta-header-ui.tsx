@@ -5,14 +5,16 @@ import ForecastLabel from "../../national_forecast_labels";
 import useFormatChartData from "../use-format-chart-data";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-const purple = theme.extend.colors["ocf-delta"].DEFAULT;
+const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
+const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+
 const ForecastWithActualPV: React.FC<{
   forecast: string;
   pvUpdated: string;
   time: string;
   text: string;
   color?: string;
-}> = ({ forecast, pvUpdated, time, color = purple, text }) => {
+}> = ({ forecast, pvUpdated, time, color = yellow, text }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
       <div className="flex items-center -ml-[2px]">
@@ -21,7 +23,7 @@ const ForecastWithActualPV: React.FC<{
       <div>
         <p
           // className={`text-lg font-semibold leading-none text-center text-${color}`}
-          className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
+          className={`text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
           style={{ color: color }}
         >
           {forecast}
@@ -34,7 +36,6 @@ const ForecastWithActualPV: React.FC<{
 
 const FourHourForecast: React.FC<{
   pv: string;
-  tip: string;
   time: string;
   color?: string;
   text: string;
@@ -47,7 +48,7 @@ const FourHourForecast: React.FC<{
       <div>
         <p
           // className={`text-lg font-semibold leading-none text-center text-${color}`}
-          className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
+          className={`text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
           style={{ color: color }}
         >
           {pv}
@@ -72,12 +73,13 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
   forecastPV,
   actualPV,
-  children,
   selectedTimeOnly,
   pvTimeOnly,
   forecastNextTimeOnly,
   deltaValue
 }) => {
+  const deltacolor = Number(deltaValue) > 0 ? deltaPos : deltaNeg;
+  const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
       <div className="text-ocf-black lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
@@ -89,7 +91,6 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
             forecast={`${forecastPV}`}
             text={`latest forecast`}
             pv={`${actualPV}`}
-            tip={`PV Live / OCF Forecast`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
           />
@@ -98,19 +99,23 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <FourHourForecast
             pv={forecastNextPV}
             time={`${forecastNextTimeOnly}`}
-            text={`4-hour forecast`}
-            tip={`Next OCF Forecast`}
+            text={`4 hour forecast`}
             color="ocf-yellow"
           />
         </div>
       </div>
       {/* <div className="inline-flex h-full">{children}</div> */}
-
-      <div className="bg-ocf-delta-100 text-ocf-black px-10 pr-2 uppercase">
+      <div
+        className={`text-ocf-black items- text-left pt-2 pl-2 pr-10 uppercase bg-${deltacolor}`}
+        style={{ background: deltacolor }}
+      >
         <p>Delta</p>
-        <div className="flex">
-          <DownArrow />
-          <p>{deltaValue}GW</p>
+        <div className="flex items-center">
+          <div className="pr-2 pt-1">{svg}</div>
+          <p className={`text-xl font-semibold leading-none mt-0.5 text-center`}>
+            {deltaValue}
+            <span className="text-xs text-ocf-black font-normal"> GW</span>
+          </p>
         </div>
       </div>
     </div>
