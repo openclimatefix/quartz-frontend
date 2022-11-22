@@ -14,7 +14,7 @@ const ForecastWithActualPV: React.FC<{
   time: string;
   text: string;
   color?: string;
-}> = ({ forecast, pvUpdated, time, color = yellow, text }) => {
+}> = ({ forecast, color = yellow, text }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
       <div className="flex items-center -ml-[2px]">
@@ -39,7 +39,7 @@ const FourHourForecast: React.FC<{
   time: string;
   color?: string;
   text: string;
-}> = ({ pv, time, text, color = yellow }) => {
+}> = ({ pv, text, color = yellow }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
       <div className="flex items-center -ml-[2px]">
@@ -52,7 +52,7 @@ const FourHourForecast: React.FC<{
           style={{ color: color }}
         >
           {pv}
-          <span className="text-xs text-ocf-black font-normal"> GW</span>
+          <span className="text-xl text-ocf-black font-normal"> GW</span>
         </p>
       </div>
     </div>
@@ -73,7 +73,6 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
   forecastPV,
   actualPV,
-  selectedTimeOnly,
   pvTimeOnly,
   forecastNextTimeOnly,
   deltaValue
@@ -90,7 +89,7 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastWithActualPV
             forecast={`${forecastPV}`}
             text={`latest forecast`}
-            pv={`${actualPV}`}
+            pvUpdated={`${actualPV}`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
           />
