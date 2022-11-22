@@ -25,6 +25,7 @@ const LegendItem: FC<{
 }> = ({ iconClasses, label, dashed, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
+  const [show4hView] = useGlobalState("show4hView");
 
   const toggleLineVisibility = () => {
     if (isVisible) {
@@ -45,6 +46,7 @@ const LegendItem: FC<{
 };
 
 const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+  const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -89,7 +91,9 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   });
 
   const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+    show4hView
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      : null,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
@@ -98,14 +102,13 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    // fourHourData: national4HourData,
+    fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
   });
 
-  // when commenting 4hour forecast back in, add pv4HourError to the list of errors to line 108 and "!national4HourData" to line 109
-  if (error || error2 || error3) return <div>failed to load</div>;
+  if (error || error2 || error3 || pv4HourError) return <div>failed to load</div>;
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
       <div className="h-full flex">
@@ -117,8 +120,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  // const fourHoursAgo = getRounded4HoursAgoString();
-  // const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
+  const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
@@ -155,7 +157,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
         )}
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
-        <div className="flex flex-row pb-3 overflow-x-auto">
+        <div className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto`}>
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
@@ -182,19 +184,21 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          {/* <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              dashed
-              label={`OCF ${fourHoursAgo} Forecast`}
-              dataKey={`4HR_FORECAST`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              label={"OCF 4hr Forecast"}
-              dataKey={`4HR_PAST_FORECAST`}
-            />
-          </div> */}
+          {show4hView && (
+            <div className={legendItemContainerClasses}>
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                dashed
+                label={`OCF ${fourHoursAgo} Forecast`}
+                dataKey={`4HR_FORECAST`}
+              />
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                label={"OCF 4hr Forecast"}
+                dataKey={`4HR_PAST_FORECAST`}
+              />
+            </div>
+          )}
         </div>
         <div className="flex-initial flex items-center pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>

@@ -34,13 +34,13 @@ const GspPvRemixChart: FC<{
   deltaView = false
 }) => {
   //when adding 4hour forecast data back in, add gsp4HourData to list in line 27
-  const { errors, fcAll, pvRealDataAfter, pvRealDataIn } = useGetGspData(gspId);
+  const { errors, fcAll, pvRealDataAfter, pvRealDataIn, gsp4HourData } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
   const chartData = useFormatChartData({
     forecastData: gspForecastData,
-    // fourHourData: gsp4HourData,
+    fourHourData: gsp4HourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,

@@ -172,7 +172,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     <FailedStateMap error="Failed to load" />
   ) : forecastLoading ? (
     <LoadStateMap>
-      <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || " ")} />
+      <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
     </LoadStateMap>
   ) : (
     <Map
@@ -180,7 +180,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       updateData={{ newData: !!initForecastData, updateMapData }}
       controlOverlay={(map: { current?: mapboxgl.Map }) => (
         <>
-          <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || " ")} />
+          <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
           <MeasuringUnit
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
