@@ -162,9 +162,9 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
             deltaView={true}
           ></GspPvRemixChart>
         )}
-      </div>
-      <div>
-        <DeltaBuckets className={`text-2xl`} />
+        <div>
+          <DeltaBuckets className={`text-2xl`} />
+        </div>
       </div>
 
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
