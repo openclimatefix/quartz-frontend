@@ -49,10 +49,10 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   // Get the next OCF forecast for the last PV value time
   const selectedPvForecastInGW = MWtoGW(
     pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === pvForecastDatetime)
-      ?.expectedPowerGenerationMegawatts || 0
+      ?.expectedPowerGenerationMegawatts || 250
   );
 
-  const calculatedDelta = Number(nextPvForecastInGW) - Number(selectedPvForecastInGW);
+  const calculatedDelta = (Number(nextPvForecastInGW) - Number(selectedPvForecastInGW)).toFixed(2);
 
   if (deltaview) {
     return (

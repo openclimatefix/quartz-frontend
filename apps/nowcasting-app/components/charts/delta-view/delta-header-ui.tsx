@@ -52,7 +52,7 @@ const FourHourForecast: React.FC<{
           style={{ color: color }}
         >
           {pv}
-          <span className="text-xl text-ocf-black font-normal"> GW</span>
+          <span className="text-xs text-ocf-black font-normal"> GW</span>
         </p>
       </div>
     </div>
