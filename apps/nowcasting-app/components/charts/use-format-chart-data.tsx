@@ -34,9 +34,9 @@ const getForecastChartData = (
 const getDelta: (datum: ChartData) => number = (datum) => {
   if (datum.PAST_FORECAST !== undefined) {
     if (datum.GENERATION_UPDATED !== undefined) {
-      return Number(datum.PAST_FORECAST) - Number(datum.GENERATION_UPDATED);
+      return Number(datum.GENERATION_UPDATED) - Number(datum.PAST_FORECAST);
     } else if (datum.GENERATION !== undefined) {
-      return Number(datum.PAST_FORECAST) - Number(datum.GENERATION);
+      return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
     }
   }
   return 0;
