@@ -41,21 +41,21 @@ const DeltaBuckets: React.FC<DeltaBucketProps> = ({ className }) => {
       id: "-1",
       text: "-200",
       bucketColor: "bg-ocf-delta-400",
-      textColor: "ocf-black",
+      textColor: "ocf-white",
       quantity: 15
     },
     {
       id: "0",
       text: "+/- MW",
       bucketColor: "bg-ocf-delta-500",
-      textColor: "ocf-black",
+      textColor: "ocf-white",
       quantity: 321
     },
     {
       id: "1",
       text: "+200",
       bucketColor: "bg-ocf-delta-600",
-      textColor: "ocf-black",
+      textColor: "ocf-white",
       quantity: 17
     },
     {
