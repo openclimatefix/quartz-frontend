@@ -1,4 +1,4 @@
-import React, { Dispatch, FC, ReactElement, SetStateAction, useMemo } from "react";
+import { Dispatch, FC, ReactElement, SetStateAction, useMemo } from "react";
 import RemixLine from "../remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../../constant";
@@ -25,6 +25,7 @@ import {
 } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
+import DeltaBuckets from "./delta-buckets-ui";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -272,6 +273,9 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
             deltaView={true}
           ></GspPvRemixChart>
         )}
+        <div>
+          <DeltaBuckets className={`text-2xl`} />
+        </div>
         <div className="flex justify-between mx-3">
           <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />

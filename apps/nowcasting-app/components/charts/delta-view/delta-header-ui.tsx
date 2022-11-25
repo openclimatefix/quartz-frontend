@@ -52,7 +52,7 @@ const FourHourForecast: React.FC<{
           style={{ color: color }}
         >
           {pv}
-          <span className="text-xl text-ocf-black font-normal"> GW</span>
+          <span className="text-xs text-ocf-black font-normal"> GW</span>
         </p>
       </div>
     </div>
@@ -66,7 +66,7 @@ type ForecastHeaderProps = {
   selectedTimeOnly: string;
   pvTimeOnly: string;
   forecastNextTimeOnly: string;
-  deltaValue: number;
+  deltaValue: string;
 };
 
 const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
@@ -88,7 +88,7 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
         <div className="pr-8">
           <ForecastWithActualPV
             forecast={`${forecastPV}`}
-            text={`latest forecast`}
+            text={`Latest Forecast`}
             pvUpdated={`${actualPV}`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
@@ -98,7 +98,7 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <FourHourForecast
             pv={forecastNextPV}
             time={`${forecastNextTimeOnly}`}
-            text={`4 hour forecast`}
+            text={`4-hour forecast`}
             color="ocf-yellow"
           />
         </div>
