@@ -18,7 +18,9 @@ const ForecastWithActualPV: React.FC<{
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
       <div className="flex items-center -ml-[2px]">
-        <p className="text-xs text-ocf-black ml-0.5 uppercase w-10 tracking-wider">{text}</p>
+        <p className="text-2xs ml-0.5 uppercase leading-tight text-ocf-black w-10 tracking-wider">
+          {text}
+        </p>
       </div>
       <div>
         <p
@@ -43,7 +45,9 @@ const FourHourForecast: React.FC<{
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
       <div className="flex items-center -ml-[2px]">
-        <p className="text-xs ml-0.5 uppercase text-ocf-black w-14 tracking-wider">{text}</p>
+        <p className="text-2xs ml-0.5 uppercase leading-tight text-ocf-black w-14 tracking-wider">
+          {text}
+        </p>
       </div>
       <div>
         <p

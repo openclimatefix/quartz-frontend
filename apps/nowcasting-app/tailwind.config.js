@@ -48,6 +48,9 @@ module.exports = {
         mono: ["ui-monospace", ...defaultTheme.fontFamily.mono],
         serif: ["Source Code Pro", ...defaultTheme.fontFamily.serif]
       },
+      fontSize: {
+        "2xs": "0.625rem"
+      },
       colors: {
         amber: {
           DEFAULT: "#FFD053",
