@@ -52,7 +52,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       ?.expectedPowerGenerationMegawatts || 0
   );
 
-  const calculatedDelta = Number(nextPvForecastInGW) - Number(selectedPvForecastInGW);
+  const calculatedDelta = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed();
 
   if (deltaview) {
     return (
