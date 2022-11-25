@@ -17,7 +17,7 @@ const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
           "focus:outline-none border-t border-black h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20 "
         }
       >
-        <div className="relative h-full flex flex-col overflow-y-scroll">{children}</div>
+        <div className="min-h-full flex flex-col overflow-y-scroll">{children}</div>
       </div>
       <div className="absolute bottom-16 -right-5 h-10 mb-[3px]">
         <ExpandButton isOpen={isOpen} onClick={() => setIsOpen((o) => !o)} />

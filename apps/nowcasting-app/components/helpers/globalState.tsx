@@ -28,8 +28,10 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   timeNow: get30MinNow(),
   clickedGspId: undefined,
   forecastCreationTime: undefined,
-  visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
-  show4hView: false
+  visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST", "4HR_FORECAST"],
+  show4hView:
+    process.env.NODE_ENV === "development" ||
+    (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production")
 });
 
 export default useGlobalState;

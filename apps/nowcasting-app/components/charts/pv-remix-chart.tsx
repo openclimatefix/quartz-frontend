@@ -25,7 +25,6 @@ const LegendItem: FC<{
 }> = ({ iconClasses, label, dashed, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
-  const [show4hView] = useGlobalState("show4hView");
 
   const toggleLineVisibility = () => {
     if (isVisible) {

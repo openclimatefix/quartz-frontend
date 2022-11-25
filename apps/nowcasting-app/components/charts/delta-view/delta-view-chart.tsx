@@ -91,12 +91,14 @@ const GspDeltaColumn: FC<{
                 <span>{gspDelta.gspRegion}</span>
                 <small>{gspDelta.gspId}</small>
               </div>
-              <div className="flex flex-col">
-                <span>{Number(gspDelta.currentYield).toFixed(2)}</span>
-                <span>{Number(gspDelta.forecast).toFixed(2)}</span>
+              <div className="flex flex-col text-right">
+                <small>
+                  {Number(gspDelta.currentYield).toFixed(2)} /{" "}
+                  {Number(gspDelta.forecast).toFixed(2)} MW
+                </small>
                 <span>
                   {!negative && "+"}
-                  {Number(gspDelta.delta).toFixed(2)}
+                  {Number(gspDelta.delta).toFixed(2)} MW
                 </span>
               </div>
             </div>
@@ -107,6 +109,7 @@ const GspDeltaColumn: FC<{
 };
 
 const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+  const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -151,7 +154,9 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
   });
 
   const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`,
+    show4hView
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      : null,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
@@ -213,7 +218,7 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    // fourHourData: national4HourData,
+    fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime,
@@ -233,8 +238,7 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  // const fourHoursAgo = getRounded4HoursAgoString();
-  // const legendItemContainerClasses = "flex flex-initial xl:flex-col flex-row justify-between";
+  const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     //Add in the Delta forecast header here
@@ -281,7 +285,7 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
         </div>
       </div>
-      <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
+      <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
         <div className="flex flex-row pb-3 overflow-x-auto">
           <div className={legendItemContainerClasses}>
             <LegendItem
@@ -309,19 +313,21 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          {/* <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              dashed
-              label={`OCF ${fourHoursAgo} Forecast`}
-              dataKey={`4HR_FORECAST`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              label={"OCF 4hr Forecast"}
-              dataKey={`4HR_PAST_FORECAST`}
-            />
-          </div> */}
+          {show4hView && (
+            <div className={legendItemContainerClasses}>
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                dashed
+                label={`OCF ${fourHoursAgo} Forecast`}
+                dataKey={`4HR_FORECAST`}
+              />
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                label={"OCF 4hr Forecast"}
+                dataKey={`4HR_PAST_FORECAST`}
+              />
+            </div>
+          )}
         </div>
         <div className="flex-initial flex items-center pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>

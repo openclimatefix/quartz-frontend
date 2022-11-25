@@ -38,6 +38,8 @@ const getDelta: (datum: ChartData) => number = (datum) => {
     } else if (datum.GENERATION !== undefined) {
       return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
     }
+  } else if (datum.FORECAST !== undefined && datum["4HR_FORECAST"] !== undefined) {
+    return Number(datum.FORECAST) - Number(datum["4HR_FORECAST"]);
   }
   return 0;
 };
