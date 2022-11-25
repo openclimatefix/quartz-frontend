@@ -63,11 +63,7 @@ export default function Home() {
     <Layout>
       <div className="h-full relative pt-16">
         <Header view={view} setView={setView} />
-        <div
-          id="map-container"
-          className={`relative float-right h-full ${currentView(VIEWS.FORECAST)}`}
-          style={{ width: "56%" }}
-        >
+        <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
           <PvLatestMap
             getForecastsData={useGetForecastsData}
             activeUnit={activeUnit}

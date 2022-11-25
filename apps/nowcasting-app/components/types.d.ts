@@ -38,3 +38,47 @@ type PvRealData = {
   datetimeUtc: string;
   solarGenerationKw: number;
 }[];
+type GspEntity = {
+  label: string;
+  gspId: number;
+  gspName: string;
+  gspGroup: string;
+  regionName: string;
+  installedCapacityMw: number;
+  rmMode: boolean;
+};
+type GspRealData = GspEntity & {
+  gspYields: [
+    {
+      datetimeUtc: string;
+      solarGenerationKw: number;
+      regime: string;
+      gsp: GspEntity;
+    }
+  ];
+};
+type GspAllForecastData = {
+  forecasts: {
+    location: GspEntity;
+    model: {
+      name: string;
+      version: string;
+    };
+    forecastCreationTime: string;
+    historic: boolean;
+    forecastValues: ForecastValue[];
+    inputDataLastUpdated: {
+      gsp: string;
+      nwp: string;
+      pv: string;
+      satellite: string;
+    };
+  }[];
+};
+type GspDeltaValue = {
+  gspId: number;
+  gspRegion: string;
+  currentYield: number;
+  forecast: number;
+  delta: number;
+};

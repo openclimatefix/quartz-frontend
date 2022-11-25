@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import React, { Dispatch, FC, ReactElement, SetStateAction, useMemo } from "react";
 import RemixLine from "../remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../../constant";
@@ -16,7 +16,13 @@ import Spinner from "../../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { ForecastData, ForecastValue } from "../../types";
+import {
+  ForecastData,
+  ForecastValue,
+  GspAllForecastData,
+  GspDeltaValue,
+  GspRealData
+} from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 
@@ -47,7 +53,59 @@ const LegendItem: FC<{
   );
 };
 
-const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+const GspDeltaColumn: FC<{
+  gspDeltas: Map<number, GspDeltaValue>;
+  setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
+  negative?: boolean;
+}> = ({ gspDeltas, setClickedGspId, negative = false }) => {
+  if (!gspDeltas.size) return null;
+
+  const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
+    if (negative) {
+      return a.delta - b.delta;
+    } else {
+      return b.delta - a.delta;
+    }
+  };
+
+  return (
+    <div className={`flex flex-col flex-1 ${negative ? "pl-3 border-l" : "pr-3"}`}>
+      {Array.from(gspDeltas.values())
+        .sort(sortFunc)
+        .map((gspDelta) => {
+          if (negative && gspDelta.delta >= 0) {
+            return null;
+          }
+          if (!negative && gspDelta.delta <= 0) {
+            return null;
+          }
+
+          return (
+            <div
+              className="flex flex-row justify-between pb-1 mb-1 border-b border-white cursor-pointer"
+              key={`gspCol${gspDelta.gspId}`}
+              onClick={() => setClickedGspId(gspDelta.gspId)}
+            >
+              <div className="flex flex-col">
+                <span>{gspDelta.gspRegion}</span>
+                <small>{gspDelta.gspId}</small>
+              </div>
+              <div className="flex flex-col">
+                <span>{Number(gspDelta.currentYield).toFixed(2)}</span>
+                <span>{Number(gspDelta.forecast).toFixed(2)}</span>
+                <span>
+                  {!negative && "+"}
+                  {Number(gspDelta.delta).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+    </div>
+  );
+};
+
+const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -98,6 +156,59 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
+
+  const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
+  const { data: allGspPvData, error: allGspPvError } = useSWR<GspRealData[]>(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const currentYields =
+    allGspPvData?.map((datum) => {
+      const gspYield = datum.gspYields.find((yieldDatum, index) => {
+        return yieldDatum.datetimeUtc === `${selectedTime}:00+00:00`;
+      });
+      return {
+        gspId: datum.gspId,
+        gspRegion: datum.regionName,
+        yield: gspYield?.solarGenerationKw || 0
+      };
+    }) || [];
+
+  const gspDeltas = useMemo(() => {
+    let tempGspDeltas = new Map();
+
+    for (let i = 0; i < currentYields.length; i++) {
+      const currentYield = currentYields[i];
+      let gspForecastData = allGspForecastData?.forecasts[i];
+      if (gspForecastData?.location.gspId !== currentYield.gspId) {
+        gspForecastData = allGspForecastData?.forecasts.find((gspForecastDatum) => {
+          return gspForecastDatum.location.gspId === currentYield.gspId;
+        });
+      }
+      const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
+        return forecastValue.targetTime === `${selectedTime}:00+00:00`;
+      });
+      tempGspDeltas.set(currentYield.gspId, {
+        gspId: currentYield.gspId,
+        gspRegion: currentYield.gspRegion,
+        currentYield: currentYield.yield / 1000,
+        forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
+        delta:
+          currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)
+      });
+    }
+    return tempGspDeltas;
+  }, [allGspForecastData, allGspPvData, selectedTime]);
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
@@ -161,6 +272,10 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
             deltaView={true}
           ></GspPvRemixChart>
         )}
+        <div className="flex justify-between mx-3">
+          <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+          <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
+        </div>
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
         <div className="flex flex-row pb-3 overflow-x-auto">
@@ -214,4 +329,4 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   );
 };
 
-export default PvRemixChart;
+export default DeltaChart;
