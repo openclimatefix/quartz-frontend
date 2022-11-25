@@ -73,7 +73,7 @@ const DeltaBuckets: React.FC<DeltaBucketProps> = ({ className }) => {
   const [selected, setSelected] = useState([]);
 
   const selectedClass = ``;
-  const unselectedClass = "bg-opacity-50";
+  const unselectedClass = "opacity-40";
 
   //there needs to be some code here that gets how many GSPs are in a specific bucket
 
