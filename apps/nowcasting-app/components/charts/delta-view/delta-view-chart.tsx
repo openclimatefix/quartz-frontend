@@ -19,6 +19,7 @@ import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
 import { ForecastData, ForecastValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
+import DeltaBuckets from "./delta-buckets-ui";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -161,6 +162,9 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
             deltaView={true}
           ></GspPvRemixChart>
         )}
+        <div>
+          <DeltaBuckets className={`text-2xl`} />
+        </div>
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
         <div className="flex flex-row pb-3 overflow-x-auto">
