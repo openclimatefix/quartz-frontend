@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_PREFIX } from "../../constant";
+import { API_PREFIX, DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
@@ -141,4 +141,38 @@ export const getRoundedTickBoundary = (
     }
   }
   return yMax;
+};
+
+export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
+  const deltaBucketKeys = getDeltaBucketKeys();
+  let currentBucket = DELTA_BUCKET[deltaBucketKeys[0] as keyof typeof DELTA_BUCKET];
+  for (const bucketKey of deltaBucketKeys) {
+    // let nextBucket = DELTA_BUCKET[0];
+
+    let bucket = Number(DELTA_BUCKET[bucketKey as keyof typeof DELTA_BUCKET]);
+
+    // let currentBucketIndex = deltaBucketKeys.indexOf(bucketKey);
+    // let nextBucketIndex = currentBucketIndex + 1;
+    // let nextBucket = Number(
+    //   DELTA_BUCKET[deltaBucketKeys[nextBucketIndex] as keyof typeof DELTA_BUCKET]
+    // );
+    // console.log("currentBucketIndex", currentBucketIndex);
+    // console.log("bucket", bucketKey, bucket);
+    // console.log("bucket", bucket, "nextBucket", nextBucket);
+    // if (isNaN(Number(bucket))) continue;
+
+    if (delta < 0) {
+      if (delta <= bucket) {
+        return bucket as DELTA_BUCKET;
+      }
+    } else if (delta > 0) {
+      if (bucket < 0) continue;
+
+      if (delta >= bucket) {
+        // return bucket as DELTA_BUCKET;
+        currentBucket = bucket;
+      } else return currentBucket as DELTA_BUCKET;
+    }
+  }
+  return DELTA_BUCKET.ZERO;
 };

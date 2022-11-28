@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { get30MinNow } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
-import { formatISODateString } from "../helpers/utils";
+import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
+import { DELTA_BUCKET } from "../../constant";
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -69,15 +70,15 @@ const useFormatChartData = ({
         getPvdata: (dp: any) => Partial<ChartData>
       ) => {
         const pvData = getPvdata(dataPoint);
-        const formatedDate = getDatetimeUtc(dataPoint);
-        if (chartMap[formatedDate]) {
-          chartMap[formatedDate] = {
-            ...chartMap[formatedDate],
+        const formattedDate = getDatetimeUtc(dataPoint);
+        if (chartMap[formattedDate]) {
+          chartMap[formattedDate] = {
+            ...chartMap[formattedDate],
             ...pvData
           };
         } else {
-          chartMap[formatedDate] = {
-            formatedDate: formatISODateString(formatedDate),
+          chartMap[formattedDate] = {
+            formattedDate: formatISODateString(formattedDate),
             ...pvData
           };
         }
@@ -120,7 +121,9 @@ const useFormatChartData = ({
       if (delta) {
         for (const chartDatum in chartMap) {
           if (typeof chartMap[chartDatum] === "object") {
-            chartMap[chartDatum].DELTA = getDelta(chartMap[chartDatum]);
+            const delta = getDelta(chartMap[chartDatum]);
+            chartMap[chartDatum].DELTA = delta;
+            chartMap[chartDatum].DELTA_BUCKET = getDeltaBucket(delta);
           }
         }
       }

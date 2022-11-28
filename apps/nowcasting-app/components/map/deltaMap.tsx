@@ -38,7 +38,7 @@ type PvLatestMapProps = {
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
-const PvLatestMap: React.FC<PvLatestMapProps> = ({
+const DeltaMap: React.FC<PvLatestMapProps> = ({
   className,
   getForecastsData,
   activeUnit,
@@ -200,4 +200,4 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   );
 };
 
-export default PvLatestMap;
+export default DeltaMap;

@@ -1,3 +1,5 @@
+import { DELTA_BUCKET } from "../constant";
+
 export type FcAllResData = {
   type: "FeatureCollection";
   forecasts: {
@@ -81,4 +83,5 @@ type GspDeltaValue = {
   currentYield: number;
   forecast: number;
   delta: number;
+  deltaBucket: DELTA_BUCKET;
 };

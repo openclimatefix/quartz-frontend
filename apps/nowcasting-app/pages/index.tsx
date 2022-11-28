@@ -15,6 +15,7 @@ import { FcAllResData } from "../components/types";
 import { axiosFetcherAuth } from "../components/helpers/utils";
 import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
+import DeltaMap from "../components/map/deltaMap";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -65,6 +66,13 @@ export default function Home() {
         <Header view={view} setView={setView} />
         <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
           <PvLatestMap
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+            getForecastsData={useGetForecastsData}
+            activeUnit={activeUnit}
+            setActiveUnit={setActiveUnit}
+          />
+          <DeltaMap
+            className={currentView(VIEWS.DELTA) ? "" : "hidden"}
             getForecastsData={useGetForecastsData}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}

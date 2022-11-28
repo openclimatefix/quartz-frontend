@@ -1,19 +1,19 @@
-import { Dispatch, FC, ReactElement, SetStateAction, useMemo } from "react";
+import { Dispatch, FC, SetStateAction, useMemo } from "react";
 import RemixLine from "../remix-line";
 import useSWR from "swr";
-import { API_PREFIX } from "../../../constant";
+import { API_PREFIX, DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
-  getRounded4HoursAgoString,
+  axiosFetcherAuth,
   formatISODateString,
-  axiosFetcherAuth
+  getDeltaBucket,
+  getRounded4HoursAgoString
 } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
 import {
@@ -70,10 +70,13 @@ const GspDeltaColumn: FC<{
   };
 
   return (
-    <div className={`flex flex-col flex-1 ${negative ? "pl-3 border-l" : "pr-3"}`}>
+    <div className={`flex flex-col flex-1 mb-24 ${negative ? "pl-3 border-l" : "pr-3"}`}>
       {Array.from(gspDeltas.values())
         .sort(sortFunc)
-        .map((gspDelta) => {
+        .filter((gspDelta) => gspDelta.deltaBucket !== DELTA_BUCKET.ZERO)
+        .map((gspDelta, index) => {
+          if (index > 9) return null;
+
           if (negative && gspDelta.delta >= 0) {
             return null;
           }
@@ -89,7 +92,9 @@ const GspDeltaColumn: FC<{
             >
               <div className="flex flex-col">
                 <span>{gspDelta.gspRegion}</span>
-                <small>{gspDelta.gspId}</small>
+                <small>
+                  {gspDelta.gspId} • {gspDelta.deltaBucket}
+                </small>
               </div>
               <div className="flex flex-col text-right">
                 <small>
@@ -189,6 +194,8 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
         yield: gspYield?.solarGenerationKw || 0
       };
     }) || [];
+  console.log("allGspForecastData", allGspForecastData?.forecasts);
+  console.log("allGspPvData", allGspPvData);
 
   const gspDeltas = useMemo(() => {
     let tempGspDeltas = new Map();
@@ -204,13 +211,15 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
       const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
         return forecastValue.targetTime === `${selectedTime}:00+00:00`;
       });
+      const delta =
+        currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
       tempGspDeltas.set(currentYield.gspId, {
         gspId: currentYield.gspId,
         gspRegion: currentYield.gspRegion,
         currentYield: currentYield.yield / 1000,
         forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
-        delta:
-          currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)
+        delta,
+        deltaBucket: getDeltaBucket(delta)
       });
     }
     return tempGspDeltas;
