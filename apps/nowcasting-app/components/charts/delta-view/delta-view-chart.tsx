@@ -278,6 +278,7 @@ const GspDeltaColumn: FC<{
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
+  const [selectedBuckets] = useGlobalState("selectedBuckets");
   if (!gspDeltas.size) return null;
 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
@@ -295,6 +296,7 @@ const GspDeltaColumn: FC<{
       <div className={`flex flex-col flex-1 ${!negative ? "pl-3" : "pr-3 "}`}>
         {deltaArray.sort(sortFunc).map((gspDelta) => {
           let bucketColor = "border-ocf-delta-500";
+          let dataKey = "";
           if (negative && gspDelta.delta >= 0) {
             return null;
           }
@@ -303,30 +305,44 @@ const GspDeltaColumn: FC<{
           }
           if (-200 < gspDelta.delta && gspDelta.delta < -60) {
             bucketColor = "border-ocf-delta-100";
+            dataKey = "-4";
           } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
             bucketColor = "border-ocf-delta-200";
+            dataKey = "-3";
           } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
             bucketColor = "border-ocf-delta-300";
+            dataKey = "-2";
           } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
             bucketColor = "border-ocf-delta-400";
+            dataKey = "-1";
           } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
             bucketColor = "border-white border-opacity-40";
+            dataKey = "0";
           } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-600";
+            dataKey = "1";
           } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-700";
+            dataKey = "2";
           } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-800";
+            dataKey = "3";
           } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
             bucketColor = "border-ocf-delta-900";
+            dataKey = "4";
           }
 
+          const isSelected = selectedBuckets.includes(dataKey);
+
+          const selectedClasses = `flex flex-row justify-between pb-1 pl-1 pr-1 mb-1 border-b-8 ${
+            gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
+          } ${bucketColor} cursor-pointer`;
+          if (!isSelected) {
+            return null;
+          }
           return (
             <div
-              className={`flex flex-row justify-between pb-1 pl-1 pr-1 mb-1 border-b-8 ${
-                gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
-              }
-              ${bucketColor} cursor-pointer`}
+              className={selectedClasses}
               key={`gspCol${gspDelta.gspId}`}
               onClick={() => setClickedGspId(gspDelta.gspId)}
             >
@@ -523,7 +539,7 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex justify-between mx-3">
+        <div className="flex justify-between mb-5 mx-3">
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
           <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
         </div>
