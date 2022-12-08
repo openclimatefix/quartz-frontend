@@ -118,11 +118,11 @@ const BucketItem: React.FC<{
 const DeltaBuckets: React.FC<{
   gspDeltas: Map<number, GspDeltaValue>;
   bucketSelection: string[];
-  setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
+  setClickedGspId?: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
-  lowerBound: number;
-  upperBound: number;
-}> = ({ gspDeltas, lowerBound, upperBound, negative = false }) => {
+  lowerBound?: number;
+  upperBound?: number;
+}> = ({ gspDeltas, negative = false }) => {
   // calculate array length here
   if (!gspDeltas.size) return null;
 
@@ -521,11 +521,7 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
           ></GspPvRemixChart>
         )}
         <div>
-          <DeltaBuckets
-            className={`text-2xl`}
-            bucketSelection={selectedBuckets}
-            gspDeltas={gspDeltas}
-          />
+          <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
         <div className="flex justify-between mx-3">
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
