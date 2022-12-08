@@ -1,115 +1,251 @@
-import React from "react";
-import { useState } from "react";
-import { theme } from "../../../tailwind.config";
+// import React from "react";
+// import { useState, FC, ReactElement, Dispatch, SetStateAction} from "react";
+// import { theme } from "../../../tailwind.config";
+// import useGlobalState from "../../helpers/globalState";
+// import { GspDeltaValue } from "../../types"
+// import { Dispatch, FC, ReactElement, SetStateAction, useMemo, useState } from "react";
 
-type DeltaBucketProps = {
-  className?: string;
-};
+// type DeltaBucketProps = {
+//   className?: string;
+//   bucketSelection?: string[];
+//   bucketRange: string[]
+// };
 
-type Bucket = {
-  id: string;
-  quantity: number;
-  text: string;
-  bucketColor: string;
-  textColor?: string;
-};
+// type Bucket = {
+//   dataKey: string;
+//   quantity: number;
+//   text: string;
+//   bucketColor: string;
+//   lowerBound: number;
+//   upperBound: number;
+//   increment: number;
+//   textColor?: string;
+//   gspDeltas?: Map<number, GspDeltaValue>;
+//   setClickedGspId?: Dispatch<SetStateAction<number | undefined>>;
+// };
 
-const DeltaBuckets: React.FC<DeltaBucketProps> = ({ className }) => {
-  const bucketValues: Bucket[] = [
-    {
-      id: "-4",
-      text: "-500",
-      bucketColor: "bg-ocf-delta-100",
-      textColor: "ocf-black",
-      quantity: 85
-    },
-    {
-      id: "-3",
-      text: "-400",
-      bucketColor: "bg-ocf-delta-200",
-      textColor: "ocf-black",
-      quantity: 32
-    },
-    {
-      id: "-2",
-      text: "-300",
-      bucketColor: "bg-ocf-delta-300",
-      textColor: "ocf-black",
-      quantity: 67
-    },
-    {
-      id: "-1",
-      text: "-200",
-      bucketColor: "bg-ocf-delta-400",
-      textColor: "ocf-white",
-      quantity: 15
-    },
-    {
-      id: "0",
-      text: "+/- MW",
-      bucketColor: "bg-ocf-delta-500",
-      textColor: "ocf-white",
-      quantity: 321
-    },
-    {
-      id: "1",
-      text: "+200",
-      bucketColor: "bg-ocf-delta-600",
-      textColor: "ocf-white",
-      quantity: 17
-    },
-    {
-      id: "2",
-      text: "+300",
-      bucketColor: "bg-ocf-delta-700",
-      textColor: "ocf-black",
-      quantity: 35
-    },
-    { id: "3", text: "+400", bucketColor: "bg-ocf-delta-800", textColor: "ocf-black", quantity: 5 },
-    { id: "4", text: "+500", bucketColor: "bg-ocf-delta-900", textColor: "ocf-black", quantity: 27 }
-  ];
+// export const BucketItem: React.FC<Bucket> = ({
+//   dataKey,
+//   quantity,
+//   text,
+//   lowerBound,
+//   upperBound,
+//   increment,
+//   bucketColor,
+//   textColor,
+//   gspDeltas,
+//   setClickedGspId
+// }) => {
+//   const selectedClass = ``;
+//   const unselectedClass = "opacity-40";
+//   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
+//   const [bucketRange, setBucketRange] = useState({})
+//   const isSelected = selectedBuckets.includes(dataKey);
 
-  const [isActive, setIsActive] = useState(true);
-  const [selected, setSelected] = useState([]);
+//   const toggleBucketSelection = () => {
+//     if (isSelected) {
+//       setSelectedBuckets(selectedBuckets.filter((bucket) => bucket !== dataKey));
+//       // setSelectedDeltas(selectedDeltas).filter((list)=> list !== deltaGroup)
+//     } else {
+//       setSelectedBuckets([...selectedBuckets, dataKey]);
+//     const createRange = (from = lowerBound, to = upperBound, step = increment) => {
+//     const rangeArray = [...Array(Math.floor((to - from) / step) + step)].map((_, i) => from + i * step)
+//     setBucketRange(rangeArray);
+//     return bucketRange
+//   }
+//     createRange(lowerBound, upperBound, increment)
+//     console.log(bucketRange)
+//     console.log(selectedBuckets);
+//     };
+//   }
 
-  const selectedClass = ``;
-  const unselectedClass = "opacity-40";
+//   const deltaArray = Array.from(gspDeltas.values())
 
-  //there needs to be some code here that gets how many GSPs are in a specific bucket
+//   return (
+//     <>
+//         <div
+//           className={`text-${textColor} justify-between flex flex-1
+//             flex-col items-center rounded`}
+//         >
+//           <button
+//             className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${
+//               isSelected ? selectedClass : unselectedClass
+//             } ${dataKey === "0" && "border-2 border-ocf-gray-800"}`}
+//           onClick={toggleBucketSelection}
+//           >
+//             <span className="text-2xl font-semibold">{quantity}</span>
+//             <span className="flex text-xs pb-2">{text}</span>
+//           </button>
+//         </div>
+//     </>
+//   );
+// };
 
-  //bucket knows if it's selected or not
+// //there needs to be some code here that gets how many GSPs are in a specific bucket
 
-  //we have an array and need to filter the array for the different values that return an array of x length.whatever that length is will be the number on the button
+// //we have an array and need to filter the array for the different values that return an array of x length.whatever that length is will be the number on the button
 
-  //should set up global state similar to selecting and deselecting the lines on the chart
+// const DeltaBuckets: React.FC<DeltaBucketProps> = ({ className, bucketSelection, bucketRange }) => {
+//   return (
+//     <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
+//       <BucketItem
+//         dataKey={"-4"}
+//         text={"-80"}
+//         bucketColor={"bg-ocf-delta-100"}
+//         textColor={"ocf-black"}
+//         quantity={22}
+//         lowerBound={-80}
+//         upperBound={-60}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"-3"}
+//         text={"-60"}
+//         bucketColor={"bg-ocf-delta-200"}
+//         textColor={"ocf-black"}
+//         quantity={26}
+//         lowerBound={-59}
+//         upperBound={-40}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"-2"}
+//         text={"-40"}
+//         bucketColor={"bg-ocf-delta-300"}
+//         textColor={"ocf-black"}
+//         quantity={35}
+//         lowerBound={-39}
+//         upperBound={-20}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"-1"}
+//         text={"-20"}
+//         bucketColor={"bg-ocf-delta-400"}
+//         textColor={"ocf-white"}
+//         quantity={52}
+//         lowerBound={-19}
+//         upperBound={-1}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"0"}
+//         text={"+/- MW"}
+//         bucketColor={"bg-ocf-delta-500"}
+//         textColor={"ocf-white"}
+//         quantity={321}
+//         lowerBound={-1}
+//         upperBound={1}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"1"}
+//         text={"+20"}
+//         bucketColor={"bg-ocf-delta-600"}
+//         textColor={"ocf-white"}
+//         quantity={17}
+//         lowerBound={2}
+//         upperBound={20}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"2"}
+//         text={"+40"}
+//         bucketColor={"bg-ocf-delta-700"}
+//         textColor={"ocf-black"}
+//         quantity={35}
+//         lowerBound={21}
+//         upperBound={39}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"3"}
+//         text={"+60"}
+//         bucketColor={"bg-ocf-delta-800"}
+//         textColor={"ocf-black"}
+//         quantity={5}
+//         lowerBound={40}
+//         upperBound={59}
+//         increment={1}
+//       ></BucketItem>
+//       <BucketItem
+//         dataKey={"4"}
+//         text={"+80"}
+//         bucketColor={"bg-ocf-delta-900"}
+//         textColor={"ocf-black"}
+//         quantity={27}
+//         lowerBound={60}
+//         upperBound={80}
+//         increment={1}
+//       ></BucketItem>
+//     </div>
+//   );
+// };
 
-  //there needs to be some style changes when a button is clicked (could do a darker color or a border)
+// export default DeltaBuckets;
 
-  return (
-    <>
-      <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
-        {bucketValues.map((bucket) => (
-          <div
-            key={bucket.text}
-            className={`text-${bucket.textColor} justify-between flex flex-1
-            flex-col items-center rounded`}
-          >
-            <button
-              className={`flex flex-col flex-1 w-full items-center p-1 pt-3 rounded-md justify-center ${
-                bucket.bucketColor
-              } ${isActive ? selectedClass : unselectedClass} ${
-                bucket.id === "0" && "border-2 border-ocf-gray-800"
-              }`}
-              onClick={() => setIsActive(!isActive)}
-            >
-              <span className="text-2xl font-semibold">{bucket.quantity}</span>
-              <span className="flex text-xs pb-2">{bucket.text}</span>
-            </button>
-          </div>
-        ))}
-      </div>
-    </>
-  );
-};
-
-export default DeltaBuckets;
+// // const bucketValues: Bucket[] = [
+// //     {
+// //       dataKey: "-4",
+// //       text: "-80",
+// //       bucketColor: "bg-ocf-delta-100",
+// //       textColor: "ocf-black",
+// //       quantity: 22
+// //     },
+// //     {
+// //       dataKey: "-3",
+// //       text: "-60",
+// //       bucketColor: "bg-ocf-delta-200",
+// //       textColor: "ocf-black",
+// //       quantity: 26
+// //     },
+// //     {
+// //       dataKey: "-2",
+// //       text: "-40",
+// //       bucketColor: "bg-ocf-delta-300",
+// //       textColor: "ocf-black",
+// //       quantity: 35
+// //     },
+// //     {
+// //       dataKey: "-1",
+// //       text: "-20",
+// //       bucketColor: "bg-ocf-delta-400",
+// //       textColor: "ocf-white",
+// //       quantity: 52
+// //     },
+// //     {
+// //       dataKey: "0",
+// //       text: "+/- MW",
+// //       bucketColor: "bg-ocf-delta-500",
+// //       textColor: "ocf-white",
+// //       quantity: 321
+// //     },
+// //     {
+// //       dataKey: "1",
+// //       text: "+20",
+// //       bucketColor: "bg-ocf-delta-600",
+// //       textColor: "ocf-white",
+// //       quantity: 17
+// //     },
+// //     {
+// //       dataKey: "2",
+// //       text: "+40",
+// //       bucketColor: "bg-ocf-delta-700",
+// //       textColor: "ocf-black",
+// //       quantity: 35
+// //     },
+// //     {
+// //       dataKey: "3",
+// //       text: "+60",
+// //       bucketColor: "bg-ocf-delta-800",
+// //       textColor: "ocf-black",
+// //       quantity: 5
+// //     },
+// //     {
+// //       dataKey: "4",
+// //       text: "+80",
+// //       bucketColor: "bg-ocf-delta-900",
+// //       textColor: "ocf-black",
+// //       quantity: 27
+// //     }
+// //   ];

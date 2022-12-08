@@ -3,17 +3,26 @@ import { theme } from "../../../tailwind.config";
 import { UpArrow, DownArrow } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
 import useFormatChartData from "../use-format-chart-data";
+import { CloseButtonIcon } from "../../icons/icons";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
-const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+const delta100 = theme.extend.colors["ocf-delta"]["100"];
+const delta200 = theme.extend.colors["ocf-delta"]["200"];
+const delta300 = theme.extend.colors["ocf-delta"]["300"];
+const delta400 = theme.extend.colors["ocf-delta"]["400"];
+const delta500 = theme.extend.colors["ocf-delta"]["500"];
+const delta600 = theme.extend.colors["ocf-delta"]["600"];
+const delta700 = theme.extend.colors["ocf-delta"]["700"];
+const delta800 = theme.extend.colors["ocf-delta"]["800"];
+const delta900 = theme.extend.colors["ocf-delta"]["900"];
 
-const ForecastWithActualPV: React.FC<{
+const GSPForecastWithActualPV: React.FC<{
   forecast: string;
   pvUpdated: string;
   time: string;
   text: string;
   color?: string;
+  onClose?: () => void;
 }> = ({ forecast, color = yellow, text }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
@@ -29,7 +38,7 @@ const ForecastWithActualPV: React.FC<{
           style={{ color: color }}
         >
           {forecast}
-          <span className="text-xs text-ocf-black font-normal"> GW</span>
+          <span className="text-xs text-ocf-black font-normal"> MW</span>
         </p>
       </div>
     </div>
@@ -56,7 +65,7 @@ const FourHourForecast: React.FC<{
           style={{ color: color }}
         >
           {pv}
-          <span className="text-xs text-ocf-black font-normal"> GW</span>
+          <span className="text-xs text-ocf-black font-normal"> MW</span>
         </p>
       </div>
     </div>
@@ -71,26 +80,57 @@ type ForecastHeaderProps = {
   pvTimeOnly: string;
   forecastNextTimeOnly: string;
   deltaValue: string;
+  timeNow: string;
+  title: string;
+  onClose?: () => void;
 };
 
-const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
+const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
   forecastPV,
+  title,
+  timeNow,
   actualPV,
   pvTimeOnly,
   forecastNextTimeOnly,
-  deltaValue
+  deltaValue,
+  onClose
 }) => {
-  const deltacolor = Number(deltaValue) > 0 ? deltaPos : deltaNeg;
+  // const deltacolor = delta200
+
+  let deltacolor = `delta100`;
+  if (Number(deltaValue) < -60) {
+    deltacolor = `ocf-delta-100`;
+  } else if (-60 <= Number(deltaValue) && Number(deltaValue) < -40) {
+    deltacolor = `ocf-delta-200`;
+  } else if (-40 <= Number(deltaValue) && Number(deltaValue) < -20) {
+    deltacolor = `ocf-delta-300`;
+  } else if (-20 <= Number(deltaValue) && Number(deltaValue) < -2) {
+    deltacolor = `ocf-delta-400`;
+  } else if (-2 <= Number(deltaValue) && Number(deltaValue) < 2) {
+    deltacolor = `ocf-black-800`;
+  } else if (2 <= Number(deltaValue) && Number(deltaValue) < 20) {
+    deltacolor = `ocf-delta-600`;
+  } else if (20 <= Number(deltaValue) && Number(deltaValue) < 40) {
+    deltacolor = `ocf-delta-700`;
+  } else if (40 <= Number(deltaValue) && Number(deltaValue) < 60) {
+    deltacolor = `ocf-delta-800`;
+  } else if (60 <= Number(deltaValue) && Number(deltaValue) < 200) {
+    deltacolor = `ocf-delta-900`;
+  }
+
+  // (Number(deltaValue) > 0 ? deltaPos : deltaNeg;
+  //add color gradient here
   const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
+  const noDelta = Number(deltaValue) === 0;
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
       <div className="text-ocf-black lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
-        National
+        {title}
       </div>
       <div className="flex justify-between flex-2 my-2 px-6 pb-2">
         <div className="pr-8">
-          <ForecastWithActualPV
+          <GSPForecastWithActualPV
             forecast={`${forecastPV}`}
             text={`Latest Forecast`}
             pvUpdated={`${actualPV}`}
@@ -107,22 +147,28 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           />
         </div>
       </div>
-      {/* <div className="inline-flex h-full">{children}</div> */}
       <div
         className={`text-ocf-black items- text-left pt-2 pl-2 pr-10 uppercase bg-${deltacolor}`}
         style={{ background: deltacolor }}
       >
         <p>Delta</p>
         <div className="flex items-center">
-          <div className="pr-2 pt-1">{svg}</div>
+          <div className="pr-2 pt-1"> {noDelta ? "" : svg}</div>
           <p className={`text-xl font-semibold leading-none mt-0.5 text-center`}>
             {deltaValue}
-            <span className="text-xs text-ocf-black font-normal"> GW</span>
+            <span className="text-xs text-ocf-black font-normal"> MW</span>
           </p>
         </div>
       </div>
+      <button
+        type="button"
+        onClick={onClose}
+        className="font-bold items-center p-5 text-2xl border-l-2 border-mapbox-black-500 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-full"
+      >
+        <CloseButtonIcon />
+      </button>
     </div>
   );
 };
 
-export default DeltaForecastHeaderUI;
+export default GSPDeltaForecastHeader;

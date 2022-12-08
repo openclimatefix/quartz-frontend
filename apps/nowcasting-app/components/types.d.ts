@@ -81,4 +81,6 @@ type GspDeltaValue = {
   currentYield: number;
   forecast: number;
   delta: number;
+  deltaColor: string;
+  dataKey: string;
 };

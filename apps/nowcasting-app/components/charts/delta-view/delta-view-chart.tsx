@@ -1,4 +1,4 @@
-import { Dispatch, FC, ReactElement, SetStateAction, useMemo } from "react";
+import { Dispatch, FC, ReactElement, SetStateAction, useMemo, useState } from "react";
 import RemixLine from "../remix-line";
 import useSWR from "swr";
 import { API_PREFIX } from "../../../constant";
@@ -25,7 +25,25 @@ import {
 } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
-import DeltaBuckets from "./delta-buckets-ui";
+import { theme } from "../../../tailwind.config";
+
+type DeltaBucketProps = {
+  className?: string;
+  bucketSelection?: string[];
+  gspDeltas?: Map<number, GspDeltaValue>;
+};
+
+type Bucket = {
+  dataKey: string;
+  quantity: number;
+  text: string;
+  bucketColor: string;
+  lowerBound: number;
+  upperBound: number;
+  increment: number;
+  textColor?: string;
+  gspDeltas?: Map<number, GspDeltaValue>;
+};
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -54,6 +72,207 @@ const LegendItem: FC<{
   );
 };
 
+const BucketItem: React.FC<{
+  dataKey: string;
+  quantity: number;
+  text: string;
+  bucketColor: string;
+  lowerBound: number;
+  upperBound: number;
+  increment: number;
+  textColor?: string;
+}> = ({ dataKey, quantity, text, bucketColor, textColor, lowerBound, upperBound }) => {
+  const selectedClass = ``;
+  const unselectedClass = "opacity-40";
+  const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
+  const isSelected = selectedBuckets.includes(dataKey);
+  const toggleBucketSelection = () => {
+    if (isSelected) {
+      setSelectedBuckets(selectedBuckets.filter((bucket) => bucket !== dataKey));
+      // setSelectedDeltas(selectedDeltas).filter((list)=> list !== deltaGroup)
+    } else {
+      setSelectedBuckets([...selectedBuckets, dataKey]);
+    }
+  };
+
+  return (
+    <>
+      <div
+        className={`text-${textColor} justify-between flex flex-1
+            flex-col items-center rounded`}
+      >
+        <button
+          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${
+            isSelected ? selectedClass : unselectedClass
+          } ${dataKey === "0" && "border-2 border-ocf-gray-800"}`}
+          onClick={toggleBucketSelection}
+        >
+          <span className="text-2xl font-semibold">{quantity}</span>
+          <span className="flex text-xs pb-2">{text}</span>
+        </button>
+      </div>
+    </>
+  );
+};
+
+const DeltaBuckets: React.FC<{
+  gspDeltas: Map<number, GspDeltaValue>;
+  bucketSelection: string[];
+  setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
+  negative?: boolean;
+  lowerBound: number;
+  upperBound: number;
+}> = ({ gspDeltas, lowerBound, upperBound, negative = false }) => {
+  // calculate array length here
+  if (!gspDeltas.size) return null;
+
+  const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
+    if (negative) {
+      return a.delta - b.delta;
+    } else {
+      return b.delta - a.delta;
+    }
+  };
+
+  const deltaArray = Array.from(gspDeltas.values());
+  // const deltaArray = Array.from(gspDeltas.values())
+  // console.log(deltaArray)
+  // const numberInBucket = deltaArray.filter((number) => {
+  //   return number.delta > lowerBound && number.delta < upperBound
+
+  const negativeEighty = deltaArray.filter((number) => {
+    return number.delta > -200 && number.delta < -60;
+  });
+
+  const negativeSixty = deltaArray.filter((number) => {
+    return number.delta > -59 && number.delta < -40;
+  });
+
+  const negativeForty = deltaArray.filter((number) => {
+    return number.delta > -39 && number.delta < -20;
+  });
+
+  const negativeTwenty = deltaArray.filter((number) => {
+    return number.delta > -19 && number.delta < -2;
+  });
+
+  const minimalDelta = deltaArray.filter((number) => {
+    return number.delta > -2 && number.delta <= 2;
+  });
+
+  const positiveTwenty = deltaArray.filter((number) => {
+    return number.delta > 2 && number.delta <= 20;
+  });
+
+  const positiveForty = deltaArray.filter((number) => {
+    return number.delta > 20 && number.delta <= 40;
+  });
+
+  const positiveSixty = deltaArray.filter((number) => {
+    return number.delta > 40 && number.delta <= 60;
+  });
+
+  const positiveEighty = deltaArray.filter((number) => {
+    return number.delta > 60 && number.delta <= 100;
+  });
+  return (
+    <>
+      <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
+        <BucketItem
+          dataKey={"-4"}
+          text={"-80"}
+          bucketColor={"bg-ocf-delta-100"}
+          textColor={"ocf-black"}
+          quantity={negativeEighty.length}
+          lowerBound={-59}
+          upperBound={-40}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"-3"}
+          text={"-60"}
+          bucketColor={"bg-ocf-delta-200"}
+          textColor={"ocf-black"}
+          quantity={negativeSixty.length}
+          lowerBound={-59}
+          upperBound={-40}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"-2"}
+          text={"-40"}
+          bucketColor={"bg-ocf-delta-300"}
+          textColor={"ocf-black"}
+          quantity={negativeForty.length}
+          lowerBound={-39}
+          upperBound={-20}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"-1"}
+          text={"-20"}
+          bucketColor={"bg-ocf-delta-400"}
+          textColor={"ocf-white"}
+          quantity={negativeTwenty.length}
+          lowerBound={-19}
+          upperBound={-1}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"0"}
+          text={"+/- MW"}
+          bucketColor={"bg-ocf-delta-500"}
+          textColor={"ocf-white"}
+          quantity={minimalDelta.length}
+          lowerBound={-1}
+          upperBound={1}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"1"}
+          text={"+20"}
+          bucketColor={"bg-ocf-delta-600"}
+          textColor={"ocf-white"}
+          quantity={positiveTwenty.length}
+          lowerBound={2}
+          upperBound={20}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"2"}
+          text={"+40"}
+          bucketColor={"bg-ocf-delta-700"}
+          textColor={"ocf-black"}
+          quantity={positiveForty.length}
+          lowerBound={21}
+          upperBound={39}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"3"}
+          text={"+60"}
+          bucketColor={"bg-ocf-delta-800"}
+          textColor={"ocf-black"}
+          quantity={positiveSixty.length}
+          lowerBound={40}
+          upperBound={59}
+          increment={1}
+        ></BucketItem>
+        <BucketItem
+          dataKey={"4"}
+          text={"+80"}
+          bucketColor={"bg-ocf-delta-900"}
+          textColor={"ocf-black"}
+          quantity={positiveEighty.length}
+          lowerBound={60}
+          upperBound={80}
+          increment={1}
+        ></BucketItem>
+      </div>
+    </>
+  );
+};
+
 const GspDeltaColumn: FC<{
   gspDeltas: Map<number, GspDeltaValue>;
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
@@ -69,21 +288,45 @@ const GspDeltaColumn: FC<{
     }
   };
 
+  const deltaArray = Array.from(gspDeltas.values());
+
   return (
-    <div className={`flex flex-col flex-1 ${negative ? "pl-3 border-l" : "pr-3"}`}>
-      {Array.from(gspDeltas.values())
-        .sort(sortFunc)
-        .map((gspDelta) => {
+    <>
+      <div className={`flex flex-col flex-1 ${!negative ? "pl-3" : "pr-3 "}`}>
+        {deltaArray.sort(sortFunc).map((gspDelta) => {
+          let bucketColor = "border-ocf-delta-500";
           if (negative && gspDelta.delta >= 0) {
             return null;
           }
           if (!negative && gspDelta.delta <= 0) {
             return null;
           }
+          if (-200 < gspDelta.delta && gspDelta.delta < -60) {
+            bucketColor = "border-ocf-delta-100";
+          } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
+            bucketColor = "border-ocf-delta-200";
+          } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
+            bucketColor = "border-ocf-delta-300";
+          } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
+            bucketColor = "border-ocf-delta-400";
+          } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
+            bucketColor = "border-white border-opacity-40";
+          } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
+            bucketColor = "border-ocf-delta-600";
+          } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
+            bucketColor = "border-ocf-delta-700";
+          } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
+            bucketColor = "border-ocf-delta-800";
+          } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
+            bucketColor = "border-ocf-delta-900";
+          }
 
           return (
             <div
-              className="flex flex-row justify-between pb-1 mb-1 border-b border-white cursor-pointer"
+              className={`flex flex-row justify-between pb-1 pl-1 pr-1 mb-1 border-b-8 ${
+                gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
+              }
+              ${bucketColor} cursor-pointer`}
               key={`gspCol${gspDelta.gspId}`}
               onClick={() => setClickedGspId(gspDelta.gspId)}
             >
@@ -104,7 +347,8 @@ const GspDeltaColumn: FC<{
             </div>
           );
         })}
-    </div>
+      </div>
+    </>
   );
 };
 
@@ -112,6 +356,7 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
+  const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
@@ -241,14 +486,12 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
   const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
-    //Add in the Delta forecast header here
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
           deltaview={true}
-          //figure out something where we can put deltaview{true}
         ></ForecastHeader>
 
         <div className="h-60 mt-4 mb-10">
@@ -278,11 +521,15 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
           ></GspPvRemixChart>
         )}
         <div>
-          <DeltaBuckets className={`text-2xl`} />
+          <DeltaBuckets
+            className={`text-2xl`}
+            bucketSelection={selectedBuckets}
+            gspDeltas={gspDeltas}
+          />
         </div>
         <div className="flex justify-between mx-3">
-          <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
+          <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">

@@ -6,6 +6,7 @@ import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
 import useGlobalState from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
+import GSPDeltaForecastHeader from "../delta-view/delta-gsp-header-ui";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -61,10 +62,55 @@ const GspPvRemixChart: FC<{
     ({} as any);
   const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
+  const fourHourForecastAtSelectedTime: NonNullable<typeof gsp4HourData>[number] =
+    gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) || ({} as any);
+
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
 
+  const originalForecastAtTimeNow = (forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)
+    .toFixed(1)
+    .toString();
+  const fourHourForecast = (fourHourForecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)
+    .toFixed(1)
+    .toString();
+  const deltaValue = (Number(fourHourForecast) - Number(originalForecastAtTimeNow))
+    .toFixed(1)
+    .toString();
+
   yMax = getRoundedTickBoundary(yMax, yMax_levels);
+
+  if (deltaView) {
+    return (
+      <>
+        <GSPDeltaForecastHeader
+          onClose={close}
+          deltaValue={deltaValue}
+          forecastNextPV={fourHourForecast}
+          actualPV={"8"}
+          title={gspInfo?.regionName || ""}
+          timeNow={timeNow}
+          forecastPV={originalForecastAtTimeNow}
+          selectedTimeOnly={"89"}
+          pvTimeOnly={"9"}
+          forecastNextTimeOnly={"9"}
+        ></GSPDeltaForecastHeader>
+        <div className=" h-60 mt-8 ">
+          <RemixLine
+            setTimeOfInterest={setTimeOfInterest}
+            timeOfInterest={selectedTime}
+            data={chartData}
+            yMax={yMax!}
+            timeNow={timeNow}
+            resetTime={resetTime}
+            visibleLines={visibleLines}
+            deltaView={deltaView}
+            deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
+          />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -73,6 +119,7 @@ const GspPvRemixChart: FC<{
           onClose={close}
           title={gspInfo?.regionName || ""}
           mwpercent={Math.round(pvPercentage)}
+          deltaView={deltaView}
         >
           <span className="font-semibold lg:text-lg md:text-lg text-med text-ocf-yellow-500">
             {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
@@ -84,7 +131,6 @@ const GspPvRemixChart: FC<{
           <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
-
       <div className=" h-60 mt-8 ">
         <RemixLine
           setTimeOfInterest={setTimeOfInterest}
