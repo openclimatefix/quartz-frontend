@@ -14,7 +14,7 @@ interface IProfileDropDown {}
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [show4hView, setShow4hView] = useGlobalState("show4hView");
-  const isStaging = process.env.VERCEL_ENV !== "production";
+  const isStaging = process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
