@@ -13,10 +13,6 @@ const ForecastWithActualPV: React.FC<{
 }> = ({ forecast, pv, time, tip, color = yellow }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
-      <div className="flex items-center mt-0.5">
-        <ClockIcon />
-        <p className="text-xs ml-0.5">{time}</p>
-      </div>
       <div>
         <ForecastLabel
           tip={
@@ -26,8 +22,8 @@ const ForecastWithActualPV: React.FC<{
           }
         >
           <p
-            className={`text-lg font-semibold leading-none text-center text-${color}`}
-            // className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
+            // className={`text-lg font-semibold leading-none text-center text-${color}`}
+            className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
             <span className="text-black">{pv}</span>
@@ -37,10 +33,10 @@ const ForecastWithActualPV: React.FC<{
           </p>
         </ForecastLabel>
       </div>
-      {/*<div className="flex items-center -ml-[2px]">*/}
-      {/*  <ClockIcon />*/}
-      {/*  <p className="text-xs ml-0.5">{time}</p>*/}
-      {/*</div>*/}
+      <div className="flex items-center -ml-[2px]">
+        <ClockIcon />
+        <p className="text-xs ml-0.5">{time}</p>
+      </div>
     </div>
   );
 };
@@ -53,10 +49,10 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
 }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
-      <div className="flex items-center mt-0.5">
-        <ClockIcon />
-        <p className="text-xs ml-0.5">{time}</p>
-      </div>
+      {/*<div className="flex items-center mt-0.5">*/}
+      {/*  <ClockIcon />*/}
+      {/*  <p className="text-xs ml-0.5">{time}</p>*/}
+      {/*</div>*/}
       <ForecastLabel
         tip={
           <div className="w-28">
@@ -66,8 +62,8 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
       >
         <div>
           <p
-            className={`text-lg font-semibold leading-none text-center text-${color}`}
-            // className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
+            // className={`text-lg font-semibold leading-none text-center text-${color}`}
+            className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
             {pv}
@@ -75,10 +71,10 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
           </p>
         </div>
       </ForecastLabel>
-      {/*<div className="flex items-center -ml-[2px]">*/}
-      {/*  <ClockIcon />*/}
-      {/*  <p className="text-xs ml-0.5">{time}</p>*/}
-      {/*</div>*/}
+      <div className="flex items-center -ml-[2px]">
+        <ClockIcon />
+        <p className="text-xs ml-0.5">{time}</p>
+      </div>
     </div>
   );
 };
@@ -110,7 +106,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastWithActualPV
             forecast={`${forecastPV}`}
             pv={`${actualPV}`}
-            tip={`OCF Forecast / PV Live`}
+            tip={`PV Live / OCF Forecast`}
             time={`${pvTimeOnly}`}
             color="ocf-yellow"
           />

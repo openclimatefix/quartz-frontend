@@ -1,4 +1,8 @@
 import axios from "axios";
+import { API_PREFIX } from "../../constant";
+import { NextApiRequest, NextApiResponse } from "next";
+import Router from "next/router";
+import * as Sentry from "@sentry/nextjs";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
@@ -56,7 +60,9 @@ export const formatISODateStringHuman = (date: string) => {
     year: "numeric",
     timeZone: "Europe/London"
   });
-  return `${date_london}`;
+  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
+
+  return `${date_london}, ${date_london_time}`;
 };
 
 export const formatISODateStringHumanNumbersOnly = (date: string) => {
@@ -86,6 +92,42 @@ export const addMinutesToISODate = (date: string, munites: number) => {
   return d.toISOString();
 };
 
+export const getRounded4HoursAgoString = () => {
+  const fourHoursAgo = new Date();
+  fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
+  if (fourHoursAgo.getMinutes() < 30) {
+    fourHoursAgo.setMinutes(0);
+  } else {
+    fourHoursAgo.setMinutes(30);
+  }
+  return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
+};
+
+//this is the function I set up that would pass the accessToken from get_token.ts into the Authorization
+//header or the request to the API.
+
+export const axiosFetcherAuth = async (url: string) => {
+  const response = await fetch("/api/get_token");
+  const { accessToken } = await response.json();
+  const router = Router;
+
+  return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+    .then(async (res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      if ([401, 403].includes(err.response.status)) {
+        Sentry.captureException(err, {
+          tags: {
+            error: "401/403 auth error"
+          }
+        });
+        router.push("/api/auth/logout");
+      }
+    });
+};
+
+// this is the previous fetcher
 export const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
     return res.data;

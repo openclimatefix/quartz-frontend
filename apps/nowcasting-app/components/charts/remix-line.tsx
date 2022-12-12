@@ -11,15 +11,21 @@ import {
 } from "recharts";
 import {
   convertISODateStringToLondonTime,
-  formatISODateStringHumanNumbersOnly
+  formatISODateStringHuman,
+  formatISODateStringHumanNumbersOnly,
+  getRounded4HoursAgoString
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
+import useGlobalState from "../helpers/globalState";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
   FORECAST?: number;
   PAST_FORECAST?: number;
+  "4HR_FORECAST"?: number;
+  "4HR_PAST_FORECAST"?: number;
   formatedDate: string; // "2022-05-16T15:00",
 };
 
@@ -27,13 +33,17 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Live updated",
   GENERATION: "PV Live estimate",
   FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast"
+  PAST_FORECAST: "OCF Forecast",
+  "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  "4HR_PAST_FORECAST": "OCF 4hr Forecast"
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
   FORECAST: yellow,
-  PAST_FORECAST: yellow
+  PAST_FORECAST: yellow,
+  "4HR_FORECAST": orange,
+  "4HR_PAST_FORECAST": orange
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -42,6 +52,7 @@ type RemixLineProps = {
   yMax: number | string;
   timeNow: string;
   resetTime?: () => void;
+  visibleLines: string[];
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -80,10 +91,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
   setTimeOfInterest,
   yMax,
   timeNow,
-  resetTime
+  resetTime,
+  visibleLines
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
+  const [show4hView] = useGlobalState("show4hView");
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(x: string | number) {
     const isSmallNumber = Number(x) < 10;
@@ -162,7 +175,29 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 ></CustomizedLabel>
               }
             />
-
+            {show4hView && (
+              <>
+                <Line
+                  type="monotone"
+                  dataKey="4HR_FORECAST"
+                  dot={false}
+                  strokeDasharray="5 5"
+                  strokeDashoffset={3}
+                  stroke={orange} // blue
+                  strokeWidth={3}
+                  hide={!visibleLines.includes("4HR_FORECAST")}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="4HR_PAST_FORECAST"
+                  dot={false}
+                  // strokeDasharray="10 10"
+                  stroke={orange} // blue
+                  strokeWidth={3}
+                  hide={!visibleLines.includes("4HR_PAST_FORECAST")}
+                />
+              </>
+            )}
             <Line
               type="monotone"
               dataKey="GENERATION"
@@ -170,6 +205,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke="black"
               strokeWidth={5}
               strokeDasharray="5 5"
+              hide={!visibleLines.includes("GENERATION")}
             />
             <Line
               type="monotone"
@@ -177,6 +213,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={3}
               stroke="black"
               dot={false}
+              hide={!visibleLines.includes("GENERATION_UPDATED")}
             />
             <Line
               type="monotone"
@@ -184,14 +221,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               stroke={yellow} //yellow
               strokeWidth={4}
+              hide={!visibleLines.includes("PAST_FORECAST")}
             />
             <Line
               type="monotone"
               dataKey="FORECAST"
               dot={false}
-              strokeDasharray="10 10"
+              strokeDasharray="5 5"
               stroke={yellow} //yellow
               strokeWidth={3}
+              hide={!visibleLines.includes("FORECAST")}
             />
             <Tooltip
               content={({ payload, label }) => {

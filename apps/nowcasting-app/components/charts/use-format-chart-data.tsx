@@ -10,30 +10,36 @@ const getForecastChartData = (
   fr?: {
     targetTime: string;
     expectedPowerGenerationMegawatts: number;
-  }
+  },
+  forecast_horizon?: number
 ) => {
   if (!fr) return {};
 
+  const futureKey = forecast_horizon === 240 ? "4HR_FORECAST" : "FORECAST";
+  const pastKey = forecast_horizon === 240 ? "4HR_PAST_FORECAST" : "PAST_FORECAST";
+
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
-      FORECAST: fr.expectedPowerGenerationMegawatts
+      [futureKey]: fr.expectedPowerGenerationMegawatts
     };
   else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      FORECAST: fr.expectedPowerGenerationMegawatts
+      [futureKey]: fr.expectedPowerGenerationMegawatts
     };
   else
     return {
-      PAST_FORECAST: fr.expectedPowerGenerationMegawatts
+      [pastKey]: fr.expectedPowerGenerationMegawatts
     };
 };
 const useFormatChartData = ({
   forecastData,
+  fourHourData,
   pvRealDayAfterData,
   pvRealDayInData,
   timeTrigger
 }: {
   forecastData?: ForecastData;
+  fourHourData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
@@ -68,7 +74,7 @@ const useFormatChartData = ({
           pva,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION_UPDATED: db.solarGenerationKw / 1000
+            GENERATION_UPDATED: Math.round(db.solarGenerationKw / 1000)
           })
         )
       );
@@ -77,7 +83,7 @@ const useFormatChartData = ({
           pvIn,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION: db.solarGenerationKw / 1000
+            GENERATION: Math.round(db.solarGenerationKw / 1000)
           })
         )
       );
@@ -88,12 +94,21 @@ const useFormatChartData = ({
           (db) => getForecastChartData(timeNow, db)
         )
       );
+      if (fourHourData) {
+        fourHourData.forEach((fc) =>
+          addDataToMap(
+            fc,
+            (db) => db.targetTime,
+            (db) => getForecastChartData(timeNow, db, 240)
+          )
+        );
+      }
 
       return Object.values(chartMap);
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
-  }, [forecastData, pvRealDayInData, pvRealDayAfterData, timeTrigger]);
+  }, [forecastData, fourHourData, pvRealDayInData, pvRealDayAfterData, timeTrigger]);
   return data;
 };
 

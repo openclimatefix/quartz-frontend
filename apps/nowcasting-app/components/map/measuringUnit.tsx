@@ -39,7 +39,7 @@ const MeasuringUnit = ({
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}
           disabled={isLoading}
           type="button"
-          className={`${buttonClasses} ${
+          className={`${buttonClasses} px-5 ${
             activeUnit === ActiveUnit.percentage
               ? "text-black bg-ocf-yellow"
               : "text-white bg-black"
@@ -48,16 +48,16 @@ const MeasuringUnit = ({
         >
           %
         </button>
-        {/*<button*/}
-        {/*  onClick={(event) => onToggle(event, ActiveUnit.capacity)}*/}
-        {/*  disabled={isLoading}*/}
-        {/*  type="button"*/}
-        {/*  className={`${buttonClasses}  ${*/}
-        {/*    activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"*/}
-        {/*  } ${isLoading ? "cursor-wait" : ""}`}*/}
-        {/*>*/}
-        {/*  Capacity*/}
-        {/*</button>*/}
+        <button
+          onClick={(event) => onToggle(event, ActiveUnit.capacity)}
+          disabled={isLoading}
+          type="button"
+          className={`${buttonClasses}  ${
+            activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"
+          } ${isLoading ? "cursor-wait" : ""}`}
+        >
+          Capacity
+        </button>
       </div>
     </div>
   );

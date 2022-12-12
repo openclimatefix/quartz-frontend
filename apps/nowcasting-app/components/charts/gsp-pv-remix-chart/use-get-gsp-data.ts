@@ -1,40 +1,55 @@
 import useSWR from "swr";
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
-import { FcAllResData } from "../../types";
-import { axiosFetcher } from "../../helpers/utils";
+import { FcAllResData, ForecastValue } from "../../types";
+import useGlobalState from "../../helpers/globalState";
+import { axiosFetcherAuth } from "../../helpers/utils";
 
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
-  const { data: fcAll, error: error1 } = useSWR<FcAllResData>(
+  const [show4hView] = useGlobalState("show4hView");
+  const { data: fcAll, error: fcAllError } = useSWR<FcAllResData>(
     getAllForecastUrl(true, true),
-    axiosFetcher,
+    axiosFetcherAuth,
     {
       refreshInterval: t5min
     }
   );
 
-  const { data: pvRealDataIn, error: error2 } = useSWR<
+  const { data: pvRealDataIn, error: pvRealInDat } = useSWR<
     {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`, axiosFetcherAuth, {
     refreshInterval: t5min
   });
 
-  const { data: pvRealDataAfter, error: error3 } = useSWR<
+  const { data: pvRealDataAfter, error: pvRealDayAfter } = useSWR<
     {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`, axiosFetcher, {
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`, axiosFetcherAuth, {
     refreshInterval: t5min
   });
+
+  const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+    show4hView
+      ? `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      : null,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
   return {
-    errors: [error1, error2, error3].filter((e) => !!e),
+    errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
     fcAll,
+    gsp4HourData,
     pvRealDataIn,
     pvRealDataAfter
   };
 };
+
 export default useGetGspData;

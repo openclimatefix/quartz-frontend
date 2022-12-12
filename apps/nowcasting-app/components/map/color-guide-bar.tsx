@@ -16,12 +16,12 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
       ];
     } else if (unit === ActiveUnit.capacity) {
       return [
-        { value: "0-100", opacity: 3, textColor: "ocf-gray-300" },
-        { value: "100-200", opacity: 20, textColor: "ocf-gray-300" },
-        { value: "200-300", opacity: 40, textColor: "ocf-gray-300" },
-        { value: "300-400", opacity: 60, textColor: "black" },
-        { value: "400-500", opacity: 80, textColor: "black" },
-        { value: "500+", opacity: 100, textColor: "black" }
+        { value: "0-50", opacity: 3, textColor: "ocf-gray-300" },
+        { value: "50-150", opacity: 20, textColor: "ocf-gray-300" },
+        { value: "150-250", opacity: 40, textColor: "ocf-gray-300" },
+        { value: "250-350", opacity: 60, textColor: "black" },
+        { value: "350-450", opacity: 80, textColor: "black" },
+        { value: "450+", opacity: 100, textColor: "black" }
       ];
     } else {
       return [

@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import React, { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
 import pkg from "../../../package.json";
@@ -6,40 +6,15 @@ import { classNames, formatISODateStringHumanNumbersOnly } from "../../helpers/u
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
+import { ChartInfo } from "../../../ChartInfo";
 const { version } = pkg;
 
 interface IProfileDropDown {}
 
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
-  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
-
-  const chartInfo = (forecastCreationTime?: string) => (
-    <div className="w-full w-64 p-2 text-sm">
-      <ul className="list-none space-y-2">
-        <li>All datetimes are in Europe/London timezone.</li>
-        <li>
-          Following{" "}
-          <a
-            className=" underline"
-            href="https://www.solar.sheffield.ac.uk/pvlive/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            PVLive
-          </a>
-          , datetimes show the end of the settlement period. For example 17:00 refers to solar
-          generation between 16:30 to 17:00.
-        </li>
-        <li>The Y axis units are in MW, for the national and GSP plots. </li>
-        <li>
-          {" "}
-          OCF Forecast Creation Time:{" "}
-          {formatISODateStringHumanNumbersOnly(forecastCreationTime || "")}
-        </li>
-      </ul>
-    </div>
-  );
+  const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const isStaging = process.env.VERCEL_ENV !== "production";
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -60,13 +35,8 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
       >
         <Menu.Items className="absolute right-0 top-12 w-48 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <Menu.Item>
-            <div className="px-4 pt-3 text-ocf-black-600 text-right">
-              <Tooltip
-                tip={chartInfo(forecastCreationTime)}
-                position="left"
-                className={"text-right"}
-                fullWidth
-              >
+            <div className="px-4 pt-2 text-ocf-black-600 text-right">
+              <Tooltip tip={<ChartInfo />} position="left" className={"text-right"} fullWidth>
                 Data
               </Tooltip>
             </div>
@@ -115,9 +85,26 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
             <p className="text-xs text-ocf-black-300">Signed in as</p>
             <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
           </div>
-
           <div className="w-full border-t border-gray-300" />
-
+          {isStaging && (
+            <Menu.Item>
+              {({ active }) => (
+                <div
+                  className={classNames(
+                    active ? "bg-gray-100" : "",
+                    "block px-4 py-2 text-sm text-gray-700"
+                  )}
+                >
+                  <button
+                    onClick={() => setShow4hView(!show4hView)}
+                    className="ml-3 text-sx  font-medium text-ocf-black-300 dark:text-gray-300"
+                  >
+                    {`${show4hView ? "Hide" : "Show"} 4-hour forecast`}
+                  </button>
+                </div>
+              )}
+            </Menu.Item>
+          )}
           <Menu.Item>
             {({ active }) => (
               <div
