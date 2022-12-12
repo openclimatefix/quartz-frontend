@@ -1,5 +1,5 @@
 import { handleAuth, handleCallback, handleLogin, handleLogout } from "@auth0/nextjs-auth0";
-import { withSentry } from "@sentry/nextjs";
+import { withSentry, setUser } from "@sentry/nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 function getUrls(req: NextApiRequest) {
@@ -43,6 +43,7 @@ export default withSentry(
     },
 
     async logout(req: NextApiRequest, res: NextApiResponse) {
+      setUser(null);
       await handleLogout(req, res, {
         returnTo: "/logout"
       });

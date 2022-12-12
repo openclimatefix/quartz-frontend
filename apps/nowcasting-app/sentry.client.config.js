@@ -22,7 +22,8 @@ Sentry.init({
     }
     // Default sample rate
     return 0.01;
-  }
+  },
+  environment: process.env.NEXT_PUBLIC_SENTRY_ENV_LABEL || process.env.NODE_ENV
   // ...
   // Note: if you want to override the automatic release value, do not set a
   // `release` value here - use the environment variable `SENTRY_RELEASE`, so
