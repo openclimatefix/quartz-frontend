@@ -122,7 +122,7 @@ export const axiosFetcherAuth = async (url: string) => {
             error: "401/403 auth error"
           }
         });
-        router.push("/api/auth/logout");
+        router.push("/api/auth/logout?redirectToLogin=true");
       }
     });
 };
