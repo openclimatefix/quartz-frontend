@@ -20,6 +20,7 @@ type GlobalStateType = {
   clickedGspId?: number;
   forecastCreationTime?: string;
   visibleLines: string[];
+  selectedBuckets: string[];
   show4hView?: boolean;
 };
 
@@ -29,6 +30,7 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   clickedGspId: undefined,
   forecastCreationTime: undefined,
   visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST", "4HR_FORECAST"],
+  selectedBuckets: ["-4", "-3", "-2", "-1", "0", "1", "2", "3", "4"],
   show4hView:
     process.env.NODE_ENV === "development" ||
     (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production")

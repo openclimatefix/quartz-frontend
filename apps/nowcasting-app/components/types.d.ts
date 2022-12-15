@@ -84,4 +84,6 @@ type GspDeltaValue = {
   forecast: number;
   delta: number;
   deltaBucket: DELTA_BUCKET;
+  deltaColor: string;
+  dataKey: string;
 };
