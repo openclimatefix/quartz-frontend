@@ -40,6 +40,25 @@ type PvRealData = {
   datetimeUtc: string;
   solarGenerationKw: number;
 }[];
+type National4HourData = ForecastValue[];
+type AllGspRealData = GspRealData[];
+type CombinedData = {
+  nationalForecastData: ForecastData | undefined;
+  pvRealDayInData: PvRealData | undefined;
+  pvRealDayAfterData: PvRealData | undefined;
+  national4HourData: National4HourData | undefined;
+  allGspForecastData: GspAllForecastData | undefined;
+  allGspRealData: AllGspRealData | undefined;
+  gspDeltas: GspDeltas | undefined;
+};
+type CombinedErrors = {
+  nationalForecastError: any;
+  pvRealDayInError: any;
+  pvRealDayAfterError: any;
+  national4HourError: any;
+  allGspForecastError: any;
+  allGspRealError: any;
+};
 type GspEntity = {
   label: string;
   gspId: number;
@@ -84,6 +103,6 @@ type GspDeltaValue = {
   forecast: number;
   delta: number;
   deltaBucket: DELTA_BUCKET;
-  deltaColor: string;
-  dataKey: string;
+  deltaColor?: string;
+  dataKey?: string;
 };

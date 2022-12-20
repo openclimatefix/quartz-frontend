@@ -17,15 +17,18 @@ import Spinner from "../../icons/spinner";
 import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
 import {
+  CombinedData,
+  CombinedErrors,
   ForecastData,
   ForecastValue,
   GspAllForecastData,
   GspDeltaValue,
-  GspRealData
+  GspRealData,
+  PvRealData
 } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
-import DeltaBuckets from "./delta-buckets-ui";
+import DeltaBucketsBrad from "./delta-buckets-ui";
 import { theme } from "../../../tailwind.config";
 
 type DeltaBucketProps = {
@@ -368,8 +371,13 @@ const GspDeltaColumn: FC<{
     </>
   );
 };
-
-const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+type DeltaChartProps = {
+  date?: string;
+  className?: string;
+  combinedData: CombinedData;
+  combinedErrors: CombinedErrors;
+};
+const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -379,13 +387,23 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const { data: nationalForecastData, error } = useSWR<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+
+  const {
+    nationalForecastData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    national4HourData,
+    allGspForecastData,
+    allGspRealData,
+    gspDeltas
+  } = combinedData;
+  const {
+    nationalForecastError,
+    pvRealDayInError,
+    pvRealDayAfterError,
+    national4HourError,
+    allGspForecastError
+  } = combinedErrors;
 
   const chartLimits = useMemo(
     () =>
@@ -397,89 +415,6 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
   );
   useHotKeyControlChart(chartLimits);
 
-  const { data: pvRealDayInData, error: error2 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: pvRealDayAfterData, error: error3 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-      : null,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-
-  const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-
-  const { data: allGspPvData, error: allGspPvError } = useSWR<GspRealData[]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-  const currentYields =
-    allGspPvData?.map((datum) => {
-      const gspYield = datum.gspYields.find((yieldDatum, index) => {
-        return yieldDatum.datetimeUtc === `${selectedTime}:00+00:00`;
-      });
-      return {
-        gspId: datum.gspId,
-        gspRegion: datum.regionName,
-        yield: gspYield?.solarGenerationKw || 0
-      };
-    }) || [];
-
-  const gspDeltas = useMemo(() => {
-    let tempGspDeltas = new Map();
-
-    for (let i = 0; i < currentYields.length; i++) {
-      const currentYield = currentYields[i];
-      let gspForecastData = allGspForecastData?.forecasts[i];
-      if (gspForecastData?.location.gspId !== currentYield.gspId) {
-        gspForecastData = allGspForecastData?.forecasts.find((gspForecastDatum) => {
-          return gspForecastDatum.location.gspId === currentYield.gspId;
-        });
-      }
-      const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
-        return forecastValue.targetTime === `${selectedTime}:00+00:00`;
-      });
-      const delta =
-        currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
-      tempGspDeltas.set(currentYield.gspId, {
-        gspId: currentYield.gspId,
-        gspRegion: currentYield.gspRegion,
-        currentYield: currentYield.yield / 1000,
-        forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
-        delta,
-        deltaBucket: getDeltaBucket(delta)
-      });
-    }
-    return tempGspDeltas;
-  }, [allGspForecastData, allGspPvData, selectedTime]);
-
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
     fourHourData: national4HourData,
@@ -489,8 +424,15 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
     delta: true
   });
 
-  // when commenting 4hour forecast back in, add pv4HourError to the list of errors to line 108 and "!national4HourData" to line 109
-  if (error || error2 || error3) return <div>failed to load</div>;
+  if (
+    nationalForecastError ||
+    pvRealDayInError ||
+    pvRealDayAfterError ||
+    national4HourError ||
+    allGspForecastError
+  )
+    return <div>failed to load</div>;
+
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
       <div className="h-full flex">

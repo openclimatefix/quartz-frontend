@@ -77,21 +77,21 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     targetTime?: string
   ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
     // Exclude first item as it's not representing gsp area
-    const filteredForecastData = forecastData?.forecasts?.slice(1);
+    const gspForecastData = forecastData?.forecasts?.slice(1);
     const gspShapeJson = gspShapeData as FeatureCollection;
     const forecastGeoJson = {
       ...gspShapeData,
       type: "FeatureCollection" as "FeatureCollection",
       features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = filteredForecastData && filteredForecastData[index];
-        const selectedFCValue =
-          filteredForecastData && targetTime
-            ? forecastDatum?.forecastValues.find(
-                (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
-              )
-            : filteredForecastData
-            ? forecastDatum?.forecastValues[latestForecastValue]
-            : undefined;
+        const forecastDatum = gspForecastData && gspForecastData[index];
+        let selectedFCValue;
+        if (gspForecastData && targetTime) {
+          selectedFCValue = forecastDatum?.forecastValues.find(
+            (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
+          );
+        } else if (gspForecastData) {
+          selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
+        }
 
         return {
           ...featureObj,
