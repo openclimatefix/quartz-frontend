@@ -346,8 +346,8 @@ const GspDeltaColumn: FC<{
 
           const isSelected = selectedBuckets.includes(dataKey);
           const deltaPercentage = negative
-            ? Number(100 - gspDelta.deltaPercentage).toFixed(0)
-            : Number(gspDelta.deltaPercentage - 100).toFixed(0);
+            ? (100 - Number(gspDelta.deltaPercentage)).toFixed(0)
+            : (Number(gspDelta.deltaPercentage) - 100).toFixed(0);
           const tickerColor = `h-2 ${gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`}`;
           const selectedClasses = `flex flex-3 flex-row bg-ocf-delta-1000 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
