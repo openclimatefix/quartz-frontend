@@ -83,7 +83,7 @@ const BucketItem: React.FC<{
   textColor?: string;
 }> = ({ dataKey, quantity, text, bucketColor, textColor, lowerBound, upperBound }) => {
   const selectedClass = ``;
-  const unselectedClass = "opacity-40";
+  const unselectedClass = `bg-opacity-40 text-opacity-40 border-2 border-${bucketColor}`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -102,13 +102,15 @@ const BucketItem: React.FC<{
             flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${
+          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center bg-${bucketColor} ${
             isSelected ? selectedClass : unselectedClass
-          } ${dataKey === "0" && "border-2 border-ocf-gray-800"}`}
+          } ${dataKey === "0" && selectedBuckets.includes("0") && "border-2 border-white"} ${
+            dataKey === "0" && !selectedBuckets.includes("0") && "border-white border-2 opacity-40"
+          }`}
           onClick={toggleBucketSelection}
         >
           <span className="text-2xl font-semibold">{quantity}</span>
-          <span className="flex text-xs pb-2">{text}</span>
+          <span className="flex text-xs pb-2">{text} MW</span>
         </button>
       </div>
     </>
@@ -173,7 +175,7 @@ const DeltaBuckets: React.FC<{
   });
 
   const positiveEighty = deltaArray.filter((number) => {
-    return number.delta > 60 && number.delta <= 100;
+    return number.delta > 60 && number.delta <= 200;
   });
   return (
     <>
@@ -181,7 +183,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-4"}
           text={"-80"}
-          bucketColor={"bg-ocf-delta-100"}
+          bucketColor={"ocf-delta-100"}
           textColor={"ocf-black"}
           quantity={negativeEighty.length}
           lowerBound={-59}
@@ -191,7 +193,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-3"}
           text={"-60"}
-          bucketColor={"bg-ocf-delta-200"}
+          bucketColor={"ocf-delta-200"}
           textColor={"ocf-black"}
           quantity={negativeSixty.length}
           lowerBound={-59}
@@ -201,7 +203,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-2"}
           text={"-40"}
-          bucketColor={"bg-ocf-delta-300"}
+          bucketColor={"ocf-delta-300"}
           textColor={"ocf-black"}
           quantity={negativeForty.length}
           lowerBound={-39}
@@ -211,7 +213,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-1"}
           text={"-20"}
-          bucketColor={"bg-ocf-delta-400"}
+          bucketColor={"ocf-delta-400"}
           textColor={"ocf-white"}
           quantity={negativeTwenty.length}
           lowerBound={-19}
@@ -220,8 +222,8 @@ const DeltaBuckets: React.FC<{
         ></BucketItem>
         <BucketItem
           dataKey={"0"}
-          text={"+/- MW"}
-          bucketColor={"bg-ocf-delta-500"}
+          text={"+/-"}
+          bucketColor={"ocf-delta-500"}
           textColor={"ocf-white"}
           quantity={minimalDelta.length}
           lowerBound={-1}
@@ -231,7 +233,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"1"}
           text={"+20"}
-          bucketColor={"bg-ocf-delta-600"}
+          bucketColor={"ocf-delta-600"}
           textColor={"ocf-white"}
           quantity={positiveTwenty.length}
           lowerBound={2}
@@ -241,7 +243,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"2"}
           text={"+40"}
-          bucketColor={"bg-ocf-delta-700"}
+          bucketColor={"ocf-delta-700"}
           textColor={"ocf-black"}
           quantity={positiveForty.length}
           lowerBound={21}
@@ -251,7 +253,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"3"}
           text={"+60"}
-          bucketColor={"bg-ocf-delta-800"}
+          bucketColor={"ocf-delta-800"}
           textColor={"ocf-black"}
           quantity={positiveSixty.length}
           lowerBound={40}
@@ -261,7 +263,7 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"4"}
           text={"+80"}
-          bucketColor={"bg-ocf-delta-900"}
+          bucketColor={"ocf-delta-900"}
           textColor={"ocf-black"}
           quantity={positiveEighty.length}
           lowerBound={60}
@@ -297,6 +299,7 @@ const GspDeltaColumn: FC<{
         {deltaArray.sort(sortFunc).map((gspDelta) => {
           let bucketColor = "border-ocf-delta-500";
           let dataKey = "";
+          let progressLineColor = "";
           if (negative && gspDelta.delta >= 0) {
             return null;
           }
@@ -305,60 +308,103 @@ const GspDeltaColumn: FC<{
           }
           if (-200 < gspDelta.delta && gspDelta.delta < -60) {
             bucketColor = "border-ocf-delta-100";
+            progressLineColor = "ocf-delta-100";
             dataKey = "-4";
           } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
             bucketColor = "border-ocf-delta-200";
+            progressLineColor = "ocf-delta-200";
             dataKey = "-3";
           } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
             bucketColor = "border-ocf-delta-300";
+            progressLineColor = "ocf-delta-300";
             dataKey = "-2";
           } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
             bucketColor = "border-ocf-delta-400";
+            progressLineColor = "ocf-delta-400";
             dataKey = "-1";
           } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
             bucketColor = "border-white border-opacity-40";
+            progressLineColor = "white bg-opacity-40";
             dataKey = "0";
           } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-600";
+            progressLineColor = "ocf-delta-600";
             dataKey = "1";
           } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-700";
+            progressLineColor = "ocf-delta-700";
             dataKey = "2";
           } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-800";
+            progressLineColor = "ocf-delta-800";
             dataKey = "3";
           } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
             bucketColor = "border-ocf-delta-900";
+            progressLineColor = "ocf-delta-900";
             dataKey = "4";
           }
 
           const isSelected = selectedBuckets.includes(dataKey);
-
-          const selectedClasses = `flex flex-row justify-between pb-1 pl-1 pr-1 mb-1 border-b-8 ${
+          const deltaPercentage = negative
+            ? Number(100 - gspDelta.deltaPercentage).toFixed(0)
+            : Number(gspDelta.deltaPercentage - 100).toFixed(0);
+          const tickerColor = `h-2 ${gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`}`;
+          const selectedClasses = `flex flex-3 flex-row bg-ocf-delta-1000 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
           } ${bucketColor} cursor-pointer`;
           if (!isSelected) {
             return null;
           }
           return (
-            <div
-              className={selectedClasses}
-              key={`gspCol${gspDelta.gspId}`}
-              onClick={() => setClickedGspId(gspDelta.gspId)}
-            >
-              <div className="flex flex-col">
-                <span>{gspDelta.gspRegion}</span>
-                <small>{gspDelta.gspId}</small>
-              </div>
-              <div className="flex flex-col text-right">
-                <small>
-                  {Number(gspDelta.currentYield).toFixed(2)} /{" "}
-                  {Number(gspDelta.forecast).toFixed(2)} MW
-                </small>
-                <span>
+            <div className="pb-0.5" key={`gspCol${gspDelta.gspId}`}>
+              <div
+                className={selectedClasses}
+                key={`gspCol${gspDelta.gspId}`}
+                onClick={() => setClickedGspId(gspDelta.gspId)}
+              >
+                <div className="flex pl-1 pt-1 w-32 items-center md:w-48">
+                  <span className="font-semibold text-sm">{gspDelta.gspRegion}</span>
+                  {/* <small>{gspDelta.gspId}</small> */}
+                </div>
+                <div className="flex flex-end items-center">
+                  <div className="flex pl-1 pt-1">
+                    <span className="font-semibold text-sm">
+                      {negative ? "-" : "+"}
+                      {deltaPercentage}%
+                    </span>
+                    {/* <small>{gspDelta.gspId}</small> */}
+                  </div>
+                  <div className="flex flex-col pt-1.5 pr-1 text-right w-32 font-semibold text-sm md:w-32">
+                    <small>
+                      {Number(gspDelta.currentYield).toFixed(2)} /{" "}
+                      {Number(gspDelta.forecast).toFixed(2)} MW
+                    </small>
+                    {/* <span>
                   {!negative && "+"}
                   {Number(gspDelta.delta).toFixed(2)} MW
-                </span>
+                </span> */}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`w-full bg-ocf-delta-1000 h-1.0 ${
+                  gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
+                } ${bucketColor}`}
+              >
+                <div
+                  className={`${
+                    gspDelta.delta > 0
+                      ? `flex flex-row-reverse items-end justify-end`
+                      : `flex items-end justify-end`
+                  }`}
+                >
+                  <div className={tickerColor} style={{ width: `1px` }}></div>
+                  <div
+                    className={`bg-${progressLineColor} h-0.5`}
+                    style={{ width: `${deltaPercentage}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
           );
@@ -471,7 +517,12 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
         currentYield: currentYield.yield / 1000,
         forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
         delta:
-          currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)
+          currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0),
+        deltaPercentage:
+          (currentYield.yield /
+            1000 /
+            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
+          100
       });
     }
     return tempGspDeltas;

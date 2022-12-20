@@ -83,4 +83,5 @@ type GspDeltaValue = {
   delta: number;
   deltaColor: string;
   dataKey: string;
+  deltaPercentage: string;
 };
