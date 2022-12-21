@@ -77,13 +77,14 @@ const BucketItem: React.FC<{
   quantity: number;
   text: string;
   bucketColor: string;
+  borderColor: string;
   lowerBound: number;
   upperBound: number;
   increment: number;
   textColor?: string;
-}> = ({ dataKey, quantity, text, bucketColor, textColor, lowerBound, upperBound }) => {
+}> = ({ dataKey, quantity, text, bucketColor, borderColor, textColor, lowerBound, upperBound }) => {
   const selectedClass = ``;
-  const unselectedClass = `bg-opacity-40 text-opacity-40 border-2 border-${bucketColor}`;
+  const unselectedClass = `bg-opacity-40 text-opacity-40 border-2 ${borderColor}`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -102,10 +103,10 @@ const BucketItem: React.FC<{
             flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center bg-${bucketColor} ${
+          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${borderColor} ${
             isSelected ? selectedClass : unselectedClass
           } ${dataKey === "0" && selectedBuckets.includes("0") && "border-2 border-white"} ${
-            dataKey === "0" && !selectedBuckets.includes("0") && "border-white border-2 opacity-40"
+            dataKey === "0" && !selectedBuckets.includes("0") && "opacity-40 bg-orange"
           }`}
           onClick={toggleBucketSelection}
         >
@@ -183,7 +184,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-4"}
           text={"-80"}
-          bucketColor={"ocf-delta-100"}
+          bucketColor={"bg-ocf-delta-100"}
+          borderColor={"border-ocf-delta-100"}
           textColor={"ocf-black"}
           quantity={negativeEighty.length}
           lowerBound={-59}
@@ -193,7 +195,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-3"}
           text={"-60"}
-          bucketColor={"ocf-delta-200"}
+          bucketColor={"bg-ocf-delta-200"}
+          borderColor={"border-ocf-delta-200"}
           textColor={"ocf-black"}
           quantity={negativeSixty.length}
           lowerBound={-59}
@@ -203,7 +206,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-2"}
           text={"-40"}
-          bucketColor={"ocf-delta-300"}
+          bucketColor={"bg-ocf-delta-300"}
+          borderColor={"border-ocf-delta-300"}
           textColor={"ocf-black"}
           quantity={negativeForty.length}
           lowerBound={-39}
@@ -213,8 +217,9 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"-1"}
           text={"-20"}
-          bucketColor={"ocf-delta-400"}
+          bucketColor={"bg-ocf-delta-400"}
           textColor={"ocf-white"}
+          borderColor={"border-ocf-delta-400"}
           quantity={negativeTwenty.length}
           lowerBound={-19}
           upperBound={-1}
@@ -223,7 +228,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"0"}
           text={"+/-"}
-          bucketColor={"ocf-delta-500"}
+          bucketColor={"bg-ocf-delta-500"}
+          borderColor={"border-ocf-white"}
           textColor={"ocf-white"}
           quantity={minimalDelta.length}
           lowerBound={-1}
@@ -233,7 +239,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"1"}
           text={"+20"}
-          bucketColor={"ocf-delta-600"}
+          bucketColor={"bg-ocf-delta-600"}
+          borderColor={"border-ocf-delta-600"}
           textColor={"ocf-white"}
           quantity={positiveTwenty.length}
           lowerBound={2}
@@ -243,7 +250,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"2"}
           text={"+40"}
-          bucketColor={"ocf-delta-700"}
+          bucketColor={"bg-ocf-delta-700"}
+          borderColor={"border-ocf-delta-700"}
           textColor={"ocf-black"}
           quantity={positiveForty.length}
           lowerBound={21}
@@ -253,7 +261,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"3"}
           text={"+60"}
-          bucketColor={"ocf-delta-800"}
+          bucketColor={"bg-ocf-delta-800"}
+          borderColor={"border-ocf-delta-800"}
           textColor={"ocf-black"}
           quantity={positiveSixty.length}
           lowerBound={40}
@@ -263,7 +272,8 @@ const DeltaBuckets: React.FC<{
         <BucketItem
           dataKey={"4"}
           text={"+80"}
-          bucketColor={"ocf-delta-900"}
+          bucketColor={"bg-ocf-delta-900"}
+          borderColor={"border-ocf-delta-900"}
           textColor={"ocf-black"}
           quantity={positiveEighty.length}
           lowerBound={60}
@@ -297,7 +307,7 @@ const GspDeltaColumn: FC<{
     <>
       <div className={`flex flex-col flex-1 ${!negative ? "pl-3" : "pr-3 "}`}>
         {deltaArray.sort(sortFunc).map((gspDelta) => {
-          let bucketColor = "border-ocf-delta-500";
+          let bucketColor = "";
           let dataKey = "";
           let progressLineColor = "";
           if (negative && gspDelta.delta >= 0) {
@@ -308,39 +318,39 @@ const GspDeltaColumn: FC<{
           }
           if (-200 < gspDelta.delta && gspDelta.delta < -60) {
             bucketColor = "border-ocf-delta-100";
-            progressLineColor = "ocf-delta-100";
+            progressLineColor = "bg-ocf-delta-100";
             dataKey = "-4";
           } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
             bucketColor = "border-ocf-delta-200";
-            progressLineColor = "ocf-delta-200";
+            progressLineColor = "bg-ocf-delta-200";
             dataKey = "-3";
           } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
             bucketColor = "border-ocf-delta-300";
-            progressLineColor = "ocf-delta-300";
+            progressLineColor = "bg-ocf-delta-300";
             dataKey = "-2";
           } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
             bucketColor = "border-ocf-delta-400";
-            progressLineColor = "ocf-delta-400";
+            progressLineColor = "bg-ocf-delta-400";
             dataKey = "-1";
           } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
             bucketColor = "border-white border-opacity-40";
-            progressLineColor = "white bg-opacity-40";
+            progressLineColor = "bg-white bg-opacity-40";
             dataKey = "0";
           } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-600";
-            progressLineColor = "ocf-delta-600";
+            progressLineColor = "bg-ocf-delta-600";
             dataKey = "1";
           } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-700";
-            progressLineColor = "ocf-delta-700";
+            progressLineColor = "bg-ocf-delta-700";
             dataKey = "2";
           } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-800";
-            progressLineColor = "ocf-delta-800";
+            progressLineColor = "bg-ocf-delta-800";
             dataKey = "3";
           } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
             bucketColor = "border-ocf-delta-900";
-            progressLineColor = "ocf-delta-900";
+            progressLineColor = "bg-ocf-delta-900";
             dataKey = "4";
           }
 
@@ -401,7 +411,7 @@ const GspDeltaColumn: FC<{
                 >
                   <div className={tickerColor} style={{ width: `1px` }}></div>
                   <div
-                    className={`bg-${progressLineColor} h-0.5`}
+                    className={`${progressLineColor} h-0.5`}
                     style={{ width: `${deltaPercentage}%` }}
                   ></div>
                 </div>
