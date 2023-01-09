@@ -128,7 +128,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
           selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
         }
         // console.log("forecastDatum", forecastDatum);
-        const currentGspDelta: GspDeltaValue = gspDeltas.get(index);
+        const currentGspDelta: GspDeltaValue = gspDeltas.get(index + 1);
         // console.log("index", index);
         // console.log("featureObj.properties?.gsp_id", featureObj.properties?.gsp_id);
         // console.log("current gsp", currentGspDelta);
@@ -145,8 +145,9 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
             [SelectedData.installedCapacityMw]: getRoundedPv(
               forecastDatum?.location.installedCapacityMw || 0
             ),
-            [SelectedData.delta]: currentGspDelta?.delta * 20 || 0,
-            deltaBucket: currentGspDelta?.deltaBucket || 0
+            [SelectedData.delta]: currentGspDelta?.delta || 0,
+            deltaBucket: currentGspDelta?.deltaBucket || 0,
+            gspDisplayName: forecastDatum?.location?.regionName || ""
           }
         };
       })
@@ -178,28 +179,58 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   console.log("latestPV", generateGeoJsonForecastData(initForecastData, selectedISOTime));
 
   const getFillColor = (selectedData: string): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the color will be green
-    -80,
+    "let",
+    "bucket",
+    ["get", selectedData],
+    "case",
+    ["<", ["to-number", ["var", "bucket"]], -80],
     ["to-color", theme.extend.colors["ocf-delta"][100]],
-    -60,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], -80],
+      ["<", ["to-number", ["var", "bucket"]], -60]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][200]],
-    -40,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], -60],
+      ["<", ["to-number", ["var", "bucket"]], -40]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][300]],
-    -20,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], -40],
+      ["<", ["to-number", ["var", "bucket"]], -20]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][400]],
-    0,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], -20],
+      ["<", ["to-number", ["var", "bucket"]], 0]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][500]],
-    20,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], 0],
+      ["<", ["to-number", ["var", "bucket"]], 20]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][600]],
-    40,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], 20],
+      ["<", ["to-number", ["var", "bucket"]], 40]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][700]],
-    60,
+    [
+      "all",
+      [">=", ["to-number", ["var", "bucket"]], 40],
+      ["<", ["to-number", ["var", "bucket"]], 60]
+    ],
     ["to-color", theme.extend.colors["ocf-delta"][800]],
-    80,
-    ["to-color", theme.extend.colors["ocf-delta"][900]]
+    [">=", ["to-number", ["var", "bucket"]], 60],
+    ["to-color", theme.extend.colors["ocf-delta"][900]],
+    // Default fill color
+    ["to-color", theme.extend.colors["ocf-delta"][500]]
   ];
   console.log("fillColor", getFillColor("delta"));
 
@@ -243,6 +274,38 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         "line-width": 4,
         "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
       }
+    });
+    // Create a popup, but don't add it to the map yet.
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+
+    map.current.on("mousemove", "latestPV-forecast", (e) => {
+      // Change the cursor style as a UI indicator.
+      map.current.getCanvas().style.cursor = "pointer";
+
+      // Copy coordinates array.
+      // const geometry = e.features?.[0].geometry;
+      // const coordinates = geometry?.type === "Polygon" ? geometry.coordinates[0][0] : [0, 0];
+      const properties = e.features?.[0].properties;
+      const content = `<strong>${properties?.gsp_id}</strong><p>${properties?.gspDisplayName}</p><p>Delta: ${properties?.delta}</p><p>Delta Bucket: ${properties?.deltaBucket}</p>`;
+
+      // Ensure that if the map is zoomed out such that multiple
+      // copies of the feature are visible, the popup appears
+      // over the copy being pointed to.
+      // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      // }
+
+      // Populate the popup and set its coordinates
+      // based on the feature found.
+      popup.setLngLat(e.lngLat).setHTML(content).addTo(map.current);
+    });
+
+    map.current.on("mouseleave", "latestPV-forecast", () => {
+      map.current.getCanvas().style.cursor = "";
+      popup.remove();
     });
   };
 
