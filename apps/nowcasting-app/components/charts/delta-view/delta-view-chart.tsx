@@ -21,6 +21,7 @@ import {
   ForecastValue,
   GspAllForecastData,
   GspDeltaValue,
+  GspEntity,
   GspRealData
 } from "../../types";
 import Tooltip from "../../tooltip";
@@ -286,6 +287,7 @@ const DeltaBuckets: React.FC<{
 };
 
 const GspDeltaColumn: FC<{
+  gspInstalledCapacity: GspEntity.gspInstalledCapacity;
   gspDeltas: Map<number, GspDeltaValue>;
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
@@ -307,6 +309,7 @@ const GspDeltaColumn: FC<{
     <>
       <div className={`flex flex-col flex-1 ${!negative ? "pl-3" : "pr-3 "}`}>
         {deltaArray.sort(sortFunc).map((gspDelta) => {
+          console.log(deltaArray);
           let bucketColor = "";
           let dataKey = "";
           let progressLineColor = "";
@@ -359,21 +362,21 @@ const GspDeltaColumn: FC<{
             ? (100 - Number(gspDelta.deltaPercentage)).toFixed(0)
             : (Number(gspDelta.deltaPercentage) - 100).toFixed(0);
           const tickerColor = `h-2 ${gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`}`;
-          const selectedClasses = `flex flex-3 flex-row bg-ocf-delta-1000 justify-between pl-1 pr-1 ${
+          const selectedClasses = `flex flex-3 flex-row bg-ocf-delta-1000 pb-0 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
           } ${bucketColor} cursor-pointer`;
           if (!isSelected) {
             return null;
           }
           return (
-            <div className="pb-0.5" key={`gspCol${gspDelta.gspId}`}>
+            <div className={`pb-0.5`} key={`gspCol${gspDelta.gspId}`}>
               <div
                 className={selectedClasses}
                 key={`gspCol${gspDelta.gspId}`}
                 onClick={() => setClickedGspId(gspDelta.gspId)}
               >
                 <div className="flex pl-1 pt-1 w-32 items-center md:w-48">
-                  <span className="font-semibold text-sm">{gspDelta.gspRegion}</span>
+                  <span className="font-semibold text-medium">{gspDelta.gspRegion}</span>
                   {/* <small>{gspDelta.gspId}</small> */}
                 </div>
                 <div className="flex flex-end items-center">
@@ -398,7 +401,7 @@ const GspDeltaColumn: FC<{
               </div>
 
               <div
-                className={`w-full bg-ocf-delta-1000 h-1.0 ${
+                className={`w-full bg-ocf-delta-1000 h-2 pb-0 ${
                   gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
                 } ${bucketColor}`}
               >
@@ -411,7 +414,7 @@ const GspDeltaColumn: FC<{
                 >
                   <div className={tickerColor} style={{ width: `1px` }}></div>
                   <div
-                    className={`${progressLineColor} h-0.5`}
+                    className={`${progressLineColor} h-1`}
                     style={{ width: `${deltaPercentage}%` }}
                   ></div>
                 </div>
