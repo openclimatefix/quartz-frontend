@@ -78,10 +78,12 @@ type GspAllForecastData = {
 type GspDeltaValue = {
   gspId: number;
   gspRegion: string;
+  gspInstalledCapacity: number;
   currentYield: number;
   forecast: number;
   delta: number;
   deltaColor: string;
   dataKey: string;
   deltaPercentage: string;
+  deltaNormalized: string
 };

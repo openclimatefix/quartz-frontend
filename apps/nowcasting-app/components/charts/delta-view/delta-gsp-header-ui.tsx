@@ -81,6 +81,7 @@ type ForecastHeaderProps = {
   forecastNextTimeOnly: string;
   deltaValue: string;
   timeNow: string;
+  installedCapacity: string
   title: string;
   onClose?: () => void;
 };
@@ -89,6 +90,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
   forecastPV,
   title,
+  installedCapacity,
   timeNow,
   actualPV,
   pvTimeOnly,
@@ -158,6 +160,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
             {deltaValue}
             <span className="text-xs text-ocf-black font-normal"> MW</span>
           </p>
+          <p>{deltaValue}/{installedCapacity}</p>
         </div>
       </div>
       <button
