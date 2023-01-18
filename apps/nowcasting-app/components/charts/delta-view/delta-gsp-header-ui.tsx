@@ -81,7 +81,7 @@ type ForecastHeaderProps = {
   forecastNextTimeOnly: string;
   deltaValue: string;
   timeNow: string;
-  installedCapacity?: string;
+  installedCapacity?: number;
   title: string;
   onClose?: () => void;
 };
