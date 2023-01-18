@@ -83,9 +83,20 @@ const BucketItem: React.FC<{
   upperBound: number;
   increment: number;
   textColor?: string;
-}> = ({ dataKey, quantity, text, bucketColor, borderColor, textColor, lowerBound, upperBound }) => {
+  altTextColor?: string;
+}> = ({
+  dataKey,
+  quantity,
+  text,
+  bucketColor,
+  borderColor,
+  textColor,
+  altTextColor,
+  lowerBound,
+  upperBound
+}) => {
   const selectedClass = ``;
-  const unselectedClass = `bg-opacity-40 text-opacity-40 border-2 ${borderColor}`;
+  const unselectedClass = `bg-opacity-0 border-2 ${borderColor}`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -100,7 +111,9 @@ const BucketItem: React.FC<{
   return (
     <>
       <div
-        className={`text-${textColor} justify-between flex flex-1
+        className={`${
+          isSelected ? `text-${textColor}` : `${altTextColor}`
+        } justify-between flex flex-1
             flex-col items-center rounded`}
       >
         <button
@@ -129,14 +142,6 @@ const DeltaBuckets: React.FC<{
 }> = ({ gspDeltas, negative = false }) => {
   // calculate array length here
   if (!gspDeltas.size) return null;
-
-  const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
-    if (negative) {
-      return a.delta - b.delta;
-    } else {
-      return b.delta - a.delta;
-    }
-  };
 
   const deltaArray = Array.from(gspDeltas.values());
   // const deltaArray = Array.from(gspDeltas.values())
@@ -188,6 +193,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-100"}
           borderColor={"border-ocf-delta-100"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-100"}
           quantity={negativeEighty.length}
           lowerBound={-59}
           upperBound={-40}
@@ -199,6 +205,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-200"}
           borderColor={"border-ocf-delta-200"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-200"}
           quantity={negativeSixty.length}
           lowerBound={-59}
           upperBound={-40}
@@ -210,6 +217,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-300"}
           borderColor={"border-ocf-delta-300"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-300"}
           quantity={negativeForty.length}
           lowerBound={-39}
           upperBound={-20}
@@ -220,6 +228,7 @@ const DeltaBuckets: React.FC<{
           text={"-20"}
           bucketColor={"bg-ocf-delta-400"}
           textColor={"ocf-white"}
+          altTextColor={"text-ocf-delta-400"}
           borderColor={"border-ocf-delta-400"}
           quantity={negativeTwenty.length}
           lowerBound={-19}
@@ -232,6 +241,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-500"}
           borderColor={"border-ocf-white"}
           textColor={"ocf-white"}
+          altTextColor={"ocf-gray-800"}
           quantity={minimalDelta.length}
           lowerBound={-1}
           upperBound={1}
@@ -243,6 +253,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-600"}
           borderColor={"border-ocf-delta-600"}
           textColor={"ocf-white"}
+          altTextColor={"text-ocf-delta-600"}
           quantity={positiveTwenty.length}
           lowerBound={2}
           upperBound={20}
@@ -254,6 +265,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-700"}
           borderColor={"border-ocf-delta-700"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-700"}
           quantity={positiveForty.length}
           lowerBound={21}
           upperBound={39}
@@ -265,6 +277,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-800"}
           borderColor={"border-ocf-delta-800"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-800"}
           quantity={positiveSixty.length}
           lowerBound={40}
           upperBound={59}
@@ -276,6 +289,7 @@ const DeltaBuckets: React.FC<{
           bucketColor={"bg-ocf-delta-900"}
           borderColor={"border-ocf-delta-900"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-900"}
           quantity={positiveEighty.length}
           lowerBound={60}
           upperBound={80}
@@ -366,23 +380,21 @@ const GspDeltaColumn: FC<{
           // const deltaPercentage = negative
           //   ? (100 - Number(gspDelta.deltaPercentage)).toFixed(0)
           //   : (Number(gspDelta.deltaPercentage) - 100).toFixed(0);
-          
+
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
             Number(gspDelta.deltaNormalized) * 100
           ).toFixed(0);
-          console.log(deltaNormalizedPercentage);
+
           const tickerColor = `h-2 ${gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`}`;
 
           const selectedClasses = `flex flex-3 flex-row bg-ocf-delta-1000 pb-0 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-          } ${bucketColor} cursor-pointer hover:bg-ocf-gray-700 hover:transition duration-700 ease-in-out`;
+          } ${bucketColor} cursor-pointer`;
 
           const selectedDeltaClass = `flex flex-3 flex-row bg-ocf-gray-800 pb-0 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-            } ${bucketColor} cursor-pointer pb-0`;
-          
-          const mwClass = `text-xs opacity-80`
+          } ${bucketColor} cursor-pointer pb-0`;
 
           if (!isSelected) {
             return null;
@@ -404,31 +416,44 @@ const GspDeltaColumn: FC<{
 
                 <div className="flex flex-end justify-around pt-1">
                   <div className="flex vertical-align-bottom font-semibold text-lg">
-                  {/* //deltavalue */}
-                  <div><p>{!negative && "+"}
-                  {Number(gspDelta.delta).toFixed(0)}<span className="opacity-80 text-xs font-thin">MW</span></p></div>
+                    {/* //deltavalue */}
+                    <div>
+                      <p>
+                        {!negative && "+"}
+                        {Number(gspDelta.delta).toFixed(0)}
+                        <span className="opacity-80 text-xs font-thin">MW</span>
+                      </p>
+                    </div>
                   </div>
 
                   {/* normalized percentage */}
                   <div className="flex flex-col pt-1.5 pr-1 text-right opacity-80 text-sm md:w-16">
-                      <p>{negative ? "-" : "+"}
-                      {deltaNormalizedPercentage}%</p>
+                    <p>
+                      {negative ? "-" : "+"}
+                      {deltaNormalizedPercentage}%
+                    </p>
                   </div>
 
                   {/* currentYield/forecasted yield */}
                   <div className="flex flex-col pt-1.5 pr-1 text-right font-semibold text-sm md:w-32">
                     <div>
                       {Number(gspDelta.currentYield).toFixed(0)}/
-                      {Number(gspDelta.forecast).toFixed(0)}<span className={`opacity-80 text-xs font-thin`}>MW</span>
+                      {Number(gspDelta.forecast).toFixed(0)}
+                      <span className={`opacity-80 text-xs font-thin`}>MW</span>
                     </div>
-                    
                   </div>
                 </div>
               </div>
               <div
-                className={`w-full bg-ocf-gray-800 h-2 pb-0 ${
-                  gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-                } ${bucketColor} cursor-pointer`}
+                className={
+                  selectedDeltaGsp === gspDelta.gspId
+                    ? `bg-ocf-gray-800 ${
+                        gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
+                      } ${bucketColor}`
+                    : `bg-ocf-delta-1000 ${
+                        gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
+                      } ${bucketColor}`
+                }
               >
                 <div
                   className={`${
