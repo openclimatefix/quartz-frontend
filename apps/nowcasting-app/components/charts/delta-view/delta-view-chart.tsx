@@ -292,10 +292,9 @@ const GspDeltaColumn: FC<{
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
-  const [selectedDeltaGsp, setSelectedDeltaGsp] = useGlobalState("selectedDeltaGsp")
+  const [selectedDeltaGsp, setSelectedDeltaGsp] = useGlobalState("selectedDeltaGsp");
   if (!gspDeltas.size) return null;
 
- 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
     if (negative) {
       return a.delta - b.delta;
@@ -304,7 +303,6 @@ const GspDeltaColumn: FC<{
     }
   };
 
- 
   const deltaArray = Array.from(gspDeltas.values());
 
   return (
@@ -358,67 +356,76 @@ const GspDeltaColumn: FC<{
             dataKey = "4";
           }
 
-          
           const isSelectedGSP = () => {
-            setClickedGspId(gspDelta.gspId)
-            setSelectedDeltaGsp(gspDelta.gspId)
-          } 
-          
+            setClickedGspId(gspDelta.gspId);
+            setSelectedDeltaGsp(gspDelta.gspId);
+          };
+
           const isSelected = selectedBuckets.includes(dataKey);
-          const deltaPercentage = negative
-            ? (100 - Number(gspDelta.deltaPercentage)).toFixed(0)
-            : (Number(gspDelta.deltaPercentage) - 100).toFixed(0);
-          const deltaNormalizedPercentage = (Math.abs((Number((gspDelta.deltaNormalized)))*100)).toFixed(0) 
-          console.log(deltaNormalizedPercentage)
+
+          // const deltaPercentage = negative
+          //   ? (100 - Number(gspDelta.deltaPercentage)).toFixed(0)
+          //   : (Number(gspDelta.deltaPercentage) - 100).toFixed(0);
+          
+          // this is normalized putting the delta value over the installed capacity of a gsp
+          const deltaNormalizedPercentage = Math.abs(
+            Number(gspDelta.deltaNormalized) * 100
+          ).toFixed(0);
+          console.log(deltaNormalizedPercentage);
           const tickerColor = `h-2 ${gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`}`;
 
           const selectedClasses = `flex flex-3 flex-row bg-ocf-delta-1000 pb-0 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-            } ${bucketColor} cursor-pointer hover:bg-ocf-gray-700 hover:transition duration-700 ease-in-out`;
-          
+          } ${bucketColor} cursor-pointer hover:bg-ocf-gray-700 hover:transition duration-700 ease-in-out`;
+
           const selectedDeltaClass = `flex flex-3 flex-row bg-ocf-gray-800 pb-0 justify-between pl-1 pr-1 ${
             gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
             } ${bucketColor} cursor-pointer pb-0`;
           
+          const mwClass = `text-xs opacity-80`
+
           if (!isSelected) {
             return null;
           }
           return (
-            <div  className={`pb-0.5`}
-                key={`gspCol${gspDelta.gspId}`}
-                >
+            <div className={`pb-0.5`} key={`gspCol${gspDelta.gspId}`}>
               <div
-                className={selectedDeltaGsp === gspDelta.gspId? selectedDeltaClass : selectedClasses}
+                className={
+                  selectedDeltaGsp === gspDelta.gspId ? selectedDeltaClass : selectedClasses
+                }
                 key={`gspCol${gspDelta.gspId}`}
                 onClick={isSelectedGSP}
               >
                 <div className="flex pl-1 pt-1 w-32 items-center md:w-48">
-                  <span className="font-semibold text-medium">{gspDelta.gspRegion}</span>
+                  <span className="font-semibold text-lg">{gspDelta.gspRegion}</span>
+
                   {/* <small>{gspDelta.gspId}</small> */}
                 </div>
-                <div className="flex flex-end items-center">
-                  <div className="flex pl-1 pt-1">
-                    <span className="font-semibold text-sm">
-                      {negative ? "-" : "+"}
-                      {deltaNormalizedPercentage}%
-                    </span>
-                    {/* <small>{gspDelta.gspId}</small> */}
+
+                <div className="flex flex-end justify-around pt-1">
+                  <div className="flex vertical-align-bottom font-semibold text-lg">
+                  {/* //deltavalue */}
+                  <div><p>{!negative && "+"}
+                  {Number(gspDelta.delta).toFixed(0)}<span className="opacity-80 text-xs font-thin">MW</span></p></div>
                   </div>
-                  <div className="flex flex-col pt-1.5 pr-1 text-right w-32 font-semibold text-sm md:w-32">
-                    <small>
-                      {Number(gspDelta.currentYield).toFixed(2)} /{" "}
-                      {Number(gspDelta.forecast).toFixed(2)} MW
-                    </small>
-                    {/* <span>
-                  {!negative && "+"}
-                  {Number(gspDelta.delta).toFixed(2)} MW
-                </span> */}
+
+                  {/* normalized percentage */}
+                  <div className="flex flex-col pt-1.5 pr-1 text-right opacity-80 text-sm md:w-16">
+                      <p>{negative ? "-" : "+"}
+                      {deltaNormalizedPercentage}%</p>
+                  </div>
+
+                  {/* currentYield/forecasted yield */}
+                  <div className="flex flex-col pt-1.5 pr-1 text-right font-semibold text-sm md:w-32">
+                    <div>
+                      {Number(gspDelta.currentYield).toFixed(0)}/
+                      {Number(gspDelta.forecast).toFixed(0)}<span className={`opacity-80 text-xs font-thin`}>MW</span>
+                    </div>
+                    
                   </div>
                 </div>
-
-           
               </div>
-     <div
+              <div
                 className={`w-full bg-ocf-gray-800 h-2 pb-0 ${
                   gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
                 } ${bucketColor} cursor-pointer`}
@@ -438,7 +445,6 @@ const GspDeltaColumn: FC<{
                 </div>
               </div>
             </div>
-              
           );
         })}
       </div>
@@ -528,9 +534,8 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
         gspCapacity: datum.installedCapacityMw,
         yield: gspYield?.solarGenerationKw || 0
       };
-      
     }) || [];
-  
+
   const gspDeltas = useMemo(() => {
     let tempGspDeltas = new Map();
 
@@ -558,7 +563,10 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
             1000 /
             (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
           100,
-        deltaNormalized: (((currentYield.yield / 1000) - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) / (currentYield.gspCapacity) || 0)
+        deltaNormalized:
+          (currentYield.yield / 1000 -
+            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
+            currentYield.gspCapacity || 0
       });
     }
     return tempGspDeltas;
