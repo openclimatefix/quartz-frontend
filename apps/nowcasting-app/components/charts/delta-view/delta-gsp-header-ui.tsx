@@ -81,7 +81,7 @@ type ForecastHeaderProps = {
   forecastNextTimeOnly: string;
   deltaValue: string;
   timeNow: string;
-  installedCapacity: string
+  installedCapacity?: string;
   title: string;
   onClose?: () => void;
 };
@@ -127,7 +127,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   const noDelta = Number(deltaValue) === 0;
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-ocf-black lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-ocf-black lg:text-2xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
         {title}
       </div>
       <div className="flex justify-between flex-2 my-2 px-6 pb-2">
@@ -150,7 +150,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
         </div>
       </div>
       <div
-        className={`text-ocf-black items- text-left pt-2 pl-2 pr-10 uppercase bg-${deltacolor}`}
+        className={`text-ocf-black text-left pt-2 pl-2 pr-5 uppercase bg-${deltacolor}`}
         style={{ background: deltacolor }}
       >
         <p>Delta</p>
@@ -160,13 +160,12 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
             {deltaValue}
             <span className="text-xs text-ocf-black font-normal"> MW</span>
           </p>
-          <p>{deltaValue}/{installedCapacity}</p>
         </div>
       </div>
       <button
         type="button"
         onClick={onClose}
-        className="font-bold items-center p-5 text-2xl border-l-2 border-mapbox-black-500 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-full"
+        className="font-bold items-center p-4 text-2xl border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
       >
         <CloseButtonIcon />
       </button>

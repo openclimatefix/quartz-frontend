@@ -85,7 +85,7 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-ocf-black lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-ocf-black lg:text-2xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
       <div className="flex justify-between flex-2 my-2 px-6 pb-2">
