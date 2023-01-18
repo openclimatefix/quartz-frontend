@@ -49,10 +49,6 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
 }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
-      {/*<div className="flex items-center mt-0.5">*/}
-      {/*  <ClockIcon />*/}
-      {/*  <p className="text-xs ml-0.5">{time}</p>*/}
-      {/*</div>*/}
       <ForecastLabel
         tip={
           <div className="w-28">
