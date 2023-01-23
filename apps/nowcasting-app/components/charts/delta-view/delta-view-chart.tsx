@@ -407,7 +407,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
 
   const chartLimits = useMemo(
     () =>
-      nationalForecastData && {
+      nationalForecastData?.[0] && {
         start: nationalForecastData[0].targetTime,
         end: nationalForecastData[nationalForecastData.length - 1].targetTime
       },
