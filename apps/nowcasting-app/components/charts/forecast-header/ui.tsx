@@ -99,7 +99,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
 }) => {
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-white lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
       <div className="flex justify-between flex-2 my-2 px-6">

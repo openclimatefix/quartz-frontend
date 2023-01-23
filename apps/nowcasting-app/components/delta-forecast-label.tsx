@@ -26,8 +26,8 @@ const DeltaForecastLabel: React.FC<DeltaForecastLabelProps> = ({
         >
           {tip}
         </span>
-        </div>
       </div>
+    </div>
   );
 };
 

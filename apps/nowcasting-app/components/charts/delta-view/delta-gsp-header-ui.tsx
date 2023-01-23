@@ -127,7 +127,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   const noDelta = Number(deltaValue) === 0;
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-ocf-black lg:text-2xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-ocf-black lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
         {title}
       </div>
       <div className="flex justify-between flex-2 my-2 px-6 pb-2">
