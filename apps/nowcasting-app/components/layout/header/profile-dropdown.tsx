@@ -60,7 +60,10 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 className={"text-right"}
                 fullWidth
               >
-                <a href="mailto:ops@openclimatefix.org">Help <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" /></a>
+                <a href="mailto:ops@openclimatefix.org">
+                  Help{" "}
+                  <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
+                </a>
               </Tooltip>
             </div>
           </Menu.Item>
