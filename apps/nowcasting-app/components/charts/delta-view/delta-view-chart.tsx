@@ -475,22 +475,10 @@ const GspDeltaColumn: FC<{
                         </div>
                       </DeltaForecastLabel>
                     </div>
-
-                    {/* <div
-                  className={`${gspDelta.delta > 0
-                      ? `static bottom-0 flex flex-row-reverse items-end justify-end`
-                      : `static bottom-0 flex items-end justify-end`}`}
-                >
-                  <div className={tickerColor} style={{ width: `1px` }}></div>
-                  <div
-                    className={`${selectedDeltaGsp === gspDelta.gspId ? `h-1.5` : `h-1`} ${progressLineColor}`}
-                    style={{ width: `${deltaNormalizedPercentage}%` }}
-                          ></div>
-                          </div> */}
                   </div>
                   <div
                     className={
-                      selectedDeltaGsp === gspDelta.gspId && clickedGspId === gspDelta.gspId
+                      clickedGspId === gspDelta.gspId
                         ? ` bg-ocf-gray-800 ${
                             gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
                           } ${bucketColor}`
@@ -507,7 +495,7 @@ const GspDeltaColumn: FC<{
                       <div className={tickerColor} style={{ width: `1px` }}></div>
                       <div
                         className={`${
-                          selectedDeltaGsp === gspDelta.gspId ? `h-1.5` : `h-1`
+                          clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
                         } ${progressLineColor}`}
                         style={{ width: `${deltaNormalizedPercentage}%` }}
                       ></div>
