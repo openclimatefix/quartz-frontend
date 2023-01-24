@@ -74,7 +74,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 target="_blank"
                 rel="noreferrer"
               >
-                Give feedback
+                Give feedback{" "}
                 <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
               </a>
             </div>
