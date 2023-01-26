@@ -406,9 +406,7 @@ const GspDeltaColumn: FC<{
                 >
                   <div
                     className={
-                      clickedGspId === gspDelta.gspId
-                        ? selectedDeltaClass
-                        : selectedClasses
+                      clickedGspId === gspDelta.gspId ? selectedDeltaClass : selectedClasses
                     }
                     key={`gspCol${gspDelta.gspId}`}
                     onClick={isSelectedGSP}
@@ -416,7 +414,7 @@ const GspDeltaColumn: FC<{
                     <div className="flex pl-1 pt-3 w-48 md:w-48">
                       <span className="font-semibold text-lg">{gspDelta.gspRegion}</span>
                     </div>
-                       {/* normalized percentage: delta value/gsp installed mw capacity */}
+                    {/* normalized percentage: delta value/gsp installed mw capacity */}
                     <div className="flex flex-end justify-around align-bottom pt-1">
                       <DeltaForecastLabel
                         tip={
@@ -432,8 +430,8 @@ const GspDeltaColumn: FC<{
                           </p>
                         </div>
                       </DeltaForecastLabel>
-                      
-                       {/* delta value in mw */}
+
+                      {/* delta value in mw */}
                       <DeltaForecastLabel
                         tip={
                           <div className="w-28 text-xs">
@@ -451,7 +449,6 @@ const GspDeltaColumn: FC<{
                           </div>
                         </div>
                       </DeltaForecastLabel>
-                   
 
                       {/* currentYield/forecasted yield */}
                       <DeltaForecastLabel
