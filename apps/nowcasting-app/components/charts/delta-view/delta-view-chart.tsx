@@ -24,11 +24,13 @@ import {
   GspAllForecastData,
   GspDeltaValue,
   GspRealData,
-  PvRealData
+  PvRealData,
+  GspEntity
 } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaBucketsBrad from "./delta-buckets-ui";
+import DeltaForecastLabel from "../../delta-forecast-label";
 import { theme } from "../../../tailwind.config";
 
 type DeltaBucketProps = {
@@ -81,13 +83,25 @@ const BucketItem: React.FC<{
   quantity: number;
   text: string;
   bucketColor: string;
+  borderColor: string;
   lowerBound: number;
   upperBound: number;
   increment: number;
   textColor?: string;
-}> = ({ dataKey, quantity, text, bucketColor, textColor, lowerBound, upperBound }) => {
+  altTextColor?: string;
+}> = ({
+  dataKey,
+  quantity,
+  text,
+  bucketColor,
+  borderColor,
+  textColor,
+  altTextColor,
+  lowerBound,
+  upperBound
+}) => {
   const selectedClass = ``;
-  const unselectedClass = "opacity-40";
+  const unselectedClass = `bg-opacity-0 border-2 ${borderColor}`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -102,17 +116,21 @@ const BucketItem: React.FC<{
   return (
     <>
       <div
-        className={`text-${textColor} justify-between flex flex-1
+        className={`${
+          isSelected ? `text-${textColor}` : `${altTextColor}`
+        } justify-between flex flex-1
             flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${
+          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${borderColor} ${
             isSelected ? selectedClass : unselectedClass
-          } ${dataKey === "0" && "border-2 border-ocf-gray-800"}`}
+          } ${dataKey === "0" && selectedBuckets.includes("0") && "border-2 border-white"} ${
+            dataKey === "0" && !selectedBuckets.includes("0") && "opacity-40 bg-orange"
+          }`}
           onClick={toggleBucketSelection}
         >
           <span className="text-2xl font-semibold">{quantity}</span>
-          <span className="flex text-xs pb-2">{text}</span>
+          <span className="flex text-xs pb-2">{text} MW</span>
         </button>
       </div>
     </>
@@ -129,14 +147,6 @@ const DeltaBuckets: React.FC<{
 }> = ({ gspDeltas, negative = false }) => {
   // calculate array length here
   if (!gspDeltas.size) return null;
-
-  const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
-    if (negative) {
-      return a.delta - b.delta;
-    } else {
-      return b.delta - a.delta;
-    }
-  };
 
   const deltaArray = Array.from(gspDeltas.values());
   // const deltaArray = Array.from(gspDeltas.values())
@@ -177,7 +187,7 @@ const DeltaBuckets: React.FC<{
   });
 
   const positiveEighty = deltaArray.filter((number) => {
-    return number.delta > 60 && number.delta <= 100;
+    return number.delta > 60 && number.delta <= 200;
   });
   return (
     <>
@@ -186,7 +196,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"-4"}
           text={"-80"}
           bucketColor={"bg-ocf-delta-100"}
+          borderColor={"border-ocf-delta-100"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-100"}
           quantity={negativeEighty.length}
           lowerBound={-59}
           upperBound={-40}
@@ -196,7 +208,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"-3"}
           text={"-60"}
           bucketColor={"bg-ocf-delta-200"}
+          borderColor={"border-ocf-delta-200"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-200"}
           quantity={negativeSixty.length}
           lowerBound={-59}
           upperBound={-40}
@@ -206,7 +220,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"-2"}
           text={"-40"}
           bucketColor={"bg-ocf-delta-300"}
+          borderColor={"border-ocf-delta-300"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-300"}
           quantity={negativeForty.length}
           lowerBound={-39}
           upperBound={-20}
@@ -217,6 +233,8 @@ const DeltaBuckets: React.FC<{
           text={"-20"}
           bucketColor={"bg-ocf-delta-400"}
           textColor={"ocf-white"}
+          altTextColor={"text-ocf-delta-400"}
+          borderColor={"border-ocf-delta-400"}
           quantity={negativeTwenty.length}
           lowerBound={-19}
           upperBound={-1}
@@ -224,9 +242,11 @@ const DeltaBuckets: React.FC<{
         ></BucketItem>
         <BucketItem
           dataKey={"0"}
-          text={"+/- MW"}
+          text={"+/-"}
           bucketColor={"bg-ocf-delta-500"}
+          borderColor={"border-ocf-white"}
           textColor={"ocf-white"}
+          altTextColor={"ocf-gray-800"}
           quantity={minimalDelta.length}
           lowerBound={-1}
           upperBound={1}
@@ -236,7 +256,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"1"}
           text={"+20"}
           bucketColor={"bg-ocf-delta-600"}
+          borderColor={"border-ocf-delta-600"}
           textColor={"ocf-white"}
+          altTextColor={"text-ocf-delta-600"}
           quantity={positiveTwenty.length}
           lowerBound={2}
           upperBound={20}
@@ -246,7 +268,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"2"}
           text={"+40"}
           bucketColor={"bg-ocf-delta-700"}
+          borderColor={"border-ocf-delta-700"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-700"}
           quantity={positiveForty.length}
           lowerBound={21}
           upperBound={39}
@@ -256,7 +280,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"3"}
           text={"+60"}
           bucketColor={"bg-ocf-delta-800"}
+          borderColor={"border-ocf-delta-800"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-800"}
           quantity={positiveSixty.length}
           lowerBound={40}
           upperBound={59}
@@ -266,7 +292,9 @@ const DeltaBuckets: React.FC<{
           dataKey={"4"}
           text={"+80"}
           bucketColor={"bg-ocf-delta-900"}
+          borderColor={"border-ocf-delta-900"}
           textColor={"ocf-black"}
+          altTextColor={"text-ocf-delta-900"}
           quantity={positiveEighty.length}
           lowerBound={60}
           upperBound={80}
@@ -283,6 +311,7 @@ const GspDeltaColumn: FC<{
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
+  const [clickedGspId] = useGlobalState("clickedGspId");
   if (!gspDeltas.size) return null;
 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
@@ -299,8 +328,9 @@ const GspDeltaColumn: FC<{
     <>
       <div className={`flex flex-col flex-1 mb-24 ${!negative ? "pl-3" : "pr-3 "}`}>
         {deltaArray.sort(sortFunc).map((gspDelta) => {
-          let bucketColor = "border-ocf-delta-500";
+          let bucketColor = "";
           let dataKey = "";
+          let progressLineColor = "";
           if (negative && gspDelta.delta >= 0) {
             return null;
           }
@@ -309,62 +339,168 @@ const GspDeltaColumn: FC<{
           }
           if (-200 < gspDelta.delta && gspDelta.delta < -60) {
             bucketColor = "border-ocf-delta-100";
+            progressLineColor = "bg-ocf-delta-100";
             dataKey = "-4";
           } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
             bucketColor = "border-ocf-delta-200";
+            progressLineColor = "bg-ocf-delta-200";
             dataKey = "-3";
           } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
             bucketColor = "border-ocf-delta-300";
+            progressLineColor = "bg-ocf-delta-300";
             dataKey = "-2";
           } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
             bucketColor = "border-ocf-delta-400";
+            progressLineColor = "bg-ocf-delta-400";
             dataKey = "-1";
           } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
             bucketColor = "border-white border-opacity-40";
+            progressLineColor = "bg-white bg-opacity-40";
             dataKey = "0";
           } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-600";
+            progressLineColor = "bg-ocf-delta-600";
             dataKey = "1";
           } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-700";
+            progressLineColor = "bg-ocf-delta-700";
             dataKey = "2";
           } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
             bucketColor = "border-ocf-delta-800";
+            progressLineColor = "bg-ocf-delta-800";
             dataKey = "3";
           } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
             bucketColor = "border-ocf-delta-900";
+            progressLineColor = "bg-ocf-delta-900";
             dataKey = "4";
           }
 
+          const isSelectedGSP = () => {
+            setClickedGspId(gspDelta.gspId);
+          };
+
           const isSelected = selectedBuckets.includes(dataKey);
 
-          const selectedClasses = `flex flex-row justify-between pb-1 pl-1 pr-1 mb-1 border-b-8 ${
-            gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
-          } ${bucketColor} cursor-pointer`;
+          // this is normalized putting the delta value over the installed capacity of a gsp
+          const deltaNormalizedPercentage = Math.abs(
+            Number(gspDelta.deltaNormalized) * 100
+          ).toFixed(0);
+
+          const tickerColor = `${clickedGspId === gspDelta.gspId ? `h-2.5` : `h-2`} ${
+            gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`
+          }`;
+
+          const selectedClasses = `static flex flex-3 flex-row pb-0 justify-between pl-1 pr-1 ${
+            gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
+          } ${bucketColor} cursor-pointer transition duration-200 ease-out hover:ease-in items-end`;
+
+          const selectedDeltaClass = `static flex flex-3 flex-row bg-ocf-gray-800 pb-0 justify-between pl-1 pr-1 ${
+            gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
+          } ${bucketColor} cursor-pointer pb-0 items-end`;
+
           if (!isSelected) {
             return null;
           }
           return (
-            <div
-              className={selectedClasses}
-              key={`gspCol${gspDelta.gspId}`}
-              onClick={() => setClickedGspId(gspDelta.gspId)}
-            >
-              <div className="flex flex-col">
-                <span>{gspDelta.gspRegion}</span>
-                <small>{gspDelta.gspId}</small>
+            <>
+              <div className="pb-0.5">
+                <div
+                  className={`bg-ocf-delta-950 transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in`}
+                  key={`gspCol${gspDelta.gspId}`}
+                >
+                  <div
+                    className={
+                      clickedGspId === gspDelta.gspId ? selectedDeltaClass : selectedClasses
+                    }
+                    key={`gspCol${gspDelta.gspId}`}
+                    onClick={isSelectedGSP}
+                  >
+                    <div className="flex pl-1 pt-3 w-48 md:w-48">
+                      <span className="font-semibold text-lg">{gspDelta.gspRegion}</span>
+                    </div>
+                    {/* normalized percentage: delta value/gsp installed mw capacity */}
+                    <div className="flex flex-end justify-around align-bottom pt-1">
+                      <DeltaForecastLabel
+                        tip={
+                          <div className="w-28  text-xs">
+                            <p>{"Normalized Delta"}</p>
+                          </div>
+                        }
+                      >
+                        <div className="flex pt-1.5 text-right opacity-80 text-sm w-16">
+                          <p>
+                            {negative ? "-" : "+"}
+                            {deltaNormalizedPercentage}%
+                          </p>
+                        </div>
+                      </DeltaForecastLabel>
+
+                      {/* delta value in mw */}
+                      <DeltaForecastLabel
+                        tip={
+                          <div className="w-28 text-xs">
+                            <p>{"Delta to Forecast"}</p>
+                          </div>
+                        }
+                      >
+                        <div className="flex pb-0 font-semibold text-lg md:w-20 w-16 justify-start">
+                          <div>
+                            <p>
+                              {!negative && "+"}
+                              {Number(gspDelta.delta).toFixed(0)}
+                              <span className="opacity-80 text-xs font-thin">MW</span>
+                            </p>
+                          </div>
+                        </div>
+                      </DeltaForecastLabel>
+
+                      {/* currentYield/forecasted yield */}
+                      <DeltaForecastLabel
+                        tip={
+                          <div className="w-28 text-xs">
+                            <p>{"Actual PV / Forecast"}</p>
+                          </div>
+                        }
+                      >
+                        <div className="flex flex-col pt-1.5 pr-1 text-left font-semibold text-sm md:w-22 w-20">
+                          <div>
+                            {Number(gspDelta.currentYield).toFixed(0)}/
+                            {Number(gspDelta.forecast).toFixed(0)}
+                            <span className={`opacity-80 text-xs font-thin`}>MW</span>
+                          </div>
+                        </div>
+                      </DeltaForecastLabel>
+                    </div>
+                  </div>
+                  <div
+                    className={
+                      clickedGspId === gspDelta.gspId
+                        ? ` bg-ocf-gray-800 ${
+                            gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
+                          } ${bucketColor}`
+                        : `${gspDelta.delta > 0 ? `border-l-8` : `border-r-8`} ${bucketColor}`
+                    }
+                  >
+                    <div
+                      className={`${
+                        gspDelta.delta > 0
+                          ? `bottom-0 flex flex-row-reverse items-end justify-end`
+                          : `flex items-end justify-end`
+                      }`}
+                    >
+                      <div className={tickerColor} style={{ width: `1px` }}></div>
+                      <div
+                        className={`${
+                          clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
+                        } ${progressLineColor}`}
+                        style={{ width: `${deltaNormalizedPercentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div></div>
+                </div>
               </div>
-              <div className="flex flex-col text-right">
-                <small>
-                  {Number(gspDelta.currentYield).toFixed(2)} /{" "}
-                  {Number(gspDelta.forecast).toFixed(2)} MW
-                </small>
-                <span>
-                  {!negative && "+"}
-                  {Number(gspDelta.delta).toFixed(2)} MW
-                </span>
-              </div>
-            </div>
+            </>
           );
         })}
       </div>
@@ -484,7 +620,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex justify-between mb-5 mx-3">
+        <div className="flex justify-between mb-15 mx-3">
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
           <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
         </div>

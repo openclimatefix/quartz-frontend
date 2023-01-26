@@ -86,6 +86,7 @@ const GspPvRemixChart: FC<{
         <GSPDeltaForecastHeader
           onClose={close}
           deltaValue={deltaValue}
+          installedCapacity={gspInfo?.installedCapacityMw}
           forecastNextPV={fourHourForecast}
           actualPV={"8"}
           title={gspInfo?.regionName || ""}
