@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
 import ForecastHeader from "../components/charts/forecast-header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, getAllForecastUrl, VIEWS } from "../constant";
+import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
 import useSWRImmutable from "swr/immutable";
 import {
@@ -149,6 +149,7 @@ export default function Home() {
       const deltaNormalized =
         (currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
           currentYield.gspCapacity || 0;
+      const deltaBucket = getDeltaBucket(delta);
       tempGspDeltas.set(currentYield.gspId, {
         gspId: currentYield.gspId,
         gspRegion: currentYield.gspRegion,
@@ -162,7 +163,8 @@ export default function Home() {
             (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
           100,
         deltaNormalized,
-        deltaBucket: getDeltaBucket(delta)
+        deltaBucket: deltaBucket,
+        deltaBucketKey: DELTA_BUCKET[deltaBucket]
       });
     }
     console.log("gspDeltas calculated");

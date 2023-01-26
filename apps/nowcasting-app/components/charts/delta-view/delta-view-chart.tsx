@@ -1,14 +1,12 @@
 import { Dispatch, FC, SetStateAction, useMemo } from "react";
 import RemixLine from "../remix-line";
-import useSWR from "swr";
-import { API_PREFIX, DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
+import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
-  axiosFetcherAuth,
+  createBucketObject,
   formatISODateString,
-  getDeltaBucket,
   getRounded4HoursAgoString
 } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
@@ -16,22 +14,10 @@ import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import {
-  CombinedData,
-  CombinedErrors,
-  ForecastData,
-  ForecastValue,
-  GspAllForecastData,
-  GspDeltaValue,
-  GspRealData,
-  PvRealData,
-  GspEntity
-} from "../../types";
+import { CombinedData, CombinedErrors, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
-import DeltaBucketsBrad from "./delta-buckets-ui";
 import DeltaForecastLabel from "../../delta-forecast-label";
-import { theme } from "../../../tailwind.config";
 
 type DeltaBucketProps = {
   className?: string;
@@ -44,6 +30,7 @@ type Bucket = {
   quantity: number;
   text: string;
   bucketColor: string;
+  borderColor: string;
   lowerBound: number;
   upperBound: number;
   increment: number;
@@ -154,152 +141,175 @@ const DeltaBuckets: React.FC<{
   // const numberInBucket = deltaArray.filter((number) => {
   //   return number.delta > lowerBound && number.delta < upperBound
 
-  const negativeEighty = deltaArray.filter((number) => {
-    return number.delta > -200 && number.delta < -60;
+  // const negativeEighty = deltaArray.filter((number) => {
+  //   return number.delta > -200 && number.delta < -60;
+  // });
+  //
+  // const negativeSixty = deltaArray.filter((number) => {
+  //   return number.delta > -59 && number.delta < -40;
+  // });
+  //
+  // const negativeForty = deltaArray.filter((number) => {
+  //   return number.delta > -39 && number.delta < -20;
+  // });
+  //
+  // const negativeTwenty = deltaArray.filter((number) => {
+  //   return number.delta > -19 && number.delta < -2;
+  // });
+  //
+  // const minimalDelta = deltaArray.filter((number) => {
+  //   return number.delta > -2 && number.delta <= 2;
+  // });
+  //
+  // const positiveTwenty = deltaArray.filter((number) => {
+  //   return number.delta > 2 && number.delta <= 20;
+  // });
+  //
+  // const positiveForty = deltaArray.filter((number) => {
+  //   return number.delta > 20 && number.delta <= 40;
+  // });
+  //
+  // const positiveSixty = deltaArray.filter((number) => {
+  //   return number.delta > 40 && number.delta <= 60;
+  // });
+  //
+  // const positiveEighty = deltaArray.filter((number) => {
+  //   return number.delta > 60 && number.delta <= 200;
+  // });
+
+  const groupedDeltas: Map<DELTA_BUCKET, GspDeltaValue[]> = new Map([
+    [DELTA_BUCKET.NEG4, []],
+    [DELTA_BUCKET.NEG3, []],
+    [DELTA_BUCKET.NEG2, []],
+    [DELTA_BUCKET.NEG1, []],
+    [DELTA_BUCKET.ZERO, []],
+    [DELTA_BUCKET.POS1, []],
+    [DELTA_BUCKET.POS2, []],
+    [DELTA_BUCKET.POS3, []],
+    [DELTA_BUCKET.POS4, []]
+  ]);
+  deltaArray.forEach((delta) => {
+    groupedDeltas.set(delta.deltaBucket, [...(groupedDeltas.get(delta.deltaBucket) || []), delta]);
+  });
+  const buckets: Bucket[] = [];
+  groupedDeltas.forEach((deltaGroup, deltaBucket) => {
+    buckets.push(createBucketObject(deltaBucket, deltaGroup));
   });
 
-  const negativeSixty = deltaArray.filter((number) => {
-    return number.delta > -59 && number.delta < -40;
-  });
-
-  const negativeForty = deltaArray.filter((number) => {
-    return number.delta > -39 && number.delta < -20;
-  });
-
-  const negativeTwenty = deltaArray.filter((number) => {
-    return number.delta > -19 && number.delta < -2;
-  });
-
-  const minimalDelta = deltaArray.filter((number) => {
-    return number.delta > -2 && number.delta <= 2;
-  });
-
-  const positiveTwenty = deltaArray.filter((number) => {
-    return number.delta > 2 && number.delta <= 20;
-  });
-
-  const positiveForty = deltaArray.filter((number) => {
-    return number.delta > 20 && number.delta <= 40;
-  });
-
-  const positiveSixty = deltaArray.filter((number) => {
-    return number.delta > 40 && number.delta <= 60;
-  });
-
-  const positiveEighty = deltaArray.filter((number) => {
-    return number.delta > 60 && number.delta <= 200;
-  });
   return (
     <>
       <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
-        <BucketItem
-          dataKey={"-4"}
-          text={"-80"}
-          bucketColor={"bg-ocf-delta-100"}
-          borderColor={"border-ocf-delta-100"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-100"}
-          quantity={negativeEighty.length}
-          lowerBound={-59}
-          upperBound={-40}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"-3"}
-          text={"-60"}
-          bucketColor={"bg-ocf-delta-200"}
-          borderColor={"border-ocf-delta-200"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-200"}
-          quantity={negativeSixty.length}
-          lowerBound={-59}
-          upperBound={-40}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"-2"}
-          text={"-40"}
-          bucketColor={"bg-ocf-delta-300"}
-          borderColor={"border-ocf-delta-300"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-300"}
-          quantity={negativeForty.length}
-          lowerBound={-39}
-          upperBound={-20}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"-1"}
-          text={"-20"}
-          bucketColor={"bg-ocf-delta-400"}
-          textColor={"ocf-white"}
-          altTextColor={"text-ocf-delta-400"}
-          borderColor={"border-ocf-delta-400"}
-          quantity={negativeTwenty.length}
-          lowerBound={-19}
-          upperBound={-1}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"0"}
-          text={"+/-"}
-          bucketColor={"bg-ocf-delta-500"}
-          borderColor={"border-ocf-white"}
-          textColor={"ocf-white"}
-          altTextColor={"ocf-gray-800"}
-          quantity={minimalDelta.length}
-          lowerBound={-1}
-          upperBound={1}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"1"}
-          text={"+20"}
-          bucketColor={"bg-ocf-delta-600"}
-          borderColor={"border-ocf-delta-600"}
-          textColor={"ocf-white"}
-          altTextColor={"text-ocf-delta-600"}
-          quantity={positiveTwenty.length}
-          lowerBound={2}
-          upperBound={20}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"2"}
-          text={"+40"}
-          bucketColor={"bg-ocf-delta-700"}
-          borderColor={"border-ocf-delta-700"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-700"}
-          quantity={positiveForty.length}
-          lowerBound={21}
-          upperBound={39}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"3"}
-          text={"+60"}
-          bucketColor={"bg-ocf-delta-800"}
-          borderColor={"border-ocf-delta-800"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-800"}
-          quantity={positiveSixty.length}
-          lowerBound={40}
-          upperBound={59}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"4"}
-          text={"+80"}
-          bucketColor={"bg-ocf-delta-900"}
-          borderColor={"border-ocf-delta-900"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-900"}
-          quantity={positiveEighty.length}
-          lowerBound={60}
-          upperBound={80}
-          increment={1}
-        ></BucketItem>
+        {/*<BucketItem*/}
+        {/*  dataKey={"-4"}*/}
+        {/*  text={"-80"}*/}
+        {/*  bucketColor={"bg-ocf-delta-100"}*/}
+        {/*  borderColor={"border-ocf-delta-100"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-100"}*/}
+        {/*  quantity={negativeEighty.length}*/}
+        {/*  lowerBound={-59}*/}
+        {/*  upperBound={-40}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"-3"}*/}
+        {/*  text={"-60"}*/}
+        {/*  bucketColor={"bg-ocf-delta-200"}*/}
+        {/*  borderColor={"border-ocf-delta-200"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-200"}*/}
+        {/*  quantity={negativeSixty.length}*/}
+        {/*  lowerBound={-59}*/}
+        {/*  upperBound={-40}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"-2"}*/}
+        {/*  text={"-40"}*/}
+        {/*  bucketColor={"bg-ocf-delta-300"}*/}
+        {/*  borderColor={"border-ocf-delta-300"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-300"}*/}
+        {/*  quantity={negativeForty.length}*/}
+        {/*  lowerBound={-39}*/}
+        {/*  upperBound={-20}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"-1"}*/}
+        {/*  text={"-20"}*/}
+        {/*  bucketColor={"bg-ocf-delta-400"}*/}
+        {/*  textColor={"ocf-white"}*/}
+        {/*  altTextColor={"text-ocf-delta-400"}*/}
+        {/*  borderColor={"border-ocf-delta-400"}*/}
+        {/*  quantity={negativeTwenty.length}*/}
+        {/*  lowerBound={-19}*/}
+        {/*  upperBound={-1}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"0"}*/}
+        {/*  text={"+/-"}*/}
+        {/*  bucketColor={"bg-ocf-delta-500"}*/}
+        {/*  borderColor={"border-ocf-white"}*/}
+        {/*  textColor={"ocf-white"}*/}
+        {/*  altTextColor={"ocf-gray-800"}*/}
+        {/*  quantity={minimalDelta.length}*/}
+        {/*  lowerBound={-1}*/}
+        {/*  upperBound={1}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"1"}*/}
+        {/*  text={"+20"}*/}
+        {/*  bucketColor={"bg-ocf-delta-600"}*/}
+        {/*  borderColor={"border-ocf-delta-600"}*/}
+        {/*  textColor={"ocf-white"}*/}
+        {/*  altTextColor={"text-ocf-delta-600"}*/}
+        {/*  quantity={positiveTwenty.length}*/}
+        {/*  lowerBound={2}*/}
+        {/*  upperBound={20}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"2"}*/}
+        {/*  text={"+40"}*/}
+        {/*  bucketColor={"bg-ocf-delta-700"}*/}
+        {/*  borderColor={"border-ocf-delta-700"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-700"}*/}
+        {/*  quantity={positiveForty.length}*/}
+        {/*  lowerBound={21}*/}
+        {/*  upperBound={39}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"3"}*/}
+        {/*  text={"+60"}*/}
+        {/*  bucketColor={"bg-ocf-delta-800"}*/}
+        {/*  borderColor={"border-ocf-delta-800"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-800"}*/}
+        {/*  quantity={positiveSixty.length}*/}
+        {/*  lowerBound={40}*/}
+        {/*  upperBound={59}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"4"}*/}
+        {/*  text={"+80"}*/}
+        {/*  bucketColor={"bg-ocf-delta-900"}*/}
+        {/*  borderColor={"border-ocf-delta-900"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-900"}*/}
+        {/*  quantity={positiveEighty.length}*/}
+        {/*  lowerBound={60}*/}
+        {/*  upperBound={80}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {buckets.map((bucket) => {
+          return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
+        })}
       </div>
     </>
   );
@@ -337,49 +347,96 @@ const GspDeltaColumn: FC<{
           if (!negative && gspDelta.delta <= 0) {
             return null;
           }
-          if (-200 < gspDelta.delta && gspDelta.delta < -60) {
-            bucketColor = "border-ocf-delta-100";
-            progressLineColor = "bg-ocf-delta-100";
-            dataKey = "-4";
-          } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
-            bucketColor = "border-ocf-delta-200";
-            progressLineColor = "bg-ocf-delta-200";
-            dataKey = "-3";
-          } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
-            bucketColor = "border-ocf-delta-300";
-            progressLineColor = "bg-ocf-delta-300";
-            dataKey = "-2";
-          } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
-            bucketColor = "border-ocf-delta-400";
-            progressLineColor = "bg-ocf-delta-400";
-            dataKey = "-1";
-          } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
-            bucketColor = "border-white border-opacity-40";
-            progressLineColor = "bg-white bg-opacity-40";
-            dataKey = "0";
-          } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
-            bucketColor = "border-ocf-delta-600";
-            progressLineColor = "bg-ocf-delta-600";
-            dataKey = "1";
-          } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
-            bucketColor = "border-ocf-delta-700";
-            progressLineColor = "bg-ocf-delta-700";
-            dataKey = "2";
-          } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
-            bucketColor = "border-ocf-delta-800";
-            progressLineColor = "bg-ocf-delta-800";
-            dataKey = "3";
-          } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
-            bucketColor = "border-ocf-delta-900";
-            progressLineColor = "bg-ocf-delta-900";
-            dataKey = "4";
+          // if (-200 < gspDelta.delta && gspDelta.delta < -60) {
+          //   bucketColor = "border-ocf-delta-100";
+          //   progressLineColor = "bg-ocf-delta-100";
+          //   dataKey = "-4";
+          // } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
+          //   bucketColor = "border-ocf-delta-200";
+          //   progressLineColor = "bg-ocf-delta-200";
+          //   dataKey = "-3";
+          // } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
+          //   bucketColor = "border-ocf-delta-300";
+          //   progressLineColor = "bg-ocf-delta-300";
+          //   dataKey = "-2";
+          // } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
+          //   bucketColor = "border-ocf-delta-400";
+          //   progressLineColor = "bg-ocf-delta-400";
+          //   dataKey = "-1";
+          // } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
+          //   bucketColor = "border-white border-opacity-40";
+          //   progressLineColor = "bg-white bg-opacity-40";
+          //   dataKey = "0";
+          // } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
+          //   bucketColor = "border-ocf-delta-600";
+          //   progressLineColor = "bg-ocf-delta-600";
+          //   dataKey = "1";
+          // } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
+          //   bucketColor = "border-ocf-delta-700";
+          //   progressLineColor = "bg-ocf-delta-700";
+          //   dataKey = "2";
+          // } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
+          //   bucketColor = "border-ocf-delta-800";
+          //   progressLineColor = "bg-ocf-delta-800";
+          //   dataKey = "3";
+          // } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
+          //   bucketColor = "border-ocf-delta-900";
+          //   progressLineColor = "bg-ocf-delta-900";
+          //   dataKey = "4";
+          // }
+          switch (gspDelta.deltaBucket) {
+            case DELTA_BUCKET.NEG4:
+              bucketColor = "border-ocf-delta-100";
+              progressLineColor = "bg-ocf-delta-100";
+              dataKey = "-4";
+              break;
+            case DELTA_BUCKET.NEG3:
+              bucketColor = "border-ocf-delta-200";
+              progressLineColor = "bg-ocf-delta-200";
+              dataKey = "-3";
+              break;
+            case DELTA_BUCKET.NEG2:
+              bucketColor = "border-ocf-delta-300";
+              progressLineColor = "bg-ocf-delta-300";
+              dataKey = "-2";
+              break;
+            case DELTA_BUCKET.NEG1:
+              bucketColor = "border-ocf-delta-400";
+              progressLineColor = "bg-ocf-delta-400";
+              dataKey = "-1";
+              break;
+            case DELTA_BUCKET.ZERO:
+              bucketColor = "border-white border-opacity-40";
+              progressLineColor = "bg-white bg-opacity-40";
+              dataKey = "0";
+              break;
+            case DELTA_BUCKET.POS1:
+              bucketColor = "border-ocf-delta-600";
+              progressLineColor = "bg-ocf-delta-600";
+              dataKey = "1";
+              break;
+            case DELTA_BUCKET.POS2:
+              bucketColor = "border-ocf-delta-700";
+              progressLineColor = "bg-ocf-delta-700";
+              dataKey = "2";
+              break;
+            case DELTA_BUCKET.POS3:
+              bucketColor = "border-ocf-delta-800";
+              progressLineColor = "bg-ocf-delta-800";
+              dataKey = "3";
+              break;
+            case DELTA_BUCKET.POS4:
+              bucketColor = "border-ocf-delta-900";
+              progressLineColor = "bg-ocf-delta-900";
+              dataKey = "4";
+              break;
           }
 
           const isSelectedGSP = () => {
             setClickedGspId(gspDelta.gspId);
           };
 
-          const isSelected = selectedBuckets.includes(dataKey);
+          const isSelected = selectedBuckets.includes(gspDelta.deltaBucketKey);
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
