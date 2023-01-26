@@ -126,11 +126,11 @@ export default function Home() {
       return {
         gspId: datum.gspId,
         gspRegion: datum.regionName,
+        gspCapacity: datum.installedCapacityMw,
         yield: gspYield?.solarGenerationKw || 0
       };
     }) || [];
   const gspDeltas = useMemo(() => {
-    console.log("gspDeltas calculated");
     let tempGspDeltas = new Map();
 
     for (let i = 0; i < currentYields.length; i++) {
@@ -146,15 +146,26 @@ export default function Home() {
       });
       const delta =
         currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
+      const deltaNormalized =
+        (currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
+          currentYield.gspCapacity || 0;
       tempGspDeltas.set(currentYield.gspId, {
         gspId: currentYield.gspId,
         gspRegion: currentYield.gspRegion,
+        gspCapacity: currentYield.gspCapacity,
         currentYield: currentYield.yield / 1000,
         forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
         delta,
+        deltaPercentage:
+          (currentYield.yield /
+            1000 /
+            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
+          100,
+        deltaNormalized,
         deltaBucket: getDeltaBucket(delta)
       });
     }
+    console.log("gspDeltas calculated");
     return tempGspDeltas;
   }, [allGspForecastData, allGspRealData, selectedTime]);
 
