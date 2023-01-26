@@ -82,8 +82,6 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     allGspRealError
   } = combinedErrors;
 
-  console.log("gspDeltas", Array.from(gspDeltas.values()));
-
   const {
     data: initForecastData,
     isValidating,
@@ -103,8 +101,6 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     1
   ];
 
-  console.log("gsp", gspDeltas.get(198)?.delta);
-
   const generateGeoJsonForecastData: (
     forecastData?: FcAllResData,
     targetTime?: string,
@@ -113,7 +109,6 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     // Exclude first item as it's not representing gsp area
     const gspForecastData = forecastData?.forecasts?.slice(1);
     const gspShapeJson = gspShapeData as FeatureCollection;
-    // console.log("gspDelta", gspDeltas);
     const forecastGeoJson = {
       ...gspShapeData,
       type: "FeatureCollection" as "FeatureCollection",
@@ -127,11 +122,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         } else if (gspForecastData) {
           selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
         }
-        // console.log("forecastDatum", forecastDatum);
         const currentGspDelta: GspDeltaValue = gspDeltas.get(index + 1);
-        // console.log("index", index);
-        // console.log("featureObj.properties?.gsp_id", featureObj.properties?.gsp_id);
-        // console.log("current gsp", currentGspDelta);
 
         return {
           ...featureObj,
@@ -158,85 +149,74 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(initForecastData, selectedISOTime, gspDeltas);
   }, [initForecastData, selectedISOTime]);
-  console.log("selectedISOTime", selectedISOTime);
-  console.log(
-    "generatedGeoJsonForecastData",
-    generatedGeoJsonForecastData.forecastGeoJson.features.map((f) => f.properties?.delta)
-  );
 
   const updateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
     if (generatedGeoJsonForecastData && source) {
-      // console.log("update map data");
-      // console.log(generatedGeoJsonForecastData.forecastGeoJson.features[198].properties);
       source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
       map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));
     }
   };
 
-  // console.log("fillOpacity", getFillOpacity(selectedDataName, isNormalized));
-
-  console.log("latestPV", generateGeoJsonForecastData(initForecastData, selectedISOTime));
-
   const getFillColor = (selectedData: string): Expression => [
     "let",
     "bucket",
     ["get", selectedData],
-    "case",
-    ["<", ["to-number", ["var", "bucket"]], -80],
-    ["to-color", theme.extend.colors["ocf-delta"][100]],
     [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], -80],
-      ["<", ["to-number", ["var", "bucket"]], -60]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][200]],
-    [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], -60],
-      ["<", ["to-number", ["var", "bucket"]], -40]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][300]],
-    [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], -40],
-      ["<", ["to-number", ["var", "bucket"]], -20]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][400]],
-    [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], -20],
-      ["<", ["to-number", ["var", "bucket"]], 0]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][500]],
-    [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], 0],
-      ["<", ["to-number", ["var", "bucket"]], 20]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][600]],
-    [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], 20],
-      ["<", ["to-number", ["var", "bucket"]], 40]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][700]],
-    [
-      "all",
-      [">=", ["to-number", ["var", "bucket"]], 40],
-      ["<", ["to-number", ["var", "bucket"]], 60]
-    ],
-    ["to-color", theme.extend.colors["ocf-delta"][800]],
-    [">=", ["to-number", ["var", "bucket"]], 60],
-    ["to-color", theme.extend.colors["ocf-delta"][900]],
-    // Default fill color
-    ["to-color", theme.extend.colors["ocf-delta"][500]]
+      "case",
+      ["<", ["to-number", ["var", "bucket"]], -80],
+      ["to-color", theme.extend.colors["ocf-delta"][100]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], -80],
+        ["<", ["to-number", ["var", "bucket"]], -60]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][200]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], -60],
+        ["<", ["to-number", ["var", "bucket"]], -40]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][300]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], -40],
+        ["<", ["to-number", ["var", "bucket"]], -20]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][400]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], -20],
+        ["<", ["to-number", ["var", "bucket"]], 20]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][500]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], 20],
+        ["<", ["to-number", ["var", "bucket"]], 40]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][600]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], 40],
+        ["<", ["to-number", ["var", "bucket"]], 60]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][700]],
+      [
+        "all",
+        [">=", ["to-number", ["var", "bucket"]], 60],
+        ["<", ["to-number", ["var", "bucket"]], 80]
+      ],
+      ["to-color", theme.extend.colors["ocf-delta"][800]],
+      [">=", ["to-number", ["var", "bucket"]], 80],
+      ["to-color", theme.extend.colors["ocf-delta"][900]],
+      // Default fill color
+      ["to-color", theme.extend.colors["ocf-delta"][500]]
+    ]
   ];
-  console.log("fillColor", getFillColor("delta"));
 
   const addFCData = (map: { current: mapboxgl.Map }) => {
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
-    console.log("forecastGeoJson", forecastGeoJson);
 
     map.current.addSource("latestPV", {
       type: "geojson",
