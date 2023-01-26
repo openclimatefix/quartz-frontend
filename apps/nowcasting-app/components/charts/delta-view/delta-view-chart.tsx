@@ -307,7 +307,6 @@ const GspDeltaColumn: FC<{
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
-  const [selectedDeltaGsp, setSelectedDeltaGsp] = useGlobalState("selectedDeltaGsp");
   const [clickedGspId] = useGlobalState("clickedGspId");
   if (!gspDeltas.size) return null;
 
@@ -374,21 +373,16 @@ const GspDeltaColumn: FC<{
 
           const isSelectedGSP = () => {
             setClickedGspId(gspDelta.gspId);
-            setSelectedDeltaGsp(gspDelta.gspId);
           };
 
           const isSelected = selectedBuckets.includes(dataKey);
-
-          // const deltaPercentage = negative
-          //   ? (100 - Number(gspDelta.deltaPercentage)).toFixed(0)
-          //   : (Number(gspDelta.deltaPercentage) - 100).toFixed(0);
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
             Number(gspDelta.deltaNormalized) * 100
           ).toFixed(0);
 
-          const tickerColor = `${selectedDeltaGsp === gspDelta.gspId ? `h-2.5` : `h-2`} ${
+          const tickerColor = `${clickedGspId === gspDelta.gspId ? `h-2.5` : `h-2`} ${
             gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`
           }`;
 
@@ -407,12 +401,12 @@ const GspDeltaColumn: FC<{
             <>
               <div className="pb-0.5">
                 <div
-                  className={`bg-ocf-delta-1000 transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in`}
+                  className={`bg-ocf-delta-950 transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in`}
                   key={`gspCol${gspDelta.gspId}`}
                 >
                   <div
                     className={
-                      selectedDeltaGsp && clickedGspId === gspDelta.gspId
+                      clickedGspId === gspDelta.gspId
                         ? selectedDeltaClass
                         : selectedClasses
                     }
@@ -422,8 +416,8 @@ const GspDeltaColumn: FC<{
                     <div className="flex pl-1 pt-3 w-48 md:w-48">
                       <span className="font-semibold text-lg">{gspDelta.gspRegion}</span>
                     </div>
-
-                    <div className="flex flex-end justify-around items-center pt-1">
+                       {/* normalized percentage: delta value/gsp installed mw capacity */}
+                    <div className="flex flex-end justify-around align-bottom pt-1">
                       <DeltaForecastLabel
                         tip={
                           <div className="w-28  text-xs">
@@ -438,7 +432,8 @@ const GspDeltaColumn: FC<{
                           </p>
                         </div>
                       </DeltaForecastLabel>
-
+                      
+                       {/* delta value in mw */}
                       <DeltaForecastLabel
                         tip={
                           <div className="w-28 text-xs">
@@ -456,17 +451,17 @@ const GspDeltaColumn: FC<{
                           </div>
                         </div>
                       </DeltaForecastLabel>
-                      {/* normalized percentage */}
+                   
 
                       {/* currentYield/forecasted yield */}
                       <DeltaForecastLabel
                         tip={
-                          <div className="w-32 text-xs">
+                          <div className="w-28 text-xs">
                             <p>{"Actual PV / Forecast"}</p>
                           </div>
                         }
                       >
-                        <div className="flex flex-col pt-1.5 pr-1 text-right font-semibold text-sm md:w-22 w-20">
+                        <div className="flex flex-col pt-1.5 pr-1 text-left font-semibold text-sm md:w-22 w-20">
                           <div>
                             {Number(gspDelta.currentYield).toFixed(0)}/
                             {Number(gspDelta.forecast).toFixed(0)}
