@@ -1,4 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
+import { getDeltaBucketKeys } from "../../constant";
 
 export function get30MinNow() {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -30,7 +31,7 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   clickedGspId: undefined,
   forecastCreationTime: undefined,
   visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST", "4HR_FORECAST"],
-  selectedBuckets: ["-4", "-3", "-2", "-1", "1", "2", "3", "4"],
+  selectedBuckets: getDeltaBucketKeys(),
   show4hView:
     process.env.NODE_ENV === "development" ||
     (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production")

@@ -42,8 +42,28 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });
       map.current.addControl(nav, "bottom-right");
-      map.current.on("load", () => setIsMapReady(true));
+
+      map.current.on("load", (event) => {
+        console.log("map loaded", event);
+        setIsMapReady(true);
+        if (map.current?.getCanvas()?.width === 400) {
+          console.log("-- -- -- resizing map");
+          map.current?.resize();
+        }
+        loadDataOverlay(map);
+      });
+
+      map.current.on("dataloading", () => {
+        if (map.current?.getCanvas()?.width === 400) {
+          console.log("-- -- -- resizing map");
+          map.current?.resize();
+        }
+      });
     }
+    // TODO: unsure as to whether react cleans up/ends up with multiple maps when re-rendering
+    // or whether removing will cause more issues elsewhere in the app.
+    // Will just keep an eye on performance etc. for now.
+    // return () => map.current?.remove();
   }, []);
 
   useEffect(() => {
@@ -54,10 +74,6 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
       setLat(Number(map.current?.getCenter().lat.toFixed(4)));
       setZoom(Number(map.current?.getZoom().toFixed(2)));
     });
-
-    map.current.on("load", (event) => {
-      loadDataOverlay(map);
-    });
   }, [map]);
 
   return (
@@ -65,7 +81,7 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>
-      <div ref={mapContainer} className="h-full" />
+      <div ref={mapContainer} className="h-full w-full" />
       <div className="map-overlay top">{children}</div>
     </div>
   );

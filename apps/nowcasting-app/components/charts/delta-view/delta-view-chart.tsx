@@ -1,33 +1,23 @@
-import { Dispatch, FC, ReactElement, SetStateAction, useMemo, useState } from "react";
+import { Dispatch, FC, SetStateAction, useMemo } from "react";
 import RemixLine from "../remix-line";
-import useSWR from "swr";
-import { API_PREFIX } from "../../../constant";
+import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
-  getRounded4HoursAgoString,
+  createBucketObject,
   formatISODateString,
-  axiosFetcherAuth
+  getRounded4HoursAgoString
 } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import {
-  ForecastData,
-  ForecastValue,
-  GspAllForecastData,
-  GspDeltaValue,
-  GspEntity,
-  GspRealData
-} from "../../types";
+import { CombinedData, CombinedErrors, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
-import { theme } from "../../../tailwind.config";
 
 type DeltaBucketProps = {
   className?: string;
@@ -40,6 +30,7 @@ type Bucket = {
   quantity: number;
   text: string;
   bucketColor: string;
+  borderColor: string;
   lowerBound: number;
   upperBound: number;
   increment: number;
@@ -150,152 +141,175 @@ const DeltaBuckets: React.FC<{
   // const numberInBucket = deltaArray.filter((number) => {
   //   return number.delta > lowerBound && number.delta < upperBound
 
-  const negativeEighty = deltaArray.filter((number) => {
-    return number.delta > -200 && number.delta < -60;
+  // const negativeEighty = deltaArray.filter((number) => {
+  //   return number.delta > -200 && number.delta < -60;
+  // });
+  //
+  // const negativeSixty = deltaArray.filter((number) => {
+  //   return number.delta > -59 && number.delta < -40;
+  // });
+  //
+  // const negativeForty = deltaArray.filter((number) => {
+  //   return number.delta > -39 && number.delta < -20;
+  // });
+  //
+  // const negativeTwenty = deltaArray.filter((number) => {
+  //   return number.delta > -19 && number.delta < -2;
+  // });
+  //
+  // const minimalDelta = deltaArray.filter((number) => {
+  //   return number.delta > -2 && number.delta <= 2;
+  // });
+  //
+  // const positiveTwenty = deltaArray.filter((number) => {
+  //   return number.delta > 2 && number.delta <= 20;
+  // });
+  //
+  // const positiveForty = deltaArray.filter((number) => {
+  //   return number.delta > 20 && number.delta <= 40;
+  // });
+  //
+  // const positiveSixty = deltaArray.filter((number) => {
+  //   return number.delta > 40 && number.delta <= 60;
+  // });
+  //
+  // const positiveEighty = deltaArray.filter((number) => {
+  //   return number.delta > 60 && number.delta <= 200;
+  // });
+
+  const groupedDeltas: Map<DELTA_BUCKET, GspDeltaValue[]> = new Map([
+    [DELTA_BUCKET.NEG4, []],
+    [DELTA_BUCKET.NEG3, []],
+    [DELTA_BUCKET.NEG2, []],
+    [DELTA_BUCKET.NEG1, []],
+    [DELTA_BUCKET.ZERO, []],
+    [DELTA_BUCKET.POS1, []],
+    [DELTA_BUCKET.POS2, []],
+    [DELTA_BUCKET.POS3, []],
+    [DELTA_BUCKET.POS4, []]
+  ]);
+  deltaArray.forEach((delta) => {
+    groupedDeltas.set(delta.deltaBucket, [...(groupedDeltas.get(delta.deltaBucket) || []), delta]);
+  });
+  const buckets: Bucket[] = [];
+  groupedDeltas.forEach((deltaGroup, deltaBucket) => {
+    buckets.push(createBucketObject(deltaBucket, deltaGroup));
   });
 
-  const negativeSixty = deltaArray.filter((number) => {
-    return number.delta > -59 && number.delta < -40;
-  });
-
-  const negativeForty = deltaArray.filter((number) => {
-    return number.delta > -39 && number.delta < -20;
-  });
-
-  const negativeTwenty = deltaArray.filter((number) => {
-    return number.delta > -19 && number.delta < -2;
-  });
-
-  const minimalDelta = deltaArray.filter((number) => {
-    return number.delta > -2 && number.delta <= 2;
-  });
-
-  const positiveTwenty = deltaArray.filter((number) => {
-    return number.delta > 2 && number.delta <= 20;
-  });
-
-  const positiveForty = deltaArray.filter((number) => {
-    return number.delta > 20 && number.delta <= 40;
-  });
-
-  const positiveSixty = deltaArray.filter((number) => {
-    return number.delta > 40 && number.delta <= 60;
-  });
-
-  const positiveEighty = deltaArray.filter((number) => {
-    return number.delta > 60 && number.delta <= 200;
-  });
   return (
     <>
       <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
-        <BucketItem
-          dataKey={"-4"}
-          text={"-80"}
-          bucketColor={"bg-ocf-delta-100"}
-          borderColor={"border-ocf-delta-100"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-100"}
-          quantity={negativeEighty.length}
-          lowerBound={-59}
-          upperBound={-40}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"-3"}
-          text={"-60"}
-          bucketColor={"bg-ocf-delta-200"}
-          borderColor={"border-ocf-delta-200"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-200"}
-          quantity={negativeSixty.length}
-          lowerBound={-59}
-          upperBound={-40}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"-2"}
-          text={"-40"}
-          bucketColor={"bg-ocf-delta-300"}
-          borderColor={"border-ocf-delta-300"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-300"}
-          quantity={negativeForty.length}
-          lowerBound={-39}
-          upperBound={-20}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"-1"}
-          text={"-20"}
-          bucketColor={"bg-ocf-delta-400"}
-          textColor={"ocf-white"}
-          altTextColor={"text-ocf-delta-400"}
-          borderColor={"border-ocf-delta-400"}
-          quantity={negativeTwenty.length}
-          lowerBound={-19}
-          upperBound={-1}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"0"}
-          text={"+/-"}
-          bucketColor={"bg-ocf-delta-500"}
-          borderColor={"border-ocf-white"}
-          textColor={"ocf-white"}
-          altTextColor={"ocf-gray-800"}
-          quantity={minimalDelta.length}
-          lowerBound={-1}
-          upperBound={1}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"1"}
-          text={"+20"}
-          bucketColor={"bg-ocf-delta-600"}
-          borderColor={"border-ocf-delta-600"}
-          textColor={"ocf-white"}
-          altTextColor={"text-ocf-delta-600"}
-          quantity={positiveTwenty.length}
-          lowerBound={2}
-          upperBound={20}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"2"}
-          text={"+40"}
-          bucketColor={"bg-ocf-delta-700"}
-          borderColor={"border-ocf-delta-700"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-700"}
-          quantity={positiveForty.length}
-          lowerBound={21}
-          upperBound={39}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"3"}
-          text={"+60"}
-          bucketColor={"bg-ocf-delta-800"}
-          borderColor={"border-ocf-delta-800"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-800"}
-          quantity={positiveSixty.length}
-          lowerBound={40}
-          upperBound={59}
-          increment={1}
-        ></BucketItem>
-        <BucketItem
-          dataKey={"4"}
-          text={"+80"}
-          bucketColor={"bg-ocf-delta-900"}
-          borderColor={"border-ocf-delta-900"}
-          textColor={"ocf-black"}
-          altTextColor={"text-ocf-delta-900"}
-          quantity={positiveEighty.length}
-          lowerBound={60}
-          upperBound={80}
-          increment={1}
-        ></BucketItem>
+        {/*<BucketItem*/}
+        {/*  dataKey={"-4"}*/}
+        {/*  text={"-80"}*/}
+        {/*  bucketColor={"bg-ocf-delta-100"}*/}
+        {/*  borderColor={"border-ocf-delta-100"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-100"}*/}
+        {/*  quantity={negativeEighty.length}*/}
+        {/*  lowerBound={-59}*/}
+        {/*  upperBound={-40}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"-3"}*/}
+        {/*  text={"-60"}*/}
+        {/*  bucketColor={"bg-ocf-delta-200"}*/}
+        {/*  borderColor={"border-ocf-delta-200"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-200"}*/}
+        {/*  quantity={negativeSixty.length}*/}
+        {/*  lowerBound={-59}*/}
+        {/*  upperBound={-40}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"-2"}*/}
+        {/*  text={"-40"}*/}
+        {/*  bucketColor={"bg-ocf-delta-300"}*/}
+        {/*  borderColor={"border-ocf-delta-300"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-300"}*/}
+        {/*  quantity={negativeForty.length}*/}
+        {/*  lowerBound={-39}*/}
+        {/*  upperBound={-20}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"-1"}*/}
+        {/*  text={"-20"}*/}
+        {/*  bucketColor={"bg-ocf-delta-400"}*/}
+        {/*  textColor={"ocf-white"}*/}
+        {/*  altTextColor={"text-ocf-delta-400"}*/}
+        {/*  borderColor={"border-ocf-delta-400"}*/}
+        {/*  quantity={negativeTwenty.length}*/}
+        {/*  lowerBound={-19}*/}
+        {/*  upperBound={-1}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"0"}*/}
+        {/*  text={"+/-"}*/}
+        {/*  bucketColor={"bg-ocf-delta-500"}*/}
+        {/*  borderColor={"border-ocf-white"}*/}
+        {/*  textColor={"ocf-white"}*/}
+        {/*  altTextColor={"ocf-gray-800"}*/}
+        {/*  quantity={minimalDelta.length}*/}
+        {/*  lowerBound={-1}*/}
+        {/*  upperBound={1}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"1"}*/}
+        {/*  text={"+20"}*/}
+        {/*  bucketColor={"bg-ocf-delta-600"}*/}
+        {/*  borderColor={"border-ocf-delta-600"}*/}
+        {/*  textColor={"ocf-white"}*/}
+        {/*  altTextColor={"text-ocf-delta-600"}*/}
+        {/*  quantity={positiveTwenty.length}*/}
+        {/*  lowerBound={2}*/}
+        {/*  upperBound={20}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"2"}*/}
+        {/*  text={"+40"}*/}
+        {/*  bucketColor={"bg-ocf-delta-700"}*/}
+        {/*  borderColor={"border-ocf-delta-700"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-700"}*/}
+        {/*  quantity={positiveForty.length}*/}
+        {/*  lowerBound={21}*/}
+        {/*  upperBound={39}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"3"}*/}
+        {/*  text={"+60"}*/}
+        {/*  bucketColor={"bg-ocf-delta-800"}*/}
+        {/*  borderColor={"border-ocf-delta-800"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-800"}*/}
+        {/*  quantity={positiveSixty.length}*/}
+        {/*  lowerBound={40}*/}
+        {/*  upperBound={59}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {/*<BucketItem*/}
+        {/*  dataKey={"4"}*/}
+        {/*  text={"+80"}*/}
+        {/*  bucketColor={"bg-ocf-delta-900"}*/}
+        {/*  borderColor={"border-ocf-delta-900"}*/}
+        {/*  textColor={"ocf-black"}*/}
+        {/*  altTextColor={"text-ocf-delta-900"}*/}
+        {/*  quantity={positiveEighty.length}*/}
+        {/*  lowerBound={60}*/}
+        {/*  upperBound={80}*/}
+        {/*  increment={1}*/}
+        {/*></BucketItem>*/}
+        {buckets.map((bucket) => {
+          return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
+        })}
       </div>
     </>
   );
@@ -322,7 +336,7 @@ const GspDeltaColumn: FC<{
 
   return (
     <>
-      <div className={`flex flex-col flex-1 ${!negative ? "pl-3" : "pr-3 "}`}>
+      <div className={`flex flex-col flex-1 mb-24 ${!negative ? "pl-3" : "pr-3 "}`}>
         {deltaArray.sort(sortFunc).map((gspDelta) => {
           let bucketColor = "";
           let dataKey = "";
@@ -333,49 +347,96 @@ const GspDeltaColumn: FC<{
           if (!negative && gspDelta.delta <= 0) {
             return null;
           }
-          if (-200 < gspDelta.delta && gspDelta.delta < -60) {
-            bucketColor = "border-ocf-delta-100";
-            progressLineColor = "bg-ocf-delta-100";
-            dataKey = "-4";
-          } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
-            bucketColor = "border-ocf-delta-200";
-            progressLineColor = "bg-ocf-delta-200";
-            dataKey = "-3";
-          } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
-            bucketColor = "border-ocf-delta-300";
-            progressLineColor = "bg-ocf-delta-300";
-            dataKey = "-2";
-          } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
-            bucketColor = "border-ocf-delta-400";
-            progressLineColor = "bg-ocf-delta-400";
-            dataKey = "-1";
-          } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
-            bucketColor = "border-white border-opacity-40";
-            progressLineColor = "bg-white bg-opacity-40";
-            dataKey = "0";
-          } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
-            bucketColor = "border-ocf-delta-600";
-            progressLineColor = "bg-ocf-delta-600";
-            dataKey = "1";
-          } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
-            bucketColor = "border-ocf-delta-700";
-            progressLineColor = "bg-ocf-delta-700";
-            dataKey = "2";
-          } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
-            bucketColor = "border-ocf-delta-800";
-            progressLineColor = "bg-ocf-delta-800";
-            dataKey = "3";
-          } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
-            bucketColor = "border-ocf-delta-900";
-            progressLineColor = "bg-ocf-delta-900";
-            dataKey = "4";
+          // if (-200 < gspDelta.delta && gspDelta.delta < -60) {
+          //   bucketColor = "border-ocf-delta-100";
+          //   progressLineColor = "bg-ocf-delta-100";
+          //   dataKey = "-4";
+          // } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
+          //   bucketColor = "border-ocf-delta-200";
+          //   progressLineColor = "bg-ocf-delta-200";
+          //   dataKey = "-3";
+          // } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
+          //   bucketColor = "border-ocf-delta-300";
+          //   progressLineColor = "bg-ocf-delta-300";
+          //   dataKey = "-2";
+          // } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
+          //   bucketColor = "border-ocf-delta-400";
+          //   progressLineColor = "bg-ocf-delta-400";
+          //   dataKey = "-1";
+          // } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
+          //   bucketColor = "border-white border-opacity-40";
+          //   progressLineColor = "bg-white bg-opacity-40";
+          //   dataKey = "0";
+          // } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
+          //   bucketColor = "border-ocf-delta-600";
+          //   progressLineColor = "bg-ocf-delta-600";
+          //   dataKey = "1";
+          // } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
+          //   bucketColor = "border-ocf-delta-700";
+          //   progressLineColor = "bg-ocf-delta-700";
+          //   dataKey = "2";
+          // } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
+          //   bucketColor = "border-ocf-delta-800";
+          //   progressLineColor = "bg-ocf-delta-800";
+          //   dataKey = "3";
+          // } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
+          //   bucketColor = "border-ocf-delta-900";
+          //   progressLineColor = "bg-ocf-delta-900";
+          //   dataKey = "4";
+          // }
+          switch (gspDelta.deltaBucket) {
+            case DELTA_BUCKET.NEG4:
+              bucketColor = "border-ocf-delta-100";
+              progressLineColor = "bg-ocf-delta-100";
+              dataKey = "-4";
+              break;
+            case DELTA_BUCKET.NEG3:
+              bucketColor = "border-ocf-delta-200";
+              progressLineColor = "bg-ocf-delta-200";
+              dataKey = "-3";
+              break;
+            case DELTA_BUCKET.NEG2:
+              bucketColor = "border-ocf-delta-300";
+              progressLineColor = "bg-ocf-delta-300";
+              dataKey = "-2";
+              break;
+            case DELTA_BUCKET.NEG1:
+              bucketColor = "border-ocf-delta-400";
+              progressLineColor = "bg-ocf-delta-400";
+              dataKey = "-1";
+              break;
+            case DELTA_BUCKET.ZERO:
+              bucketColor = "border-white border-opacity-40";
+              progressLineColor = "bg-white bg-opacity-40";
+              dataKey = "0";
+              break;
+            case DELTA_BUCKET.POS1:
+              bucketColor = "border-ocf-delta-600";
+              progressLineColor = "bg-ocf-delta-600";
+              dataKey = "1";
+              break;
+            case DELTA_BUCKET.POS2:
+              bucketColor = "border-ocf-delta-700";
+              progressLineColor = "bg-ocf-delta-700";
+              dataKey = "2";
+              break;
+            case DELTA_BUCKET.POS3:
+              bucketColor = "border-ocf-delta-800";
+              progressLineColor = "bg-ocf-delta-800";
+              dataKey = "3";
+              break;
+            case DELTA_BUCKET.POS4:
+              bucketColor = "border-ocf-delta-900";
+              progressLineColor = "bg-ocf-delta-900";
+              dataKey = "4";
+              break;
           }
 
           const isSelectedGSP = () => {
             setClickedGspId(gspDelta.gspId);
           };
 
-          const isSelected = selectedBuckets.includes(dataKey);
+          const isSelected = selectedBuckets.includes(gspDelta.deltaBucketKey);
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
@@ -503,7 +564,13 @@ const GspDeltaColumn: FC<{
     </>
   );
 };
-const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+type DeltaChartProps = {
+  date?: string;
+  className?: string;
+  combinedData: CombinedData;
+  combinedErrors: CombinedErrors;
+};
+const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -513,115 +580,33 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const { data: nationalForecastData, error } = useSWR<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+
+  const {
+    nationalForecastData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    national4HourData,
+    allGspForecastData,
+    allGspRealData,
+    gspDeltas
+  } = combinedData;
+  const {
+    nationalForecastError,
+    pvRealDayInError,
+    pvRealDayAfterError,
+    national4HourError,
+    allGspForecastError
+  } = combinedErrors;
 
   const chartLimits = useMemo(
     () =>
-      nationalForecastData && {
+      nationalForecastData?.[0] && {
         start: nationalForecastData[0].targetTime,
         end: nationalForecastData[nationalForecastData.length - 1].targetTime
       },
     [nationalForecastData]
   );
   useHotKeyControlChart(chartLimits);
-
-  const { data: pvRealDayInData, error: error2 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: pvRealDayAfterData, error: error3 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-      : null,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-
-  const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-
-  const { data: allGspPvData, error: allGspPvError } = useSWR<GspRealData[]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-  const currentYields =
-    allGspPvData?.map((datum) => {
-      const gspYield = datum.gspYields.find((yieldDatum, index) => {
-        return yieldDatum.datetimeUtc === `${selectedTime}:00+00:00`;
-      });
-      return {
-        gspId: datum.gspId,
-        gspRegion: datum.regionName,
-        gspCapacity: datum.installedCapacityMw,
-        yield: gspYield?.solarGenerationKw || 0
-      };
-    }) || [];
-
-  const gspDeltas = useMemo(() => {
-    let tempGspDeltas = new Map();
-
-    for (let i = 0; i < currentYields.length; i++) {
-      const currentYield = currentYields[i];
-      let gspForecastData = allGspForecastData?.forecasts[i];
-      if (gspForecastData?.location.gspId !== currentYield.gspId) {
-        gspForecastData = allGspForecastData?.forecasts.find((gspForecastDatum) => {
-          return gspForecastDatum.location.gspId === currentYield.gspId;
-        });
-      }
-      const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
-        return forecastValue.targetTime === `${selectedTime}:00+00:00`;
-      });
-      tempGspDeltas.set(currentYield.gspId, {
-        gspId: currentYield.gspId,
-        gspRegion: currentYield.gspRegion,
-        gspCapacity: currentYield.gspCapacity,
-        currentYield: currentYield.yield / 1000,
-        forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
-        delta:
-          currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0),
-        deltaPercentage:
-          (currentYield.yield /
-            1000 /
-            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
-          100,
-        deltaNormalized:
-          (currentYield.yield / 1000 -
-            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
-            currentYield.gspCapacity || 0
-      });
-    }
-    return tempGspDeltas;
-  }, [allGspForecastData, allGspPvData, selectedTime]);
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
@@ -632,8 +617,15 @@ const DeltaChart: FC<{ date?: string; className?: string }> = ({ className }) =>
     delta: true
   });
 
-  // when commenting 4hour forecast back in, add pv4HourError to the list of errors to line 108 and "!national4HourData" to line 109
-  if (error || error2 || error3) return <div>failed to load</div>;
+  if (
+    nationalForecastError ||
+    pvRealDayInError ||
+    pvRealDayAfterError ||
+    national4HourError ||
+    allGspForecastError
+  )
+    return <div>failed to load</div>;
+
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
       <div className="h-full flex">

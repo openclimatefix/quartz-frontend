@@ -63,7 +63,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
 
   const chartLimits = useMemo(
     () =>
-      nationalForecastData && {
+      nationalForecastData?.[0] && {
         start: nationalForecastData[0].targetTime,
         end: nationalForecastData[nationalForecastData.length - 1].targetTime
       },

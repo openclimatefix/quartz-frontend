@@ -81,7 +81,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
     >
       <PlayButton
         startTime={get30MinNow()}
-        endTime={pvForecastData[pvForecastData.length - 1].targetTime}
+        endTime={pvForecastData[pvForecastData.length - 1]?.targetTime}
       ></PlayButton>
     </ForecastHeaderUI>
   );

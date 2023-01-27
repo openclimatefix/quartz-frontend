@@ -20,6 +20,7 @@ import {
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
 import useGlobalState from "../helpers/globalState";
+import { DELTA_BUCKET } from "../../constant";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
@@ -33,7 +34,8 @@ export type ChartData = {
   "4HR_FORECAST"?: number;
   "4HR_PAST_FORECAST"?: number;
   DELTA?: number;
-  formatedDate: string; // "2022-05-16T15:00",
+  DELTA_BUCKET?: DELTA_BUCKET;
+  formattedDate: string; // "2022-05-16T15:00",
 };
 
 const toolTiplabels: Record<string, string> = {
@@ -108,7 +110,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   deltaYMaxOverride
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
-  const preppedData = data.sort((a, b) => a.formatedDate.localeCompare(b.formatedDate));
+  const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(
@@ -175,7 +177,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           >
             <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
             <XAxis
-              dataKey="formatedDate"
+              dataKey="formattedDate"
               tickFormatter={prettyPrintXdate}
               scale="band"
               tick={{ fill: "white", style: { fontSize: "12px" } }}
@@ -325,7 +327,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       {Object.entries(data)
                         .reverse()
                         .map(([name, value]) => {
-                          if (name === "formatedDate") return null;
+                          if (name === "formattedDate") return null;
                           const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
                             ? "font-semibold"
                             : "font-normal";
@@ -353,7 +355,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         })}
                       <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
                         <div>
-                          {formatISODateStringHumanNumbersOnly(data?.formatedDate + ":00+00:00")}{" "}
+                          {formatISODateStringHumanNumbersOnly(data?.formattedDate + ":00+00:00")}{" "}
                         </div>
                         <div>MW</div>
                       </li>

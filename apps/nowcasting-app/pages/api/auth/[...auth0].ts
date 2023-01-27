@@ -31,7 +31,7 @@ export default withSentry(
         await handleLogin(req, res, {
           authorizationParams: {
             redirect_uri: redirectUri,
-            audience: "https://nowcasting-api-eu-auth0.com/", // TODO: Make this an env variable,
+            audience: process.env.NEXT_PUBLIC_AUTH0_API_AUDIENCE || "https://api.nowcasting.io/",
             scope: "openid profile email offline_access",
             useRefreshTokens: true
           },
