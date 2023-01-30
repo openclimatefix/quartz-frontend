@@ -22,7 +22,7 @@ const DeltaForecastLabel: React.FC<DeltaForecastLabelProps> = ({
         <span
           className={`relative ${getPositionClass(
             position
-          )} flex top-1 text-center mb-0 mt-2z-10 text-xs px-1 py-1 leading-snug bg-ocf-gray-300 rounded-lg text-black`}
+          )} flex top-1 text-center mb-0 mt-2 z-10 text-xs px-1 py-1 leading-snug bg-ocf-gray-300 rounded-lg text-black`}
         >
           {tip}
         </span>

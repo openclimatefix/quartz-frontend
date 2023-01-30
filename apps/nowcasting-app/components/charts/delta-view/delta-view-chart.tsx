@@ -447,117 +447,98 @@ const GspDeltaColumn: FC<{
             gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`
           }`;
 
-          const selectedClasses = `static flex flex-3 flex-row pb-0 justify-between pl-1 pr-1 ${
-            gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-          } ${bucketColor} cursor-pointer transition duration-200 ease-out hover:ease-in items-end`;
+          const selectedClasses = `${bucketColor} transition duration-200 ease-out hover:ease-in items-end`;
 
-          const selectedDeltaClass = `static flex flex-3 flex-row bg-ocf-gray-800 pb-0 justify-between pl-1 pr-1 ${
-            gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-          } ${bucketColor} cursor-pointer pb-0 items-end`;
+          const selectedDeltaClass = `bg-ocf-gray-800 ${bucketColor} items-end`;
 
           if (!isSelected) {
             return null;
           }
           return (
-            <>
-              <div className="pb-0.5">
-                <div
-                  className={`bg-ocf-delta-950 transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in`}
-                  key={`gspCol${gspDelta.gspId}`}
-                >
-                  <div
-                    className={
-                      clickedGspId === gspDelta.gspId ? selectedDeltaClass : selectedClasses
-                    }
-                    key={`gspCol${gspDelta.gspId}`}
-                    onClick={isSelectedGSP}
-                  >
-                    <div className="flex pl-1 pt-3 w-48 md:w-48">
-                      <span className="font-semibold text-lg">{gspDelta.gspRegion}</span>
-                    </div>
-                    {/* normalized percentage: delta value/gsp installed mw capacity */}
-                    <div className="flex flex-end justify-around align-bottom pt-1">
-                      <DeltaForecastLabel
-                        tip={
-                          <div className="w-28  text-xs">
-                            <p>{"Normalized Delta"}</p>
-                          </div>
-                        }
-                      >
-                        <div className="flex pt-1.5 text-right opacity-80 text-sm w-16">
-                          <p>
-                            {negative ? "-" : "+"}
-                            {deltaNormalizedPercentage}%
-                          </p>
-                        </div>
-                      </DeltaForecastLabel>
-
-                      {/* delta value in mw */}
-                      <DeltaForecastLabel
-                        tip={
-                          <div className="w-28 text-xs">
-                            <p>{"Delta to Forecast"}</p>
-                          </div>
-                        }
-                      >
-                        <div className="flex pb-0 font-semibold text-lg md:w-20 w-16 justify-start">
-                          <div>
-                            <p>
-                              {!negative && "+"}
-                              {Number(gspDelta.delta).toFixed(0)}
-                              <span className="opacity-80 text-xs font-thin">MW</span>
-                            </p>
-                          </div>
-                        </div>
-                      </DeltaForecastLabel>
-
-                      {/* currentYield/forecasted yield */}
-                      <DeltaForecastLabel
-                        tip={
-                          <div className="w-28 text-xs">
-                            <p>{"Actual PV / Forecast"}</p>
-                          </div>
-                        }
-                      >
-                        <div className="flex flex-col pt-1.5 pr-1 text-left font-semibold text-sm md:w-22 w-20">
-                          <div>
-                            {Number(gspDelta.currentYield).toFixed(0)}/
-                            {Number(gspDelta.forecast).toFixed(0)}
-                            <span className={`opacity-80 text-xs font-thin`}>MW</span>
-                          </div>
-                        </div>
-                      </DeltaForecastLabel>
-                    </div>
-                  </div>
-                  <div
-                    className={
-                      clickedGspId === gspDelta.gspId
-                        ? ` bg-ocf-gray-800 ${
-                            gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
-                          } ${bucketColor}`
-                        : `${gspDelta.delta > 0 ? `border-l-8` : `border-r-8`} ${bucketColor}`
+            <div
+              className={`mb-0.5 bg-ocf-delta-950 cursor-pointer relative flex w-full transition duration-200 ease-out hover:bg-ocf-gray-800 hover:ease-in`}
+              key={`gspCol${gspDelta.gspId}`}
+              onClick={isSelectedGSP}
+            >
+              <div
+                className={`static items-center flex flex-1 py-2 justify-between pl-1 pr-1 ${
+                  clickedGspId === gspDelta.gspId ? selectedDeltaClass : selectedClasses
+                } ${gspDelta.delta > 0 ? `border-l-8` : `border-r-8`}`}
+                key={`gspCol${gspDelta.gspId}`}
+              >
+                <div className="flex-initial pl-1 max-w-[35%] 2xl:max-w-full">
+                  <span className="">{gspDelta.gspRegion}</span>
+                </div>
+                <div className="flex flex-initial flex-end justify-around items-center">
+                  {/* normalized percentage: delta value/gsp installed mw capacity */}
+                  <DeltaForecastLabel
+                    tip={
+                      <div className="w-28 text-xs">
+                        <p>{"Normalized Delta"}</p>
+                      </div>
                     }
                   >
-                    <div
-                      className={`${
-                        gspDelta.delta > 0
-                          ? `bottom-0 flex flex-row-reverse items-end justify-end`
-                          : `flex items-end justify-end`
-                      }`}
-                    >
-                      <div className={tickerColor} style={{ width: `1px` }}></div>
-                      <div
-                        className={`${
-                          clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
-                        } ${progressLineColor}`}
-                        style={{ width: `${deltaNormalizedPercentage}%` }}
-                      ></div>
+                    <div className="flex pr-3 text-right opacity-80 text-sm">
+                      <p>
+                        {negative ? "-" : "+"}
+                        {deltaNormalizedPercentage}%
+                      </p>
                     </div>
-                  </div>
-                  <div></div>
+                  </DeltaForecastLabel>
+
+                  {/* delta value in mw */}
+                  <DeltaForecastLabel
+                    tip={
+                      <div className="w-28 text-xs">
+                        <p>{"Delta to Forecast"}</p>
+                      </div>
+                    }
+                  >
+                    <div className="flex pr-3 font-semibold justify-start">
+                      <div>
+                        <p>
+                          {!negative && "+"}
+                          {Number(gspDelta.delta).toFixed(0)}{" "}
+                          <span className="opacity-80 text-xs font-thin">MW</span>
+                        </p>
+                      </div>
+                    </div>
+                  </DeltaForecastLabel>
+
+                  {/* currentYield/forecasted yield */}
+                  <DeltaForecastLabel
+                    tip={
+                      <div className="w-28 text-xs">
+                        <p>{"Actual PV / Forecast"}</p>
+                      </div>
+                    }
+                  >
+                    <div className="flex flex-col pr-1 text-left font-semibold text-sm">
+                      <div>
+                        {Number(gspDelta.currentYield).toFixed(0)}/
+                        {Number(gspDelta.forecast).toFixed(0)}{" "}
+                        <span className={`opacity-80 text-xs font-thin`}>MW</span>
+                      </div>
+                    </div>
+                  </DeltaForecastLabel>
                 </div>
               </div>
-            </>
+              <div className={`absolute bottom-0 right-0 left-0 ${bucketColor}`}>
+                <div
+                  className={`flex items-end justify-end ${
+                    gspDelta.delta > 0 ? `bottom-0 flex-row-reverse ml-2` : `mr-2`
+                  }`}
+                >
+                  <div className={tickerColor} style={{ width: `1px` }}></div>
+                  <div
+                    className={`${
+                      clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
+                    } ${progressLineColor}`}
+                    style={{ width: `${deltaNormalizedPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -677,7 +658,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex justify-between mb-15 mx-3">
+        <div className="flex justify-between mb-15">
           <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
           <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
         </div>

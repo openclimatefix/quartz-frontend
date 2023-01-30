@@ -126,7 +126,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
   const noDelta = Number(deltaValue) === 0;
   return (
-    <div className="flex content-between bg-ocf-gray-800 h-auto">
+    <div className="flex content-between bg-ocf-gray-800 h-16">
       <div className="text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
         {title}
       </div>
