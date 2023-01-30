@@ -53,8 +53,12 @@ const GspPvRemixChart: FC<{
   }
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
     return (
-      <div className="h-60  flex">
-        <Spinner />
+      <div className="mt-8">
+        {/* Header spacer */}
+        <div className="h-16"></div>
+        <div className="h-60 flex">
+          <Spinner />
+        </div>
       </div>
     );
   const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
