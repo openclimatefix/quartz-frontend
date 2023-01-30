@@ -194,13 +194,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               <>
                 <YAxis
                   tickFormatter={(val, i) =>
-                    prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2, isGSP ? 1 : 1000)
+                    prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2)
                   }
                   tick={{
                     fill: "white",
                     style: { fontSize: "12px" },
                     textAnchor: "end",
-                    dx: roundTickMax ? 10 : 24
+                    dx: roundTickMax ? 36 : 24
                   }}
                   ticks={[deltaYMax, deltaYMax / 2, 0, -deltaYMax / 2, -deltaYMax]}
                   tickCount={5}
@@ -208,13 +208,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   yAxisId="delta"
                   orientation="right"
                   label={{
-                    value: `Delta (${isGSP ? "MW" : "GW"})`,
+                    value: `Delta (MW)`,
                     angle: 90,
                     position: "insideRight",
                     fill: "white",
                     style: { fontSize: "12px" },
                     offset: 0,
-                    dx: roundTickMax ? -22 : -6,
+                    dx: roundTickMax ? 0 : -10,
                     dy: 30
                   }}
                   domain={[-deltaYMax, deltaYMax]}
