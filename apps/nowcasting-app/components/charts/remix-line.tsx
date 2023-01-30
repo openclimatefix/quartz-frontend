@@ -243,7 +243,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               className={timeNow !== timeOfInterest ? "" : "hidden"}
               label={
                 <CustomizedLabel
-                  className="fill-amber-400    cursor-pointer"
+                  className={`fill-amber-400 cursor-pointer ${isGSP ? "hidden" : ""}`}
                   value={"NOW"}
                   onClick={resetTime}
                 ></CustomizedLabel>
