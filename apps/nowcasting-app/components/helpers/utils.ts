@@ -217,15 +217,15 @@ export const createBucketObject = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDel
     case DELTA_BUCKET.NEG1:
       bucketColor = "bg-ocf-delta-400";
       borderColor = "border-ocf-delta-400";
-      textColour = "text-black";
+      textColour = "text-white";
       altTextColour = "text-ocf-delta-400";
       lowerBound = DELTA_BUCKET.NEG2;
       upperBound = deltaBucket;
       break;
     case DELTA_BUCKET.ZERO:
       bucketColor = "bg-ocf-delta-500";
-      borderColor = "border-ocf-delta-500";
-      textColour = "text-white";
+      borderColor = "border-ocf-gray-800";
+      textColour = "text-white border-white border-2";
       altTextColour = "text-ocf-gray-800";
       lowerBound = DELTA_BUCKET.NEG1;
       upperBound = DELTA_BUCKET.POS1;
@@ -241,7 +241,7 @@ export const createBucketObject = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDel
     case DELTA_BUCKET.POS2:
       bucketColor = "bg-ocf-delta-700";
       borderColor = "border-ocf-delta-700";
-      textColour = "text-white";
+      textColour = "text-black";
       altTextColour = "text-ocf-delta-700";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS3;
@@ -249,7 +249,7 @@ export const createBucketObject = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDel
     case DELTA_BUCKET.POS3:
       bucketColor = "bg-ocf-delta-800";
       borderColor = "border-ocf-delta-800";
-      textColour = "text-white";
+      textColour = "text-black";
       altTextColour = "text-ocf-delta-800";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS4;
@@ -257,7 +257,7 @@ export const createBucketObject = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDel
     case DELTA_BUCKET.POS4:
       bucketColor = "bg-ocf-delta-900";
       borderColor = "border-ocf-delta-900";
-      textColour = "text-white";
+      textColour = "text-black";
       altTextColour = "text-ocf-delta-900";
       lowerBound = deltaBucket;
       upperBound = 3000;

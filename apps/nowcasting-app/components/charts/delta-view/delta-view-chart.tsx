@@ -74,21 +74,22 @@ const BucketItem: React.FC<{
   lowerBound: number;
   upperBound: number;
   increment: number;
-  textColor?: string;
-  altTextColor?: string;
+  textColour?: string;
+  altTextColour?: string;
 }> = ({
   dataKey,
   quantity,
   text,
   bucketColor,
   borderColor,
-  textColor,
-  altTextColor,
+  textColour,
+  altTextColour,
   lowerBound,
   upperBound
 }) => {
   const selectedClass = ``;
   const unselectedClass = `bg-opacity-0 border-2 ${borderColor}`;
+  const smallDeltaClass = `bg-opacity-50 border-2`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -104,15 +105,13 @@ const BucketItem: React.FC<{
     <>
       <div
         className={`${
-          isSelected ? `text-${textColor}` : `${altTextColor}`
+          isSelected && !DELTA_BUCKET.ZERO ? `${textColour}` : `${altTextColour}`
         } justify-between flex flex-1
             flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-3 rounded-md justify-center ${bucketColor} ${borderColor} ${
+          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-2 rounded-md justify-center ${bucketColor} ${borderColor} ${
             isSelected ? selectedClass : unselectedClass
-          } ${dataKey === "0" && selectedBuckets.includes("0") && "border-2 border-white"} ${
-            dataKey === "0" && !selectedBuckets.includes("0") && "opacity-40 bg-orange"
           }`}
           onClick={toggleBucketSelection}
         >
@@ -136,46 +135,6 @@ const DeltaBuckets: React.FC<{
   if (!gspDeltas.size) return null;
 
   const deltaArray = Array.from(gspDeltas.values());
-  // const deltaArray = Array.from(gspDeltas.values())
-  // console.log(deltaArray)
-  // const numberInBucket = deltaArray.filter((number) => {
-  //   return number.delta > lowerBound && number.delta < upperBound
-
-  // const negativeEighty = deltaArray.filter((number) => {
-  //   return number.delta > -200 && number.delta < -60;
-  // });
-  //
-  // const negativeSixty = deltaArray.filter((number) => {
-  //   return number.delta > -59 && number.delta < -40;
-  // });
-  //
-  // const negativeForty = deltaArray.filter((number) => {
-  //   return number.delta > -39 && number.delta < -20;
-  // });
-  //
-  // const negativeTwenty = deltaArray.filter((number) => {
-  //   return number.delta > -19 && number.delta < -2;
-  // });
-  //
-  // const minimalDelta = deltaArray.filter((number) => {
-  //   return number.delta > -2 && number.delta <= 2;
-  // });
-  //
-  // const positiveTwenty = deltaArray.filter((number) => {
-  //   return number.delta > 2 && number.delta <= 20;
-  // });
-  //
-  // const positiveForty = deltaArray.filter((number) => {
-  //   return number.delta > 20 && number.delta <= 40;
-  // });
-  //
-  // const positiveSixty = deltaArray.filter((number) => {
-  //   return number.delta > 40 && number.delta <= 60;
-  // });
-  //
-  // const positiveEighty = deltaArray.filter((number) => {
-  //   return number.delta > 60 && number.delta <= 200;
-  // });
 
   const groupedDeltas: Map<DELTA_BUCKET, GspDeltaValue[]> = new Map([
     [DELTA_BUCKET.NEG4, []],
@@ -199,114 +158,6 @@ const DeltaBuckets: React.FC<{
   return (
     <>
       <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
-        {/*<BucketItem*/}
-        {/*  dataKey={"-4"}*/}
-        {/*  text={"-80"}*/}
-        {/*  bucketColor={"bg-ocf-delta-100"}*/}
-        {/*  borderColor={"border-ocf-delta-100"}*/}
-        {/*  textColor={"ocf-black"}*/}
-        {/*  altTextColor={"text-ocf-delta-100"}*/}
-        {/*  quantity={negativeEighty.length}*/}
-        {/*  lowerBound={-59}*/}
-        {/*  upperBound={-40}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"-3"}*/}
-        {/*  text={"-60"}*/}
-        {/*  bucketColor={"bg-ocf-delta-200"}*/}
-        {/*  borderColor={"border-ocf-delta-200"}*/}
-        {/*  textColor={"ocf-black"}*/}
-        {/*  altTextColor={"text-ocf-delta-200"}*/}
-        {/*  quantity={negativeSixty.length}*/}
-        {/*  lowerBound={-59}*/}
-        {/*  upperBound={-40}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"-2"}*/}
-        {/*  text={"-40"}*/}
-        {/*  bucketColor={"bg-ocf-delta-300"}*/}
-        {/*  borderColor={"border-ocf-delta-300"}*/}
-        {/*  textColor={"ocf-black"}*/}
-        {/*  altTextColor={"text-ocf-delta-300"}*/}
-        {/*  quantity={negativeForty.length}*/}
-        {/*  lowerBound={-39}*/}
-        {/*  upperBound={-20}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"-1"}*/}
-        {/*  text={"-20"}*/}
-        {/*  bucketColor={"bg-ocf-delta-400"}*/}
-        {/*  textColor={"ocf-white"}*/}
-        {/*  altTextColor={"text-ocf-delta-400"}*/}
-        {/*  borderColor={"border-ocf-delta-400"}*/}
-        {/*  quantity={negativeTwenty.length}*/}
-        {/*  lowerBound={-19}*/}
-        {/*  upperBound={-1}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"0"}*/}
-        {/*  text={"+/-"}*/}
-        {/*  bucketColor={"bg-ocf-delta-500"}*/}
-        {/*  borderColor={"border-ocf-white"}*/}
-        {/*  textColor={"ocf-white"}*/}
-        {/*  altTextColor={"ocf-gray-800"}*/}
-        {/*  quantity={minimalDelta.length}*/}
-        {/*  lowerBound={-1}*/}
-        {/*  upperBound={1}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"1"}*/}
-        {/*  text={"+20"}*/}
-        {/*  bucketColor={"bg-ocf-delta-600"}*/}
-        {/*  borderColor={"border-ocf-delta-600"}*/}
-        {/*  textColor={"ocf-white"}*/}
-        {/*  altTextColor={"text-ocf-delta-600"}*/}
-        {/*  quantity={positiveTwenty.length}*/}
-        {/*  lowerBound={2}*/}
-        {/*  upperBound={20}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"2"}*/}
-        {/*  text={"+40"}*/}
-        {/*  bucketColor={"bg-ocf-delta-700"}*/}
-        {/*  borderColor={"border-ocf-delta-700"}*/}
-        {/*  textColor={"ocf-black"}*/}
-        {/*  altTextColor={"text-ocf-delta-700"}*/}
-        {/*  quantity={positiveForty.length}*/}
-        {/*  lowerBound={21}*/}
-        {/*  upperBound={39}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"3"}*/}
-        {/*  text={"+60"}*/}
-        {/*  bucketColor={"bg-ocf-delta-800"}*/}
-        {/*  borderColor={"border-ocf-delta-800"}*/}
-        {/*  textColor={"ocf-black"}*/}
-        {/*  altTextColor={"text-ocf-delta-800"}*/}
-        {/*  quantity={positiveSixty.length}*/}
-        {/*  lowerBound={40}*/}
-        {/*  upperBound={59}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
-        {/*<BucketItem*/}
-        {/*  dataKey={"4"}*/}
-        {/*  text={"+80"}*/}
-        {/*  bucketColor={"bg-ocf-delta-900"}*/}
-        {/*  borderColor={"border-ocf-delta-900"}*/}
-        {/*  textColor={"ocf-black"}*/}
-        {/*  altTextColor={"text-ocf-delta-900"}*/}
-        {/*  quantity={positiveEighty.length}*/}
-        {/*  lowerBound={60}*/}
-        {/*  upperBound={80}*/}
-        {/*  increment={1}*/}
-        {/*></BucketItem>*/}
         {buckets.map((bucket) => {
           return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
         })}
@@ -347,43 +198,6 @@ const GspDeltaColumn: FC<{
           if (!negative && gspDelta.delta <= 0) {
             return null;
           }
-          // if (-200 < gspDelta.delta && gspDelta.delta < -60) {
-          //   bucketColor = "border-ocf-delta-100";
-          //   progressLineColor = "bg-ocf-delta-100";
-          //   dataKey = "-4";
-          // } else if (-60 < gspDelta.delta && gspDelta.delta < -40) {
-          //   bucketColor = "border-ocf-delta-200";
-          //   progressLineColor = "bg-ocf-delta-200";
-          //   dataKey = "-3";
-          // } else if (-40 < gspDelta.delta && gspDelta.delta < -20) {
-          //   bucketColor = "border-ocf-delta-300";
-          //   progressLineColor = "bg-ocf-delta-300";
-          //   dataKey = "-2";
-          // } else if (-20 < gspDelta.delta && gspDelta.delta < -1) {
-          //   bucketColor = "border-ocf-delta-400";
-          //   progressLineColor = "bg-ocf-delta-400";
-          //   dataKey = "-1";
-          // } else if (-1 <= gspDelta.delta && gspDelta.delta < 2) {
-          //   bucketColor = "border-white border-opacity-40";
-          //   progressLineColor = "bg-white bg-opacity-40";
-          //   dataKey = "0";
-          // } else if (2 < gspDelta.delta && 20 > gspDelta.delta) {
-          //   bucketColor = "border-ocf-delta-600";
-          //   progressLineColor = "bg-ocf-delta-600";
-          //   dataKey = "1";
-          // } else if (20 < gspDelta.delta && 40 > gspDelta.delta) {
-          //   bucketColor = "border-ocf-delta-700";
-          //   progressLineColor = "bg-ocf-delta-700";
-          //   dataKey = "2";
-          // } else if (40 < gspDelta.delta && 60 > gspDelta.delta) {
-          //   bucketColor = "border-ocf-delta-800";
-          //   progressLineColor = "bg-ocf-delta-800";
-          //   dataKey = "3";
-          // } else if ((60 < gspDelta.delta && 80 > gspDelta.delta) || gspDelta.delta > 80) {
-          //   bucketColor = "border-ocf-delta-900";
-          //   progressLineColor = "bg-ocf-delta-900";
-          //   dataKey = "4";
-          // }
           switch (gspDelta.deltaBucket) {
             case DELTA_BUCKET.NEG4:
               bucketColor = "border-ocf-delta-100";
