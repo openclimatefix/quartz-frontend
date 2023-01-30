@@ -31,7 +31,7 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   clickedGspId: undefined,
   forecastCreationTime: undefined,
   visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST", "4HR_FORECAST"],
-  selectedBuckets: getDeltaBucketKeys(),
+  selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
   show4hView:
     process.env.NODE_ENV === "development" ||
     (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production")
