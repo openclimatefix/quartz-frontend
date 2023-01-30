@@ -53,14 +53,14 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                     className="cursor-pointer"
                     title="Copy Email to Clipboard"
                   >
-                    For help, please email OCF at <span>ops@openclimatefix.org</span>
+                    Click to email OCF at <span>ops@openclimatefix.org</span>
                   </div>
                 }
                 position="left"
                 className={"text-right"}
                 fullWidth
               >
-                <a href="mailto:ops@openclimatefix.org">
+                <a href="mailto:ops@openclimatefix.org?subject=Nowcasting%20Feedback">
                   Help{" "}
                   <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
                 </a>
