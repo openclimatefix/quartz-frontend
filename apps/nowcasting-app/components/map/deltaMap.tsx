@@ -189,7 +189,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         [">=", ["to-number", ["var", "bucket"]], -20],
         ["<", ["to-number", ["var", "bucket"]], 20]
       ],
-      ["to-color", theme.extend.colors["ocf-delta"][500]],
+      ["to-color", "transparent"],
       [
         "all",
         [">=", ["to-number", ["var", "bucket"]], 20],
@@ -211,7 +211,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       [">=", ["to-number", ["var", "bucket"]], 80],
       ["to-color", theme.extend.colors["ocf-delta"][900]],
       // Default fill color
-      ["to-color", theme.extend.colors["ocf-delta"][500]]
+      ["to-color", "transparent"]
     ]
   ];
 
@@ -258,7 +258,9 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     // Create a popup, but don't add it to the map yet.
     const popup = new mapboxgl.Popup({
       closeButton: false,
-      closeOnClick: false
+      closeOnClick: false,
+      anchor: "bottom-right",
+      maxWidth: "none"
     });
 
     map.current.on("mousemove", "latestPV-forecast", (e) => {
@@ -269,18 +271,31 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       // const geometry = e.features?.[0].geometry;
       // const coordinates = geometry?.type === "Polygon" ? geometry.coordinates[0][0] : [0, 0];
       const properties = e.features?.[0].properties;
-      const content = `<strong>${properties?.gsp_id}</strong><p>${properties?.gspDisplayName}</p><p>Delta: ${properties?.delta}</p><p>Delta Bucket: ${properties?.deltaBucket}</p>`;
 
-      // Ensure that if the map is zoomed out such that multiple
-      // copies of the feature are visible, the popup appears
-      // over the copy being pointed to.
-      // while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-      //   coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-      // }
+      const positiveDelta = properties?.delta > 0;
+      const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          <div class="flex justify-between mb-1">
+            <div class="text-xs">${properties?.GSPs}</div>
+            <div class="text-xs">#${properties?.gsp_id}</div>
+          </div>
+          <div class="flex justify-between text-base">
+            <div class="text-ocf-yellow">${properties?.gspDisplayName}</div>
+            <div class="">
+              <span class="font-bold">${
+                positiveDelta
+                  ? `<span class="up-arrow"></span>`
+                  : `<span class="down-arrow"></span>`
+              }</span>
+              <span class="mr-1 ${
+                positiveDelta ? "text-ocf-delta-900" : "text-ocf-delta-100"
+              }">${properties?.delta.toFixed(2)}</span><small class="text-xs">MW</small>
+            </div>
+          </div>
+        </div>`;
 
       // Populate the popup and set its coordinates
       // based on the feature found.
-      popup.setLngLat(e.lngLat).setHTML(content).addTo(map.current);
+      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
     });
 
     map.current.on("mouseleave", "latestPV-forecast", () => {
@@ -290,7 +305,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   };
 
   return (
-    <div className={`relative h-full w-full ${className}`}>
+    <div className={`delta-map relative h-full w-full ${className}`}>
       {forecastError ? (
         <FailedStateMap error="Failed to load" />
       ) : forecastLoading ? (
