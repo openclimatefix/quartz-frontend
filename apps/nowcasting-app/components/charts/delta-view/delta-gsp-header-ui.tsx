@@ -150,11 +150,11 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
         </div>
       </div>
       <div
-        className={`text-ocf-black text-left pt-2 pl-2 pr-5 uppercase bg-${deltacolor}`}
+        className={`bg-${deltacolor} flex flex-col justify-between pl-3 pr-4 py-2 text-left text-ocf-black uppercase`}
         style={{ background: deltacolor }}
       >
-        <p>Delta</p>
-        <div className="flex items-center">
+        <p className="leading-tight tracking-wider">Delta</p>
+        <div className="flex items-end">
           <div className="pr-2 pt-1"> {noDelta ? "" : svg}</div>
           <p className={`text-xl font-semibold leading-none mt-0.5 text-center`}>
             {deltaValue}

@@ -122,10 +122,10 @@ type DeltaIconProps = {
 export const UpArrow: React.FC<DeltaIconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    height="24"
+    height="22"
     id="triangle-up"
     viewBox="0 0 32 32"
-    width="24"
+    width="22"
   >
     <path d="M4 24 H28 L16 6 z" />
   </svg>
@@ -134,10 +134,10 @@ export const UpArrow: React.FC<DeltaIconProps> = ({ className }) => (
 export const DownArrow: React.FC<DeltaIconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    height="24"
+    height="22"
     id="triangle-down"
     viewBox="0 0 32 32"
-    width="24"
+    width="22"
   >
     <path d="M4 8 H28 L16 26 z" />
   </svg>

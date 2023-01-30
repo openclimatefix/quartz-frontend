@@ -109,12 +109,12 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       </div>
       {/* <div className="inline-flex h-full">{children}</div> */}
       <div
-        className={`text-ocf-black items- text-left pt-2 pl-2 pr-10 uppercase bg-${deltacolor}`}
+        className={`bg-${deltacolor} flex flex-col justify-between pl-3 pr-4 py-2 text-left text-ocf-black uppercase`}
         style={{ background: deltacolor }}
       >
-        <p>Delta</p>
-        <div className="flex items-center">
-          <div className="pr-2 pt-1">{svg}</div>
+        <p className="leading-tight tracking-wider">Delta</p>
+        <div className="flex items-end">
+          <div className="pr-2">{svg}</div>
           <p className={`text-xl font-semibold leading-none mt-0.5 text-center`}>
             {deltaValue}
             <span className="text-xs text-ocf-black font-normal"> GW</span>
