@@ -39,8 +39,8 @@ export type ChartData = {
 };
 
 const toolTiplabels: Record<string, string> = {
-  GENERATION_UPDATED: "PV Live updated",
   GENERATION: "PV Live estimate",
+  GENERATION_UPDATED: "PV Live updated",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
   "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
@@ -194,13 +194,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               <>
                 <YAxis
                   tickFormatter={(val, i) =>
-                    prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2, isGSP ? 1 : 1000)
+                    prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2)
                   }
                   tick={{
                     fill: "white",
                     style: { fontSize: "12px" },
                     textAnchor: "end",
-                    dx: roundTickMax ? 10 : 24
+                    dx: roundTickMax ? 36 : 24
                   }}
                   ticks={[deltaYMax, deltaYMax / 2, 0, -deltaYMax / 2, -deltaYMax]}
                   tickCount={5}
@@ -208,13 +208,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   yAxisId="delta"
                   orientation="right"
                   label={{
-                    value: `Delta (${isGSP ? "MW" : "GW"})`,
+                    value: `Delta (MW)`,
                     angle: 90,
                     position: "insideRight",
                     fill: "white",
                     style: { fontSize: "12px" },
                     offset: 0,
-                    dx: roundTickMax ? -22 : -6,
+                    dx: roundTickMax ? 0 : -10,
                     dy: 30
                   }}
                   domain={[-deltaYMax, deltaYMax]}
@@ -319,40 +319,36 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Tooltip
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
-                if (!data) return <div></div>;
-
+                if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
+                  return <div></div>;
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
                     <ul className="">
-                      {Object.entries(data)
-                        .reverse()
-                        .map(([name, value]) => {
-                          if (name === "formattedDate") return null;
-                          const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
-                            ? "font-semibold"
-                            : "font-normal";
-                          const sign = ["DELTA"].includes(name)
-                            ? Number(value) > 0
-                              ? "+"
-                              : ""
-                            : "";
-                          const color = ["DELTA"].includes(name)
-                            ? Number(value) > 0
-                              ? deltaPos
-                              : deltaNeg
-                            : toolTipColors[name];
-                          return (
-                            <li className={`font-sans`} key={`item-${name}`} style={{ color }}>
-                              <div className={`flex justify-between ${textClass}`}>
-                                <div>{toolTiplabels[name]}: </div>
-                                <div className={`font-sans ml-7`}>
-                                  {sign}
-                                  {prettyPrintYNumberWithCommas(value as string)}{" "}
-                                </div>
+                      {Object.entries(toolTiplabels).map(([key, name]) => {
+                        const value = data[key];
+                        if (key === "DELTA" && !deltaView) return null;
+                        if (typeof value !== "number") return null;
+                        const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
+                          ? "font-semibold"
+                          : "font-normal";
+                        const sign = ["DELTA"].includes(key) ? (Number(value) > 0 ? "+" : "") : "";
+                        const color = ["DELTA"].includes(key)
+                          ? Number(value) > 0
+                            ? deltaPos
+                            : deltaNeg
+                          : toolTipColors[key];
+                        return (
+                          <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
+                            <div className={`flex justify-between ${textClass}`}>
+                              <div>{toolTiplabels[key]}: </div>
+                              <div className={`font-sans ml-7`}>
+                                {sign}
+                                {prettyPrintYNumberWithCommas(String(value))}{" "}
                               </div>
-                            </li>
-                          );
-                        })}
+                            </div>
+                          </li>
+                        );
+                      })}
                       <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
                         <div>
                           {formatISODateStringHumanNumbersOnly(data?.formattedDate + ":00+00:00")}{" "}

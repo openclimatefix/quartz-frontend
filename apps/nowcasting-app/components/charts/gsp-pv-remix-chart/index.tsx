@@ -4,7 +4,7 @@ import useFormatChartData from "../use-format-chart-data";
 import { formatISODateString, getRoundedTickBoundary } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
-import useGlobalState from "../../helpers/globalState";
+import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import GSPDeltaForecastHeader from "../delta-view/delta-gsp-header-ui";
 
@@ -61,13 +61,13 @@ const GspPvRemixChart: FC<{
         </div>
       </div>
     );
+  const now30min = formatISODateString(get30MinNow());
   const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
-    gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) ||
-    ({} as any);
+    gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) || ({} as any);
   const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   const fourHourForecastAtSelectedTime: NonNullable<typeof gsp4HourData>[number] =
-    gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === selectedTime) || ({} as any);
+    gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) || ({} as any);
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
