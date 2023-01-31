@@ -328,6 +328,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         const value = data[key];
                         if (key === "DELTA" && !deltaView) return null;
                         if (typeof value !== "number") return null;
+                        if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
+                          return null;
                         const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
                           ? "font-semibold"
                           : "font-normal";
