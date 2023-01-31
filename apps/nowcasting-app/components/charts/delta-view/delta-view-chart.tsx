@@ -89,7 +89,6 @@ const BucketItem: React.FC<{
 }) => {
   const selectedClass = ``;
   const unselectedClass = `bg-opacity-0 border-2 ${borderColor}`;
-  const smallDeltaClass = `bg-opacity-50 border-2`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -116,7 +115,9 @@ const BucketItem: React.FC<{
           onClick={toggleBucketSelection}
         >
           <span className="text-2xl font-semibold">{quantity}</span>
-          <span className="flex text-xs pb-2">{text} MW</span>
+          <span className="flex text-xs pb-2">
+            {text === DELTA_BUCKET.ZERO.toString() ? `-/+` : `${text} MW`}
+          </span>
         </button>
       </div>
     </>

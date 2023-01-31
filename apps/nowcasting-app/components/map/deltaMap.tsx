@@ -24,6 +24,7 @@ import {
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
+import DeltaColorGuideBar from "./delta-color-guide-bar";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -319,15 +320,10 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-              {/*<MeasuringUnit*/}
-              {/*  activeUnit={activeUnit}*/}
-              {/*  setActiveUnit={setActiveUnit}*/}
-              {/*  isLoading={isValidating && !initForecastData}*/}
-              {/*/>*/}
             </>
           )}
         >
-          {/*<ColorGuideBar unit={activeUnit} />*/}
+          <DeltaColorGuideBar />
         </Map>
       )}
     </div>
