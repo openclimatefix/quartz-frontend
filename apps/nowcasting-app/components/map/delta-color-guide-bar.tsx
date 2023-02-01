@@ -59,7 +59,7 @@ const DeltaColorGuideBar: FC<{}> = () => {
             return (
               <div
                 key={value}
-                className={`px-3 py-[1px] ${background} whitespace-nowrap ${
+                className={`px-3 py-[1px] ${background} text-xs md:text-sm whitespace-nowrap ${
                   text !== 0 ? "border-l border-ocf-black-100" : ""
                 } ${textColor}`}
               >
