@@ -185,7 +185,8 @@ const GspDeltaColumn: FC<{
   };
 
   const deltaArray = Array.from(gspDeltas.values());
-
+  console.log("deltaArray", deltaArray);
+  let hasRows = false;
   return (
     <>
       <div className={`flex flex-col flex-1 mb-24 ${!negative ? "pl-3" : "pr-3 "}`}>
@@ -252,6 +253,9 @@ const GspDeltaColumn: FC<{
           };
 
           const isSelected = selectedBuckets.includes(gspDelta.deltaBucketKey);
+          if (isSelected && !hasRows) {
+            hasRows = true;
+          }
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
@@ -269,6 +273,7 @@ const GspDeltaColumn: FC<{
           if (!isSelected) {
             return null;
           }
+
           return (
             <div
               className={`mb-0.5 bg-ocf-delta-950 cursor-pointer relative flex w-full transition duration-200 ease-out hover:bg-ocf-gray-800 hover:ease-in`}
@@ -356,6 +361,19 @@ const GspDeltaColumn: FC<{
             </div>
           );
         })}
+
+        {!hasRows && (
+          <div className={`${negative ? "pl" : "pr"}-3`}>
+            <div
+              className={`flex flex-col flex-1 items-center justify-center border-dashed border border-ocf-gray-400 rounded-md p-6`}
+            >
+              <span className="text-sm text-center text-ocf-gray-400">
+                No {negative ? "negative" : "positive"} GSP deltas <br />
+                for current filters
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
