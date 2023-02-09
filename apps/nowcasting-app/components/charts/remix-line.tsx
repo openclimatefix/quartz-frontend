@@ -321,6 +321,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const data = payload && payload[0]?.payload;
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
                   return <div></div>;
+
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
                     <ul className="">
@@ -339,13 +340,17 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             ? deltaPos
                             : deltaNeg
                           : toolTipColors[key];
+                        const computedValue =
+                          key === "DELTA" && `${data["formattedDate"]}:00.000Z` >= timeNow
+                            ? "-"
+                            : prettyPrintYNumberWithCommas(String(value));
                         return (
                           <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                             <div className={`flex justify-between ${textClass}`}>
                               <div>{toolTiplabels[key]}: </div>
                               <div className={`font-sans ml-7`}>
                                 {sign}
-                                {prettyPrintYNumberWithCommas(String(value))}{" "}
+                                {computedValue}{" "}
                               </div>
                             </div>
                           </li>

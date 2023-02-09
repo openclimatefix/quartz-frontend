@@ -35,6 +35,7 @@ export default function Home() {
   const [show4hView] = useGlobalState("show4hView");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const [timeNow] = useGlobalState("timeNow");
 
   // Assuming first item in the array is the latest
   const useGetForecastsData = (isNormalized: boolean) => {
@@ -144,11 +145,15 @@ export default function Home() {
       const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
         return forecastValue.targetTime === `${selectedTime}:00+00:00`;
       });
-      const delta =
-        currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
-      const deltaNormalized =
-        (currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
-          currentYield.gspCapacity || 0;
+      const isFuture = `${selectedTime}:00.000Z` >= timeNow;
+      const delta = isFuture
+        ? 0
+        : currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
+      const deltaNormalized = isFuture
+        ? 0
+        : (currentYield.yield / 1000 -
+            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
+            currentYield.gspCapacity || 0;
       const deltaBucket = getDeltaBucket(delta);
       tempGspDeltas.set(currentYield.gspId, {
         gspId: currentYield.gspId,

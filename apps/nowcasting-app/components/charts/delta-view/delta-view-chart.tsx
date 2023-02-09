@@ -474,8 +474,17 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
         <div className="flex justify-between mb-15">
-          <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
-          <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+          {`${selectedTime}:00.000Z` >= timeNow && (
+            <div className="pt-6 pb-36 text-center text-ocf-gray-600 w-full">
+              [ GSP-level delta values not yet available for future ]
+            </div>
+          )}
+          {`${selectedTime}:00.000Z` < timeNow && (
+            <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
+          )}
+          {`${selectedTime}:00.000Z` < timeNow && (
+            <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+          )}
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">

@@ -102,7 +102,7 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <FourHourForecast
             pv={forecastNextPV}
             time={`${forecastNextTimeOnly}`}
-            text={`4-hour forecast`}
+            text={`Next forecast`}
             color={"ocf-yellow"}
           />
         </div>
