@@ -229,7 +229,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={2}
               label={
                 <CustomizedLabel
-                  className={timeNow !== timeOfInterest ? "hidden" : ""}
+                  className={!deltaView && timeNow !== timeOfInterest ? "hidden" : ""}
                   value={prettyPrintXdate(timeOfInterest)}
                   solidLine={true}
                 ></CustomizedLabel>
@@ -242,11 +242,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeDasharray="3 3"
               className={timeNow !== timeOfInterest ? "" : "hidden"}
               label={
-                <CustomizedLabel
-                  className={`fill-amber-400 cursor-pointer ${isGSP ? "hidden" : ""}`}
-                  value={"NOW"}
-                  onClick={resetTime}
-                ></CustomizedLabel>
+                deltaView ? undefined : (
+                  <CustomizedLabel
+                    className={`fill-amber-400 cursor-pointer ${isGSP ? "hidden" : ""}`}
+                    value={"NOW"}
+                    onClick={resetTime}
+                  />
+                )
               }
             />
             {show4hView && (

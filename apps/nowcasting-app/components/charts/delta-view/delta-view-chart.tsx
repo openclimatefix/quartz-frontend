@@ -1,8 +1,8 @@
-import { Dispatch, FC, SetStateAction, useMemo } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
-import useGlobalState from "../../helpers/globalState";
+import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
   createBucketObject,
@@ -192,7 +192,6 @@ const GspDeltaColumn: FC<{
   };
 
   const deltaArray = Array.from(gspDeltas.values());
-  console.log("deltaArray", deltaArray);
   let hasRows = false;
   return (
     <>
@@ -438,6 +437,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     delta: true
   });
 
+  // While 4-hour is not available, we default to the latest interval with an Initial Estimate
+  useEffect(() => {
+    setSelectedISOTime(get30MinNow(-30));
+  }, []);
+
   if (
     nationalForecastError ||
     pvRealDayInError ||
@@ -445,7 +449,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     national4HourError ||
     allGspForecastError
   )
-    return <div>failed to load</div>;
+    return <div>Failed to load data.</div>;
 
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
