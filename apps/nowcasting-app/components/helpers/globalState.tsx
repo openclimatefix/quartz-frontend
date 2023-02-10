@@ -34,7 +34,8 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
   show4hView:
     process.env.NODE_ENV === "development" ||
-    (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production")
+    (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") ||
+    false
 });
 
 export default useGlobalState;

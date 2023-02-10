@@ -43,7 +43,8 @@ const LegendItem: FC<{
   label: string;
   dashed?: boolean;
   dataKey: string;
-}> = ({ iconClasses, label, dashed, dataKey }) => {
+  show4hrView: boolean | undefined;
+}> = ({ iconClasses, label, dashed, dataKey, show4hrView }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
 
@@ -58,8 +59,14 @@ const LegendItem: FC<{
   return (
     <div className="flex items-center">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
-        <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
+      <button className="text-left pl-1 max-w-full" onClick={toggleLineVisibility}>
+        <span
+          className={`uppercase block whitespace-nowrap ${show4hrView ? "pr-3" : "pr-6"} pl-1${
+            isVisible ? " font-extrabold" : ""
+          }`}
+        >
+          {label}
+        </span>
       </button>
     </div>
   );
@@ -505,19 +512,24 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           )}
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-        <div className="flex flex-row pb-3 overflow-x-auto">
+      <div
+        className="absolute bottom-0 left-0 right-0 flex flex-none justify-start align-items:baseline
+                   px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible"
+      >
+        <div className={`flex flex-1 flex-row pb-3 overflow-x-scroll${show4hView ? "" : ""}`}>
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
               dashed
               label={"PV live initial estimate"}
               dataKey={`GENERATION`}
+              show4hrView={show4hView}
             />
             <LegendItem
               iconClasses={"text-ocf-black"}
               label={"PV live updated"}
               dataKey={`GENERATION_UPDATED`}
+              show4hrView={show4hView}
             />
           </div>
           <div className={legendItemContainerClasses}>
@@ -526,11 +538,13 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               dashed
               label={"OCF Forecast"}
               dataKey={`FORECAST`}
+              show4hrView={show4hView}
             />
             <LegendItem
               iconClasses={"text-ocf-yellow"}
               label={"OCF Final Forecast"}
               dataKey={`PAST_FORECAST`}
+              show4hrView={show4hView}
             />
           </div>
           {show4hView && (
@@ -540,16 +554,18 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
                 dashed
                 label={`OCF ${fourHoursAgo} Forecast`}
                 dataKey={`4HR_FORECAST`}
+                show4hrView={show4hView}
               />
               <LegendItem
                 iconClasses={"text-ocf-orange"}
                 label={"OCF 4hr Forecast"}
                 dataKey={`4HR_PAST_FORECAST`}
+                show4hrView={show4hView}
               />
             </div>
           )}
         </div>
-        <div className="flex-initial flex items-center pb-3">
+        <div className="flex-initial flex items-center pl-3 pb-3">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
             <InfoIcon />
           </Tooltip>
