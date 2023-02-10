@@ -112,6 +112,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
+  const fourHoursFromNow = new Date(timeNow);
+  fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
   /** Ensures that the legend is ordered in the same way as the stacked items */
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -343,7 +345,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             : deltaNeg
                           : toolTipColors[key];
                         const computedValue =
-                          key === "DELTA" && `${data["formattedDate"]}:00.000Z` >= timeNow
+                          (key === "DELTA" &&
+                            !show4hView &&
+                            `${data["formattedDate"]}:00.000Z` >= timeNow) ||
+                          (show4hView &&
+                            `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
                             ? "-"
                             : prettyPrintYNumberWithCommas(String(value));
                         return (
@@ -351,7 +357,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             <div className={`flex justify-between ${textClass}`}>
                               <div>{toolTiplabels[key]}: </div>
                               <div className={`font-sans ml-7`}>
-                                {sign}
+                                {(show4hView || key !== "DELTA") && sign}
                                 {computedValue}{" "}
                               </div>
                             </div>
