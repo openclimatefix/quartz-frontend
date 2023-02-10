@@ -466,7 +466,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto mb-7">
+      <div className="flex-auto flex flex-col mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
@@ -502,9 +502,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex justify-between mb-15">
+        <div className="flex flex-1 justify-between mb-15">
           {`${selectedTime}:00.000Z` >= timeNow && (
-            <div className="pt-6 pb-36 text-center text-ocf-gray-600 w-full">
+            <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
               [ GSP-level delta values not yet available for future ]
             </div>
           )}
