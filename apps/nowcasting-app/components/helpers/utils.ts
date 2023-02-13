@@ -217,8 +217,8 @@ export const createBucketObject: (
       break;
     case DELTA_BUCKET.ZERO:
       bucketColor = "bg-ocf-delta-500";
-      borderColor = "border-ocf-gray-800";
-      textColor = "text-white border-white border-2";
+      borderColor = "border-white";
+      textColor = "text-white";
       altTextColor = "text-ocf-gray-800";
       lowerBound = DELTA_BUCKET.NEG1;
       upperBound = DELTA_BUCKET.POS1;

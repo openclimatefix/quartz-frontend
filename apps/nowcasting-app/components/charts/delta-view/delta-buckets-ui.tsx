@@ -17,8 +17,10 @@ const BucketItem: React.FC<Bucket> = ({
   lowerBound,
   upperBound
 }) => {
-  const selectedClass = ``;
-  const unselectedClass = `bg-opacity-0 border-2 ${borderColor}`;
+  const selectedClass = `${borderColor}`;
+  const unselectedClass = `bg-opacity-0 ${
+    borderColor === "border-white" ? "border-ocf-gray-800" : borderColor
+  }`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
@@ -32,13 +34,11 @@ const BucketItem: React.FC<Bucket> = ({
   return (
     <>
       <div
-        className={`${
-          isSelected && !DELTA_BUCKET.ZERO ? `${textColor}` : `${altTextColor}`
-        } justify-between flex flex-1
+        className={`${isSelected ? `${textColor}` : `${altTextColor}`} justify-between flex flex-1
             flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-2 rounded-md justify-center ${bucketColor} ${borderColor} ${
+          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-2 rounded-md justify-center border-2 ${bucketColor} ${
             isSelected ? selectedClass : unselectedClass
           }`}
           onClick={toggleBucketSelection}
