@@ -110,3 +110,17 @@ type GspDeltaValue = {
   deltaPercentage: string;
   deltaNormalized: string;
 };
+
+export type Bucket = {
+  dataKey: string;
+  quantity: number;
+  text: string;
+  bucketColor: string;
+  borderColor: string;
+  lowerBound: number;
+  upperBound: number;
+  increment: number;
+  textColor: string;
+  altTextColor: string;
+  gspDeltas?: Map<number, GspDeltaValue>;
+};

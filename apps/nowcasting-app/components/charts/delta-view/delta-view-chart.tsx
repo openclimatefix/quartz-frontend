@@ -4,11 +4,7 @@ import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
-import {
-  createBucketObject,
-  formatISODateString,
-  getRounded4HoursAgoString
-} from "../../helpers/utils";
+import { formatISODateString, getRounded4HoursAgoString } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
@@ -18,25 +14,7 @@ import { CombinedData, CombinedErrors, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
-
-type DeltaBucketProps = {
-  className?: string;
-  bucketSelection?: string[];
-  gspDeltas?: Map<number, GspDeltaValue>;
-};
-
-type Bucket = {
-  dataKey: string;
-  quantity: number;
-  text: string;
-  bucketColor: string;
-  borderColor: string;
-  lowerBound: number;
-  upperBound: number;
-  increment: number;
-  textColor?: string;
-  gspDeltas?: Map<number, GspDeltaValue>;
-};
+import DeltaBuckets from "./delta-buckets-ui";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -72,108 +50,6 @@ const LegendItem: FC<{
   );
 };
 
-const BucketItem: React.FC<{
-  dataKey: string;
-  quantity: number;
-  text: string;
-  bucketColor: string;
-  borderColor: string;
-  lowerBound: number;
-  upperBound: number;
-  increment: number;
-  textColour?: string;
-  altTextColour?: string;
-}> = ({
-  dataKey,
-  quantity,
-  text,
-  bucketColor,
-  borderColor,
-  textColour,
-  altTextColour,
-  lowerBound,
-  upperBound
-}) => {
-  const selectedClass = ``;
-  const unselectedClass = `bg-opacity-0 border-2 ${borderColor}`;
-  const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
-  const isSelected = selectedBuckets.includes(dataKey);
-  const toggleBucketSelection = () => {
-    if (isSelected) {
-      setSelectedBuckets(selectedBuckets.filter((bucket) => bucket !== dataKey));
-      // setSelectedDeltas(selectedDeltas).filter((list)=> list !== deltaGroup)
-    } else {
-      setSelectedBuckets([...selectedBuckets, dataKey]);
-    }
-  };
-
-  return (
-    <>
-      <div
-        className={`${
-          isSelected && !DELTA_BUCKET.ZERO ? `${textColour}` : `${altTextColour}`
-        } justify-between flex flex-1
-            flex-col items-center rounded`}
-      >
-        <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-2 rounded-md justify-center ${bucketColor} ${borderColor} ${
-            isSelected ? selectedClass : unselectedClass
-          }`}
-          onClick={toggleBucketSelection}
-        >
-          <span className="text-2xl font-semibold">{quantity}</span>
-          <span className="flex text-xs pb-2">
-            {text === DELTA_BUCKET.ZERO.toString() ? `-/+` : `${text} MW`}
-          </span>
-        </button>
-      </div>
-    </>
-  );
-};
-
-const DeltaBuckets: React.FC<{
-  gspDeltas: Map<number, GspDeltaValue>;
-  bucketSelection: string[];
-  setClickedGspId?: Dispatch<SetStateAction<number | undefined>>;
-  negative?: boolean;
-  lowerBound?: number;
-  upperBound?: number;
-}> = ({ gspDeltas, negative = false }) => {
-  // calculate array length here
-  if (!gspDeltas.size) return null;
-
-  const deltaArray = Array.from(gspDeltas.values());
-
-  const groupedDeltas: Map<DELTA_BUCKET, GspDeltaValue[]> = new Map([
-    [DELTA_BUCKET.NEG4, []],
-    [DELTA_BUCKET.NEG3, []],
-    [DELTA_BUCKET.NEG2, []],
-    [DELTA_BUCKET.NEG1, []],
-    [DELTA_BUCKET.ZERO, []],
-    [DELTA_BUCKET.POS1, []],
-    [DELTA_BUCKET.POS2, []],
-    [DELTA_BUCKET.POS3, []],
-    [DELTA_BUCKET.POS4, []]
-  ]);
-  deltaArray.forEach((delta) => {
-    groupedDeltas.set(delta.deltaBucket, [...(groupedDeltas.get(delta.deltaBucket) || []), delta]);
-  });
-  const buckets: Bucket[] = [];
-  groupedDeltas.forEach((deltaGroup, deltaBucket) => {
-    buckets.push(createBucketObject(deltaBucket, deltaGroup));
-  });
-
-  return (
-    <>
-      <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
-        {buckets.map((bucket) => {
-          return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
-        })}
-      </div>
-    </>
-  );
-};
-
 const GspDeltaColumn: FC<{
   gspDeltas: Map<number, GspDeltaValue>;
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
@@ -192,6 +68,7 @@ const GspDeltaColumn: FC<{
   };
 
   const deltaArray = Array.from(gspDeltas.values());
+  console.log("deltaArray", deltaArray);
   let hasRows = false;
   return (
     <>
@@ -254,10 +131,6 @@ const GspDeltaColumn: FC<{
               break;
           }
 
-          const isSelectedGSP = () => {
-            setClickedGspId(gspDelta.gspId);
-          };
-
           const isSelected = selectedBuckets.includes(gspDelta.deltaBucketKey);
           if (isSelected && !hasRows) {
             hasRows = true;
@@ -284,7 +157,7 @@ const GspDeltaColumn: FC<{
             <div
               className={`mb-0.5 bg-ocf-delta-950 cursor-pointer relative flex w-full transition duration-200 ease-out hover:bg-ocf-gray-800 hover:ease-in`}
               key={`gspCol${gspDelta.gspId}`}
-              onClick={isSelectedGSP}
+              onClick={() => setClickedGspId(gspDelta.gspId)}
             >
               <div
                 className={`static items-center flex flex-1 py-2 justify-between pl-1 pr-1 ${

@@ -114,7 +114,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [show4hView] = useGlobalState("show4hView");
   const fourHoursFromNow = new Date(timeNow);
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
-  /** Ensures that the legend is ordered in the same way as the stacked items */
+
   function prettyPrintYNumberWithCommas(
     x: string | number,
     showDecimals: number = 2,

@@ -55,52 +55,16 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   className,
   getForecastsData,
   combinedData,
-  combinedErrors,
-  activeUnit,
-  setActiveUnit
+  activeUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
 
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
-  if (activeUnit === ActiveUnit.percentage)
-    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
-  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
-  const {
-    pvRealDayInData,
-    pvRealDayAfterData,
-    national4HourData,
-    allGspForecastData,
-    allGspRealData,
-    gspDeltas
-  } = combinedData;
-  const {
-    pvRealDayInError,
-    pvRealDayAfterError,
-    national4HourError,
-    allGspForecastError,
-    allGspRealError
-  } = combinedErrors;
+  const { gspDeltas } = combinedData;
 
-  const {
-    data: initForecastData,
-    isValidating,
-    error: forecastError
-  } = getForecastsData(isNormalized);
+  const { data: initForecastData, error: forecastError } = getForecastsData(isNormalized);
   const forecastLoading = false;
-
-  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the opacity will be 0
-    0,
-    0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : MAX_POWER_GENERATED,
-    1
-  ];
 
   const generateGeoJsonForecastData: (
     forecastData?: FcAllResData,
@@ -269,8 +233,6 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       map.current.getCanvas().style.cursor = "pointer";
 
       // Copy coordinates array.
-      // const geometry = e.features?.[0].geometry;
-      // const coordinates = geometry?.type === "Polygon" ? geometry.coordinates[0][0] : [0, 0];
       const properties = e.features?.[0].properties;
 
       const positiveDelta = properties?.delta > 0;

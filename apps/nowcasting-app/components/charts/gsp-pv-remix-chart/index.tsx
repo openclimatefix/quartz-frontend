@@ -7,6 +7,7 @@ import useGetGspData from "./use-get-gsp-data";
 import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import GSPDeltaForecastHeader from "../delta-view/delta-gsp-header-ui";
+import { ForecastValue } from "../../types";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -66,21 +67,20 @@ const GspPvRemixChart: FC<{
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) || ({} as any);
   const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
-  const fourHourForecastAtSelectedTime: NonNullable<typeof gsp4HourData>[number] =
-    gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) || ({} as any);
+  const fourHourForecastAtSelectedTime: ForecastValue =
+    gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
+    ({} as ForecastValue);
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
 
-  const originalForecastAtTimeNow = (forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)
-    .toFixed(1)
-    .toString();
-  const fourHourForecast = (fourHourForecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)
-    .toFixed(1)
-    .toString();
-  const deltaValue = (Number(fourHourForecast) - Number(originalForecastAtTimeNow))
-    .toFixed(1)
-    .toString();
+  const originalForecastAtTimeNow = (
+    forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0
+  ).toFixed(1);
+  const fourHourForecast = (
+    fourHourForecastAtSelectedTime.expectedPowerGenerationMegawatts || 0
+  ).toFixed(1);
+  const deltaValue = (Number(fourHourForecast) - Number(originalForecastAtTimeNow)).toFixed(1);
 
   yMax = getRoundedTickBoundary(yMax, yMax_levels);
 
@@ -89,13 +89,13 @@ const GspPvRemixChart: FC<{
       <>
         <GSPDeltaForecastHeader
           onClose={close}
-          deltaValue={deltaValue}
+          deltaValue={deltaValue.toString()}
           installedCapacity={gspInfo?.installedCapacityMw}
-          forecastNextPV={fourHourForecast}
+          forecastNextPV={fourHourForecast.toString()}
           actualPV={"8"}
           title={gspInfo?.regionName || ""}
           timeNow={timeNow}
-          forecastPV={originalForecastAtTimeNow}
+          forecastPV={originalForecastAtTimeNow.toString()}
           selectedTimeOnly={"89"}
           pvTimeOnly={"9"}
           forecastNextTimeOnly={"9"}

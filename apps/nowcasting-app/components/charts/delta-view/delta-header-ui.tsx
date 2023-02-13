@@ -1,8 +1,6 @@
 import React from "react";
 import { theme } from "../../../tailwind.config";
 import { UpArrow, DownArrow } from "../../icons/icons";
-import ForecastLabel from "../../national_forecast_labels";
-import useFormatChartData from "../use-format-chart-data";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
@@ -24,7 +22,6 @@ const ForecastWithActualPV: React.FC<{
       </div>
       <div>
         <p
-          // className={`text-lg font-semibold leading-none text-center text-${color}`}
           className={`text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
           style={{ color: color }}
         >
@@ -51,7 +48,6 @@ const FourHourForecast: React.FC<{
       </div>
       <div>
         <p
-          // className={`text-lg font-semibold leading-none text-center text-${color}`}
           className={`text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
           style={{ color: color }}
         >
@@ -107,7 +103,6 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           />
         </div>
       </div>
-      {/* <div className="inline-flex h-full">{children}</div> */}
       <div
         className={`bg-${deltacolor} flex flex-col justify-between pl-3 pr-4 py-2 text-left text-ocf-black uppercase`}
         style={{ background: deltacolor }}

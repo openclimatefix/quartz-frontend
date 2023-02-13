@@ -1,20 +1,9 @@
 import React from "react";
 import { theme } from "../../../tailwind.config";
 import { UpArrow, DownArrow } from "../../icons/icons";
-import ForecastLabel from "../../national_forecast_labels";
-import useFormatChartData from "../use-format-chart-data";
 import { CloseButtonIcon } from "../../icons/icons";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-const delta100 = theme.extend.colors["ocf-delta"]["100"];
-const delta200 = theme.extend.colors["ocf-delta"]["200"];
-const delta300 = theme.extend.colors["ocf-delta"]["300"];
-const delta400 = theme.extend.colors["ocf-delta"]["400"];
-const delta500 = theme.extend.colors["ocf-delta"]["500"];
-const delta600 = theme.extend.colors["ocf-delta"]["600"];
-const delta700 = theme.extend.colors["ocf-delta"]["700"];
-const delta800 = theme.extend.colors["ocf-delta"]["800"];
-const delta900 = theme.extend.colors["ocf-delta"]["900"];
 
 const GSPForecastWithActualPV: React.FC<{
   forecast: string;
@@ -33,7 +22,6 @@ const GSPForecastWithActualPV: React.FC<{
       </div>
       <div>
         <p
-          // className={`text-lg font-semibold leading-none text-center text-${color}`}
           className={`text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
           style={{ color: color }}
         >
@@ -60,7 +48,6 @@ const FourHourForecast: React.FC<{
       </div>
       <div>
         <p
-          // className={`text-lg font-semibold leading-none text-center text-${color}`}
           className={`text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
           style={{ color: color }}
         >
@@ -98,9 +85,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   deltaValue,
   onClose
 }) => {
-  // const deltacolor = delta200
-
-  let deltacolor = `delta100`;
+  let deltacolor = `ocf-black-800`;
   if (Number(deltaValue) < -60) {
     deltacolor = `ocf-delta-100`;
   } else if (-60 <= Number(deltaValue) && Number(deltaValue) < -40) {
@@ -121,8 +106,6 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
     deltacolor = `ocf-delta-900`;
   }
 
-  // (Number(deltaValue) > 0 ? deltaPos : deltaNeg;
-  //add color gradient here
   const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
   const noDelta = Number(deltaValue) === 0;
   return (
