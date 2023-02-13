@@ -172,6 +172,9 @@ export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
       if (delta >= bucket) {
         // return bucket as DELTA_BUCKET;
         currentBucket = bucket;
+        if (bucket === DELTA_BUCKET.POS4) {
+          return bucket as DELTA_BUCKET;
+        }
       } else return currentBucket as DELTA_BUCKET;
     }
   }
