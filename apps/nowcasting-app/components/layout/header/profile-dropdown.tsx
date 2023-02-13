@@ -15,6 +15,7 @@ interface IProfileDropDown {}
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const isStaging = process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -90,23 +91,25 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
             <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
           </div>
           <div className="w-full border-t border-gray-300" />
-          <Menu.Item>
-            {({ active }) => (
-              <div
-                className={classNames(
-                  active ? "bg-gray-100" : "",
-                  "block px-4 py-2 text-sm text-gray-700"
-                )}
-              >
-                <button
-                  onClick={() => setShow4hView(!show4hView)}
-                  className="ml-3 text-sx  font-medium text-ocf-black-300 dark:text-gray-300"
+          {isStaging && (
+            <Menu.Item>
+              {({ active }) => (
+                <div
+                  className={classNames(
+                    active ? "bg-gray-100" : "",
+                    "block px-4 py-2 text-sm text-gray-700"
+                  )}
                 >
-                  {`${show4hView ? "Hide" : "Show"} 4-hour forecast`}
-                </button>
-              </div>
-            )}
-          </Menu.Item>
+                  <button
+                    onClick={() => setShow4hView(!show4hView)}
+                    className="ml-3 text-sx  font-medium text-ocf-black-300 dark:text-gray-300"
+                  >
+                    {`${show4hView ? "Hide" : "Show"} 4-hour forecast`}
+                  </button>
+                </div>
+              )}
+            </Menu.Item>
+          )}
           <Menu.Item>
             {({ active }) => (
               <div

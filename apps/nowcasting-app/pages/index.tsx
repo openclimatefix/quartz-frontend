@@ -1,4 +1,4 @@
-import { withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
 import Layout from "../components/layout/layout";
 import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
@@ -27,6 +27,7 @@ import { axiosFetcherAuth, formatISODateString, getDeltaBucket } from "../compon
 import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
+import * as Sentry from "@sentry/nextjs";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -36,6 +37,20 @@ export default function Home() {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [timeNow] = useGlobalState("timeNow");
+  const { user, isLoading, error } = useUser();
+
+  useEffect(() => {
+    if (user && !isLoading && !error) {
+      Sentry.setUser({
+        id: user.sub || "",
+        email: user.email || "",
+        username: user.nickname || "",
+        name: user.name,
+        locale: user.locale,
+        avatar: user.picture
+      });
+    }
+  }, [user, isLoading, error]);
 
   // Assuming first item in the array is the latest
   const useGetForecastsData = (isNormalized: boolean) => {

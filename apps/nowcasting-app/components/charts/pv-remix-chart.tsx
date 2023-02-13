@@ -156,7 +156,11 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
         )}
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
-        <div className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto`}>
+        <div
+          className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto${
+            show4hView ? " pl-32" : ""
+          }`}
+        >
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}

@@ -2,6 +2,8 @@ import axios from "axios";
 import { API_PREFIX, DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Bucket, GspDeltaValue } from "../types";
+import Router from "next/router";
+import * as Sentry from "@sentry/nextjs";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
@@ -108,10 +110,22 @@ export const getRounded4HoursAgoString = () => {
 export const axiosFetcherAuth = async (url: string) => {
   const response = await fetch("/api/get_token");
   const { accessToken } = await response.json();
+  const router = Router;
 
-  return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } }).then(async (res) => {
-    return res.data;
-  });
+  return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+    .then(async (res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      if ([401, 403].includes(err.response.status)) {
+        Sentry.captureException(err, {
+          tags: {
+            error: "401/403 auth error"
+          }
+        });
+        router.push("/api/auth/logout?redirectToLogin=true");
+      }
+    });
 };
 
 // this is the previous fetcher
