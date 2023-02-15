@@ -28,6 +28,7 @@ import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
+import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -225,7 +226,9 @@ export default function Home() {
         <Header view={view} setView={setView} />
         <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
           <PvLatestMap
-            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+            className={
+              currentView(VIEWS.FORECAST) || currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"
+            }
             getForecastsData={useGetForecastsData}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
@@ -247,6 +250,7 @@ export default function Home() {
             combinedErrors={combinedErrors}
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
           />
+          <SolarSiteChart className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"} />
         </SideLayout>
       </div>
     </Layout>
