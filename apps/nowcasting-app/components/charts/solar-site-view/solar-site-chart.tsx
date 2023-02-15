@@ -129,8 +129,19 @@ const SolarSiteChart: FC<{ date?: string; className?: string }> = ({ className }
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
-        <div className="text-2xl content-center">
-          This is the Solar Site View under construction.
+        <div className="text-2xl ml-20 mt-5">
+          <p>Solar Site View under construction.</p>
+          <iframe
+            src="https://giphy.com/embed/xZsLh7B3KMMyUptD9D"
+            width="300"
+            height="200"
+            frameBorder="0"
+            className="giphy-embed"
+            allowFullScreen
+          ></iframe>
+          <p>
+            <a href="https://giphy.com/gifs/tlceurope-xZsLh7B3KMMyUptD9D"></a>
+          </p>
         </div>
         <ForecastHeader
           pvForecastData={nationalForecastData}
