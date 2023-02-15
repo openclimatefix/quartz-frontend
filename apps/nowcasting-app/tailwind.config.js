@@ -16,7 +16,11 @@ module.exports = {
       black: 900
     }
   },
-  content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+    "../../node_modules/@openclimatefix/nowcasting-ui**/**/*.{js,ts,jsx,tsx}"
+  ],
   safelist: [
     "bg-ocf-yellow",
     "bg-ocf-yellow/5",

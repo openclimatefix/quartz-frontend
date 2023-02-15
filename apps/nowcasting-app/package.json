@@ -15,6 +15,7 @@
     "@auth0/nextjs-auth0": "^1.8.0",
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
+    "@openclimatefix/nowcasting-ui.layout.header": "^0.0.0-f649ced28a24a78d733ed24d1edad168057e7047",
     "@react-icons/all-files": "^4.1.0",
     "@sentry/nextjs": "^6.19.7",
     "axios": "^0.27.2",
@@ -32,7 +33,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/eslint-parser": "^7.19.1",
-    "@openclimatefix/nowcasting-tsconfig": "*",
+    "@openclimatefix/nowcasting-tsconfig": "file:../../packages/nowcasting-tsconfig",
     "@storybook/addon-actions": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.22",
     "@storybook/addon-links": "^6.4.22",
@@ -42,6 +43,7 @@
     "@storybook/react": "^6.4.22",
     "@tailwindcss/forms": "^0.5.1",
     "@tailwindcss/typography": "^0.5.2",
+    "@testing-library/react": "^13.4.0",
     "@types/leaflet": "^1.7.9",
     "@types/mapbox-gl": "^2.7.2",
     "@types/react": "^17.0.38",
@@ -59,6 +61,10 @@
     "swr": "^1.3.0",
     "tailwindcss": "^3.0.24",
     "typescript": "^4.6.4"
+  },
+  "resolutions": {
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2"
   },
   "prettier": {
     "trailingComma": "none",

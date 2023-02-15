@@ -4,6 +4,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 const { withSentryConfig } = require("@sentry/nextjs");
+const path = require("path");
 
 const moduleExports = {
   // Your existing module.exports
@@ -16,7 +17,10 @@ const sentryWebpackPluginOptions = {
   //   release, url, org, project, authToken, configFile, stripPrefix,
   //   urlPrefix, include, ignore
 
-  silent: true // Suppresses all logs
+  silent: true, // Suppresses all logs
+  alias: {
+    react: path.resolve("./node_modules/react")
+  }
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options.
 };
