@@ -1,6 +1,7 @@
 import axios from "axios";
-import { API_PREFIX } from "../../constant";
+import { API_PREFIX, DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import { NextApiRequest, NextApiResponse } from "next";
+import { Bucket, GspDeltaValue } from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 
@@ -132,4 +133,153 @@ export const axiosFetcher = (url: string) => {
   return axios(url).then(async (res) => {
     return res.data;
   });
+};
+
+// round it up to the 'yMax_levels' so that the y major ticks look right.
+export const getRoundedTickBoundary = (
+  yMax: number,
+  yMax_levels: number[],
+  positive: boolean = true
+) => {
+  for (let i = 0; i < yMax_levels.length; i++) {
+    let level = yMax_levels[i];
+    if (positive) {
+      yMax = yMax < level ? level : yMax;
+      if (yMax === level) {
+        break;
+      }
+    } else {
+      yMax = yMax > level ? level : yMax;
+      if (yMax === level) {
+        break;
+      }
+    }
+  }
+  return yMax;
+};
+
+export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
+  const deltaBucketKeys = getDeltaBucketKeys();
+  let currentBucket = DELTA_BUCKET[deltaBucketKeys[0] as keyof typeof DELTA_BUCKET];
+  for (const bucketKey of deltaBucketKeys) {
+    let bucket = Number(DELTA_BUCKET[bucketKey as keyof typeof DELTA_BUCKET]);
+
+    if (delta < 0) {
+      if (delta <= bucket) {
+        return bucket as DELTA_BUCKET;
+      }
+    } else if (delta > 0) {
+      if (bucket < 0) continue;
+
+      if (delta >= bucket) {
+        currentBucket = bucket;
+        if (bucket === DELTA_BUCKET.POS4) {
+          return bucket as DELTA_BUCKET;
+        }
+      } else return currentBucket as DELTA_BUCKET;
+    }
+  }
+  return DELTA_BUCKET.ZERO;
+};
+
+export const createBucketObject: (
+  deltaBucket: DELTA_BUCKET,
+  deltaGroup: GspDeltaValue[]
+) => Bucket = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDeltaValue[]) => {
+  let bucketColor = "bg-ocf-delta-500";
+  let borderColor = "border-ocf-delta-500";
+  let textColor = "text-white";
+  let altTextColor = "text-ocf-gray-800";
+  let text = deltaBucket.toString();
+  let quantity = deltaGroup.length;
+  let dataKey = DELTA_BUCKET[deltaBucket];
+  let lowerBound = 0;
+  let upperBound = 0;
+  let increment = 1;
+  switch (deltaBucket) {
+    case DELTA_BUCKET.NEG4:
+      bucketColor = "bg-ocf-delta-100";
+      borderColor = "border-ocf-delta-100";
+      textColor = "text-black";
+      altTextColor = "text-ocf-delta-100";
+      lowerBound = -3000;
+      upperBound = deltaBucket;
+      break;
+    case DELTA_BUCKET.NEG3:
+      bucketColor = "bg-ocf-delta-200";
+      borderColor = "border-ocf-delta-200";
+      textColor = "text-black";
+      altTextColor = "text-ocf-delta-200";
+      lowerBound = DELTA_BUCKET.NEG4;
+      upperBound = deltaBucket;
+      break;
+    case DELTA_BUCKET.NEG2:
+      bucketColor = "bg-ocf-delta-300";
+      borderColor = "border-ocf-delta-300";
+      textColor = "text-black";
+      altTextColor = "text-ocf-delta-300";
+      lowerBound = DELTA_BUCKET.NEG3;
+      upperBound = deltaBucket;
+      break;
+    case DELTA_BUCKET.NEG1:
+      bucketColor = "bg-ocf-delta-400";
+      borderColor = "border-ocf-delta-400";
+      textColor = "text-white";
+      altTextColor = "text-ocf-delta-400";
+      lowerBound = DELTA_BUCKET.NEG2;
+      upperBound = deltaBucket;
+      break;
+    case DELTA_BUCKET.ZERO:
+      bucketColor = "bg-ocf-delta-500";
+      borderColor = "border-white";
+      textColor = "text-white";
+      altTextColor = "text-ocf-gray-800";
+      lowerBound = DELTA_BUCKET.NEG1;
+      upperBound = DELTA_BUCKET.POS1;
+      break;
+    case DELTA_BUCKET.POS1:
+      bucketColor = "bg-ocf-delta-600";
+      borderColor = "border-ocf-delta-600";
+      textColor = "text-white";
+      altTextColor = "text-ocf-delta-600";
+      lowerBound = deltaBucket;
+      upperBound = DELTA_BUCKET.POS2;
+      break;
+    case DELTA_BUCKET.POS2:
+      bucketColor = "bg-ocf-delta-700";
+      borderColor = "border-ocf-delta-700";
+      textColor = "text-black";
+      altTextColor = "text-ocf-delta-700";
+      lowerBound = deltaBucket;
+      upperBound = DELTA_BUCKET.POS3;
+      break;
+    case DELTA_BUCKET.POS3:
+      bucketColor = "bg-ocf-delta-800";
+      borderColor = "border-ocf-delta-800";
+      textColor = "text-black";
+      altTextColor = "text-ocf-delta-800";
+      lowerBound = deltaBucket;
+      upperBound = DELTA_BUCKET.POS4;
+      break;
+    case DELTA_BUCKET.POS4:
+      bucketColor = "bg-ocf-delta-900";
+      borderColor = "border-ocf-delta-900";
+      textColor = "text-black";
+      altTextColor = "text-ocf-delta-900";
+      lowerBound = deltaBucket;
+      upperBound = 3000;
+      break;
+  }
+  return {
+    bucketColor,
+    borderColor,
+    textColor,
+    altTextColor,
+    text,
+    quantity,
+    dataKey,
+    lowerBound,
+    upperBound,
+    increment
+  };
 };

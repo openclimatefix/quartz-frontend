@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { get30MinNow } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
-import { formatISODateString } from "../helpers/utils";
+import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
+import { DELTA_BUCKET } from "../../constant";
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -31,18 +32,32 @@ const getForecastChartData = (
       [pastKey]: fr.expectedPowerGenerationMegawatts
     };
 };
+const getDelta: (datum: ChartData) => number = (datum) => {
+  if (datum.PAST_FORECAST !== undefined) {
+    if (datum.GENERATION_UPDATED !== undefined) {
+      return Number(datum.GENERATION_UPDATED) - Number(datum.PAST_FORECAST);
+    } else if (datum.GENERATION !== undefined) {
+      return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
+    }
+  } else if (datum.FORECAST !== undefined && datum["4HR_FORECAST"] !== undefined) {
+    return Number(datum.FORECAST) - Number(datum["4HR_FORECAST"]);
+  }
+  return 0;
+};
 const useFormatChartData = ({
   forecastData,
   fourHourData,
   pvRealDayAfterData,
   pvRealDayInData,
-  timeTrigger
+  timeTrigger,
+  delta = false
 }: {
   forecastData?: ForecastData;
   fourHourData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
+  delta?: boolean;
 }) => {
   const data = useMemo(() => {
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
@@ -55,15 +70,15 @@ const useFormatChartData = ({
         getPvdata: (dp: any) => Partial<ChartData>
       ) => {
         const pvData = getPvdata(dataPoint);
-        const formatedDate = getDatetimeUtc(dataPoint);
-        if (chartMap[formatedDate]) {
-          chartMap[formatedDate] = {
-            ...chartMap[formatedDate],
+        const formattedDate = getDatetimeUtc(dataPoint);
+        if (chartMap[formattedDate]) {
+          chartMap[formattedDate] = {
+            ...chartMap[formattedDate],
             ...pvData
           };
         } else {
-          chartMap[formatedDate] = {
-            formatedDate: formatISODateString(formatedDate),
+          chartMap[formattedDate] = {
+            formattedDate: formatISODateString(formattedDate),
             ...pvData
           };
         }
@@ -102,6 +117,15 @@ const useFormatChartData = ({
             (db) => getForecastChartData(timeNow, db, 240)
           )
         );
+      }
+      if (delta) {
+        for (const chartDatum in chartMap) {
+          if (typeof chartMap[chartDatum] === "object") {
+            const delta = getDelta(chartMap[chartDatum]);
+            chartMap[chartDatum].DELTA = delta;
+            chartMap[chartDatum].DELTA_BUCKET = getDeltaBucket(delta);
+          }
+        }
       }
 
       return Object.values(chartMap);

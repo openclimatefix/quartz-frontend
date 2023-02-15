@@ -10,18 +10,13 @@ export const getAllForecastUrl = (isNormalized: boolean, isHistoric: boolean) =>
 
 export const apiErrorMSGS = [
   {
-    key: /\/solar\/GB\/gsp\/forecast\/all\??$/,
-    getMsg: (key: string) => "Error fetching initial data. Retrying now…"
+    key: /\/solar\/GB\/national\/forecast\??historic=false&only_forecast_values=true$/,
+    getMsg: (key: string) => "Error fetching national forecast data. Retrying now…"
   },
-  {
-    key: /\/solar\/GB\/gsp\/forecast\/all\?historic=true&normalize=true$/,
-    getMsg: (key: string) => "Error fetching map data. Retrying now…"
-  },
-
-  {
-    key: /\/solar\/GB\/national\/forecast\??$/,
-    getMsg: (key: string) => "Error fetching national forecasts data. Retrying now…"
-  },
+  // {
+  //   key: /\/solar\/GB\/gsp\/forecast\/all\?historic=true&normalize=true$/,
+  //   getMsg: (key: string) => "Error fetching map data. Retrying now…"
+  // },
   {
     key: /\/solar\/GB\/national\/pvlive\/?regime=in-day$/,
     getMsg: (key: string) => "Error fetching National PV Live initial estimate. Retrying now ..."
@@ -30,7 +25,20 @@ export const apiErrorMSGS = [
     key: /\/solar\/GB\/national\/pvlive\/?regime=day-after$/,
     getMsg: (key: string) => "Error fetching National PV Live updated. Retrying now ..."
   },
+  {
+    key: /\/solar\/GB\/national\/forecast\??forecast_horizon_minutes=240&historic=true&only_forecast_values=true$/,
+    getMsg: (key: string) => "Error fetching national forecast data. Retrying now…"
+  },
 
+  {
+    key: /\/solar\/GB\/gsp\/forecast\/all\??historic=true$/,
+    getMsg: (key: string) => "Error fetching gsp forecasts data. Retrying now…"
+  },
+
+  {
+    key: /\/solar\/GB\/gsp\/pvlive\/all\??regime=in-day$/,
+    getMsg: (key: string) => "Error fetching gsp forecasts data. Retrying now…"
+  },
   {
     key: /\/solar\/GB\/gsp\/pvlive\/\d+\/?regime=in-day$/,
     getMsg: (key: string) => {
@@ -52,3 +60,16 @@ export enum VIEWS {
   DELTA = "DELTA",
   SOLAR_SITES = "SOLAR SITES"
 }
+
+export enum DELTA_BUCKET {
+  NEG4 = -80,
+  NEG3 = -60,
+  NEG2 = -40,
+  NEG1 = -20,
+  ZERO = 0,
+  POS1 = 20,
+  POS2 = 40,
+  POS3 = 60,
+  POS4 = 80
+}
+export const getDeltaBucketKeys = () => Object.keys(DELTA_BUCKET).filter((k) => isNaN(Number(k)));

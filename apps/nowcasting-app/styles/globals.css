@@ -6,3 +6,32 @@
 .recharts-surface {
   overflow: visible;
 }
+
+.delta-map .mapboxgl-popup-content {
+  background: rgba(0,0,0,0.5);
+  color: white;
+  padding: 1rem;
+}
+
+.delta-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+  border-top-color: rgba(0,0,0,0.5);
+}
+
+.up-arrow, .down-arrow {
+  content: "";
+  display: inline-block;
+  height: 0;
+  width: 0;
+  border-color: transparent;
+  margin-bottom: 1px;
+}
+
+.up-arrow {
+  border-width: 0 0.4rem 0.7rem;
+  border-bottom-color: theme('colors.ocf-delta.900');
+}
+
+.down-arrow {
+  border-width: 0.7rem 0.4rem 0;
+  border-top-color: theme('colors.ocf-delta.100');
+}

@@ -50,8 +50,21 @@ const LogoutPage: NextPage = () => {
                 See you next time.
               </h1>
               <p className="mt-2 text-lg text-gray-500">You have successfully logged out.</p>
+              <div className="mt-4 cursor-pointer">
+                <Link href="/" className="text-xs font-medium hover:cursor-pointer">
+                  <button
+                    type="submit"
+                    name="action"
+                    value="default"
+                    className="bg-ocf-gray-500 hover:bg-ocf-yellow-400 active:bg-ocf-yellow-600 transition duration-200 py-1 px-3 rounded-full"
+                  >
+                    Log back in.<span aria-hidden="true"> &rarr;</span>
+                  </button>
+                </Link>
+              </div>
             </div>
-            <div className="mt-24">
+
+            <div className="mt-16">
               <h2 className="text-sm font-semibold tracking-wide text-gray-500 uppercase">
                 Popular pages
               </h2>
@@ -83,16 +96,6 @@ const LogoutPage: NextPage = () => {
                   </li>
                 ))}
               </ul>
-              <div className="mt-8">
-                <Link
-                  href="/"
-                  className="text-base font-medium text-danube-600 hover:text-danube-500"
-                >
-                  <div>
-                    Or log in again<span aria-hidden="true"> &rarr;</span>
-                  </div>
-                </Link>
-              </div>
             </div>
           </div>
         </main>

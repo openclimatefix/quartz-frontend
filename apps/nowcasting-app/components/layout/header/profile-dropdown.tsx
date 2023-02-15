@@ -7,6 +7,7 @@ import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
 import { ChartInfo } from "../../../ChartInfo";
+import { ExternalLinkIcon } from "../../icons/icons";
 const { version } = pkg;
 
 interface IProfileDropDown {}
@@ -53,14 +54,17 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                     className="cursor-pointer"
                     title="Copy Email to Clipboard"
                   >
-                    For help, please email OCF at <span>ops@openclimatefix.org</span>
+                    Click to email OCF at <span>ops@openclimatefix.org</span>
                   </div>
                 }
                 position="left"
                 className={"text-right"}
                 fullWidth
               >
-                <a href="mailto:ops@openclimatefix.org">Help</a>
+                <a href="mailto:ops@openclimatefix.org?subject=Nowcasting%20Feedback">
+                  Help{" "}
+                  <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
+                </a>
               </Tooltip>
             </div>
           </Menu.Item>
@@ -71,7 +75,8 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 target="_blank"
                 rel="noreferrer"
               >
-                Feedback
+                Give feedback{" "}
+                <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
               </a>
             </div>
           </Menu.Item>
