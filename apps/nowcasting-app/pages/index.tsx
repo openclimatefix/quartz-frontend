@@ -5,8 +5,9 @@ import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
-import Header from "../components/layout/header";
+import { Header } from "@openclimatefix/nowcasting-ui.layout.header";
 import ForecastHeader from "../components/charts/forecast-header";
+import pkg from "../package.json";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
@@ -28,6 +29,7 @@ import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
+const { version } = pkg;
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -222,7 +224,7 @@ export default function Home() {
   return (
     <Layout>
       <div className="h-full relative pt-16">
-        <Header view={view} setView={setView} />
+        <Header version={version} view={view} setView={setView} />
         <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
