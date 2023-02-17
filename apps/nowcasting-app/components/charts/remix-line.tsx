@@ -231,7 +231,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={2}
               label={
                 <CustomizedLabel
-                  className={!deltaView && timeNow !== timeOfInterest ? "hidden" : ""}
+                  className={
+                    (!deltaView && timeNow !== timeOfInterest) || (deltaView && isGSP)
+                      ? "hidden"
+                      : ""
+                  }
                   value={prettyPrintXdate(timeOfInterest)}
                   solidLine={true}
                 ></CustomizedLabel>
