@@ -3,6 +3,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { FC, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
+import useGlobalState from "../helpers/globalState";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
@@ -13,13 +14,21 @@ mapboxgl.accessToken =
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
  */
-const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateData, children }) => {
+const Map: FC<IMap> = ({
+  loadDataOverlay,
+  controlOverlay,
+  bearing = 0,
+  updateData,
+  children,
+  title
+}) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
-  const [lng, setLng] = useState(-2.3175601);
-  const [lat, setLat] = useState(54.70534432);
-  const [zoom, setZoom] = useState(5);
+  const [lng, setLng] = useGlobalState("lng");
+  const [lat, setLat] = useGlobalState("lat");
+  const [zoom, setZoom] = useGlobalState("zoom");
+  const [maps, setMaps] = useGlobalState("maps");
 
   useUpdateMapStateOnClick({ map: map.current, isMapReady });
   useEffect(() => {
@@ -39,6 +48,8 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
         bearing,
         keyboard: false
       });
+      // Updater function to prevent state updates overriding each other in race condition on load
+      setMaps((m) => [...m, map.current!]);
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });
       map.current.addControl(nav, "bottom-right");
@@ -46,7 +57,7 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
       map.current.on("load", (event) => {
         console.log("map loaded", event);
         setIsMapReady(true);
-        if (map.current?.getCanvas()?.width === 400) {
+        if (map.current?.getCanvas()?.width === 800) {
           console.log("-- -- -- resizing map");
           map.current?.resize();
         }
@@ -69,7 +80,7 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
 
-    map.current.on("move", () => {
+    map.current.on("moveend", () => {
       setLng(Number(map.current?.getCenter().lng.toFixed(4)));
       setLat(Number(map.current?.getCenter().lat.toFixed(4)));
       setZoom(Number(map.current?.getZoom().toFixed(2)));
@@ -81,7 +92,7 @@ const Map: FC<IMap> = ({ loadDataOverlay, controlOverlay, bearing = 0, updateDat
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>
-      <div ref={mapContainer} className="h-full w-full" />
+      <div ref={mapContainer} data-title={title} className="h-full w-full" />
       <div className="map-overlay top">{children}</div>
     </div>
   );

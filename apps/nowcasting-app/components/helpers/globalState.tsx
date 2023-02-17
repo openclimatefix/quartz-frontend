@@ -1,5 +1,6 @@
 import { createGlobalState } from "react-hooks-global-state";
 import { getDeltaBucketKeys } from "../../constant";
+import mapboxgl from "mapbox-gl";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -27,6 +28,10 @@ type GlobalStateType = {
   forecastCreationTime?: string;
   visibleLines: string[];
   selectedBuckets: string[];
+  maps: mapboxgl.Map[];
+  lng: number;
+  lat: number;
+  zoom: number;
   show4hView?: boolean;
 };
 
@@ -37,6 +42,10 @@ const { useGlobalState } = createGlobalState<GlobalStateType>({
   forecastCreationTime: undefined,
   visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
   selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
+  maps: [],
+  lng: -2.3175601,
+  lat: 54.70534432,
+  zoom: 5,
   show4hView:
     process.env.NODE_ENV === "development" ||
     // Also hide on Staging/Preview deployments for now, only show on dev by default.
