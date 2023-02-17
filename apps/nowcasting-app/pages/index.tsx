@@ -183,11 +183,11 @@ export default function Home() {
       const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
         return forecastValue.targetTime === `${selectedTime}:00+00:00`;
       });
-      const isFuture = `${selectedTime}:00.000Z` >= timeNow;
-      const delta = isFuture
+      const isFutureOrNoYield = `${selectedTime}:00.000Z` >= timeNow || !currentYield.yield;
+      const delta = isFutureOrNoYield
         ? 0
         : currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
-      const deltaNormalized = isFuture
+      const deltaNormalized = isFutureOrNoYield
         ? 0
         : (currentYield.yield / 1000 -
             (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /

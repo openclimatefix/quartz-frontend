@@ -4,21 +4,26 @@ import mapboxgl from "mapbox-gl";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
-  const date = new Date();
+  let date = new Date();
 
   let minutes = date.getMinutes();
   if (offsetMinutes !== 0) {
     minutes += offsetMinutes;
     date.setMinutes(minutes);
   }
-  if (minutes <= 30) {
-    date.setHours(date.getHours());
-    date.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
-  } else {
-    date.setHours(date.getHours() + 1);
-    date.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
-  }
+  date = getNext30MinSlot(date);
   return date.toISOString();
+}
+
+export function getNext30MinSlot(isoTime: Date) {
+  if (isoTime.getMinutes() <= 30) {
+    isoTime.setHours(isoTime.getHours());
+    isoTime.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
+  } else {
+    isoTime.setHours(isoTime.getHours() + 1);
+    isoTime.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
+  }
+  return isoTime;
 }
 
 type GlobalStateType = {
