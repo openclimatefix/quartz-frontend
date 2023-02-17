@@ -378,7 +378,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div className="flex flex-1 justify-between mb-15">
           {`${selectedTime}:00.000Z` >= timeNow && (
             <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
-              [ GSP-level delta values not yet available for future ]
+              [ Delta values not available for times in the future ]
             </div>
           )}
           {`${selectedTime}:00.000Z` < timeNow && (
