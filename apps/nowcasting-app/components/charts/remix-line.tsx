@@ -355,7 +355,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           (show4hView &&
                             `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
                             ? "-"
-                            : prettyPrintYNumberWithCommas(String(value));
+                            : prettyPrintYNumberWithCommas(String(value), 1);
                         return (
                           <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                             <div className={`flex justify-between ${textClass}`}>

@@ -251,7 +251,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
               }</span>
               <span class="mr-1 ${
                 positiveDelta ? "text-ocf-delta-900" : "text-ocf-delta-100"
-              }">${properties?.delta.toFixed(2)}</span><small class="text-xs">MW</small>
+              }">${properties?.delta.toFixed(1)}</span><small class="text-xs">MW</small>
             </div>
           </div>
         </div>`;
