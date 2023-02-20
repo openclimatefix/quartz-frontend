@@ -5,7 +5,7 @@ import mapboxgl, { Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
-import { getAllForecastUrl, MAX_POWER_GENERATED } from "../../constant";
+import { VIEWS } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
@@ -251,7 +251,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
               }</span>
               <span class="mr-1 ${
                 positiveDelta ? "text-ocf-delta-900" : "text-ocf-delta-100"
-              }">${properties?.delta.toFixed(2)}</span><small class="text-xs">MW</small>
+              }">${properties?.delta.toFixed(1)}</span><small class="text-xs">MW</small>
             </div>
           </div>
         </div>`;
@@ -284,6 +284,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
             </>
           )}
+          title={VIEWS.DELTA}
         >
           <DeltaColorGuideBar />
         </Map>

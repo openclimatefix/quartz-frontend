@@ -6,7 +6,6 @@ import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
-import ForecastHeader from "../components/charts/forecast-header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
@@ -17,9 +16,7 @@ import {
   CombinedErrors,
   FcAllResData,
   ForecastData,
-  ForecastValue,
   GspAllForecastData,
-  GspRealData,
   National4HourData,
   PvRealData
 } from "../components/types";
@@ -35,10 +32,14 @@ export default function Home() {
   const [view, setView] = useState<VIEWS>(VIEWS.FORECAST);
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
   const [show4hView] = useGlobalState("show4hView");
-  const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [timeNow] = useGlobalState("timeNow");
   const { user, isLoading, error } = useUser();
+  const [maps] = useGlobalState("maps");
+  const [lat] = useGlobalState("lat");
+  const [lng] = useGlobalState("lng");
+  const [zoom] = useGlobalState("zoom");
 
   useEffect(() => {
     if (user && !isLoading && !error) {
@@ -52,6 +53,28 @@ export default function Home() {
       });
     }
   }, [user, isLoading, error]);
+
+  useEffect(() => {
+    maps.forEach((map) => {
+      if (map.getCanvas()?.style.width === "400px") {
+        console.log("-- -- -- resizing map");
+        map.resize();
+      }
+    });
+  }, [view, maps]);
+
+  useEffect(() => {
+    maps.forEach((map, index) => {
+      if (map.getContainer().dataset.title === view) return;
+
+      if (map.getCenter().lat !== lat || map.getCenter().lng !== lng) {
+        map.setCenter([lng, lat]);
+      }
+      if (map.getZoom() !== zoom) {
+        map.setZoom(zoom);
+      }
+    });
+  }, [lat, lng, zoom]);
 
   // Assuming first item in the array is the latest
   const useGetForecastsData = (isNormalized: boolean) => {
@@ -161,11 +184,11 @@ export default function Home() {
       const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
         return forecastValue.targetTime === `${selectedTime}:00+00:00`;
       });
-      const isFuture = `${selectedTime}:00.000Z` >= timeNow;
-      const delta = isFuture
+      const isFutureOrNoYield = `${selectedTime}:00.000Z` >= timeNow || !currentYield.yield;
+      const delta = isFutureOrNoYield
         ? 0
         : currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
-      const deltaNormalized = isFuture
+      const deltaNormalized = isFutureOrNoYield
         ? 0
         : (currentYield.yield / 1000 -
             (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /

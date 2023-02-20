@@ -2,7 +2,7 @@ import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
-import useGlobalState, { get30MinNow } from "../../helpers/globalState";
+import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import { formatISODateString, getRounded4HoursAgoString } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
@@ -273,6 +273,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const selectedTimeHalfHourSlot = getNext30MinSlot(new Date(selectedTime));
+  const halfHourAgoDate = new Date(timeNow).setMinutes(new Date(timeNow).getMinutes() - 30);
+  const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
 
   const {
     nationalForecastData,
@@ -376,15 +379,15 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
         <div className="flex flex-1 justify-between mb-15">
-          {`${selectedTime}:00.000Z` >= timeNow && (
+          {selectedTimeHalfHourSlot.toISOString() >= halfHourAgo && (
             <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
-              [ GSP-level delta values not yet available for future ]
+              [ Delta values not available for times in the future ]
             </div>
           )}
-          {`${selectedTime}:00.000Z` < timeNow && (
+          {selectedTimeHalfHourSlot.toISOString() < halfHourAgo && (
             <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
           )}
-          {`${selectedTime}:00.000Z` < timeNow && (
+          {selectedTimeHalfHourSlot.toISOString() < halfHourAgo && (
             <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
           )}
         </div>

@@ -231,7 +231,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={2}
               label={
                 <CustomizedLabel
-                  className={!deltaView && timeNow !== timeOfInterest ? "hidden" : ""}
+                  className={
+                    (!deltaView && timeNow !== timeOfInterest) || (deltaView && isGSP)
+                      ? "hidden"
+                      : ""
+                  }
                   value={prettyPrintXdate(timeOfInterest)}
                   solidLine={true}
                 ></CustomizedLabel>
@@ -351,7 +355,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           (show4hView &&
                             `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
                             ? "-"
-                            : prettyPrintYNumberWithCommas(String(value));
+                            : prettyPrintYNumberWithCommas(String(value), 1);
                         return (
                           <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                             <div className={`flex justify-between ${textClass}`}>
