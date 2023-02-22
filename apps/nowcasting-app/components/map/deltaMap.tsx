@@ -117,6 +117,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
 
   const updateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
+    console.log("updateMapData", generatedGeoJsonForecastData);
     if (generatedGeoJsonForecastData && source) {
       source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
       map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));

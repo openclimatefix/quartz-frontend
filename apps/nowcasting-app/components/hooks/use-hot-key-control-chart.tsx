@@ -14,13 +14,13 @@ const useHotKeyControlChart = (limits?: { start: string; end: string }) => {
             formatISODateString(selectedISOTime || "") === formatISODateString(limits?.start || "")
           )
             return selectedISOTime;
-          return addMinutesToISODate(selectedISOTime || "", -15);
+          return addMinutesToISODate(selectedISOTime || "", -30);
         });
       } else if (e.key === rightKey) {
         setSelectedISOTime((selectedISOTime) => {
           if (formatISODateString(selectedISOTime || "") === formatISODateString(limits?.end || ""))
             return selectedISOTime;
-          return addMinutesToISODate(selectedISOTime || "", 15);
+          return addMinutesToISODate(selectedISOTime || "", 30);
         });
       }
     },

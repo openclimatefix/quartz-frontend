@@ -294,15 +294,15 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     allGspForecastError
   } = combinedErrors;
 
-  const chartLimits = useMemo(
-    () =>
-      nationalForecastData?.[0] && {
-        start: nationalForecastData[0].targetTime,
-        end: nationalForecastData[nationalForecastData.length - 1].targetTime
-      },
-    [nationalForecastData]
-  );
-  useHotKeyControlChart(chartLimits);
+  // const chartLimits = useMemo(
+  //   () =>
+  //     nationalForecastData?.[0] && {
+  //       start: nationalForecastData[0].targetTime,
+  //       end: nationalForecastData[nationalForecastData.length - 1].targetTime
+  //     },
+  //   [nationalForecastData]
+  // );
+  // useHotKeyControlChart(chartLimits);
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
