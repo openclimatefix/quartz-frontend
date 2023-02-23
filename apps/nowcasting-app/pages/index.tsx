@@ -28,7 +28,7 @@ import * as Sentry from "@sentry/nextjs";
 
 export default function Home() {
   useAndUpdateSelectedTime();
-  const [view, setView] = useState<VIEWS>(VIEWS.FORECAST);
+  const [view, setView] = useGlobalState("view");
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
   const [show4hView] = useGlobalState("show4hView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");

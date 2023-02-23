@@ -1,5 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { getDeltaBucketKeys } from "../../constant";
+import { getDeltaBucketKeys, VIEWS } from "../../constant";
 import mapboxgl from "mapbox-gl";
 
 export function get30MinNow(offsetMinutes = 0) {
@@ -26,11 +26,13 @@ export function getNext30MinSlot(isoTime: Date) {
   return isoTime;
 }
 
-type GlobalStateType = {
+export type GlobalStateType = {
   selectedISOTime?: string;
   timeNow: string;
+  intervals: any[];
   clickedGspId?: number;
   forecastCreationTime?: string;
+  view: VIEWS;
   visibleLines: string[];
   selectedBuckets: string[];
   maps: mapboxgl.Map[];
@@ -40,22 +42,25 @@ type GlobalStateType = {
   show4hView?: boolean;
 };
 
-const { useGlobalState } = createGlobalState<GlobalStateType>({
-  selectedISOTime: get30MinNow(),
-  timeNow: get30MinNow(),
-  clickedGspId: undefined,
-  forecastCreationTime: undefined,
-  visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
-  selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
-  maps: [],
-  lng: -2.3175601,
-  lat: 54.70534432,
-  zoom: 5,
-  show4hView:
-    process.env.NODE_ENV === "development" ||
-    // Also hide on Staging/Preview deployments for now, only show on dev by default.
-    // (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") ||
-    false
-});
+export const { useGlobalState, getGlobalState, setGlobalState } =
+  createGlobalState<GlobalStateType>({
+    selectedISOTime: get30MinNow(),
+    timeNow: get30MinNow(),
+    intervals: [],
+    clickedGspId: undefined,
+    forecastCreationTime: undefined,
+    view: VIEWS.FORECAST,
+    visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
+    selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
+    maps: [],
+    lng: -2.3175601,
+    lat: 54.70534432,
+    zoom: 5,
+    show4hView:
+      process.env.NODE_ENV === "development" ||
+      // Also hide on Staging/Preview deployments for now, only show on dev by default.
+      // (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") ||
+      false
+  });
 
 export default useGlobalState;
