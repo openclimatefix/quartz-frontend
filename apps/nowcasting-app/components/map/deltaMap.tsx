@@ -5,7 +5,7 @@ import mapboxgl, { Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
-import { VIEWS } from "../../constant";
+import { DELTA_BUCKET, VIEWS } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
@@ -130,51 +130,51 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     ["get", selectedData],
     [
       "case",
-      ["<", ["to-number", ["var", "bucket"]], -80],
+      ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG4],
       ["to-color", theme.extend.colors["ocf-delta"][100]],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], -80],
-        ["<", ["to-number", ["var", "bucket"]], -60]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG4],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG3]
       ],
       ["to-color", theme.extend.colors["ocf-delta"][200]],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], -60],
-        ["<", ["to-number", ["var", "bucket"]], -40]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG3],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG2]
       ],
       ["to-color", theme.extend.colors["ocf-delta"][300]],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], -40],
-        ["<", ["to-number", ["var", "bucket"]], -20]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG2],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG1]
       ],
       ["to-color", theme.extend.colors["ocf-delta"][400]],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], -20],
-        ["<", ["to-number", ["var", "bucket"]], 20]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG1],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS1]
       ],
       ["to-color", "transparent"],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], 20],
-        ["<", ["to-number", ["var", "bucket"]], 40]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS1],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS2]
       ],
       ["to-color", theme.extend.colors["ocf-delta"][600]],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], 40],
-        ["<", ["to-number", ["var", "bucket"]], 60]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS2],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS3]
       ],
       ["to-color", theme.extend.colors["ocf-delta"][700]],
       [
         "all",
-        [">=", ["to-number", ["var", "bucket"]], 60],
-        ["<", ["to-number", ["var", "bucket"]], 80]
+        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS3],
+        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS4]
       ],
       ["to-color", theme.extend.colors["ocf-delta"][800]],
-      [">=", ["to-number", ["var", "bucket"]], 80],
+      [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS4],
       ["to-color", theme.extend.colors["ocf-delta"][900]],
       // Default fill color
       ["to-color", "transparent"]
