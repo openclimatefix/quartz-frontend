@@ -23,6 +23,7 @@ function MyApp({ Component, pageProps }: any) {
               Sentry.captureException(error);
             }
             const defaultMsg = "Error fetching data. Retrying now…";
+            console.log("error", key, error);
             const errorMsg = apiErrorMSGS.find((e) => key.match(e.key))?.getMsg(key);
             toast(errorMsg || defaultMsg, {
               type: "error",

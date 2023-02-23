@@ -48,6 +48,9 @@ module.exports = {
         mono: ["ui-monospace", ...defaultTheme.fontFamily.mono],
         serif: ["Source Code Pro", ...defaultTheme.fontFamily.serif]
       },
+      fontSize: {
+        "2xs": "0.625rem"
+      },
       colors: {
         amber: {
           DEFAULT: "#FFD053",
@@ -173,6 +176,19 @@ module.exports = {
           700: "#3A887C",
           800: "#296158",
           900: "#183934"
+        },
+        "ocf-delta": {
+          DEFAULT: "#6C6C6C",
+          100: "#9AA1F9",
+          200: "#9EC8FA",
+          300: "#70859D",
+          400: "#4F5D66",
+          500: "#6C6C6C",
+          600: "#67643B",
+          700: "#9F973A",
+          800: "#FCED4F",
+          900: "#F19F38",
+          950: "#595959"
         }
       }
     }

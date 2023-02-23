@@ -44,8 +44,9 @@ export default withSentry(
 
     async logout(req: NextApiRequest, res: NextApiResponse) {
       setUser(null);
+      const returnTo = req.query.redirectToLogin ? "/api/auth/login" : "/logout";
       await handleLogout(req, res, {
-        returnTo: "/logout"
+        returnTo
       });
     }
   })

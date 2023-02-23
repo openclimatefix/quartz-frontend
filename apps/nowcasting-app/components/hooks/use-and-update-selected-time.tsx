@@ -1,19 +1,39 @@
 import { useEffect } from "react";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, {
+  get30MinNow,
+  getGlobalState,
+  setGlobalState
+} from "../helpers/globalState";
 
-let intervals: any[] = [];
+const intervals = (() => getGlobalState("intervals"))();
+const setIntervals = (newIntervals: any[]) => setGlobalState("intervals", newIntervals);
+const setSelectedISOTime = (newTime: string) => setGlobalState("selectedISOTime", newTime);
 const clearIntervals = () => {
-  intervals.forEach((i) => clearInterval(i));
+  console.log("clearing intervals");
+  getGlobalState("intervals").forEach((i) => {
+    console.log("clearing interval", i);
+    clearInterval(i);
+  });
+  console.log("cleared intervals");
+  setIntervals([]);
+  console.log("set intervals to empty");
+};
+const startNewInterval = () => {
+  setIntervals([
+    ...intervals,
+    setInterval(() => {
+      console.log("checking for new time");
+      const time30MinNow = get30MinNow();
+      setSelectedISOTime(time30MinNow);
+    }, 1000 * 60)
+  ]);
 };
 const useAndUpdateSelectedTime = () => {
-  const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
   useEffect(() => {
-    intervals.push(
-      setInterval(() => {
-        const time30MinNow = get30MinNow();
-        setSelectedISOTime(time30MinNow);
-      }, 1000 * 60)
-    );
+    if (intervals.length < 1) {
+      startNewInterval();
+    }
     return () => {
       clearIntervals();
     };
@@ -22,16 +42,15 @@ const useAndUpdateSelectedTime = () => {
 };
 export const useStopAndResetTime = () => {
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
-  const stopTime = clearIntervals;
+  const stopTime = () => {
+    console.log("stopping time");
+    clearIntervals();
+  };
   const resetTime = () => {
+    console.log("restarting time");
     clearIntervals();
     setSelectedISOTime(get30MinNow());
-    intervals.push(
-      setInterval(() => {
-        const time30MinNow = get30MinNow();
-        setSelectedISOTime(time30MinNow);
-      }, 1000 * 60)
-    );
+    startNewInterval();
   };
   return { stopTime, resetTime };
 };

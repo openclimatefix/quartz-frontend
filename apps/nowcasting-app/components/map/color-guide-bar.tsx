@@ -40,7 +40,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
   }
   return (
     <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">
-      <div className="flex justify-between h-full text-ocf-black-600 font-bold relative items-end text-sm">
+      <div className="flex justify-between text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm">
         {values.map((value, index) => (
           <div
             key={value.value}

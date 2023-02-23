@@ -1,22 +1,26 @@
 import React from "react";
 import { CloseButtonIcon } from "../../icons/icons";
+import DeltaForecastHeaderUI from "../delta-view/delta-header-ui";
+import GspDeltaForecastHeaderUI from "../delta-view/delta-gsp-header-ui";
 
 type ForecastHeaderGSPProps = {
   title: string;
   mwpercent: number;
   onClose?: () => void;
+  deltaView?: boolean;
 };
 
 const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
   title,
   mwpercent,
   children,
+  deltaView,
   onClose
 }) => {
   return (
     <div id="x" className={"flex content-between flex-wrap mt-6 bg-ocf-gray-800 h-12"}>
       <div
-        className={`bg-ocf-gray-800 text-white lg:text-xl md:text-lg text-med font-black flex-[2] ml-5 m-auto py-2`}
+        className={`bg-ocf-gray-800 text-white lg:text-xl md:text-lg text-base font-bold flex-[2] ml-5 m-auto py-2`}
       >
         {title}
       </div>

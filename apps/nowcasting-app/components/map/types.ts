@@ -7,7 +7,8 @@ export enum ActiveUnit {
 export enum SelectedData {
   expectedPowerGenerationNormalized = "expectedPowerGenerationNormalized",
   expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts",
-  installedCapacityMw = "installedCapacityMw"
+  installedCapacityMw = "installedCapacityMw",
+  delta = "delta"
 }
 
 export interface IMap {
@@ -15,4 +16,5 @@ export interface IMap {
   controlOverlay: any;
   bearing?: number;
   updateData: { newData: boolean; updateMapData: (map: mapboxgl.Map) => void };
+  title: string;
 }

@@ -25,7 +25,6 @@ const LegendItem: FC<{
 }> = ({ iconClasses, label, dashed, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
-  const [show4hView] = useGlobalState("show4hView");
 
   const toggleLineVisibility = () => {
     if (isVisible) {
@@ -64,7 +63,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
 
   const chartLimits = useMemo(
     () =>
-      nationalForecastData && {
+      nationalForecastData?.[0] && {
         start: nationalForecastData[0].targetTime,
         end: nationalForecastData[nationalForecastData.length - 1].targetTime
       },
@@ -128,6 +127,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
+          deltaview={false}
         ></ForecastHeader>
 
         <div className="h-60 mt-4 mb-10">

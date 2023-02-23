@@ -49,10 +49,6 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
 }) => {
   return (
     <div className="flex flex-col m-auto h-10 justify-between">
-      {/*<div className="flex items-center mt-0.5">*/}
-      {/*  <ClockIcon />*/}
-      {/*  <p className="text-xs ml-0.5">{time}</p>*/}
-      {/*</div>*/}
       <ForecastLabel
         tip={
           <div className="w-28">
@@ -78,6 +74,7 @@ const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: st
     </div>
   );
 };
+
 type ForecastHeaderProps = {
   forecastNextPV: string;
   forecastPV: string;
@@ -98,7 +95,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
 }) => {
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-white lg:text-2xl md:text-lg text-sm font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
       <div className="flex justify-between flex-2 my-2 px-6">
