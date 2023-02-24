@@ -62,14 +62,14 @@ export enum VIEWS {
 }
 
 export enum DELTA_BUCKET {
-  NEG4 = -80,
-  NEG3 = -60,
-  NEG2 = -40,
-  NEG1 = -20,
+  NEG4 = -100,
+  NEG3 = -75,
+  NEG2 = -50,
+  NEG1 = -25,
   ZERO = 0,
-  POS1 = 20,
-  POS2 = 40,
-  POS3 = 60,
-  POS4 = 80
+  POS1 = 25,
+  POS2 = 50,
+  POS3 = 75,
+  POS4 = 100
 }
 export const getDeltaBucketKeys = () => Object.keys(DELTA_BUCKET).filter((k) => isNaN(Number(k)));

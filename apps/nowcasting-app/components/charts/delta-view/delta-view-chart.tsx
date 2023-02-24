@@ -8,7 +8,6 @@ import { formatISODateString, getRounded4HoursAgoString } from "../../helpers/ut
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
-import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
 import { CombinedData, CombinedErrors, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
@@ -264,6 +263,7 @@ type DeltaChartProps = {
   combinedErrors: CombinedErrors;
 };
 const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
+  // const [view] = useGlobalState("view");
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -276,6 +276,10 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const selectedTimeHalfHourSlot = getNext30MinSlot(new Date(selectedTime));
   const halfHourAgoDate = new Date(timeNow).setMinutes(new Date(timeNow).getMinutes() - 30);
   const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
+  const hasGspPvInitialForSelectedTime = !!combinedData.pvRealDayInData?.find(
+    (d) =>
+      d.datetimeUtc === `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}:00+00:00`
+  );
 
   const {
     nationalForecastData,
@@ -294,15 +298,15 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     allGspForecastError
   } = combinedErrors;
 
-  const chartLimits = useMemo(
-    () =>
-      nationalForecastData?.[0] && {
-        start: nationalForecastData[0].targetTime,
-        end: nationalForecastData[nationalForecastData.length - 1].targetTime
-      },
-    [nationalForecastData]
-  );
-  useHotKeyControlChart(chartLimits);
+  // const chartLimits = useMemo(
+  //   () =>
+  //     nationalForecastData?.[0] && {
+  //       start: nationalForecastData[0].targetTime,
+  //       end: nationalForecastData[nationalForecastData.length - 1].targetTime
+  //     },
+  //   [nationalForecastData]
+  // );
+  // useHotKeyControlChart(chartLimits);
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
@@ -314,9 +318,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   });
 
   // While 4-hour is not available, we default to the latest interval with an Initial Estimate
-  useEffect(() => {
-    setSelectedISOTime(get30MinNow(-30));
-  }, []);
+  // useEffect(() => {
+  //   if (selectedISOTime === get30MinNow() && view === VIEWS.DELTA) {
+  //     setSelectedISOTime(get30MinNow(-60));
+  //   }
+  // }, [view]);
 
   if (
     nationalForecastError ||
@@ -379,16 +385,16 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
         <div className="flex flex-1 justify-between mb-15">
-          {selectedTimeHalfHourSlot.toISOString() >= halfHourAgo && (
+          {!hasGspPvInitialForSelectedTime && (
             <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
-              [ Delta values not available for times in the future ]
+              [ Delta values not available until PV Live output available ]
             </div>
           )}
-          {selectedTimeHalfHourSlot.toISOString() < halfHourAgo && (
-            <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
-          )}
-          {selectedTimeHalfHourSlot.toISOString() < halfHourAgo && (
-            <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+          {hasGspPvInitialForSelectedTime && (
+            <>
+              <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
+              <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+            </>
           )}
         </div>
       </div>

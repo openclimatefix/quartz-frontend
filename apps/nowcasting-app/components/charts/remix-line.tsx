@@ -231,11 +231,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={2}
               label={
                 <CustomizedLabel
-                  className={
+                  className={`text-sm ${
                     (!deltaView && timeNow !== timeOfInterest) || (deltaView && isGSP)
                       ? "hidden"
                       : ""
-                  }
+                  }`}
                   value={prettyPrintXdate(timeOfInterest)}
                   solidLine={true}
                 ></CustomizedLabel>
@@ -250,13 +250,23 @@ const RemixLine: React.FC<RemixLineProps> = ({
               label={
                 deltaView ? undefined : (
                   <CustomizedLabel
-                    className={`fill-amber-400 cursor-pointer ${isGSP ? "hidden" : ""}`}
-                    value={"NOW"}
+                    className={`fill-amber-400 cursor-pointer text-sm ${isGSP ? "hidden" : ""}`}
+                    value={"LIVE"}
                     onClick={resetTime}
                   />
                 )
               }
             />
+            {deltaView && (
+              <Bar
+                type="monotone"
+                dataKey="DELTA"
+                yAxisId={"delta"}
+                // @ts-ignore
+                shape={<CustomBar />}
+                barSize={3}
+              />
+            )}
             {show4hView && (
               <>
                 <Line
@@ -314,16 +324,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={3}
               hide={!visibleLines.includes("FORECAST")}
             />
-            {deltaView && (
-              <Bar
-                type="monotone"
-                dataKey="DELTA"
-                yAxisId={"delta"}
-                // @ts-ignore
-                shape={<CustomBar />}
-                barSize={3}
-              />
-            )}
             <Tooltip
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
