@@ -124,3 +124,52 @@ export type Bucket = {
   altTextColor: string;
   gspDeltas?: Map<number, GspDeltaValue>;
 };
+
+// Sites
+export type Site = {
+  site_uuid: string;
+  client_name: string;
+  client_site_id: string;
+  client_site_name: string;
+  region: string;
+  dno: string;
+  gsp: string;
+  orientation: string;
+  tilt: string;
+  latitude: number;
+  longitude: number;
+  installed_capacity_kw: number;
+};
+
+export type AllSites = {
+  site_list: Site[];
+};
+
+export type SiteForecastValue = {
+  target_datetime_utc: string;
+  expected_generation_kw: number;
+};
+
+export type SitePvActualValue = {
+  datetime_utc: string;
+  actual_generation_kw: number;
+};
+
+export type SitesPvForecast = {
+  site_uuid: string;
+  forecast_uuid: string;
+  forecast_creation_time: string;
+  forecast_version: string;
+  forecast_values: SiteForecastValue[];
+};
+
+export type SitesPvActual = {
+  site_uuid: string;
+  pv_actual_values: SitePvActualValue[];
+};
+
+export type CombinedSitesData = {
+  allSitesData: Site[] | undefined;
+  sitesPvForecastData: SitesPvForecast[];
+  sitesPvActualData: SitesPvActual[];
+};

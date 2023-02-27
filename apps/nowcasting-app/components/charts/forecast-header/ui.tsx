@@ -4,7 +4,7 @@ import { ClockIcon } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
-const ForecastWithActualPV: React.FC<{
+export const ForecastWithActualPV: React.FC<{
   forecast: string;
   pv: string;
   time: string;
@@ -41,7 +41,7 @@ const ForecastWithActualPV: React.FC<{
   );
 };
 
-const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: string }> = ({
+export const NextForecast: React.FC<{ pv: string; tip: string; time: string; color?: string }> = ({
   pv,
   time,
   tip,

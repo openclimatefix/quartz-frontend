@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from "react";
+import React, { FC, useMemo, useState } from "react";
 import RemixLine from "../remix-line";
 import Line from "../remix-line";
 import useSWR from "swr";
@@ -9,7 +9,7 @@ import useFormatChartData from "../use-format-chart-data";
 import {
   getRounded4HoursAgoString,
   formatISODateString,
-  axiosFetcherAuth
+  convertISODateStringToLondonTime
 } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
@@ -17,9 +17,11 @@ import Spinner from "../../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { ForecastData, ForecastValue } from "../../types";
+import { CombinedSitesData } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
+import useFormatChartDataSites from "../use-format-chart-data-sites";
+import { ForecastWithActualPV, NextForecast } from "../forecast-header/ui";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -49,7 +51,10 @@ const LegendItem: FC<{
   );
 };
 
-const SolarSiteChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; className?: string }> = ({
+  sitesData,
+  className
+}) => {
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -58,62 +63,69 @@ const SolarSiteChart: FC<{ date?: string; className?: string }> = ({ className }
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const { data: nationalForecastData, error } = useSWR<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
 
-  const chartLimits = useMemo(
-    () =>
-      nationalForecastData && {
-        start: nationalForecastData[0].targetTime,
-        end: nationalForecastData[nationalForecastData.length - 1].targetTime
-      },
-    [nationalForecastData]
-  );
-  useHotKeyControlChart(chartLimits);
+  console.log("sitesData", sitesData);
+  // const chartLimits = useMemo(
+  //   () =>
+  //     nationalForecastData && {
+  //       start: nationalForecastData[0].targetTime,
+  //       end: nationalForecastData[nationalForecastData.length - 1].targetTime
+  //     },
+  //   [nationalForecastData]
+  // );
+  // useHotKeyControlChart(chartLimits);
 
-  const { data: pvRealDayInData, error: error2 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
+  // const { data: pvRealDayInData, error: error2 } = useSWR<
+  //   {
+  //     datetimeUtc: string;
+  //     solarGenerationKw: number;
+  //   }[]
+  // >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
+  //   refreshInterval: 60 * 1000 * 5 // 5min
+  // });
+  //
+  // const { data: pvRealDayAfterData, error: error3 } = useSWR<
+  //   {
+  //     datetimeUtc: string;
+  //     solarGenerationKw: number;
+  //   }[]
+  // >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
+  //   refreshInterval: 60 * 1000 * 5 // 5min
+  // });
+  //
+  // const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  //   show4hView
+  //     ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+  //     : null,
+  //   axiosFetcherAuth,
+  //   {
+  //     refreshInterval: 60 * 1000 * 5 // 5min
+  //   }
+  // );
 
-  const { data: pvRealDayAfterData, error: error3 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-      : null,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-
-  const chartData = useFormatChartData({
-    forecastData: nationalForecastData,
-    fourHourData: national4HourData,
-    pvRealDayInData,
-    pvRealDayAfterData,
+  const chartData = useFormatChartDataSites({
+    allSitesData: sitesData.allSitesData,
+    pvForecastData: sitesData.sitesPvForecastData,
+    // fourHourData: national4HourData,
+    // pvRealDayInData,
+    pvActualData: sitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
 
-  if (error || error2 || error3 || pv4HourError) return <div>failed to load</div>;
-  if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
+  console.log("chartData", chartData);
+  const cumulativeCapacity = sitesData.allSitesData?.reduce(
+    (acc, site) => acc + site.installed_capacity_kw,
+    0
+  );
+  const forecastPV = chartData?.reduce(
+    (acc, site) => acc + (site.FORECAST || 0) + (site.PAST_FORECAST || 0),
+    0
+  );
+  const actualPV = chartData?.reduce((acc, site) => acc + (site.GENERATION_UPDATED || 0), 0);
+  console.log("cumulativeCapacity", Math.round(Number(cumulativeCapacity)));
+
+  // if () return <div>failed to load</div>;
+  if (!sitesData.sitesPvForecastData || !sitesData.sitesPvActualData)
     return (
       <div className="h-full flex">
         <Spinner></Spinner>
@@ -143,11 +155,34 @@ const SolarSiteChart: FC<{ date?: string; className?: string }> = ({ className }
             <a href="https://giphy.com/gifs/tlceurope-xZsLh7B3KMMyUptD9D"></a>
           </p>
         </div>
-        <ForecastHeader
-          pvForecastData={nationalForecastData}
-          pvLiveData={pvRealDayInData}
-          deltaview={false}
-        ></ForecastHeader>
+        <div className="flex content-between bg-ocf-gray-800 h-auto">
+          <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
+            All Sites
+          </div>
+          <div className="flex justify-between flex-2 my-2 px-6">
+            <div className="pr-8">
+              <ForecastWithActualPV
+                forecast={`${forecastPV.toFixed(1)}`}
+                pv={`${actualPV.toFixed(1)}`}
+                tip={`PV Live / OCF Forecast`}
+                time={`${convertISODateStringToLondonTime(
+                  sitesData?.sitesPvActualData?.[0]?.pv_actual_values?.[0].datetime_utc
+                )}`}
+                color="ocf-yellow"
+              />
+            </div>
+            <div>
+              {/*<NextForecast*/}
+              {/*  pv={forecastNextPV}*/}
+              {/*  time={`${forecastNextTimeOnly}`}*/}
+              {/*  tip={`Next OCF Forecast`}*/}
+              {/*  color="ocf-yellow"*/}
+              {/*/>*/}
+            </div>
+          </div>
+          <div className="inline-flex h-full"></div>
+          {/*<div className="inline-flex h-full">{children}</div>*/}
+        </div>
 
         <div className="h-60 mt-4 mb-10">
           <RemixLine
@@ -156,7 +191,7 @@ const SolarSiteChart: FC<{ date?: string; className?: string }> = ({ className }
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
-            yMax={MAX_NATIONAL_GENERATION_MW}
+            yMax={Math.round(Number(cumulativeCapacity))}
             visibleLines={visibleLines}
           />
         </div>

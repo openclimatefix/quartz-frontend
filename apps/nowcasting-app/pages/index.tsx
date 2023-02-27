@@ -7,20 +7,29 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, VIEWS } from "../constant";
+import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, SITES_API_PREFIX, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
 import useSWRImmutable from "swr/immutable";
 import {
   AllGspRealData,
+  AllSites,
   CombinedData,
   CombinedErrors,
+  CombinedSitesData,
   FcAllResData,
   ForecastData,
   GspAllForecastData,
   National4HourData,
-  PvRealData
+  PvRealData,
+  SitesPvActual,
+  SitesPvForecast
 } from "../components/types";
-import { axiosFetcherAuth, formatISODateString, getDeltaBucket } from "../components/helpers/utils";
+import {
+  axiosFetcher,
+  axiosFetcherAuth,
+  formatISODateString,
+  getDeltaBucket
+} from "../components/helpers/utils";
 import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
@@ -242,6 +251,64 @@ export default function Home() {
     allGspRealError
   };
 
+  const selectedSiteId = "725a8670-d012-474d-b901-1179f43e7182";
+  const selectedSiteId2 = "9570f807-fc9e-47e9-b5e3-5915ddddef3d";
+  const userSites = [selectedSiteId, selectedSiteId2];
+  const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
+    `${SITES_API_PREFIX}/sites/site_list`,
+    axiosFetcher,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast>(
+    `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId}`,
+    axiosFetcher,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: sitePvForecastData2, error: sitePvForecastError2 } = useSWR<SitesPvForecast>(
+    `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId2}`,
+    axiosFetcher,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: sitePvActualData, error: sitePvActualError } = useSWR<SitesPvActual>(
+    `${SITES_API_PREFIX}/sites/pv_actual/${selectedSiteId}`,
+    axiosFetcher,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: sitePvActualData2, error: sitePvActualError2 } = useSWR<SitesPvActual>(
+    `${SITES_API_PREFIX}/sites/pv_actual/${selectedSiteId2}`,
+    axiosFetcher,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
+  const sitesData: CombinedSitesData = {
+    allSitesData:
+      allSitesData?.site_list.filter((site) => userSites.includes(site.site_uuid)) || undefined,
+    sitesPvForecastData: [sitePvForecastData, sitePvForecastData2].filter(
+      (d): d is SitesPvForecast => !!d
+    ),
+    sitesPvActualData: [sitePvActualData, sitePvActualData2].filter((d): d is SitesPvActual => !!d)
+  };
+
+  const sitesErrors = {
+    allSitesError,
+    sitesPvForecastError: [sitePvForecastError, sitePvForecastError2].filter(
+      (e) => e !== undefined
+    ),
+    sitesPvActualError: [sitePvActualError, sitePvActualError2].filter((e) => e !== undefined)
+  };
+  console.log("sitesData", sitesData);
+  console.log("sitesErrors", sitesErrors);
+
   const currentView = (v: VIEWS) => v === view;
   return (
     <Layout>
@@ -273,7 +340,10 @@ export default function Home() {
             combinedErrors={combinedErrors}
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
           />
-          <SolarSiteChart className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"} />
+          <SolarSiteChart
+            sitesData={sitesData}
+            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+          />
         </SideLayout>
       </div>
     </Layout>

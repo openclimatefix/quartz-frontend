@@ -3,6 +3,7 @@ import {
   ComposedChart,
   Line,
   Bar,
+  Brush,
   Rectangle,
   CartesianGrid,
   XAxis,
@@ -39,8 +40,8 @@ export type ChartData = {
 };
 
 const toolTiplabels: Record<string, string> = {
-  GENERATION: "PV Live estimate",
-  GENERATION_UPDATED: "PV Live updated",
+  // GENERATION: "PV Live estimate",
+  GENERATION_UPDATED: "PV Actual",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
   "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
@@ -49,7 +50,7 @@ const toolTiplabels: Record<string, string> = {
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
-  GENERATION: "white",
+  // GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
   "4HR_FORECAST": orange,
@@ -184,7 +185,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               scale="band"
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
-              interval={11}
+              interval={49}
             />
             <YAxis
               tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
@@ -295,34 +296,34 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="GENERATION"
               dot={false}
               stroke="black"
-              strokeWidth={3}
+              strokeWidth={2}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
+            />
+            <Bar
+              type="monotone"
+              dataKey="PAST_FORECAST"
+              // dot={true}
+              stroke={yellow} //yellow
+              strokeWidth={1}
+              hide={!visibleLines.includes("PAST_FORECAST")}
+            />
+            <Bar
+              type="monotone"
+              dataKey="FORECAST"
+              // dot={false}
+              // strokeDasharray="5 5"
+              stroke={yellow} //yellow
+              strokeWidth={1}
+              hide={!visibleLines.includes("FORECAST")}
             />
             <Line
               type="monotone"
               dataKey="GENERATION_UPDATED"
-              strokeWidth={3}
+              strokeWidth={2}
               stroke="black"
               dot={false}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
-            />
-            <Line
-              type="monotone"
-              dataKey="PAST_FORECAST"
-              dot={false}
-              stroke={yellow} //yellow
-              strokeWidth={3}
-              hide={!visibleLines.includes("PAST_FORECAST")}
-            />
-            <Line
-              type="monotone"
-              dataKey="FORECAST"
-              dot={false}
-              strokeDasharray="5 5"
-              stroke={yellow} //yellow
-              strokeWidth={3}
-              hide={!visibleLines.includes("FORECAST")}
             />
             <Tooltip
               content={({ payload, label }) => {
@@ -379,6 +380,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 );
               }}
             />
+            <Brush dataKey="formattedDate" height={20} stroke={yellow} fill="#333" />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
