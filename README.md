@@ -24,7 +24,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 # Getting involved
 
 - [List of "good first issues"](https://github.com/search?l=&p=1&q=user%3Aopenclimatefix+label%3A%22good+first+issue%22&ref=advsearch&type=Issues&utf8=%E2%9C%93&state=open): GitHub "issues" which describe changes we'd like to make to the code.
-- [OCF's coding style](https://github.com/openclimatefix/nowcasting/blob/main/coding_style.md)
+- [OCF's coding style](https://github.com/openclimatefix/.github/blob/main/coding_style.md)
 - The main tools we use include: PyTorch, PyTorch Lighting, xarray, pandas, pvlib
 
 # Overview of OCF's nowcasting repositories
