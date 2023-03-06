@@ -35,6 +35,7 @@ import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
+import SitesMap from "../components/map/sitesMap";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -254,12 +255,10 @@ export default function Home() {
   const selectedSiteId = "725a8670-d012-474d-b901-1179f43e7182";
   const selectedSiteId2 = "9570f807-fc9e-47e9-b5e3-5915ddddef3d";
   const userSites = [selectedSiteId, selectedSiteId2];
+  // const userSites = [selectedSiteId];
   const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
     `${SITES_API_PREFIX}/sites/site_list`,
-    axiosFetcher,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
+    axiosFetcher
   );
   const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast>(
     `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId}`,
@@ -306,8 +305,6 @@ export default function Home() {
     ),
     sitesPvActualError: [sitePvActualError, sitePvActualError2].filter((e) => e !== undefined)
   };
-  console.log("sitesData", sitesData);
-  console.log("sitesErrors", sitesErrors);
 
   const currentView = (v: VIEWS) => v === view;
   return (
@@ -316,10 +313,16 @@ export default function Home() {
         <Header view={view} setView={setView} />
         <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
           <PvLatestMap
-            className={
-              currentView(VIEWS.FORECAST) || currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"
-            }
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
             getForecastsData={useGetForecastsData}
+            activeUnit={activeUnit}
+            setActiveUnit={setActiveUnit}
+          />
+          <SitesMap
+            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+            getForecastsData={useGetForecastsData}
+            sitesData={sitesData}
+            sitesErrors={sitesErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />

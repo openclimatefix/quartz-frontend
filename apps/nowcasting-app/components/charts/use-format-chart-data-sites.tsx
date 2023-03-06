@@ -23,18 +23,20 @@ const getForecastChartData = (
 
   const futureKey = forecast_horizon === 240 ? "4HR_FORECAST" : "FORECAST";
   const pastKey = forecast_horizon === 240 ? "4HR_PAST_FORECAST" : "PAST_FORECAST";
+  const generation =
+    fr.expected_generation_kw > 20 ? fr.expected_generation_kw / 7000 : fr.expected_generation_kw;
 
   if (new Date(fr.target_datetime_utc).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: fr.expected_generation_kw / 1000
+      [futureKey]: generation
     };
   else if (new Date(fr.target_datetime_utc).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: fr.expected_generation_kw / 1000
+      [futureKey]: generation
     };
   else
     return {
-      [pastKey]: fr.expected_generation_kw / 1000
+      [pastKey]: generation
     };
 };
 const getDelta: (datum: ChartData) => number = (datum) => {
@@ -92,7 +94,7 @@ const useFormatChartDataSites = ({
           };
         } else {
           chartMap[formattedDate] = {
-            formattedDate: formatISODateString(formattedDate),
+            formattedDate: new Date(formattedDate).getTime().toString(),
             ...pvData
           };
         }

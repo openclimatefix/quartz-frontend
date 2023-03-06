@@ -64,7 +64,6 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
 
-  console.log("sitesData", sitesData);
   // const chartLimits = useMemo(
   //   () =>
   //     nationalForecastData && {
@@ -112,7 +111,6 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
     timeTrigger: selectedTime
   });
 
-  console.log("chartData", chartData);
   const cumulativeCapacity = sitesData.allSitesData?.reduce(
     (acc, site) => acc + site.installed_capacity_kw,
     0
@@ -122,7 +120,6 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
     0
   );
   const actualPV = chartData?.reduce((acc, site) => acc + (site.GENERATION_UPDATED || 0), 0);
-  console.log("cumulativeCapacity", Math.round(Number(cumulativeCapacity)));
 
   // if () return <div>failed to load</div>;
   if (!sitesData.sitesPvForecastData || !sitesData.sitesPvActualData)
@@ -141,20 +138,20 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
-        <div className="text-2xl ml-20 mt-5">
-          <p>Solar Site View under construction.</p>
-          <iframe
-            src="https://giphy.com/embed/xZsLh7B3KMMyUptD9D"
-            width="300"
-            height="200"
-            frameBorder="0"
-            className="giphy-embed"
-            allowFullScreen
-          ></iframe>
-          <p>
-            <a href="https://giphy.com/gifs/tlceurope-xZsLh7B3KMMyUptD9D"></a>
-          </p>
-        </div>
+        {/*<div className="text-2xl ml-20 mt-5">*/}
+        {/*  <p>Solar Site View under construction.</p>*/}
+        {/*  <iframe*/}
+        {/*    src="https://giphy.com/embed/xZsLh7B3KMMyUptD9D"*/}
+        {/*    width="300"*/}
+        {/*    height="200"*/}
+        {/*    frameBorder="0"*/}
+        {/*    className="giphy-embed"*/}
+        {/*    allowFullScreen*/}
+        {/*  ></iframe>*/}
+        {/*  <p>*/}
+        {/*    <a href="https://giphy.com/gifs/tlceurope-xZsLh7B3KMMyUptD9D"></a>*/}
+        {/*  </p>*/}
+        {/*</div>*/}
         <div className="flex content-between bg-ocf-gray-800 h-auto">
           <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
             All Sites

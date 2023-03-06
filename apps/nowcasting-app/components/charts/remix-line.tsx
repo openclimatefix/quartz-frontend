@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import {
   convertISODateStringToLondonTime,
+  dateToLondonDateTimeString,
   formatISODateStringHuman,
   formatISODateStringHumanNumbersOnly,
   getRounded4HoursAgoString,
@@ -21,7 +22,7 @@ import {
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
 import useGlobalState from "../helpers/globalState";
-import { DELTA_BUCKET } from "../../constant";
+import { DELTA_BUCKET, VIEWS } from "../../constant";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
@@ -113,6 +114,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
+  const [view] = useGlobalState("view");
   const fourHoursFromNow = new Date(timeNow);
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
@@ -128,6 +130,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
   function prettyPrintXdate(x: string) {
+    if (Number(x) > 0) {
+      return new Date(Number(x)).toISOString().slice(11, 16).replace("T", " ");
+    }
     return convertISODateStringToLondonTime(x + ":00+00:00");
   }
 
@@ -151,6 +156,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
     getRoundedTickBoundary(Math.max(Number(deltaMax), 0 - Number(deltaMin)) || 0, deltaMaxTicks);
   const roundTickMax = deltaYMax % 1000 === 0;
   const isGSP = deltaYMaxOverride && deltaYMaxOverride < 1000;
+  const now = new Date();
+  const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
+  const ticks = offsets.map((o) => {
+    return new Date(now).setHours(o, 0, 0, 0);
+  });
 
   return (
     <div style={{ position: "relative", width: "100%", paddingBottom: "240px" }}>
@@ -174,18 +184,40 @@ const RemixLine: React.FC<RemixLineProps> = ({
               bottom: 20,
               left: 20
             }}
-            onClick={(e?: { activeLabel?: string }) =>
-              setTimeOfInterest && e?.activeLabel && setTimeOfInterest(e.activeLabel)
-            }
+            onClick={(e?: { activeLabel?: string }) => {
+              if (setTimeOfInterest && e?.activeLabel) {
+                view === VIEWS.SOLAR_SITES
+                  ? setTimeOfInterest(new Date(Number(e.activeLabel)).toISOString())
+                  : setTimeOfInterest(e.activeLabel);
+              }
+            }}
           >
             <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
             <XAxis
               dataKey="formattedDate"
+              xAxisId={"x-axis"}
               tickFormatter={prettyPrintXdate}
-              scale="band"
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
-              interval={49}
+              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
+              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+            />
+            <XAxis
+              dataKey="formattedDate"
+              xAxisId={"x-axis-2"}
+              tickFormatter={prettyPrintXdate}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tickLine={true}
+              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
+              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+              orientation="top"
+              hide={true}
             />
             <YAxis
               tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
@@ -227,9 +259,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
-              x={timeOfInterest}
+              x={view === VIEWS.SOLAR_SITES ? new Date(timeOfInterest).getTime() : timeOfInterest}
               stroke="white"
               strokeWidth={2}
+              xAxisId={"x-axis"}
               label={
                 <CustomizedLabel
                   className={`text-sm ${
@@ -243,9 +276,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             />
             <ReferenceLine
-              x={timeNow}
+              x={view === VIEWS.SOLAR_SITES ? new Date(timeNow).getTime() : timeNow}
               stroke="white"
-              strokeWidth={1}
+              strokeWidth={2}
+              xAxisId={"x-axis"}
               strokeDasharray="3 3"
               className={timeNow !== timeOfInterest ? "" : "hidden"}
               label={
@@ -263,6 +297,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 type="monotone"
                 dataKey="DELTA"
                 yAxisId={"delta"}
+                xAxisId={"x-axis"}
                 // @ts-ignore
                 shape={<CustomBar />}
                 barSize={3}
@@ -274,6 +309,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   type="monotone"
                   dataKey="4HR_FORECAST"
                   dot={false}
+                  xAxisId={"x-axis"}
                   strokeDasharray="5 5"
                   strokeDashoffset={3}
                   stroke={orange} // blue
@@ -284,6 +320,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   type="monotone"
                   dataKey="4HR_PAST_FORECAST"
                   dot={false}
+                  xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
                   strokeWidth={3}
@@ -295,26 +332,30 @@ const RemixLine: React.FC<RemixLineProps> = ({
               type="monotone"
               dataKey="GENERATION"
               dot={false}
+              xAxisId={"x-axis"}
               stroke="black"
               strokeWidth={2}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
             />
-            <Bar
+            <Line
               type="monotone"
               dataKey="PAST_FORECAST"
-              // dot={true}
+              dot={false}
+              connectNulls={true}
+              xAxisId={"x-axis"}
               stroke={yellow} //yellow
-              strokeWidth={1}
+              strokeWidth={2}
               hide={!visibleLines.includes("PAST_FORECAST")}
             />
-            <Bar
+            <Line
               type="monotone"
               dataKey="FORECAST"
-              // dot={false}
-              // strokeDasharray="5 5"
+              dot={false}
+              xAxisId={"x-axis"}
+              strokeDasharray="5 5"
               stroke={yellow} //yellow
-              strokeWidth={1}
+              strokeWidth={2}
               hide={!visibleLines.includes("FORECAST")}
             />
             <Line
@@ -322,6 +363,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="GENERATION_UPDATED"
               strokeWidth={2}
               stroke="black"
+              xAxisId={"x-axis"}
               dot={false}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
             />
@@ -330,6 +372,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const data = payload && payload[0]?.payload;
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
                   return <div></div>;
+
+                let formattedDate = data?.formattedDate + ":00+00:00";
+                if (view === VIEWS.SOLAR_SITES) {
+                  const date = new Date(Number(data?.formattedDate));
+                  formattedDate = dateToLondonDateTimeString(date);
+                }
 
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
@@ -370,8 +418,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         );
                       })}
                       <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
-                        <div>
-                          {formatISODateStringHumanNumbersOnly(data?.formattedDate + ":00+00:00")}{" "}
+                        <div className="pr-4">
+                          {formatISODateStringHumanNumbersOnly(formattedDate)}{" "}
                         </div>
                         <div>MW</div>
                       </li>
@@ -380,7 +428,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 );
               }}
             />
-            <Brush dataKey="formattedDate" height={20} stroke={yellow} fill="#333" />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
