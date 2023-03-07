@@ -195,7 +195,7 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
       </div>
       <div>
         <SitesTable
-          dno={sitesData?.allSitesData?.[0].dno}
+          dno={"dno"}
           region={"Northern England"}
           client_site_name={"client name"}
           installed_capacity_kw={82}
@@ -204,6 +204,9 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
           client_site_id={"82"}
           gsp={"57"}
           tilt={"85"}
+          orientation={"orientation"}
+          latitude={45}
+          longitude={12}
         />
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
