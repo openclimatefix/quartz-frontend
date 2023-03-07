@@ -22,6 +22,7 @@ import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { ForecastWithActualPV, NextForecast } from "../forecast-header/ui";
+import SitesTable from "./search-table";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -138,20 +139,6 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
-        {/*<div className="text-2xl ml-20 mt-5">*/}
-        {/*  <p>Solar Site View under construction.</p>*/}
-        {/*  <iframe*/}
-        {/*    src="https://giphy.com/embed/xZsLh7B3KMMyUptD9D"*/}
-        {/*    width="300"*/}
-        {/*    height="200"*/}
-        {/*    frameBorder="0"*/}
-        {/*    className="giphy-embed"*/}
-        {/*    allowFullScreen*/}
-        {/*  ></iframe>*/}
-        {/*  <p>*/}
-        {/*    <a href="https://giphy.com/gifs/tlceurope-xZsLh7B3KMMyUptD9D"></a>*/}
-        {/*  </p>*/}
-        {/*</div>*/}
         <div className="flex content-between bg-ocf-gray-800 h-auto">
           <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
             All Sites
@@ -205,6 +192,19 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
             visibleLines={visibleLines}
           ></GspPvRemixChart>
         )}
+      </div>
+      <div>
+        <SitesTable
+          dno={sitesData?.allSitesData?.[0].dno}
+          region={"Northern England"}
+          client_site_name={"client name"}
+          installed_capacity_kw={82}
+          site_uuid={"52"}
+          client_name={"client"}
+          client_site_id={"82"}
+          gsp={"57"}
+          tilt={"85"}
+        />
       </div>
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
         <div

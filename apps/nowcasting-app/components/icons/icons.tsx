@@ -142,3 +142,56 @@ export const DownArrow: React.FC<DeltaIconProps> = ({ className }) => (
     <path d="M4 8 H28 L16 26 z" />
   </svg>
 );
+
+export const SitesDownArrow: React.FC<DeltaIconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="16"
+    id="triangle-down"
+    viewBox="0 0 36 25"
+    width="16"
+  >
+    <path d="M4 8 H28 L16 26 z" />
+  </svg>
+);
+
+export const SitesUpArrow: React.FC<DeltaIconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height="16"
+    id="triangle-up"
+    viewBox="0 0 36 16"
+    width="16"
+  >
+    <path d="M4 24 H28 L16 6 z" />
+  </svg>
+);
+
+export const ThinUpArrow: React.FC<DeltaIconProps> = ({ className }) => (
+  <svg
+    width="16"
+    height="20"
+    viewBox="0 0 28 24"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="white"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+  >
+    <path d="M11 2.206l-6.235 7.528-.765-.645 7.521-9 7.479 9-.764.646-6.236-7.53v21.884h-1v-21.883z" />
+  </svg>
+);
+
+export const ThinDownArrow: React.FC<DeltaIconProps> = ({ className }) => (
+  <svg
+    width="16"
+    height="20"
+    viewBox="0 0 28 16"
+    fill="white"
+    strokeWidth="5"
+    xmlns="http://www.w3.org/2000/svg"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+  >
+    <path d="M11 21.883l-6.235-7.527-.765.644 7.521 9 7.479-9-.764-.645-6.236 7.529v-21.884h-1v21.883z" />
+  </svg>
+);
