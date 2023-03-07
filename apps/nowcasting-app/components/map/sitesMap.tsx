@@ -14,6 +14,7 @@ import { CombinedSitesData, FcAllResData, SitesPvForecast } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
+import SitesMapSlider from "./sites-zoom-slider";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -357,6 +358,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
                 setActiveUnit={setActiveUnit}
                 isLoading={isValidating && !initForecastData}
               />
+              <SitesMapSlider />
             </>
           )}
           title={VIEWS.FORECAST}
