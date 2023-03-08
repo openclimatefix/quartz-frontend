@@ -15,6 +15,7 @@ import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
 import SitesMapSlider from "./sites-zoom-slider";
+import SitesLegend from "./sites-legend";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -353,17 +354,13 @@ const SitesMap: React.FC<SitesMapProps> = ({
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-              <MeasuringUnit
-                activeUnit={activeUnit}
-                setActiveUnit={setActiveUnit}
-                isLoading={isValidating && !initForecastData}
-              />
+              z
+              <SitesMapSlider />
             </>
           )}
           title={VIEWS.FORECAST}
         >
-          <SitesMapSlider />
-          {/* <ColorGuideBar unit={activeUnit} /> */}
+          <SitesLegend color={"color"} />
         </Map>
       )}
     </div>
