@@ -358,12 +358,12 @@ const SitesMap: React.FC<SitesMapProps> = ({
                 setActiveUnit={setActiveUnit}
                 isLoading={isValidating && !initForecastData}
               />
-              <SitesMapSlider />
             </>
           )}
           title={VIEWS.FORECAST}
         >
-          <ColorGuideBar unit={activeUnit} />
+          <SitesMapSlider />
+          {/* <ColorGuideBar unit={activeUnit} /> */}
         </Map>
       )}
     </div>
