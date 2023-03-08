@@ -1,14 +1,10 @@
 import useGlobalState from "../helpers/globalState";
-import useState from "react";
 
-const SitesMapSlider: React.FC<{ selected?: string; unselected?: string }> = ({
+const SitesMapSlider: React.FC<{ selected?: string; unselected?: string; event?: any }> = ({
   selected,
   unselected
 }) => {
   const [zoom] = useGlobalState("zoom");
-  const handleClick = (event) => {
-    console.log(event.target.innerHTML);
-  };
 
   unselected = "bg-ocf-delta-950 px-2 opacity-40 ";
   selected =
@@ -31,18 +27,10 @@ const SitesMapSlider: React.FC<{ selected?: string; unselected?: string }> = ({
           Currently Viewing
         </div>
         <div className="flex flex-row text-center text-ocf-gray-600 cursor-pointer">
-          <div onClick={handleClick} className={zoomLevel === "National" ? selected : unselected}>
-            National
-          </div>
-          <div onClick={handleClick} className={zoomLevel === "Regional" ? selected : unselected}>
-            Regional
-          </div>
-          <div onClick={handleClick} className={zoomLevel === "GSP" ? selected : unselected}>
-            GSP
-          </div>
-          <div onClick={handleClick} className={zoomLevel === "Sites" ? selected : unselected}>
-            Sites
-          </div>
+          <div className={zoomLevel === "National" ? selected : unselected}>National</div>
+          <div className={zoomLevel === "Regional" ? selected : unselected}>Regional</div>
+          <div className={zoomLevel === "GSP" ? selected : unselected}>GSP</div>
+          <div className={zoomLevel === "Sites" ? selected : unselected}>Sites</div>
         </div>
       </div>
     </>
