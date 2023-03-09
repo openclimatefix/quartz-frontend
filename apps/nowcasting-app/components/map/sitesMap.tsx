@@ -16,6 +16,7 @@ import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
 import SitesMapSlider from "./sites-zoom-slider";
 import SitesLegend from "./sites-legend";
+import ShowSiteCount from "./show-count-tickbox";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -354,8 +355,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-              z
               <SitesMapSlider />
+              <ShowSiteCount />
             </>
           )}
           title={VIEWS.FORECAST}

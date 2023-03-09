@@ -39,6 +39,7 @@ export type GlobalStateType = {
   lng: number;
   lat: number;
   zoom: number;
+  showSiteCount?: boolean;
   show4hView?: boolean;
 };
 
@@ -56,6 +57,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lng: -2.3175601,
     lat: 54.70534432,
     zoom: 5,
+    showSiteCount: undefined,
     show4hView:
       process.env.NODE_ENV === "development" ||
       // Also hide on Staging/Preview deployments for now, only show on dev by default.
