@@ -77,39 +77,40 @@ export default function Home() {
 
   // Assuming first item in the array is the latest
   const useGetForecastsData = (isNormalized: boolean) => {
-    const [forecastLoading, setForecastLoading] = useState(true);
+    // const [forecastLoading, setForecastLoading] = useState(true);
     const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
-    const bareForecastData = useSWRImmutable<FcAllResData>(
-      () => getAllForecastUrl(false, false),
-      axiosFetcherAuth,
-      {
-        onSuccess: (data) => {
-          if (data.forecasts?.length)
-            setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-          setForecastLoading(false);
-        }
-      }
-    );
+    // const bareForecastData = useSWRImmutable<FcAllResData>(
+    //   () => getAllForecastUrl(false, false),
+    //   axiosFetcherAuth,
+    //   {
+    //     onSuccess: (data) => {
+    //       if (data.forecasts?.length)
+    //         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+    //       setForecastLoading(false);
+    //     }
+    //   }
+    // );
 
     const allForecastData = useSWR<FcAllResData>(
       () => getAllForecastUrl(true, true),
       axiosFetcherAuth,
       {
         refreshInterval: 1000 * 60 * 5, // 5min
-        isPaused: () => forecastLoading,
+        // isPaused: () => forecastLoading,
         onSuccess: (data) => {
           setForecastCreationTime(data.forecasts[0].forecastCreationTime);
         }
       }
     );
-    useEffect(() => {
-      if (!forecastLoading) {
-        allForecastData.mutate();
-      }
-    }, [forecastLoading]);
+    // useEffect(() => {
+    //   if (!forecastLoading) {
+    //     allForecastData.mutate();
+    //   }
+    // }, [forecastLoading]);
 
-    if (isNormalized) return allForecastData;
-    else return allForecastData.data ? allForecastData : bareForecastData;
+    return allForecastData;
+    // if (isNormalized) return allForecastData;
+    // else return allForecastData.data ? allForecastData : bareForecastData;
   };
 
   const { data: nationalForecastData, error: nationalForecastError } = useSWR<ForecastData>(
@@ -146,6 +147,7 @@ export default function Home() {
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
     axiosFetcherAuth,
     {
+      isPaused: () => !nationalForecastData,
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
@@ -264,7 +266,11 @@ export default function Home() {
         </div>
 
         <SideLayout>
-          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
+          <PvRemixChart
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+          />
           <DeltaViewChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}

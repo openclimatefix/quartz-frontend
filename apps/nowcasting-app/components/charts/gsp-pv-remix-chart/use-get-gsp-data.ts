@@ -7,13 +7,6 @@ import { axiosFetcherAuth } from "../../helpers/utils";
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
-  const { data: fcAll, error: fcAllError } = useSWR<FcAllResData>(
-    getAllForecastUrl(true, true),
-    axiosFetcherAuth,
-    {
-      refreshInterval: t5min
-    }
-  );
 
   const { data: pvRealDataIn, error: pvRealInDat } = useSWR<
     {
@@ -44,8 +37,7 @@ const useGetGspData = (gspId: number) => {
   );
 
   return {
-    errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
-    fcAll,
+    errors: [pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
     gsp4HourData,
     pvRealDataIn,
     pvRealDataAfter

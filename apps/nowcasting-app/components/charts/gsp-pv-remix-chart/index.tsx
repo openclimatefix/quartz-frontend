@@ -7,7 +7,7 @@ import useGetGspData from "./use-get-gsp-data";
 import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import GSPDeltaForecastHeader from "../delta-view/delta-gsp-header-ui";
-import { ForecastValue } from "../../types";
+import { ForecastValue, GspAllForecastData } from "../../types";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -21,6 +21,7 @@ const GspPvRemixChart: FC<{
   selectedTime: string;
   close: () => void;
   setTimeOfInterest: (t: string) => void;
+  fcAll?: GspAllForecastData;
   timeNow: string;
   resetTime: () => void;
   visibleLines: string[];
@@ -30,13 +31,14 @@ const GspPvRemixChart: FC<{
   selectedTime,
   close,
   setTimeOfInterest,
+  fcAll,
   timeNow,
   resetTime,
   visibleLines,
   deltaView = false
 }) => {
   //when adding 4hour forecast data back in, add gsp4HourData to list in line 27
-  const { errors, fcAll, pvRealDataAfter, pvRealDataIn, gsp4HourData } = useGetGspData(gspId);
+  const { errors, pvRealDataAfter, pvRealDataIn, gsp4HourData } = useGetGspData(gspId);
   const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspForecastData = gspData?.forecastValues;
   const gspInfo = gspData?.location;
