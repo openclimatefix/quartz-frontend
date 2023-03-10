@@ -54,6 +54,9 @@ const GspPvRemixChart: FC<{
     console.log(errors);
     return <div>failed to load</div>;
   }
+  console.log("fcAll", fcAll);
+  console.log("pvRealDataIn", pvRealDataIn);
+  console.log("pvRealDataAfter", pvRealDataAfter);
   if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
     return (
       <div className="mt-8">

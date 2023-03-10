@@ -93,6 +93,7 @@ const PvRemixChart: FC<{
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
+  console.log("PV Remix Chart - combinedData", combinedData);
   const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (

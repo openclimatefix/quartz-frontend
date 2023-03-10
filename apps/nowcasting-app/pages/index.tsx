@@ -147,7 +147,6 @@ export default function Home() {
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
     axiosFetcherAuth,
     {
-      isPaused: () => !nationalForecastData,
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
@@ -171,6 +170,8 @@ export default function Home() {
         yield: gspYield?.solarGenerationKw || 0
       };
     }) || [];
+
+  console.log("allGspForecastData INDEX", allGspForecastData);
   const gspDeltas = useMemo(() => {
     let tempGspDeltas = new Map();
 
