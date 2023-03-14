@@ -2,7 +2,7 @@ import React, { FC, useMemo, useState } from "react";
 import RemixLine from "../remix-line";
 import Line from "../remix-line";
 import useSWR from "swr";
-import { API_PREFIX } from "../../../constant";
+import { AGGREGATION_LEVELS, API_PREFIX } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
@@ -22,7 +22,7 @@ import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { ForecastWithActualPV, NextForecast } from "../forecast-header/ui";
-import SitesTable from "./search-table";
+import { RegionTable, GSPTable, SiteTable } from "./solar-site-tables";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -59,11 +59,13 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
+  const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const currentAggregation = (a: AGGREGATION_LEVELS) => a === aggregationLevel;
 
   // const chartLimits = useMemo(
   //   () =>
@@ -111,6 +113,10 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
     pvActualData: sitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
+
+  console.log(chartData);
+  console.log(sitesData);
+  console.log(aggregationLevel);
 
   const cumulativeCapacity = sitesData.allSitesData?.reduce(
     (acc, site) => acc + site.installed_capacity_kw,
@@ -193,22 +199,22 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
           ></GspPvRemixChart>
         )}
       </div>
-      <div>
-        <SitesTable
-          dno={"dno"}
-          region={"Northern England"}
-          client_site_name={"client name"}
-          installed_capacity_kw={82}
-          site_uuid={"52"}
-          client_name={"client"}
-          client_site_id={"82"}
-          gsp={"57"}
-          tilt={"85"}
-          orientation={"orientation"}
-          latitude={45}
-          longitude={12}
-        />
-      </div>
+
+      <RegionTable
+        className={
+          currentAggregation(AGGREGATION_LEVELS.REGION) ||
+          currentAggregation(AGGREGATION_LEVELS.NATIONAL)
+            ? ""
+            : "hidden"
+        }
+        sitesCombinedData={sitesData}
+        allSites={sitesData.allSitesData}
+        sitesPvActual={sitesData.sitesPvActualData}
+        sitesPvForecast={sitesData.sitesPvForecastData}
+      />
+      <GSPTable className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"} />
+      <SiteTable className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"} />
+
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
         <div
           className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto${

@@ -64,6 +64,13 @@ export enum VIEWS {
   SOLAR_SITES = "SOLAR SITES"
 }
 
+export enum AGGREGATION_LEVELS {
+  NATIONAL = "NATIONAL",
+  REGION = "REGION",
+  GSP = "GSP",
+  SITE = "SITE"
+}
+
 export enum DELTA_BUCKET {
   NEG4 = -100,
   NEG3 = -75,

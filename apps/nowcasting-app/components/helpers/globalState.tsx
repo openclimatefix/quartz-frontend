@@ -1,5 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { getDeltaBucketKeys, VIEWS } from "../../constant";
+import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS } from "../../constant";
 import mapboxgl from "mapbox-gl";
 
 export function get30MinNow(offsetMinutes = 0) {
@@ -33,6 +33,7 @@ export type GlobalStateType = {
   clickedGspId?: number;
   forecastCreationTime?: string;
   view: VIEWS;
+  aggregationLevel: AGGREGATION_LEVELS;
   visibleLines: string[];
   selectedBuckets: string[];
   maps: mapboxgl.Map[];
@@ -58,6 +59,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lat: 54.70534432,
     zoom: 5,
     showSiteCount: undefined,
+    aggregationLevel: AGGREGATION_LEVELS.REGION,
     show4hView:
       process.env.NODE_ENV === "development" ||
       // Also hide on Staging/Preview deployments for now, only show on dev by default.

@@ -5,7 +5,7 @@ import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
-import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
+import { AGGREGATION_LEVELS, MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
@@ -14,9 +14,9 @@ import { CombinedSitesData, FcAllResData, SitesPvForecast } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
-import SitesMapSlider from "./sites-zoom-slider";
-import SitesLegend from "./sites-legend";
-import ShowSiteCount from "./show-count-tickbox";
+import Slider from "./sitesMapFeatures/sitesZoomSlider";
+import SitesLegend from "./sitesMapFeatures/sitesLegend";
+import ShowSiteCount from "./sitesMapFeatures/showCountTickbox";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -52,14 +52,13 @@ const SitesMap: React.FC<SitesMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-
+  const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
   let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
   if (activeUnit === ActiveUnit.percentage)
     selectedDataName = SelectedData.expectedPowerGenerationNormalized;
   if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
-
   const {
     data: initForecastData,
     isValidating,
@@ -240,6 +239,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
   };
 
   console.log("sitesData", sitesData);
+  console.log(aggregationLevel);
 
   const addFCData = (map: { current: mapboxgl.Map }) => {
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
@@ -355,8 +355,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-              <SitesMapSlider />
-              <ShowSiteCount />
+              <Slider aggregation={aggregationLevel} setAggregation={setAggregationLevel} />
+              {/* <ShowSiteCount /> */}
             </>
           )}
           title={VIEWS.FORECAST}
