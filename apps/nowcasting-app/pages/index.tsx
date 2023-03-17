@@ -7,7 +7,13 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, SITES_API_PREFIX, VIEWS } from "../constant";
+import {
+  API_PREFIX,
+  DELTA_BUCKET,
+  getAllForecastUrl,
+  SITES_API_PREFIX,
+  VIEWS
+} from "../constant";
 import useGlobalState from "../components/helpers/globalState";
 import useSWRImmutable from "swr/immutable";
 import {
@@ -260,6 +266,7 @@ export default function Home() {
     `${SITES_API_PREFIX}/sites/site_list`,
     axiosFetcher
   );
+ 
   const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast>(
     `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId}`,
     axiosFetcher,
@@ -267,6 +274,10 @@ export default function Home() {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
+
+  console.log("allSitesData", allSitesData)
+  
+
   const { data: sitePvForecastData2, error: sitePvForecastError2 } = useSWR<SitesPvForecast>(
     `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId2}`,
     axiosFetcher,
@@ -288,10 +299,9 @@ export default function Home() {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
-
+//allSitesData?.site_list.filter((site) => userSites.includes(site.site_uuid)) || undefined,
   const sitesData: CombinedSitesData = {
-    allSitesData:
-      allSitesData?.site_list.filter((site) => userSites.includes(site.site_uuid)) || undefined,
+    allSitesData:allSitesData?.site_list,
     sitesPvForecastData: [sitePvForecastData, sitePvForecastData2].filter(
       (d): d is SitesPvForecast => !!d
     ),
@@ -307,6 +317,7 @@ export default function Home() {
   };
 
   const currentView = (v: VIEWS) => v === view;
+
   return (
     <Layout>
       <div className="h-full relative pt-16">

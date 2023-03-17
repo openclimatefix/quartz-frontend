@@ -7,11 +7,12 @@ import {
   SitesDownArrow,
   SitesUpArrow
 } from "../../icons/icons";
-import { CombinedSitesData, SitesPvActual, SitesPvForecast, Site } from "../../types";
+import { CombinedSitesData, SitesPvActual, SitesPvForecast, Site, AllSites } from "../../types";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { AGGREGATION_LEVELS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
+
 
 const sites = [
   {
@@ -108,66 +109,98 @@ const sites = [
   }
 ];
 
-export const RegionTable: React.FC<{
-  className: string;
-  allSites: Site[];
-  sitesPvActual: SitesPvActual[];
-  sitesPvForecast: SitesPvForecast[];
-  sitesCombinedData?: CombinedSitesData[];
-}> = ({ className, allSites, sitesCombinedData, sitesPvActual, sitesPvForecast }) => {
-  let size = 17;
-  const [zoom] = useGlobalState("zoom");
 
+
+const TableHeader: React.FC<{ text: string }> = ({ text }) => {
   return (
-    <>
-      <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
         <div
           className="sticky flex flex-row bg-ocf-sites-100
             justify-between"
         >
           <div className="ml-10 w-80">
             <div className="py-3 font-bold text-sm ">
-              <p>Region</p>
+              <p>{text}</p>
             </div>
           </div>
-
-          <div className="flex flex-row justify-end">
-            <div className="w-32 py-3 flex justify-start font-bold text-sm">
+          <div className="flex flex-row">
+            <div className="text-white w-32
+                         justify-start py-3 pr-10 font-bold flex flex-row text-sm">
               <p>Capacity</p>
             </div>
-            <div>
+            <div className="flex text-white font-bold w-32 justify-start py-3 pr-10 text-sm">
               <p>MW</p>
-              <span className="pl-2 pb-1 font-bold">
-                <ThinUpArrow />
-              </span>
             </div>
           </div>
-        </div>
-      </div>
+        </div>)
+}
+// Tables will show Capacity => This should be the forecast as % yield if we don't have truth value in the past. 
+//Tables will also show generation MW value over installed capacity. If we have truths, use truths, if we have forecast, use forecast given a specific time. 
 
-      <div className="h-52 overflow-y-scroll">
-        {allSites?.map((site) => {
+type TableDataProps = {
+  dno?: string,
+  gsp?: string,
+  actualGeneration?: string,
+  forecast?: string,
+  installedCapacity?: string,
+  text?: string
+  site_uuid?: string
+  normalizedValue?: string
+  sitesData: Map<number, Site>
+  aggregationLevel?: string
+  level?: string
+}
+
+const TableData: React.FC<TableDataProps> = ({ sitesData, level, text, installedCapacity, normalizedValue}) => {
+  const [aggregationLevel] = useGlobalState("aggregationLevel")
+  
+  if (!sitesData) {
+    return (
+      <div>
+        There is currently no data. 
+      </div>
+    )
+  }
+
+  const sitesArray = Array.from(sitesData.values())
+  
+  return (
+    <>
+    <div className="h-52 overflow-y-scroll">
+        {sitesArray?.map((site) => {
+        
+          if (aggregationLevel === "REGION") {
+            const obj = JSON.parse(site.dno)
+            level = obj.long_name
+          } else if (aggregationLevel === "GSP") {
+            const obj = JSON.parse(site.gsp)
+            level = `${obj.name} - ${obj.gsp_id}`
+          } else if (aggregationLevel==="SITE") {
+            level = site.client_site_id
+          } else {
+            const obj = JSON.parse(site.dno)
+            level = `${obj.long_name} - ${obj.dno_id}`
+            }
           return (
             <>
               <div key={site.site_uuid} className="flex flex-col bg-ocf-delta-950">
                 <div className="flex flex-row justify-between text-sm">
                   <div className="ml-10 w-80">
                     <div className="py-3 text-white font-bold text-sm">
-                      {site.site_uuid === null ? "No DNO name" : site.dno}
+                      {level}
                     </div>
-                  </div>
+                  </div> 
                   <div className="flex flex-row">
                     <div
                       className="text-white w-32
-                         justify-center py-3 font-bold flex flex-row text-sm"
+                         justify-center py-3 pr-10 font-bold flex flex-row text-sm"
                     >
                       <p>
-                        {site.installed_capacity_kw.toFixed()}
+                        {normalizedValue}
                         <span className="ocf-gray-400 text-xs">%</span>
                       </p>
                     </div>
                     <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
-                      {site.installed_capacity_kw}/{site.installed_capacity_kw}
+                     {site.installed_capacity_kw.toFixed(2)}
                       <span className="text-ocf-gray-400 text-xs font-thin pt-1">MW</span>
                     </div>
                   </div>
@@ -180,25 +213,73 @@ export const RegionTable: React.FC<{
             </>
           );
         })}
-      </div>
+        </div>
+        </>)}
+        
+
+
+export const RegionTable: React.FC<{
+  className: string;
+  allSites: Map<number,Site>;
+  sitesPvActual: SitesPvActual[];
+  sitesPvForecast: SitesPvForecast[];
+  sitesCombinedData?: CombinedSitesData[];
+  dno: string
+}> = ({ className, allSites, dno, sitesCombinedData, sitesPvActual, sitesPvForecast }) => {
+ 
+  return (
+  
+    <>
+      <div className={`${className || ""}`}>
+     <TableHeader text={"Region"}/>
+        <TableData
+          sitesData={allSites}
+          normalizedValue={"50"}
+         />
+        </div>
     </>
   );
 };
 
-export const GSPTable: React.FC<{ className: string; sitesCombinedData?: CombinedSitesData }> = ({
+export const GSPTable: React.FC<{
+  allSites: Map<number,Site>;
+  sitesPvActual: SitesPvActual[];
+  sitesPvForecast: SitesPvForecast[];
+  sitesCombinedData?: CombinedSitesData[];
+  className: string
+}> = ({
   sitesCombinedData,
+  allSites,
   className
 }) => {
+  // const gsp = allSites[0].gsp
+  // const installedCapacity = allSites[0].installed_capacity_kw.toFixed(2)
   return (
-    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>This is the GSP Site Table</div>
+    <>
+      <div className={`${className || ""}`}>
+     <TableHeader text={"Grid Supply Point"}/>
+        <TableData
+          sitesData={allSites}
+          normalizedValue={"50"}
+        />
+        </div>
+     </>
   );
 };
 
-export const SiteTable: React.FC<{ className: string; sitesCombinedData?: CombinedSitesData }> = ({
+export const SiteTable: React.FC<{ className: string; allSites: Map<number,Site>;  sitesCombinedData?: CombinedSitesData;}> = ({
+  allSites,
   sitesCombinedData,
   className
 }) => {
   return (
-    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>This is the Site Table</div>
+    <>
+      <div className={`${className || ""}`}>
+        <TableHeader text={"Site"} />
+        <TableData
+          sitesData={allSites}
+        />
+        </div>
+    </>
   );
-};
+}

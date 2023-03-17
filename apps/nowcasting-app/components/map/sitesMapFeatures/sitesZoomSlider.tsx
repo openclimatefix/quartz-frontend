@@ -100,6 +100,7 @@ const Slider: React.FC<SliderProps> = ({ selected, unselected, aggregation, setA
             aggregation={AGGREGATION_LEVELS.SITE}
           />
         </div>
+        
         <div className={zoomLevel === "National" ? selected : unselected}>National</div>
         <div className={zoomLevel === "Regional" ? selected : unselected}>Region</div>
         <div className={zoomLevel === "GSP" ? selected : unselected}>Grid Supply Point</div>
