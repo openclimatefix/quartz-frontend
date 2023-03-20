@@ -212,8 +212,14 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
         sitesPvActual={sitesData.sitesPvActualData}
         sitesPvForecast={sitesData.sitesPvForecastData}
       />
-      <GSPTable allSites={sitesData.allSitesData} className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"} />
-      <SiteTable allSites={sitesData.allSitesData} className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"} />
+      <GSPTable
+        allSites={sitesData.allSitesData}
+        className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
+      />
+      <SiteTable
+        allSites={sitesData.allSitesData}
+        className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
+      />
 
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
         <div

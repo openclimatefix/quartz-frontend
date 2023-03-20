@@ -7,13 +7,7 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import {
-  API_PREFIX,
-  DELTA_BUCKET,
-  getAllForecastUrl,
-  SITES_API_PREFIX,
-  VIEWS
-} from "../constant";
+import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, SITES_API_PREFIX, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
 import useSWRImmutable from "swr/immutable";
 import {
@@ -240,6 +234,22 @@ export default function Home() {
     return tempGspDeltas;
   }, [allGspForecastData, allGspRealData, selectedTime]);
 
+  // // code for site specific aggregated values
+  // const dnoAggregations = sitesArray.reduce((acc, group) => {
+  //   let { installed_capacity_kw, dno } = group
+  //   return { ...acc, [dno]: [...(acc[dno] || []), installed_capacity_kw] }
+  // }, {}
+  // )
+
+  // const gspAggregations = sitesArray.reduce((acc, group) => {
+  //   let { site_uuid, gsp } = group
+  //   return { ...acc, [gsp]: [...(acc[gsp] || []), site_uuid] }
+  // }, {}
+  // )
+
+  // console.log(dnoAggregations)
+  // console.log(gspAggregations)
+
   const combinedData: CombinedData = {
     nationalForecastData,
     pvRealDayInData,
@@ -266,7 +276,7 @@ export default function Home() {
     `${SITES_API_PREFIX}/sites/site_list`,
     axiosFetcher
   );
- 
+
   const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast>(
     `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId}`,
     axiosFetcher,
@@ -275,8 +285,7 @@ export default function Home() {
     }
   );
 
-  console.log("allSitesData", allSitesData)
-  
+  console.log("allSitesData", allSitesData);
 
   const { data: sitePvForecastData2, error: sitePvForecastError2 } = useSWR<SitesPvForecast>(
     `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId2}`,
@@ -299,9 +308,9 @@ export default function Home() {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
-//allSitesData?.site_list.filter((site) => userSites.includes(site.site_uuid)) || undefined,
+  //allSitesData?.site_list.filter((site) => userSites.includes(site.site_uuid)) || undefined,
   const sitesData: CombinedSitesData = {
-    allSitesData:allSitesData?.site_list,
+    allSitesData: allSitesData?.site_list,
     sitesPvForecastData: [sitePvForecastData, sitePvForecastData2].filter(
       (d): d is SitesPvForecast => !!d
     ),
