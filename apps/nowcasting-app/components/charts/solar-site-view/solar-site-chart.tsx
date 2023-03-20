@@ -207,7 +207,6 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
             ? ""
             : "hidden"
         }
-        sitesCombinedData={sitesData}
         allSites={sitesData.allSitesData}
         sitesPvActual={sitesData.sitesPvActualData}
         sitesPvForecast={sitesData.sitesPvForecastData}

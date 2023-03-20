@@ -221,9 +221,9 @@ const TableData: React.FC<TableDataProps> = ({
 export const RegionTable: React.FC<{
   className: string;
   allSites: Map<number, Site>;
-  sitesPvActual: SitesPvActual[];
-  sitesPvForecast: SitesPvForecast[];
-  sitesCombinedData?: CombinedSitesData[];
+  sitesPvActual?: SitesPvActual[];
+  sitesPvForecast?: SitesPvForecast[];
+  sitesCombinedData?: CombinedSitesData;
   dno: string;
 }> = ({ className, allSites, dno, sitesCombinedData, sitesPvActual, sitesPvForecast }) => {
   return (
@@ -240,7 +240,7 @@ export const GSPTable: React.FC<{
   allSites: Map<number, Site>;
   sitesPvActual: SitesPvActual[];
   sitesPvForecast: SitesPvForecast[];
-  sitesCombinedData?: CombinedSitesData[];
+  sitesCombinedData?: CombinedSitesData;
   className: string;
 }> = ({ sitesCombinedData, allSites, className }) => {
   // const gsp = allSites[0].gsp
