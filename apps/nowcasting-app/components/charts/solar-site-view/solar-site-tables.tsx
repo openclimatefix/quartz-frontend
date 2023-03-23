@@ -14,6 +14,9 @@ import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { AGGREGATION_LEVELS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
 import { convertISODateStringToLondonTime } from "../../helpers/utils";
+import { ChartData } from "../remix-line";
+import { consoleSandbox } from "@sentry/utils";
+import { formatISODateString } from "../../helpers/utils";
 
 const sites = [
   {
@@ -139,55 +142,111 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
 //Tables will also show generation MW value over installed capacity. If we have truths, use truths, if we have forecast, use forecast given a specific time.
 
 type TableDataProps = {
-  dno?: string;
-  gsp?: string;
-  actualGeneration?: string;
-  forecast?: string;
-  installedCapacity?: string;
-  text?: string;
+  aggregationLabel?: string;
+  aggregatedCapacity?: string;
+  aggregatedActualPV?: string;
+  aggregatedExpectedPV?: string;
   site_uuid?: string;
-  normalizedValue?: string;
-  sitesData: Map<number, Site>;
-  aggregationLevel?: string;
-  level?: string;
+  sitesData: CombinedSitesData;
 };
 
 const TableData: React.FC<TableDataProps> = ({
   sitesData,
-  level,
-  text,
-  installedCapacity,
-  normalizedValue
+  aggregationLabel,
+  aggregatedCapacity,
+  aggregatedActualPV,
+  aggregatedExpectedPV
 }) => {
   const [aggregationLevel] = useGlobalState("aggregationLevel");
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
+  console.log(selectedISOTime);
 
-  if (!sitesData) {
-    return <div>There is currently no data.</div>;
-  }
-  const sitesArray = Array.from(sitesData.values());
+  // site level
+  const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
+    const siteForecast = sitesData.sitesPvForecastData.find((fc) => fc.site_uuid === site_uuid);
+    return (
+      siteForecast?.forecast_values.find(
+        (fv) => formatISODateString(fv.target_datetime_utc) === formatISODateString(targetTime)
+      )?.expected_generation_kw || 0
+    );
+  };
+
+  const getExpectedPowerGenerationNational = (site_uuid: string, targetTime: string) => {
+    const siteForecast = sitesData.sitesPvForecastData.find((fc) => fc.site_uuid === site_uuid);
+    return (
+      siteForecast?.forecast_values.find(
+        (fv) => formatISODateString(fv.target_datetime_utc) === formatISODateString(targetTime)
+      )?.expected_generation_kw || 0
+    );
+  };
+
+  const getPvActualGenerationForSite = (site_uuid: string, targetTime: string) => {
+    const siteForecast = sitesData.sitesPvActualData.find((pv) => pv.site_uuid === site_uuid);
+    return (
+      siteForecast?.pv_actual_values.find(
+        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
+      )?.actual_generation_kw || 0
+    );
+  };
+
+  const getPvActualGenerationNational = (site_uuid: string, targetTime: string) => {
+    const siteGeneration = sitesData.sitesPvActualData.find((pv) => pv.site_uuid === site_uuid);
+    const siteGenerationArray = [];
+    const siteGenerationValue =
+      siteGeneration?.pv_actual_values.find(
+        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
+      )?.actual_generation_kw || 0;
+    siteGenerationArray.push(siteGenerationValue);
+    console.log("site", siteGenerationArray);
+    const cumulativePV = siteGenerationArray.reduce((acc, site) => acc + site, 0);
+    return cumulativePV;
+  };
 
   return (
     <>
       <div className="h-52 overflow-y-scroll">
-        {sitesArray?.map((site) => {
-          if (aggregationLevel === "REGION") {
+        {sitesData.allSitesData.map((site) => {
+          const expectedPowerGeneration = getExpectedPowerGenerationForSite(
+            site.site_uuid,
+            selectedISOTime || new Date().toISOString()
+          );
+
+          const actualPowerGeneration = getPvActualGenerationForSite(
+            site.site_uuid,
+            selectedISOTime || new Date().toISOString()
+          );
+
+          const actualPowerGenerationNational = getPvActualGenerationNational(
+            site.site_uuid,
+            selectedISOTime || new Date().toISOString()
+          );
+
+          console.log(actualPowerGenerationNational);
+
+          if (aggregationLevel === "NATIONAL") {
+            aggregationLabel = "National";
+            aggregatedCapacity = cumulativeCapacityNational.toFixed(2);
+            aggregatedActualPV = actualPowerGenerationNational.toFixed(2);
+            // aggregatedExpected = expectedPowerGenerationNational.toFixed(2)
+            // arrayToMap = ["National"]
+          } else if (aggregationLevel === "REGION") {
             const obj = JSON.parse(site.dno);
-            level = obj.long_name;
+            aggregationLabel = obj.long_name;
           } else if (aggregationLevel === "GSP") {
             const obj = JSON.parse(site.gsp);
-            level = `${obj.name} - ${obj.gsp_id}`;
+            aggregationLabel = `${obj.name} - ${obj.gsp_id}`;
           } else if (aggregationLevel === "SITE") {
-            level = site.client_site_id;
+            aggregationLabel = site.client_site_id;
           } else {
             const obj = JSON.parse(site.dno);
-            level = `${obj.long_name} - ${obj.dno_id}`;
+            aggregationLabel = `${obj.long_name} - ${obj.dno_id}`;
           }
           return (
             <>
               <div key={site.site_uuid} className="flex flex-col bg-ocf-delta-950">
                 <div className="flex flex-row justify-between text-sm">
                   <div className="ml-10 w-80">
-                    <div className="py-3 text-white font-bold text-sm">{level}</div>
+                    <div className="py-3 text-white font-bold text-sm">{aggregationLabel}</div>
                   </div>
                   <div className="flex flex-row">
                     <div
@@ -195,12 +254,12 @@ const TableData: React.FC<TableDataProps> = ({
                          justify-center py-3 pr-10 font-bold flex flex-row text-sm"
                     >
                       <p>
-                        {normalizedValue}
+                        {aggregatedExpectedPV ? aggregatedExpectedPV : aggregatedActual}
                         <span className="ocf-gray-400 text-xs">%</span>
                       </p>
                     </div>
                     <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
-                      {site.installed_capacity_kw.toFixed(2)}
+                      {aggregatedActual} /{aggregatedCapacity}
                       <span className="text-ocf-gray-400 text-xs font-thin pt-1">MW</span>
                     </div>
                   </div>
@@ -218,6 +277,35 @@ const TableData: React.FC<TableDataProps> = ({
   );
 };
 
+export const NationalTable: React.FC<{
+  className: string;
+  allSites: Map<number, Site>;
+  sitesPvActual?: SitesPvActual[];
+  sitesPvForecast?: SitesPvForecast[];
+  sitesCombinedData: CombinedSitesData;
+}> = ({ className, allSites, sitesCombinedData }) => {
+  const cumulativeCapacityNational = sitesCombinedData.allSitesData?.reduce(
+    (acc, site) => acc + site.installed_capacity_kw,
+    0
+  );
+  // const cumulativeGenerationNational = sitesCombinedData.sitesPvActualData?.reduce((acc, site) => acc + site.pv_actual_values, 0)
+
+  // const cumulativeExpectedGenerationNational = sitesCombinedData.sitesPvForecastData?.forEach(site => site.find(pv(acc, pv)=> acc + site.forecast_values))
+  return (
+    <>
+      <div className={`${className || ""}`}>
+        <TableHeader text={"National"} />
+        <TableData
+          sitesData={["National"]}
+          aggregationLabel={"National"}
+          aggregatedCapacity={cumulativeCapacityNational.toFixed(2)}
+          aggregatedPercentCapacity={cumulativePercentCapacityNational.toFixed(2)}
+        />
+      </div>
+    </>
+  );
+};
+
 export const RegionTable: React.FC<{
   className: string;
   allSites: Map<number, Site>;
@@ -225,12 +313,12 @@ export const RegionTable: React.FC<{
   sitesPvForecast?: SitesPvForecast[];
   sitesCombinedData?: CombinedSitesData;
   dno: string;
-}> = ({ className, allSites, dno, sitesCombinedData, sitesPvActual, sitesPvForecast }) => {
+}> = ({ className, allSites, sitesCombinedData }) => {
   return (
     <>
       <div className={`${className || ""}`}>
         <TableHeader text={"Region"} />
-        <TableData sitesData={allSites} normalizedValue={"50"} />
+        <TableData sitesData={sitesCombinedData} />
       </div>
     </>
   );
@@ -241,15 +329,14 @@ export const GSPTable: React.FC<{
   sitesPvActual: SitesPvActual[];
   sitesPvForecast: SitesPvForecast[];
   sitesCombinedData?: CombinedSitesData;
+  data: ChartData[];
   className: string;
-}> = ({ sitesCombinedData, allSites, className }) => {
-  // const gsp = allSites[0].gsp
-  // const installedCapacity = allSites[0].installed_capacity_kw.toFixed(2)
+}> = ({ sitesCombinedData, allSites, className, data }) => {
   return (
     <>
       <div className={`${className || ""}`}>
         <TableHeader text={"Grid Supply Point"} />
-        <TableData sitesData={allSites} normalizedValue={"50"} />
+        <TableData sitesData={sitesCombinedData} normalizedValue={"50"} />
       </div>
     </>
   );
@@ -258,13 +345,13 @@ export const GSPTable: React.FC<{
 export const SiteTable: React.FC<{
   className: string;
   allSites: Map<number, Site>;
-  sitesCombinedData?: CombinedSitesData;
+  sitesCombinedData: CombinedSitesData;
 }> = ({ allSites, sitesCombinedData, className }) => {
   return (
     <>
       <div className={`${className || ""}`}>
         <TableHeader text={"Site"} />
-        <TableData sitesData={allSites} />
+        <TableData sitesData={sitesCombinedData} />
       </div>
     </>
   );
