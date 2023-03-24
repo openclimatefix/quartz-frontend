@@ -1,5 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS } from "../../constant";
+import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS, SORT_BY } from "../../constant";
 import mapboxgl from "mapbox-gl";
 
 export function get30MinNow(offsetMinutes = 0) {
@@ -27,7 +27,7 @@ export function getNext30MinSlot(isoTime: Date) {
 }
 
 export type GlobalStateType = {
-  selectedISOTime?: string;
+  selectedISOTime: string;
   timeNow: string;
   intervals: any[];
   clickedGspId?: number;
@@ -42,6 +42,7 @@ export type GlobalStateType = {
   zoom: number;
   showSiteCount?: boolean;
   show4hView?: boolean;
+  sortBy: SORT_BY;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -51,7 +52,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     intervals: [],
     clickedGspId: undefined,
     forecastCreationTime: undefined,
-    view: VIEWS.FORECAST,
+    view: VIEWS.SOLAR_SITES,
     visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
@@ -60,6 +61,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     zoom: 5,
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
+    sortBy: SORT_BY.CAPACITY,
     show4hView:
       process.env.NODE_ENV === "development" ||
       // Also hide on Staging/Preview deployments for now, only show on dev by default.

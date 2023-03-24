@@ -6,6 +6,8 @@ import {
   PvRealData,
   Site,
   SiteForecastValue,
+  SitePvActual,
+  SitePvForecast,
   SitesPvActual,
   SitesPvForecast
 } from "../types";
@@ -61,9 +63,9 @@ const useFormatChartDataSites = ({
   delta = false
 }: {
   allSitesData: Site[] | undefined;
-  pvForecastData?: SitesPvForecast[];
+  pvForecastData?: SitePvForecast[];
   // fourHourData?: ForecastData[];
-  pvActualData?: SitesPvActual[];
+  pvActualData?: SitePvActual[];
   // pvRealDayInData?: PvRealData;
   timeTrigger?: string;
   delta?: boolean;

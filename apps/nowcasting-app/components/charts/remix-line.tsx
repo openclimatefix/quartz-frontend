@@ -340,6 +340,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
             />
             <Line
               type="monotone"
+              dataKey="GENERATION_UPDATED"
+              strokeWidth={2}
+              stroke="black"
+              xAxisId={"x-axis"}
+              dot={false}
+              hide={!visibleLines.includes("GENERATION_UPDATED")}
+            />
+            <Line
+              type="monotone"
               dataKey="PAST_FORECAST"
               dot={false}
               connectNulls={true}
@@ -357,15 +366,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               strokeWidth={2}
               hide={!visibleLines.includes("FORECAST")}
-            />
-            <Line
-              type="monotone"
-              dataKey="GENERATION_UPDATED"
-              strokeWidth={2}
-              stroke="black"
-              xAxisId={"x-axis"}
-              dot={false}
-              hide={!visibleLines.includes("GENERATION_UPDATED")}
             />
             <Tooltip
               content={({ payload, label }) => {

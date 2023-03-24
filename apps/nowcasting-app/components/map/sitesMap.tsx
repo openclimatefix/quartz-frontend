@@ -3,7 +3,7 @@ import { SWRResponse } from "swr";
 import React, { Dispatch, SetStateAction, useMemo } from "react";
 import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
-import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
+import { FailedStateMap, LoadStateMap, Map as MapComponent, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { AGGREGATION_LEVELS, MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import ButtonGroup from "../../components/button-group";
@@ -134,14 +134,14 @@ const SitesMap: React.FC<SitesMapProps> = ({
       return;
 
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
-    if (generatedGeoJsonForecastData && source) {
-      source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-      map.setPaintProperty(
-        "latestPV-forecast",
-        "fill-opacity",
-        getFillOpacity(selectedDataName, isNormalized)
-      );
-    }
+    // if (generatedGeoJsonForecastData && source) {
+    //   source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+    //   map.setPaintProperty(
+    //     "latestPV-forecast",
+    //     "fill-opacity",
+    //     getFillOpacity(selectedDataName, isNormalized)
+    //   );
+    // }
     sitesData.allSitesData?.forEach((site) => {
       const expectedPowerGeneration = getExpectedPowerGenerationForSite(
         site.site_uuid,
@@ -150,7 +150,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
       const siteSource = map.getSource(`site-${site.site_uuid}`) as unknown as
         | mapboxgl.GeoJSONSource
         | undefined;
-      console.log("expectedPowerGeneration", expectedPowerGeneration);
 
       if (siteSource) {
         siteSource.setData({
@@ -196,23 +195,36 @@ const SitesMap: React.FC<SitesMapProps> = ({
           }
         });
       }
+
       // Capacity ring
-      const capacityLayer =
+      let capacityLayer =
         (map.getLayer(`Capacity-${site.site_uuid}`) as unknown as CircleLayer) || undefined;
+
       if (capacityLayer) {
         map.setPaintProperty(
           `Capacity-${site.site_uuid}`,
           "circle-radius",
           Math.round(site.installed_capacity_kw * 4)
         );
+      } else {
+        map.addLayer({
+          id: `Capacity-${site.site_uuid}`,
+          type: "circle",
+          source: `site-${site.site_uuid}`,
+          paint: {
+            "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+            "circle-stroke-width": 1,
+            "circle-opacity": 0
+          }
+        });
       }
-      const generationLayer =
+      let generationLayer =
         (map.getLayer(`Generation-${site.site_uuid}`) as unknown as CircleLayer) || undefined;
       if (generationLayer) {
         map.setPaintProperty(
           `Generation-${site.site_uuid}`,
           "circle-radius",
-          Math.round(expectedPowerGeneration * 4)
+          Math.round(expectedPowerGeneration * 1000 * 4)
         );
       } else {
         map.addLayer({
@@ -220,8 +232,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
           type: "circle",
           source: `site-${site.site_uuid}`,
           paint: {
-            "circle-color": "#FF0000",
-            "circle-radius": Math.round(expectedPowerGeneration * 4),
+            "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+            "circle-radius": Math.round(expectedPowerGeneration * 1000 * 4),
             "circle-opacity": 0.5
           }
         });
@@ -245,7 +257,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
     sitesData.allSitesData?.map((site) => {
-      console.log("site map", site);
       const expectedPowerGeneration = getExpectedPowerGenerationForSite(
         site.site_uuid,
         selectedISOTime || new Date().toISOString()
@@ -291,7 +302,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
         type: "circle",
         source: `site-${site.site_uuid}`,
         paint: {
-          "circle-radius": Math.round(expectedPowerGeneration * 4),
+          "circle-radius": Math.round(expectedPowerGeneration * 1000 * 4),
           // "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
           // "circle-stroke-width": 1,
           "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
@@ -349,7 +360,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
           <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
         </LoadStateMap>
       ) : (
-        <Map
+        <MapComponent
           loadDataOverlay={addFCData}
           updateData={{ newData: !!initForecastData, updateMapData }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
@@ -359,10 +370,10 @@ const SitesMap: React.FC<SitesMapProps> = ({
               {/* <ShowSiteCount /> */}
             </>
           )}
-          title={VIEWS.FORECAST}
+          title={VIEWS.SOLAR_SITES}
         >
           <SitesLegend color={"color"} />
-        </Map>
+        </MapComponent>
       )}
     </div>
   );

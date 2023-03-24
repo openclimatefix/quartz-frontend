@@ -155,21 +155,24 @@ export type SitePvActualValue = {
   actual_generation_kw: number;
 };
 
-export type SitesPvForecast = {
-  site_uuid: string;
+export type SitePvForecast = {
   forecast_uuid: string;
-  forecast_creation_time: string;
+  site_uuid: string;
+  forecast_creation_datetime: string;
   forecast_version: string;
   forecast_values: SiteForecastValue[];
 };
 
-export type SitesPvActual = {
+export type SitesPvForecast = SitePvForecast[];
+
+export type SitePvActual = {
   site_uuid: string;
   pv_actual_values: SitePvActualValue[];
 };
+export type SitesPvActual = SitePvActual[];
 
 export type CombinedSitesData = {
   allSitesData: Site[] | undefined;
-  sitesPvForecastData: SitesPvForecast[];
-  sitesPvActualData: SitesPvActual[];
+  sitesPvForecastData: SitePvForecast[];
+  sitesPvActualData: SitePvActual[];
 };

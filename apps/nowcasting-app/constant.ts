@@ -71,6 +71,13 @@ export enum AGGREGATION_LEVELS {
   SITE = "SITE"
 }
 
+export enum SORT_BY {
+  NAME = "NAME",
+  GENERATION = "GENERATION",
+  CAPACITY = "CAPACITY",
+  YIELD = "YIELD"
+}
+
 export enum DELTA_BUCKET {
   NEG4 = -100,
   NEG3 = -75,

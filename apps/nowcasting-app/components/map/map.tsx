@@ -55,10 +55,8 @@ const Map: FC<IMap> = ({
       map.current.addControl(nav, "bottom-right");
 
       map.current.on("load", (event) => {
-        console.log("map loaded", event);
         setIsMapReady(true);
         if (map.current?.getCanvas()?.width === 800) {
-          console.log("-- -- -- resizing map");
           map.current?.resize();
         }
         loadDataOverlay(map);
@@ -66,7 +64,6 @@ const Map: FC<IMap> = ({
 
       map.current.on("dataloading", () => {
         if (map.current?.getCanvas()?.width === 400) {
-          console.log("-- -- -- resizing map");
           map.current?.resize();
         }
       });
@@ -86,8 +83,6 @@ const Map: FC<IMap> = ({
       setZoom(Number(map.current?.getZoom().toFixed(2)));
     });
   }, [map]);
-
-  console.log(zoom);
 
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">

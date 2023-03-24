@@ -22,7 +22,7 @@ import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { ForecastWithActualPV, NextForecast } from "../forecast-header/ui";
-import { RegionTable, GSPTable, SiteTable } from "./solar-site-tables";
+import { AggregatedDataTable } from "./solar-site-tables";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -52,10 +52,11 @@ const LegendItem: FC<{
   );
 };
 
-const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; className?: string }> = ({
-  sitesData,
-  className
-}) => {
+const SolarSiteChart: FC<{
+  combinedSitesData: CombinedSitesData;
+  date?: string;
+  className?: string;
+}> = ({ combinedSitesData, className }) => {
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -106,18 +107,15 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
   // );
 
   const chartData = useFormatChartDataSites({
-    allSitesData: sitesData.allSitesData,
-    pvForecastData: sitesData.sitesPvForecastData,
+    allSitesData: combinedSitesData.allSitesData,
+    pvForecastData: combinedSitesData.sitesPvForecastData,
     // fourHourData: national4HourData,
     // pvRealDayInData,
-    pvActualData: sitesData.sitesPvActualData,
+    pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
 
-  console.log(chartData);
-  console.log(sitesData);
-
-  const cumulativeCapacity = sitesData.allSitesData?.reduce(
+  const cumulativeCapacity = combinedSitesData.allSitesData?.reduce(
     (acc, site) => acc + site.installed_capacity_kw,
     0
   );
@@ -127,8 +125,127 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
   );
   const actualPV = chartData?.reduce((acc, site) => acc + (site.GENERATION_UPDATED || 0), 0);
 
+  // TABLE DATA MANIPULATION
+  // site level
+  const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
+    const siteForecast = combinedSitesData.sitesPvForecastData.find(
+      (fc) => fc.site_uuid === site_uuid
+    );
+    return (
+      siteForecast?.forecast_values.find(
+        (fv) => formatISODateString(fv.target_datetime_utc) === formatISODateString(targetTime)
+      )?.expected_generation_kw || 0
+    );
+  };
+
+  const getPvActualGenerationForSite = (site_uuid: string, targetTime: string) => {
+    const siteForecast = combinedSitesData.sitesPvActualData.find(
+      (pv) => pv.site_uuid === site_uuid
+    );
+    return (
+      siteForecast?.pv_actual_values.find(
+        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
+      )?.actual_generation_kw || 0
+    );
+  };
+
+  // TODO: move into helper function
+  // const sitesTableData = useFormatSitesTableData(combinedSitesData, aggregationLevel, selectedISOTime);
+  const sitesTableData = {
+    sites: new Map(),
+    regions: new Map(),
+    gsps: new Map(),
+    national: { label: "National", capacity: 0, actualPV: 0, expectedPV: 0, aggregatedYield: 0 }
+  };
+  // Loop through the sites and aggregate the data by Region, GSP, and National
+  for (const i in combinedSitesData?.allSitesData || []) {
+    const site = combinedSitesData.allSitesData?.[i];
+    if (!site) continue;
+    const lastSite = (combinedSitesData?.allSitesData || []).length - 1 === Number(i);
+    const siteCapacity = site.installed_capacity_kw;
+    const siteActualPV = getPvActualGenerationForSite(site.site_uuid, selectedISOTime);
+    const siteExpectedPV = getExpectedPowerGenerationForSite(site.site_uuid, selectedISOTime);
+
+    // site level
+    const siteName = site.client_site_name || site.client_site_id || site.site_uuid;
+    let updatedSiteData = sitesTableData.sites.get(siteName) || {
+      label: siteName,
+      capacity: 0,
+      actualPV: 0,
+      expectedPV: 0,
+      aggregatedYield: 0
+    };
+    updatedSiteData.capacity += siteCapacity;
+    updatedSiteData.actualPV += siteActualPV;
+    updatedSiteData.expectedPV += siteExpectedPV;
+    updatedSiteData.aggregatedYield =
+      ((updatedSiteData.actualPV || updatedSiteData.expectedPV) / updatedSiteData.capacity) * 100;
+    sitesTableData.sites.set(siteName, updatedSiteData);
+
+    // region level
+    const region: string = JSON.parse(site.dno).long_name;
+    let updatedRegionData = sitesTableData.regions.get(region) || {
+      label: region,
+      capacity: 0,
+      actualPV: 0,
+      expectedPV: 0,
+      aggregatedYield: 0
+    };
+    updatedRegionData.capacity += siteCapacity;
+    updatedRegionData.actualPV += siteActualPV;
+    updatedRegionData.expectedPV += siteExpectedPV;
+    sitesTableData.regions.set(region, updatedRegionData);
+
+    // gsp level
+    const gsp: string = JSON.parse(site.gsp).name;
+    let updatedGspData = sitesTableData.gsps.get(gsp) || {
+      label: gsp,
+      capacity: 0,
+      actualPV: 0,
+      expectedPV: 0,
+      aggregatedYield: 0
+    };
+    updatedGspData.capacity += siteCapacity;
+    updatedGspData.actualPV += siteActualPV;
+    updatedGspData.expectedPV += siteExpectedPV;
+    if (lastSite) {
+      updatedGspData.aggregatedYield =
+        ((updatedGspData.actualPV || updatedGspData.expectedPV) / updatedGspData.capacity) * 100;
+    }
+    sitesTableData.gsps.set(gsp, updatedGspData);
+
+    // national level
+    sitesTableData.national.capacity += siteCapacity;
+    sitesTableData.national.actualPV += siteActualPV;
+    sitesTableData.national.expectedPV += siteExpectedPV;
+
+    // set aggregated yield at the end of the loop
+    if (lastSite) {
+      sitesTableData.regions.forEach((region, regionName) => {
+        let updatedRegionFinalData = sitesTableData.regions.get(regionName);
+        updatedRegionFinalData.aggregatedYield =
+          ((updatedRegionFinalData.actualPV || updatedRegionFinalData.expectedPV) /
+            updatedRegionFinalData.capacity) *
+          100;
+        sitesTableData.regions.set(regionName, updatedRegionFinalData);
+      });
+      sitesTableData.gsps.forEach((gsp, gspName) => {
+        let updatedGspFinalData = sitesTableData.gsps.get(gspName);
+        updatedGspFinalData.aggregatedYield =
+          ((updatedGspFinalData.actualPV || updatedGspFinalData.expectedPV) /
+            updatedGspFinalData.capacity) *
+          100;
+        sitesTableData.gsps.set(gspName, updatedGspFinalData);
+      });
+      sitesTableData.national.aggregatedYield =
+        ((sitesTableData.national.actualPV || sitesTableData.national.expectedPV) /
+          sitesTableData.national.capacity) *
+        100;
+    }
+  }
+
   // if () return <div>failed to load</div>;
-  if (!sitesData.sitesPvForecastData || !sitesData.sitesPvActualData)
+  if (!combinedSitesData.sitesPvForecastData || !combinedSitesData.sitesPvActualData)
     return (
       <div className="h-full flex">
         <Spinner></Spinner>
@@ -137,7 +254,7 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
 
   const setSelectedTime = (time: string) => {
     stopTime();
-    setSelectedISOTime(time + ":00.000Z");
+    setSelectedISOTime(time);
   };
   const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
@@ -156,7 +273,7 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
                 tip={`PV Live / OCF Forecast`}
                 time={"time"}
                 // time={`${convertISODateStringToLondonTime(
-                //   sitesData?.sitesPvActualData?.[0]?.pv_actual_values?.[0].datetime_utc
+                //   combinedSitesData?.sitesPvActualData?.[0]?.pv_actual_values?.[0].datetime_utc
                 // )}`||""}
                 color="ocf-yellow"
               />
@@ -181,7 +298,7 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
-            yMax={Math.round(Number(cumulativeCapacity))}
+            yMax={Math.round(Number(cumulativeCapacity) / 20)}
             visibleLines={visibleLines}
           />
         </div>
@@ -200,24 +317,25 @@ const SolarSiteChart: FC<{ sitesData: CombinedSitesData; date?: string; classNam
         )}
       </div>
 
-      <RegionTable
+      <AggregatedDataTable
         className={
           currentAggregation(AGGREGATION_LEVELS.REGION) ||
           currentAggregation(AGGREGATION_LEVELS.NATIONAL)
             ? ""
             : "hidden"
         }
-        allSites={sitesData.allSitesData}
-        sitesPvActual={sitesData.sitesPvActualData}
-        sitesPvForecast={sitesData.sitesPvForecastData}
+        title={"Region"}
+        tableData={Array.from(sitesTableData.regions.values())}
       />
-      <GSPTable
-        allSites={sitesData.allSitesData}
+      <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
+        title={"GSP"}
+        tableData={Array.from(sitesTableData.gsps.values())}
       />
-      <SiteTable
-        allSites={sitesData.allSitesData}
+      <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
+        title={"Sites"}
+        tableData={Array.from(sitesTableData.sites.values())}
       />
 
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
