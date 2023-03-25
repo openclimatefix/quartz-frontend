@@ -5,12 +5,6 @@ __metadata:
   version: 6
   cacheKey: 8
 
-".next-0aa4e3@workspace:.next":
-  version: 0.0.0-use.local
-  resolution: ".next-0aa4e3@workspace:.next"
-  languageName: unknown
-  linkType: soft
-
 "@ampproject/remapping@npm:^2.1.0":
   version: 2.2.0
   resolution: "@ampproject/remapping@npm:2.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40ampproject%2Fremapping%2F-%2Fremapping-2.2.0.tgz"
@@ -1813,6 +1807,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@babel/runtime@npm:7.12.18":
+  version: 7.12.18
+  resolution: "@babel/runtime@npm:7.12.18::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40babel%2Fruntime%2F-%2Fruntime-7.12.18.tgz"
+  dependencies:
+    regenerator-runtime: ^0.13.4
+  checksum: 0ba38dc8d478584b0b5fb15fc2b7855f9f20561917bd434a66429d55d1165199d6161bc5fb087b87254712827f63561ff5196df66701e5647d67c7d0f557569a
+  languageName: node
+  linkType: hard
+
 "@babel/runtime@npm:7.15.4":
   version: 7.15.4
   resolution: "@babel/runtime@npm:7.15.4::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40babel%2Fruntime%2F-%2Fruntime-7.15.4.tgz"
@@ -1949,6 +1952,23 @@ __metadata:
   version: 0.2.3
   resolution: "@bcoe/v8-coverage@npm:0.2.3::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40bcoe%2Fv8-coverage%2F-%2Fv8-coverage-0.2.3.tgz"
   checksum: 850f9305536d0f2bd13e9e0881cb5f02e4f93fad1189f7b2d4bebf694e3206924eadee1068130d43c11b750efcc9405f88a8e42ef098b6d75239c0f047de1a27
+  languageName: node
+  linkType: hard
+
+"@bit-foundations/env-configs.typescript.jsx-transform@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@bit-foundations/env-configs.typescript.jsx-transform@npm:0.0.1::__archiveUrl=https%3A%2F%2Fnode.bit.cloud%2F%40bit-foundations%2Fenv-configs.typescript.jsx-transform%2F-%2F%40bit-foundations-env-configs.typescript.jsx-transform-0.0.1.tgz"
+  checksum: 5103cd5f37397b05a658b3f773c08495eab94ec88cd317f95ffa6ed8baa23f7d64f6de722107d8eaf082c602d4aaf1e12464b3a59b054b513de1a899c1a1405c
+  languageName: node
+  linkType: hard
+
+"@bit-foundations/styling.tailwind.webpack-transformer@npm:0.0.6":
+  version: 0.0.6
+  resolution: "@bit-foundations/styling.tailwind.webpack-transformer@npm:0.0.6::__archiveUrl=https%3A%2F%2Fnode.bit.cloud%2F%40bit-foundations%2Fstyling.tailwind.webpack-transformer%2F-%2F%40bit-foundations-styling.tailwind.webpack-transformer-0.0.6.tgz"
+  dependencies:
+    jsonpath-plus: 6.0.1
+    tailwindcss: 3.0.23
+  checksum: d3d4519a2e743d4a1109dbda7e89212b14f1624fa09067cfbef59ed34de5acdd6879ed6be9c7575f4bd4130c58d92bac92fa4ec254a5b5bd5829bc8809032bf6
   languageName: node
   linkType: hard
 
@@ -2227,6 +2247,32 @@ __metadata:
     "@jridgewell/resolve-uri": 3.1.0
     "@jridgewell/sourcemap-codec": 1.4.14
   checksum: 9d703b859cff5cd83b7308fd457a431387db5db96bd781a63bf48e183418dd9d3d44e76b9e4ae13237f6abeeb25d739ec9215c1d5bfdd08f66f750a50074a339
+  languageName: node
+  linkType: hard
+
+"@learn-bit-react/ui-library-wrappers.tailwind.configs.tailwind-config@npm:0.0.4":
+  version: 0.0.4
+  resolution: "@learn-bit-react/ui-library-wrappers.tailwind.configs.tailwind-config@npm:0.0.4::__archiveUrl=https%3A%2F%2Fnode.bit.cloud%2F%40learn-bit-react%2Fui-library-wrappers.tailwind.configs.tailwind-config%2F-%2F%40learn-bit-react-ui-library-wrappers.tailwind.configs.tailwind-config-0.0.4.tgz"
+  checksum: 456ac603cd37aad03d7480acc4bb2c0cca08dc2a9f3b7eac1f01e2b7e39a4715d8ea73a03a3f77a0d0bc0c8da618f73845379b713f773f47fd5617639ba656cb
+  languageName: node
+  linkType: hard
+
+"@learn-bit-react/ui-library-wrappers.tailwind.environments.env-with-tailwind@npm:3.1.7":
+  version: 3.1.7
+  resolution: "@learn-bit-react/ui-library-wrappers.tailwind.environments.env-with-tailwind@npm:3.1.7::__archiveUrl=https%3A%2F%2Fnode.bit.cloud%2F%40learn-bit-react%2Fui-library-wrappers.tailwind.environments.env-with-tailwind%2F-%2F%40learn-bit-react-ui-library-wrappers.tailwind.environments.env-with-tailwind-3.1.7.tgz"
+  dependencies:
+    "@babel/runtime": 7.12.18
+    "@bit-foundations/env-configs.typescript.jsx-transform": 0.0.1
+    "@bit-foundations/styling.tailwind.webpack-transformer": 0.0.6
+    "@learn-bit-react/ui-library-wrappers.tailwind.configs.tailwind-config": 0.0.4
+    "@teambit/harmony": 0.3.3
+    core-js: ^3.0.0
+    jsonpath-plus: 7.0.0
+    tailwindcss: 3.1.6
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0
+    react-dom: ^16.8.0 || ^17.0.0
+  checksum: 02fe2ea2acf320764cfd9103cfc51ebe387177de0df36e611c33bb21789b9481efeffb6ea2a5c91f0949eb9c7dcbc4affc3a94d71d9ac995befcfc4f94e46604
   languageName: node
   linkType: hard
 
@@ -2585,7 +2631,8 @@ __metadata:
     "@babel/runtime": 7.20.0
     "@headlessui/react": ^1.6.1
     "@heroicons/react": ^1.0.6
-    "@openclimatefix/nowcasting-tsconfig": "file:../../packages/nowcasting-tsconfig"
+    "@learn-bit-react/ui-library-wrappers.tailwind.environments.env-with-tailwind": 3.1.7
+    "@openclimatefix/nowcasting-ui.envs.react": 0.0.2
     "@react-icons/all-files": ^4.1.0
     "@sentry/nextjs": ^6.19.7
     "@storybook/addon-actions": ^6.4.22
@@ -2637,10 +2684,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@openclimatefix/nowcasting-tsconfig@file:../../packages/nowcasting-tsconfig::locator=%40openclimatefix%2Fnowcasting-app%40workspace%3A.":
-  version: 0.0.0
-  resolution: "@openclimatefix/nowcasting-tsconfig@file:../../packages/nowcasting-tsconfig#../../packages/nowcasting-tsconfig::hash=faeef8&locator=%40openclimatefix%2Fnowcasting-app%40workspace%3A."
-  checksum: 79975938f07e9683cba78debd5babddd732b25af28216b411ba133210b18dfeeaa4d0fc8d7eeb913a3537c89915b7130f1d00c5c6d5c00b0244977cb974f3f23
+"@openclimatefix/nowcasting-ui.envs.react@npm:0.0.2":
+  version: 0.0.2
+  resolution: "@openclimatefix/nowcasting-ui.envs.react@npm:0.0.2::__archiveUrl=https%3A%2F%2Fnode.bit.cloud%2F%40openclimatefix%2Fnowcasting-ui.envs.react%2F-%2F%40openclimatefix-nowcasting-ui.envs.react-0.0.2.tgz"
+  dependencies:
+    "@babel/runtime": 7.20.0
+    "@bit-foundations/env-configs.typescript.jsx-transform": 0.0.1
+    "@tailwindcss/forms": ^0.5.1
+    "@tailwindcss/typography": ^0.5.2
+    "@teambit/harmony": 0.3.3
+    core-js: ^3.0.0
+    jsonpath-plus: 6.0.1
+    react-toastify: ^9.0.4
+    tailwindcss: ^3.0.24
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0
+    react-dom: ^16.8.0 || ^17.0.0
+  checksum: aaa4cf3bae830d2dbbca0396f655778beb971e9a3a04f1d1bf1f6d128dddd3b4f846dcf943a28ca7c6b6743fc88b049da2978f3d44a121f41c93e9a17c3343c8
   languageName: node
   linkType: hard
 
@@ -4187,6 +4247,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@teambit/harmony@npm:0.3.3":
+  version: 0.3.3
+  resolution: "@teambit/harmony@npm:0.3.3::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40teambit%2Fharmony%2F-%2Fharmony-0.3.3.tgz"
+  dependencies:
+    cleargraph: ^5.6.0
+    comment-json: ^3.0.3
+    fs-extra: ^8.1.0
+    reflect-metadata: ^0.1.13
+    user-home: ^2.0.0
+  checksum: a6aaf9a4b98e63b2e34ef7564b3de4f458ffc6de79c340f6031940826da72bf30867b8967ed007fec52f722db52b63f34945e048f59314acac1efdc685a24140
+  languageName: node
+  linkType: hard
+
 "@testing-library/dom@npm:^8.5.0":
   version: 8.20.0
   resolution: "@testing-library/dom@npm:8.20.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40testing-library%2Fdom%2F-%2Fdom-8.20.0.tgz"
@@ -4539,43 +4612,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:^17.0.5":
-  version: 17.0.19
-  resolution: "@types/react-dom@npm:17.0.19::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Freact-dom%2F-%2Freact-dom-17.0.19.tgz"
-  dependencies:
-    "@types/react": ^17
-  checksum: 875a472d868b235435c905ded16cf92297bd2afb20a5a78f5dccd54312f6f038ccf452ea92bb41c0b39150c2f16f3ddff0265a2de756c6f63b0971dd5719578b
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:^18.0.0":
-  version: 18.0.11
-  resolution: "@types/react-dom@npm:18.0.11::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Freact-dom%2F-%2Freact-dom-18.0.11.tgz"
+"@types/react-dom@npm:17.0.2":
+  version: 17.0.2
+  resolution: "@types/react-dom@npm:17.0.2::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Freact-dom%2F-%2Freact-dom-17.0.2.tgz"
   dependencies:
     "@types/react": "*"
-  checksum: 579691e4d5ec09688087568037c35edf8cfb1ab3e07f6c60029280733ee7b5c06d66df6fcc90786702c93ac8cb13bc7ff16c79ddfc75d082938fbaa36e1cdbf4
+  checksum: 1725928a1c3a0026044e6401e6b53729e1a88849034fc67138d7784ec44a5132fe2e9056a19b741ccb462ff0ec0d8c2c01ef316bda19be0e31f2ead9346f600b
   languageName: node
   linkType: hard
 
-"@types/react@npm:*":
-  version: 17.0.38
-  resolution: "@types/react@npm:17.0.38::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Freact%2F-%2Freact-17.0.38.tgz"
+"@types/react@npm:17.0.2":
+  version: 17.0.2
+  resolution: "@types/react@npm:17.0.2::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Freact%2F-%2Freact-17.0.2.tgz"
   dependencies:
     "@types/prop-types": "*"
-    "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 4079f4f959cd4a4bfaeda8b89fe8a1b1f8bdc9d87acfdc5f74a0b39cec9ec6a470724357c62778c0f063180b360c250e920c5a142f1dbcda67d9cc25a6d43a85
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:^17, @types/react@npm:^17.0.8":
-  version: 17.0.53
-  resolution: "@types/react@npm:17.0.53::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Freact%2F-%2Freact-17.0.53.tgz"
-  dependencies:
-    "@types/prop-types": "*"
-    "@types/scheduler": "*"
-    csstype: ^3.0.2
-  checksum: dacfde02c260fd98bed2eb775ed0c7ce1397be4c0844f907a50763b081a4008f81f57071889a16eb1350ddcf0927f3cf1a6541702c8ad03de3c70383ef931e3f
+  checksum: a5198857165feddcbfc7d33e3322460ac62b8894d702414496a825b0c82272911ec33a42ef7c9d623a59308070eef4dfee6ff834b0674aa3f87eeb644196ee3b
   languageName: node
   linkType: hard
 
@@ -4585,13 +4637,6 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: e99fc7cc6265407987b30deda54c1c24bb1478803faf6037557a774b2f034c5b097ffd65847daa87e82a61a250d919f35c3588654b0fdaa816906650f596d1b0
-  languageName: node
-  linkType: hard
-
-"@types/scheduler@npm:*":
-  version: 0.16.2
-  resolution: "@types/scheduler@npm:0.16.2::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2F%40types%2Fscheduler%2F-%2Fscheduler-0.16.2.tgz"
-  checksum: b6b4dcfeae6deba2e06a70941860fb1435730576d3689225a421280b7742318d1548b3d22c1f66ab68e414f346a9542f29240bc955b6332c5b11e561077583bc
   languageName: node
   linkType: hard
 
@@ -5488,7 +5533,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"arg@npm:^5.0.2":
+"arg@npm:^5.0.1, arg@npm:^5.0.2":
   version: 5.0.2
   resolution: "arg@npm:5.0.2::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Farg%2F-%2Farg-5.0.2.tgz"
   checksum: 6c69ada1a9943d332d9e5382393e897c500908d91d5cb735a01120d5f71daf1b339b7b8980cbeaba8fd1afc68e658a739746179e4315a26e8a28951ff9930078
@@ -6721,7 +6766,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:^4.0.0, chalk@npm:^4.1.0":
+"chalk@npm:^4.0.0, chalk@npm:^4.1.0, chalk@npm:^4.1.2":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fchalk%2F-%2Fchalk-4.1.2.tgz"
   dependencies:
@@ -6924,6 +6969,16 @@ __metadata:
   version: 2.2.0
   resolution: "clean-stack@npm:2.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fclean-stack%2F-%2Fclean-stack-2.2.0.tgz"
   checksum: 2ac8cd2b2f5ec986a3c743935ec85b07bc174d5421a5efc8017e1f146a1cf5f781ae962618f416352103b32c9cd7e203276e8c28241bbe946160cab16149fb68
+  languageName: node
+  linkType: hard
+
+"cleargraph@npm:^5.6.0":
+  version: 5.8.0
+  resolution: "cleargraph@npm:5.8.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fcleargraph%2F-%2Fcleargraph-5.8.0.tgz"
+  dependencies:
+    graphlib: ^2.1.8
+    lodash: ^4.17.15
+  checksum: cbf6cd32ae57829261841ed4b307c83a6c9251fd43adc7a0e7ca26e8bd1967d8c17bc375588a32400ef7d217979962f9176e33166d0a76fd2486d0243c316185
   languageName: node
   linkType: hard
 
@@ -7151,6 +7206,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"comment-json@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "comment-json@npm:3.0.3::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fcomment-json%2F-%2Fcomment-json-3.0.3.tgz"
+  dependencies:
+    core-util-is: ^1.0.2
+    esprima: ^4.0.1
+    has-own-prop: ^2.0.0
+    repeat-string: ^1.6.1
+  checksum: c8e92e820b73e7bd83890e38680617b21028eca9a7e83a2af72750eae8c7e2570dd40e5848148b1e1d34d58ce62a0cb4e2b5836df0f8daa1d6bceca8666936cd
+  languageName: node
+  linkType: hard
+
 "common-path-prefix@npm:^3.0.0":
   version: 3.0.0
   resolution: "common-path-prefix@npm:3.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fcommon-path-prefix%2F-%2Fcommon-path-prefix-3.0.0.tgz"
@@ -7375,7 +7442,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-util-is@npm:~1.0.0":
+"core-util-is@npm:^1.0.2, core-util-is@npm:~1.0.0":
   version: 1.0.3
   resolution: "core-util-is@npm:1.0.3::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fcore-util-is%2F-%2Fcore-util-is-1.0.3.tgz"
   checksum: 9de8597363a8e9b9952491ebe18167e3b36e7707569eed0ebf14f8bba773611376466ae34575bca8cfe3c767890c859c74056084738f09d4e4a6f902b2ad7d99
@@ -7405,6 +7472,19 @@ __metadata:
     path-type: ^4.0.0
     yaml: ^1.10.0
   checksum: 4be63e7117955fd88333d7460e4c466a90f556df6ef34efd59034d2463484e339666c41f02b523d574a797ec61f4a91918c5b89a316db2ea2f834e0d2d09465b
+  languageName: node
+  linkType: hard
+
+"cosmiconfig@npm:^7.0.1":
+  version: 7.1.0
+  resolution: "cosmiconfig@npm:7.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fcosmiconfig%2F-%2Fcosmiconfig-7.1.0.tgz"
+  dependencies:
+    "@types/parse-json": ^4.0.0
+    import-fresh: ^3.2.1
+    parse-json: ^5.0.0
+    path-type: ^4.0.0
+    yaml: ^1.10.0
+  checksum: c53bf7befc1591b2651a22414a5e786cd5f2eeaa87f3678a3d49d6069835a9d8d1aef223728e98aa8fec9a95bf831120d245096db12abe019fecb51f5696c96f
   languageName: node
   linkType: hard
 
@@ -7936,7 +8016,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"detective@npm:^5.2.1":
+"detective@npm:^5.2.0, detective@npm:^5.2.1":
   version: 5.2.1
   resolution: "detective@npm:5.2.1::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fdetective%2F-%2Fdetective-5.2.1.tgz"
   dependencies:
@@ -9169,7 +9249,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-glob@npm:^3.2.12, fast-glob@npm:^3.2.9":
+"fast-glob@npm:^3.2.11, fast-glob@npm:^3.2.12, fast-glob@npm:^3.2.9":
   version: 3.2.12
   resolution: "fast-glob@npm:3.2.12::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Ffast-glob%2F-%2Ffast-glob-3.2.12.tgz"
   dependencies:
@@ -9583,6 +9663,17 @@ __metadata:
     path-is-absolute: ^1.0.0
     rimraf: ^2.2.8
   checksum: 6edfd65fc813baa27f1603778c0f5ec11f8c5006a20b920437813ee2023eba18aeec8bef1c89b2e6c84f9fc90fdc7c916f4a700466c8c69d22a35d018f2570f0
+  languageName: node
+  linkType: hard
+
+"fs-extra@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "fs-extra@npm:8.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Ffs-extra%2F-%2Ffs-extra-8.1.0.tgz"
+  dependencies:
+    graceful-fs: ^4.2.0
+    jsonfile: ^4.0.0
+    universalify: ^0.1.0
+  checksum: bf44f0e6cea59d5ce071bba4c43ca76d216f89e402dc6285c128abc0902e9b8525135aa808adad72c9d5d218e9f4bcc63962815529ff2f684ad532172a284880
   languageName: node
   linkType: hard
 
@@ -10141,6 +10232,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"graphlib@npm:^2.1.8":
+  version: 2.1.8
+  resolution: "graphlib@npm:2.1.8::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fgraphlib%2F-%2Fgraphlib-2.1.8.tgz"
+  dependencies:
+    lodash: ^4.17.15
+  checksum: 1e0db4dea1c8187d59103d5582ecf32008845ebe2103959a51d22cb6dae495e81fb9263e22c922bca3aaecb56064a45cd53424e15a4626cfb5a0c52d0aff61a8
+  languageName: node
+  linkType: hard
+
 "grid-index@npm:^1.1.0":
   version: 1.1.0
   resolution: "grid-index@npm:1.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fgrid-index%2F-%2Fgrid-index-1.1.0.tgz"
@@ -10200,6 +10300,13 @@ __metadata:
   dependencies:
     is-glob: ^3.0.0
   checksum: cafad93e599f49f676a9ab444ec90210fcda35ac14ad6c9bb96c08057ad18a1318f1116b053aa6bdc744f19252537006872d3fc76785e842bbe8cc4312447fc8
+  languageName: node
+  linkType: hard
+
+"has-own-prop@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "has-own-prop@npm:2.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fhas-own-prop%2F-%2Fhas-own-prop-2.0.0.tgz"
+  checksum: ca6336e85ead2295c9603880cbc199e2d3ff7eaea0e9035d68fbc79892e9cf681abc62c0909520f112c671dad9961be2173b21dff951358cc98425c560e789e0
   languageName: node
   linkType: hard
 
@@ -11935,6 +12042,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jsonfile@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "jsonfile@npm:4.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fjsonfile%2F-%2Fjsonfile-4.0.0.tgz"
+  dependencies:
+    graceful-fs: ^4.1.6
+  dependenciesMeta:
+    graceful-fs:
+      optional: true
+  checksum: 6447d6224f0d31623eef9b51185af03ac328a7553efcee30fa423d98a9e276ca08db87d71e17f2310b0263fd3ffa6c2a90a6308367f661dc21580f9469897c9e
+  languageName: node
+  linkType: hard
+
 "jsonfile@npm:^6.0.1":
   version: 6.1.0
   resolution: "jsonfile@npm:6.1.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fjsonfile%2F-%2Fjsonfile-6.1.0.tgz"
@@ -11945,6 +12064,20 @@ __metadata:
     graceful-fs:
       optional: true
   checksum: 7af3b8e1ac8fe7f1eccc6263c6ca14e1966fcbc74b618d3c78a0a2075579487547b94f72b7a1114e844a1e15bb00d440e5d1720bfc4612d790a6f285d5ea8354
+  languageName: node
+  linkType: hard
+
+"jsonpath-plus@npm:6.0.1":
+  version: 6.0.1
+  resolution: "jsonpath-plus@npm:6.0.1::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fjsonpath-plus%2F-%2Fjsonpath-plus-6.0.1.tgz"
+  checksum: bddec34b742249c5b38077dfcd8eb479fab4e077943253017326503ce4f527ef66938288c728712fd923907493d6eaba69a43015dc3dd9fdf48d89028ae7f466
+  languageName: node
+  linkType: hard
+
+"jsonpath-plus@npm:7.0.0":
+  version: 7.0.0
+  resolution: "jsonpath-plus@npm:7.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fjsonpath-plus%2F-%2Fjsonpath-plus-7.0.0.tgz"
+  checksum: f3f41044cfdd0345950e2888f72cacfaae6b2e6356a32d9ecfac6ba68acffd11398b6a127a70a5f4ee4257210fcfbef7253df0e0c415de9266ec2ca0cc7d9264
   languageName: node
   linkType: hard
 
@@ -13620,7 +13753,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-hash@npm:^2.0.1":
+"object-hash@npm:^2.0.1, object-hash@npm:^2.2.0":
   version: 2.2.0
   resolution: "object-hash@npm:2.2.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fobject-hash%2F-%2Fobject-hash-2.2.0.tgz"
   checksum: 55ba841e3adce9c4f1b9b46b41983eda40f854e0d01af2802d3ae18a7085a17168d6b81731d43fdf1d6bcbb3c9f9c56d22c8fea992203ad90a38d7d919bc28f1
@@ -14483,7 +14616,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-load-config@npm:^3.1.4":
+"postcss-load-config@npm:^3.1.0, postcss-load-config@npm:^3.1.4":
   version: 3.1.4
   resolution: "postcss-load-config@npm:3.1.4::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fpostcss-load-config%2F-%2Fpostcss-load-config-3.1.4.tgz"
   dependencies:
@@ -14602,6 +14735,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"postcss-nested@npm:5.0.6":
+  version: 5.0.6
+  resolution: "postcss-nested@npm:5.0.6::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fpostcss-nested%2F-%2Fpostcss-nested-5.0.6.tgz"
+  dependencies:
+    postcss-selector-parser: ^6.0.6
+  peerDependencies:
+    postcss: ^8.2.14
+  checksum: dbcbfd11e514f485ac0d2b649b32bcbd855665a88a76f697f8be6c5017aa0260954ecccd2475bbd5865a5d248eae9a4e6e10d2d51927621d05430381aa37e43b
+  languageName: node
+  linkType: hard
+
 "postcss-nested@npm:6.0.0":
   version: 6.0.0
   resolution: "postcss-nested@npm:6.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fpostcss-nested%2F-%2Fpostcss-nested-6.0.0.tgz"
@@ -14633,7 +14777,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-selector-parser@npm:^6.0.10, postcss-selector-parser@npm:^6.0.11":
+"postcss-selector-parser@npm:^6.0.10, postcss-selector-parser@npm:^6.0.11, postcss-selector-parser@npm:^6.0.6, postcss-selector-parser@npm:^6.0.9":
   version: 6.0.11
   resolution: "postcss-selector-parser@npm:6.0.11::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fpostcss-selector-parser%2F-%2Fpostcss-selector-parser-6.0.11.tgz"
   dependencies:
@@ -14671,7 +14815,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.0.9, postcss@npm:^8.4.13":
+"postcss@npm:^8.0.9, postcss@npm:^8.4.13, postcss@npm:^8.4.14, postcss@npm:^8.4.6":
   version: 8.4.21
   resolution: "postcss@npm:8.4.21::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fpostcss%2F-%2Fpostcss-8.4.21.tgz"
   dependencies:
@@ -15464,6 +15608,13 @@ __metadata:
     indent-string: ^2.1.0
     strip-indent: ^1.0.1
   checksum: 2bb8f76fda9c9f44e26620047b0ba9dd1834b0a80309d0badcc23fdcf7bb27a7ca74e66b683baa0d4b8cb5db787f11be086504036d63447976f409dd3e73fd7d
+  languageName: node
+  linkType: hard
+
+"reflect-metadata@npm:^0.1.13":
+  version: 0.1.13
+  resolution: "reflect-metadata@npm:0.1.13::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Freflect-metadata%2F-%2Freflect-metadata-0.1.13.tgz"
+  checksum: 798d379a7b6f6455501145419505c97dd11cbc23857a386add2b9ef15963ccf15a48d9d15507afe01d4cd74116df8a213247200bac00320bd7c11ddeaa5e8fb4
   languageName: node
   linkType: hard
 
@@ -17170,6 +17321,76 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tailwindcss@npm:3.0.23":
+  version: 3.0.23
+  resolution: "tailwindcss@npm:3.0.23::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Ftailwindcss%2F-%2Ftailwindcss-3.0.23.tgz"
+  dependencies:
+    arg: ^5.0.1
+    chalk: ^4.1.2
+    chokidar: ^3.5.3
+    color-name: ^1.1.4
+    cosmiconfig: ^7.0.1
+    detective: ^5.2.0
+    didyoumean: ^1.2.2
+    dlv: ^1.1.3
+    fast-glob: ^3.2.11
+    glob-parent: ^6.0.2
+    is-glob: ^4.0.3
+    normalize-path: ^3.0.0
+    object-hash: ^2.2.0
+    postcss: ^8.4.6
+    postcss-js: ^4.0.0
+    postcss-load-config: ^3.1.0
+    postcss-nested: 5.0.6
+    postcss-selector-parser: ^6.0.9
+    postcss-value-parser: ^4.2.0
+    quick-lru: ^5.1.1
+    resolve: ^1.22.0
+  peerDependencies:
+    autoprefixer: ^10.0.2
+    postcss: ^8.0.9
+  bin:
+    tailwind: lib/cli.js
+    tailwindcss: lib/cli.js
+  checksum: 2e7fdd11561e619770f656821c4b6850fdef633777c1f56fc815e566fc3fe6ec707df0966e90764ef9f452be0d0ee54daa0541002918eada590def3788a30f08
+  languageName: node
+  linkType: hard
+
+"tailwindcss@npm:3.1.6":
+  version: 3.1.6
+  resolution: "tailwindcss@npm:3.1.6::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Ftailwindcss%2F-%2Ftailwindcss-3.1.6.tgz"
+  dependencies:
+    arg: ^5.0.2
+    chokidar: ^3.5.3
+    color-name: ^1.1.4
+    detective: ^5.2.1
+    didyoumean: ^1.2.2
+    dlv: ^1.1.3
+    fast-glob: ^3.2.11
+    glob-parent: ^6.0.2
+    is-glob: ^4.0.3
+    lilconfig: ^2.0.5
+    normalize-path: ^3.0.0
+    object-hash: ^3.0.0
+    picocolors: ^1.0.0
+    postcss: ^8.4.14
+    postcss-import: ^14.1.0
+    postcss-js: ^4.0.0
+    postcss-load-config: ^3.1.4
+    postcss-nested: 5.0.6
+    postcss-selector-parser: ^6.0.10
+    postcss-value-parser: ^4.2.0
+    quick-lru: ^5.1.1
+    resolve: ^1.22.1
+  peerDependencies:
+    postcss: ^8.0.9
+  bin:
+    tailwind: lib/cli.js
+    tailwindcss: lib/cli.js
+  checksum: 90719c6fd0dcdda5c8e2882ad421048c9dd90890e0c118d12ff3ec31adba53eb2df8fed1ed203e728e5b32297e1cc207df463a6b196d37344a63fde9f67c52b6
+  languageName: node
+  linkType: hard
+
 "tailwindcss@npm:^3.0.24":
   version: 3.2.6
   resolution: "tailwindcss@npm:3.2.6::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Ftailwindcss%2F-%2Ftailwindcss-3.2.6.tgz"
@@ -18013,6 +18234,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"universalify@npm:^0.1.0":
+  version: 0.1.2
+  resolution: "universalify@npm:0.1.2::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Funiversalify%2F-%2Funiversalify-0.1.2.tgz"
+  checksum: 40cdc60f6e61070fe658ca36016a8f4ec216b29bf04a55dce14e3710cc84c7448538ef4dad3728d0bfe29975ccd7bfb5f414c45e7b78883567fb31b246f02dff
+  languageName: node
+  linkType: hard
+
 "universalify@npm:^2.0.0":
   version: 2.0.0
   resolution: "universalify@npm:2.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Funiversalify%2F-%2Funiversalify-2.0.0.tgz"
@@ -18132,6 +18360,15 @@ __metadata:
   version: 3.1.1
   resolution: "use@npm:3.1.1::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fuse%2F-%2Fuse-3.1.1.tgz"
   checksum: 08a130289f5238fcbf8f59a18951286a6e660d17acccc9d58d9b69dfa0ee19aa038e8f95721b00b432c36d1629a9e32a464bf2e7e0ae6a244c42ddb30bdd8b33
+  languageName: node
+  linkType: hard
+
+"user-home@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "user-home@npm:2.0.0::__archiveUrl=https%3A%2F%2Fregistry.npmjs.org%2Fuser-home%2F-%2Fuser-home-2.0.0.tgz"
+  dependencies:
+    os-homedir: ^1.0.0
+  checksum: a3329faa959fcd9e3e01a03347ca974f7f6b8896e6a634f29c61d8d5b61557d853c6fc5a6dff1a28e2da85b400d0e4490368a28de452ba8c41a2bf3a92cb110a
   languageName: node
   linkType: hard
 

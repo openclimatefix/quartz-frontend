@@ -11,49 +11,49 @@
 {
     "config/constants": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "2d85a41a06e6a88a47be7e9f6640e183f544f535",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/config/constants"
     },
     "helpers/global-state": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "3aa0ba6421560ebc771d20fb81da96890b4afe02",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/helpers/global-state"
     },
     "helpers/utils": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "5eef1983976f95dfdc73aca5b3dc7f9d388019ed",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/helpers/utils"
     },
     "icons/icons": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "ea31239d3480642c9ce2dbc77ffe0b5ed1b5ccdb",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/icons/icons"
     },
     "icons/logo": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "6667cb48e159b21398040cd4170154980398e1a2",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/icons/logo"
     },
     "layout/header": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "f649ced28a24a78d733ed24d1edad168057e7047",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/layout/header"
     },
     "misc/chart-info": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "78d53fbf60df1e82c9c0791f572e66fb4ad4e423",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/misc/chart-info"
     },
     "misc/tooltip": {
         "scope": "openclimatefix.nowcasting-ui",
-        "version": "b2bc99110a7ea2ff6e0776bac58c72a9b5593080",
+        "version": "0.0.3",
         "mainFile": "index.ts",
         "rootDir": "nowcasting-ui/misc/tooltip"
     },

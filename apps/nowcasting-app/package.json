@@ -15,7 +15,7 @@
     "@auth0/nextjs-auth0": "^1.8.0",
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
-    "@openclimatefix/nowcasting-ui.layout.header": "^0.0.0-f649ced28a24a78d733ed24d1edad168057e7047",
+    "@openclimatefix/nowcasting-ui.layout.header": "^0.0.3",
     "@react-icons/all-files": "^4.1.0",
     "@sentry/nextjs": "^6.19.7",
     "axios": "^0.27.2",
@@ -33,7 +33,6 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/eslint-parser": "^7.19.1",
-    "@openclimatefix/nowcasting-tsconfig": "file:../../packages/nowcasting-tsconfig",
     "@storybook/addon-actions": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.22",
     "@storybook/addon-links": "^6.4.22",
