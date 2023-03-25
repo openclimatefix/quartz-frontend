@@ -33,6 +33,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/eslint-parser": "^7.19.1",
+    "@openclimatefix/nowcasting-tsconfig": "file:../../packages/nowcasting-tsconfig",
     "@storybook/addon-actions": "^6.4.22",
     "@storybook/addon-essentials": "^6.4.22",
     "@storybook/addon-links": "^6.4.22",

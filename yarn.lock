@@ -1941,6 +1941,9 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@openclimatefix/nowcasting-tsconfig@file:packages/nowcasting-tsconfig":
+  version "0.0.0"
+
 "@openclimatefix/nowcasting-ui.config.constants@0.0.3":
   version "0.0.3"
   resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.config.constants/-/@openclimatefix-nowcasting-ui.config.constants-0.0.3.tgz#cfcb54345dd16abb5534c5f7e747605ea0976069"
