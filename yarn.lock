@@ -1944,73 +1944,73 @@
 "@openclimatefix/nowcasting-tsconfig@file:packages/nowcasting-tsconfig":
   version "0.0.0"
 
-"@openclimatefix/nowcasting-ui.config.constants@0.0.0-2d85a41a06e6a88a47be7e9f6640e183f544f535":
-  version "0.0.0-2d85a41a06e6a88a47be7e9f6640e183f544f535"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.config.constants/-/@openclimatefix-nowcasting-ui.config.constants-0.0.0-2d85a41a06e6a88a47be7e9f6640e183f544f535.tgz#b3063255a27648a40942a9ea7e7de212a49545e5"
-  integrity sha1-swYyVaJ2SKQJQqnqfn3iEqSVReU=
+"@openclimatefix/nowcasting-ui.config.constants@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.config.constants/-/@openclimatefix-nowcasting-ui.config.constants-0.0.3.tgz#cfcb54345dd16abb5534c5f7e747605ea0976069"
+  integrity sha1-z8tUNF3RartVNMX350dgXqCXYGk=
   dependencies:
     core-js "^3.0.0"
 
-"@openclimatefix/nowcasting-ui.helpers.global-state@0.0.0-3aa0ba6421560ebc771d20fb81da96890b4afe02":
-  version "0.0.0-3aa0ba6421560ebc771d20fb81da96890b4afe02"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.helpers.global-state/-/@openclimatefix-nowcasting-ui.helpers.global-state-0.0.0-3aa0ba6421560ebc771d20fb81da96890b4afe02.tgz#fdf8309fca303fd05ddc13f49ce6d797f5c5f930"
-  integrity sha1-/fgwn8owP9Bd3BP0nObXl/XF+TA=
+"@openclimatefix/nowcasting-ui.helpers.global-state@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.helpers.global-state/-/@openclimatefix-nowcasting-ui.helpers.global-state-0.0.3.tgz#79a1eb84f7416ca4057d1cefbf3ee9ac111170d0"
+  integrity sha1-eaHrhPdBbKQFfRzvvz7prBERcNA=
   dependencies:
-    "@openclimatefix/nowcasting-ui.config.constants" "0.0.0-2d85a41a06e6a88a47be7e9f6640e183f544f535"
+    "@openclimatefix/nowcasting-ui.config.constants" "0.0.3"
     core-js "^3.0.0"
     react-hooks-global-state "^1.0.2"
 
-"@openclimatefix/nowcasting-ui.helpers.utils@0.0.0-5eef1983976f95dfdc73aca5b3dc7f9d388019ed":
-  version "0.0.0-5eef1983976f95dfdc73aca5b3dc7f9d388019ed"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.helpers.utils/-/@openclimatefix-nowcasting-ui.helpers.utils-0.0.0-5eef1983976f95dfdc73aca5b3dc7f9d388019ed.tgz#88120b3829c8c9a49ba503a7d0780d4e1f22f370"
-  integrity sha1-iBILOCnIyaSbpQOn0HgNTh8i83A=
+"@openclimatefix/nowcasting-ui.helpers.utils@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.helpers.utils/-/@openclimatefix-nowcasting-ui.helpers.utils-0.0.3.tgz#dc482f234c531f3aaa7f5d0c3d8f7140c5d37f1f"
+  integrity sha1-3EgvI0xTHzqqf10MPY9xQMXTfx8=
   dependencies:
     core-js "^3.0.0"
 
-"@openclimatefix/nowcasting-ui.icons.icons@0.0.0-ea31239d3480642c9ce2dbc77ffe0b5ed1b5ccdb":
-  version "0.0.0-ea31239d3480642c9ce2dbc77ffe0b5ed1b5ccdb"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.icons.icons/-/@openclimatefix-nowcasting-ui.icons.icons-0.0.0-ea31239d3480642c9ce2dbc77ffe0b5ed1b5ccdb.tgz#57da328457ae10c7bf4cd4fdd7bfae6e0b160504"
-  integrity sha1-V9oyhFeuEMe/TNT917+ubgsWBQQ=
+"@openclimatefix/nowcasting-ui.icons.icons@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.icons.icons/-/@openclimatefix-nowcasting-ui.icons.icons-0.0.3.tgz#df2e3e94277897e3ad44de6d61b4a617cab1a6c6"
+  integrity sha1-3y4+lCd4l+OtRN5tYbSmF8qxpsY=
   dependencies:
     core-js "^3.0.0"
 
-"@openclimatefix/nowcasting-ui.icons.logo@0.0.0-6667cb48e159b21398040cd4170154980398e1a2":
-  version "0.0.0-6667cb48e159b21398040cd4170154980398e1a2"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.icons.logo/-/@openclimatefix-nowcasting-ui.icons.logo-0.0.0-6667cb48e159b21398040cd4170154980398e1a2.tgz#13d476e3a947acc6abc48a69b04b8df49af4a067"
-  integrity sha1-E9R246lHrMarxIppsEuN9Jr0oGc=
+"@openclimatefix/nowcasting-ui.icons.logo@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.icons.logo/-/@openclimatefix-nowcasting-ui.icons.logo-0.0.3.tgz#725098569e0b82f04cf9e19dd6d548b4987a6648"
+  integrity sha1-clCYVp4LgvBM+eGd1tVItJh6Zkg=
   dependencies:
     core-js "^3.0.0"
 
-"@openclimatefix/nowcasting-ui.layout.header@^0.0.0-f649ced28a24a78d733ed24d1edad168057e7047":
-  version "0.0.0-f649ced28a24a78d733ed24d1edad168057e7047"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.layout.header/-/@openclimatefix-nowcasting-ui.layout.header-0.0.0-f649ced28a24a78d733ed24d1edad168057e7047.tgz#0871c2a3b8afd79e946cbb0ac8b5e145e6d9bd7d"
-  integrity sha1-CHHCo7iv156UbLsKyLXhRebZvX0=
+"@openclimatefix/nowcasting-ui.layout.header@^0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.layout.header/-/@openclimatefix-nowcasting-ui.layout.header-0.0.3.tgz#283824faa62d24042272ebf77c438e21e4380052"
+  integrity sha1-KDgk+qYtJAQicuv3fEOOIeQ4AFI=
   dependencies:
     "@auth0/nextjs-auth0" "^1.8.0"
     "@headlessui/react" "^1.6.1"
-    "@openclimatefix/nowcasting-ui.config.constants" "0.0.0-2d85a41a06e6a88a47be7e9f6640e183f544f535"
-    "@openclimatefix/nowcasting-ui.helpers.global-state" "0.0.0-3aa0ba6421560ebc771d20fb81da96890b4afe02"
-    "@openclimatefix/nowcasting-ui.helpers.utils" "0.0.0-5eef1983976f95dfdc73aca5b3dc7f9d388019ed"
-    "@openclimatefix/nowcasting-ui.icons.icons" "0.0.0-ea31239d3480642c9ce2dbc77ffe0b5ed1b5ccdb"
-    "@openclimatefix/nowcasting-ui.icons.logo" "0.0.0-6667cb48e159b21398040cd4170154980398e1a2"
-    "@openclimatefix/nowcasting-ui.misc.chart-info" "0.0.0-78d53fbf60df1e82c9c0791f572e66fb4ad4e423"
-    "@openclimatefix/nowcasting-ui.misc.tooltip" "0.0.0-b2bc99110a7ea2ff6e0776bac58c72a9b5593080"
+    "@openclimatefix/nowcasting-ui.config.constants" "0.0.3"
+    "@openclimatefix/nowcasting-ui.helpers.global-state" "0.0.3"
+    "@openclimatefix/nowcasting-ui.helpers.utils" "0.0.3"
+    "@openclimatefix/nowcasting-ui.icons.icons" "0.0.3"
+    "@openclimatefix/nowcasting-ui.icons.logo" "0.0.3"
+    "@openclimatefix/nowcasting-ui.misc.chart-info" "0.0.3"
+    "@openclimatefix/nowcasting-ui.misc.tooltip" "0.0.3"
     core-js "^3.0.0"
     next "^12.0.7"
 
-"@openclimatefix/nowcasting-ui.misc.chart-info@0.0.0-78d53fbf60df1e82c9c0791f572e66fb4ad4e423":
-  version "0.0.0-78d53fbf60df1e82c9c0791f572e66fb4ad4e423"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.misc.chart-info/-/@openclimatefix-nowcasting-ui.misc.chart-info-0.0.0-78d53fbf60df1e82c9c0791f572e66fb4ad4e423.tgz#8400ea564886a9b2cb408c7e918ea35b3c35a07d"
-  integrity sha1-hADqVkiGqbLLQIx+kY6jWzw1oH0=
+"@openclimatefix/nowcasting-ui.misc.chart-info@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.misc.chart-info/-/@openclimatefix-nowcasting-ui.misc.chart-info-0.0.3.tgz#4315e0f513220987271089d8e1cbcc1027444d37"
+  integrity sha1-QxXg9RMiCYcnEInY4cvMECdETTc=
   dependencies:
-    "@openclimatefix/nowcasting-ui.helpers.global-state" "0.0.0-3aa0ba6421560ebc771d20fb81da96890b4afe02"
-    "@openclimatefix/nowcasting-ui.helpers.utils" "0.0.0-5eef1983976f95dfdc73aca5b3dc7f9d388019ed"
+    "@openclimatefix/nowcasting-ui.helpers.global-state" "0.0.3"
+    "@openclimatefix/nowcasting-ui.helpers.utils" "0.0.3"
     core-js "^3.0.0"
 
-"@openclimatefix/nowcasting-ui.misc.tooltip@0.0.0-b2bc99110a7ea2ff6e0776bac58c72a9b5593080":
-  version "0.0.0-b2bc99110a7ea2ff6e0776bac58c72a9b5593080"
-  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.misc.tooltip/-/@openclimatefix-nowcasting-ui.misc.tooltip-0.0.0-b2bc99110a7ea2ff6e0776bac58c72a9b5593080.tgz#e2ff3264438f12a7924faacefbf250cc709de413"
-  integrity sha1-4v8yZEOPEqeST6rO+/JQzHCd5BM=
+"@openclimatefix/nowcasting-ui.misc.tooltip@0.0.3":
+  version "0.0.3"
+  resolved "https://node.bit.cloud/@openclimatefix/nowcasting-ui.misc.tooltip/-/@openclimatefix-nowcasting-ui.misc.tooltip-0.0.3.tgz#76d90fd737393fd76a7f2aad6a8d3625e459828e"
+  integrity sha1-dtkP1zc5P9dqfyqtao02JeRZgo4=
   dependencies:
     core-js "^3.0.0"
 
@@ -5383,9 +5383,9 @@ core-js@^1.0.0:
   integrity sha512-ZiPp9pZlgxpWRu0M+YWbm6+aQ84XEfH1JRXvfOc/fILWI0VKhLC2LX13X1NYq4fULzLMq7Hfh43CSo2/aIaUPA==
 
 core-js@^3.0.0:
-  version "3.28.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.28.0.tgz#ed8b9e99c273879fdfff0edfc77ee709a5800e4a"
-  integrity sha512-GiZn9D4Z/rSYvTeg1ljAIsEqFm0LaN9gVtwDCrKL80zHtS31p9BAjmTxVqTQDMpwlMolJZOFntUG2uwyj7DAqw==
+  version "3.29.1"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.29.1.tgz#40ff3b41588b091aaed19ca1aa5cb111803fa9a6"
+  integrity sha512-+jwgnhg6cQxKYIIjGtAHq2nwUOolo9eoFZ4sHfUH09BLXBgxnH4gA0zEd+t+BO2cNB8idaBtZFcFTRjQJRJmAw==
 
 core-js@^3.0.4, core-js@^3.6.5, core-js@^3.8.2:
   version "3.22.7"
