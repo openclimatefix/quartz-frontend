@@ -2,7 +2,7 @@
 export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.nowcasting.io/v0";
 export const SITES_API_PREFIX =
   process.env.NEXT_PUBLIC_SITES_API_PREFIX ||
-  "https://pvsite-production-api-sites.eu-west-1.elasticbeanstalk.com";
+  "https://pvsite-development-api-sites.eu-west-1.elasticbeanstalk.com";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
 
