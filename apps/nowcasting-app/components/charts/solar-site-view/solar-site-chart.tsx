@@ -155,7 +155,7 @@ const SolarSiteChart: FC<{
     sites: new Map(),
     regions: new Map(),
     gsps: new Map(),
-    national: { label: "National", capacity: 0, actualPV: 0, expectedPV: 0, aggregatedYield: 0 }
+    national: new Map()
   };
   // Loop through the sites and aggregate the data by Region, GSP, and National
   for (const i in combinedSitesData?.allSitesData || []) {
@@ -215,10 +215,24 @@ const SolarSiteChart: FC<{
     sitesTableData.gsps.set(gsp, updatedGspData);
 
     // national level
-    sitesTableData.national.capacity += siteCapacity;
-    sitesTableData.national.actualPV += siteActualPV;
-    sitesTableData.national.expectedPV += siteExpectedPV;
-
+    const national = "National";
+    let updatedNationalData = sitesTableData.national.get(national) || {
+      label: "National Aggregate Value",
+      capacity: 0,
+      actualPV: 0,
+      expectedPV: 0,
+      aggregatedYield: 0
+    };
+    updatedNationalData.capacity += siteCapacity;
+    updatedNationalData.actualPV += siteActualPV;
+    updatedNationalData.expectedPV += siteExpectedPV;
+    if (lastSite) {
+      updatedNationalData.aggregatedYield =
+        ((updatedNationalData.actualPV || updatedNationalData.expectedPV) /
+          updatedNationalData.capacity) *
+        100;
+    }
+    sitesTableData.national.set(national, updatedNationalData);
     // set aggregated yield at the end of the loop
     if (lastSite) {
       sitesTableData.regions.forEach((region, regionName) => {
@@ -237,14 +251,19 @@ const SolarSiteChart: FC<{
           100;
         sitesTableData.gsps.set(gspName, updatedGspFinalData);
       });
-      sitesTableData.national.aggregatedYield =
-        ((sitesTableData.national.actualPV || sitesTableData.national.expectedPV) /
-          sitesTableData.national.capacity) *
-        100;
+      sitesTableData.national.forEach((national, nationalName) => {
+        let updatedNationalFinalData = sitesTableData.national.get(nationalName);
+        updatedNationalFinalData.aggregatedYield =
+          ((updatedNationalFinalData.actualPV || updatedNationalFinalData.expectedPV) /
+            updatedNationalFinalData.capacity) *
+          100;
+        sitesTableData.national.set(nationalName, updatedNationalFinalData);
+      });
     }
   }
 
   // if () return <div>failed to load</div>;
+
   if (!combinedSitesData.sitesPvForecastData || !combinedSitesData.sitesPvActualData)
     return (
       <div className="h-full flex">
@@ -316,17 +335,17 @@ const SolarSiteChart: FC<{
           ></GspPvRemixChart>
         )}
       </div>
-
       <AggregatedDataTable
-        className={
-          currentAggregation(AGGREGATION_LEVELS.REGION) ||
-          currentAggregation(AGGREGATION_LEVELS.NATIONAL)
-            ? ""
-            : "hidden"
-        }
+        className={currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "" : "hidden"}
+        title={"National"}
+        tableData={Array.from(sitesTableData.national.values())}
+      />
+      <AggregatedDataTable
+        className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
         title={"Region"}
         tableData={Array.from(sitesTableData.regions.values())}
       />
+
       <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
         title={"GSP"}

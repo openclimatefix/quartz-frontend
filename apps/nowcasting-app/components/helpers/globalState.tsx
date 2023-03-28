@@ -14,7 +14,6 @@ export function get30MinNow(offsetMinutes = 0) {
   date = getNext30MinSlot(date);
   return date.toISOString();
 }
-
 export function getNext30MinSlot(isoTime: Date) {
   if (isoTime.getMinutes() <= 30) {
     isoTime.setHours(isoTime.getHours());
@@ -43,6 +42,7 @@ export type GlobalStateType = {
   showSiteCount?: boolean;
   show4hView?: boolean;
   sortBy: SORT_BY;
+  autoZoom: boolean;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -59,6 +59,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lng: -2.3175601,
     lat: 54.70534432,
     zoom: 5,
+    autoZoom: false,
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
