@@ -37,7 +37,7 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
           <p>Capacity</p>
         </div>
         <div className="flex text-white font-bold w-32 justify-start py-3 pr-10 text-sm">
-          <p>MW</p>
+          <p>KW</p>
         </div>
       </div>
     </div>
@@ -92,7 +92,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                     <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
                       {Number(mostAccurateGeneration).toFixed(mostAccurateGeneration < 10 ? 1 : 0)}{" "}
                       / {Number(site.capacity).toFixed()}
-                      <span className="text-ocf-gray-400 text-xs font-thin pt-1">MW</span>
+                      <span className="text-ocf-gray-400 text-xs font-thin pt-1">KW</span>
                     </div>
                   </div>
                 </div>

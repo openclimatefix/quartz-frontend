@@ -9,7 +9,8 @@ import useFormatChartData from "../use-format-chart-data";
 import {
   getRounded4HoursAgoString,
   formatISODateString,
-  convertISODateStringToLondonTime
+  convertISODateStringToLondonTime,
+  formatISODateStringHuman
 } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
@@ -123,7 +124,11 @@ const SolarSiteChart: FC<{
     (acc, site) => acc + (site.FORECAST || 0) + (site.PAST_FORECAST || 0),
     0
   );
+
+  const forecastPVMW = forecastPV / 1000;
+
   const actualPV = chartData?.reduce((acc, site) => acc + (site.GENERATION_UPDATED || 0), 0);
+  const actualPVMW = actualPV / 1000;
 
   // TABLE DATA MANIPULATION
   // site level
@@ -261,7 +266,11 @@ const SolarSiteChart: FC<{
       });
     }
   }
-
+  const allSitesYield = Array.from(sitesTableData.national.values());
+  const nationalPVActual = allSitesYield[0].actualPV;
+  const nationalPVExpected = allSitesYield[0].expectedPV;
+  const allSitesSelectedTime = formatISODateString(selectedTime);
+  const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
   // if () return <div>failed to load</div>;
 
   if (!combinedSitesData.sitesPvForecastData || !combinedSitesData.sitesPvActualData)
@@ -287,13 +296,11 @@ const SolarSiteChart: FC<{
           <div className="flex justify-between flex-2 my-2 px-6">
             <div className="pr-8">
               <ForecastWithActualPV
-                forecast={`${forecastPV.toFixed(1)}`}
-                pv={`${actualPV.toFixed(1)}`}
-                tip={`PV Live / OCF Forecast`}
-                time={"time"}
-                // time={`${convertISODateStringToLondonTime(
-                //   combinedSitesData?.sitesPvActualData?.[0]?.pv_actual_values?.[0].datetime_utc
-                // )}`||""}
+                forecast={`${nationalPVExpected.toFixed(1)}`}
+                pv={`${nationalPVActual.toFixed(1)}`}
+                tip={`PV Actual / OCF Forecast`}
+                sites={true}
+                time={allSitesChartDateTime}
                 color="ocf-yellow"
               />
             </div>
