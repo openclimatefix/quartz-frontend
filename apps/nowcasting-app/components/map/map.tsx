@@ -13,6 +13,9 @@ mapboxgl.accessToken =
  * @param loadDataOverlay Function that gets called to load the data.
  * @param controlOverlay Can pass additional JSX components to render on top of the map.
  * @param bearing Rotation of the map. Defaults to 0 degrees
+ * @param updateData Object with a boolean to indicate whether to update the map data and a function to update the map data.
+ * @param children Children to render on top of the map.
+ * @param title Title of the map.
  */
 const Map: FC<IMap> = ({
   loadDataOverlay,

@@ -38,6 +38,7 @@ import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 import SitesMap from "../components/map/sitesMap";
+import { useFormatSitesData } from "../components/hooks/useFormatSitesData";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -334,6 +335,8 @@ export default function Home() {
 
   const currentView = (v: VIEWS) => v === view;
 
+  const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
+
   return (
     <Layout>
       <div className="h-full relative pt-16">
@@ -349,6 +352,7 @@ export default function Home() {
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
             getForecastsData={useGetForecastsData}
             sitesData={sitesData}
+            aggregatedSitesData={aggregatedSitesData}
             sitesErrors={sitesErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
@@ -371,6 +375,7 @@ export default function Home() {
           {/*/>*/}
           <SolarSiteChart
             combinedSitesData={sitesData}
+            aggregatedSitesData={aggregatedSitesData}
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
           />
           {/*<DeltaViewChart*/}

@@ -8,7 +8,15 @@ import {
   SitesDownArrow,
   SitesUpArrow
 } from "../../icons/icons";
-import { CombinedSitesData, SitesPvActual, SitesPvForecast, Site, AllSites } from "../../types";
+import {
+  CombinedSitesData,
+  SitesPvActual,
+  SitesPvForecast,
+  Site,
+  AllSites,
+  AggregatedSitesDatum,
+  AggregatedSitesDataGroupMap
+} from "../../types";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { SORT_BY } from "../../../constant";
@@ -47,13 +55,13 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
 //Tables will also show generation MW value over installed capacity. If we have truths, use truths, if we have forecast, use forecast given a specific time.
 
 type TableDataProps = {
-  rows: any[]; // TODO: add types to these table rows
+  rows: AggregatedSitesDatum[];
   setClickedSite: Dispatch<SetStateAction<number | undefined>>;
 };
 
 const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
   const [sortBy, setSortBy] = useGlobalState("sortBy");
-  const [selectedSite] = useGlobalState("selectedSite");
+  // const [selectedSite] = useGlobalState("selectedSite");
   const sortFn = (a: any, b: any) => {
     if (sortBy === SORT_BY.CAPACITY) {
       return b.capacity - a.capacity;
@@ -136,7 +144,7 @@ const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
 export const AggregatedDataTable: React.FC<{
   className: string;
   title: string;
-  tableData: any;
+  tableData: AggregatedSitesDatum[];
 }> = ({ className, title, tableData }) => {
   return (
     <>

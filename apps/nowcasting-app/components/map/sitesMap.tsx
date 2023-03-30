@@ -1,16 +1,28 @@
 import { SWRResponse } from "swr";
 
-import React, { Dispatch, SetStateAction, useMemo } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map as MapComponent, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
-import { AGGREGATION_LEVELS, MAX_POWER_GENERATED, VIEWS } from "../../constant";
+import {
+  AGGREGATION_LEVEL_MIN_ZOOM,
+  AGGREGATION_LEVELS,
+  MAX_POWER_GENERATED,
+  VIEWS
+} from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
+import gspShapeData2 from "../../data/gsp-regions.json";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
-import { CombinedSitesData, FcAllResData, SitesPvForecast } from "../types";
+import {
+  AggregatedSitesCombinedData,
+  AggregatedSitesDatum,
+  CombinedSitesData,
+  FcAllResData,
+  SitesPvForecast
+} from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
@@ -38,6 +50,7 @@ type SitesMapProps = {
   className?: string;
   getForecastsData: (isNormalized: boolean) => SWRResponse<FcAllResData, any>;
   sitesData: CombinedSitesData;
+  aggregatedSitesData: AggregatedSitesCombinedData;
   sitesErrors: any;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
@@ -47,93 +60,146 @@ const SitesMap: React.FC<SitesMapProps> = ({
   className,
   getForecastsData,
   sitesData,
+  aggregatedSitesData,
   sitesErrors,
   activeUnit,
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
-  const latestForecastValue = 0;
-  const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
-  if (activeUnit === ActiveUnit.percentage)
-    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
-  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
-  const {
-    data: initForecastData,
-    isValidating,
-    error: forecastError
-  } = getForecastsData(isNormalized);
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  // const latestForecastValue = 0;
+  // const isNormalized = activeUnit === ActiveUnit.percentage;
+  // let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
+  // if (activeUnit === ActiveUnit.percentage)
+  //   selectedDataName = SelectedData.expectedPowerGenerationNormalized;
+  // if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
+  // const {
+  //   data: initForecastData,
+  //   isValidating,
+  //   error: forecastError
+  // } = getForecastsData(isNormalized);
 
   const forecastLoading = false;
 
-  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the opacity will be 0
-    0,
-    0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : MAX_POWER_GENERATED,
-    1
-  ];
+  // const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
+  //   "interpolate",
+  //   ["linear"],
+  //   ["to-number", ["get", selectedData]],
+  //   // on value 0 the opacity will be 0
+  //   0,
+  //   0,
+  //   // on value maximum the opacity will be 1
+  //   isNormalized ? 1 : MAX_POWER_GENERATED,
+  //   1
+  // ];
 
-  const generateGeoJsonForecastData: (
-    forecastData?: FcAllResData,
-    targetTime?: string
-  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    // Exclude first item as it's not representing gsp area
-    const gspForecastData = forecastData?.forecasts?.slice(1);
-    const gspShapeJson = gspShapeData as FeatureCollection;
-    const forecastGeoJson = {
-      ...gspShapeData,
-      type: "FeatureCollection" as "FeatureCollection",
-      features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = gspForecastData && gspForecastData[index];
-        let selectedFCValue;
-        if (gspForecastData && targetTime) {
-          selectedFCValue = forecastDatum?.forecastValues.find(
-            (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
-          );
-        } else if (gspForecastData) {
-          selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
-        }
-
-        return {
-          ...featureObj,
+  // const generateGeoJsonForecastData: (
+  //   forecastData?: FcAllResData,
+  //   targetTime?: string
+  // ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
+  //   // Exclude first item as it's not representing gsp area
+  //   const gspForecastData = forecastData?.forecasts?.slice(1);
+  //   const gspShapeJson = gspShapeData as FeatureCollection;
+  //   const forecastGeoJson = {
+  //     ...gspShapeData,
+  //     type: "FeatureCollection" as "FeatureCollection",
+  //     features: gspShapeJson.features.map((featureObj, index) => {
+  //       const forecastDatum = gspForecastData && gspForecastData[index];
+  //       let selectedFCValue;
+  //       if (gspForecastData && targetTime) {
+  //         selectedFCValue = forecastDatum?.forecastValues.find(
+  //           (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
+  //         );
+  //       } else if (gspForecastData) {
+  //         selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
+  //       }
+  //
+  //       return {
+  //         ...featureObj,
+  //         properties: {
+  //           ...featureObj.properties,
+  //           [SelectedData.expectedPowerGenerationMegawatts]:
+  //             selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
+  //           [SelectedData.expectedPowerGenerationNormalized]:
+  //             selectedFCValue &&
+  //             getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
+  //           [SelectedData.installedCapacityMw]: getRoundedPv(
+  //             forecastDatum?.location.installedCapacityMw || 0
+  //           )
+  //         }
+  //       };
+  //     })
+  //   };
+  //
+  //   return { forecastGeoJson };
+  // };
+  // const generatedGeoJsonForecastData = useMemo(() => {
+  //   return generateGeoJsonForecastData(initForecastData, selectedISOTime);
+  // }, [initForecastData, selectedISOTime]);
+  const setSourceData = (source: mapboxgl.GeoJSONSource, aggregatedDatum: AggregatedSitesDatum) => {
+    source.setData({
+      type: "FeatureCollection",
+      features: [
+        {
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [aggregatedDatum.lng, aggregatedDatum.lat]
+          },
           properties: {
-            ...featureObj.properties,
-            [SelectedData.expectedPowerGenerationMegawatts]:
-              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
-            [SelectedData.expectedPowerGenerationNormalized]:
-              selectedFCValue &&
-              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
-            [SelectedData.installedCapacityMw]: getRoundedPv(
-              forecastDatum?.location.installedCapacityMw || 0
-            )
+            site_uuid: aggregatedDatum.id,
+            siteName: aggregatedDatum.label,
+            installedCapacityMw: aggregatedDatum.capacity,
+            expectedPowerGenerationMegawatts: aggregatedDatum.expectedPV,
+            expectedPowerGenerationNormalized: 0
           }
-        };
-      })
-    };
-
-    return { forecastGeoJson };
+        }
+      ]
+    });
   };
-  const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime);
-  }, [initForecastData, selectedISOTime]);
+  const addGroupSource = (
+    map: mapboxgl.Map,
+    prefix: "site" | "gsp" | "region" | "national",
+    aggregatedDatum: AggregatedSitesDatum
+  ) => {
+    map.addSource(`${prefix}-${aggregatedDatum.label}`, {
+      type: "geojson",
+      data: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [aggregatedDatum.lng, aggregatedDatum.lat]
+            },
+            properties: {
+              site_uuid: aggregatedDatum.id,
+              siteName: aggregatedDatum.label,
+              installedCapacityMw: aggregatedDatum.capacity,
+              expectedPowerGenerationMegawatts: aggregatedDatum.expectedPV,
+              expectedPowerGenerationNormalized: 0
+            }
+          }
+        ]
+      }
+    });
+  };
 
   const updateMapData = (map: mapboxgl.Map) => {
+    // console.log("updateMapData");
+    // console.log("aggregationLevel", aggregationLevel);
     if (
       typeof map !== "object" ||
       typeof map.getSource !== "function" ||
       // @ts-ignore
       map._removed ||
-      !map.getSource("latestPV")
+      !map.isStyleLoaded()
     )
       return;
 
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
+    // const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
     // if (generatedGeoJsonForecastData && source) {
     //   source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
     //   map.setPaintProperty(
@@ -142,98 +208,207 @@ const SitesMap: React.FC<SitesMapProps> = ({
     //     getFillOpacity(selectedDataName, isNormalized)
     //   );
     // }
-    sitesData.allSitesData?.forEach((site) => {
-      const expectedPowerGeneration = getExpectedPowerGenerationForSite(
-        site.site_uuid,
-        selectedISOTime || new Date().toISOString()
-      );
-      const siteSource = map.getSource(`site-${site.site_uuid}`) as unknown as
+
+    // Sites
+    Array.from(aggregatedSitesData.sites.values())?.forEach((site) => {
+      const siteSource = map.getSource(`site-${site.label}`) as unknown as
         | mapboxgl.GeoJSONSource
         | undefined;
+      let capacityLayer =
+        (map.getLayer(`Capacity-${site.label}`) as unknown as CircleLayer) || undefined;
+      let generationLayer =
+        (map.getLayer(`Generation-${site.label}`) as unknown as CircleLayer) || undefined;
+
+      if (capacityLayer)
+        map.setLayoutProperty(
+          `Capacity-${site.label}`,
+          "visibility",
+          aggregationLevel !== AGGREGATION_LEVELS.SITE ? "none" : "visible"
+        );
 
       if (siteSource) {
-        siteSource.setData({
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [site.longitude, site.latitude]
-              },
-              properties: {
-                site_uuid: site.site_uuid,
-                siteName: site.client_site_id,
-                installedCapacityMw: site.installed_capacity_kw,
-                expectedPowerGenerationMegawatts: expectedPowerGeneration,
-                expectedPowerGenerationNormalized: 0
-              }
-            }
-          ]
-        });
+        setSourceData(siteSource, site);
       } else {
-        map.addSource(`site-${site.site_uuid}`, {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [
-              {
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [site.longitude, site.latitude]
-                },
-                properties: {
-                  site_uuid: site.site_uuid,
-                  siteName: site.client_site_id,
-                  installedCapacityMw: site.installed_capacity_kw,
-                  expectedPowerGenerationMegawatts: expectedPowerGeneration,
-                  expectedPowerGenerationNormalized: 0
-                }
-              }
-            ]
-          }
-        });
+        addGroupSource(map, "site", site);
       }
 
       // Capacity ring
-      let capacityLayer =
-        (map.getLayer(`Capacity-${site.site_uuid}`) as unknown as CircleLayer) || undefined;
-
       if (capacityLayer) {
         map.setPaintProperty(
-          `Capacity-${site.site_uuid}`,
+          `Capacity-${site.label}`,
           "circle-radius",
-          Math.round(site.installed_capacity_kw * 4)
+          Math.round(site.capacity * 5)
         );
       } else {
         map.addLayer({
-          id: `Capacity-${site.site_uuid}`,
+          id: `Capacity-${site.label}`,
           type: "circle",
-          source: `site-${site.site_uuid}`,
+          source: `site-${site.label}`,
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.SITE,
           paint: {
             "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
             "circle-stroke-width": 1,
-            "circle-opacity": 0
+            "circle-opacity": 0,
+            "circle-radius": Math.round(site.capacity * 5)
           }
         });
+        map.on("click", `Capacity-${site.label}`, (e) => {
+          console.log("Capacity click site");
+          console.log("e.features", e.features?.[0]);
+          setClickedSiteGroupId(site.id);
+        });
       }
-      let generationLayer =
-        (map.getLayer(`Generation-${site.site_uuid}`) as unknown as CircleLayer) || undefined;
+
+      // Generation inner circle
       if (generationLayer) {
         map.setPaintProperty(
-          `Generation-${site.site_uuid}`,
+          `Generation-${site.label}`,
           "circle-radius",
-          Math.round(expectedPowerGeneration * 1000 * 4)
+          Math.round(site.expectedPV * 5)
         );
       } else {
         map.addLayer({
-          id: `Generation-${site.site_uuid}`,
+          id: `Generation-${site.label}`,
           type: "circle",
-          source: `site-${site.site_uuid}`,
+          source: `site-${site.label}`,
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.SITE,
           paint: {
             "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-            "circle-radius": Math.round(expectedPowerGeneration * 1000 * 4),
+            "circle-radius": Math.round(site.expectedPV * 5),
+            "circle-opacity": 0.5
+          }
+        });
+      }
+    });
+
+    // GSPs
+    Array.from(aggregatedSitesData.gsps.values())?.forEach((gsp) => {
+      const gspSource = map.getSource(`gsp-${gsp.label}`) as unknown as
+        | mapboxgl.GeoJSONSource
+        | undefined;
+      let capacityLayer =
+        (map.getLayer(`Capacity-${gsp.label}`) as unknown as CircleLayer) || undefined;
+      let generationLayer =
+        (map.getLayer(`Generation-${gsp.label}`) as unknown as CircleLayer) || undefined;
+
+      if (capacityLayer)
+        map.setLayoutProperty(
+          `Capacity-${gsp.label}`,
+          "visibility",
+          aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
+        );
+
+      if (gspSource) {
+        setSourceData(gspSource, gsp);
+      } else {
+        addGroupSource(map, "gsp", gsp);
+      }
+
+      // Capacity ring
+      if (capacityLayer) {
+        map.setPaintProperty(
+          `Capacity-${gsp.label}`,
+          "circle-radius",
+          Math.round(gsp.capacity * 5)
+        );
+      } else {
+        map.addLayer({
+          id: `Capacity-${gsp.label}`,
+          type: "circle",
+          source: `gsp-${gsp.label}`,
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+          paint: {
+            "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+            "circle-stroke-width": 1,
+            "circle-opacity": 0,
+            "circle-radius": Math.round(gsp.capacity * 5)
+          }
+        });
+      }
+
+      // Generation inner circle
+      if (generationLayer) {
+        map.setPaintProperty(
+          `Generation-${gsp.label}`,
+          "circle-radius",
+          Math.round(gsp.expectedPV * 5)
+        );
+      } else {
+        map.addLayer({
+          id: `Generation-${gsp.label}`,
+          type: "circle",
+          source: `gsp-${gsp.label}`,
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+          paint: {
+            "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+            "circle-radius": Math.round(gsp.expectedPV * 5),
+            "circle-opacity": 0.5
+          }
+        });
+      }
+    });
+
+    // Regions
+    Array.from(aggregatedSitesData.regions.values())?.forEach((region) => {
+      const regionSource = map.getSource(`region-${region.label}`) as unknown as
+        | mapboxgl.GeoJSONSource
+        | undefined;
+      let capacityLayer =
+        (map.getLayer(`Capacity-${region.label}`) as unknown as CircleLayer) || undefined;
+      let generationLayer =
+        (map.getLayer(`Generation-${region.label}`) as unknown as CircleLayer) || undefined;
+
+      if (capacityLayer)
+        map.setLayoutProperty(
+          `Capacity-${region.label}`,
+          "visibility",
+          aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
+        );
+
+      if (regionSource) {
+        setSourceData(regionSource, region);
+      } else {
+        addGroupSource(map, "region", region);
+      }
+
+      // Capacity ring
+      if (capacityLayer) {
+        map.setPaintProperty(
+          `Capacity-${region.label}`,
+          "circle-radius",
+          Math.round(region.capacity)
+        );
+      } else {
+        map.addLayer({
+          id: `Capacity-${region.label}`,
+          type: "circle",
+          source: `region-${region.label}`,
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+          paint: {
+            "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+            "circle-stroke-width": 1,
+            "circle-opacity": 0,
+            "circle-radius": Math.round(region.capacity)
+          }
+        });
+      }
+
+      // Generation inner circle
+      if (generationLayer) {
+        map.setPaintProperty(
+          `Generation-${region.label}`,
+          "circle-radius",
+          Math.round(region.expectedPV)
+        );
+      } else {
+        map.addLayer({
+          id: `Generation-${region.label}`,
+          type: "circle",
+          source: `region-${region.label}`,
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+          paint: {
+            "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+            "circle-radius": Math.round(region.expectedPV),
             "circle-opacity": 0.5
           }
         });
@@ -241,113 +416,231 @@ const SitesMap: React.FC<SitesMapProps> = ({
     });
   };
 
-  const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
-    const siteForecast = sitesData.sitesPvForecastData.find((fc) => fc.site_uuid === site_uuid);
-    return (
-      (siteForecast?.forecast_values.find(
-        (fv) => formatISODateString(fv.target_datetime_utc) === formatISODateString(targetTime)
-      )?.expected_generation_kw || 0) / 1000
-    );
-  };
-
-  console.log("sitesData", sitesData);
   console.log(aggregationLevel);
 
   const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
+    // const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
+    // Create a popup, but don't add it to the map yet.
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: "bottom-right",
+      maxWidth: "none"
+    });
+    // Sites
+    Array.from(aggregatedSitesData.sites.values()).map((site) => {
+      addGroupSource(map.current, "site", site);
 
-    sitesData.allSitesData?.map((site) => {
-      const expectedPowerGeneration = getExpectedPowerGenerationForSite(
-        site.site_uuid,
-        selectedISOTime || new Date().toISOString()
-      );
-      map.current.addSource(`site-${site.site_uuid}`, {
-        type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [site.longitude, site.latitude]
-              },
-              properties: {
-                site_uuid: site.site_uuid,
-                siteName: site.client_site_id,
-                installedCapacityMw: site.installed_capacity_kw,
-                expectedPowerGenerationMegawatts: expectedPowerGeneration,
-                expectedPowerGenerationNormalized: 0
-              }
-            }
-          ]
-        }
-      });
       // Capacity ring
       map.current.addLayer({
-        id: `Capacity-${site.site_uuid}`,
+        id: `Capacity-${site.label}`,
         type: "circle",
-        source: `site-${site.site_uuid}`,
+        source: `site-${site.label}`,
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.SITE,
+        layout: {
+          visibility: aggregationLevel !== AGGREGATION_LEVELS.SITE ? "none" : "visible"
+        },
         paint: {
-          "circle-radius": Math.round(site.installed_capacity_kw * 4),
+          "circle-radius": Math.round(site.capacity * 5),
           "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
           "circle-stroke-width": 1,
           // "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
           "circle-opacity": 0
         }
       });
+      map.current.on("mousemove", `Capacity-${site.label}`, (e) => {
+        // Change the cursor style as a UI indicator.
+        map.current.getCanvas().style.cursor = "pointer";
+
+        // Copy coordinates array.
+        const properties = e.features?.[0].properties;
+
+        const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
+          <span class="text-lg">${site.label}</span>
+        </div>`;
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+      });
+
+      map.current.on("mouseleave", `Capacity-${site.label}`, () => {
+        map.current.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+
       // Generation circle
       map.current.addLayer({
-        id: `Generation-${site.site_uuid}`,
+        id: `Generation-${site.label}`,
         type: "circle",
-        source: `site-${site.site_uuid}`,
+        source: `site-${site.label}`,
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.SITE,
+        layout: {
+          visibility: aggregationLevel !== AGGREGATION_LEVELS.SITE ? "none" : "visible"
+        },
         paint: {
-          "circle-radius": Math.round(expectedPowerGeneration * 1000 * 4),
+          "circle-radius": Math.round(site.expectedPV * 5),
           // "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
           // "circle-stroke-width": 1,
           "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
           "circle-opacity": 0.8
         }
       });
+      map.current.on("click", `Capacity-${site.label}`, (e) => {
+        console.log("Capacity click site");
+        console.log("e.features", e.features?.[0]);
+      });
     });
 
-    map.current.addSource("latestPV", {
-      type: "geojson",
-      data: forecastGeoJson
+    // GSPs
+    Array.from(aggregatedSitesData.gsps.values()).map((gsp) => {
+      addGroupSource(map.current, "gsp", gsp);
+
+      // Capacity ring
+      map.current.addLayer({
+        id: `Capacity-${gsp.label}`,
+        type: "circle",
+        source: `gsp-${gsp.label}`,
+        layout: {
+          visibility: aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
+        },
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+        paint: {
+          "circle-radius": Math.round(gsp.capacity * 5),
+          "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+          "circle-stroke-width": 1,
+          "circle-opacity": 0
+        }
+      });
+
+      map.current.on("mousemove", `Capacity-${gsp.label}`, (e) => {
+        // Change the cursor style as a UI indicator.
+        map.current.getCanvas().style.cursor = "pointer";
+
+        const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
+          <span class="text-lg">${gsp.label}</span>
+        </div>`;
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+      });
+
+      map.current.on("mouseleave", `Capacity-${gsp.label}`, () => {
+        map.current.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+
+      // Generation inner circle
+      map.current.addLayer({
+        id: `Generation-${gsp.label}`,
+        type: "circle",
+        source: `gsp-${gsp.label}`,
+        layout: {
+          visibility: aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
+        },
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+        paint: {
+          "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+          "circle-radius": Math.round(gsp.expectedPV * 5),
+          "circle-opacity": 0.5
+        }
+      });
     });
 
-    map.current.addLayer({
-      id: "latestPV-forecast",
-      type: "fill",
-      source: "latestPV",
-      layout: { visibility: "visible" },
-      paint: {
-        "fill-color": yellow,
-        "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
-      }
+    // Regions
+    Array.from(aggregatedSitesData.regions.values()).map((region) => {
+      addGroupSource(map.current, "region", region);
+
+      // Capacity ring
+      map.current.addLayer({
+        id: `Capacity-${region.label}`,
+        type: "circle",
+        source: `region-${region.label}`,
+        layout: {
+          visibility: aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
+        },
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+        paint: {
+          "circle-radius": Math.round(region.capacity * 5),
+          "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+          "circle-stroke-width": 1,
+          "circle-opacity": 0
+        }
+      });
+
+      map.current.on("mousemove", `Capacity-${region.label}`, (e) => {
+        // Change the cursor style as a UI indicator.
+        map.current.getCanvas().style.cursor = "pointer";
+
+        const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
+          <span class="text-lg">${region.label}</span>
+        </div>`;
+
+        // Populate the popup and set its coordinates
+        // based on the feature found.
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+      });
+
+      // Generation inner circle
+      map.current.addLayer({
+        id: `Generation-${region.label}`,
+        type: "circle",
+        source: `region-${region.label}`,
+        layout: {
+          visibility: aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
+        },
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+        paint: {
+          "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+          "circle-radius": Math.round(region.expectedPV * 5),
+          "circle-opacity": 0.5
+        }
+      });
+
+      map.current.on("mouseleave", `Capacity-${region.label}`, () => {
+        map.current.getCanvas().style.cursor = "";
+        popup.remove();
+      });
     });
 
-    map.current.addLayer({
-      id: "latestPV-forecast-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 0.6,
-        "line-opacity": 0.2
-      }
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast-select-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 4,
-        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
-      }
-    });
+    // map.current.addSource("latestPV", {
+    //   type: "geojson",
+    //   data: forecastGeoJson
+    // });
+    //
+    // map.current.addLayer({
+    //   id: "latestPV-forecast",
+    //   type: "fill",
+    //   source: "latestPV",
+    //   layout: { visibility: "visible" },
+    //   paint: {
+    //     "fill-color": yellow,
+    //     "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
+    //   }
+    // });
+    //
+    // map.current.addLayer({
+    //   id: "latestPV-forecast-borders",
+    //   type: "line",
+    //   source: "latestPV",
+    //   paint: {
+    //     "line-color": "#ffffff",
+    //     "line-width": 0.6,
+    //     "line-opacity": 0.2
+    //   }
+    // });
+    //
+    // map.current.addLayer({
+    //   id: "latestPV-forecast-select-borders",
+    //   type: "line",
+    //   source: "latestPV",
+    //   paint: {
+    //     "line-color": "#ffffff",
+    //     "line-width": 4,
+    //     "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+    //   }
+    // });
   };
   // return <div>Empty</div>;
 
@@ -362,7 +655,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       ) : (
         <MapComponent
           loadDataOverlay={addFCData}
-          updateData={{ newData: !!initForecastData, updateMapData }}
+          updateData={{ newData: !!aggregatedSitesData && aggregationLevel, updateMapData }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />

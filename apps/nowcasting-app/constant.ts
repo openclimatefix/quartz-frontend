@@ -71,6 +71,13 @@ export enum AGGREGATION_LEVELS {
   SITE = "SITE"
 }
 
+export enum AGGREGATION_LEVEL_MIN_ZOOM {
+  NATIONAL = 0,
+  REGION = 5,
+  GSP = 7,
+  SITE = 8.5
+}
+
 export enum SORT_BY {
   NAME = "NAME",
   GENERATION = "GENERATION",
