@@ -56,12 +56,11 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
 
 type TableDataProps = {
   rows: AggregatedSitesDatum[];
-  setClickedSite: Dispatch<SetStateAction<number | undefined>>;
 };
 
-const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
+const TableData: React.FC<TableDataProps> = ({ rows }) => {
   const [sortBy, setSortBy] = useGlobalState("sortBy");
-  // const [selectedSite] = useGlobalState("selectedSite");
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
   const sortFn = (a: any, b: any) => {
     if (sortBy === SORT_BY.CAPACITY) {
       return b.capacity - a.capacity;
@@ -80,6 +79,9 @@ const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
 
   const selectedSiteClass = `bg-ocf-gray-800 cursor-pointer`;
 
+  // const classes = {`${
+  //                     clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
+  //                   }
   return (
     <>
       <div className="h-52 overflow-y-scroll">
@@ -88,14 +90,15 @@ const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
           return (
             <>
               <div
-                className="mb-0.5 bg-ocf-delta-950 cursor-pointer relative  w-full 
-              transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in"
+                className={`${
+                  clickedSiteGroupId === site.id
+                    ? "bg-ocf-gray-800 text"
+                    : "bg-ocf-delta-950 transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in"
+                } mb-0.5 bg-ocf-delta-950 cursor-pointer relative  w-full 
+            `}
+                onClick={() => setClickedSiteGroupId(site.id)}
               >
-                <div
-                  key={site.label}
-                  onClick={() => console.log(site.label)}
-                  className={`flex flex-col`}
-                >
+                <div key={site.label} className={`flex flex-col`}>
                   <div className="flex flex-row justify-between text-sm">
                     <div className="ml-10 w-80">
                       <div className="py-3 text-white font-bold text-sm">{site.label}</div>
@@ -124,9 +127,14 @@ const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
                   className="flex items-end justify-end flex-row-reverse relative w-full 
                mb-0.5"
                 >
-                  <div className="bg-ocf-yellow h-2.5" style={{ width: `2px` }}></div>
                   <div
-                    className="bg-ocf-yellow h-1"
+                    className={`${
+                      clickedSiteGroupId === site.id ? "h-3" : "h-2.5"
+                    } bg-ocf-yellow-500`}
+                    style={{ width: `2px` }}
+                  ></div>
+                  <div
+                    className={`h-1 bg-ocf-yellow-500`}
                     style={{
                       width: `${Number(site.aggregatedYield).toFixed()}%`
                     }}
