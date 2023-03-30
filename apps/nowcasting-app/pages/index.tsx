@@ -293,10 +293,10 @@ export default function Home() {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
-  console.log("sitesUuids", siteUuids);
-  console.log("siteUuidsString", siteUuidsString);
+  // console.log("sitesUuids", siteUuids);
+  // console.log("siteUuidsString", siteUuidsString);
 
-  console.log("allSitesData", allSitesData);
+  // console.log("allSitesData", allSitesData);
   //
   // const { data: sitePvForecastData2, error: sitePvForecastError2 } = useSWR<SitesPvForecast>(
   //   `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId2}`,

@@ -282,138 +282,138 @@ const SitesMap: React.FC<SitesMapProps> = ({
     });
 
     // GSPs
-    Array.from(aggregatedSitesData.gsps.values())?.forEach((gsp) => {
-      const gspSource = map.getSource(`gsp-${gsp.label}`) as unknown as
-        | mapboxgl.GeoJSONSource
-        | undefined;
-      let capacityLayer =
-        (map.getLayer(`Capacity-${gsp.label}`) as unknown as CircleLayer) || undefined;
-      let generationLayer =
-        (map.getLayer(`Generation-${gsp.label}`) as unknown as CircleLayer) || undefined;
-
-      if (capacityLayer)
-        map.setLayoutProperty(
-          `Capacity-${gsp.label}`,
-          "visibility",
-          aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
-        );
-
-      if (gspSource) {
-        setSourceData(gspSource, gsp);
-      } else {
-        addGroupSource(map, "gsp", gsp);
-      }
-
-      // Capacity ring
-      if (capacityLayer) {
-        map.setPaintProperty(
-          `Capacity-${gsp.label}`,
-          "circle-radius",
-          Math.round(gsp.capacity * 5)
-        );
-      } else {
-        map.addLayer({
-          id: `Capacity-${gsp.label}`,
-          type: "circle",
-          source: `gsp-${gsp.label}`,
-          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
-          paint: {
-            "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-            "circle-stroke-width": 1,
-            "circle-opacity": 0,
-            "circle-radius": Math.round(gsp.capacity * 5)
-          }
-        });
-      }
-
-      // Generation inner circle
-      if (generationLayer) {
-        map.setPaintProperty(
-          `Generation-${gsp.label}`,
-          "circle-radius",
-          Math.round(gsp.expectedPV * 5)
-        );
-      } else {
-        map.addLayer({
-          id: `Generation-${gsp.label}`,
-          type: "circle",
-          source: `gsp-${gsp.label}`,
-          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
-          paint: {
-            "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-            "circle-radius": Math.round(gsp.expectedPV * 5),
-            "circle-opacity": 0.5
-          }
-        });
-      }
-    });
+    // Array.from(aggregatedSitesData.gsps.values())?.forEach((gsp) => {
+    //   const gspSource = map.getSource(`gsp-${gsp.label}`) as unknown as
+    //     | mapboxgl.GeoJSONSource
+    //     | undefined;
+    //   let capacityLayer =
+    //     (map.getLayer(`Capacity-${gsp.label}`) as unknown as CircleLayer) || undefined;
+    //   let generationLayer =
+    //     (map.getLayer(`Generation-${gsp.label}`) as unknown as CircleLayer) || undefined;
+    //
+    //   if (capacityLayer)
+    //     map.setLayoutProperty(
+    //       `Capacity-${gsp.label}`,
+    //       "visibility",
+    //       aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
+    //     );
+    //
+    //   if (gspSource) {
+    //     setSourceData(gspSource, gsp);
+    //   } else {
+    //     addGroupSource(map, "gsp", gsp);
+    //   }
+    //
+    //   // Capacity ring
+    //   if (capacityLayer) {
+    //     map.setPaintProperty(
+    //       `Capacity-${gsp.label}`,
+    //       "circle-radius",
+    //       Math.round(gsp.capacity * 5)
+    //     );
+    //   } else {
+    //     map.addLayer({
+    //       id: `Capacity-${gsp.label}`,
+    //       type: "circle",
+    //       source: `gsp-${gsp.label}`,
+    //       // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+    //       paint: {
+    //         "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //         "circle-stroke-width": 1,
+    //         "circle-opacity": 0,
+    //         "circle-radius": Math.round(gsp.capacity * 5)
+    //       }
+    //     });
+    //   }
+    //
+    //   // Generation inner circle
+    //   if (generationLayer) {
+    //     map.setPaintProperty(
+    //       `Generation-${gsp.label}`,
+    //       "circle-radius",
+    //       Math.round(gsp.expectedPV * 5)
+    //     );
+    //   } else {
+    //     map.addLayer({
+    //       id: `Generation-${gsp.label}`,
+    //       type: "circle",
+    //       source: `gsp-${gsp.label}`,
+    //       // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+    //       paint: {
+    //         "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //         "circle-radius": Math.round(gsp.expectedPV * 5),
+    //         "circle-opacity": 0.5
+    //       }
+    //     });
+    //   }
+    // });
 
     // Regions
-    Array.from(aggregatedSitesData.regions.values())?.forEach((region) => {
-      const regionSource = map.getSource(`region-${region.label}`) as unknown as
-        | mapboxgl.GeoJSONSource
-        | undefined;
-      let capacityLayer =
-        (map.getLayer(`Capacity-${region.label}`) as unknown as CircleLayer) || undefined;
-      let generationLayer =
-        (map.getLayer(`Generation-${region.label}`) as unknown as CircleLayer) || undefined;
-
-      if (capacityLayer)
-        map.setLayoutProperty(
-          `Capacity-${region.label}`,
-          "visibility",
-          aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
-        );
-
-      if (regionSource) {
-        setSourceData(regionSource, region);
-      } else {
-        addGroupSource(map, "region", region);
-      }
-
-      // Capacity ring
-      if (capacityLayer) {
-        map.setPaintProperty(
-          `Capacity-${region.label}`,
-          "circle-radius",
-          Math.round(region.capacity)
-        );
-      } else {
-        map.addLayer({
-          id: `Capacity-${region.label}`,
-          type: "circle",
-          source: `region-${region.label}`,
-          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-          paint: {
-            "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-            "circle-stroke-width": 1,
-            "circle-opacity": 0,
-            "circle-radius": Math.round(region.capacity)
-          }
-        });
-      }
-
-      // Generation inner circle
-      if (generationLayer) {
-        map.setPaintProperty(
-          `Generation-${region.label}`,
-          "circle-radius",
-          Math.round(region.expectedPV)
-        );
-      } else {
-        map.addLayer({
-          id: `Generation-${region.label}`,
-          type: "circle",
-          source: `region-${region.label}`,
-          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-          paint: {
-            "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-            "circle-radius": Math.round(region.expectedPV),
-            "circle-opacity": 0.5
-          }
-        });
-      }
-    });
+    // Array.from(aggregatedSitesData.regions.values())?.forEach((region) => {
+    //   const regionSource = map.getSource(`region-${region.label}`) as unknown as
+    //     | mapboxgl.GeoJSONSource
+    //     | undefined;
+    //   let capacityLayer =
+    //     (map.getLayer(`Capacity-${region.label}`) as unknown as CircleLayer) || undefined;
+    //   let generationLayer =
+    //     (map.getLayer(`Generation-${region.label}`) as unknown as CircleLayer) || undefined;
+    //
+    //   if (capacityLayer)
+    //     map.setLayoutProperty(
+    //       `Capacity-${region.label}`,
+    //       "visibility",
+    //       aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
+    //     );
+    //
+    //   if (regionSource) {
+    //     setSourceData(regionSource, region);
+    //   } else {
+    //     addGroupSource(map, "region", region);
+    //   }
+    //
+    //   // Capacity ring
+    //   if (capacityLayer) {
+    //     map.setPaintProperty(
+    //       `Capacity-${region.label}`,
+    //       "circle-radius",
+    //       Math.round(region.capacity)
+    //     );
+    //   } else {
+    //     map.addLayer({
+    //       id: `Capacity-${region.label}`,
+    //       type: "circle",
+    //       source: `region-${region.label}`,
+    //       // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+    //       paint: {
+    //         "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //         "circle-stroke-width": 1,
+    //         "circle-opacity": 0,
+    //         "circle-radius": Math.round(region.capacity)
+    //       }
+    //     });
+    //   }
+    //
+    //   // Generation inner circle
+    //   if (generationLayer) {
+    //     map.setPaintProperty(
+    //       `Generation-${region.label}`,
+    //       "circle-radius",
+    //       Math.round(region.expectedPV)
+    //     );
+    //   } else {
+    //     map.addLayer({
+    //       id: `Generation-${region.label}`,
+    //       type: "circle",
+    //       source: `region-${region.label}`,
+    //       // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+    //       paint: {
+    //         "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //         "circle-radius": Math.round(region.expectedPV),
+    //         "circle-opacity": 0.5
+    //       }
+    //     });
+    //   }
+    // });
   };
 
   console.log(aggregationLevel);
@@ -427,6 +427,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       anchor: "bottom-right",
       maxWidth: "none"
     });
+
     // Sites
     Array.from(aggregatedSitesData.sites.values()).map((site) => {
       addGroupSource(map.current, "site", site);
@@ -438,7 +439,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
         source: `site-${site.label}`,
         // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.SITE,
         layout: {
-          visibility: aggregationLevel !== AGGREGATION_LEVELS.SITE ? "none" : "visible"
+          visibility: aggregationLevel === AGGREGATION_LEVELS.SITE ? "visible" : "none"
         },
         paint: {
           "circle-radius": Math.round(site.capacity * 5),
@@ -489,121 +490,123 @@ const SitesMap: React.FC<SitesMapProps> = ({
       map.current.on("click", `Capacity-${site.label}`, (e) => {
         console.log("Capacity click site");
         console.log("e.features", e.features?.[0]);
+        setClickedSiteGroupId(e.features?.[0].properties?.groupId);
       });
     });
 
     // GSPs
-    Array.from(aggregatedSitesData.gsps.values()).map((gsp) => {
-      addGroupSource(map.current, "gsp", gsp);
-
-      // Capacity ring
-      map.current.addLayer({
-        id: `Capacity-${gsp.label}`,
-        type: "circle",
-        source: `gsp-${gsp.label}`,
-        layout: {
-          visibility: aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
-        },
-        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
-        paint: {
-          "circle-radius": Math.round(gsp.capacity * 5),
-          "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-          "circle-stroke-width": 1,
-          "circle-opacity": 0
-        }
-      });
-
-      map.current.on("mousemove", `Capacity-${gsp.label}`, (e) => {
-        // Change the cursor style as a UI indicator.
-        map.current.getCanvas().style.cursor = "pointer";
-
-        const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
-          <span class="text-lg">${gsp.label}</span>
-        </div>`;
-
-        // Populate the popup and set its coordinates
-        // based on the feature found.
-        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
-      });
-
-      map.current.on("mouseleave", `Capacity-${gsp.label}`, () => {
-        map.current.getCanvas().style.cursor = "";
-        popup.remove();
-      });
-
-      // Generation inner circle
-      map.current.addLayer({
-        id: `Generation-${gsp.label}`,
-        type: "circle",
-        source: `gsp-${gsp.label}`,
-        layout: {
-          visibility: aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
-        },
-        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
-        paint: {
-          "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-          "circle-radius": Math.round(gsp.expectedPV * 5),
-          "circle-opacity": 0.5
-        }
-      });
-    });
+    // Array.from(aggregatedSitesData.gsps.values()).map((gsp) => {
+    //   addGroupSource(map.current, "gsp", gsp);
+    //
+    //   // Capacity ring
+    //   map.current.addLayer({
+    //     id: `Capacity-${gsp.label}`,
+    //     type: "circle",
+    //     source: `gsp-${gsp.label}`,
+    //     layout: {
+    //       visibility: aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
+    //     },
+    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+    //     paint: {
+    //       "circle-radius": Math.round(gsp.capacity * 5),
+    //       "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //       "circle-stroke-width": 1,
+    //       "circle-opacity": 0
+    //     }
+    //   });
+    //
+    //   map.current.on("mousemove", `Capacity-${gsp.label}`, (e) => {
+    //     // Change the cursor style as a UI indicator.
+    //     map.current.getCanvas().style.cursor = "pointer";
+    //
+    //     const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
+    //       <span class="text-lg">${gsp.label}</span>
+    //     </div>`;
+    //
+    //     // Populate the popup and set its coordinates
+    //     // based on the feature found.
+    //     popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+    //   });
+    //
+    //   map.current.on("mouseleave", `Capacity-${gsp.label}`, () => {
+    //     map.current.getCanvas().style.cursor = "";
+    //     popup.remove();
+    //   });
+    //
+    //   // Generation inner circle
+    //   map.current.addLayer({
+    //     id: `Generation-${gsp.label}`,
+    //     type: "circle",
+    //     source: `gsp-${gsp.label}`,
+    //     layout: {
+    //       visibility: aggregationLevel !== AGGREGATION_LEVELS.GSP ? "none" : "visible"
+    //     },
+    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+    //     paint: {
+    //       "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //       "circle-radius": Math.round(gsp.expectedPV * 5),
+    //       "circle-opacity": 0.5
+    //     }
+    //   });
+    // });
 
     // Regions
-    Array.from(aggregatedSitesData.regions.values()).map((region) => {
-      addGroupSource(map.current, "region", region);
+    // Array.from(aggregatedSitesData.regions.values()).map((region) => {
+    //   addGroupSource(map.current, "region", region);
+    //
+    //   // Capacity ring
+    //   map.current.addLayer({
+    //     id: `Capacity-${region.label}`,
+    //     type: "circle",
+    //     source: `region-${region.label}`,
+    //     layout: {
+    //       visibility: aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
+    //     },
+    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+    //     paint: {
+    //       "circle-radius": Math.round(region.capacity * 5),
+    //       "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //       "circle-stroke-width": 1,
+    //       "circle-opacity": 0
+    //     }
+    //   });
+    //
+    //   map.current.on("mousemove", `Capacity-${region.label}`, (e) => {
+    //     // Change the cursor style as a UI indicator.
+    //     map.current.getCanvas().style.cursor = "pointer";
+    //
+    //     const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
+    //       <span class="text-lg">${region.label}</span>
+    //     </div>`;
+    //
+    //     // Populate the popup and set its coordinates
+    //     // based on the feature found.
+    //     popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+    //   });
+    //
+    //   // Generation inner circle
+    //   map.current.addLayer({
+    //     id: `Generation-${region.label}`,
+    //     type: "circle",
+    //     source: `region-${region.label}`,
+    //     layout: {
+    //       visibility: aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
+    //     },
+    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+    //     paint: {
+    //       "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
+    //       "circle-radius": Math.round(region.expectedPV * 5),
+    //       "circle-opacity": 0.5
+    //     }
+    //   });
+    //
+    //   map.current.on("mouseleave", `Capacity-${region.label}`, () => {
+    //     map.current.getCanvas().style.cursor = "";
+    //     popup.remove();
+    //   });
+    // });
 
-      // Capacity ring
-      map.current.addLayer({
-        id: `Capacity-${region.label}`,
-        type: "circle",
-        source: `region-${region.label}`,
-        layout: {
-          visibility: aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
-        },
-        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-        paint: {
-          "circle-radius": Math.round(region.capacity * 5),
-          "circle-stroke-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-          "circle-stroke-width": 1,
-          "circle-opacity": 0
-        }
-      });
-
-      map.current.on("mousemove", `Capacity-${region.label}`, (e) => {
-        // Change the cursor style as a UI indicator.
-        map.current.getCanvas().style.cursor = "pointer";
-
-        const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
-          <span class="text-lg">${region.label}</span>
-        </div>`;
-
-        // Populate the popup and set its coordinates
-        // based on the feature found.
-        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
-      });
-
-      // Generation inner circle
-      map.current.addLayer({
-        id: `Generation-${region.label}`,
-        type: "circle",
-        source: `region-${region.label}`,
-        layout: {
-          visibility: aggregationLevel !== AGGREGATION_LEVELS.REGION ? "none" : "visible"
-        },
-        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-        paint: {
-          "circle-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c",
-          "circle-radius": Math.round(region.expectedPV * 5),
-          "circle-opacity": 0.5
-        }
-      });
-
-      map.current.on("mouseleave", `Capacity-${region.label}`, () => {
-        map.current.getCanvas().style.cursor = "";
-        popup.remove();
-      });
-    });
-
+    // Latest PV
     // map.current.addSource("latestPV", {
     //   type: "geojson",
     //   data: forecastGeoJson
@@ -642,6 +645,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
     //   }
     // });
   };
+
   // return <div>Empty</div>;
 
   return (

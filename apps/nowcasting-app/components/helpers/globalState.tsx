@@ -63,7 +63,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     zoom: 5,
     autoZoom: false,
     showSiteCount: undefined,
-    aggregationLevel: AGGREGATION_LEVELS.REGION,
+    aggregationLevel: AGGREGATION_LEVELS.SITE,
     sortBy: SORT_BY.CAPACITY,
     show4hView:
       process.env.NODE_ENV === "development" ||
