@@ -8,7 +8,15 @@ import {
   SitesDownArrow,
   SitesUpArrow
 } from "../../icons/icons";
-import { CombinedSitesData, SitesPvActual, SitesPvForecast, Site, AllSites } from "../../types";
+import {
+  CombinedSitesData,
+  SitesPvActual,
+  SitesPvForecast,
+  Site,
+  AllSites,
+  AggregatedSitesDatum,
+  AggregatedSitesDataGroupMap
+} from "../../types";
 import useGlobalState from "../../helpers/globalState";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { SORT_BY } from "../../../constant";
@@ -47,7 +55,7 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
 //Tables will also show generation MW value over installed capacity. If we have truths, use truths, if we have forecast, use forecast given a specific time.
 
 type TableDataProps = {
-  rows: any[]; // TODO: add types to these table rows
+  rows: AggregatedSitesDatum[];
 };
 
 const TableData: React.FC<TableDataProps> = ({ rows }) => {
@@ -117,7 +125,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
 export const AggregatedDataTable: React.FC<{
   className: string;
   title: string;
-  tableData: any;
+  tableData: AggregatedSitesDatum[];
 }> = ({ className, title, tableData }) => {
   return (
     <>

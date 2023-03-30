@@ -30,6 +30,7 @@ export type GlobalStateType = {
   timeNow: string;
   intervals: any[];
   clickedGspId?: number;
+  clickedSiteGroupId?: string;
   forecastCreationTime?: string;
   view: VIEWS;
   aggregationLevel: AGGREGATION_LEVELS;
@@ -51,6 +52,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     timeNow: get30MinNow(),
     intervals: [],
     clickedGspId: undefined,
+    clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
     view: VIEWS.SOLAR_SITES,
     visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],

@@ -1,5 +1,5 @@
 import React from "react";
-import { AGGREGATION_LEVELS } from "../../../constant";
+import { AGGREGATION_LEVEL_MIN_ZOOM, AGGREGATION_LEVELS } from "../../../constant";
 import useGlobalState from "../../helpers/globalState";
 import { Dispatch, SetStateAction } from "react";
 import { classNames } from "../../helpers/utils";
@@ -39,15 +39,15 @@ const AggregationButton: React.FC<AggregationLevelProps> = ({
 
   if (autoSetting) {
     let zoomLevel = "";
-    if (zoom <= 5) {
+    if (zoom < AGGREGATION_LEVEL_MIN_ZOOM.REGION) {
       aggregation = AGGREGATION_LEVELS.NATIONAL;
       setAggregationFunc(aggregation);
       zoomLevel = "National";
-    } else if (zoom > 5 && zoom < 7) {
+    } else if (zoom < AGGREGATION_LEVEL_MIN_ZOOM.GSP) {
       aggregation = AGGREGATION_LEVELS.REGION;
       setAggregationFunc(aggregation);
       zoomLevel = "Region";
-    } else if (zoom >= 7 && zoom <= 8.5) {
+    } else if (zoom < AGGREGATION_LEVEL_MIN_ZOOM.SITE) {
       aggregation = AGGREGATION_LEVELS.GSP;
       setAggregationFunc(aggregation);
       zoomLevel = "Grid Supply Point";
