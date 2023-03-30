@@ -48,11 +48,12 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
 
 type TableDataProps = {
   rows: any[]; // TODO: add types to these table rows
+  setClickedSite: Dispatch<SetStateAction<number | undefined>>;
 };
 
-const TableData: React.FC<TableDataProps> = ({ rows }) => {
+const TableData: React.FC<TableDataProps> = ({ rows, setClickedSite }) => {
   const [sortBy, setSortBy] = useGlobalState("sortBy");
-
+  const [selectedSite] = useGlobalState("selectedSite");
   const sortFn = (a: any, b: any) => {
     if (sortBy === SORT_BY.CAPACITY) {
       return b.capacity - a.capacity;
@@ -67,6 +68,10 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
     return b.label - a.label;
   };
 
+  const unselectedSiteClass = `transition duration-200 ease-out hover:ease-in hover:bg-ocf-gray-700 cursor-pointer`;
+
+  const selectedSiteClass = `bg-ocf-gray-800 cursor-pointer`;
+
   return (
     <>
       <div className="h-52 overflow-y-scroll">
@@ -74,37 +79,51 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
           const mostAccurateGeneration = site.actualPV || site.expectedPV;
           return (
             <>
-              <div key={site.label} className="flex flex-col bg-ocf-delta-950">
-                <div className="flex flex-row justify-between text-sm">
-                  <div className="ml-10 w-80">
-                    <div className="py-3 text-white font-bold text-sm">{site.label}</div>
-                  </div>
-                  <div className="flex flex-row">
-                    <div
-                      className="text-white w-32
-                         justify-center py-3 pr-10 font-bold flex flex-row text-sm"
-                    >
-                      <p>
-                        {Number(site.aggregatedYield).toFixed()}
-                        <span className="ocf-gray-400 text-xs">%</span>
-                      </p>
+              <div
+                className="mb-0.5 bg-ocf-delta-950 cursor-pointer relative  w-full 
+              transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in"
+              >
+                <div
+                  key={site.label}
+                  onClick={() => console.log(site.label)}
+                  className={`flex flex-col`}
+                >
+                  <div className="flex flex-row justify-between text-sm">
+                    <div className="ml-10 w-80">
+                      <div className="py-3 text-white font-bold text-sm">{site.label}</div>
                     </div>
-                    <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
-                      {Number(mostAccurateGeneration).toFixed(mostAccurateGeneration < 10 ? 1 : 0)}{" "}
-                      / {Number(site.capacity).toFixed()}
-                      <span className="text-ocf-gray-400 text-xs font-thin pt-1">KW</span>
+                    <div className="flex flex-row">
+                      <div
+                        className="text-white w-32
+                         justify-center py-3 pr-10 font-bold flex flex-row text-sm"
+                      >
+                        <p>
+                          {Number(site.aggregatedYield).toFixed()}
+                          <span className="ocf-gray-400 text-xs">%</span>
+                        </p>
+                      </div>
+                      <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
+                        {Number(mostAccurateGeneration).toFixed(
+                          mostAccurateGeneration < 10 ? 1 : 0
+                        )}{" "}
+                        / {Number(site.capacity).toFixed()}
+                        <span className="text-ocf-gray-400 text-xs font-thin pt-1">KW</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-end justify-end flex-row-reverse bg-ocf-delta-950 mb-0.5">
-                <div className="bg-ocf-yellow h-2.5" style={{ width: `2px` }}></div>
                 <div
-                  className="bg-ocf-yellow h-1"
-                  style={{
-                    width: `${Number(site.aggregatedYield).toFixed()}%`
-                  }}
-                ></div>
+                  className="flex items-end justify-end flex-row-reverse relative w-full 
+               mb-0.5"
+                >
+                  <div className="bg-ocf-yellow h-2.5" style={{ width: `2px` }}></div>
+                  <div
+                    className="bg-ocf-yellow h-1"
+                    style={{
+                      width: `${Number(site.aggregatedYield).toFixed()}%`
+                    }}
+                  ></div>
+                </div>
               </div>
             </>
           );
