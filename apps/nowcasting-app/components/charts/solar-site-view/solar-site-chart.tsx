@@ -267,8 +267,8 @@ const SolarSiteChart: FC<{
     }
   }
   const allSitesYield = Array.from(sitesTableData.national.values());
-  const nationalPVActual = allSitesYield[0].actualPV;
-  const nationalPVExpected = allSitesYield[0].expectedPV;
+  const nationalPVActual = allSitesYield[0].actualPV || 0;
+  const nationalPVExpected = allSitesYield[0].expectedPV || 0;
   const allSitesSelectedTime = formatISODateString(selectedTime);
   const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
   // if () return <div>failed to load</div>;
