@@ -267,11 +267,10 @@ const SolarSiteChart: FC<{
     }
   }
   const allSitesYield = Array.from(sitesTableData.national.values());
-  const nationalPVActual = allSitesYield[0].actualPV || 0;
-  const nationalPVExpected = allSitesYield[0].expectedPV || 0;
+  const nationalPVActual = allSitesYield[0]?.actualPV || undefined;
+  const nationalPVExpected = allSitesYield[0]?.expectedPV || undefined;
   const allSitesSelectedTime = formatISODateString(selectedTime);
   const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
-  // if () return <div>failed to load</div>;
 
   if (!combinedSitesData.sitesPvForecastData || !combinedSitesData.sitesPvActualData)
     return (
@@ -296,8 +295,8 @@ const SolarSiteChart: FC<{
           <div className="flex justify-between flex-2 my-2 px-6">
             <div className="pr-8">
               <ForecastWithActualPV
-                forecast={`${nationalPVExpected.toFixed(1)}`}
-                pv={`${nationalPVActual.toFixed(1)}`}
+                forecast={`${nationalPVExpected?.toFixed(1)}`}
+                pv={`${nationalPVActual?.toFixed(1)}`}
                 tip={`PV Actual / OCF Forecast`}
                 sites={true}
                 time={allSitesChartDateTime}
