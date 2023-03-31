@@ -47,6 +47,15 @@ export const convertISODateStringToLondonTime = (date: string) => {
   return date_london_time_str;
 };
 
+export const convertToLocaleDateString = (date: string) => {
+  const localeDatetime = new Date(date);
+  if (isNaN(localeDatetime.getTime())) {
+    throw new Error(`Invalid date: ${date}`);
+  }
+  localeDatetime.setMinutes(localeDatetime.getMinutes() - localeDatetime.getTimezoneOffset());
+  return localeDatetime.toISOString();
+};
+
 export const formatISODateStringHuman = (date: string) => {
   // Change date to nice human readable format.
   // Note that this converts the string to Europe London Time

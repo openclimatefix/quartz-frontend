@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import {
   convertISODateStringToLondonTime,
+  convertToLocaleDateString,
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
   getRounded4HoursAgoString,
@@ -114,7 +115,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
   const [view] = useGlobalState("view");
-  const fourHoursFromNow = new Date(timeNow);
+  const currentTime = convertToLocaleDateString(new Date().toISOString()).slice(0, 16);
+  const fourHoursFromNow = new Date(currentTime);
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
   function prettyPrintYNumberWithCommas(
@@ -161,6 +163,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
+  const getTimeOfInterestWithTimeZone = (timeOfInterest: string) => {
+    return (
+      new Date(timeOfInterest).getTime() - new Date(timeOfInterest).getTimezoneOffset() * 60000
+    );
+  };
   return (
     <div style={{ position: "relative", width: "100%", paddingBottom: "240px" }}>
       <div
@@ -186,7 +193,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             onClick={(e?: { activeLabel?: string }) => {
               if (setTimeOfInterest && e?.activeLabel) {
                 view === VIEWS.SOLAR_SITES
-                  ? setTimeOfInterest(new Date(Number(e.activeLabel)).toISOString())
+                  ? setTimeOfInterest(
+                      new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
+                    )
                   : setTimeOfInterest(e.activeLabel);
               }
             }}
@@ -273,14 +282,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
-              x={view === VIEWS.SOLAR_SITES ? new Date(timeOfInterest).getTime() : timeOfInterest}
+              x={
+                view === VIEWS.SOLAR_SITES
+                  ? getTimeOfInterestWithTimeZone(timeOfInterest)
+                  : timeOfInterest
+              }
               stroke="white"
               strokeWidth={2}
               xAxisId={"x-axis"}
               label={
                 <CustomizedLabel
                   className={`text-sm ${
-                    (!deltaView && timeNow !== timeOfInterest) || (deltaView && isGSP)
+                    (!deltaView && currentTime !== timeOfInterest) || (deltaView && isGSP)
                       ? "hidden"
                       : ""
                   }`}
@@ -290,12 +303,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             />
             <ReferenceLine
-              x={view === VIEWS.SOLAR_SITES ? new Date(timeNow).getTime() : timeNow}
+              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
               stroke="white"
               strokeWidth={2}
               xAxisId={"x-axis"}
               strokeDasharray="3 3"
-              className={timeNow !== timeOfInterest ? "" : "hidden"}
+              className={currentTime !== timeOfInterest ? "" : "hidden"}
               label={
                 deltaView ? undefined : (
                   <CustomizedLabel
@@ -414,7 +427,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         const computedValue =
                           (key === "DELTA" &&
                             !show4hView &&
-                            `${data["formattedDate"]}:00.000Z` >= timeNow) ||
+                            `${data["formattedDate"]}:00.000Z` >= currentTime) ||
                           (show4hView &&
                             `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
                             ? "-"

@@ -11,7 +11,7 @@ import {
   SitesPvActual,
   SitesPvForecast
 } from "../types";
-import { formatISODateString, getDeltaBucket } from "../helpers/utils";
+import { convertToLocaleDateString, formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 import { DELTA_BUCKET } from "../../constant";
 
@@ -94,7 +94,7 @@ const useFormatChartDataSites = ({
         const formattedDate = getDatetimeUtc(dataPoint);
         if (!chartMap[formattedDate]) {
           chartMap[formattedDate] = {
-            formattedDate: new Date(formattedDate).getTime().toString(),
+            formattedDate: new Date(convertToLocaleDateString(formattedDate)).getTime().toString(),
             ...sitePvData
           };
         } else {
