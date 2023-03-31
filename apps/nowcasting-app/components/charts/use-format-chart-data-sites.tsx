@@ -151,7 +151,12 @@ const useFormatChartDataSites = ({
       //   }
       // }
 
-      return Object.values(chartMap);
+      // Filter out data points without forecast data
+      const filteredData = Object.values(chartMap).filter((datum) => {
+        return datum.FORECAST !== undefined || datum.PAST_FORECAST !== undefined;
+      });
+
+      return filteredData;
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
