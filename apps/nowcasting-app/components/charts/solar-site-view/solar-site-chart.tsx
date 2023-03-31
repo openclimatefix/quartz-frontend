@@ -1,28 +1,21 @@
-import React, { FC, useMemo, useState } from "react";
+import React, { FC } from "react";
 import RemixLine from "../remix-line";
-import Line from "../remix-line";
-import useSWR from "swr";
-import { AGGREGATION_LEVELS, API_PREFIX } from "../../../constant";
-import ForecastHeader from "../forecast-header";
+import { AGGREGATION_LEVELS } from "../../../constant";
 import useGlobalState from "../../helpers/globalState";
-import useFormatChartData from "../use-format-chart-data";
 import {
-  getRounded4HoursAgoString,
-  formatISODateString,
   convertISODateStringToLondonTime,
-  formatISODateStringHuman
+  formatISODateString,
+  getRounded4HoursAgoString,
+  getRoundedTickBoundary
 } from "../../helpers/utils";
-import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW } from "../../../constant";
-import useHotKeyControlChart from "../../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
 import { AggregatedSitesCombinedData, CombinedSitesData } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
-import { ForecastWithActualPV, NextForecast } from "../forecast-header/ui";
+import { ForecastWithActualPV } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
 
@@ -113,40 +106,29 @@ const SolarSiteChart: FC<{
   const chartData = useFormatChartDataSites({
     allSitesData: combinedSitesData.allSitesData,
     pvForecastData: combinedSitesData.sitesPvForecastData,
-    // fourHourData: national4HourData,
-    // pvRealDayInData,
     pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
   // TODO: this currently only works for sites;
   //  need to add a helper function to filter sites by group to feed into here
+  const selectedSiteData = combinedSitesData.allSitesData?.filter(
+    (site) => site.site_uuid === clickedSiteGroupId
+  );
+  const selectedSiteCapacity = selectedSiteData?.[0]?.installed_capacity_kw || 0;
   const filteredChartData = useFormatChartDataSites({
-    allSitesData: combinedSitesData.allSitesData?.filter(
-      (site) => site.site_uuid === clickedSiteGroupId
-    ),
+    allSitesData: selectedSiteData,
     pvForecastData: combinedSitesData.sitesPvForecastData,
-    // fourHourData: national4HourData,
-    // pvRealDayInData,
     pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
 
-  const cumulativeCapacity = combinedSitesData.allSitesData?.reduce(
-    (acc, site) => acc + site.installed_capacity_kw,
-    0
-  );
-  const forecastPV = chartData?.reduce(
-    (acc, site) => acc + (site.FORECAST || 0) + (site.PAST_FORECAST || 0),
-    0
-  );
+  let yMax = Number(aggregatedSitesData.national.get("National")?.capacity);
+  const yMax_levels = [
+    1, 2, 3, 4, 6, 8, 9, 20, 28, 36, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450,
+    600
+  ];
+  yMax = getRoundedTickBoundary(yMax, yMax_levels);
 
-  const forecastPVMW = forecastPV / 1000;
-
-  const actualPV = chartData?.reduce((acc, site) => acc + (site.GENERATION_UPDATED || 0), 0);
-  const actualPVMW = actualPV / 1000;
-
-  // TABLE DATA MANIPULATION
-  // site level
   const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
     const siteForecast = combinedSitesData.sitesPvForecastData.find(
       (fc) => fc.site_uuid === site_uuid
@@ -233,11 +215,10 @@ const SolarSiteChart: FC<{
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
-            yMax={Math.round(Number(cumulativeCapacity) / 20)}
+            yMax={yMax}
             visibleLines={visibleLines}
           />
         </div>
-        {/* <span>{clickedSiteGroupId || "No site group selected"}</span> */}
         {clickedSiteGroupId && (
           <>
             <ForecastHeaderSite
@@ -261,26 +242,13 @@ const SolarSiteChart: FC<{
                 timeOfInterest={selectedTime}
                 setTimeOfInterest={setSelectedTime}
                 data={filteredChartData}
-                yMax={Math.round(Number(cumulativeCapacity) / 20)}
+                yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
                 visibleLines={visibleLines}
               />
             </div>
           </>
         )}
       </div>
-      {/*{clickedGspId && (*/}
-      {/*  <GspPvRemixChart*/}
-      {/*    close={() => {*/}
-      {/*      setClickedGspId(undefined);*/}
-      {/*    }}*/}
-      {/*    setTimeOfInterest={setSelectedTime}*/}
-      {/*    selectedTime={selectedTime}*/}
-      {/*    gspId={clickedGspId}*/}
-      {/*    timeNow={formatISODateString(timeNow)}*/}
-      {/*    resetTime={resetTime}*/}
-      {/*    visibleLines={visibleLines}*/}
-      {/*  ></GspPvRemixChart>*/}
-      {/*)}*/}
 
       <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "" : "hidden"}

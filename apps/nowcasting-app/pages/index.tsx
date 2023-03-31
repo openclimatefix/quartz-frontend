@@ -280,7 +280,7 @@ export default function Home() {
     `${SITES_API_PREFIX}/sites`,
     axiosFetcher
   );
-  const slicedSitesData = allSitesData?.site_list.slice(0, 50) || [];
+  const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
   const siteUuidsString = siteUuids?.join(",");
   // const siteUuidsString = userSites?.join(",");

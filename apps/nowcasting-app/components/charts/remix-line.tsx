@@ -1,21 +1,19 @@
 import React, { FC } from "react";
 import {
+  Bar,
+  CartesianGrid,
   ComposedChart,
   Line,
-  Bar,
-  Brush,
   Rectangle,
-  CartesianGrid,
-  XAxis,
-  YAxis,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
+  XAxis,
+  YAxis
 } from "recharts";
 import {
   convertISODateStringToLondonTime,
   dateToLondonDateTimeString,
-  formatISODateStringHuman,
   formatISODateStringHumanNumbersOnly,
   getRounded4HoursAgoString,
   getRoundedTickBoundary
@@ -23,6 +21,7 @@ import {
 import { theme } from "../../tailwind.config";
 import useGlobalState from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
+
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
@@ -129,9 +128,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
       showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-  function prettyPrintXdate(x: string) {
-    if (Number(x) > 0) {
-      return new Date(Number(x)).toISOString().slice(11, 16).replace("T", " ");
+  function prettyPrintXdate(x: string | number) {
+    if (typeof x === "number") {
+      return convertISODateStringToLondonTime(new Date(x).toISOString());
     }
     return convertISODateStringToLondonTime(x + ":00+00:00");
   }
@@ -205,6 +204,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
               interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
             />
+
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
@@ -220,10 +220,24 @@ const RemixLine: React.FC<RemixLineProps> = ({
               hide={true}
             />
             <YAxis
-              tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val)}
+              tickFormatter={
+                view === VIEWS.SOLAR_SITES
+                  ? undefined
+                  : (val, i) => prettyPrintYNumberWithCommas(val)
+              }
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
               domain={[0, yMax]}
+              label={{
+                value: `Generation (KW)`,
+                angle: 270,
+                position: "outsideLeft",
+                fill: "white",
+                style: { fontSize: "12px" },
+                offset: 0,
+                dx: -20,
+                dy: 0
+              }}
             />
             {deltaView && (
               <>
