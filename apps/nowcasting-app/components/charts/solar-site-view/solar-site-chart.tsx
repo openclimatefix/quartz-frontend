@@ -24,6 +24,7 @@ import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { ForecastWithActualPV, NextForecast } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
+import ForecastHeaderSite from "./forecast-header";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -168,6 +169,11 @@ const SolarSiteChart: FC<{
     );
   };
 
+  const getSiteName = (site_uuid: string) => {
+    const site = combinedSitesData.allSitesData?.find((s) => s.site_uuid === clickedSiteGroupId);
+    return site?.client_site_id || "";
+  };
+
   const allSitesYield = Array.from(aggregatedSitesData.national.values());
   const nationalPVActual = allSitesYield[0]?.actualPV || 0;
   const nationalPVExpected = allSitesYield[0]?.expectedPV || 0;
@@ -232,31 +238,50 @@ const SolarSiteChart: FC<{
           />
         </div>
         <span>{clickedSiteGroupId || "No site group selected"}</span>
-        <div className="h-60 mt-4 mb-10">
-          <RemixLine
-            resetTime={resetTime}
-            timeNow={formatISODateString(timeNow)}
-            timeOfInterest={selectedTime}
-            setTimeOfInterest={setSelectedTime}
-            data={filteredChartData}
-            yMax={Math.round(Number(cumulativeCapacity) / 20)}
-            visibleLines={visibleLines}
-          />
-        </div>
-        {/*{clickedGspId && (*/}
-        {/*  <GspPvRemixChart*/}
-        {/*    close={() => {*/}
-        {/*      setClickedGspId(undefined);*/}
-        {/*    }}*/}
-        {/*    setTimeOfInterest={setSelectedTime}*/}
-        {/*    selectedTime={selectedTime}*/}
-        {/*    gspId={clickedGspId}*/}
-        {/*    timeNow={formatISODateString(timeNow)}*/}
-        {/*    resetTime={resetTime}*/}
-        {/*    visibleLines={visibleLines}*/}
-        {/*  ></GspPvRemixChart>*/}
-        {/*)}*/}
+        {clickedSiteGroupId && (
+          <>
+            <ForecastHeaderSite
+              forecast={
+                getExpectedPowerGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) ||
+                "0"
+              }
+              pvActual={
+                getPvActualGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) || "0"
+              }
+              time={allSitesChartDateTime}
+              onClose={() => {
+                setClickedSiteGroupId(undefined);
+              }}
+              title={getSiteName(clickedSiteGroupId) || "No site name for this site group"}
+            ></ForecastHeaderSite>
+            <div className="h-60 mt-4 mb-10">
+              <RemixLine
+                resetTime={resetTime}
+                timeNow={formatISODateString(timeNow)}
+                timeOfInterest={selectedTime}
+                setTimeOfInterest={setSelectedTime}
+                data={filteredChartData}
+                yMax={Math.round(Number(cumulativeCapacity) / 20)}
+                visibleLines={visibleLines}
+              />
+            </div>
+          </>
+        )}
       </div>
+      {/*{clickedGspId && (*/}
+      {/*  <GspPvRemixChart*/}
+      {/*    close={() => {*/}
+      {/*      setClickedGspId(undefined);*/}
+      {/*    }}*/}
+      {/*    setTimeOfInterest={setSelectedTime}*/}
+      {/*    selectedTime={selectedTime}*/}
+      {/*    gspId={clickedGspId}*/}
+      {/*    timeNow={formatISODateString(timeNow)}*/}
+      {/*    resetTime={resetTime}*/}
+      {/*    visibleLines={visibleLines}*/}
+      {/*  ></GspPvRemixChart>*/}
+      {/*)}*/}
+
       <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "" : "hidden"}
         title={"National"}
