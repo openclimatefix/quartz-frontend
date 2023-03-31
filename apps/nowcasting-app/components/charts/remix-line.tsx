@@ -421,7 +421,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         <div className="pr-4">
                           {formatISODateStringHumanNumbersOnly(formattedDate)}{" "}
                         </div>
-                        <div>MW</div>
+                        <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
                     </ul>
                   </div>
