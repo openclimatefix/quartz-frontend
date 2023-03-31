@@ -197,7 +197,7 @@ const SolarSiteChart: FC<{
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto mb-7">
+      <div className="flex-auto mb-2">
         <div className="flex content-between bg-ocf-gray-800 h-auto">
           <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
             All Sites
@@ -237,7 +237,7 @@ const SolarSiteChart: FC<{
             visibleLines={visibleLines}
           />
         </div>
-        <span>{clickedSiteGroupId || "No site group selected"}</span>
+        {/* <span>{clickedSiteGroupId || "No site group selected"}</span> */}
         {clickedSiteGroupId && (
           <>
             <ForecastHeaderSite
@@ -287,7 +287,7 @@ const SolarSiteChart: FC<{
         title={"National"}
         tableData={Array.from(aggregatedSitesData.national.values())}
       />
-      <AggregatedDataTable
+      {/* <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
         title={"Region"}
         tableData={Array.from(aggregatedSitesData.regions.values())}
@@ -296,7 +296,7 @@ const SolarSiteChart: FC<{
         className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
         title={"GSP"}
         tableData={Array.from(aggregatedSitesData.gsps.values())}
-      />
+      /> */}
       <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
         title={"Sites"}

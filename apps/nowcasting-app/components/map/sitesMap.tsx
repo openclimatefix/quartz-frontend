@@ -705,7 +705,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-              <Slider aggregation={aggregationLevel} setAggregation={setAggregationLevel} />
+              {/* <Slider aggregation={aggregationLevel} setAggregation={setAggregationLevel} /> */}
               {/* <ShowSiteCount /> */}
             </>
           )}
