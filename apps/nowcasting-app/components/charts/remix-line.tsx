@@ -41,7 +41,7 @@ export type ChartData = {
 };
 
 const toolTiplabels: Record<string, string> = {
-  // GENERATION: "PV Live estimate",
+  GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Actual",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
@@ -51,7 +51,7 @@ const toolTiplabels: Record<string, string> = {
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
-  // GENERATION: "white",
+  GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
   "4HR_FORECAST": orange,
@@ -213,7 +213,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
               interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
             />
-
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
@@ -234,6 +233,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   ? undefined
                   : (val, i) => prettyPrintYNumberWithCommas(val)
               }
+              yAxisId={"y-axis"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
               domain={[0, yMax]}
@@ -263,7 +263,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   ticks={[deltaYMax, deltaYMax / 2, 0, -deltaYMax / 2, -deltaYMax]}
                   tickCount={5}
                   tickLine={false}
-                  yAxisId="delta"
+                  yAxisId={"delta"}
+                  scale={"auto"}
                   orientation="right"
                   label={{
                     value: `Delta (MW)`,
@@ -277,7 +278,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   }}
                   domain={[-deltaYMax, deltaYMax]}
                 />
-                <ReferenceLine y={0} stroke="white" strokeWidth={0.1} yAxisId={"delta"} />
+                <ReferenceLine
+                  yAxisId={"delta"}
+                  xAxisId={"x-axis"}
+                  y={0}
+                  stroke="white"
+                  strokeWidth={0.1}
+                />
               </>
             )}
 
@@ -289,7 +296,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
               stroke="white"
               strokeWidth={2}
+              yAxisId={"y-axis"}
               xAxisId={"x-axis"}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               label={
                 <CustomizedLabel
                   className={`text-sm ${
@@ -306,7 +315,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
               x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
               stroke="white"
               strokeWidth={2}
+              yAxisId={"y-axis"}
               xAxisId={"x-axis"}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               strokeDasharray="3 3"
               className={currentTime !== timeOfInterest ? "" : "hidden"}
               label={
@@ -336,6 +347,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   type="monotone"
                   dataKey="4HR_FORECAST"
                   dot={false}
+                  yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   strokeDasharray="5 5"
                   strokeDashoffset={3}
@@ -347,6 +359,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   type="monotone"
                   dataKey="4HR_PAST_FORECAST"
                   dot={false}
+                  yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
@@ -360,6 +373,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="GENERATION"
               dot={false}
               xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
               stroke="black"
               strokeWidth={2}
               strokeDasharray="5 5"
@@ -371,6 +385,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={2}
               stroke="black"
               xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
               dot={false}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
             />
@@ -380,6 +395,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               connectNulls={true}
               xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
               stroke={yellow} //yellow
               strokeWidth={2}
               hide={!visibleLines.includes("PAST_FORECAST")}
@@ -389,6 +405,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="FORECAST"
               dot={false}
               xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
               strokeDasharray="5 5"
               stroke={yellow} //yellow
               strokeWidth={2}
@@ -414,6 +431,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         if (key === "DELTA" && !deltaView) return null;
                         if (typeof value !== "number") return null;
                         if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
+                          return null;
+                        if (key.includes("4HR") && (!show4hView || !visibleLines.includes(key)))
                           return null;
                         const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
                           ? "font-semibold"

@@ -126,156 +126,136 @@ export default function Home() {
     else return allForecastData.data ? allForecastData : bareForecastData;
   };
 
-  // const { data: nationalForecastData, error: nationalForecastError } = useSWR<ForecastData>(
-  //   `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  // const { data: pvRealDayInData, error: pvRealDayInError } = useSWR<PvRealData>(
-  //   `${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  // const { data: pvRealDayAfterData, error: pvRealDayAfterError } = useSWR<PvRealData>(
-  //   `${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  // const { data: national4HourData, error: national4HourError } = useSWR<National4HourData>(
-  //   show4hView
-  //     ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-  //     : null,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  // const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
-  //   `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  // const { data: allGspRealData, error: allGspRealError } = useSWR<AllGspRealData>(
-  //   `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  //
-  // const currentYields =
-  //   allGspRealData?.map((datum) => {
-  //     const gspYield = datum.gspYields.find((yieldDatum, index) => {
-  //       return yieldDatum.datetimeUtc === `${selectedTime}:00+00:00`;
-  //     });
-  //     return {
-  //       gspId: datum.gspId,
-  //       gspRegion: datum.regionName,
-  //       gspCapacity: datum.installedCapacityMw,
-  //       yield: gspYield?.solarGenerationKw || 0
-  //     };
-  //   }) || [];
-  // const gspDeltas = useMemo(() => {
-  //   let tempGspDeltas = new Map();
-  //
-  //   for (let i = 0; i < currentYields.length; i++) {
-  //     const currentYield = currentYields[i];
-  //     let gspForecastData = allGspForecastData?.forecasts[i];
-  //     if (gspForecastData?.location.gspId !== currentYield.gspId) {
-  //       gspForecastData = allGspForecastData?.forecasts.find((gspForecastDatum) => {
-  //         return gspForecastDatum.location.gspId === currentYield.gspId;
-  //       });
-  //     }
-  //     const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
-  //       return forecastValue.targetTime === `${selectedTime}:00+00:00`;
-  //     });
-  //     const isFutureOrNoYield = `${selectedTime}:00.000Z` >= timeNow || !currentYield.yield;
-  //     const delta = isFutureOrNoYield
-  //       ? 0
-  //       : currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
-  //     const deltaNormalized = isFutureOrNoYield
-  //       ? 0
-  //       : (currentYield.yield / 1000 -
-  //           (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
-  //           currentYield.gspCapacity || 0;
-  //     const deltaBucket = getDeltaBucket(delta);
-  //     tempGspDeltas.set(currentYield.gspId, {
-  //       gspId: currentYield.gspId,
-  //       gspRegion: currentYield.gspRegion,
-  //       gspCapacity: currentYield.gspCapacity,
-  //       currentYield: currentYield.yield / 1000,
-  //       forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
-  //       delta,
-  //       deltaPercentage:
-  //         (currentYield.yield /
-  //           1000 /
-  //           (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
-  //         100,
-  //       deltaNormalized,
-  //       deltaBucket: deltaBucket,
-  //       deltaBucketKey: DELTA_BUCKET[deltaBucket]
-  //     });
-  //   }
-  //   console.log("gspDeltas calculated");
-  //   console.log(
-  //     "gspDeltas",
-  //     Array.from(tempGspDeltas)
-  //       .filter((gspDelta) => gspDelta[1].delta > 0)
-  //       .map((gspDelta, index) => {
-  //         const delta = gspDelta[1].delta;
-  //         return delta;
-  //       })
-  //   );
-  //   return tempGspDeltas;
-  // }, [allGspForecastData, allGspRealData, selectedTime]);
+  const { data: nationalForecastData, error: nationalForecastError } = useSWR<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: pvRealDayInData, error: pvRealDayInError } = useSWR<PvRealData>(
+    `${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: pvRealDayAfterData, error: pvRealDayAfterError } = useSWR<PvRealData>(
+    `${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: national4HourData, error: national4HourError } = useSWR<National4HourData>(
+    show4hView
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      : null,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+  const { data: allGspRealData, error: allGspRealError } = useSWR<AllGspRealData>(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
+    axiosFetcherAuth,
+    {
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
 
-  // // code for site specific aggregated values
-  // const dnoAggregations = sitesArray.reduce((acc, group) => {
-  //   let { installed_capacity_kw, dno } = group
-  //   return { ...acc, [dno]: [...(acc[dno] || []), installed_capacity_kw] }
-  // }, {}
-  // )
+  const currentYields =
+    allGspRealData?.map((datum) => {
+      const gspYield = datum.gspYields.find((yieldDatum, index) => {
+        return yieldDatum.datetimeUtc === `${selectedTime}:00+00:00`;
+      });
+      return {
+        gspId: datum.gspId,
+        gspRegion: datum.regionName,
+        gspCapacity: datum.installedCapacityMw,
+        yield: gspYield?.solarGenerationKw || 0
+      };
+    }) || [];
+  const gspDeltas = useMemo(() => {
+    let tempGspDeltas = new Map();
 
-  // const gspAggregations = sitesArray.reduce((acc, group) => {
-  //   let { site_uuid, gsp } = group
-  //   return { ...acc, [gsp]: [...(acc[gsp] || []), site_uuid] }
-  // }, {}
-  // )
+    for (let i = 0; i < currentYields.length; i++) {
+      const currentYield = currentYields[i];
+      let gspForecastData = allGspForecastData?.forecasts[i];
+      if (gspForecastData?.location.gspId !== currentYield.gspId) {
+        gspForecastData = allGspForecastData?.forecasts.find((gspForecastDatum) => {
+          return gspForecastDatum.location.gspId === currentYield.gspId;
+        });
+      }
+      const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
+        return forecastValue.targetTime === `${selectedTime}:00+00:00`;
+      });
+      const isFutureOrNoYield = `${selectedTime}:00.000Z` >= timeNow || !currentYield.yield;
+      const delta = isFutureOrNoYield
+        ? 0
+        : currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
+      const deltaNormalized = isFutureOrNoYield
+        ? 0
+        : (currentYield.yield / 1000 -
+            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
+            currentYield.gspCapacity || 0;
+      const deltaBucket = getDeltaBucket(delta);
+      tempGspDeltas.set(currentYield.gspId, {
+        gspId: currentYield.gspId,
+        gspRegion: currentYield.gspRegion,
+        gspCapacity: currentYield.gspCapacity,
+        currentYield: currentYield.yield / 1000,
+        forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
+        delta,
+        deltaPercentage:
+          (currentYield.yield /
+            1000 /
+            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
+          100,
+        deltaNormalized,
+        deltaBucket: deltaBucket,
+        deltaBucketKey: DELTA_BUCKET[deltaBucket]
+      });
+    }
+    console.log("gspDeltas calculated");
+    console.log(
+      "gspDeltas",
+      Array.from(tempGspDeltas)
+        .filter((gspDelta) => gspDelta[1].delta > 0)
+        .map((gspDelta, index) => {
+          const delta = gspDelta[1].delta;
+          return delta;
+        })
+    );
+    return tempGspDeltas;
+  }, [allGspForecastData, allGspRealData, selectedTime]);
 
-  // console.log(dnoAggregations)
-  // console.log(gspAggregations)
-
-  // const combinedData: CombinedData = {
-  //   nationalForecastData,
-  //   pvRealDayInData,
-  //   pvRealDayAfterData,
-  //   national4HourData,
-  //   allGspForecastData,
-  //   allGspRealData,
-  //   gspDeltas
-  // };
-  // const combinedErrors: CombinedErrors = {
-  //   nationalForecastError,
-  //   pvRealDayInError,
-  //   pvRealDayAfterError,
-  //   national4HourError,
-  //   allGspForecastError,
-  //   allGspRealError
-  // };
+  const combinedData: CombinedData = {
+    nationalForecastData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    national4HourData,
+    allGspForecastData,
+    allGspRealData,
+    gspDeltas
+  };
+  const combinedErrors: CombinedErrors = {
+    nationalForecastError,
+    pvRealDayInError,
+    pvRealDayAfterError,
+    national4HourError,
+    allGspForecastError,
+    allGspRealError
+  };
 
   // Sites API data
-  const selectedSiteId = "725a8670-d012-474d-b901-1179f43e7182";
-  const selectedSiteId2 = "9570f807-fc9e-47e9-b5e3-5915ddddef3d";
-  const userSites = [selectedSiteId, selectedSiteId2];
-  // const userSites = [selectedSiteId];
   const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
     `${SITES_API_PREFIX}/sites`,
     axiosFetcher
@@ -283,44 +263,26 @@ export default function Home() {
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
   const siteUuidsString = siteUuids?.join(",");
-  // const siteUuidsString = userSites?.join(",");
   const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast, any>(
     `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
     axiosFetcher,
     {
       isPaused: () => !siteUuidsString?.length,
-      // dedupingInterval: 10000,
+      dedupingInterval: 10000,
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
-  // console.log("sitesUuids", siteUuids);
-  // console.log("siteUuidsString", siteUuidsString);
 
-  // console.log("allSitesData", allSitesData);
-  //
-  // const { data: sitePvForecastData2, error: sitePvForecastError2 } = useSWR<SitesPvForecast>(
-  //   `${SITES_API_PREFIX}/sites/pv_forecast/${selectedSiteId2}`,
-  //   axiosFetcher,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
   const { data: sitesPvActualData, error: sitePvActualError } = useSWR<SitesPvActual>(
     `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
     axiosFetcher,
     {
       isPaused: () => !siteUuidsString?.length,
+      dedupingInterval: 10000,
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
-  // const { data: sitePvActualData2, error: sitePvActualError2 } = useSWR<SitesPvActual>(
-  //   `${SITES_API_PREFIX}/sites/pv_actual/${selectedSiteId2}`,
-  //   axiosFetcher,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-  //allSitesData?.site_list.filter((site) => userSites.includes(site.site_uuid)) || undefined,
+
   const sitesData: CombinedSitesData = {
     allSitesData: slicedSitesData,
     sitesPvForecastData: sitePvForecastData?.filter((d): d is SitePvForecast => !!d) || [],
@@ -342,12 +304,12 @@ export default function Home() {
       <div className="h-full relative pt-16">
         <Header view={view} setView={setView} />
         <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
-          {/*<PvLatestMap*/}
-          {/*  className={currentView(VIEWS.FORECAST) ? "" : "hidden"}*/}
-          {/*  getForecastsData={useGetForecastsData}*/}
-          {/*  activeUnit={activeUnit}*/}
-          {/*  setActiveUnit={setActiveUnit}*/}
-          {/*/>*/}
+          <PvLatestMap
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+            getForecastsData={useGetForecastsData}
+            activeUnit={activeUnit}
+            setActiveUnit={setActiveUnit}
+          />
           <SitesMap
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
             getForecastsData={useGetForecastsData}
@@ -357,32 +319,32 @@ export default function Home() {
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
-          {/*<DeltaMap*/}
-          {/*  className={currentView(VIEWS.DELTA) ? "" : "hidden"}*/}
-          {/*  getForecastsData={useGetForecastsData}*/}
-          {/*  combinedData={combinedData}*/}
-          {/*  combinedErrors={combinedErrors}*/}
-          {/*  activeUnit={activeUnit}*/}
-          {/*  setActiveUnit={setActiveUnit}*/}
-          {/*/>*/}
+          <DeltaMap
+            className={currentView(VIEWS.DELTA) ? "" : "hidden"}
+            getForecastsData={useGetForecastsData}
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
+            activeUnit={activeUnit}
+            setActiveUnit={setActiveUnit}
+          />
         </div>
 
         <SideLayout>
-          {/*<PvRemixChart*/}
-          {/*  combinedData={combinedData}*/}
-          {/*  combinedErrors={combinedErrors}*/}
-          {/*  className={currentView(VIEWS.FORECAST) ? "" : "hidden"}*/}
-          {/*/>*/}
+          <PvRemixChart
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+          />
           <SolarSiteChart
             combinedSitesData={sitesData}
             aggregatedSitesData={aggregatedSitesData}
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
           />
-          {/*<DeltaViewChart*/}
-          {/*  combinedData={combinedData}*/}
-          {/*  combinedErrors={combinedErrors}*/}
-          {/*  className={currentView(VIEWS.DELTA) ? "" : "hidden"}*/}
-          {/*/>*/}
+          <DeltaViewChart
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
+            className={currentView(VIEWS.DELTA) ? "" : "hidden"}
+          />
         </SideLayout>
       </div>
     </Layout>
