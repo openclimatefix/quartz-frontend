@@ -20,7 +20,7 @@ import {
   getRoundedTickBoundary
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
@@ -115,7 +115,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
   const [view] = useGlobalState("view");
-  const currentTime = convertToLocaleDateString(new Date().toISOString()).slice(0, 16);
+  const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
+  const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
@@ -289,9 +290,26 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
+              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
+              stroke="white"
+              strokeWidth={2}
+              yAxisId={"y-axis"}
+              xAxisId={"x-axis"}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              strokeDasharray="3 3"
+              className={currentTime !== timeOfInterest ? "" : "hidden"}
+              label={
+                <CustomizedLabel
+                  className={`fill-amber-400 cursor-pointer text-sm ${isGSP ? "hidden" : ""}`}
+                  value={"LIVE"}
+                  onClick={resetTime}
+                />
+              }
+            />
+            <ReferenceLine
               x={
                 view === VIEWS.SOLAR_SITES
-                  ? getTimeOfInterestWithTimeZone(timeOfInterest)
+                  ? new Date(localeTimeOfInterest).getTime()
                   : timeOfInterest
               }
               stroke="white"
@@ -309,25 +327,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   value={prettyPrintXdate(timeOfInterest)}
                   solidLine={true}
                 ></CustomizedLabel>
-              }
-            />
-            <ReferenceLine
-              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
-              stroke="white"
-              strokeWidth={2}
-              yAxisId={"y-axis"}
-              xAxisId={"x-axis"}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-              strokeDasharray="3 3"
-              className={currentTime !== timeOfInterest ? "" : "hidden"}
-              label={
-                deltaView ? undefined : (
-                  <CustomizedLabel
-                    className={`fill-amber-400 cursor-pointer text-sm ${isGSP ? "hidden" : ""}`}
-                    value={"LIVE"}
-                    onClick={resetTime}
-                  />
-                )
               }
             />
             {deltaView && (
