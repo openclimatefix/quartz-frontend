@@ -164,11 +164,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
-  const getTimeOfInterestWithTimeZone = (timeOfInterest: string) => {
-    return (
-      new Date(timeOfInterest).getTime() - new Date(timeOfInterest).getTimezoneOffset() * 60000
-    );
-  };
   return (
     <div style={{ position: "relative", width: "100%", paddingBottom: "240px" }}>
       <div
