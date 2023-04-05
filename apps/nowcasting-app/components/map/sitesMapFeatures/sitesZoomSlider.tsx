@@ -4,15 +4,6 @@ import useGlobalState from "../../helpers/globalState";
 import { Dispatch, SetStateAction } from "react";
 import { classNames } from "../../helpers/utils";
 
-// type HeaderLinkProps = {
-//   url: string;
-//   text: string;
-//   className?: string;
-//   disabled?: boolean;
-//   currentView?: VIEWS;
-//   view?: VIEWS;
-//   setViewFunc?: Dispatch<SetStateAction<VIEWS>>;
-// };
 type AggregationLevelProps = {
   text: string;
   className?: string;

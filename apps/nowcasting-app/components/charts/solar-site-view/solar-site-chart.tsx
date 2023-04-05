@@ -65,44 +65,6 @@ const SolarSiteChart: FC<{
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const currentAggregation = (a: AGGREGATION_LEVELS) => a === aggregationLevel;
 
-  // const chartLimits = useMemo(
-  //   () =>
-  //     nationalForecastData && {
-  //       start: nationalForecastData[0].targetTime,
-  //       end: nationalForecastData[nationalForecastData.length - 1].targetTime
-  //     },
-  //   [nationalForecastData]
-  // );
-  // useHotKeyControlChart(chartLimits);
-
-  // const { data: pvRealDayInData, error: error2 } = useSWR<
-  //   {
-  //     datetimeUtc: string;
-  //     solarGenerationKw: number;
-  //   }[]
-  // >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
-  //   refreshInterval: 60 * 1000 * 5 // 5min
-  // });
-  //
-  // const { data: pvRealDayAfterData, error: error3 } = useSWR<
-  //   {
-  //     datetimeUtc: string;
-  //     solarGenerationKw: number;
-  //   }[]
-  // >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
-  //   refreshInterval: 60 * 1000 * 5 // 5min
-  // });
-  //
-  // const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-  //   show4hView
-  //     ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-  //     : null,
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: 60 * 1000 * 5 // 5min
-  //   }
-  // );
-
   const chartData = useFormatChartDataSites({
     allSitesData: combinedSitesData.allSitesData,
     pvForecastData: combinedSitesData.sitesPvForecastData,
