@@ -128,7 +128,7 @@ const SolarSiteChart: FC<{
 
   if (!combinedSitesData.sitesPvForecastData || !combinedSitesData.sitesPvActualData)
     return (
-      <div className="h-full flex">
+      <div className={`h-full flex ${className}`}>
         <Spinner></Spinner>
       </div>
     );

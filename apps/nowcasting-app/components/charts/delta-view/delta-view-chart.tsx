@@ -331,11 +331,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     national4HourError ||
     allGspForecastError
   )
-    return <div>Failed to load data.</div>;
+    return <div className={`h-full flex ${className}`}>Failed to load data.</div>;
 
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
-      <div className="h-full flex">
+      <div className={`h-full flex ${className}`}>
         <Spinner></Spinner>
       </div>
     );

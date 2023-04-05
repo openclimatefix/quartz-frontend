@@ -101,10 +101,10 @@ const PvRemixChart: FC<{
     national4HourError |
     allGspForecastError
   )
-    return <div>failed to load</div>;
+    return <div className={`${className}`}>failed to load</div>;
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
-      <div className="h-full flex">
+      <div className={`h-full flex ${className}`}>
         <Spinner></Spinner>
       </div>
     );
