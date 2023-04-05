@@ -54,7 +54,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     clickedGspId: undefined,
     clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
-    view: VIEWS.SOLAR_SITES,
+    view: VIEWS.FORECAST,
     visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
