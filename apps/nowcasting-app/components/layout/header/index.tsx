@@ -105,7 +105,6 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             currentView={view}
             setViewFunc={setView}
             text="Solar Sites"
-            disabled
           />
           <HeaderLink
             url="/"

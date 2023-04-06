@@ -7,24 +7,38 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, VIEWS } from "../constant";
+import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, SITES_API_PREFIX, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
 import useSWRImmutable from "swr/immutable";
 import {
   AllGspRealData,
+  AllSites,
   CombinedData,
   CombinedErrors,
+  CombinedSitesData,
   FcAllResData,
   ForecastData,
   GspAllForecastData,
   National4HourData,
-  PvRealData
+  PvRealData,
+  SitePvActual,
+  SitePvForecast,
+  SitesPvActual,
+  SitesPvForecast
 } from "../components/types";
-import { axiosFetcherAuth, formatISODateString, getDeltaBucket } from "../components/helpers/utils";
+import {
+  axiosFetcher,
+  axiosFetcherAuth,
+  formatISODateString,
+  getDeltaBucket
+} from "../components/helpers/utils";
 import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
+import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
+import SitesMap from "../components/map/sitesMap";
+import { useFormatSitesData } from "../components/hooks/useFormatSitesData";
 
 export default function Home() {
   useAndUpdateSelectedTime();
@@ -241,7 +255,50 @@ export default function Home() {
     allGspRealError
   };
 
+  // Sites API data
+  const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
+    `${SITES_API_PREFIX}/sites`,
+    axiosFetcher
+  );
+  const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
+  const siteUuids = slicedSitesData.map((site) => site.site_uuid);
+  const siteUuidsString = siteUuids?.join(",");
+  const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast, any>(
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+    axiosFetcher,
+    {
+      isPaused: () => !siteUuidsString?.length,
+      dedupingInterval: 10000,
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
+  const { data: sitesPvActualData, error: sitePvActualError } = useSWR<SitesPvActual>(
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    axiosFetcher,
+    {
+      isPaused: () => !siteUuidsString?.length,
+      dedupingInterval: 10000,
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
+  const sitesData: CombinedSitesData = {
+    allSitesData: slicedSitesData,
+    sitesPvForecastData: sitePvForecastData?.filter((d): d is SitePvForecast => !!d) || [],
+    sitesPvActualData: sitesPvActualData?.filter((d): d is SitePvActual => !!d) || []
+  };
+
+  const sitesErrors = {
+    allSitesError,
+    sitesPvForecastError: sitePvForecastError,
+    sitesPvActualError: sitePvActualError
+  };
+
   const currentView = (v: VIEWS) => v === view;
+
+  const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
+
   return (
     <Layout>
       <div className="h-full relative pt-16">
@@ -250,6 +307,15 @@ export default function Home() {
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
             getForecastsData={useGetForecastsData}
+            activeUnit={activeUnit}
+            setActiveUnit={setActiveUnit}
+          />
+          <SitesMap
+            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+            getForecastsData={useGetForecastsData}
+            sitesData={sitesData}
+            aggregatedSitesData={aggregatedSitesData}
+            sitesErrors={sitesErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
@@ -264,7 +330,16 @@ export default function Home() {
         </div>
 
         <SideLayout>
-          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
+          <PvRemixChart
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+          />
+          <SolarSiteChart
+            combinedSitesData={sitesData}
+            aggregatedSitesData={aggregatedSitesData}
+            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+          />
           <DeltaViewChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}

@@ -1,5 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { getDeltaBucketKeys, VIEWS } from "../../constant";
+import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS, SORT_BY } from "../../constant";
 import mapboxgl from "mapbox-gl";
 
 export function get30MinNow(offsetMinutes = 0) {
@@ -14,7 +14,6 @@ export function get30MinNow(offsetMinutes = 0) {
   date = getNext30MinSlot(date);
   return date.toISOString();
 }
-
 export function getNext30MinSlot(isoTime: Date) {
   if (isoTime.getMinutes() <= 30) {
     isoTime.setHours(isoTime.getHours());
@@ -27,19 +26,24 @@ export function getNext30MinSlot(isoTime: Date) {
 }
 
 export type GlobalStateType = {
-  selectedISOTime?: string;
+  selectedISOTime: string;
   timeNow: string;
   intervals: any[];
   clickedGspId?: number;
+  clickedSiteGroupId?: string;
   forecastCreationTime?: string;
   view: VIEWS;
+  aggregationLevel: AGGREGATION_LEVELS;
   visibleLines: string[];
   selectedBuckets: string[];
   maps: mapboxgl.Map[];
   lng: number;
   lat: number;
   zoom: number;
+  showSiteCount?: boolean;
   show4hView?: boolean;
+  sortBy: SORT_BY;
+  autoZoom: boolean;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -48,6 +52,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     timeNow: get30MinNow(),
     intervals: [],
     clickedGspId: undefined,
+    clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
     view: VIEWS.FORECAST,
     visibleLines: ["GENERATION", "GENERATION_UPDATED", "FORECAST", "PAST_FORECAST"],
@@ -56,6 +61,10 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lng: -2.3175601,
     lat: 54.70534432,
     zoom: 5,
+    autoZoom: false,
+    showSiteCount: undefined,
+    aggregationLevel: AGGREGATION_LEVELS.SITE,
+    sortBy: SORT_BY.CAPACITY,
     show4hView:
       process.env.NODE_ENV === "development" ||
       // Also hide on Staging/Preview deployments for now, only show on dev by default.

@@ -331,11 +331,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     national4HourError ||
     allGspForecastError
   )
-    return <div>Failed to load data.</div>;
+    return <div className={`h-full flex ${className}`}>Failed to load data.</div>;
 
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
-      <div className="h-full flex">
+      <div className={`h-full flex ${className}`}>
         <Spinner></Spinner>
       </div>
     );
@@ -355,7 +355,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           deltaview={true}
         ></ForecastHeader>
 
-        <div className="h-60 mt-4 mb-10">
+        <div className="h-60 mt-4 mb-6">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}

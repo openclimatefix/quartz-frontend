@@ -100,7 +100,7 @@ const GspPvRemixChart: FC<{
           pvTimeOnly={"9"}
           forecastNextTimeOnly={"9"}
         ></GSPDeltaForecastHeader>
-        <div className=" h-60 mt-8 ">
+        <div className="h-60 mt-4 mb-6">
           <RemixLine
             setTimeOfInterest={setTimeOfInterest}
             timeOfInterest={selectedTime}
@@ -136,7 +136,7 @@ const GspPvRemixChart: FC<{
           <span className="text-xs text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
-      <div className=" h-60 mt-8 ">
+      <div className="h-60 mt-4 mb-6">
         <RemixLine
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}

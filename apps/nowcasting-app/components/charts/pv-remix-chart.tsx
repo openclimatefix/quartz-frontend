@@ -13,7 +13,7 @@ import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
-import { ForecastData, ForecastValue } from "../types";
+import { CombinedData, CombinedErrors, ForecastData, ForecastValue } from "../types";
 import Tooltip from "../tooltip";
 import { ChartInfo } from "../../ChartInfo";
 
@@ -44,7 +44,12 @@ const LegendItem: FC<{
   );
 };
 
-const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) => {
+const PvRemixChart: FC<{
+  combinedData: CombinedData;
+  combinedErrors: CombinedErrors;
+  date?: string;
+  className?: string;
+}> = ({ combinedData, combinedErrors, className }) => {
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -53,13 +58,23 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const { data: nationalForecastData, error } = useSWR<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
+
+  const {
+    nationalForecastData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    national4HourData,
+    allGspForecastData,
+    allGspRealData,
+    gspDeltas
+  } = combinedData;
+  const {
+    nationalForecastError,
+    pvRealDayInError,
+    pvRealDayAfterError,
+    national4HourError,
+    allGspForecastError
+  } = combinedErrors;
 
   const chartLimits = useMemo(
     () =>
@@ -71,34 +86,6 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
   );
   useHotKeyControlChart(chartLimits);
 
-  const { data: pvRealDayInData, error: error2 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: pvRealDayAfterData, error: error3 } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`, axiosFetcherAuth, {
-    refreshInterval: 60 * 1000 * 5 // 5min
-  });
-
-  const { data: national4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
-    show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-      : null,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
-  );
-
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
     fourHourData: national4HourData,
@@ -107,10 +94,17 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
     timeTrigger: selectedTime
   });
 
-  if (error || error2 || error3 || pv4HourError) return <div>failed to load</div>;
+  if (
+    nationalForecastError |
+    pvRealDayInError |
+    pvRealDayAfterError |
+    national4HourError |
+    allGspForecastError
+  )
+    return <div className={`${className}`}>failed to load</div>;
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
-      <div className="h-full flex">
+      <div className={`h-full flex ${className}`}>
         <Spinner></Spinner>
       </div>
     );
@@ -130,7 +124,7 @@ const PvRemixChart: FC<{ date?: string; className?: string }> = ({ className }) 
           deltaview={false}
         ></ForecastHeader>
 
-        <div className="h-60 mt-4 mb-10">
+        <div className="h-60 mt-4 mb-6">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
