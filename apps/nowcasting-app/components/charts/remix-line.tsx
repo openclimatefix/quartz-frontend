@@ -77,7 +77,7 @@ const CustomizedLabel: FC<any> = ({
   solidLine,
   onClick
 }) => {
-  const yy = 230;
+  const yy = -9;
   return (
     <g>
       <line
@@ -87,13 +87,13 @@ const CustomizedLabel: FC<any> = ({
         fill="none"
         fillOpacity="1"
         x1={x}
-        y1={yy - 50}
+        y1={yy + 30}
         x2={x}
         y2={yy}
       ></line>
       <g className={`fill-white ${className || ""}`} onClick={onClick}>
-        <rect x={x - 28} y={yy} width="58" height="30" offset={offset} fill={"inherit"}></rect>
-        <text x={x + 1} y={yy + 21} fill="black" id="time-now" textAnchor="middle">
+        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
+        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
           {value}
         </text>
       </g>
@@ -157,7 +157,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
     deltaYMaxOverride ||
     getRoundedTickBoundary(Math.max(Number(deltaMax), 0 - Number(deltaMin)) || 0, deltaMaxTicks);
   const roundTickMax = deltaYMax % 1000 === 0;
-  const isGSP = deltaYMaxOverride && deltaYMaxOverride < 1000;
+  const isGSP = !!deltaYMaxOverride && deltaYMaxOverride < 1000;
   const now = new Date();
   const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
   const ticks = offsets.map((o) => {
@@ -165,7 +165,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   });
 
   return (
-    <div style={{ position: "relative", width: "100%", paddingBottom: "240px" }}>
+    <div style={{ position: "relative", width: "100%", paddingBottom: "270px" }}>
       <div
         style={{
           position: "absolute",
@@ -240,7 +240,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 fill: "white",
                 style: { fontSize: "12px" },
                 offset: 0,
-                dx: -20,
+                dx: -26,
                 dy: 0
               }}
             />
@@ -287,7 +287,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <ReferenceLine
               x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
               stroke="white"
-              strokeWidth={2}
+              strokeWidth={currentTime === timeOfInterest ? 2 : 1}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
@@ -295,7 +295,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               className={currentTime !== timeOfInterest ? "" : "hidden"}
               label={
                 <CustomizedLabel
-                  className={`fill-amber-400 cursor-pointer text-sm ${isGSP ? "hidden" : ""}`}
+                  className={`fill-amber-400 cursor-pointer text-sm`}
                   value={"LIVE"}
                   onClick={resetTime}
                 />
@@ -314,11 +314,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               label={
                 <CustomizedLabel
-                  className={`text-sm ${
-                    (!deltaView && currentTime !== timeOfInterest) || (deltaView && isGSP)
-                      ? "hidden"
-                      : ""
-                  }`}
+                  className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
                   value={prettyPrintXdate(timeOfInterest)}
                   solidLine={true}
                 ></CustomizedLabel>

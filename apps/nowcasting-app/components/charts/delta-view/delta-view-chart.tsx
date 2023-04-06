@@ -355,7 +355,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           deltaview={true}
         ></ForecastHeader>
 
-        <div className="h-60 mt-4 mb-10">
+        <div className="h-60 mt-4 mb-6">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
