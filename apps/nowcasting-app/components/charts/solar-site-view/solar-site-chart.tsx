@@ -235,20 +235,14 @@ const SolarSiteChart: FC<{
 
       <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
         <div
-          className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto${
+          className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto ${
             show4hView ? " pl-32" : ""
           }`}
         >
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
-              dashed
-              label={"PV live initial estimate"}
-              dataKey={`GENERATION`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              label={"PV live updated"}
+              label={"PV Actual"}
               dataKey={`GENERATION_UPDATED`}
             />
           </div>
@@ -259,13 +253,16 @@ const SolarSiteChart: FC<{
               label={"OCF Forecast"}
               dataKey={`FORECAST`}
             />
+          </div>
+          <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-yellow"}
               label={"OCF Final Forecast"}
               dataKey={`PAST_FORECAST`}
             />
           </div>
-          {show4hView && (
+        </div>
+        {/* {show4hView && (
             <div className={legendItemContainerClasses}>
               <LegendItem
                 iconClasses={"text-ocf-orange"}
@@ -279,9 +276,9 @@ const SolarSiteChart: FC<{
                 dataKey={`4HR_PAST_FORECAST`}
               />
             </div>
-          )}
-        </div>
-        <div className="flex-initial flex items-center pb-3">
+          )} */}
+
+        <div className="flex-initial flex items-center pb-6 pl-6">
           <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
             <InfoIcon />
           </Tooltip>
