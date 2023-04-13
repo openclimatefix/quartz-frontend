@@ -16,7 +16,6 @@ import {
   CombinedData,
   CombinedErrors,
   CombinedSitesData,
-  FcAllResData,
   ForecastData,
   GspAllForecastData,
   National4HourData,
@@ -90,41 +89,43 @@ export default function Home() {
   }, [lat, lng, zoom]);
 
   // Assuming first item in the array is the latest
-  const useGetForecastsData = (isNormalized: boolean) => {
-    const [forecastLoading, setForecastLoading] = useState(true);
-    const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
-    const bareForecastData = useSWRImmutable<FcAllResData>(
-      () => getAllForecastUrl(false, false),
-      axiosFetcherAuth,
-      {
-        onSuccess: (data) => {
-          if (data.forecasts?.length)
-            setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-          setForecastLoading(false);
-        }
-      }
-    );
-
-    const allForecastData = useSWR<FcAllResData>(
-      () => getAllForecastUrl(true, true),
-      axiosFetcherAuth,
-      {
-        refreshInterval: 1000 * 60 * 5, // 5min
-        isPaused: () => forecastLoading,
-        onSuccess: (data) => {
-          setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-        }
-      }
-    );
-    useEffect(() => {
-      if (!forecastLoading) {
-        allForecastData.mutate();
-      }
-    }, [forecastLoading]);
-
-    if (isNormalized) return allForecastData;
-    else return allForecastData.data ? allForecastData : bareForecastData;
-  };
+  // const useGetForecastsData = (isNormalized: boolean) => {
+  //   const [forecastLoading, setForecastLoading] = useState(true);
+  //   const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
+  //   // const bareForecastData = useSWRImmutable<FcAllResData>(
+  //   //   () => getAllForecastUrl(false, false),
+  //   //   axiosFetcherAuth,
+  //   //   {
+  //   //     onSuccess: (data) => {
+  //   //       if (data.forecasts?.length)
+  //   //         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+  //   //       setForecastLoading(false);
+  //   //     }
+  //   //   }
+  //   // );
+  //
+  //   const allForecastData = useSWR<GspAllForecastData>(
+  //     () => getAllForecastUrl(true, true),
+  //     axiosFetcherAuth,
+  //     {
+  //       refreshInterval: 1000 * 60 * 5, // 5min
+  //       // isPaused: () => forecastLoading,
+  //       onSuccess: (data) => {
+  //         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+  //       }
+  //     }
+  //   );
+  //   console.log("allForecastData", allForecastData);
+  //   // useEffect(() => {
+  //   //   if (!forecastLoading) {
+  //   //     allForecastData.mutate();
+  //   //   }
+  //   // }, [forecastLoading]);
+  //
+  //   // if (isNormalized) return allForecastData;
+  //   // else return allForecastData.data ? allForecastData : [];
+  //   return allForecastData?.data ? allForecastData : { data: { forecasts: [] } };
+  // };
 
   const { data: nationalForecastData, error: nationalForecastError } = useSWR<ForecastData>(
     `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
@@ -306,13 +307,13 @@ export default function Home() {
         <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
-            getForecastsData={useGetForecastsData}
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
           <SitesMap
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-            getForecastsData={useGetForecastsData}
             sitesData={sitesData}
             aggregatedSitesData={aggregatedSitesData}
             sitesErrors={sitesErrors}
@@ -321,7 +322,6 @@ export default function Home() {
           />
           <DeltaMap
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
-            getForecastsData={useGetForecastsData}
             combinedData={combinedData}
             combinedErrors={combinedErrors}
             activeUnit={activeUnit}

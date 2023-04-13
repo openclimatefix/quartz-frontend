@@ -29,7 +29,7 @@ export type FcAllResData = {
 type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
-  expectedPowerGenerationNormalized: null;
+  expectedPowerGenerationNormalized: number | null;
 };
 type ForecastData = {
   targetTime: string;

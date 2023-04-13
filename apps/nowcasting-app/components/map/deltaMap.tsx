@@ -44,7 +44,6 @@ const getRoundedPvPercent = (per: number, round: boolean = true) => {
 
 type DeltaMapProps = {
   className?: string;
-  getForecastsData: (isNormalized: boolean) => SWRResponse<FcAllResData, any>;
   combinedData: CombinedData;
   combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
@@ -53,8 +52,8 @@ type DeltaMapProps = {
 
 const DeltaMap: React.FC<DeltaMapProps> = ({
   className,
-  getForecastsData,
   combinedData,
+  combinedErrors,
   activeUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
@@ -63,11 +62,12 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   const isNormalized = activeUnit === ActiveUnit.percentage;
   const { gspDeltas } = combinedData;
 
-  const { data: initForecastData, error: forecastError } = getForecastsData(isNormalized);
   const forecastLoading = false;
+  const initForecastData = combinedData?.allGspForecastData;
+  const forecastError = combinedErrors?.allGspForecastError;
 
   const generateGeoJsonForecastData: (
-    forecastData?: FcAllResData,
+    forecastData?: GspAllForecastData,
     targetTime?: string,
     gspDeltas?: Map<string, number>
   ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
@@ -78,7 +78,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       ...gspShapeData,
       type: "FeatureCollection" as "FeatureCollection",
       features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = gspForecastData && gspForecastData[index];
+        const forecastDatum = gspForecastData && gspForecastData[index + 1];
         let selectedFCValue;
         if (gspForecastData && targetTime) {
           selectedFCValue = forecastDatum?.forecastValues.find(

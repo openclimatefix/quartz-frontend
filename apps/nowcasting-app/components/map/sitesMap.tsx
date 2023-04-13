@@ -49,7 +49,6 @@ const getRoundedPvPercent = (per: number, round: boolean = true) => {
 
 type SitesMapProps = {
   className?: string;
-  getForecastsData: (isNormalized: boolean) => SWRResponse<FcAllResData, any>;
   sitesData: CombinedSitesData;
   aggregatedSitesData: AggregatedSitesCombinedData;
   sitesErrors: any;
@@ -59,7 +58,6 @@ type SitesMapProps = {
 
 const SitesMap: React.FC<SitesMapProps> = ({
   className,
-  getForecastsData,
   sitesData,
   aggregatedSitesData,
   sitesErrors,
