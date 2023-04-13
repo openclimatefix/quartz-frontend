@@ -30,7 +30,7 @@ export const ForecastWithActualPV: React.FC<{
             <span className="text-black">{pv}</span>
             <span className="text-ocf-gray-300"> / </span>
             {forecast}
-            <span className="text-xs text-ocf-gray-300 font-normal">{sites ? "KW" : "GW"}</span>
+            <span className="text-xs text-ocf-gray-300 font-normal"> {sites ? "KW" : "GW"}</span>
           </p>
         </ForecastLabel>
       </div>
