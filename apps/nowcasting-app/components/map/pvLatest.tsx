@@ -75,7 +75,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     forecastData?: GspAllForecastData,
     targetTime?: string
   ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    const gspForecastData = forecastData?.forecasts;
+    const gspForecastData = forecastData?.forecasts || [];
     const gspShapeJson = gspShapeData as FeatureCollection;
     const forecastGeoJson = {
       ...gspShapeData,
