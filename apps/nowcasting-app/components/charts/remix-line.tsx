@@ -16,8 +16,10 @@ import {
   convertToLocaleDateString,
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
+  dateToLondonDateTimeOnlyString,
   getRounded4HoursAgoString,
-  getRoundedTickBoundary
+  getRoundedTickBoundary,
+  getTimeFromDate
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
@@ -78,6 +80,7 @@ const CustomizedLabel: FC<any> = ({
   onClick
 }) => {
   const yy = -9;
+
   return (
     <g>
       <line
@@ -100,6 +103,21 @@ const CustomizedLabel: FC<any> = ({
     </g>
   );
 };
+
+const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLine, onClick }) => {
+  const yy = -9;
+  return (
+    <g>
+      <g className={`fill-white ${className || ""}`} onClick={onClick}>
+        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
+        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
+          {value}
+        </text>
+      </g>
+    </g>
+  );
+};
+
 const RemixLine: React.FC<RemixLineProps> = ({
   timeOfInterest,
   data,
@@ -137,6 +155,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
     }
     return convertISODateStringToLondonTime(x + ":00+00:00");
   }
+  function prettyPrintDate(x: string | number) {
+    if (typeof x === "number") {
+      return dateToLondonDateTimeOnlyString(new Date(x));
+    }
+    return dateToLondonDateTimeOnlyString(new Date(x));
+  }
 
   const CustomBar = (props: { DELTA: number }) => {
     const { DELTA } = props;
@@ -161,6 +185,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const now = new Date();
   const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
   const ticks = offsets.map((o) => {
+    return new Date(now).setHours(o, 0, 0, 0);
+  });
+  const timeOffsets = [-10, 13, 37, 61];
+  const timeTicks = timeOffsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
@@ -212,16 +240,19 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
-              tickFormatter={prettyPrintXdate}
+              tickFormatter={prettyPrintDate}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
-              tickLine={true}
+              // ticks={timeTicks}
+              domain={[timeTicks[0], timeTicks[timeTicks.length - 1]]}
+              // interval={undefined}
               type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
-              orientation="top"
-              hide={true}
+              ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
+              // domain={view === VIEWS.SOLAR_SITES ? [timeTicks[0], timeTicks[timeTicks.length - 1]] : undefined}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
+              orientation="bottom"
+              tickMargin={-2}
+              hide={false}
             />
             <YAxis
               tickFormatter={
@@ -320,6 +351,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 ></CustomizedLabel>
               }
             />
+
             {deltaView && (
               <Bar
                 type="monotone"

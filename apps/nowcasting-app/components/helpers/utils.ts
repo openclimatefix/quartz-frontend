@@ -81,6 +81,16 @@ export const dateToLondonDateTimeString = (date: Date) => {
   return `${date_london}, ${date_london_time}`;
 };
 
+export const dateToLondonDateTimeOnlyString = (date: Date) => {
+  const date_london = date.toLocaleString("en-GB", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    timeZone: "Europe/London"
+  });
+  return date_london + " ";
+};
+
 export const formatISODateStringHumanNumbersOnly = (date: string) => {
   // Change date to nice human readable format.
   // Note that this converts the string to Europe London Time
