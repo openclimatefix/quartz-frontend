@@ -89,7 +89,7 @@ const useFormatChartData = ({
           pva,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION_UPDATED: Math.round(db.solarGenerationKw / 1000)
+            GENERATION_UPDATED: db.solarGenerationKw / 1000
           })
         )
       );
@@ -98,7 +98,7 @@ const useFormatChartData = ({
           pvIn,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION: Math.round(db.solarGenerationKw / 1000)
+            GENERATION: db.solarGenerationKw / 1000
           })
         )
       );
