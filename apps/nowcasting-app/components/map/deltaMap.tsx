@@ -71,8 +71,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     targetTime?: string,
     gspDeltas?: Map<string, number>
   ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    // Exclude first item as it's not representing gsp area
-    const gspForecastData = forecastData?.forecasts?.slice(1);
+    const gspForecastData = forecastData?.forecasts || [];
     const gspShapeJson = gspShapeData as FeatureCollection;
     const forecastGeoJson = {
       ...gspShapeData,
