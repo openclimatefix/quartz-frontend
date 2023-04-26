@@ -259,14 +259,14 @@ export default function Home() {
   // Sites API data
   const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
     `${SITES_API_PREFIX}/sites`,
-    axiosFetcher
+    axiosFetcherAuth
   );
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
   const siteUuidsString = siteUuids?.join(",");
   const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast, any>(
     `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
-    axiosFetcher,
+    axiosFetcherAuth,
     {
       isPaused: () => !siteUuidsString?.length,
       dedupingInterval: 10000,
@@ -276,7 +276,7 @@ export default function Home() {
 
   const { data: sitesPvActualData, error: sitePvActualError } = useSWR<SitesPvActual>(
     `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
-    axiosFetcher,
+    axiosFetcherAuth,
     {
       isPaused: () => !siteUuidsString?.length,
       dedupingInterval: 10000,
