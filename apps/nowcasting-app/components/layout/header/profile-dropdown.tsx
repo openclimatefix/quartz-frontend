@@ -2,7 +2,7 @@ import React, { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
 import pkg from "../../../package.json";
-import { classNames, formatISODateStringHumanNumbersOnly } from "../../helpers/utils";
+import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from "../../helpers/utils";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
@@ -15,7 +15,6 @@ interface IProfileDropDown {}
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [show4hView, setShow4hView] = useGlobalState("show4hView");
-  const isStaging = process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -91,7 +90,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
             <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
           </div>
           <div className="w-full border-t border-gray-300" />
-          {isStaging && (
+          {!isProduction && (
             <Menu.Item>
               {({ active }) => (
                 <div

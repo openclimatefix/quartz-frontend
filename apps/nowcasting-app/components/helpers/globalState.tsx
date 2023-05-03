@@ -1,6 +1,7 @@
 import { createGlobalState } from "react-hooks-global-state";
 import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS, SORT_BY } from "../../constant";
 import mapboxgl from "mapbox-gl";
+import { isProduction } from "./utils";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -65,11 +66,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.SITE,
     sortBy: SORT_BY.CAPACITY,
-    show4hView:
-      process.env.NODE_ENV === "development" ||
-      // Also hide on Staging/Preview deployments for now, only show on dev by default.
-      // (!!process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") ||
-      false
+    show4hView: !isProduction
   });
 
 export default useGlobalState;

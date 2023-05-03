@@ -29,7 +29,8 @@ import {
   axiosFetcher,
   axiosFetcherAuth,
   formatISODateString,
-  getDeltaBucket
+  getDeltaBucket,
+  isProduction
 } from "../components/helpers/utils";
 import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
@@ -312,14 +313,16 @@ export default function Home() {
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
-          <SitesMap
-            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-            sitesData={sitesData}
-            aggregatedSitesData={aggregatedSitesData}
-            sitesErrors={sitesErrors}
-            activeUnit={activeUnit}
-            setActiveUnit={setActiveUnit}
-          />
+          {!isProduction && (
+            <SitesMap
+              className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+              sitesData={sitesData}
+              aggregatedSitesData={aggregatedSitesData}
+              sitesErrors={sitesErrors}
+              activeUnit={activeUnit}
+              setActiveUnit={setActiveUnit}
+            />
+          )}
           <DeltaMap
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
             combinedData={combinedData}
@@ -335,11 +338,13 @@ export default function Home() {
             combinedErrors={combinedErrors}
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
           />
-          <SolarSiteChart
-            combinedSitesData={sitesData}
-            aggregatedSitesData={aggregatedSitesData}
-            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-          />
+          {!isProduction && (
+            <SolarSiteChart
+              combinedSitesData={sitesData}
+              aggregatedSitesData={aggregatedSitesData}
+              className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+            />
+          )}
           <DeltaViewChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}
