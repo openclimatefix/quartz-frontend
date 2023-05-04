@@ -5,8 +5,7 @@ import { Bucket, GspDeltaValue } from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 
-export const isProduction =
-  process.env.NODE_ENV === "production" || process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
+export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
