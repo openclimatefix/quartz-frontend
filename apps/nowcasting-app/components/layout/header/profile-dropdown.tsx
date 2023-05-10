@@ -15,6 +15,7 @@ interface IProfileDropDown {}
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const [largeScreenMode, setLargeScreenMode] = useGlobalState("largeScreenMode");
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -101,7 +102,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 >
                   <button
                     onClick={() => setShow4hView(!show4hView)}
-                    className="ml-3 text-sx  font-medium text-ocf-black-300 dark:text-gray-300"
+                    className="ml-3 text-xs  font-medium text-ocf-black-300"
                   >
                     {`${show4hView ? "Hide" : "Show"} 4-hour forecast`}
                   </button>
@@ -109,6 +110,44 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
               )}
             </Menu.Item>
           )}
+          <Menu.Item>
+            {({ active }) => (
+              <div
+                className={classNames(
+                  active ? "bg-gray-100" : "",
+                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                )}
+              >
+                {largeScreenMode && (
+                  // checkmark
+                  <span className="flex items-center">
+                    <svg
+                      className="w-4 h-4 mr-1 -mt-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </span>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setLargeScreenMode(!largeScreenMode);
+                  }}
+                  className="ml-2 text-xs font-medium text-ocf-black-300"
+                >
+                  {`${largeScreenMode ? "Disable" : "Enable"} large screen mode`}
+                </button>
+              </div>
+            )}
+          </Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <div

@@ -35,10 +35,15 @@ const LegendItem: FC<{
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center flex-1">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
-        <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
+      <button
+        className="text-left pl-1 max-w-full w-44 2xl:w-auto text-xs 2xl:text-base 2xl:tracking-wider 2xl:pb-1"
+        onClick={toggleLineVisibility}
+      >
+        <span className={`uppercase pl-1${isVisible ? " font-extrabold 2xl:font-semibold" : ""}`}>
+          {label}
+        </span>
       </button>
     </div>
   );
@@ -114,7 +119,7 @@ const PvRemixChart: FC<{
     setSelectedISOTime(time + ":00.000Z");
   };
   const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
+  const legendItemContainerClasses = "flex flex-initial flex-col lg:flex-row justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto mb-7">
@@ -149,12 +154,8 @@ const PvRemixChart: FC<{
           ></GspPvRemixChart>
         )}
       </div>
-      <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
-        <div
-          className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto${
-            show4hView ? " pl-32" : ""
-          }`}
-        >
+      <div className="flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
+        <div className={`flex flex-1 justify-around max-w-2xl flex-col pb-3 overflow-x-auto`}>
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}

@@ -13,7 +13,7 @@ export const ForecastWithActualPV: React.FC<{
   sites?: boolean;
 }> = ({ forecast, pv, time, tip, color = yellow, sites }) => {
   return (
-    <div className="flex flex-col m-auto h-10 justify-between">
+    <div className="flex flex-col m-auto h-10 2xl:h-14 justify-between">
       <div>
         <ForecastLabel
           tip={
@@ -24,19 +24,22 @@ export const ForecastWithActualPV: React.FC<{
         >
           <p
             // className={`text-lg font-semibold leading-none text-center text-${color}`}
-            className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
+            className={`text-lg 2xl:text-2xl font-semibold leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
             <span className="text-black">{pv}</span>
             <span className="text-ocf-gray-300"> / </span>
             {forecast}
-            <span className="text-xs text-ocf-gray-300 font-normal"> {sites ? "KW" : "GW"}</span>
+            <span className="text-xs 2xl:text-base text-ocf-gray-300 font-normal">
+              {" "}
+              {sites ? "KW" : "GW"}
+            </span>
           </p>
         </ForecastLabel>
       </div>
       <div className="flex items-center -ml-[2px]">
         <ClockIcon />
-        <p className="text-xs ml-0.5">{time}</p>
+        <p className="text-xs 2xl:text-base ml-0.5">{time}</p>
       </div>
     </div>
   );
@@ -49,7 +52,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
   color = yellow
 }) => {
   return (
-    <div className="flex flex-col m-auto h-10 justify-between">
+    <div className="flex flex-col m-auto h-10 2xl:h-14 justify-between">
       <ForecastLabel
         tip={
           <div className="w-28">
@@ -60,17 +63,17 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
         <div>
           <p
             // className={`text-lg font-semibold leading-none text-center text-${color}`}
-            className={`text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
+            className={`text-lg 2xl:text-2xl font-semibold leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
             {pv}
-            <span className="text-xs text-ocf-gray-300 font-normal"> GW</span>
+            <span className="text-xs 2xl:text-base text-ocf-gray-300 font-normal"> GW</span>
           </p>
         </div>
       </ForecastLabel>
       <div className="flex items-center -ml-[2px]">
         <ClockIcon />
-        <p className="text-xs ml-0.5">{time}</p>
+        <p className="text-xs 2xl:text-base ml-0.5">{time}</p>
       </div>
     </div>
   );
@@ -96,7 +99,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
 }) => {
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-white 2xl:text-3xl lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
       <div className="flex justify-between flex-2 my-2 px-6">

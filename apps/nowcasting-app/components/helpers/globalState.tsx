@@ -43,6 +43,7 @@ export type GlobalStateType = {
   zoom: number;
   showSiteCount?: boolean;
   show4hView?: boolean;
+  largeScreenMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
 };
@@ -66,7 +67,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.SITE,
     sortBy: SORT_BY.CAPACITY,
-    show4hView: !isProduction
+    show4hView: !isProduction,
+    largeScreenMode: false
   });
 
 export default useGlobalState;
