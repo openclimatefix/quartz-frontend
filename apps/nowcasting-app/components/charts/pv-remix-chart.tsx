@@ -38,10 +38,14 @@ const LegendItem: FC<{
     <div className="flex items-center flex-1">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
       <button
-        className="text-left pl-1 max-w-full w-44 2xl:w-auto text-xs 2xl:text-base 2xl:tracking-wider 2xl:pb-1"
+        className="inline-flex flex-1 text-left pl-1 max-w-full w-44 2xl:w-auto text-xs 2xl:text-base 2xl:tracking-wider 2xl:pb-1"
         onClick={toggleLineVisibility}
       >
-        <span className={`uppercase pl-1${isVisible ? " font-extrabold 2xl:font-semibold" : ""}`}>
+        <span
+          className={`block w-auto uppercase pl-1${
+            isVisible ? " font-extrabold 2xl:font-semibold" : ""
+          }`}
+        >
           {label}
         </span>
       </button>
@@ -119,7 +123,8 @@ const PvRemixChart: FC<{
     setSelectedISOTime(time + ":00.000Z");
   };
   const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = "flex flex-initial flex-col lg:flex-row justify-between";
+  const legendItemContainerClasses =
+    "flex flex-initial flex-col lg:flex-row 3xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex flex-col flex-auto">
@@ -157,7 +162,7 @@ const PvRemixChart: FC<{
         </div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-        <div className={`flex flex-1 justify-around max-w-2xl flex-col pb-3 overflow-x-auto`}>
+        <div className={`flex flex-1 justify-around flex-col 3xl:flex-row pb-3 overflow-x-auto`}>
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
