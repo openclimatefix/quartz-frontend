@@ -122,14 +122,14 @@ const PvRemixChart: FC<{
   const legendItemContainerClasses = "flex flex-initial flex-col lg:flex-row justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto mb-7">
+      <div className="flex flex-col flex-auto">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
           deltaview={false}
         ></ForecastHeader>
 
-        <div className="h-60 mt-4 mb-6">
+        <div className="flex-1 relative h-60 2xl:h-auto mt-4 mb-6">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -140,21 +140,23 @@ const PvRemixChart: FC<{
             visibleLines={visibleLines}
           />
         </div>
-        {clickedGspId && (
-          <GspPvRemixChart
-            close={() => {
-              setClickedGspId(undefined);
-            }}
-            setTimeOfInterest={setSelectedTime}
-            selectedTime={selectedTime}
-            gspId={clickedGspId}
-            timeNow={formatISODateString(timeNow)}
-            resetTime={resetTime}
-            visibleLines={visibleLines}
-          ></GspPvRemixChart>
-        )}
+        <div className="flex-1 flex flex-col relative h-60 2xl:h-auto">
+          {clickedGspId && (
+            <GspPvRemixChart
+              close={() => {
+                setClickedGspId(undefined);
+              }}
+              setTimeOfInterest={setSelectedTime}
+              selectedTime={selectedTime}
+              gspId={clickedGspId}
+              timeNow={formatISODateString(timeNow)}
+              resetTime={resetTime}
+              visibleLines={visibleLines}
+            ></GspPvRemixChart>
+          )}
+        </div>
       </div>
-      <div className="flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
+      <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
         <div className={`flex flex-1 justify-around max-w-2xl flex-col pb-3 overflow-x-auto`}>
           <div className={legendItemContainerClasses}>
             <LegendItem

@@ -57,7 +57,7 @@ const GspPvRemixChart: FC<{
       <div className="mt-8">
         {/* Header spacer */}
         <div className="h-16"></div>
-        <div className="h-60 flex">
+        <div className="h-60 flex flex-1">
           <Spinner />
         </div>
       </div>
@@ -100,43 +100,7 @@ const GspPvRemixChart: FC<{
           pvTimeOnly={"9"}
           forecastNextTimeOnly={"9"}
         ></GSPDeltaForecastHeader>
-        <div className="h-60 mt-4 mb-6">
-          <RemixLine
-            setTimeOfInterest={setTimeOfInterest}
-            timeOfInterest={selectedTime}
-            data={chartData}
-            yMax={yMax!}
-            timeNow={timeNow}
-            resetTime={resetTime}
-            visibleLines={visibleLines}
-            deltaView={deltaView}
-            deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
-          />
-        </div>
-      </>
-    );
-  }
-
-  return (
-    <>
-      <div className="bg-black">
-        <ForecastHeaderGSP
-          onClose={close}
-          title={gspInfo?.regionName || ""}
-          mwpercent={Math.round(pvPercentage)}
-          deltaView={deltaView}
-        >
-          <span className="font-semibold lg:text-lg md:text-lg text-med text-ocf-yellow-500">
-            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
-          </span>
-          <span className="font-semibold lg:text-lg md:text-lg text-med text-white">
-            {" "}
-            / {gspInfo?.installedCapacityMw}
-          </span>
-          <span className="text-xs text-ocf-gray-300"> MW</span>
-        </ForecastHeaderGSP>
-      </div>
-      <div className="h-60 mt-4 mb-6">
+        {/*<div className="h-60 mt-4 mb-6">*/}
         <RemixLine
           setTimeOfInterest={setTimeOfInterest}
           timeOfInterest={selectedTime}
@@ -148,7 +112,43 @@ const GspPvRemixChart: FC<{
           deltaView={deltaView}
           deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
         />
+        {/*</div>*/}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex-initial">
+        <ForecastHeaderGSP
+          onClose={close}
+          title={gspInfo?.regionName || ""}
+          mwpercent={Math.round(pvPercentage)}
+          deltaView={deltaView}
+        >
+          <span className="font-semibold text-base md:text-lg 2xl:text-2xl text-ocf-yellow-500">
+            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+          </span>
+          <span className="font-semibold text-base md:text-lg 2xl:text-2xl text-white">
+            {" "}
+            / {gspInfo?.installedCapacityMw}
+          </span>
+          <span className="text-xs md:text-base 2xl:text-lg text-ocf-gray-300"> MW</span>
+        </ForecastHeaderGSP>
       </div>
+      {/*<div className="h-60 mt-4 mb-6">*/}
+      <RemixLine
+        setTimeOfInterest={setTimeOfInterest}
+        timeOfInterest={selectedTime}
+        data={chartData}
+        yMax={yMax!}
+        timeNow={timeNow}
+        resetTime={resetTime}
+        visibleLines={visibleLines}
+        deltaView={deltaView}
+        deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
+      />
+      {/*</div>*/}
     </>
   );
 };

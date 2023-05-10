@@ -40,13 +40,15 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
   }
   return (
     <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">
-      <div className="flex justify-between text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm">
+      <div className="flex justify-between text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm 2xl:text-xl 2xl:tracking-wide">
         {values.map((value, index) => (
           <div
             key={value.value}
-            className={`px-3 py-[1px] bg-ocf-yellow/${value.opacity} whitespace-nowrap ${
-              index !== 0 ? "border-l border-ocf-black-600" : ""
-            } text-${value.textColor}`}
+            className={`px-3 py-[1px] 2xl:px-4 2xl:py-[2px] bg-ocf-yellow/${
+              value.opacity
+            } whitespace-nowrap ${index !== 0 ? "border-l border-ocf-black-600" : ""} text-${
+              value.textColor
+            }`}
           >
             {value.value}
             {index === 0 && (

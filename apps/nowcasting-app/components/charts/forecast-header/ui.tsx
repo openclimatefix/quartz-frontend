@@ -13,7 +13,7 @@ export const ForecastWithActualPV: React.FC<{
   sites?: boolean;
 }> = ({ forecast, pv, time, tip, color = yellow, sites }) => {
   return (
-    <div className="flex flex-col m-auto h-10 2xl:h-14 justify-between">
+    <div className="flex flex-col m-auto h-10 2xl:h-auto justify-between">
       <div>
         <ForecastLabel
           tip={
@@ -30,7 +30,7 @@ export const ForecastWithActualPV: React.FC<{
             <span className="text-black">{pv}</span>
             <span className="text-ocf-gray-300"> / </span>
             {forecast}
-            <span className="text-xs 2xl:text-base text-ocf-gray-300 font-normal">
+            <span className="text-xs 2xl:text-lg text-ocf-gray-300 font-normal">
               {" "}
               {sites ? "KW" : "GW"}
             </span>
@@ -67,7 +67,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
             style={{ color: color }}
           >
             {pv}
-            <span className="text-xs 2xl:text-base text-ocf-gray-300 font-normal"> GW</span>
+            <span className="text-xs 2xl:text-lg text-ocf-gray-300 font-normal"> GW</span>
           </p>
         </div>
       </ForecastLabel>

@@ -18,16 +18,18 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
   onClose
 }) => {
   return (
-    <div id="x" className={"flex content-between flex-wrap mt-6 bg-ocf-gray-800 h-12"}>
+    <div id="x" className={"flex content-between flex-wrap mb-3.5 bg-ocf-gray-800 h-12 2xl:h-14"}>
       <div
-        className={`bg-ocf-gray-800 text-white lg:text-xl md:text-lg text-base font-bold flex-[2] ml-5 m-auto py-2`}
+        className={`bg-ocf-gray-800 text-white text-base md:text-lg lg:text-xl 2xl:text-2xl font-bold flex-[2] ml-5 m-auto py-2`}
       >
         {title}
       </div>
       <div className="flex flex-row justify-between flex-initial m-auto px-6">
-        <div className="lg:text-lg md:text-lg pr-8">
-          <span className="font-semibold text-med text-ocf-yellow-500 pr-0.5">{mwpercent}</span>
-          <span className="text-xs text-ocf-gray-300">%</span>
+        <div className="lg:text-lg md:text-lg 2xl:text-2xl pr-8">
+          <span className="font-semibold text-md 2xl:text-2xl text-ocf-yellow-500 pr-0.5">
+            {mwpercent}
+          </span>
+          <span className="text-xs 2xl:text-2xl text-ocf-gray-300">%</span>
         </div>
         <div>{children}</div>
       </div>
