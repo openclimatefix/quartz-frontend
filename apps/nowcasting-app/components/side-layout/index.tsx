@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ExpandButton from "./expand-button";
+import useGlobalState from "../helpers/globalState";
 
 type SideLayoutProps = {
   className?: string;
@@ -7,10 +8,12 @@ type SideLayoutProps = {
 
 const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [largeScreenMode] = useGlobalState("largeScreenMode");
+  const closedWidth = largeScreenMode ? "50%" : "44%";
   return (
     <div
       className={`h-full pt-16 absolute top-0 left-0 z-20 ${className || ""}`}
-      style={{ width: isOpen ? "90%" : "44%" }}
+      style={{ width: isOpen ? "90%" : closedWidth }}
     >
       <div
         className={

@@ -126,14 +126,14 @@ const GspPvRemixChart: FC<{
           mwpercent={Math.round(pvPercentage)}
           deltaView={deltaView}
         >
-          <span className="font-semibold text-base md:text-lg 2xl:text-2xl text-ocf-yellow-500">
+          <span className="font-semibold text-base md:text-lg dash:text-5xl text-ocf-yellow-500">
             {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
           </span>
-          <span className="font-semibold text-base md:text-lg 2xl:text-2xl text-white">
+          <span className="font-semibold text-base md:text-lg dash:text-5xl text-white">
             {" "}
             / {gspInfo?.installedCapacityMw}
           </span>
-          <span className="text-xs md:text-base 2xl:text-lg text-ocf-gray-300"> MW</span>
+          <span className="text-xs md:text-base dash:text-3xl text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
       {/*<div className="h-60 mt-4 mb-6">*/}

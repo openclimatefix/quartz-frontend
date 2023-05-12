@@ -164,7 +164,7 @@ const GspDeltaColumn: FC<{
                 } ${gspDelta.delta > 0 ? `border-l-8` : `border-r-8`}`}
                 key={`gspCol${gspDelta.gspId}`}
               >
-                <div className="flex-initial pl-1 max-w-[35%] 2xl:max-w-full">
+                <div className="flex-initial pl-1 max-w-[35%] dash:max-w-full">
                   <span className="">{gspDelta.gspRegion}</span>
                 </div>
                 <div className="flex flex-initial flex-end justify-around items-center">
@@ -355,7 +355,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           deltaview={true}
         ></ForecastHeader>
 
-        <div className="h-60 mt-4 mb-6">
+        <div className="h-60 dash:h-auto mt-4 mb-6">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -367,20 +367,22 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
             deltaView={true}
           />
         </div>
-        {clickedGspId && (
-          <GspPvRemixChart
-            close={() => {
-              setClickedGspId(undefined);
-            }}
-            setTimeOfInterest={setSelectedTime}
-            selectedTime={selectedTime}
-            gspId={clickedGspId}
-            timeNow={formatISODateString(timeNow)}
-            resetTime={resetTime}
-            visibleLines={visibleLines}
-            deltaView={true}
-          ></GspPvRemixChart>
-        )}
+        <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
+          {clickedGspId && (
+            <GspPvRemixChart
+              close={() => {
+                setClickedGspId(undefined);
+              }}
+              setTimeOfInterest={setSelectedTime}
+              selectedTime={selectedTime}
+              gspId={clickedGspId}
+              timeNow={formatISODateString(timeNow)}
+              resetTime={resetTime}
+              visibleLines={visibleLines}
+              deltaView={true}
+            ></GspPvRemixChart>
+          )}
+        </div>
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>

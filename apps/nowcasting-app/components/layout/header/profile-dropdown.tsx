@@ -143,7 +143,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                   }}
                   className="ml-2 text-xs font-medium text-ocf-black-300"
                 >
-                  {`${largeScreenMode ? "Disable" : "Enable"} large screen mode`}
+                  {`Dashboard mode`}
                 </button>
               </div>
             )}

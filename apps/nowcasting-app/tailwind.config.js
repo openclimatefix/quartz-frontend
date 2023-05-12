@@ -1,4 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
+const plugin = require("tailwindcss/plugin");
 
 module.exports = {
   theme: {
@@ -214,5 +215,12 @@ module.exports = {
     "bg-ocf-yellow/90",
     "bg-ocf-yellow/100"
   ],
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")]
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/container-queries"),
+    plugin(function ({ addVariant }) {
+      addVariant("dash", ".dashboard-mode &");
+    })
+  ]
 };

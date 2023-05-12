@@ -115,6 +115,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
   const [view] = useGlobalState("view");
+  const [largeScreenMode] = useGlobalState("largeScreenMode");
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
@@ -327,7 +328,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 strokeDasharray="5 5"
                 strokeDashoffset={3}
                 stroke={orange} // blue
-                strokeWidth={3}
+                strokeWidth={largeScreenMode ? 6 : 3}
                 hide={!visibleLines.includes("4HR_FORECAST")}
               />
               <Line
@@ -338,7 +339,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 xAxisId={"x-axis"}
                 // strokeDasharray="10 10"
                 stroke={orange} // blue
-                strokeWidth={3}
+                strokeWidth={largeScreenMode ? 6 : 3}
                 hide={!visibleLines.includes("4HR_PAST_FORECAST")}
               />
             </>
@@ -350,14 +351,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
             xAxisId={"x-axis"}
             yAxisId={"y-axis"}
             stroke="black"
-            strokeWidth={2}
+            strokeWidth={largeScreenMode ? 6 : 3}
             strokeDasharray="5 5"
             hide={!visibleLines.includes("GENERATION")}
           />
           <Line
             type="monotone"
             dataKey="GENERATION_UPDATED"
-            strokeWidth={2}
+            strokeWidth={largeScreenMode ? 4 : 2}
             stroke="black"
             xAxisId={"x-axis"}
             yAxisId={"y-axis"}
@@ -372,7 +373,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             xAxisId={"x-axis"}
             yAxisId={"y-axis"}
             stroke={yellow} //yellow
-            strokeWidth={2}
+            strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("PAST_FORECAST")}
           />
           <Line
@@ -383,7 +384,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             strokeDasharray="5 5"
             stroke={yellow} //yellow
-            strokeWidth={2}
+            strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
           <Tooltip

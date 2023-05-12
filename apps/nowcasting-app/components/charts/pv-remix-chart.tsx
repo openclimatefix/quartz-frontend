@@ -38,12 +38,12 @@ const LegendItem: FC<{
     <div className="flex items-center flex-1">
       <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
       <button
-        className="inline-flex flex-1 text-left pl-1 max-w-full w-44 2xl:w-auto text-xs 2xl:text-base 2xl:tracking-wider 2xl:pb-1"
+        className="inline-flex flex-1 text-left pl-1 max-w-full w-44 dash:w-auto text-xs dash:text-base dash:tracking-wider dash:pb-1"
         onClick={toggleLineVisibility}
       >
         <span
           className={`block w-auto uppercase pl-1${
-            isVisible ? " font-extrabold 2xl:font-semibold" : ""
+            isVisible ? " font-extrabold dash:font-semibold" : ""
           }`}
         >
           {label}
@@ -134,7 +134,7 @@ const PvRemixChart: FC<{
           deltaview={false}
         ></ForecastHeader>
 
-        <div className="flex-1 relative h-60 2xl:h-auto mt-4 mb-6">
+        <div className="flex-1 relative h-60 dash:h-auto mt-4">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -145,7 +145,7 @@ const PvRemixChart: FC<{
             visibleLines={visibleLines}
           />
         </div>
-        <div className="flex-1 flex flex-col relative h-60 2xl:h-auto">
+        <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
           {clickedGspId && (
             <GspPvRemixChart
               close={() => {

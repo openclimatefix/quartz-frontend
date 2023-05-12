@@ -300,12 +300,20 @@ export default function Home() {
   const currentView = (v: VIEWS) => v === view;
 
   const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
-
+  const [largeScreenMode] = useGlobalState("largeScreenMode");
+  const closedWidth = largeScreenMode ? "50%" : "56%";
+  console.log("largeScreenMode", largeScreenMode);
   return (
     <Layout>
-      <div className="h-full relative pt-16">
+      <div
+        className={`h-full relative pt-16${largeScreenMode ? " @container dashboard-mode" : ""}`}
+      >
         <Header view={view} setView={setView} />
-        <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
+        <div
+          id="map-container"
+          className={`relative float-right h-full`}
+          style={{ width: closedWidth }}
+        >
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
             combinedData={combinedData}
