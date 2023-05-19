@@ -1,6 +1,7 @@
 import React from "react";
 import { theme } from "../../../tailwind.config";
 import { UpArrow, DownArrow } from "../../icons/icons";
+import { ForecastHeadlineFigure } from "../forecast-header/ui";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
@@ -84,23 +85,33 @@ const DeltaForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       <div className="text-white lg:text-2xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
-      <div className="flex justify-between flex-2 my-2 px-6 pb-2">
-        <div className="pr-8">
-          <ForecastWithActualPV
-            forecast={`${forecastPV}`}
-            text={`Latest Forecast`}
-            pvUpdated={`${actualPV}`}
-            time={`${pvTimeOnly}`}
-            color="ocf-yellow"
-          />
+      <div className="flex justify-between flex-2 my-2 px-6">
+        <div className="pr-2 2xl:pr-4 3xl:pr-8">
+          {/*<GSPForecastWithActualPV*/}
+          {/*  forecast={`${forecastPV}`}*/}
+          {/*  text={`Latest Forecast`}*/}
+          {/*  pvUpdated={`${actualPV}`}*/}
+          {/*  time={`${pvTimeOnly}`}*/}
+          {/*  color="ocf-yellow"*/}
+          {/*/>*/}
+          <ForecastHeadlineFigure tip={"Latest OCF Forecast"} time={pvTimeOnly}>
+            {/*<span className="text-black">{actualPV}</span>*/}
+            {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
+            {forecastPV}
+          </ForecastHeadlineFigure>
         </div>
         <div>
-          <FourHourForecast
-            pv={forecastNextPV}
-            time={`${forecastNextTimeOnly}`}
-            text={`Next forecast`}
-            color={"ocf-yellow"}
-          />
+          {/*<FourHourForecast*/}
+          {/*  pv={forecastNextPV}*/}
+          {/*  time={`${forecastNextTimeOnly}`}*/}
+          {/*  text={`Next forecast`}*/}
+          {/*  color={"ocf-yellow"}*/}
+          {/*/>*/}
+          <ForecastHeadlineFigure tip={"Next OCF Forecast"} time={forecastNextTimeOnly}>
+            {/*<span className="text-black">{actualPV}</span>*/}
+            {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
+            {forecastNextPV}
+          </ForecastHeadlineFigure>
         </div>
       </div>
       <div

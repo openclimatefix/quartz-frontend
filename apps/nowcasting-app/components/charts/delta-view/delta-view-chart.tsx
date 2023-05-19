@@ -355,7 +355,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           deltaview={true}
         ></ForecastHeader>
 
-        <div className="h-60 dash:h-auto mt-4 mb-6">
+        <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto mt-4">
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -367,8 +367,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
             deltaView={true}
           />
         </div>
-        <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
-          {clickedGspId && (
+        {clickedGspId && (
+          <div className="flex-1 flex flex-col relative min-h-[30vh] h-auto">
             <GspPvRemixChart
               close={() => {
                 setClickedGspId(undefined);
@@ -381,12 +381,12 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               visibleLines={visibleLines}
               deltaView={true}
             ></GspPvRemixChart>
-          )}
-        </div>
+          </div>
+        )}
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex flex-1 justify-between mb-15">
+        <div className="flex flex-initial justify-between mb-15">
           {!hasGspPvInitialForSelectedTime && (
             <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
               [ Delta values not available until PV Live output available ]

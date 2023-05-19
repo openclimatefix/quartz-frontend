@@ -56,6 +56,12 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
     2
   );
 
+  console.log(
+    "time",
+    selectedPvActualDatetime,
+    convertISODateStringToLondonTime(selectedPvActualDatetime)
+  );
+
   if (deltaview) {
     return (
       <DeltaForecastHeaderUI

@@ -1,10 +1,14 @@
 import { FC } from "react";
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
-import { formatISODateString, getRoundedTickBoundary } from "../../helpers/utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  getRoundedTickBoundary
+} from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
-import useGlobalState, { get30MinNow } from "../../helpers/globalState";
+import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import GSPDeltaForecastHeader from "../delta-view/delta-gsp-header-ui";
 import { ForecastValue } from "../../types";
@@ -71,6 +75,16 @@ const GspPvRemixChart: FC<{
     gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
     ({} as ForecastValue);
 
+  // get pv time
+  const selectedPvActualDatetime = pvRealDataIn[0].datetimeUtc;
+  console.log("selectedPvActualDatetime", selectedPvActualDatetime);
+  // get the time for the OCF Forecast
+  const futurePvForecastDatetime = formatISODateString(timeNow);
+  const futurePVForecastDatetimeLabel = convertISODateStringToLondonTime(
+    futurePvForecastDatetime + ":00.000Z"
+  );
+  console.log("futurePvForecastDatetime", futurePvForecastDatetime);
+
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
 
@@ -83,23 +97,28 @@ const GspPvRemixChart: FC<{
   const deltaValue = (Number(fourHourForecast) - Number(originalForecastAtTimeNow)).toFixed(1);
 
   yMax = getRoundedTickBoundary(yMax, yMax_levels);
+  console.log("timeNow", timeNow);
 
   if (deltaView) {
     return (
       <>
-        <GSPDeltaForecastHeader
-          onClose={close}
-          deltaValue={deltaValue.toString()}
-          installedCapacity={gspInfo?.installedCapacityMw}
-          forecastNextPV={fourHourForecast.toString()}
-          actualPV={"8"}
-          title={gspInfo?.regionName || ""}
-          timeNow={timeNow}
-          forecastPV={originalForecastAtTimeNow.toString()}
-          selectedTimeOnly={"89"}
-          pvTimeOnly={"9"}
-          forecastNextTimeOnly={"9"}
-        ></GSPDeltaForecastHeader>
+        <div className="flex-initial">
+          <GSPDeltaForecastHeader
+            onClose={close}
+            deltaValue={deltaValue.toString()}
+            installedCapacity={gspInfo?.installedCapacityMw}
+            forecastNextPV={fourHourForecast.toString()}
+            actualPV={"8"}
+            title={gspInfo?.regionName || ""}
+            timeNow={timeNow}
+            forecastPV={originalForecastAtTimeNow.toString()}
+            selectedTimeOnly={"89"}
+            pvTimeOnly={convertISODateStringToLondonTime(timeNow)}
+            forecastNextTimeOnly={convertISODateStringToLondonTime(
+              getNext30MinSlot(new Date(timeNow))?.toISOString()
+            )}
+          ></GSPDeltaForecastHeader>
+        </div>
         {/*<div className="h-60 mt-4 mb-6">*/}
         <RemixLine
           setTimeOfInterest={setTimeOfInterest}

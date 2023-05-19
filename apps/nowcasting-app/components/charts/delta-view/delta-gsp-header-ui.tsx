@@ -2,6 +2,8 @@ import React from "react";
 import { theme } from "../../../tailwind.config";
 import { UpArrow, DownArrow } from "../../icons/icons";
 import { CloseButtonIcon } from "../../icons/icons";
+import { DELTA_BUCKET } from "../../../constant";
+import { ForecastHeadlineFigure } from "../forecast-header/ui";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
@@ -85,70 +87,84 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   deltaValue,
   onClose
 }) => {
-  let deltacolor = `ocf-black-800`;
-  if (Number(deltaValue) < -60) {
+  let deltacolor = `ocf-gray-900`;
+  if (Number(deltaValue) < DELTA_BUCKET.NEG4) {
     deltacolor = `ocf-delta-100`;
-  } else if (-60 <= Number(deltaValue) && Number(deltaValue) < -40) {
+  } else if (DELTA_BUCKET.NEG4 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.NEG3) {
     deltacolor = `ocf-delta-200`;
-  } else if (-40 <= Number(deltaValue) && Number(deltaValue) < -20) {
+  } else if (DELTA_BUCKET.NEG3 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.NEG2) {
     deltacolor = `ocf-delta-300`;
-  } else if (-20 <= Number(deltaValue) && Number(deltaValue) < -2) {
+  } else if (DELTA_BUCKET.NEG2 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.NEG1) {
     deltacolor = `ocf-delta-400`;
-  } else if (-2 <= Number(deltaValue) && Number(deltaValue) < 2) {
-    deltacolor = `ocf-black-800`;
-  } else if (2 <= Number(deltaValue) && Number(deltaValue) < 20) {
+  } else if (DELTA_BUCKET.NEG1 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS1) {
+    deltacolor = `ocf-gray-900`;
+  } else if (DELTA_BUCKET.POS1 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS2) {
     deltacolor = `ocf-delta-600`;
-  } else if (20 <= Number(deltaValue) && Number(deltaValue) < 40) {
+  } else if (DELTA_BUCKET.POS2 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS3) {
     deltacolor = `ocf-delta-700`;
-  } else if (40 <= Number(deltaValue) && Number(deltaValue) < 60) {
+  } else if (DELTA_BUCKET.POS3 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS4) {
     deltacolor = `ocf-delta-800`;
-  } else if (60 <= Number(deltaValue) && Number(deltaValue) < 200) {
+  } else if (DELTA_BUCKET.POS4 <= Number(deltaValue)) {
     deltacolor = `ocf-delta-900`;
   }
 
   const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
   const noDelta = Number(deltaValue) === 0;
+  console.log("pvTimeOnly", pvTimeOnly);
+  console.log("forecastNextTimeOnly", forecastNextTimeOnly);
   return (
-    <div className="flex content-between bg-ocf-gray-800 h-16">
+    <div className="flex content-between bg-ocf-gray-800 h-12 dash:h-16">
       <div className="text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
         {title}
       </div>
-      <div className="flex justify-between flex-2 my-2 px-6 pb-2">
-        <div className="pr-8">
-          <GSPForecastWithActualPV
-            forecast={`${forecastPV}`}
-            text={`Latest Forecast`}
-            pvUpdated={`${actualPV}`}
-            time={`${pvTimeOnly}`}
-            color="ocf-yellow"
-          />
+      <div className="flex justify-between items-center flex-2 my-2 dash:3xl:my-3 px-2 2xl:px-4 3xl:px-6">
+        <div className="pr-2 2xl:pr-4 3xl:pr-8">
+          {/*<GSPForecastWithActualPV*/}
+          {/*  forecast={`${forecastPV}`}*/}
+          {/*  text={`Latest Forecast`}*/}
+          {/*  pvUpdated={`${actualPV}`}*/}
+          {/*  time={`${pvTimeOnly}`}*/}
+          {/*  color="ocf-yellow"*/}
+          {/*/>*/}
+          <ForecastHeadlineFigure tip={"Latest OCF Forecast"} time={pvTimeOnly}>
+            {/*<span className="text-black">{actualPV}</span>*/}
+            {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
+            {forecastPV}
+          </ForecastHeadlineFigure>
         </div>
         <div>
-          <FourHourForecast
-            pv={forecastNextPV}
-            time={`${forecastNextTimeOnly}`}
-            text={`Next forecast`}
-            color={"ocf-yellow"}
-          />
+          {/*<FourHourForecast*/}
+          {/*  pv={forecastNextPV}*/}
+          {/*  time={`${forecastNextTimeOnly}`}*/}
+          {/*  text={`Next forecast`}*/}
+          {/*  color={"ocf-yellow"}*/}
+          {/*/>*/}
+          <ForecastHeadlineFigure tip={"Next OCF Forecast"} time={forecastNextTimeOnly}>
+            {/*<span className="text-black">{actualPV}</span>*/}
+            {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
+            {forecastNextPV}
+          </ForecastHeadlineFigure>
         </div>
       </div>
       <div
-        className={`bg-${deltacolor} flex flex-col justify-between pl-3 pr-4 py-2 text-left text-ocf-black uppercase`}
+        className={`bg-${deltacolor} flex flex-col justify-between px-2 items-center text-left text-ocf-black uppercase`}
         style={{ background: deltacolor }}
       >
-        <p className="leading-tight tracking-wider">Delta</p>
-        <div className="flex items-end">
-          <div className="pr-2 pt-1"> {noDelta ? "" : svg}</div>
-          <p className={`text-xl font-semibold leading-none mt-0.5 text-center`}>
+        <div className="flex flex-1 items-center">
+          <div className="pr-1 pt-1 hidden 2xl:block"> {noDelta ? "" : svg}</div>
+          <p className={`text-2xl 2xl:text-3xl font-semibold leading-none mr-2 text-center`}>
             {deltaValue}
-            <span className="text-xs text-ocf-black font-normal"> MW</span>
           </p>
+          <div className="flex flex-col">
+            <p className="text-2xs 2xl:text-xs leading-tight tracking-wider">Delta</p>
+            <span className="text-2xs 2xl:text-xs text-ocf-black font-normal"> MW</span>
+          </div>
         </div>
       </div>
       <button
         type="button"
         onClick={onClose}
-        className="font-bold items-center p-4 text-2xl border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+        className="font-bold items-center p-2 text-2xl border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
       >
         <CloseButtonIcon />
       </button>
