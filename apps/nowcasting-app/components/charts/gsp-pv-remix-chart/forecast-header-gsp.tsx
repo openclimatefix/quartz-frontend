@@ -20,16 +20,16 @@ const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
   return (
     <div id="x" className={"flex content-between flex-wrap mb-3.5 bg-ocf-gray-800 h-12 dash:h-16"}>
       <div
-        className={`text-white text-base md:text-lg lg:text-xl dash:text-4xl dash:tracking-wide font-bold flex-[2] ml-5 m-auto py-2`}
+        className={`text-white text-base md:text-lg lg:text-xl dash:2xl:text-4xl dash:text-3xl  dash:tracking-wide font-bold flex-[2] ml-5 m-auto py-2`}
       >
         {title}
       </div>
-      <div className="flex flex-row justify-between flex-initial m-auto px-6">
-        <div className="lg:text-lg md:text-lg dash:text-2xl pr-8">
-          <span className="font-semibold text-md dash:text-5xl text-ocf-yellow-500 pr-0.5">
+      <div className="flex flex-row justify-between items-center flex-initial m-auto px-4 lg:px-6">
+        <div className="lg:text-lg md:text-lg dash:text-2xl pr-4 lg:pr-6">
+          <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-ocf-yellow-500 pr-0.5">
             {mwpercent}
           </span>
-          <span className="text-xs dash:text-3xl text-ocf-gray-300">%</span>
+          <span className="text-sm lg:text-lg dash:text-2xl text-ocf-gray-300">%</span>
         </div>
         <div>{children}</div>
       </div>

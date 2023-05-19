@@ -22,7 +22,7 @@ export const ForecastHeadlineFigure: React.FC<{
           }
         >
           <div
-            className={`flex items-center dash:3xl:text-6xl dash:xl:text-5xl lg:text-4xl md:text-2xl text-xl font-semibold leading-none mt-0.5 text-center text-${color}`}
+            className={`flex items-center dash:3xl:text-6xl dash:xl:text-5xl lg:text-3xl md:text-xl text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
             {children}
@@ -150,8 +150,8 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       <div className="text-white dash:2xl:text-5xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
-      <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-4 lg:px-6">
-        <div className="pr-4 lg:pr-8">
+      <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 xl:px-6">
+        <div className="pr-4 lg:pr-4 xl:pr-6">
           <ForecastHeadlineFigure
             tip={`PV Live / OCF Forecast`}
             time={pvTimeOnly}
