@@ -62,9 +62,6 @@ const Map: FC<IMap> = ({
         if (map.current?.getCanvas()?.width === 800) {
           map.current?.resize();
         }
-        if (Number(map.current?.getCanvas()?.width) > 800) {
-          setZoom(6);
-        }
         loadDataOverlay(map);
       });
 

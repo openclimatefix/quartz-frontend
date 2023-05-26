@@ -7,9 +7,8 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import React, { useEffect, useMemo, useState } from "react";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, SITES_API_PREFIX, VIEWS } from "../constant";
+import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
-import useSWRImmutable from "swr/immutable";
 import {
   AllGspRealData,
   AllSites,
@@ -26,7 +25,6 @@ import {
   SitesPvForecast
 } from "../components/types";
 import {
-  axiosFetcher,
   axiosFetcherAuth,
   formatISODateString,
   getDeltaBucket,
@@ -53,6 +51,8 @@ export default function Home() {
   const [lat] = useGlobalState("lat");
   const [lng] = useGlobalState("lng");
   const [zoom] = useGlobalState("zoom");
+
+  const currentView = (v: VIEWS) => v === view;
 
   useEffect(() => {
     if (user && !isLoading && !error) {
@@ -260,7 +260,8 @@ export default function Home() {
   // Sites API data
   const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
     `${SITES_API_PREFIX}/sites`,
-    axiosFetcherAuth
+    axiosFetcherAuth,
+    { isPaused: () => !currentView(VIEWS.SOLAR_SITES) }
   );
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
@@ -269,7 +270,7 @@ export default function Home() {
     `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
     axiosFetcherAuth,
     {
-      isPaused: () => !siteUuidsString?.length,
+      isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
       dedupingInterval: 10000,
       refreshInterval: 60 * 1000 * 5 // 5min
     }
@@ -279,7 +280,7 @@ export default function Home() {
     `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
     axiosFetcherAuth,
     {
-      isPaused: () => !siteUuidsString?.length,
+      isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
       dedupingInterval: 10000,
       refreshInterval: 60 * 1000 * 5 // 5min
     }
@@ -296,8 +297,6 @@ export default function Home() {
     sitesPvForecastError: sitePvForecastError,
     sitesPvActualError: sitePvActualError
   };
-
-  const currentView = (v: VIEWS) => v === view;
 
   const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
   const [largeScreenMode] = useGlobalState("largeScreenMode");

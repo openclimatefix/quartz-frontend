@@ -28,9 +28,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 }) => {
   const computedClasses = classNames(
     className || "",
-    disabled
-      ? "text-gray-500 cursor-not-allowed"
-      : "text-white cursor-pointer hover:text-ocf-yellow-400",
+    disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
     "flex px-4 py-2 font-semibold text-sm"
   );
 
@@ -48,10 +46,11 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 
   if (setViewFunc && view) {
     const isCurrentView = currentView === view;
+    console.log("isCurrentView", isCurrentView);
     return (
       <Menu.Item>
         <a
-          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "")}
+          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "text-white")}
           onClick={() => setViewFunc(view)}
         >
           {text}
@@ -63,7 +62,10 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   return (
     <Menu.Item>
       {({ active }) => (
-        <Link href={url} className={classNames(computedClasses, active ? "text-ocf-yellow" : "")}>
+        <Link
+          href={url}
+          className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+        >
           {text}
         </Link>
       )}
@@ -74,6 +76,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
+  console.log("view", view);
   return (
     <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center z-30">
       <div className="p-1 mt-1 items-end flex flex-col">

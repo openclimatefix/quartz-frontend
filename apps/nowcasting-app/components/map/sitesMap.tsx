@@ -461,10 +461,18 @@ const SitesMap: React.FC<SitesMapProps> = ({
       anchor: "bottom-right",
       maxWidth: "none"
     });
+    console.log("addFCData");
 
     // Sites
+    const siteSource = map.current.getSource(`site`) as unknown as
+      | mapboxgl.GeoJSONSource
+      | undefined;
     const sitesFeatureArray = generateFeatureArray(aggregatedSitesData.sites);
-    addGroupSource(map.current, "site", sitesFeatureArray);
+    if (siteSource) {
+      setSourceData(siteSource, sitesFeatureArray);
+    } else {
+      addGroupSource(map.current, "site", sitesFeatureArray);
+    }
 
     // Capacity ring
     map.current.addLayer({

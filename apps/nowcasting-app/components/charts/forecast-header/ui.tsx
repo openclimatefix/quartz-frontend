@@ -7,38 +7,50 @@ const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 export const ForecastHeadlineFigure: React.FC<{
   tip: string;
   color?: string;
-  time: string;
+  time?: string;
   unit?: string;
+  gsp?: boolean;
   children?: React.ReactNode;
-}> = ({ tip, color = yellow, time, unit = "GW", children }) => {
+}> = ({ tip, color = yellow, time, unit = "GW", gsp = false, children }) => {
+  const textSizeClasses = `font-semibold md:text-xl text-lg leading-none text-${color} pr-0.5 ${
+    gsp
+      ? "dash:2xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl"
+      : "dash:3xl:text-6xl dash:xl:text-5xl lg:text-3xl"
+  }`;
   return (
     <div className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between">
-      <div>
-        <ForecastLabel
-          tip={
-            <div className="w-36">
-              <p>{tip}</p>
-            </div>
-          }
-        >
-          <div
-            className={`flex items-center dash:3xl:text-6xl dash:xl:text-5xl lg:text-3xl md:text-xl text-lg font-semibold leading-none mt-0.5 text-center text-${color}`}
-            style={{ color: color }}
+      <div className="flex flex-1 self-center items-center justify-center">
+        <div className={`flex items-center ${textSizeClasses}`}>
+          <ForecastLabel
+            position={"middle"}
+            tip={
+              <div className="min-w-36">
+                <p>{tip}</p>
+              </div>
+            }
           >
             {children}
-            <div className="flex flex-col gap-1 dash:3xl:gap-1 dash:xl:gap-0 items-start justify-center dash:xl:justify-between dash:justify-center pl-2">
-              <div className="flex items-center text-white">
-                <ClockIcon />
-                <p className="text-xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
-                  {time}
-                </p>
-              </div>
-              <span className="text-xs dash:text-sm dash:xl:text-base text-ocf-gray-300 font-normal dash:leading-none leading-none">
-                {unit}
-              </span>
+          </ForecastLabel>
+          <div
+            className={`${
+              gsp ? "dash:3xl:gap-0" : "dash:3xl:gap-1"
+            } flex flex-col dash:xl:gap-0 gap-1 items-start justify-center dash:xl:justify-between dash:justify-center pl-2`}
+          >
+            <div className="flex items-center text-white">
+              {time && (
+                <>
+                  <ClockIcon />
+                  <p className="text-xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
+                    {time}
+                  </p>
+                </>
+              )}
             </div>
+            <span className="text-xs dash:text-sm dash:xl:text-base text-ocf-gray-300 font-normal dash:leading-none leading-none">
+              {unit}
+            </span>
           </div>
-        </ForecastLabel>
+        </div>
       </div>
     </div>
   );
@@ -131,7 +143,7 @@ type ForecastHeaderProps = {
   forecastNextPV: string;
   forecastPV: string;
   actualPV: string;
-  selectedTimeOnly: string;
+  // selectedTimeOnly: string;
   pvTimeOnly: string;
   forecastNextTimeOnly: string;
 };
@@ -141,17 +153,17 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastPV,
   actualPV,
   children,
-  selectedTimeOnly,
+  // selectedTimeOnly,
   pvTimeOnly,
   forecastNextTimeOnly
 }) => {
   return (
     <div className="flex content-between bg-ocf-gray-800 h-auto">
-      <div className="text-white dash:2xl:text-5xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
+      <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>
-      <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 xl:px-6">
-        <div className="pr-4 lg:pr-4 xl:pr-6">
+      <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 3xl:px-6">
+        <div className="pr-4 lg:pr-4 3xl:pr-6">
           <ForecastHeadlineFigure
             tip={`PV Live / OCF Forecast`}
             time={pvTimeOnly}
@@ -164,7 +176,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
         </div>
         <div>
           <ForecastHeadlineFigure
-            tip={`PV Live / OCF Forecast`}
+            tip={`Next OCF Forecast`}
             time={forecastNextTimeOnly}
             color="ocf-yellow"
           >

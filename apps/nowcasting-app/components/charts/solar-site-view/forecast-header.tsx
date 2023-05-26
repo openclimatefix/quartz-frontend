@@ -1,7 +1,5 @@
 import React from "react";
 import { CloseButtonIcon } from "../../icons/icons";
-import DeltaForecastHeaderUI from "../delta-view/delta-header-ui";
-import GspDeltaForecastHeaderUI from "../delta-view/delta-gsp-header-ui";
 
 type ForecastHeaderSiteProps = {
   title: string;

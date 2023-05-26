@@ -87,31 +87,29 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
   deltaValue,
   onClose
 }) => {
-  let deltacolor = `ocf-gray-900`;
+  let deltaColor = `ocf-gray-900`;
   if (Number(deltaValue) < DELTA_BUCKET.NEG4) {
-    deltacolor = `ocf-delta-100`;
+    deltaColor = `ocf-delta-100`;
   } else if (DELTA_BUCKET.NEG4 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.NEG3) {
-    deltacolor = `ocf-delta-200`;
+    deltaColor = `ocf-delta-200`;
   } else if (DELTA_BUCKET.NEG3 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.NEG2) {
-    deltacolor = `ocf-delta-300`;
+    deltaColor = `ocf-delta-300`;
   } else if (DELTA_BUCKET.NEG2 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.NEG1) {
-    deltacolor = `ocf-delta-400`;
+    deltaColor = `ocf-delta-400`;
   } else if (DELTA_BUCKET.NEG1 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS1) {
-    deltacolor = `ocf-gray-900`;
+    deltaColor = `ocf-gray-900`;
   } else if (DELTA_BUCKET.POS1 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS2) {
-    deltacolor = `ocf-delta-600`;
+    deltaColor = `ocf-delta-600`;
   } else if (DELTA_BUCKET.POS2 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS3) {
-    deltacolor = `ocf-delta-700`;
+    deltaColor = `ocf-delta-700`;
   } else if (DELTA_BUCKET.POS3 <= Number(deltaValue) && Number(deltaValue) < DELTA_BUCKET.POS4) {
-    deltacolor = `ocf-delta-800`;
+    deltaColor = `ocf-delta-800`;
   } else if (DELTA_BUCKET.POS4 <= Number(deltaValue)) {
-    deltacolor = `ocf-delta-900`;
+    deltaColor = `ocf-delta-900`;
   }
 
   const svg = Number(deltaValue) > 0 ? <UpArrow /> : <DownArrow />;
   const noDelta = Number(deltaValue) === 0;
-  console.log("pvTimeOnly", pvTimeOnly);
-  console.log("forecastNextTimeOnly", forecastNextTimeOnly);
   return (
     <div className="flex content-between bg-ocf-gray-800 h-12 dash:h-16">
       <div className="text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
@@ -126,7 +124,7 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
           {/*  time={`${pvTimeOnly}`}*/}
           {/*  color="ocf-yellow"*/}
           {/*/>*/}
-          <ForecastHeadlineFigure tip={"Latest OCF Forecast"} time={pvTimeOnly}>
+          <ForecastHeadlineFigure tip={"Latest OCF Forecast"} time={pvTimeOnly} unit={"MW"}>
             {/*<span className="text-black">{actualPV}</span>*/}
             {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
             {forecastPV}
@@ -139,16 +137,14 @@ const GSPDeltaForecastHeader: React.FC<ForecastHeaderProps> = ({
           {/*  text={`Next forecast`}*/}
           {/*  color={"ocf-yellow"}*/}
           {/*/>*/}
-          <ForecastHeadlineFigure tip={"Next OCF Forecast"} time={forecastNextTimeOnly}>
-            {/*<span className="text-black">{actualPV}</span>*/}
-            {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
+          <ForecastHeadlineFigure tip={"Next OCF Forecast"} time={forecastNextTimeOnly} unit={"MW"}>
             {forecastNextPV}
           </ForecastHeadlineFigure>
         </div>
       </div>
       <div
-        className={`bg-${deltacolor} flex flex-col justify-between px-2 items-center text-left text-ocf-black uppercase`}
-        style={{ background: deltacolor }}
+        className={`bg-${deltaColor} flex flex-col justify-between px-2 items-center text-left text-ocf-black uppercase`}
+        style={{ background: deltaColor }}
       >
         <div className="flex flex-1 items-center">
           <div className="pr-1 pt-1 hidden 2xl:block"> {noDelta ? "" : svg}</div>

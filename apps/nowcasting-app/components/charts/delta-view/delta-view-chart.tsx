@@ -4,7 +4,11 @@ import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
-import { formatISODateString, getRounded4HoursAgoString } from "../../helpers/utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  getRounded4HoursAgoString
+} from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
@@ -14,6 +18,7 @@ import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
+import useTimeNow from "../../hooks/use-time-now";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -346,13 +351,14 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   };
   const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
+
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto flex flex-col mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
-          deltaview={true}
+          deltaView={true}
         ></ForecastHeader>
 
         <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto mt-4">

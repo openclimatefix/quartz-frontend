@@ -39,14 +39,22 @@ export const formatISODateString = (date: string) => {
   const dateid = date?.slice(0, 16);
   return dateid;
 };
-export const convertISODateStringToLondonTime = (date: string) => {
-  // Changes the ISO date string to Europe London time, and return time only
-  const d = new Date(date);
-  const date_london_time_str = d
+
+export const formatISODateAsLondonTime = (date: Date) => {
+  const date_london_time_str = date
     .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
     .slice(0, 5);
 
   return date_london_time_str;
+};
+export const convertISODateStringToLondonTime = (date: string) => {
+  if (!date || date === ":00.000Z") return "00:00";
+  // Changes the ISO date string to Europe London time, and return time only
+  const d = new Date(date);
+  if (typeof d !== "object" || isNaN(d.getTime())) {
+    throw new Error(`Invalid date: ${date}`);
+  }
+  return formatISODateAsLondonTime(d);
 };
 
 export const convertToLocaleDateString = (date: string) => {
@@ -102,6 +110,9 @@ export const MWtoGW = (MW: number) => {
 };
 export const KWtoGW = (MW: number) => {
   return (MW / 1000 / 1000).toFixed(1);
+};
+export const KWtoMW = (MW: number) => {
+  return (MW / 1000).toFixed(1);
 };
 
 export const addMinutesToISODate = (date: string, munites: number) => {

@@ -1,4 +1,5 @@
 import React from "react";
+import logout from "../../pages/logout";
 
 type LegendLineGraphIconProps = {
   className?: string;
@@ -117,52 +118,41 @@ export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
 
 type DeltaIconProps = {
   className?: string;
+  size?: number;
 };
 
-export const UpArrow: React.FC<DeltaIconProps> = ({ className }) => (
+export const UpArrow: React.FC<DeltaIconProps> = ({ className, size = 22 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    height="22"
+    height={size}
     id="triangle-up"
     viewBox="0 0 32 32"
-    width="22"
+    width={size}
   >
     <path d="M4 24 H28 L16 6 z" />
   </svg>
 );
 
-export const DownArrow: React.FC<DeltaIconProps> = ({ className }) => (
+export const DownArrow: React.FC<DeltaIconProps> = ({ className, size = 22 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    height="22"
+    height={size}
     id="triangle-down"
     viewBox="0 0 32 32"
-    width="22"
+    width={size}
   >
     <path d="M4 8 H28 L16 26 z" />
   </svg>
 );
 
-export const SitesDownArrow: React.FC<DeltaIconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="16"
-    id="triangle-down"
-    viewBox="0 0 36 25"
-    width="16"
-  >
+export const SitesDownArrow: React.FC<DeltaIconProps> = ({ className, size = 16 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" height={size} viewBox="0 0 36 25" width={size}>
     <path d="M4 8 H28 L16 26 z" />
   </svg>
 );
 
-export const SitesUpArrow: React.FC<DeltaIconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height="16"
-    id="triangle-up"
-    viewBox="0 0 36 16"
-    width="16"
-  >
+export const SitesUpArrow: React.FC<DeltaIconProps> = ({ className, size = 16 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" height={size} viewBox="0 0 36 16" width={size}>
     <path d="M4 24 H28 L16 6 z" />
   </svg>
 );
