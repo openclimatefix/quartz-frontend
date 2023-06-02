@@ -51,8 +51,7 @@ module.exports = {
         serif: ["Source Code Pro", ...defaultTheme.fontFamily.serif]
       },
       fontSize: {
-        "2xs": "0.625rem",
-        "large-screen-sm": "1.125rem"
+        "2xs": "0.625rem"
       },
       colors: {
         amber: {

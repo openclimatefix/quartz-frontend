@@ -301,7 +301,6 @@ export default function Home() {
   const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
   const [largeScreenMode] = useGlobalState("largeScreenMode");
   const closedWidth = largeScreenMode ? "50%" : "56%";
-  console.log("largeScreenMode", largeScreenMode);
   return (
     <Layout>
       <div

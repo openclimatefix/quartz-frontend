@@ -1,7 +1,7 @@
 import React from "react";
 import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
 import { ForecastHeadlineFigure } from "../forecast-header/ui";
-import { DeltaHeaderBlock } from "../delta-view/delta-header-ui";
+import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 
 type ForecastHeaderGSPProps = {
   title: string;

@@ -12,7 +12,7 @@ import {
   MWtoGW
 } from "../../helpers/utils";
 import ForecastHeaderUI from "./ui";
-import { DeltaHeaderBlock } from "../delta-view/delta-header-ui";
+import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 
 type ForecastHeaderProps = {
   pvLiveData: PvRealData;

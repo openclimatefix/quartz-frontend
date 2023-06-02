@@ -461,7 +461,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
       anchor: "bottom-right",
       maxWidth: "none"
     });
-    console.log("addFCData");
 
     // Sites
     const siteSource = map.current.getSource(`site`) as unknown as

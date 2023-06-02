@@ -46,7 +46,6 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 
   if (setViewFunc && view) {
     const isCurrentView = currentView === view;
-    console.log("isCurrentView", isCurrentView);
     return (
       <Menu.Item>
         <a
@@ -76,7 +75,6 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
-  console.log("view", view);
   return (
     <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center z-30">
       <div className="p-1 mt-1 items-end flex flex-col">

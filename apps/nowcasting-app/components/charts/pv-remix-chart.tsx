@@ -109,19 +109,13 @@ const PvRemixChart: FC<{
   });
 
   if (
-    nationalForecastError |
-    pvRealDayInError |
-    pvRealDayAfterError |
-    national4HourError |
+    nationalForecastError ||
+    pvRealDayInError ||
+    pvRealDayAfterError ||
+    national4HourError ||
     allGspForecastError
   )
     return <div className={`${className}`}>failed to load</div>;
-  // if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
-  //   return (
-  //     <div className={`h-full flex ${className}`}>
-  //       <Spinner></Spinner>
-  //     </div>
-  //   );
 
   const setSelectedTime = (time: string) => {
     stopTime();
@@ -131,20 +125,12 @@ const PvRemixChart: FC<{
   const legendItemContainerClasses =
     "flex flex-initial flex-col lg:flex-row 3xl:flex-col justify-between";
 
-  // // get the time for the OCF Forecast
-  // const futurePvForecastDatetime = formatISODateString(timeNow);
-  // const futurePvForecastDatetimeLabel = convertISODateStringToLondonTime(
-  //   futurePvForecastDatetime + ":00.000Z"
-  // );
-
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex flex-col flex-auto">
         <ForecastHeader
           pvForecastData={nationalForecastData || []}
           pvLiveData={pvRealDayInData || []}
-          // futurePvForecastDatetime={futurePvForecastDatetime}
-          // futurePVForecastDatetimeLabel={futurePVForecastDatetimeLabel}
           deltaView={false}
         ></ForecastHeader>
 
@@ -176,8 +162,6 @@ const PvRemixChart: FC<{
               selectedTime={selectedTime}
               gspId={clickedGspId}
               timeNow={formatISODateString(timeNow)}
-              // futurePvForecastDatetime={futurePvForecastDatetime}
-              // futurePvForecastDatetimeLabel={futurePvForecastDatetimeLabel}
               resetTime={resetTime}
               visibleLines={visibleLines}
             ></GspPvRemixChart>
