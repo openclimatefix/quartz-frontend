@@ -5,9 +5,7 @@ import {
   convertISODateStringToLondonTime,
   formatISODateString,
   getRoundedTickBoundary,
-  KWtoGW,
-  KWtoMW,
-  MWtoGW
+  KWtoMW
 } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
@@ -54,22 +52,22 @@ const GspPvRemixChart: FC<{
     timeTrigger: selectedTime,
     delta: deltaView
   });
-  console.log("err", errors);
   if (errors.length) {
     console.log(errors);
     return <div>failed to load</div>;
   }
-  if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
-    return (
-      <div className="mt-8">
-        {/* Header spacer */}
-        <div className="h-16"></div>
-        <div className="h-60 flex flex-1">
-          <Spinner />
-        </div>
-      </div>
-    );
+  // if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
+  //   return (
+  //     <div className="mt-8">
+  //       {/* Header spacer */}
+  //       <div className="h-16"></div>
+  //       <div className="h-60 flex flex-1">
+  //         <Spinner />
+  //       </div>
+  //     </div>
+  //   );
   const now30min = formatISODateString(get30MinNow());
+  const dataMissing = !fcAll || !pvRealDataIn || !pvRealDataAfter;
   const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
     gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) || ({} as any);
   const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
@@ -81,10 +79,10 @@ const GspPvRemixChart: FC<{
   //
 
   // get the latest Actual pv value in GW
-  const latestPvActualInMW = KWtoMW(pvRealDataIn[0].solarGenerationKw);
+  const latestPvActualInMW = KWtoMW(pvRealDataIn?.[0]?.solarGenerationKw || 0);
 
   // get pv time
-  const latestPvActualDatetime = pvRealDataIn[0].datetimeUtc;
+  const latestPvActualDatetime = pvRealDataIn?.[0]?.datetimeUtc || timeNow;
 
   // Use the same time for the Forecast historic
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime);
@@ -107,18 +105,15 @@ const GspPvRemixChart: FC<{
       (fc) => formatISODateString(fc.targetTime) === followingPvForecastDateString
     )?.expectedPowerGenerationMegawatts || 0;
 
-  const deltaValue = (
-    Number(latestPvActualInMW) - Number(correspondingLatestPvForecastInMW)
-  ).toFixed(2);
+  const deltaValue = dataMissing
+    ? "---"
+    : (Number(latestPvActualInMW) - Number(correspondingLatestPvForecastInMW)).toFixed(2);
 
   //
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInfo?.installedCapacityMw || 100;
   yMax = getRoundedTickBoundary(yMax, yMax_levels);
-
-  const fakeForecastValue = 432.654;
-  const fakeDeltaValue = (fakeForecastValue - Number(latestPvActualInMW)).toFixed(2);
 
   return (
     <>
@@ -130,12 +125,10 @@ const GspPvRemixChart: FC<{
           pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime)}
           pvValue={Number(latestPvActualInMW)?.toFixed(1)}
           forecastPV={correspondingLatestPvForecastInMW?.toFixed(1)}
-          // forecastPV={fakeForecastValue.toFixed(1)}
           forecastNextTimeOnly={convertISODateStringToLondonTime(
             followingPvForecastDatetime.toISOString()
           )}
           forecastNextPV={followingPvForecastInMW?.toFixed(1)}
-          // forecastNextPV={fakeForecastValue.toFixed(1)}
           deltaValue={deltaValue.toString()}
           deltaView={deltaView}
         >
@@ -149,17 +142,24 @@ const GspPvRemixChart: FC<{
           <span className="text-xs dash:text-2xl text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
-      <RemixLine
-        setTimeOfInterest={setTimeOfInterest}
-        timeOfInterest={selectedTime}
-        data={chartData}
-        yMax={yMax!}
-        timeNow={timeNow}
-        resetTime={resetTime}
-        visibleLines={visibleLines}
-        deltaView={deltaView}
-        deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
-      />
+      <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto">
+        {dataMissing && (
+          <div className="h-full absolute flex pb-7 items-center justify-center inset-0 z-30">
+            <Spinner />
+          </div>
+        )}
+        <RemixLine
+          setTimeOfInterest={setTimeOfInterest}
+          timeOfInterest={selectedTime}
+          data={chartData}
+          yMax={yMax!}
+          timeNow={timeNow}
+          resetTime={resetTime}
+          visibleLines={visibleLines}
+          deltaView={deltaView}
+          deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
+        />
+      </div>
     </>
   );
 };
