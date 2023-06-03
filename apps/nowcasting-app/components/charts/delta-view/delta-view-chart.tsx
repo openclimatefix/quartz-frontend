@@ -19,6 +19,7 @@ import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
 import useTimeNow from "../../hooks/use-time-now";
+import { ChartLegend } from "../ChartLegend";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -406,65 +407,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           )}
         </div>
       </div>
-      <div
-        className="absolute bottom-0 left-0 right-0 flex flex-none justify-start align-items:baseline
-                   px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible"
-      >
-        <div className={`flex flex-1 flex-row pb-3 overflow-x-scroll${show4hView ? "" : ""}`}>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              dashed
-              label={"PV live initial estimate"}
-              dataKey={`GENERATION`}
-              show4hrView={show4hView}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              label={"PV live updated"}
-              dataKey={`GENERATION_UPDATED`}
-              show4hrView={show4hView}
-            />
-          </div>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              dashed
-              label={"OCF Forecast"}
-              dataKey={`FORECAST`}
-              show4hrView={show4hView}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              label={"OCF Final Forecast"}
-              dataKey={`PAST_FORECAST`}
-              show4hrView={show4hView}
-            />
-          </div>
-          {show4hView && (
-            <div className={legendItemContainerClasses}>
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                dashed
-                label={`OCF ${fourHoursAgo} Forecast`}
-                dataKey={`4HR_FORECAST`}
-                show4hrView={show4hView}
-              />
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                label={"OCF 4hr Forecast"}
-                dataKey={`4HR_PAST_FORECAST`}
-                show4hrView={show4hView}
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex-initial flex items-center pl-3 pb-3">
-          <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
-            <InfoIcon />
-          </Tooltip>
-        </div>
-      </div>
+      <ChartLegend />
     </div>
   );
 };

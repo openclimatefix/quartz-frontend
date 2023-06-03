@@ -261,7 +261,12 @@ export default function Home() {
   const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
     `${SITES_API_PREFIX}/sites`,
     axiosFetcherAuth,
-    { isPaused: () => !currentView(VIEWS.SOLAR_SITES) }
+    {
+      isPaused: () => {
+        console.log("isPaused", !currentView(VIEWS.SOLAR_SITES));
+        return !currentView(VIEWS.SOLAR_SITES);
+      }
+    }
   );
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);

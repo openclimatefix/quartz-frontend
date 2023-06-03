@@ -21,42 +21,7 @@ import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
 import { CombinedData, CombinedErrors, ForecastData, ForecastValue } from "../types";
 import Tooltip from "../tooltip";
 import { ChartInfo } from "../../ChartInfo";
-
-const LegendItem: FC<{
-  iconClasses: string;
-  label: string;
-  dashed?: boolean;
-  dataKey: string;
-}> = ({ iconClasses, label, dashed, dataKey }) => {
-  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
-  const isVisible = visibleLines.includes(dataKey);
-
-  const toggleLineVisibility = () => {
-    if (isVisible) {
-      setVisibleLines(visibleLines.filter((line) => line !== dataKey));
-    } else {
-      setVisibleLines([...visibleLines, dataKey]);
-    }
-  };
-
-  return (
-    <div className="flex items-center flex-1">
-      <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button
-        className="inline-flex flex-1 text-left pl-1 max-w-full w-44 dash:w-auto text-xs dash:text-base dash:tracking-wider dash:pb-1"
-        onClick={toggleLineVisibility}
-      >
-        <span
-          className={`block w-auto uppercase pl-1${
-            isVisible ? " font-extrabold dash:font-semibold" : ""
-          }`}
-        >
-          {label}
-        </span>
-      </button>
-    </div>
-  );
-};
+import { ChartLegend } from "./ChartLegend";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;
@@ -64,7 +29,6 @@ const PvRemixChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedData, combinedErrors, className }) => {
-  const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -121,9 +85,6 @@ const PvRemixChart: FC<{
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses =
-    "flex flex-initial flex-col lg:flex-row 3xl:flex-col justify-between";
 
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
@@ -168,56 +129,7 @@ const PvRemixChart: FC<{
           )}
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-        <div className={`flex flex-1 justify-around flex-col 3xl:flex-row pb-3 overflow-x-auto`}>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              dashed
-              label={"PV live initial estimate"}
-              dataKey={`GENERATION`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              label={"PV live updated"}
-              dataKey={`GENERATION_UPDATED`}
-            />
-          </div>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              dashed
-              label={"OCF Forecast"}
-              dataKey={`FORECAST`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              label={"OCF Final Forecast"}
-              dataKey={`PAST_FORECAST`}
-            />
-          </div>
-          {show4hView && (
-            <div className={legendItemContainerClasses}>
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                dashed
-                label={`OCF ${fourHoursAgo} Forecast`}
-                dataKey={`4HR_FORECAST`}
-              />
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                label={"OCF 4hr Forecast"}
-                dataKey={`4HR_PAST_FORECAST`}
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex-initial flex items-center pb-3">
-          <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
-            <InfoIcon />
-          </Tooltip>
-        </div>
-      </div>
+      <ChartLegend />
     </div>
   );
 };
