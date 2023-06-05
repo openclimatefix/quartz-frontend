@@ -14,7 +14,7 @@ export const DeltaHeaderBlock: React.FC<{
   if (unit === "GW") {
     deltaNumberInMW = Number(deltaValue) * 1000;
   }
-  const [largeScreenMode] = useGlobalState("largeScreenMode");
+  const [largeScreenMode] = useGlobalState("dashboardMode");
   const svgSize = largeScreenMode ? 28 : 22;
   let svg: JSX.Element | null =
     Number(deltaNumberInMW) > 0 ? <UpArrow size={svgSize} /> : <DownArrow size={svgSize} />;
