@@ -185,3 +185,15 @@ export const ThinDownArrow: React.FC<DeltaIconProps> = ({ className }) => (
     <path d="M11 21.883l-6.235-7.527-.765.644 7.521 9 7.479-9-.764-.645-6.236 7.529v-21.884h-1v21.883z" />
   </svg>
 );
+
+export const Checkmark: React.FC<IconProps> = ({ className }) => (
+  // checkmark
+  <svg
+    className={`w-4 h-4 mr-1 -mt-1${className ? ` ${className}` : ""}`}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+  </svg>
+);

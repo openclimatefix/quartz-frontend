@@ -107,7 +107,7 @@ const GspPvRemixChart: FC<{
 
   const deltaValue = dataMissing
     ? "---"
-    : (Number(latestPvActualInMW) - Number(correspondingLatestPvForecastInMW)).toFixed(2);
+    : (Number(latestPvActualInMW) - Number(correspondingLatestPvForecastInMW)).toFixed(1);
 
   //
 

@@ -85,7 +85,8 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ className }) => {
             <LegendItem
               iconClasses={"text-ocf-orange"}
               dashed
-              label={`OCF ${fourHoursAgo} Forecast`}
+              // label={`OCF ${fourHoursAgo} Forecast`}
+              label={`OCF 4hr+ Forecast`}
               dataKey={`4HR_FORECAST`}
             />
             <LegendItem

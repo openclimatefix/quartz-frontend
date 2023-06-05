@@ -5,6 +5,7 @@ import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
+import Cookies from "cookies";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
@@ -37,8 +38,12 @@ import * as Sentry from "@sentry/nextjs";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 import SitesMap from "../components/map/sitesMap";
 import { useFormatSitesData } from "../components/hooks/useFormatSitesData";
+import {
+  CookieStorageKeys,
+  setArraySettingInCookieStorage
+} from "../components/helpers/cookieStorage";
 
-export default function Home() {
+export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
@@ -51,6 +56,20 @@ export default function Home() {
   const [lat] = useGlobalState("lat");
   const [lng] = useGlobalState("lng");
   const [zoom] = useGlobalState("zoom");
+  const [largeScreenMode] = useGlobalState("dashboardMode");
+  const [visibleLines] = useGlobalState("visibleLines");
+
+  // Local state used to set initial state on server side render, then updated by global state
+  const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
+    dashboardModeServer === "true"
+  );
+  useEffect(() => {
+    setCombinedDashboardModeActive(largeScreenMode);
+  }, [largeScreenMode]);
+
+  useEffect(() => {
+    setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
+  }, [visibleLines]);
 
   const currentView = (v: VIEWS) => v === view;
 
@@ -75,6 +94,13 @@ export default function Home() {
       }
     });
   }, [view, maps]);
+
+  useEffect(() => {
+    maps.forEach((map) => {
+      console.log("-- -- -- resizing map");
+      map.resize();
+    });
+  }, [combinedDashboardModeActive]);
 
   useEffect(() => {
     maps.forEach((map, index) => {
@@ -303,13 +329,18 @@ export default function Home() {
     sitesPvActualError: sitePvActualError
   };
 
+  // console.log("cookies", cookies().getAll());
+
   const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
-  const [largeScreenMode] = useGlobalState("largeScreenMode");
-  const closedWidth = largeScreenMode ? "50%" : "56%";
+
+  const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
+
   return (
     <Layout>
       <div
-        className={`h-full relative pt-16${largeScreenMode ? " @container dashboard-mode" : ""}`}
+        className={`h-full relative pt-16${
+          combinedDashboardModeActive ? " @container dashboard-mode" : ""
+        }`}
       >
         <Header view={view} setView={setView} />
         <div
@@ -343,7 +374,7 @@ export default function Home() {
           />
         </div>
 
-        <SideLayout>
+        <SideLayout dashboardModeActive={combinedDashboardModeActive}>
           <PvRemixChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}
@@ -367,4 +398,13 @@ export default function Home() {
   );
 }
 
-export const getServerSideProps = withPageAuthRequired();
+export const getServerSideProps = withPageAuthRequired({
+  async getServerSideProps(context) {
+    const cookies = new Cookies(context.req, context.res);
+    return {
+      props: {
+        dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE)
+      }
+    };
+  }
+});

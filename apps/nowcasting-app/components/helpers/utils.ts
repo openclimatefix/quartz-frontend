@@ -7,6 +7,8 @@ import * as Sentry from "@sentry/nextjs";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
+export const enable4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
 const forecastAccessor1 = (d: any) => d.forecastValues[1].expectedPowerGenerationMegawatts;

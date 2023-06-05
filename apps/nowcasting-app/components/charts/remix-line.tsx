@@ -45,7 +45,8 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Actual",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
-  "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  "4HR_FORECAST": `OCF 4hr+ Forecast`,
   "4HR_PAST_FORECAST": "OCF 4hr Forecast",
   DELTA: "Delta"
 };
@@ -115,7 +116,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [show4hView] = useGlobalState("show4hView");
   const [view] = useGlobalState("view");
-  const [largeScreenMode] = useGlobalState("largeScreenMode");
+  const [largeScreenMode] = useGlobalState("dashboardMode");
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
@@ -328,7 +329,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 strokeDasharray="5 5"
                 strokeDashoffset={3}
                 stroke={orange} // blue
-                strokeWidth={largeScreenMode ? 6 : 3}
+                strokeWidth={largeScreenMode ? 4 : 2}
                 hide={!visibleLines.includes("4HR_FORECAST")}
               />
               <Line
@@ -339,7 +340,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 xAxisId={"x-axis"}
                 // strokeDasharray="10 10"
                 stroke={orange} // blue
-                strokeWidth={largeScreenMode ? 6 : 3}
+                strokeWidth={largeScreenMode ? 4 : 2}
                 hide={!visibleLines.includes("4HR_PAST_FORECAST")}
               />
             </>
@@ -351,7 +352,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             xAxisId={"x-axis"}
             yAxisId={"y-axis"}
             stroke="black"
-            strokeWidth={largeScreenMode ? 6 : 3}
+            strokeWidth={largeScreenMode ? 4 : 2}
             strokeDasharray="5 5"
             hide={!visibleLines.includes("GENERATION")}
           />
@@ -389,6 +390,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           />
           <Tooltip
             content={({ payload, label }) => {
+              console.log("payload", payload);
               const data = payload && payload[0]?.payload;
               if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0)) return <div></div>;
 
@@ -419,12 +421,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           : deltaNeg
                         : toolTipColors[key];
                       const computedValue =
-                        (key === "DELTA" &&
-                          !show4hView &&
-                          `${data["formattedDate"]}:00.000Z` >= currentTime) ||
-                        (show4hView &&
-                          `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
-                          ? "-"
+                        key === "DELTA" &&
+                        !show4hView &&
+                        `${data["formattedDate"]}:00.000Z` >= currentTime
+                          ? // `${data["formattedDate"]}:00.000Z` >= currentTime ||
+                            // (show4hView &&
+                            //   key.includes("4HR") &&
+                            //   `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
+                            "-"
                           : prettyPrintYNumberWithCommas(String(value), 1);
                       return (
                         <li className={`font-sans`} key={`item-${key}`} style={{ color }}>

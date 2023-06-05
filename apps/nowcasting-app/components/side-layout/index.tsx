@@ -4,12 +4,16 @@ import useGlobalState from "../helpers/globalState";
 
 type SideLayoutProps = {
   className?: string;
+  dashboardModeActive?: boolean;
 };
 
-const SideLayout: React.FC<SideLayoutProps> = ({ children, className }) => {
+const SideLayout: React.FC<SideLayoutProps> = ({
+  children,
+  className,
+  dashboardModeActive = false
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [largeScreenMode] = useGlobalState("largeScreenMode");
-  const closedWidth = largeScreenMode ? "50%" : "44%";
+  const closedWidth = dashboardModeActive ? "50%" : "44%";
   return (
     <div
       className={`h-full pt-16 absolute top-0 left-0 z-20 ${className || ""}`}
