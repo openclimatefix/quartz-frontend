@@ -59,13 +59,13 @@ const DeltaColorGuideBar: FC<{}> = () => {
             return (
               <div
                 key={value}
-                className={`px-3 py-[1px] ${background} text-xs md:text-sm whitespace-nowrap ${
+                className={`px-3 py-[1px] ${background} text-xs md:text-sm dash:text-xl dash:tracking-wide whitespace-nowrap ${
                   text !== 0 ? "border-l border-ocf-black-100" : ""
                 } ${textColor}`}
               >
                 {text > 0 ? "+" : ""}
                 {text}
-                <span className="text-xs font-normal">{text === DELTA_BUCKET.NEG4 && " MW"}</span>
+                <span className="text-xs font-normal">{text === DELTA_BUCKET.POS4 && " MW"}</span>
               </div>
             );
           })}
