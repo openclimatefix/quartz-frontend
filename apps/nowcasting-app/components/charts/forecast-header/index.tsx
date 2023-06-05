@@ -60,7 +60,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   );
 
   if (deltaView) {
-    const deltaValue = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(2);
+    const deltaValue = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
     return (
       <ForecastHeaderUI
         forecastNextPV={nextPvForecastInGW}
