@@ -28,9 +28,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 }) => {
   const computedClasses = classNames(
     className || "",
-    disabled
-      ? "text-gray-500 cursor-not-allowed"
-      : "text-white cursor-pointer hover:text-ocf-yellow-400",
+    disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
     "flex px-4 py-2 font-semibold text-sm"
   );
 
@@ -51,7 +49,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
     return (
       <Menu.Item>
         <a
-          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "")}
+          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "text-white")}
           onClick={() => setViewFunc(view)}
         >
           {text}
@@ -63,7 +61,10 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   return (
     <Menu.Item>
       {({ active }) => (
-        <Link href={url} className={classNames(computedClasses, active ? "text-ocf-yellow" : "")}>
+        <Link
+          href={url}
+          className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+        >
           {text}
         </Link>
       )}

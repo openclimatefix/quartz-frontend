@@ -119,12 +119,19 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       typeof map !== "object" ||
       typeof map.getSource !== "function" ||
       // @ts-ignore
-      map._removed ||
-      !map.getSource("latestPV")
+      map._removed
     )
       return;
+    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    if (!source) {
+      const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
+      map.addSource("latestPV", {
+        type: "geojson",
+        data: forecastGeoJson
+      });
+    }
+
     if (generatedGeoJsonForecastData && source) {
       source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
       map.setPaintProperty(

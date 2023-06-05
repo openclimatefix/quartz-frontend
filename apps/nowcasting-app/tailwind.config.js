@@ -1,4 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
+const plugin = require("tailwindcss/plugin");
 
 module.exports = {
   theme: {
@@ -14,24 +15,7 @@ module.exports = {
       extrabold: 800,
       "extra-bold": 800,
       black: 900
-    }
-  },
-  content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
-  safelist: [
-    "bg-ocf-yellow",
-    "bg-ocf-yellow/5",
-    "bg-ocf-yellow/10",
-    "bg-ocf-yellow/20",
-    "bg-ocf-yellow/30",
-    "bg-ocf-yellow/40",
-    "bg-ocf-yellow/50",
-    "bg-ocf-yellow/60",
-    "bg-ocf-yellow/70",
-    "bg-ocf-yellow/80",
-    "bg-ocf-yellow/90",
-    "bg-ocf-yellow/100"
-  ],
-  theme: {
+    },
     container: {
       center: true,
       padding: {
@@ -41,6 +25,24 @@ module.exports = {
         xl: "5rem",
         "2xl": "6rem"
       }
+    },
+    screens: {
+      sm: "640px",
+      // => @media (min-width: 640px) { ... }
+
+      md: "768px",
+      // => @media (min-width: 768px) { ... }
+
+      lg: "1024px",
+      // => @media (min-width: 1024px) { ... }
+
+      xl: "1280px",
+      // => @media (min-width: 1280px) { ... }
+
+      "2xl": "1536px",
+      // => @media (min-width: 1536px) { ... }
+      "3xl": "1750px",
+      "4xl": "1900px"
     },
     extend: {
       fontFamily: {
@@ -197,5 +199,27 @@ module.exports = {
       }
     }
   },
-  plugins: [require("@tailwindcss/forms"), require("@tailwindcss/typography")]
+  content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
+  safelist: [
+    "bg-ocf-yellow",
+    "bg-ocf-yellow/5",
+    "bg-ocf-yellow/10",
+    "bg-ocf-yellow/20",
+    "bg-ocf-yellow/30",
+    "bg-ocf-yellow/40",
+    "bg-ocf-yellow/50",
+    "bg-ocf-yellow/60",
+    "bg-ocf-yellow/70",
+    "bg-ocf-yellow/80",
+    "bg-ocf-yellow/90",
+    "bg-ocf-yellow/100"
+  ],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+    require("@tailwindcss/container-queries"),
+    plugin(function ({ addVariant }) {
+      addVariant("dash", ".dashboard-mode &");
+    })
+  ]
 };

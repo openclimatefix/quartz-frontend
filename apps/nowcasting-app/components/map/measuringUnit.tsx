@@ -18,7 +18,7 @@ const MeasuringUnit = ({
     setActiveUnit(unit);
   };
   const buttonClasses =
-    "relative inline-flex items-center px-3 py-0.5 text-sm font-extrabold hover:bg-ocf-yellow border-gray-600";
+    "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";
 
   return (
     <div className="flex justify-end mr-0">

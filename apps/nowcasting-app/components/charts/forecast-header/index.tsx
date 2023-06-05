@@ -1,50 +1,50 @@
 import React from "react";
-import { get30MinNow } from "../../helpers/globalState";
+import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
 import {
   convertISODateStringToLondonTime,
+  dateToLondonDateTimeString,
+  formatISODateAsLondonTime,
   formatISODateString,
   KWtoGW,
   MWtoGW
 } from "../../helpers/utils";
 import ForecastHeaderUI from "./ui";
-import DeltaForecastHeaderUI from "../delta-view/delta-header-ui";
+import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 
 type ForecastHeaderProps = {
   pvLiveData: PvRealData;
   pvForecastData: ForecastData;
-  deltaview: boolean;
+  deltaView: boolean;
 };
 
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   pvLiveData,
   pvForecastData,
-  deltaview
+  deltaView
 }) => {
   const timeNow = useTimeNow();
 
-  // get the time for the OCF Forecast
-  const futurePvForecastDatetime = formatISODateString(timeNow);
-  const futurePVForecastDatetimeLabel = convertISODateStringToLondonTime(
-    futurePvForecastDatetime + ":00.000Z"
-  );
+  // get the latest Actual pv value in GW
+  const selectedPvActualInGW = pvLiveData?.length
+    ? KWtoGW(pvLiveData?.[0]?.solarGenerationKw)
+    : "0.0";
 
-  // Get the next OCF forecast, for now (or future)
-  const nextPvForecastInGW = MWtoGW(
-    pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === futurePvForecastDatetime)
-      ?.expectedPowerGenerationMegawatts || 0
-  );
-
-  // get the Actual pv value in GW
-  const selectedPvActualInGW = KWtoGW(pvLiveData[0].solarGenerationKw);
-
-  // get pv time
-  const selectedPvActualDatetime = pvLiveData[0].datetimeUtc;
+  // get pv times
+  const latestPvActualDatetime = pvLiveData?.[0]?.datetimeUtc || timeNow;
 
   // Use the same time for the Forecast historic
-  const pvForecastDatetime = formatISODateString(selectedPvActualDatetime);
+  const pvForecastDatetime = formatISODateString(latestPvActualDatetime) || timeNow;
+
+  // Get the next OCF forecast following the latest PV actual datetime
+  const followingPvForecastDatetime = latestPvActualDatetime
+    ? getNext30MinSlot(new Date(latestPvActualDatetime))
+    : new Date(timeNow);
+  const followingPvForecastDateString = formatISODateString(
+    followingPvForecastDatetime.toISOString()
+  );
 
   // Get the next OCF forecast for the last PV value time
   const selectedPvForecastInGW = MWtoGW(
@@ -52,21 +52,25 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       ?.expectedPowerGenerationMegawatts || 0
   );
 
-  const calculatedDelta = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(
-    2
+  // Get the next OCF forecast
+  const nextPvForecastInGW = MWtoGW(
+    pvForecastData?.find(
+      (fc) => formatISODateString(fc.targetTime) === followingPvForecastDateString
+    )?.expectedPowerGenerationMegawatts || 0
   );
 
-  if (deltaview) {
+  if (deltaView) {
+    const deltaValue = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
     return (
-      <DeltaForecastHeaderUI
-        deltaValue={calculatedDelta}
+      <ForecastHeaderUI
         forecastNextPV={nextPvForecastInGW}
         actualPV={selectedPvActualInGW}
         forecastPV={selectedPvForecastInGW}
-        selectedTimeOnly={convertISODateStringToLondonTime(pvForecastDatetime + ":00.000Z")}
-        pvTimeOnly={convertISODateStringToLondonTime(selectedPvActualDatetime)}
-        forecastNextTimeOnly={futurePVForecastDatetimeLabel}
-      ></DeltaForecastHeaderUI>
+        pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
+        forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
+      >
+        <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
+      </ForecastHeaderUI>
     );
   }
 
@@ -75,13 +79,12 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastNextPV={nextPvForecastInGW}
       actualPV={selectedPvActualInGW}
       forecastPV={selectedPvForecastInGW}
-      selectedTimeOnly={convertISODateStringToLondonTime(pvForecastDatetime + ":00.000Z")}
-      pvTimeOnly={convertISODateStringToLondonTime(selectedPvActualDatetime)}
-      forecastNextTimeOnly={futurePVForecastDatetimeLabel}
+      pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
+      forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
     >
       <PlayButton
         startTime={get30MinNow()}
-        endTime={pvForecastData[pvForecastData.length - 1]?.targetTime}
+        endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}
       ></PlayButton>
     </ForecastHeaderUI>
   );
