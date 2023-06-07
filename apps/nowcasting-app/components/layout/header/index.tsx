@@ -46,11 +46,15 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 
   if (setViewFunc && view) {
     const isCurrentView = currentView === view;
+    let textColorClasses = isCurrentView ? "text-ocf-yellow" : "text-white";
+    if (disabled) textColorClasses = "text-gray-500 cursor-not-allowed";
     return (
       <Menu.Item>
         <a
-          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "text-white")}
-          onClick={() => setViewFunc(view)}
+          className={classNames(computedClasses, textColorClasses)}
+          onClick={() => {
+            if (!disabled) setViewFunc(view);
+          }}
         >
           {text}
         </a>
