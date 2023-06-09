@@ -1,5 +1,8 @@
 // export const API_PREFIX = "http://localhost:8000/v0";
 export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.nowcasting.io/v0";
+export const SITES_API_PREFIX =
+  process.env.NEXT_PUBLIC_SITES_API_PREFIX ||
+  "https://api-dev-site.nowcasting.io";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
 
@@ -59,6 +62,27 @@ export enum VIEWS {
   FORECAST = "FORECAST",
   DELTA = "DELTA",
   SOLAR_SITES = "SOLAR SITES"
+}
+
+export enum AGGREGATION_LEVELS {
+  NATIONAL = "NATIONAL",
+  REGION = "REGION",
+  GSP = "GSP",
+  SITE = "SITE"
+}
+
+export enum AGGREGATION_LEVEL_MIN_ZOOM {
+  NATIONAL = 0,
+  REGION = 5,
+  GSP = 7,
+  SITE = 8.5
+}
+
+export enum SORT_BY {
+  NAME = "NAME",
+  GENERATION = "GENERATION",
+  CAPACITY = "CAPACITY",
+  YIELD = "YIELD"
 }
 
 export enum DELTA_BUCKET {

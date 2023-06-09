@@ -10,7 +10,7 @@ import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
-import { FcAllResData } from "../types";
+import { CombinedData, CombinedErrors, GspAllForecastData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
@@ -33,14 +33,16 @@ const getRoundedPvPercent = (per: number, round: boolean = true) => {
 
 type PvLatestMapProps = {
   className?: string;
-  getForecastsData: (isNormalized: boolean) => SWRResponse<FcAllResData, any>;
+  combinedData: CombinedData;
+  combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
 const PvLatestMap: React.FC<PvLatestMapProps> = ({
   className,
-  getForecastsData,
+  combinedData,
+  combinedErrors,
   activeUnit,
   setActiveUnit
 }) => {
@@ -53,12 +55,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     selectedDataName = SelectedData.expectedPowerGenerationNormalized;
   if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
-  const {
-    data: initForecastData,
-    isValidating,
-    error: forecastError
-  } = getForecastsData(isNormalized);
   const forecastLoading = false;
+  const initForecastData = combinedData?.allGspForecastData;
+  const forecastError = combinedErrors?.allGspForecastError;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
@@ -73,7 +72,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   ];
 
   const generateGeoJsonForecastData: (
-    forecastData?: FcAllResData,
+    forecastData?: GspAllForecastData,
     targetTime?: string
   ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
     const gspForecastData = forecastData?.forecasts || [];
@@ -120,12 +119,19 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       typeof map !== "object" ||
       typeof map.getSource !== "function" ||
       // @ts-ignore
-      map._removed ||
-      !map.getSource("latestPV")
+      map._removed
     )
       return;
+    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    if (!source) {
+      const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
 
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
+      map.addSource("latestPV", {
+        type: "geojson",
+        data: forecastGeoJson
+      });
+    }
+
     if (generatedGeoJsonForecastData && source) {
       source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
       map.setPaintProperty(
@@ -182,11 +188,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     <div className={`relative h-full w-full ${className}`}>
       {forecastError ? (
         <FailedStateMap error="Failed to load" />
-      ) : forecastLoading ? (
-        <LoadStateMap>
-          <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-        </LoadStateMap>
       ) : (
+        // ) : !forecastError && !initForecastData ? (
+        //   <LoadStateMap>
+        //     <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+        //   </LoadStateMap>
         <Map
           loadDataOverlay={addFCData}
           updateData={{ newData: !!initForecastData, updateMapData }}
@@ -196,7 +202,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
               <MeasuringUnit
                 activeUnit={activeUnit}
                 setActiveUnit={setActiveUnit}
-                isLoading={isValidating && !initForecastData}
+                isLoading={!initForecastData}
               />
             </>
           )}

@@ -1,4 +1,4 @@
-import { classNames } from "../../helpers/utils";
+import { classNames, isProduction } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
@@ -28,9 +28,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 }) => {
   const computedClasses = classNames(
     className || "",
-    disabled
-      ? "text-gray-500 cursor-not-allowed"
-      : "text-white cursor-pointer hover:text-ocf-yellow-400",
+    disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
     "flex px-4 py-2 font-semibold text-sm"
   );
 
@@ -48,11 +46,15 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 
   if (setViewFunc && view) {
     const isCurrentView = currentView === view;
+    let textColorClasses = isCurrentView ? "text-ocf-yellow" : "text-white";
+    if (disabled) textColorClasses = "text-gray-500 cursor-not-allowed";
     return (
       <Menu.Item>
         <a
-          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "")}
-          onClick={() => setViewFunc(view)}
+          className={classNames(computedClasses, textColorClasses)}
+          onClick={() => {
+            if (!disabled) setViewFunc(view);
+          }}
         >
           {text}
         </a>
@@ -63,7 +65,10 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   return (
     <Menu.Item>
       {({ active }) => (
-        <Link href={url} className={classNames(computedClasses, active ? "text-ocf-yellow" : "")}>
+        <Link
+          href={url}
+          className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+        >
           {text}
         </Link>
       )}
@@ -105,7 +110,7 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             currentView={view}
             setViewFunc={setView}
             text="Solar Sites"
-            disabled
+            disabled={isProduction}
           />
           <HeaderLink
             url="/"

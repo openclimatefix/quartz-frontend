@@ -19,14 +19,13 @@ const clearIntervals = () => {
   console.log("set intervals to empty");
 };
 const startNewInterval = () => {
-  setIntervals([
-    ...intervals,
-    setInterval(() => {
-      console.log("checking for new time");
-      const time30MinNow = get30MinNow();
-      setSelectedISOTime(time30MinNow);
-    }, 1000 * 60)
-  ]);
+  const newInterval = setInterval(() => {
+    console.log("checking for new time");
+    const time30MinNow = get30MinNow();
+    setSelectedISOTime(time30MinNow);
+  }, 1000 * 60);
+  console.log("starting new interval: ", newInterval);
+  setIntervals([...intervals, newInterval]);
 };
 const useAndUpdateSelectedTime = () => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");

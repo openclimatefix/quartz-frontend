@@ -15,6 +15,6 @@ export interface IMap {
   loadDataOverlay: any;
   controlOverlay: any;
   bearing?: number;
-  updateData: { newData: boolean; updateMapData: (map: mapboxgl.Map) => void };
+  updateData: { newData: boolean | string; updateMapData: (map: mapboxgl.Map) => void };
   title: string;
 }

@@ -2,12 +2,13 @@ import React, { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
 import pkg from "../../../package.json";
-import { classNames, formatISODateStringHumanNumbersOnly } from "../../helpers/utils";
+import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from "../../helpers/utils";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
 import { ChartInfo } from "../../../ChartInfo";
-import { ExternalLinkIcon } from "../../icons/icons";
+import { Checkmark, ExternalLinkIcon } from "../../icons/icons";
+import { CookieStorageKeys, setBooleanSettingInLocalStorage } from "../../helpers/cookieStorage";
 const { version } = pkg;
 
 interface IProfileDropDown {}
@@ -15,7 +16,16 @@ interface IProfileDropDown {}
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [show4hView, setShow4hView] = useGlobalState("show4hView");
-  const isStaging = process.env.NEXT_PUBLIC_VERCEL_ENV !== "production";
+  const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
+  const toggleDashboardMode = () => {
+    setDashboardMode(!dashboardMode);
+    setBooleanSettingInLocalStorage(CookieStorageKeys.DASHBOARD_MODE, !dashboardMode);
+  };
+  const toggle4hView = () => {
+    setShow4hView(!show4hView);
+    setBooleanSettingInLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW, !show4hView);
+  };
+  console.log("dashboardMode", dashboardMode);
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -91,25 +101,55 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
             <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
           </div>
           <div className="w-full border-t border-gray-300" />
-          {isStaging && (
+          {process.env.NEXT_PUBLIC_4H_VIEW === "true" && (
             <Menu.Item>
               {({ active }) => (
                 <div
                   className={classNames(
                     active ? "bg-gray-100" : "",
-                    "block px-4 py-2 text-sm text-gray-700"
+                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
                   )}
                 >
+                  {show4hView && (
+                    <span className="flex items-center">
+                      <Checkmark />
+                    </span>
+                  )}
                   <button
-                    onClick={() => setShow4hView(!show4hView)}
-                    className="ml-3 text-sx  font-medium text-ocf-black-300 dark:text-gray-300"
+                    onClick={toggle4hView}
+                    className="ml-1 text-xs  font-medium text-ocf-black-300"
                   >
-                    {`${show4hView ? "Hide" : "Show"} 4-hour forecast`}
+                    {`4-hour forecast`}
                   </button>
                 </div>
               )}
             </Menu.Item>
           )}
+          <Menu.Item>
+            {({ active }) => (
+              <div
+                className={classNames(
+                  active ? "bg-gray-100" : "",
+                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                )}
+              >
+                {dashboardMode && (
+                  <span className="flex items-center">
+                    <Checkmark />
+                  </span>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    toggleDashboardMode();
+                  }}
+                  className="ml-1 text-xs font-medium text-ocf-black-300"
+                >
+                  {`Dashboard mode`}
+                </button>
+              </div>
+            )}
+          </Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <div

@@ -29,7 +29,7 @@ export type FcAllResData = {
 type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
-  expectedPowerGenerationNormalized: null;
+  expectedPowerGenerationNormalized: number | null;
 };
 type ForecastData = {
   targetTime: string;
@@ -123,4 +123,77 @@ export type Bucket = {
   textColor: string;
   altTextColor: string;
   gspDeltas?: Map<number, GspDeltaValue>;
+};
+
+// Sites
+export type Site = {
+  site_uuid: string;
+  client_name: string;
+  client_site_id: string;
+  client_site_name: string;
+  region: string;
+  dno: string;
+  gsp: string;
+  orientation: string;
+  tilt: string;
+  latitude: number;
+  longitude: number;
+  installed_capacity_kw: number;
+};
+
+export type AllSites = {
+  site_list: Site[];
+};
+
+export type SiteForecastValue = {
+  target_datetime_utc: string;
+  expected_generation_kw: number;
+};
+
+export type SitePvActualValue = {
+  datetime_utc: string;
+  actual_generation_kw: number;
+};
+
+export type SitePvForecast = {
+  forecast_uuid: string;
+  site_uuid: string;
+  forecast_creation_datetime: string;
+  forecast_version: string;
+  forecast_values: SiteForecastValue[];
+};
+
+export type SitesPvForecast = SitePvForecast[];
+
+export type SitePvActual = {
+  site_uuid: string;
+  pv_actual_values: SitePvActualValue[];
+};
+export type SitesPvActual = SitePvActual[];
+
+export type CombinedSitesData = {
+  allSitesData: Site[] | undefined;
+  sitesPvForecastData: SitePvForecast[];
+  sitesPvActualData: SitePvActual[];
+};
+
+// Common object type across Sites, GSPs, Regions and National
+export type AggregatedSitesDatum = {
+  id: string;
+  label: string;
+  capacity: number;
+  actualPV: number;
+  expectedPV: number;
+  aggregatedYield: number;
+  lat: number;
+  lng: number;
+};
+
+export type AggregatedSitesDataGroupMap = Map<string, AggregatedSitesDatum>;
+
+export type AggregatedSitesCombinedData = {
+  sites: AggregatedSitesDataGroupMap;
+  regions: AggregatedSitesDataGroupMap;
+  gsps: AggregatedSitesDataGroupMap;
+  national: AggregatedSitesDataGroupMap;
 };

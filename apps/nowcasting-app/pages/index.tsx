@@ -5,28 +5,45 @@ import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
+import Cookies from "cookies";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, getAllForecastUrl, VIEWS } from "../constant";
+import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
 import useGlobalState from "../components/helpers/globalState";
-import useSWRImmutable from "swr/immutable";
 import {
   AllGspRealData,
+  AllSites,
   CombinedData,
   CombinedErrors,
-  FcAllResData,
+  CombinedSitesData,
   ForecastData,
   GspAllForecastData,
   National4HourData,
-  PvRealData
+  PvRealData,
+  SitePvActual,
+  SitePvForecast,
+  SitesPvActual,
+  SitesPvForecast
 } from "../components/types";
-import { axiosFetcherAuth, formatISODateString, getDeltaBucket } from "../components/helpers/utils";
+import {
+  axiosFetcherAuth,
+  formatISODateString,
+  getDeltaBucket,
+  isProduction
+} from "../components/helpers/utils";
 import useSWR from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
+import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
+import SitesMap from "../components/map/sitesMap";
+import { useFormatSitesData } from "../components/hooks/useFormatSitesData";
+import {
+  CookieStorageKeys,
+  setArraySettingInCookieStorage
+} from "../components/helpers/cookieStorage";
 
-export default function Home() {
+export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
@@ -39,6 +56,22 @@ export default function Home() {
   const [lat] = useGlobalState("lat");
   const [lng] = useGlobalState("lng");
   const [zoom] = useGlobalState("zoom");
+  const [largeScreenMode] = useGlobalState("dashboardMode");
+  const [visibleLines] = useGlobalState("visibleLines");
+
+  // Local state used to set initial state on server side render, then updated by global state
+  const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
+    dashboardModeServer === "true"
+  );
+  useEffect(() => {
+    setCombinedDashboardModeActive(largeScreenMode);
+  }, [largeScreenMode]);
+
+  useEffect(() => {
+    setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
+  }, [visibleLines]);
+
+  const currentView = (v: VIEWS) => v === view;
 
   useEffect(() => {
     if (user && !isLoading && !error) {
@@ -63,6 +96,13 @@ export default function Home() {
   }, [view, maps]);
 
   useEffect(() => {
+    maps.forEach((map) => {
+      console.log("-- -- -- resizing map");
+      map.resize();
+    });
+  }, [combinedDashboardModeActive]);
+
+  useEffect(() => {
     maps.forEach((map, index) => {
       if (map.getContainer().dataset.title === view) return;
 
@@ -76,41 +116,43 @@ export default function Home() {
   }, [lat, lng, zoom]);
 
   // Assuming first item in the array is the latest
-  const useGetForecastsData = (isNormalized: boolean) => {
-    const [forecastLoading, setForecastLoading] = useState(true);
-    const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
-    const bareForecastData = useSWRImmutable<FcAllResData>(
-      () => getAllForecastUrl(false, false),
-      axiosFetcherAuth,
-      {
-        onSuccess: (data) => {
-          if (data.forecasts?.length)
-            setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-          setForecastLoading(false);
-        }
-      }
-    );
-
-    const allForecastData = useSWR<FcAllResData>(
-      () => getAllForecastUrl(true, true),
-      axiosFetcherAuth,
-      {
-        refreshInterval: 1000 * 60 * 5, // 5min
-        isPaused: () => forecastLoading,
-        onSuccess: (data) => {
-          setForecastCreationTime(data.forecasts[0].forecastCreationTime);
-        }
-      }
-    );
-    useEffect(() => {
-      if (!forecastLoading) {
-        allForecastData.mutate();
-      }
-    }, [forecastLoading]);
-
-    if (isNormalized) return allForecastData;
-    else return allForecastData.data ? allForecastData : bareForecastData;
-  };
+  // const useGetForecastsData = (isNormalized: boolean) => {
+  //   const [forecastLoading, setForecastLoading] = useState(true);
+  //   const [, setForecastCreationTime] = useGlobalState("forecastCreationTime");
+  //   // const bareForecastData = useSWRImmutable<FcAllResData>(
+  //   //   () => getAllForecastUrl(false, false),
+  //   //   axiosFetcherAuth,
+  //   //   {
+  //   //     onSuccess: (data) => {
+  //   //       if (data.forecasts?.length)
+  //   //         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+  //   //       setForecastLoading(false);
+  //   //     }
+  //   //   }
+  //   // );
+  //
+  //   const allForecastData = useSWR<GspAllForecastData>(
+  //     () => getAllForecastUrl(true, true),
+  //     axiosFetcherAuth,
+  //     {
+  //       refreshInterval: 1000 * 60 * 5, // 5min
+  //       // isPaused: () => forecastLoading,
+  //       onSuccess: (data) => {
+  //         setForecastCreationTime(data.forecasts[0].forecastCreationTime);
+  //       }
+  //     }
+  //   );
+  //   console.log("allForecastData", allForecastData);
+  //   // useEffect(() => {
+  //   //   if (!forecastLoading) {
+  //   //     allForecastData.mutate();
+  //   //   }
+  //   // }, [forecastLoading]);
+  //
+  //   // if (isNormalized) return allForecastData;
+  //   // else return allForecastData.data ? allForecastData : [];
+  //   return allForecastData?.data ? allForecastData : { data: { forecasts: [] } };
+  // };
 
   const { data: nationalForecastData, error: nationalForecastError } = useSWR<ForecastData>(
     `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
@@ -241,21 +283,90 @@ export default function Home() {
     allGspRealError
   };
 
-  const currentView = (v: VIEWS) => v === view;
+  // Sites API data
+  const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
+    `${SITES_API_PREFIX}/sites`,
+    axiosFetcherAuth,
+    {
+      isPaused: () => {
+        console.log("isPaused", !currentView(VIEWS.SOLAR_SITES));
+        return !currentView(VIEWS.SOLAR_SITES);
+      }
+    }
+  );
+  const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
+  const siteUuids = slicedSitesData.map((site) => site.site_uuid);
+  const siteUuidsString = siteUuids?.join(",");
+  const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast, any>(
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+    axiosFetcherAuth,
+    {
+      isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
+      dedupingInterval: 10000,
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
+  const { data: sitesPvActualData, error: sitePvActualError } = useSWR<SitesPvActual>(
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    axiosFetcherAuth,
+    {
+      isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
+      dedupingInterval: 10000,
+      refreshInterval: 60 * 1000 * 5 // 5min
+    }
+  );
+
+  const sitesData: CombinedSitesData = {
+    allSitesData: slicedSitesData,
+    sitesPvForecastData: sitePvForecastData?.filter((d): d is SitePvForecast => !!d) || [],
+    sitesPvActualData: sitesPvActualData?.filter((d): d is SitePvActual => !!d) || []
+  };
+
+  const sitesErrors = {
+    allSitesError,
+    sitesPvForecastError: sitePvForecastError,
+    sitesPvActualError: sitePvActualError
+  };
+
+  // console.log("cookies", cookies().getAll());
+
+  const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
+
+  const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
+
   return (
     <Layout>
-      <div className="h-full relative pt-16">
+      <div
+        className={`h-full relative pt-16${
+          combinedDashboardModeActive ? " @container dashboard-mode" : ""
+        }`}
+      >
         <Header view={view} setView={setView} />
-        <div id="map-container" className={`relative float-right h-full`} style={{ width: "56%" }}>
+        <div
+          id="map-container"
+          className={`relative float-right h-full`}
+          style={{ width: closedWidth }}
+        >
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
-            getForecastsData={useGetForecastsData}
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
+          {!isProduction && (
+            <SitesMap
+              className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+              sitesData={sitesData}
+              aggregatedSitesData={aggregatedSitesData}
+              sitesErrors={sitesErrors}
+              activeUnit={activeUnit}
+              setActiveUnit={setActiveUnit}
+            />
+          )}
           <DeltaMap
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
-            getForecastsData={useGetForecastsData}
             combinedData={combinedData}
             combinedErrors={combinedErrors}
             activeUnit={activeUnit}
@@ -263,8 +374,19 @@ export default function Home() {
           />
         </div>
 
-        <SideLayout>
-          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
+        <SideLayout dashboardModeActive={combinedDashboardModeActive}>
+          <PvRemixChart
+            combinedData={combinedData}
+            combinedErrors={combinedErrors}
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+          />
+          {!isProduction && (
+            <SolarSiteChart
+              combinedSitesData={sitesData}
+              aggregatedSitesData={aggregatedSitesData}
+              className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+            />
+          )}
           <DeltaViewChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}
@@ -276,4 +398,13 @@ export default function Home() {
   );
 }
 
-export const getServerSideProps = withPageAuthRequired();
+export const getServerSideProps = withPageAuthRequired({
+  async getServerSideProps(context) {
+    const cookies = new Cookies(context.req, context.res);
+    return {
+      props: {
+        dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE)
+      }
+    };
+  }
+});

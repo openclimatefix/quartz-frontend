@@ -5,6 +5,10 @@ import { Bucket, GspDeltaValue } from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 
+export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
+
+export const enable4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
 const forecastAccessor1 = (d: any) => d.forecastValues[1].expectedPowerGenerationMegawatts;
@@ -37,14 +41,31 @@ export const formatISODateString = (date: string) => {
   const dateid = date?.slice(0, 16);
   return dateid;
 };
-export const convertISODateStringToLondonTime = (date: string) => {
-  // Changes the ISO date string to Europe London time, and return time only
-  const d = new Date(date);
-  const date_london_time_str = d
+
+export const formatISODateAsLondonTime = (date: Date) => {
+  const date_london_time_str = date
     .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
     .slice(0, 5);
 
   return date_london_time_str;
+};
+export const convertISODateStringToLondonTime = (date: string) => {
+  if (!date || date === ":00.000Z") return "00:00";
+  // Changes the ISO date string to Europe London time, and return time only
+  const d = new Date(date);
+  if (typeof d !== "object" || isNaN(d.getTime())) {
+    throw new Error(`Invalid date: ${date}`);
+  }
+  return formatISODateAsLondonTime(d);
+};
+
+export const convertToLocaleDateString = (date: string) => {
+  const localeDatetime = new Date(date);
+  if (isNaN(localeDatetime.getTime())) {
+    throw new Error(`Invalid date: ${date}`);
+  }
+  localeDatetime.setMinutes(localeDatetime.getMinutes() - localeDatetime.getTimezoneOffset());
+  return localeDatetime.toISOString();
 };
 
 export const formatISODateStringHuman = (date: string) => {
@@ -54,14 +75,20 @@ export const formatISODateStringHuman = (date: string) => {
 
   const d = new Date(date);
 
-  const date_london = d.toLocaleString("en-GB", {
+  return dateToLondonDateTimeString(d);
+};
+
+export const dateToLondonDateTimeString = (date: Date) => {
+  const date_london = date.toLocaleString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
     timeZone: "Europe/London"
   });
-  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
+  const date_london_time = date
+    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
+    .slice(0, 5);
 
   return `${date_london}, ${date_london_time}`;
 };
@@ -85,6 +112,9 @@ export const MWtoGW = (MW: number) => {
 };
 export const KWtoGW = (MW: number) => {
   return (MW / 1000 / 1000).toFixed(1);
+};
+export const KWtoMW = (MW: number) => {
+  return (MW / 1000).toFixed(1);
 };
 
 export const addMinutesToISODate = (date: string, munites: number) => {
