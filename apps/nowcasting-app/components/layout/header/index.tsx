@@ -85,10 +85,14 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
         <a
           className="flex h-6 w-auto mr-2"
           target="_blank"
-          href="https://nowcasting.io/"
+          href="https://quartz.solar/"
           rel="noreferrer"
         >
-          <img src="/NOWCASTING_Secondary-white.svg" alt="ofc" className="h-6 w-auto" />
+          <img
+            src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg"
+            alt="quartz_logo"
+            className="h-6 w-auto"
+          />
         </a>
         <div className="mr-[6px] flex items-center">
           <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>

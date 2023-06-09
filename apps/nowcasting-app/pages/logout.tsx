@@ -17,7 +17,7 @@ const links = [
     title: "API Reference",
     description: "A complete API reference for our library",
     icon: ViewListIcon,
-    url: "https://api.nowcasting.io/docs"
+    url: "https://api.quartz.solar/docs"
   },
   {
     title: "Support",
@@ -31,7 +31,7 @@ const LogoutPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Logged out | Nowcasting App</title>
+        <title>Logged out | Quartz Solar UI</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -40,8 +40,8 @@ const LogoutPage: NextPage = () => {
           <div className="flex-shrink-0 pt-16">
             <img
               className="w-auto h-12 mx-auto"
-              src="https://nowcasting.io/nowcasting.svg"
-              alt="Nowcasting Logo"
+              src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg"
+              alt="Quartz Logo"
             />
           </div>
           <div className="max-w-xl py-16 mx-auto sm:py-24">

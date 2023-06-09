@@ -7,7 +7,7 @@ const NotFoundPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Not found | Nowcasting App</title>
+        <title>Not found | Quartz Solar UI</title>
       </Head>
       <div className="flex flex-col min-h-screen pt-16">
         <main className="flex flex-col justify-center flex-grow w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -17,8 +17,8 @@ const NotFoundPage: NextPage = () => {
                 <span className="sr-only">Workflow</span>
                 <img
                   className="w-auto h-12"
-                  src="https://nowcasting.io/nowcasting.svg"
-                  alt="Nowcasting Logo"
+                  src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg"
+                  alt="Quartz Solar Logo"
                 />
               </div>
             </Link>
