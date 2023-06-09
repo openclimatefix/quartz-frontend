@@ -80,18 +80,28 @@ type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
   return (
-    <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center z-30">
-      <div className="p-1 mt-1 items-end flex flex-col">
+    <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full p-1 text-sm items-center z-30">
+      <div className="flex-grow-0 my-1 flex-shrink-0">
         <a
-          className="flex h-6 w-auto mr-2"
+          className="flex h-8 self-center w-auto"
+          target="_blank"
+          href="https://quartz.solar/"
+          rel="noreferrer"
+        >
+          <img src="/QUARTZSOLAR_LOGO_ICON.svg" alt="quartz_logo" className="h-8 w-auto" />
+        </a>
+      </div>
+      <div className="p-1 mt-1 mb-1.5 items-end flex flex-col">
+        <a
+          className="flex h-6 w-auto"
           target="_blank"
           href="https://quartz.solar/"
           rel="noreferrer"
         >
           <img
-            src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg"
+            src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"
             alt="quartz_logo"
-            className="h-6 w-auto"
+            className="h-8 w-auto"
           />
         </a>
         <div className="mr-[6px] flex items-center">
