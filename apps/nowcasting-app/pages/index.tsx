@@ -403,7 +403,7 @@ export const getServerSideProps = withPageAuthRequired({
     const cookies = new Cookies(context.req, context.res);
     return {
       props: {
-        dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE)
+        dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
       }
     };
   }
