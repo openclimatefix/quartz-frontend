@@ -70,7 +70,7 @@ export const useFormatSitesData = (
       const site = combinedSitesData.allSitesData?.[i];
       if (!site) continue;
       const lastSite = (combinedSitesData?.allSitesData || []).length - 1 === Number(i);
-      const siteCapacity = site.installed_capacity_kw;
+      const siteCapacity = site.inverter_capacity_kw;
       const siteActualPV = getPvActualGenerationForSite(
         combinedSitesData.sitesPvActualData,
         site.site_uuid,
