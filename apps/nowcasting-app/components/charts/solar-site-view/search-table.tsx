@@ -81,7 +81,7 @@ const sites = [
 //Table for GSPs
 // Table for Sites
 // get data for the table
-const SitesTable: React.FC<Site> = ({ dno, region, installed_capacity_kw }) => {
+const SitesTable: React.FC<Site> = ({ dno, region, inverter_capacity_kw }) => {
   let size = 17;
   return (
     <>
