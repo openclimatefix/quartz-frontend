@@ -76,7 +76,7 @@ const SolarSiteChart: FC<{
   const selectedSiteData = combinedSitesData.allSitesData?.filter(
     (site) => site.site_uuid === clickedSiteGroupId
   );
-  const selectedSiteCapacity = selectedSiteData?.[0]?.installed_capacity_kw || 0;
+  const selectedSiteCapacity = selectedSiteData?.[0]?.inverter_capacity_kw || 0;
   const filteredChartData = useFormatChartDataSites({
     allSitesData: selectedSiteData,
     pvForecastData: combinedSitesData.sitesPvForecastData,
