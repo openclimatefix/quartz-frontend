@@ -67,7 +67,7 @@ const PvRemixChart: FC<{
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    probabilisticUpperBoundData: nationalForecastData,
+    probabilisticRangeData: nationalForecastData,
     fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,
