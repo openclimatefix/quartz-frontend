@@ -48,7 +48,7 @@ const getDelta: (datum: ChartData) => number = (datum) => {
 const useFormatChartData = ({
   forecastData,
   fourHourData,
-  probabilisticUpperBoundData,
+  probabilisticRangeData,
   pvRealDayAfterData,
   pvRealDayInData,
   timeTrigger,
@@ -56,7 +56,7 @@ const useFormatChartData = ({
 }: {
   forecastData?: ForecastData;
   fourHourData?: ForecastData;
-  probabilisticUpperBoundData?: ForecastData;
+  probabilisticRangeData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
@@ -112,14 +112,26 @@ const useFormatChartData = ({
           (db) => getForecastChartData(timeNow, db)
         )
       );
-      probabilisticUpperBoundData?.forEach((fc) =>
+      probabilisticRangeData?.forEach((fc) =>
         addDataToMap(
           fc,
           (db) => db.targetTime,
-          (db) => ({ PROBABILISTIC_UPPER_BOUND: 1.1 * db.expectedPowerGenerationMegawatts })
+          //add an array here for the probabilistic range. it'll be two numbers [lower, upper]
+          (db) => ({
+            PROBABILISTIC_RANGE: [
+              1.1 * db.expectedPowerGenerationMegawatts,
+              0.9 * db.expectedPowerGenerationMegawatts
+            ]
+          })
         )
       );
-      console.log("chartMap", chartMap);
+      // probabilisticLowerBoundData?.forEach((fc) => (
+      //   addDataToMap(
+      //     fc,
+      //     (db) => db.targetTime,
+      //     (db) => ({ PROBABILISTIC_LOWER_BOUND: 0.9 * db.expectedPowerGenerationMegawatts })
+      //   )
+      // ));
 
       if (fourHourData) {
         fourHourData.forEach((fc) =>
