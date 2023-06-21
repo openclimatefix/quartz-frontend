@@ -1,5 +1,7 @@
 import React, { FC } from "react";
 import {
+  AreaChart,
+  Area,
   Bar,
   CartesianGrid,
   ComposedChart,
@@ -37,6 +39,8 @@ export type ChartData = {
   "4HR_PAST_FORECAST"?: number;
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
+  PROBABILISTIC_UPPER_BOUND: number;
+  PROBABILISTIC_LOWER_BOUND: number;
   formattedDate: string; // "2022-05-16T15:00",
 };
 
@@ -45,6 +49,7 @@ const toolTiplabels: Record<string, string> = {
   GENERATION_UPDATED: "PV Actual",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
+  PROBABILISTIC_UPPER_BOUND: "OCF Probabilistic Upper Bound",
   // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
   "4HR_FORECAST": `OCF 4hr+ Forecast`,
   "4HR_PAST_FORECAST": "OCF 4hr Forecast",
@@ -345,6 +350,17 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             </>
           )}
+          <Area
+            type="monotone"
+            dataKey="PROBABILISTIC_UPPER_BOUND"
+            dot={false}
+            xAxisId={"x-axis"}
+            yAxisId={"y-axis"}
+            // strokeDasharray="5 5"
+            fill={yellow}
+            strokeWidth="0"
+            // strokeWidth={largeScreenMode ? 4 : 2}
+          />
           <Line
             type="monotone"
             dataKey="GENERATION"
@@ -388,6 +404,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
+
           <Tooltip
             content={({ payload, label }) => {
               console.log("payload", payload);
