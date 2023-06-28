@@ -1,6 +1,5 @@
 import React, { FC } from "react";
 import {
-  AreaChart,
   Area,
   Bar,
   CartesianGrid,
