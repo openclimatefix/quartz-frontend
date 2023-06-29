@@ -125,13 +125,6 @@ const useFormatChartData = ({
           })
         )
       );
-      // probabilisticLowerBoundData?.forEach((fc) => (
-      //   addDataToMap(
-      //     fc,
-      //     (db) => db.targetTime,
-      //     (db) => ({ PROBABILISTIC_LOWER_BOUND: 0.9 * db.expectedPowerGenerationMegawatts })
-      //   )
-      // ));
 
       if (fourHourData) {
         fourHourData.forEach((fc) =>

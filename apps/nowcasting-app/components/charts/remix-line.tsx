@@ -38,7 +38,7 @@ export type ChartData = {
   "4HR_PAST_FORECAST"?: number;
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
-  PROBABILISTIC_RANGE: Array<number>;
+  PROBABILISTIC_RANGE?: Array<number>;
   formattedDate: string; // "2022-05-16T15:00",
 };
 
