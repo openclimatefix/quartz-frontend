@@ -93,7 +93,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 
 | Repo                                                                     | Description                                                                                            | Main Developer                                 |
 |--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------| 
-| [NWP](https://github.com/openclimatefix/nwp)                             | Tools for downloading and processing numerical weather predictions          |[Jack Kelly](https://github.com/JackKelly)                            
+| [NWP](https://github.com/openclimatefix/nwp)                             | Tools for downloading and processing numerical weather predictions          |[Jacob Bieker](https://github.com/jacobbieker)                           
 | [GFS Downloader](https://github.com/openclimatefix/gfs-downloader)       | NCEP GFS 0.25 Degree Global Forecast Grids Historical Archive: https://rda.ucar.edu/datasets/ds084.1/ | [Zak Watts](https://github.com/zakwatts)
 | [OCF ML Metrics](https://github.com/openclimatefix/ocf-ml-metrics)       | Collection of simple baseline models and metrics for standardized evaluation of OCF forecasting models  | [Jacob Bieker](https://github.com/jacobbieker) | 
 | [OCF Blocs2](https://github.com/openclimatefix/ocf_blosc2)               | Blosc2 codec used for OCF's Zarr compression | [Jacob Bieker](https://github.com/jacobbieker) | 
