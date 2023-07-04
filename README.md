@@ -73,7 +73,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 | [GSP Consumer](https://github.com/openclimatefix/gspconsumer)                      | Collect GSP solar generation data from PVLive | [Peter Dudfield](https://github.com/peterdudfield)
 | [PV Consumer](https://github.com/openclimatefix/gspconsumer)                       | Consumer PV data from various sources | [Peter Dudfield](https://github.com/peterdudfield)
 | [MetOfficeDataHub](https://github.com/openclimatefix/metofficedatahub)             | Python wrapper around MetOffice Atmospheric Model Data REST API | [Peter Dudfield](https://github.com/peterdudfield)
-| [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol](https://github.com/devsjc)
+| [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc)
 | [UK PV National GSP API](https://github.com/openclimatefix/uk-pv-national-gsp-api) | API for hosting nowcasting solar predictions. Will just return 'dummy numbers' until about mid-2022! | [Peter Dudfield](https://github.com/peterdudfield)
 | [Satip](https://github.com/openclimatefix/satip)                                   | Satip contains the code necessary for retrieving, transforming and storing EUMETSAT data | [Jacob Bieker](https://github.com/jacobbieker)
 | [Nowcasting Forecast](https://github.com/openclimatefix/nowcasting_forecast)       | Making live forecasts for the nowcasting project                                                       | [Peter Dudfield](https://github.com/peterdudfield)
@@ -83,7 +83,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 | [Nowcasting](https://github.com/openclimatefix/nowcasting)                         | Front End repo for the Nowcasting project. | [Brad Fulford](https://github.com/braddf)
 | [UK Analysis Dashboard ](https://github.com/openclimatefix/uk-analysis-dashboard ) | This is a Streamlit app for the OCF team that reports database statistics | [Rachel Tipton](https://github.com/rachel-labri-tipton) 
 | [Nowcasting](https://github.com/openclimatefix/nowcasting)                         | Front End repo for the Nowcasting project. | [Brad Fulford](https://github.com/braddf)
-| [OCF Infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments                                   | [Sol](https://github.com/devsjc)
+| [OCF Infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments                                   | [Sol Cotton](https://github.com/devsjc)
 | [PV Site Production](https://github.com/openclimatefix/pv-site-production)         | Production service for PV site level forecasts | [Peter Dudfield](https://github.com/peterdudfield)
 | [PV Site API](https://github.com/openclimatefix/pv-site-api)                       | Site specific API for SBRI project | [Peter Dudfield](https://github.com/peterdudfield)              | 
 | [PV Site Mobile](https://github.com/openclimatefix/pv-site-mobile)                 | Front End web application for site-level forecast UI | [Brad Fulford](https://github.com/braddf)
