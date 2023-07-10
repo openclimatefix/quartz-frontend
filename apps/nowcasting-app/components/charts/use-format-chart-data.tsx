@@ -118,10 +118,7 @@ const useFormatChartData = ({
           (db) => db.targetTime,
           //add an array here for the probabilistic range. it'll be two numbers [lower, upper]
           (db) => ({
-            PROBABILISTIC_RANGE: [
-              1.1 * db.expectedPowerGenerationMegawatts,
-              0.9 * db.expectedPowerGenerationMegawatts
-            ]
+            PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
           })
         )
       );
