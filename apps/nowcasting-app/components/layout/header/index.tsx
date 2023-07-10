@@ -134,7 +134,7 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             text="Delta"
           />
           <HeaderLink
-            url="https://openclimatefix.notion.site/openclimatefix/Nowcasting-Documentation-0d718915650e4f098470d695aa3494bf"
+            url="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
             text="Documentation"
           />
         </Menu>
