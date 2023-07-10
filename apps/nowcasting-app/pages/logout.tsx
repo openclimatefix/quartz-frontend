@@ -40,7 +40,7 @@ const LogoutPage: NextPage = () => {
           <div className="flex-shrink-0 pt-16">
             <img
               className="w-auto h-12 mx-auto"
-              src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg"
+              src="/QUARTZSOLAR_LOGO_PRIMARY_BLACK_2.svg"
               alt="Quartz Logo"
             />
           </div>
