@@ -50,7 +50,8 @@ const toolTiplabels: Record<string, string> = {
   // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
   "4HR_FORECAST": `OCF 4hr+ Forecast`,
   "4HR_PAST_FORECAST": "OCF 4hr Forecast",
-  DELTA: "Delta"
+  DELTA: "Delta",
+  PROBABILISTIC_RANGE: "OCF Probabilistic Range"
 };
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
@@ -59,7 +60,8 @@ const toolTipColors: Record<string, string> = {
   PAST_FORECAST: yellow,
   "4HR_FORECAST": orange,
   "4HR_PAST_FORECAST": orange,
-  DELTA: deltaPos
+  DELTA: deltaPos,
+  PROBABILISTIC_RANGE: "white"
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -96,7 +98,7 @@ const CustomizedLabel: FC<any> = ({
       ></line>
       <g className={`fill-white ${className || ""}`} onClick={onClick}>
         <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
+        <text x={x} y={yy + 15} fill="BLACK" className="text-xs" id="time-now" textAnchor="middle">
           {value}
         </text>
       </g>
@@ -381,11 +383,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
             dot={false}
             xAxisId={"x-axis"}
             yAxisId={"y-axis"}
-            // strokeDasharray="5 5"
-            fill="#FFD053" //blue
+            stroke={yellow}
+            fill={yellow}
             fillOpacity={0.4}
             strokeWidth={0}
-            // strokeWidth={largeScreenMode ? 4 : 2}
           />
 
           <Line
@@ -454,11 +455,23 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     {Object.entries(toolTiplabels).map(([key, name]) => {
                       const value = data[key];
                       if (key === "DELTA" && !deltaView) return null;
+                      if (key === "PROBABILISTIC_RANGE" && !deltaView) return;
+                      <>
+                        <li className="text-ocf-yellow flex justify-between">
+                          OCF plevel_10:
+                          <span>{prettyPrintYNumberWithCommas(String(value[0]), 1)}</span>
+                        </li>
+                        <li className="text-ocf-yellow flex justify-between">
+                          OCF plevel_90:
+                          <span>{prettyPrintYNumberWithCommas(String(value[1]), 1)}</span>
+                        </li>
+                      </>;
                       if (typeof value !== "number") return null;
                       if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
                         return null;
                       if (key.includes("4HR") && (!show4hView || !visibleLines.includes(key)))
                         return null;
+
                       const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
                         ? "font-semibold"
                         : "font-normal";
@@ -478,6 +491,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             //   `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
                             "-"
                           : prettyPrintYNumberWithCommas(String(value), 1);
+
                       return (
                         <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                           <div className={`flex justify-between ${textClass}`}>
