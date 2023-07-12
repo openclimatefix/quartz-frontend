@@ -11,7 +11,7 @@ const links = [
     title: "Documentation",
     description: "Learn how to integrate our tools with your app",
     icon: BookOpenIcon,
-    url: "#"
+    url: "https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
   },
   {
     title: "API Reference",
@@ -23,7 +23,7 @@ const links = [
     title: "Support",
     description: "Get help with any problems you encounter",
     icon: SupportIcon,
-    url: "#"
+    url: "mailto:ops@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request"
   }
 ];
 
