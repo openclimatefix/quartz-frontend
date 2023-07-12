@@ -5,10 +5,10 @@ export default function Footer() {
         <a
           className="flex  space-x-6 justify-center "
           target="_blank"
-          href="https://nowcasting.io/"
+          href="https://quartz.solar/"
           rel="noreferrer"
         >
-          <img src="/NOWCASTING_Secondary-white.svg" alt="ofc" width={200} className="flex	" />
+          <img src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg" alt="ofc" width={200} className="flex	" />
         </a>
         <a
           href="https://www.openclimatefix.org/"
