@@ -1,6 +1,6 @@
-# Nowcasting App
+# Quartz Solar UI
 
-This is the main Nowcasting App, hosted at [app.nowcasting.io](app.nowcasting.io).
+This is the main Quartz Solar UI, hosted at [app.quartz.solar](app.quartz.solar).
 It is used by customers to login and view their forecasts.
 
 ## Getting Started

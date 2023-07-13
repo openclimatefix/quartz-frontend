@@ -71,7 +71,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 className={"text-right"}
                 fullWidth
               >
-                <a href="mailto:ops@openclimatefix.org?subject=Nowcasting%20Feedback">
+                <a href="mailto:ops@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request">
                   Help{" "}
                   <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
                 </a>
