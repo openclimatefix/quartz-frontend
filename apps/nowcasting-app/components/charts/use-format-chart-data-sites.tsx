@@ -1,16 +1,6 @@
 import { useMemo } from "react";
 import { get30MinNow } from "../helpers/globalState";
-import {
-  AllSites,
-  ForecastData,
-  PvRealData,
-  Site,
-  SiteForecastValue,
-  SitePvActual,
-  SitePvForecast,
-  SitesPvActual,
-  SitesPvForecast
-} from "../types";
+import { Site, SiteForecastValue, SitePvActual, SitePvForecast } from "../types";
 import { convertToLocaleDateString, formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 import { DELTA_BUCKET } from "../../constant";
