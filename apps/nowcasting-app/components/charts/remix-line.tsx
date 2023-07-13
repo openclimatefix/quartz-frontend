@@ -471,14 +471,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     {Object.entries(toolTiplabels).map(([key, name]) => {
                       const value = data[key];
                       const pLevelLabels = ["P 10%", "P 90%"];
-                      const pLevelComputed = pLevelLabels.map((pLevel) => (
+                      const pLevelComputed = pLevelLabels.map((pLevel: any) => (
                         <li key={key}>{pLevel}:</li>
                       ));
                       if (key === "PROBABILISTIC_RANGE" && !value) return null;
                       if (key === "PROBABILISTIC_RANGE" && deltaView) return null;
                       const pLevelValue =
                         key === "PROBABILISTIC_RANGE" && value
-                          ? value.map((v) => (
+                          ? value.map((v: any) => (
                               <li key={key} className={`flex justify-end`}>
                                 {prettyPrintYNumberWithCommas(String(v), 1)}
                               </li>
