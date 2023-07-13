@@ -51,8 +51,9 @@ const toolTiplabels: Record<string, string> = {
   "4HR_FORECAST": `OCF 4hr+ Forecast`,
   "4HR_PAST_FORECAST": "OCF 4hr Forecast",
   DELTA: "Delta",
-  PROBABILISTIC_RANGE: "OCF Probabilistic Range"
+  PROBABILISTIC_RANGE: "P"
 };
+
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
@@ -350,33 +351,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             </>
           )}
 
-          <Line
-            type="monotone"
-            dataKey="PAST_FORECAST"
-            dot={false}
-            connectNulls={true}
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            stroke={yellow} //yellow
-            fill="transparent"
-            fillOpacity={0.6}
-            strokeWidth={largeScreenMode ? 4 : 0}
-            hide={!visibleLines.includes("PAST_FORECAST")}
-          />
-          <Line
-            type="monotone"
-            dataKey="FORECAST"
-            dot={false}
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            strokeDasharray="5 5"
-            stroke={yellow} //yellow
-            fill="transparent"
-            fillOpacity={0.6}
-            strokeWidth={largeScreenMode ? 4 : 0}
-            hide={!visibleLines.includes("FORECAST")}
-          />
-
           <Area
             type="monotone"
             dataKey="PROBABILISTIC_RANGE"
@@ -455,17 +429,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     {Object.entries(toolTiplabels).map(([key, name]) => {
                       const value = data[key];
                       if (key === "DELTA" && !deltaView) return null;
-                      if (key === "PROBABILISTIC_RANGE" && !deltaView) return;
-                      <>
-                        <li className="text-ocf-yellow flex justify-between">
-                          OCF plevel_10:
-                          <span>{prettyPrintYNumberWithCommas(String(value[0]), 1)}</span>
-                        </li>
-                        <li className="text-ocf-yellow flex justify-between">
-                          OCF plevel_90:
-                          <span>{prettyPrintYNumberWithCommas(String(value[1]), 1)}</span>
-                        </li>
-                      </>;
                       if (typeof value !== "number") return null;
                       if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
                         return null;
@@ -503,6 +466,34 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           </div>
                         </li>
                       );
+                    })}
+                    {/* adding probabilistic values to the tooltip */}
+                    {Object.entries(toolTiplabels).map(([key, name]) => {
+                      const value = data[key];
+                      const pLevelLabels = ["P 10%", "P 90%"];
+                      const pLevelComputed = pLevelLabels.map((pLevel) => (
+                        <li key={key}>{pLevel}:</li>
+                      ));
+                      if (key === "PROBABILISTIC_RANGE" && !value) return null;
+                      if (key === "PROBABILISTIC_RANGE" && deltaView) return null;
+                      const pLevelValue =
+                        key === "PROBABILISTIC_RANGE" && value
+                          ? value.map((v) => (
+                              <li key={key} className={`flex justify-end`}>
+                                {prettyPrintYNumberWithCommas(String(v), 1)}
+                              </li>
+                            ))
+                          : null;
+                      if (key === "PROBABILISTIC_RANGE" && !deltaView)
+                        return (
+                          <li className={`font-sans`}>
+                            <div className={`flex justify-between`}>
+                              {/* <div>PROBABILISTIC_RANGE: </div> */}
+                              <div className={`font-sans ml-14`}>{pLevelComputed}</div>
+                              <div>{pLevelValue}</div>
+                            </div>
+                          </li>
+                        );
                     })}
                     <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
                       <div className="pr-4">
