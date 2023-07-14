@@ -483,6 +483,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         typeof value[1] !== "number"
                       )
                         return null;
+                      if ((key === "PROBABILISTIC_RANGE" && value[0] < 0) || value[1] < 0)
+                        return null;
                       const pLevelValue =
                         key === "PROBABILISTIC_RANGE" && value
                           ? value.map((v: any) => (
