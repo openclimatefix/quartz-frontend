@@ -479,7 +479,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       if (key === "PROBABILISTIC_RANGE" && deltaView) return null;
                       if (
                         key === "PROBABILISTIC_RANGE" &&
-                        (value[0] !== "number" || value[1] !== "number")
+                        typeof value[0] !== "number" &&
+                        typeof value[1] !== "number"
                       )
                         return null;
                       const pLevelValue =
