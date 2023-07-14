@@ -62,7 +62,7 @@ const toolTipColors: Record<string, string> = {
   "4HR_FORECAST": orange,
   "4HR_PAST_FORECAST": orange,
   DELTA: deltaPos,
-  PROBABILISTIC_RANGE: "white"
+  PROBABILISTIC_RANGE: yellow
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -470,6 +470,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     {/* adding probabilistic values to the tooltip */}
                     {Object.entries(toolTiplabels).map(([key, name]) => {
                       const value = data[key];
+                      const color = toolTipColors[key];
                       const pLevelLabels = ["P 10%", "P 90%"];
                       const pLevelComputed = pLevelLabels.map((pLevel: any) => (
                         <li key={key}>{pLevel}:</li>
@@ -486,7 +487,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           : null;
                       if (key === "PROBABILISTIC_RANGE" && !deltaView)
                         return (
-                          <li className={`font-sans`}>
+                          <li className={`font-sans`} style={{ color }}>
                             <div className={`flex justify-between`}>
                               {/* <div>PROBABILISTIC_RANGE: </div> */}
                               <div className={`font-sans ml-14`}>{pLevelComputed}</div>
