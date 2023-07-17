@@ -485,7 +485,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         return null;
                       if (
                         key === "PROBABILISTIC_RANGE" &&
-                        (Math.round(value[0] * 10) < 0 || Math.round(value[1] * 10) < 0)
+                        (Math.round(value[0] * 100) < 0 || Math.round(value[1] * 100) < 0)
                       )
                         return null;
                       const pLevelValue =
