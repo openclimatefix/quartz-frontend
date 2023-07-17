@@ -483,12 +483,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         typeof value[1] !== "number"
                       )
                         return null;
-                      if (key === "PROBABILISTIC_RANGE" && (value[0] < 0 || value[1] < 0)) return 0;
+                      if (
+                        key === "PROBABILISTIC_RANGE" &&
+                        (Math.round(value[0] * 10) < 0 || Math.round(value[1] * 10) < 0)
+                      )
+                        return null;
                       const pLevelValue =
                         key === "PROBABILISTIC_RANGE" && value
                           ? value.map((v: any) => (
                               <li key={key} className={`flex justify-end`}>
-                                {prettyPrintYNumberWithCommas(String(v), 1)}
+                                {prettyPrintYNumberWithCommas(String(v), 1).replace("-", "")}
                               </li>
                             ))
                           : null;
