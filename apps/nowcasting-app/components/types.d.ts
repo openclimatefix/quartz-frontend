@@ -30,11 +30,19 @@ type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized: number | null;
+  plevels: {
+    plevel_10: number;
+    plevel_90: number;
+  };
 };
 type ForecastData = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized?: number | null;
+  plevels: {
+    plevel_10: number;
+    plevel_90: number;
+  };
 }[];
 type PvRealData = {
   datetimeUtc: string;
