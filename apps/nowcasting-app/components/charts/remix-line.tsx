@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import {
+  Area,
   Bar,
   CartesianGrid,
   ComposedChart,
@@ -37,6 +38,7 @@ export type ChartData = {
   "4HR_PAST_FORECAST"?: number;
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
+  PROBABILISTIC_RANGE?: Array<number>;
   formattedDate: string; // "2022-05-16T15:00",
 };
 
@@ -48,8 +50,10 @@ const toolTiplabels: Record<string, string> = {
   // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
   "4HR_FORECAST": `OCF 4hr+ Forecast`,
   "4HR_PAST_FORECAST": "OCF 4hr Forecast",
-  DELTA: "Delta"
+  DELTA: "Delta",
+  PROBABILISTIC_RANGE: "P"
 };
+
 const toolTipColors: Record<string, string> = {
   GENERATION_UPDATED: "white",
   GENERATION: "white",
@@ -57,7 +61,8 @@ const toolTipColors: Record<string, string> = {
   PAST_FORECAST: yellow,
   "4HR_FORECAST": orange,
   "4HR_PAST_FORECAST": orange,
-  DELTA: deltaPos
+  DELTA: deltaPos,
+  PROBABILISTIC_RANGE: yellow
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -345,6 +350,19 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             </>
           )}
+
+          <Area
+            type="monotone"
+            dataKey="PROBABILISTIC_RANGE"
+            dot={false}
+            xAxisId={"x-axis"}
+            yAxisId={"y-axis"}
+            stroke={yellow}
+            fill={yellow}
+            fillOpacity={0.4}
+            strokeWidth={0}
+          />
+
           <Line
             type="monotone"
             dataKey="GENERATION"
@@ -374,6 +392,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             xAxisId={"x-axis"}
             yAxisId={"y-axis"}
             stroke={yellow} //yellow
+            fill="transparent"
+            fillOpacity={100}
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("PAST_FORECAST")}
           />
@@ -385,9 +405,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             strokeDasharray="5 5"
             stroke={yellow} //yellow
+            fill="transparent"
+            fillOpacity={100}
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
+
           <Tooltip
             content={({ payload, label }) => {
               console.log("payload", payload);
@@ -411,6 +434,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         return null;
                       if (key.includes("4HR") && (!show4hView || !visibleLines.includes(key)))
                         return null;
+
                       const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
                         ? "font-semibold"
                         : "font-normal";
@@ -430,6 +454,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             //   `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
                             "-"
                           : prettyPrintYNumberWithCommas(String(value), 1);
+
                       return (
                         <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                           <div className={`flex justify-between ${textClass}`}>
@@ -441,6 +466,45 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           </div>
                         </li>
                       );
+                    })}
+                    {/* adding probabilistic values to the tooltip */}
+                    {Object.entries(toolTiplabels).map(([key, name]) => {
+                      const value = data[key];
+                      const color = toolTipColors[key];
+                      const pLevelLabels = ["P 10%", "P 90%"];
+                      const pLevelComputed = pLevelLabels.map((pLevel: any) => (
+                        <li key={key}>{pLevel}:</li>
+                      ));
+                      if (key === "PROBABILISTIC_RANGE" && !value) return null;
+                      if (key === "PROBABILISTIC_RANGE" && deltaView) return null;
+                      if (
+                        key === "PROBABILISTIC_RANGE" &&
+                        typeof value[0] !== "number" &&
+                        typeof value[1] !== "number"
+                      )
+                        return null;
+                      if (
+                        key === "PROBABILISTIC_RANGE" &&
+                        (Math.round(value[0] * 100) < 0 || Math.round(value[1] * 100) < 0)
+                      )
+                        return null;
+                      const pLevelValue =
+                        key === "PROBABILISTIC_RANGE" && value
+                          ? value.map((v: any) => (
+                              <li key={key} className={`flex justify-end`}>
+                                {prettyPrintYNumberWithCommas(String(v), 1).replace("-", "")}
+                              </li>
+                            ))
+                          : null;
+                      if (key === "PROBABILISTIC_RANGE" && !deltaView)
+                        return (
+                          <li className={`font-sans`} style={{ color }}>
+                            <div className={`flex justify-between`}>
+                              <div className={`font-sans ml-14`}>{pLevelComputed}</div>
+                              <div>{pLevelValue}</div>
+                            </div>
+                          </li>
+                        );
                     })}
                     <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
                       <div className="pr-4">

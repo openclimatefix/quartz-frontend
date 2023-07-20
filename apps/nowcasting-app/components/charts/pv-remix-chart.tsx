@@ -60,12 +60,14 @@ const PvRemixChart: FC<{
         start: nationalForecastData[0].targetTime,
         end: nationalForecastData[nationalForecastData.length - 1].targetTime
       },
+
     [nationalForecastData]
   );
   useHotKeyControlChart(chartLimits);
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
+    probabilisticRangeData: nationalForecastData,
     fourHourData: national4HourData,
     pvRealDayInData,
     pvRealDayAfterData,

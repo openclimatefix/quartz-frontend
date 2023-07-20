@@ -30,11 +30,19 @@ type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized: number | null;
+  plevels: {
+    plevel_10: number;
+    plevel_90: number;
+  };
 };
 type ForecastData = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized?: number | null;
+  plevels: {
+    plevel_10: number;
+    plevel_90: number;
+  };
 }[];
 type PvRealData = {
   datetimeUtc: string;
@@ -138,7 +146,8 @@ export type Site = {
   tilt: string;
   latitude: number;
   longitude: number;
-  installed_capacity_kw: number;
+  inverter_capacity_kw: number;
+  module_capacity_kw: number;
 };
 
 export type AllSites = {
