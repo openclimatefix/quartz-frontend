@@ -155,21 +155,21 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   // };
 
   const { data: nationalForecastData, error: nationalForecastError } = useSWR<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true&UI`,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
   const { data: pvRealDayInData, error: pvRealDayInError } = useSWR<PvRealData>(
-    `${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`,
+    `${API_PREFIX}/solar/GB/national/pvlive?regime=in-day&UI`,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
   const { data: pvRealDayAfterData, error: pvRealDayAfterError } = useSWR<PvRealData>(
-    `${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`,
+    `${API_PREFIX}/solar/GB/national/pvlive?regime=day-after&UI`,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
@@ -177,7 +177,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
   const { data: national4HourData, error: national4HourError } = useSWR<National4HourData>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true&UI`
       : null,
     axiosFetcherAuth,
     {
@@ -185,14 +185,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&UI`,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
     }
   );
   const { data: allGspRealData, error: allGspRealError } = useSWR<AllGspRealData>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&UI`,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
@@ -285,7 +285,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   // Sites API data
   const { data: allSitesData, error: allSitesError } = useSWR<AllSites>(
-    `${SITES_API_PREFIX}/sites`,
+    `${SITES_API_PREFIX}/sites?UI`,
     axiosFetcherAuth,
     {
       isPaused: () => {
@@ -298,7 +298,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
   const siteUuidsString = siteUuids?.join(",");
   const { data: sitePvForecastData, error: sitePvForecastError } = useSWR<SitesPvForecast, any>(
-    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}&UI`,
     axiosFetcherAuth,
     {
       isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
@@ -308,7 +308,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
 
   const { data: sitesPvActualData, error: sitePvActualError } = useSWR<SitesPvActual>(
-    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}&UI`,
     axiosFetcherAuth,
     {
       isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),

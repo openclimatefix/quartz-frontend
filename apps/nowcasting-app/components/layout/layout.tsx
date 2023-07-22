@@ -12,7 +12,7 @@ const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useSWR<{
     status: string;
     message: string;
-  }>(`${API_PREFIX}/solar/GB/status`, axiosFetcherAuth, {
+  }>(`${API_PREFIX}/solar/GB/status?UI`, axiosFetcherAuth, {
     refreshInterval: 60 * 1000 * 5 // 5min
   });
 

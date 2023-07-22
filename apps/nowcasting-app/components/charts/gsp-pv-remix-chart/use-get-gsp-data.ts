@@ -20,7 +20,7 @@ const useGetGspData = (gspId: number) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`, axiosFetcherAuth, {
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day&UI`, axiosFetcherAuth, {
     refreshInterval: t5min
   });
 
@@ -29,13 +29,13 @@ const useGetGspData = (gspId: number) => {
       datetimeUtc: string;
       solarGenerationKw: number;
     }[]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`, axiosFetcherAuth, {
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after&UI`, axiosFetcherAuth, {
     refreshInterval: t5min
   });
 
   const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true&UI`
       : null,
     axiosFetcherAuth,
     {
