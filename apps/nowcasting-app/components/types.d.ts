@@ -29,21 +29,15 @@ export type FcAllResData = {
 type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
-  expectedPowerGenerationNormalized: number | null;
-  plevels: {
+  expectedPowerGenerationNormalized?: number | null;
+  plevels?: {
     plevel_10: number;
     plevel_90: number;
   };
 };
-type ForecastData = {
-  targetTime: string;
-  expectedPowerGenerationMegawatts: number;
-  expectedPowerGenerationNormalized?: number | null;
-  plevels: {
-    plevel_10: number;
-    plevel_90: number;
-  };
-}[];
+
+type ForecastData = ForecastValue[];
+
 type PvRealData = {
   datetimeUtc: string;
   solarGenerationKw: number;
