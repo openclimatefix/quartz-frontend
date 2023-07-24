@@ -105,23 +105,23 @@ const useFormatChartData = ({
           })
         )
       );
-      forecastData.forEach((fc) =>
+      forecastData.forEach((fc) => {
         addDataToMap(
           fc,
           (db) => db.targetTime,
           (db) => getForecastChartData(timeNow, db)
-        )
-      );
-      probabilisticRangeData?.forEach((fc) =>
-        addDataToMap(
-          fc,
-          (db) => db.targetTime,
-          //add an array here for the probabilistic range. it'll be two numbers [lower, upper]
-          (db) => ({
-            PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
-          })
-        )
-      );
+        );
+        if (fc.plevels) {
+          addDataToMap(
+            fc,
+            (db) => db.targetTime,
+            //add an array here for the probabilistic range. it'll be two numbers [lower, upper]
+            (db) => ({
+              PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
+            })
+          );
+        }
+      });
 
       if (fourHourData) {
         fourHourData.forEach((fc) =>
