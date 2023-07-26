@@ -252,16 +252,16 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         deltaBucketKey: DELTA_BUCKET[deltaBucket]
       });
     }
-    console.log("gspDeltas calculated");
-    console.log(
-      "gspDeltas",
-      Array.from(tempGspDeltas)
-        .filter((gspDelta) => gspDelta[1].delta > 0)
-        .map((gspDelta, index) => {
-          const delta = gspDelta[1].delta;
-          return delta;
-        })
-    );
+    // console.log("gspDeltas calculated");
+    // console.log(
+    //   "gspDeltas",
+    //   Array.from(tempGspDeltas)
+    //     .filter((gspDelta) => gspDelta[1].delta > 0)
+    //     .map((gspDelta, index) => {
+    //       const delta = gspDelta[1].delta;
+    //       return delta;
+    //     })
+    // );
     return tempGspDeltas;
   }, [allGspForecastData, allGspRealData, selectedTime]);
 
