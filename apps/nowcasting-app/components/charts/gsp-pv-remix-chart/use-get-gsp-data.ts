@@ -7,13 +7,6 @@ import { axiosFetcherAuth } from "../../helpers/utils";
 const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
-  // const { data: fcAll, error: fcAllError } = useSWR<FcAllResData>(
-  //   getAllForecastUrl(true, true),
-  //   axiosFetcherAuth,
-  //   {
-  //     refreshInterval: t5min
-  //   }
-  // );
 
   const { data: pvRealDataIn, error: pvRealInDat } = useSWR<
     {
@@ -42,16 +35,13 @@ const useGetGspData = (gspId: number) => {
     }
   );
 
-  //add new useSWR for gspLocationInfo
-  const { data: gspLocationInfo, error: gspLocationError } = useSWR<GspEntity>(
+  //add new useSWR for gspLocationInfo since this is not
+  const { data: gspLocationInfo, error: gspLocationError } = useSWR<GspEntity[]>(
     `${API_PREFIX}/system/GB/gsp/?gsp_id=${gspId}`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
+    axiosFetcherAuth
   );
 
-  const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastData>(
     show4hView
       ? `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
       : null,

@@ -63,9 +63,6 @@ const GspPvRemixChart: FC<{
     console.log(errors);
     return <div>failed to load</div>;
   }
-  console.log("gspForecastDataOneGSP", gspForecastDataOneGSP);
-  console.log("chartdata", chartData);
-  console.log("gspName", gspLocationInfo?.installedCapacityMw);
 
   const now30min = formatISODateString(get30MinNow());
   const dataMissing = !gspForecastDataOneGSP || !pvRealDataIn || !pvRealDataAfter;
