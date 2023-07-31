@@ -5,13 +5,15 @@ import useGlobalState from "../../helpers/globalState";
 import { axiosFetcherAuth } from "../../helpers/utils";
 
 const t5min = 60 * 1000 * 5;
+const t2min = 60 * 1000 * 2;
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
   const { data: fcAll, error: fcAllError } = useSWR<FcAllResData>(
     getAllForecastUrl(true, true),
     axiosFetcherAuth,
     {
-      refreshInterval: t5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
 
@@ -21,7 +23,8 @@ const useGetGspData = (gspId: number) => {
       solarGenerationKw: number;
     }[]
   >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`, axiosFetcherAuth, {
-    refreshInterval: t5min
+    refreshInterval: t5min,
+    dedupingInterval: t2min
   });
 
   const { data: pvRealDataAfter, error: pvRealDayAfter } = useSWR<
@@ -30,7 +33,8 @@ const useGetGspData = (gspId: number) => {
       solarGenerationKw: number;
     }[]
   >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`, axiosFetcherAuth, {
-    refreshInterval: t5min
+    refreshInterval: t5min,
+    dedupingInterval: t2min
   });
 
   const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
@@ -39,7 +43,8 @@ const useGetGspData = (gspId: number) => {
       : null,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
 

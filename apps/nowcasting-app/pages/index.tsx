@@ -59,6 +59,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
 
+  const t5min = 1000 * 60 * 5;
+  const t2min = 1000 * 60 * 2;
+
   // Local state used to set initial state on server side render, then updated by global state
   const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
     dashboardModeServer === "true"
@@ -158,21 +161,24 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
   const { data: pvRealDayInData, error: pvRealDayInError } = useSWR<PvRealData>(
     `${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
   const { data: pvRealDayAfterData, error: pvRealDayAfterError } = useSWR<PvRealData>(
     `${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
   const { data: national4HourData, error: national4HourError } = useSWR<National4HourData>(
@@ -181,21 +187,24 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       : null,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
   const { data: allGspForecastData, error: allGspForecastError } = useSWR<GspAllForecastData>(
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
   const { data: allGspRealData, error: allGspRealError } = useSWR<AllGspRealData>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`,
     axiosFetcherAuth,
     {
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min,
+      dedupingInterval: t2min
     }
   );
 
@@ -303,7 +312,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     {
       isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
       dedupingInterval: 10000,
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min
     }
   );
 
@@ -313,7 +322,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     {
       isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES),
       dedupingInterval: 10000,
-      refreshInterval: 60 * 1000 * 5 // 5min
+      refreshInterval: t5min
     }
   );
 
