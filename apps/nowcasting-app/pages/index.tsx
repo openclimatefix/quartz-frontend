@@ -31,7 +31,6 @@ import {
   getDeltaBucket,
   isProduction
 } from "../components/helpers/utils";
-import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 import { ActiveUnit } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";

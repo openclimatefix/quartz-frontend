@@ -1,12 +1,14 @@
 import {
   AllGspRealData,
   AllSites,
+  FcAllResData,
   ForecastData,
   GspAllForecastData,
   National4HourData,
   PvRealData,
   SitesPvActual,
-  SitesPvForecast
+  SitesPvForecast,
+  SolarStatus
 } from "../types";
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 import { axiosFetcherAuth } from "../helpers/utils";
@@ -22,7 +24,9 @@ type APIResponseType =
   | AllGspRealData
   | AllSites
   | SitesPvForecast
-  | SitesPvActual;
+  | SitesPvActual
+  | SolarStatus
+  | FcAllResData;
 export const useLoadDataFromApi = <T extends APIResponseType>(
   url: string | null,
   config: SWRConfiguration<T, Error> = {}
