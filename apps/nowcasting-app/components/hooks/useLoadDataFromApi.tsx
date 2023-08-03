@@ -34,6 +34,11 @@ export const useLoadDataFromApi = <T extends APIResponseType>(
   return useSWR<T, Error>(url, axiosFetcherAuth, {
     refreshInterval: t5min,
     dedupingInterval: t2min,
+    onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+      if (error.toString().includes("403")) return;
+      if (retryCount >= 10) return;
+      setTimeout(() => revalidate({ retryCount }), 2000);
+    },
     ...config
   });
 };
