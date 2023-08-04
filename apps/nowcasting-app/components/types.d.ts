@@ -113,6 +113,11 @@ type GspDeltaValue = {
   deltaNormalized: string;
 };
 
+export type SolarStatus = {
+  status: string;
+  message: string;
+};
+
 export type Bucket = {
   dataKey: string;
   quantity: number;
