@@ -1,12 +1,14 @@
 import React from "react";
 
-type SpinnerProps = {};
+type SpinnerProps = {
+  className?: string;
+};
 
-const Spinner: React.FC<SpinnerProps> = ({}) => {
+const Spinner: React.FC<SpinnerProps> = ({ className = "" }) => {
   return (
     <svg
       role="status"
-      className="w-8 h-8 mr-2 text-ocf-gray-700 m-auto self-center animate-spin dark:text-gray-600 fill-white"
+      className={`w-8 h-8 mr-2 text-ocf-gray-700 m-auto self-center animate-spin dark:text-gray-600 fill-white ${className}`}
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
