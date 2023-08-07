@@ -99,7 +99,7 @@ const CustomizedLabel: FC<any> = ({
       ></line>
       <g className={`fill-white ${className || ""}`} onClick={onClick}>
         <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="BLACK" className="text-xs" id="time-now" textAnchor="middle">
+        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
           {value}
         </text>
       </g>
