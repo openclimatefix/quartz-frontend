@@ -19,10 +19,7 @@ const useGetGspData = (gspId: number) => {
   //add new useSWR for gspChartData
   const { data: gspForecastDataOneGSP, error: gspForecastDataOneGSPError } = useLoadDataFromApi<ForecastData>(
     `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast`,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
+    axiosFetcherAuth
   );
 
   //add new useSWR for gspLocationInfo since this is not
