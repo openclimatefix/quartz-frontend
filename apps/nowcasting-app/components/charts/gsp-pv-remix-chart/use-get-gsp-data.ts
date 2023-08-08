@@ -2,14 +2,11 @@ import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData, ForecastData, GspEntity, PvRealData } from "../../types";
 import useGlobalState from "../../helpers/globalState";
 import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
+import { axiosFetcherAuth } from "../../helpers/utils";
+
 
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
-
-  const { data: fcAll, error: fcAllError } = useLoadDataFromApi<FcAllResData>(
-    getAllForecastUrl(true, true)
-  );
-
 
   const { data: pvRealDataIn, error: pvRealInDat } = useLoadDataFromApi<PvRealData>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`
@@ -21,7 +18,7 @@ const useGetGspData = (gspId: number) => {
 
   //add new useSWR for gspChartData
   const { data: gspForecastDataOneGSP, error: gspForecastDataOneGSPError } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=0&historic=false&only_forecast_values=true`,
+    `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast`,
     axiosFetcherAuth,
     {
       refreshInterval: 60 * 1000 * 5 // 5min
@@ -36,7 +33,7 @@ const useGetGspData = (gspId: number) => {
 
   const { data: gsp4HourData, error: pv4HourError } = useLoadDataFromApi<ForecastData>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
       : null
   );
 
