@@ -99,7 +99,7 @@ const CustomizedLabel: FC<any> = ({
       ></line>
       <g className={`fill-white ${className || ""}`} onClick={onClick}>
         <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="BLACK" className="text-xs" id="time-now" textAnchor="middle">
+        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
           {value}
         </text>
       </g>
@@ -180,9 +180,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
           data={preppedData}
           margin={{
             top: 20,
-            right: 20,
+            right: 16,
             bottom: 20,
-            left: 20
+            left: 16
           }}
           onClick={(e?: { activeLabel?: string }) => {
             if (setTimeOfInterest && e?.activeLabel) {
@@ -413,7 +413,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
           <Tooltip
             content={({ payload, label }) => {
-              console.log("payload", payload);
               const data = payload && payload[0]?.payload;
               if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0)) return <div></div>;
 
@@ -473,7 +472,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       const color = toolTipColors[key];
                       const pLevelLabels = ["P 10%", "P 90%"];
                       const pLevelComputed = pLevelLabels.map((pLevel: any) => (
-                        <li key={key}>{pLevel}:</li>
+                        <li key={key + pLevel}>{pLevel}:</li>
                       ));
                       if (key === "PROBABILISTIC_RANGE" && !value) return null;
                       if (key === "PROBABILISTIC_RANGE" && deltaView) return null;
@@ -490,8 +489,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         return null;
                       const pLevelValue =
                         key === "PROBABILISTIC_RANGE" && value
-                          ? value.map((v: any) => (
-                              <li key={key} className={`flex justify-end`}>
+                          ? value.map((v: any, index: number) => (
+                              <li key={key + String(index)} className={`flex justify-end`}>
                                 {prettyPrintYNumberWithCommas(String(v), 1).replace("-", "")}
                               </li>
                             ))

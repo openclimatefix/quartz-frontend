@@ -1,27 +1,17 @@
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import RemixLine from "./remix-line";
-import Line from "./remix-line";
-import useSWR from "swr";
-import { API_PREFIX } from "../../constant";
 import ForecastHeader from "./forecast-header";
 import useGlobalState from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
-import {
-  getRounded4HoursAgoString,
-  formatISODateString,
-  axiosFetcherAuth,
-  convertISODateStringToLondonTime
-} from "../helpers/utils";
+import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
-import { CombinedData, CombinedErrors, ForecastData, ForecastValue } from "../types";
-import Tooltip from "../tooltip";
-import { ChartInfo } from "../../ChartInfo";
+import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
+import DataLoadingChartStatus from "./DataLoadingChartStatus";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;
@@ -36,6 +26,7 @@ const PvRemixChart: FC<{
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const [loadingState] = useGlobalState("loadingState");
 
   const {
     nationalForecastData,
@@ -105,6 +96,7 @@ const PvRemixChart: FC<{
               <Spinner></Spinner>
             </div>
           )}
+          <DataLoadingChartStatus loadingState={loadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}

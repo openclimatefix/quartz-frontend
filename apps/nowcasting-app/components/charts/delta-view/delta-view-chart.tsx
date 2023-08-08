@@ -20,6 +20,7 @@ import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
 import useTimeNow from "../../hooks/use-time-now";
 import { ChartLegend } from "../ChartLegend";
+import DataLoadingChartStatus from "../DataLoadingChartStatus";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -277,6 +278,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
+  const [loadingState] = useGlobalState("loadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const selectedTimeHalfHourSlot = getNext30MinSlot(new Date(selectedTime));
@@ -363,6 +365,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         ></ForecastHeader>
 
         <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto mt-4">
+          <DataLoadingChartStatus loadingState={loadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
