@@ -4,6 +4,7 @@ import {
   FcAllResData,
   ForecastData,
   GspAllForecastData,
+  GspEntities,
   National4HourData,
   PvRealData,
   SitesPvActual,
@@ -21,6 +22,7 @@ type APIResponseType =
   | PvRealData
   | National4HourData
   | GspAllForecastData
+  | GspEntities
   | AllGspRealData
   | AllSites
   | SitesPvForecast

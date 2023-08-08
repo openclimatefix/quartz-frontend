@@ -40,12 +40,19 @@ const GspPvRemixChart: FC<{
   deltaView = false
 }) => {
   //when adding 4hour forecast data back in, add gsp4HourData to list in line 27
-  const { errors, fcAll, pvRealDataAfter, pvRealDataIn, gsp4HourData } = useGetGspData(gspId);
-  const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
-  const gspForecastData = gspData?.forecastValues;
-  const gspInfo = gspData?.location;
+  const {
+    errors,
+    pvRealDataAfter,
+    pvRealDataIn,
+    gspLocationInfo,
+    gspForecastDataOneGSP,
+    gsp4HourData
+  } = useGetGspData(gspId);
+  // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
+  const gspInstalledCapacity = gspLocationInfo?.[0]?.installedCapacityMw;
+  const gspName = gspLocationInfo?.[0]?.regionName;
   const chartData = useFormatChartData({
-    forecastData: gspForecastData,
+    forecastData: gspForecastDataOneGSP,
     fourHourData: gsp4HourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
@@ -56,20 +63,12 @@ const GspPvRemixChart: FC<{
     console.log(errors);
     return <div>failed to load</div>;
   }
-  // if (!fcAll || !pvRealDataIn || !pvRealDataAfter)
-  //   return (
-  //     <div className="mt-8">
-  //       {/* Header spacer */}
-  //       <div className="h-16"></div>
-  //       <div className="h-60 flex flex-1">
-  //         <Spinner />
-  //       </div>
-  //     </div>
-  //   );
+
   const now30min = formatISODateString(get30MinNow());
-  const dataMissing = !fcAll || !pvRealDataIn || !pvRealDataAfter;
-  const forecastAtSelectedTime: NonNullable<typeof gspForecastData>[number] =
-    gspForecastData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) || ({} as any);
+  const dataMissing = !gspForecastDataOneGSP || !pvRealDataIn || !pvRealDataAfter;
+  const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =
+    gspForecastDataOneGSP?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
+    ({} as any);
   const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   const fourHourForecastAtSelectedTime: ForecastValue =
@@ -94,14 +93,14 @@ const GspPvRemixChart: FC<{
   );
 
   // Get the next OCF forecast for the last PV value time
-  const correspondingLatestPvForecast = gspForecastData?.find(
+  const correspondingLatestPvForecast = gspForecastDataOneGSP?.find(
     (fc) => formatISODateString(fc.targetTime) === pvForecastDatetime
   );
   const correspondingLatestPvForecastInMW =
     correspondingLatestPvForecast?.expectedPowerGenerationMegawatts || 0;
   // Get the next OCF forecast
   const followingPvForecastInMW =
-    gspForecastData?.find(
+    gspForecastDataOneGSP?.find(
       (fc) => formatISODateString(fc.targetTime) === followingPvForecastDateString
     )?.expectedPowerGenerationMegawatts || 0;
 
@@ -112,7 +111,7 @@ const GspPvRemixChart: FC<{
   //
 
   // set ymax to the installed capacity of the graph
-  let yMax = gspInfo?.installedCapacityMw || 100;
+  let yMax = gspInstalledCapacity || 100;
   yMax = getRoundedTickBoundary(yMax, yMax_levels);
 
   return (
@@ -120,7 +119,7 @@ const GspPvRemixChart: FC<{
       <div className="flex-initial">
         <ForecastHeaderGSP
           onClose={close}
-          title={gspInfo?.regionName || ""}
+          title={gspName || ""}
           mwpercent={Math.round(pvPercentage)}
           pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime)}
           pvValue={Number(latestPvActualInMW)?.toFixed(1)}
@@ -135,9 +134,10 @@ const GspPvRemixChart: FC<{
           <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-ocf-yellow-500">
             {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
           </span>
+
           <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-white">
             {" "}
-            / {gspInfo?.installedCapacityMw}
+            / {gspInstalledCapacity}
           </span>
           <span className="text-xs dash:text-2xl text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
@@ -157,7 +157,7 @@ const GspPvRemixChart: FC<{
           resetTime={resetTime}
           visibleLines={visibleLines}
           deltaView={deltaView}
-          deltaYMaxOverride={Math.ceil(Number(gspInfo?.installedCapacityMw) / 200) * 100 || 500}
+          deltaYMaxOverride={Math.ceil(Number(gspInstalledCapacity) / 200) * 100 || 500}
         />
       </div>
     </>
