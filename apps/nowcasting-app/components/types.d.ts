@@ -91,6 +91,8 @@ type GspEntity = {
   installedCapacityMw: number;
   rmMode: boolean;
 };
+type GspEntities = GspEntity[];
+
 type GspRealData = GspEntity & {
   gspYields: [
     {

@@ -1,8 +1,7 @@
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
-import { FcAllResData, ForecastData, GspEntity, PvRealData } from "../../types";
+import { FcAllResData, ForecastData, GspEntities, PvRealData } from "../../types";
 import useGlobalState from "../../helpers/globalState";
 import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
-
 
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
@@ -16,12 +15,11 @@ const useGetGspData = (gspId: number) => {
   );
 
   //add new useSWR for gspChartData
-  const { data: gspForecastDataOneGSP, error: gspForecastDataOneGSPError } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast`
-  );
+  const { data: gspForecastDataOneGSP, error: gspForecastDataOneGSPError } =
+    useLoadDataFromApi<ForecastData>(`${API_PREFIX}/solar/GB/gsp/${gspId}/forecast`);
 
   //add new useSWR for gspLocationInfo since this is not
-  const { data: gspLocationInfo, error: gspLocationError } = useLoadDataFromApi<GspEntity[]>(
+  const { data: gspLocationInfo, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
     `${API_PREFIX}/system/GB/gsp/?gsp_id=${gspId}`
   );
 
