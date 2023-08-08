@@ -1,7 +1,6 @@
 import axios from "axios";
-import { API_PREFIX, DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
-import { NextApiRequest, NextApiResponse } from "next";
-import { Bucket, GspDeltaValue } from "../types";
+import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
+import { Bucket, CombinedLoading, CombinedValidating, GspDeltaValue, LoadingState } from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 
@@ -26,6 +25,46 @@ export const getForecastAccessorForTimeHorizon = (selectedTimeHorizon: number) =
 
 export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(" ");
+};
+
+export const getLoadingState = (
+  combinedLoading: CombinedLoading,
+  combinedValidating: CombinedValidating
+): LoadingState => {
+  let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
+  let showMessage = false;
+  let message = "";
+  if (initialLoadComplete) {
+    if (combinedValidating.nationalForecastValidating) {
+      message = "Loading latest National Forecast";
+      showMessage = true;
+    }
+    if (combinedValidating.pvRealDayInValidating) {
+      message = showMessage ? "Loading latest data" : "Loading latest PV Live Initial";
+      showMessage = true;
+    }
+    if (combinedValidating.pvRealDayAfterValidating) {
+      message = showMessage ? "Loading latest data" : "Loading latest PV Live Updated";
+      showMessage = true;
+    }
+    if (combinedValidating.national4HourValidating) {
+      message = showMessage ? "Loading latest data" : "Loading latest National 4 Hour";
+      showMessage = true;
+    }
+    if (combinedValidating.allGspForecastValidating) {
+      message = showMessage ? "Loading latest data" : "Loading latest GSP Forecast";
+      showMessage = true;
+    }
+    if (combinedValidating.allGspRealValidating) {
+      message = showMessage ? "Loading latest data" : "Loading latest GSP Actual";
+      showMessage = true;
+    }
+  }
+  return {
+    initialLoadComplete,
+    showMessage,
+    message
+  };
 };
 
 /**

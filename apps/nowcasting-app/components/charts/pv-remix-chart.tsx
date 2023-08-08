@@ -1,4 +1,4 @@
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
 import useGlobalState from "../helpers/globalState";
@@ -11,6 +11,7 @@ import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
+import DataLoadingChartStatus from "./DataLoadingChartStatus";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;
@@ -25,6 +26,7 @@ const PvRemixChart: FC<{
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const [loadingState] = useGlobalState("loadingState");
 
   const {
     nationalForecastData,
@@ -94,6 +96,7 @@ const PvRemixChart: FC<{
               <Spinner></Spinner>
             </div>
           )}
+          <DataLoadingChartStatus loadingState={loadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
