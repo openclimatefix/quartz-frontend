@@ -217,6 +217,13 @@ export type CombinedSitesData = {
   sitesPvForecastData: SitePvForecast[];
   sitesPvActualData: SitePvActual[];
 };
+export type SiteData = {
+  label: string;
+  capacity: number;
+  actualPV: number;
+  expectedPV: number;
+  aggregatedYield: number;
+};
 
 // Common object type across Sites, GSPs, Regions and National
 export type AggregatedSitesDatum = {

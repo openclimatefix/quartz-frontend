@@ -217,7 +217,7 @@ const SolarSiteChart: FC<{
         title={"National"}
         tableData={Array.from(aggregatedSitesData.national.values())}
       />
-      {/* <AggregatedDataTable
+      <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
         title={"Region"}
         tableData={Array.from(aggregatedSitesData.regions.values())}
@@ -226,7 +226,7 @@ const SolarSiteChart: FC<{
         className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
         title={"GSP"}
         tableData={Array.from(aggregatedSitesData.gsps.values())}
-      /> */}
+      />
       <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
         title={"Sites"}

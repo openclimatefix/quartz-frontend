@@ -66,7 +66,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     clickedGspId: undefined,
     clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
-    view: VIEWS.FORECAST,
+    view: VIEWS.SOLAR_SITES,
     visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
       "GENERATION",
       "GENERATION_UPDATED",

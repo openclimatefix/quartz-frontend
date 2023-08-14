@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AggregatedSitesCombinedData,
   CombinedSitesData,
+  SiteData,
   SitePvActual,
   SitePvForecast
 } from "../types";
@@ -43,19 +44,19 @@ export const useFormatSitesData = (
   combinedSitesData: CombinedSitesData,
   selectedISOTime: string
 ) => {
-  // const [sitesTableData, setSitesTableData] = useState<{
-  //   sites: Map<string, SiteData>;
-  //   regions: Map<string, SiteData>;
-  //   gsps: Map<string, SiteData>;
-  //   national: SiteData;
-  // }>({
-  //   sites: new Map(),
-  //   regions: new Map(),
-  //   gsps: new Map(),
-  //   national: { label: "National", capacity: 0, actualPV: 0, expectedPV: 0, aggregatedYield: 0 }
-  // });
-
-  const data = useMemo(() => {
+  const firstNonZeroForecastValue = combinedSitesData.sitesPvForecastData?.find(
+    (fc) => fc.forecast_values[0].expected_generation_kw > 0
+  );
+  const firstForecastData = JSON.stringify(firstNonZeroForecastValue, null, 2) || "";
+  console.log("first forecast data", firstForecastData);
+  return useMemo(() => {
+    console.log("useFormatSitesData", combinedSitesData, selectedISOTime);
+    // const [sitesTableData, setSitesTableData] = useState<AggregatedSitesCombinedData>({
+    //   sites: new Map(),
+    //   regions: new Map(),
+    //   gsps: new Map(),
+    //   national: new Map()
+    // });
     const sitesTableData: AggregatedSitesCombinedData = {
       sites: new Map(),
       regions: new Map(),
@@ -195,6 +196,5 @@ export const useFormatSitesData = (
       }
     }
     return sitesTableData;
-  }, [combinedSitesData, selectedISOTime]);
-  return data;
+  }, [firstForecastData, selectedISOTime]);
 };

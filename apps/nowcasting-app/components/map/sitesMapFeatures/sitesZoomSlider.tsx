@@ -30,21 +30,13 @@ const AggregationButton: React.FC<AggregationLevelProps> = ({
 
   if (autoSetting) {
     let zoomLevel = "";
-    if (zoom < AGGREGATION_LEVEL_MIN_ZOOM.REGION) {
-      aggregation = AGGREGATION_LEVELS.NATIONAL;
-      setAggregationFunc(aggregation);
+    if (currentAggregation === AGGREGATION_LEVELS.NATIONAL) {
       zoomLevel = "National";
-    } else if (zoom < AGGREGATION_LEVEL_MIN_ZOOM.GSP) {
-      aggregation = AGGREGATION_LEVELS.REGION;
-      setAggregationFunc(aggregation);
+    } else if (currentAggregation === AGGREGATION_LEVELS.REGION) {
       zoomLevel = "Region";
-    } else if (zoom < AGGREGATION_LEVEL_MIN_ZOOM.SITE) {
-      aggregation = AGGREGATION_LEVELS.GSP;
-      setAggregationFunc(aggregation);
+    } else if (currentAggregation === AGGREGATION_LEVELS.GSP) {
       zoomLevel = "Grid Supply Point";
-    } else {
-      aggregation = AGGREGATION_LEVELS.SITE;
-      setAggregationFunc(aggregation);
+    } else if (currentAggregation === AGGREGATION_LEVELS.SITE) {
       zoomLevel = "Site";
     }
     return (

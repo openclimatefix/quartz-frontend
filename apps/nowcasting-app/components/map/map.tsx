@@ -4,6 +4,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState from "../helpers/globalState";
+import { AGGREGATION_LEVEL_MIN_ZOOM, AGGREGATION_LEVELS } from "../../constant";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
@@ -32,6 +33,7 @@ const Map: FC<IMap> = ({
   const [lat, setLat] = useGlobalState("lat");
   const [zoom, setZoom] = useGlobalState("zoom");
   const [maps, setMaps] = useGlobalState("maps");
+  const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
 
   useUpdateMapStateOnClick({ map: map.current, isMapReady });
   useEffect(() => {
@@ -70,6 +72,29 @@ const Map: FC<IMap> = ({
           map.current?.resize();
         }
       });
+
+      map.current.on("moveend", () => {
+        console.log("setting map state");
+        const currentZoom = map.current?.getZoom() || 0;
+        setLng(Number(map.current?.getCenter().lng.toFixed(4)));
+        setLat(Number(map.current?.getCenter().lat.toFixed(4)));
+        setZoom(Number(currentZoom.toFixed(2)));
+        console.log("zoom", zoom);
+        console.log("currentZoom", currentZoom);
+        if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.REGION) {
+          console.log("setting aggregation to national");
+          setAggregation(AGGREGATION_LEVELS.NATIONAL);
+        } else if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.GSP) {
+          console.log("setting aggregation to region");
+          setAggregation(AGGREGATION_LEVELS.REGION);
+        } else if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.SITE) {
+          console.log("setting aggregation to gsp");
+          setAggregation(AGGREGATION_LEVELS.GSP);
+        } else {
+          console.log("setting aggregation to site");
+          setAggregation(AGGREGATION_LEVELS.SITE);
+        }
+      });
     }
     // TODO: unsure as to whether react cleans up/ends up with multiple maps when re-rendering
     // or whether removing will cause more issues elsewhere in the app.
@@ -77,15 +102,16 @@ const Map: FC<IMap> = ({
     // return () => map.current?.remove();
   }, []);
 
-  useEffect(() => {
-    if (!map.current) return; // wait for map to initialize
-
-    map.current.on("moveend", () => {
-      setLng(Number(map.current?.getCenter().lng.toFixed(4)));
-      setLat(Number(map.current?.getCenter().lat.toFixed(4)));
-      setZoom(Number(map.current?.getZoom().toFixed(2)));
-    });
-  }, [map]);
+  // useEffect(() => {
+  //   if (!map.current) return; // wait for map to initialize
+  //
+  //   map.current.on("moveend", () => {
+  //     console.log("setting map state");
+  //     setLng(Number(map.current?.getCenter().lng.toFixed(4)));
+  //     setLat(Number(map.current?.getCenter().lat.toFixed(4)));
+  //     setZoom(Number(map.current?.getZoom().toFixed(2)));
+  //   });
+  // }, [map]);
 
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
