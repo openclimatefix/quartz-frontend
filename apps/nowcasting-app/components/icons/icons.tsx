@@ -197,3 +197,59 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
   </svg>
 );
+
+export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    className={`animate-spin dark:text-gray-600 fill-white ${props.className}`}
+    width={24}
+    height={24}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx={12}
+      cy={12}
+      r={10.5}
+      stroke="currentColor"
+      fill="none"
+      strokeOpacity={0.25}
+      strokeWidth={3}
+    />
+    <path
+      d="M12 1.5a10.5 10.5 0 019.988 7.26"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const SpinnerTextInline = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    className={`animate-spin dark:text-gray-600 fill-white ${props.className}`}
+    width={14}
+    height={14}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <circle
+      cx={7}
+      cy={7}
+      r={6}
+      stroke="currentColor"
+      fill="none"
+      strokeOpacity={0.25}
+      strokeWidth={2}
+    />
+    <path
+      d="M7 1a6 6 0 015.707 4.149"
+      stroke="currentColor"
+      fill="none"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);

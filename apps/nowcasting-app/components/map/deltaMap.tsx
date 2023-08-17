@@ -25,6 +25,7 @@ import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
 import DeltaColorGuideBar from "./delta-color-guide-bar";
+import { safelyUpdateMapData } from "../helpers/mapUtils";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -285,7 +286,10 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       ) : (
         <Map
           loadDataOverlay={addFCData}
-          updateData={{ newData: !!initForecastData, updateMapData }}
+          updateData={{
+            newData: !!initForecastData,
+            updateMapData: (map) => safelyUpdateMapData(map, updateMapData)
+          }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />

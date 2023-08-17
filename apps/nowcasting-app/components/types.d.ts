@@ -1,5 +1,10 @@
 import { DELTA_BUCKET } from "../constant";
 
+export type LoadingState = {
+  initialLoadComplete: boolean;
+  showMessage: boolean;
+  message: string;
+};
 export type FcAllResData = {
   type: "FeatureCollection";
   forecasts: {
@@ -53,6 +58,22 @@ type CombinedData = {
   allGspRealData: AllGspRealData | undefined;
   gspDeltas: GspDeltas | undefined;
 };
+type CombinedLoading = {
+  nationalForecastLoading: boolean;
+  pvRealDayInLoading: boolean;
+  pvRealDayAfterLoading: boolean;
+  national4HourLoading: boolean;
+  allGspForecastLoading: boolean;
+  allGspRealLoading: boolean;
+};
+type CombinedValidating = {
+  nationalForecastValidating: boolean;
+  pvRealDayInValidating: boolean;
+  pvRealDayAfterValidating: boolean;
+  national4HourValidating: boolean;
+  allGspForecastValidating: boolean;
+  allGspRealValidating: boolean;
+};
 type CombinedErrors = {
   nationalForecastError: any;
   pvRealDayInError: any;
@@ -70,6 +91,8 @@ type GspEntity = {
   installedCapacityMw: number;
   rmMode: boolean;
 };
+type GspEntities = GspEntity[];
+
 type GspRealData = GspEntity & {
   gspYields: [
     {
@@ -111,6 +134,11 @@ type GspDeltaValue = {
   dataKey: string;
   deltaPercentage: string;
   deltaNormalized: string;
+};
+
+export type SolarStatus = {
+  status: string;
+  message: string;
 };
 
 export type Bucket = {
