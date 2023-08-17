@@ -125,7 +125,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: nationalForecastValidating,
     error: nationalForecastError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true&UI`
   );
 
   const {
@@ -133,13 +133,13 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isLoading: pvRealDayInLoading,
     isValidating: pvRealDayInValidating,
     error: pvRealDayInError
-  } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`);
+  } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day&UI`);
   const {
     data: pvRealDayAfterData,
     isLoading: pvRealDayAfterLoading,
     isValidating: pvRealDayAfterValidating,
     error: pvRealDayAfterError
-  } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`);
+  } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after&UI`);
   const {
     data: national4HourData,
     isLoading: national4HourLoading,
@@ -147,7 +147,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     error: national4HourError
   } = useLoadDataFromApi<National4HourData>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true&UI`
       : null
   );
   const {
@@ -156,14 +156,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: allGspForecastValidating,
     error: allGspForecastError
   } = useLoadDataFromApi<GspAllForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&UI`
   );
   const {
     data: allGspRealData,
     isLoading: allGspRealLoading,
     isValidating: allGspRealValidating,
     error: allGspRealError
-  } = useLoadDataFromApi<AllGspRealData>(`${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`);
+  } = useLoadDataFromApi<AllGspRealData>(`${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&UI`);
 
   const currentYields =
     allGspRealData?.map((datum) => {
@@ -287,7 +287,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   // Sites API data
   const { data: allSitesData, error: allSitesError } = useLoadDataFromApi<AllSites>(
-    `${SITES_API_PREFIX}/sites`,
+    `${SITES_API_PREFIX}/sites?UI`,
     {
       isPaused: () => !currentView(VIEWS.SOLAR_SITES)
     }
@@ -295,16 +295,17 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
   const siteUuidsString = siteUuids?.join(",");
+
   const { data: sitePvForecastData, error: sitePvForecastError } =
     useLoadDataFromApi<SitesPvForecast>(
-      `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+      `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}&UI`,
       {
         isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
       }
     );
 
   const { data: sitesPvActualData, error: sitePvActualError } = useLoadDataFromApi<SitesPvActual>(
-    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}&UI`,
     {
       isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
     }
