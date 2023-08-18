@@ -17,10 +17,10 @@ import { FeatureCollection } from "geojson";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
-const getRoundedPv = (pv: number, round: boolean = true) => {
-  if (!round) return Math.round(pv);
-  // round To: 0, 100, 200, 300, 400, 500
-  return Math.round(pv / 100) * 100;
+const getRoundedPv = (pv: number, precision: number = -2) => {
+  // -2 rounds to: 0, 100, 200, 300, 400, 500
+  // 2 rounds to 4.32, 4.33, 4.34, 4.35, 4.36, 4.37
+  return Math.round(pv / 10 ** precision) * 10 ** precision;
 };
 const getRoundedPvPercent = (per: number, round: boolean = true) => {
   if (!round) return per;
@@ -51,12 +51,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
+  let selectedDataName = SelectedData.expectedPowerGenerationMegawattsRounded;
   if (activeUnit === ActiveUnit.percentage)
     selectedDataName = SelectedData.expectedPowerGenerationNormalized;
   if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
-  const forecastLoading = false;
   const initForecastData = combinedData?.allGspForecastData;
   const forecastError = combinedErrors?.allGspForecastError;
 
@@ -97,13 +96,20 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           properties: {
             ...featureObj.properties,
             [SelectedData.expectedPowerGenerationMegawatts]:
-              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
+              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts, -1),
+            [SelectedData.expectedPowerGenerationMegawattsRounded]:
+              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts, 2),
             [SelectedData.expectedPowerGenerationNormalized]:
+              selectedFCValue &&
+              getRoundedPv(selectedFCValue.expectedPowerGenerationNormalized || 0, -3),
+            [SelectedData.expectedPowerGenerationNormalizedRounded]:
               selectedFCValue &&
               getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
             [SelectedData.installedCapacityMw]: getRoundedPv(
-              forecastDatum?.location.installedCapacityMw || 0
-            )
+              forecastDatum?.location.installedCapacityMw || 0,
+              -1
+            ),
+            gspDisplayName: forecastDatum?.location?.regionName || ""
           }
         };
       })
@@ -176,10 +182,58 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
       }
     });
+
+    // Create a popup, but don't add it to the map yet.
+    const popup = new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: "bottom-right",
+      maxWidth: "none"
+    });
+
+    map.current.on("mousemove", "latestPV-forecast", (e) => {
+      // Change the cursor style as a UI indicator.
+      map.current.getCanvas().style.cursor = "pointer";
+
+      // Copy coordinates array.
+      const properties = e.features?.[0].properties;
+      console.log("GSP PROPS:", properties);
+
+      const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          <div class="flex justify-between items-center mb-1">
+            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs} • #${
+        properties?.gsp_id
+      }</div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="text-xs text-ocf-yellow">${(
+              Number(properties?.[SelectedData.expectedPowerGenerationNormalized]) * 100
+            ).toFixed(1)}%</div>
+            <div>
+              <span class="text-ocf-yellow">${
+                properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(1) || 0
+              }</span> / 
+              <span class="">${properties?.[SelectedData.installedCapacityMw]?.toFixed(
+                1
+              )}</span> <span class="text-2xs text-mapbox-black-300">MW</span>
+            </div>
+          </div>
+        </div>`;
+
+      // Populate the popup and set its coordinates
+      // based on the feature found.
+      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+    });
+
+    map.current.on("mouseleave", "latestPV-forecast", () => {
+      map.current.getCanvas().style.cursor = "";
+      popup.remove();
+    });
   };
 
   return (
-    <div className={`relative h-full w-full ${className}`}>
+    <div className={`pv-map relative h-full w-full ${className}`}>
       {forecastError ? (
         <FailedStateMap error="Failed to load" />
       ) : (

@@ -7,13 +7,13 @@
   overflow: visible;
 }
 
-.delta-map .mapboxgl-popup-content {
+.pv-map .mapboxgl-popup-content, .delta-map .mapboxgl-popup-content {
   background: rgba(0,0,0,0.5);
   color: white;
   padding: 1rem;
 }
 
-.delta-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip, .delta-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
   border-top-color: rgba(0,0,0,0.5);
 }
 
