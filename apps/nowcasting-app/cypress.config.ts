@@ -17,7 +17,6 @@ export default defineConfig({
     baseUrl: process.env.AUTH0_BASE_URL
   },
 
-  chromeWebSecurity: false,
   // ...rest of the Cypress project config
   projectId: process.env.CYPRESS_PROJECT_ID,
 
