@@ -14,6 +14,7 @@ import { CombinedData, CombinedErrors, GspAllForecastData } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
+import { safelyUpdateMapData } from "../helpers/mapUtils";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -115,13 +116,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, [initForecastData, selectedISOTime]);
 
   const updateMapData = (map: mapboxgl.Map) => {
-    if (
-      typeof map !== "object" ||
-      typeof map.getSource !== "function" ||
-      // @ts-ignore
-      map._removed
-    )
-      return;
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
     if (!source) {
       const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
