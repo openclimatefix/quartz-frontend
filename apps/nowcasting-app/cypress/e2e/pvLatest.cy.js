@@ -1,0 +1,51 @@
+describe("Load the page", () => {
+  beforeEach(function () {
+    cy.intercept("POST", "/graphql").as("createBankAccount");
+    cy.loginToAuth0(Cypress.env("auth0_username"), Cypress.env("auth0_password"));
+  });
+  it("successfully loads", () => {
+    // Should now already be logged in and have a session cookie.
+    cy.visit("http://localhost:3002");
+
+    // Ensure Auth0 has redirected us back to the local app.
+    cy.location("href").should("equal", "http://localhost:3002/");
+  });
+
+  it("loads the main header elements", () => {
+    cy.visit("http://localhost:3002/");
+    cy.location("href").should("equal", "http://localhost:3002/");
+    cy.get("header").should("exist");
+    cy.get("header").should("be.visible");
+    cy.get("header").should("contain", "PV Forecast");
+    cy.get("header").should("contain", "Solar Sites");
+    cy.get("header").should("contain", "Delta");
+    cy.get("header").should("contain", "Documentation");
+    cy.get("header").contains("PV Forecast").should("have.class", "text-ocf-yellow");
+    cy.get("header").contains("Solar Sites").should("not.have.class", "text-ocf-yellow");
+    cy.get("header a[href='https://quartz.solar/']").should("exist");
+    cy.get("header a[href='https://quartz.solar/']").should("be.visible");
+    cy.get("header").should("contain", "powered by");
+    cy.get("header").contains("powered by").should("exist");
+    cy.get("header").contains("powered by").should("be.visible");
+    cy.get("header")
+      .contains("powered by")
+      .siblings("a")
+      .first()
+      .should("have.attr", "href", "https://www.openclimatefix.org/");
+    // Profile dropdown menu
+    cy.get("header #headlessui-menu-items-7").should("not.exist");
+    cy.get("header button").contains("Open user menu").should("exist");
+    cy.get("header button").contains("Open user menu").parent().click();
+    cy.get("header #headlessui-menu-items-7").should("exist");
+    cy.get("header #headlessui-menu-items-7").should("be.visible");
+    cy.get("header #headlessui-menu-items-7").should("contain", "Data");
+    cy.get("header #headlessui-menu-items-7").should("contain", "Help");
+    cy.get("header #headlessui-menu-items-7").should("contain", "Give feedback");
+    cy.get("header #headlessui-menu-items-7").should("contain", "Sign out");
+  });
+  it("loads the PV Forecast page elements", () => {
+    cy.visit("http://localhost:3002/");
+    cy.location("href").should("equal", "http://localhost:3002/");
+    // TODO: Add tests for the PV Forecast page elements, probably with mocked data.
+  });
+});

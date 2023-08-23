@@ -10,7 +10,8 @@
     "build-storybook": "build-storybook",
     "test": "jest",
     "lint": "next lint",
-    "pre-commit": "pre-commit run"
+    "pre-commit": "pre-commit run",
+    "test": "cypress run"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^1.8.0",
@@ -57,6 +58,7 @@
     "autoprefixer": "^10.4.7",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
+    "cypress": "^12.17.4",
     "eslint": "^8.23.1",
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",
