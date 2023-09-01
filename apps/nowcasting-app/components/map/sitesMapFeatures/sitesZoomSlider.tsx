@@ -63,10 +63,12 @@ const AggregationButton: React.FC<AggregationLevelProps> = ({
           <div
             className={classNames(
               computedClasses,
-              "cursor-pointer text-ocf-yellow-500 hover:opacity-80",
+              // "cursor-pointer text-ocf-yellow-500 hover:opacity-80",
+              "text-ocf-yellow-500",
               isCurrentAggregation
-                ? "ease-in duration-100 text-ocf-yellow-500 text-s border-b-4 cursor-pointer border-l-2 border-ocf-yellow-600 bg-ocf-black-900 bg-opacity-50"
+                ? "ease-in duration-100 text-ocf-yellow-500 text-s border-b-4 border-l-2 border-ocf-yellow-600 bg-ocf-black-900"
                 : "bg-ocf-delta-950 opacity-30"
+              // ? "ease-in duration-100 text-ocf-yellow-500 text-s border-b-4 cursor-pointer border-l-2 border-ocf-yellow-600 bg-ocf-black-900 bg-opacity-50"
             )}
             onClick={() => setAggregationFunc(aggregation)}
           >
@@ -94,32 +96,32 @@ const Slider: React.FC<SliderProps> = ({ selected, unselected, aggregation, setA
 
   return (
     <>
-      <div className="absolute top-0 m-4 bg-transparent flex flex-col right-6 ml-12 z-20">
-        <div className="pb-1 px-2 text-white font-bold text-center text-base bg-ocf-black-800">
-          Aggregation Settings
+      <div className="absolute top-0 m-4 bg-transparent flex flex-col right-0 ml-12 z-20">
+        <div className="py-1 px-3 text-white font-bold text-center text-base bg-ocf-black-800">
+          Aggregation Level
         </div>
         <div className="flex flex-col justify-between">
-          <div className="flex flex-row justify-around bg-ocf-delta-950 bg-opacity-60 font-bold">
-            <div
-              className="p-2 text-base text-white text-opacity-30 hover:cursor-pointer hover:text-white"
-              onClick={toggleAutoZoom}
-            >
-              Select
-            </div>
-            <div className="text-ocf-yellow-500 p-2">
-              <span
-                className={autoZoom ? "text-ocf-yellow-500" : "text-ocf-yellow-500 text-opacity-30"}
-              >
-                Auto
-              </span>{" "}
-              |{" "}
-              <span
-                className={autoZoom ? "text-ocf-yellow-500 text-opacity-30" : "text-ocf-yellow-500"}
-              >
-                Custom
-              </span>
-            </div>
-          </div>
+          {/*<div className="flex flex-row justify-around bg-ocf-delta-950 bg-opacity-60 font-bold">*/}
+          {/*  <div*/}
+          {/*    className="p-2 text-base text-white text-opacity-30 hover:cursor-pointer hover:text-white"*/}
+          {/*    onClick={toggleAutoZoom}*/}
+          {/*  >*/}
+          {/*    Select*/}
+          {/*  </div>*/}
+          {/*  <div className="text-ocf-yellow-500 p-2">*/}
+          {/*    <span*/}
+          {/*      className={autoZoom ? "text-ocf-yellow-500" : "text-ocf-yellow-500 text-opacity-30"}*/}
+          {/*    >*/}
+          {/*      Auto*/}
+          {/*    </span>{" "}*/}
+          {/*    |{" "}*/}
+          {/*    <span*/}
+          {/*      className={autoZoom ? "text-ocf-yellow-500 text-opacity-30" : "text-ocf-yellow-500"}*/}
+          {/*    >*/}
+          {/*      Custom*/}
+          {/*    </span>*/}
+          {/*  </div>*/}
+          {/*</div>*/}
           <AggregationButton
             text={"National"}
             aggregation={AGGREGATION_LEVELS.NATIONAL}
