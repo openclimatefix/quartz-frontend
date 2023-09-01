@@ -7,7 +7,7 @@ import {
   getBooleanSettingFromLocalStorage,
   CookieStorageKeys
 } from "./cookieStorage";
-import { LoadingState } from "../types";
+import { EndpointStates, LoadingState, SitesEndpointStates } from "../types";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -55,7 +55,8 @@ export type GlobalStateType = {
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
-  loadingState: LoadingState;
+  loadingState: LoadingState<EndpointStates>;
+  sitesLoadingState: LoadingState<SitesEndpointStates>;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -85,6 +86,11 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     show4hView: enable4hView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW),
     dashboardMode: getBooleanSettingFromLocalStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {
+      initialLoadComplete: false,
+      showMessage: false,
+      message: "Loading data"
+    },
+    sitesLoadingState: {
       initialLoadComplete: false,
       showMessage: false,
       message: "Loading data"

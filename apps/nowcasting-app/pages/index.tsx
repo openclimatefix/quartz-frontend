@@ -29,10 +29,10 @@ import {
 } from "../components/types";
 import { components } from "../types/quartz-api";
 import {
-  axiosFetcherAuth,
   formatISODateString,
   getDeltaBucket,
   getLoadingState,
+  getSitesLoadingState,
   isProduction
 } from "../components/helpers/utils";
 import { ActiveUnit } from "../components/map/types";
@@ -62,6 +62,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [zoom] = useGlobalState("zoom");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
+  const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
   const [, setLoadingState] = useGlobalState("loadingState");
 
   // Local state used to set initial state on server side render, then updated by global state
@@ -301,16 +302,17 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
 
   // Sites API data
-  const { data: allSitesData, error: allSitesError } = useLoadDataFromApi<AllSites>(
-    `${SITES_API_PREFIX}/sites`,
-    {
-      // isPaused: () => {
-        console.log("Sites API data paused?", !sitesViewSelected);
-        return false;
-        // return !sitesViewSelected;
-      }
+  const {
+    data: allSitesData,
+    isLoading: allSitesLoading,
+    isValidating: allSitesValidating,
+    error: allSitesError
+  } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites?UI`, {
+    isPaused: () => {
+      console.log("Sites API data paused?", !sitesViewSelected);
+      return !sitesViewSelected;
     }
-  );
+  });
   const slicedSitesData = useMemo(
     () => allSitesData?.site_list.slice(0, 100) || [],
     [allSitesData]
@@ -319,7 +321,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const siteUuidsString = siteUuids?.join(",") || "";
   const {
     data: sitePvForecastData,
-    isValidating: sitePvForecastRevalidating,
+    isLoading: sitePvForecastLoading,
+    isValidating: sitePvForecastValidating,
     error: sitePvForecastError
   } = useLoadDataFromApi<SitesPvForecast>(
     `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
@@ -335,7 +338,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
 
-  const { data: sitesPvActualData, error: sitePvActualError } = useLoadDataFromApi<SitesPvActual>(
+  const {
+    data: sitesPvActualData,
+    isLoading: sitePvActualLoading,
+    isValidating: sitePvActualValidating,
+    error: sitePvActualError
+  } = useLoadDataFromApi<SitesPvActual>(
     `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
     {
       // isPaused: () => {
@@ -361,30 +369,56 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     )
   };
 
-  const sitesErrors = {
+  const sitesCombinedLoading = useMemo(
+    () => ({
+      allSitesLoading,
+      sitePvForecastLoading,
+      sitePvActualLoading
+    }),
+    [allSitesLoading, sitePvForecastLoading, sitePvActualLoading]
+  );
+
+  const sitesCombinedValidating = useMemo(
+    () => ({
+      allSitesValidating,
+      sitePvForecastValidating,
+      sitePvActualValidating
+    }),
+    [allSitesValidating, sitePvForecastValidating, sitePvActualValidating]
+  );
+
+  const sitesCombinedErrors = {
     allSitesError,
     sitesPvForecastError: sitePvForecastError,
     sitesPvActualError: sitePvActualError
   };
 
-  console.log("sitePvForecastRevalidating", sitePvForecastRevalidating);
+  console.log("sitePvForecastRevalidating", sitePvForecastValidating);
 
   const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
-  const aggregatedSitesData2 = useFormatSitesData(sitesData, selectedISOTime);
-  console.log("aggregatedSitesData == ", aggregatedSitesData == aggregatedSitesData2);
-  console.log("aggregatedSitesData === ", aggregatedSitesData === aggregatedSitesData2);
-  console.log(
-    "aggregatedSitesData == ",
-    useFormatSitesData(sitesData, selectedISOTime) == useFormatSitesData(sitesData, selectedISOTime)
-  );
-  console.log("sitesData ==", sitesData == sitesData);
-  console.log("sitesData ===", sitesData === sitesData);
-  console.log("selectedISOTime ==", selectedISOTime == selectedISOTime);
-  console.log("selectedISOTime ===", selectedISOTime === selectedISOTime);
+
   // Watch and update loading state
   useEffect(() => {
     setLoadingState(getLoadingState(combinedLoading, combinedValidating));
   }, [combinedLoading, combinedValidating, setLoadingState]);
+  const sitesCombinedErrorsLength = Object.values(sitesCombinedErrors).filter((e) => !!e).length;
+
+  // Watch and update sites loading state
+  useEffect(() => {
+    setSitesLoadingState(
+      getSitesLoadingState(
+        sitesCombinedLoading,
+        sitesCombinedValidating,
+        sitesCombinedErrors,
+        sitesData
+      )
+    );
+  }, [
+    sitesCombinedLoading,
+    sitesCombinedValidating,
+    sitesCombinedErrorsLength,
+    setSitesLoadingState
+  ]);
 
   const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
 
@@ -413,7 +447,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
               className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
               sitesData={sitesData}
               aggregatedSitesData={aggregatedSitesData}
-              sitesErrors={sitesErrors}
+              sitesErrors={sitesCombinedErrors}
               activeUnit={activeUnit}
               setActiveUnit={setActiveUnit}
             />
@@ -427,7 +461,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           />
         </div>
 
-        <SideLayout dashboardModeActive={combinedDashboardModeActive}>
+        <SideLayout
+          bottomPadding={!currentView(VIEWS.SOLAR_SITES)}
+          dashboardModeActive={combinedDashboardModeActive}
+        >
           <PvRemixChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}

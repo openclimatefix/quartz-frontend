@@ -63,71 +63,93 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData);
   }, [initForecastData, selectedISOTime]);
-  const updateMapData = (map: mapboxgl.Map) => {
+
+  // const updateMapData = (map: mapboxgl.Map) => {
+  //   const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+  //   if (!source) {
+  //     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
+  //
+  //     map.addSource("latestPV", {
+  //       type: "geojson",
+  //       data: forecastGeoJson
+  //     });
+  //   }
+  //
+  //   if (generatedGeoJsonForecastData && source) {
+  //     source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+  //     map.setPaintProperty(
+  //       "latestPV-forecast",
+  //       "fill-opacity",
+  //       getFillOpacity(selectedDataName, isNormalized)
+  //     );
+  //   }
+  // };
+
+  const addOrUpdateFCData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+
     if (!source) {
       const { forecastGeoJson } = generateGeoJsonForecastData(
         initForecastData,
         selectedISOTime,
         combinedData
       );
-
       map.addSource("latestPV", {
         type: "geojson",
         data: forecastGeoJson
       });
     }
 
-    if (generatedGeoJsonForecastData && source) {
-      source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-      map.setPaintProperty(
-        "latestPV-forecast",
-        "fill-opacity",
-        getFillOpacity(selectedDataName, isNormalized)
-      );
+    const pvForecastLayer = map.getLayer("latestPV-forecast");
+    if (!pvForecastLayer) {
+      map.addLayer({
+        id: "latestPV-forecast",
+        type: "fill",
+        source: "latestPV",
+        layout: { visibility: "visible" },
+        paint: {
+          "fill-color": yellow,
+          "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
+        }
+      });
+    } else {
+      if (generatedGeoJsonForecastData && source) {
+        source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+        map.setPaintProperty(
+          "latestPV-forecast",
+          "fill-opacity",
+          getFillOpacity(selectedDataName, isNormalized)
+        );
+      }
     }
-  };
 
-  const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
+    const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
+    if (!pvForecastBordersLayer) {
+      map.addLayer({
+        id: "latestPV-forecast-borders",
+        type: "line",
+        source: "latestPV",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 0.6,
+          "line-opacity": 0.2
+        }
+      });
+    }
 
-    map.current.addSource("latestPV", {
-      type: "geojson",
-      data: forecastGeoJson
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast",
-      type: "fill",
-      source: "latestPV",
-      layout: { visibility: "visible" },
-      paint: {
-        "fill-color": yellow,
-        "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
-      }
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 0.6,
-        "line-opacity": 0.2
-      }
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast-select-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 4,
-        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
-      }
-    });
+    const pvForecastSelectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+    if (!pvForecastSelectBordersLayer) {
+      map.addLayer({
+        id: "latestPV-forecast-select-borders",
+        type: "line",
+        source: "latestPV",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 4,
+          "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+        }
+      });
+    }
   };
 
   return (
@@ -140,8 +162,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         //     <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
         //   </LoadStateMap>
         <Map
-          loadDataOverlay={addFCData}
-          updateData={{ newData: !!initForecastData, updateMapData }}
+          loadDataOverlay={(map: { current: mapboxgl.Map }) =>
+            safelyUpdateMapData(map.current, addOrUpdateFCData)
+          }
+          updateData={{
+            newData: !!initForecastData,
+            updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateFCData)
+          }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />

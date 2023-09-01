@@ -10,9 +10,11 @@ import {
   SitePvForecast
 } from "../types";
 import gspLatLongData from "../../data/gsp_lat_long_map.json";
+import dnoLatLongData from "../../data/dno_lat_long_map.json";
 import { AGGREGATION_LEVELS } from "../../constant";
 
 const gspLatLongMap = new Map(gspLatLongData as [string, { lat: number; long: number }][]);
+const dnoLatLongMap = new Map(dnoLatLongData as [string, { lat: number; long: number }][]);
 
 const getExpectedPowerGenerationForSite = (
   forecastData: SitePvForecast[],
@@ -48,9 +50,7 @@ export const useFormatSitesData = (
     (fc) => fc.forecast_values[0].expected_generation_kw > 0
   );
   const firstForecastData = JSON.stringify(firstNonZeroForecastValue, null, 2) || "";
-  console.log("first forecast data", firstForecastData);
   return useMemo(() => {
-    console.log("useFormatSitesData", combinedSitesData, selectedISOTime);
     // const [sitesTableData, setSitesTableData] = useState<AggregatedSitesCombinedData>({
     //   sites: new Map(),
     //   regions: new Map(),
@@ -107,7 +107,7 @@ export const useFormatSitesData = (
       // region level
       const region = JSON.parse(site.dno);
       const regionName: string = region?.long_name || "";
-      const regionLatLong = gspLatLongMap.get(region.dno_id);
+      const regionLatLong = dnoLatLongMap.get(region.dno_id);
       const regionLat = regionLatLong?.lat || 0;
       const regionLong = regionLatLong?.long || 0;
       let updatedRegionData = sitesTableData.regions.get(regionName) || {
@@ -152,15 +152,19 @@ export const useFormatSitesData = (
 
       // national level
       const national = "National";
+      let nationalCapacity = 0;
+      sitesTableData.regions.forEach((region, regionName) => {
+        nationalCapacity += region.capacity;
+      });
       let updatedNationalData = sitesTableData.national.get(national) || {
         id: "national",
         label: "National Aggregate Value",
-        capacity: 0,
+        capacity: nationalCapacity,
         actualPV: 0,
         expectedPV: 0,
         aggregatedYield: 0,
-        lat: 0,
-        lng: 0
+        lat: 54.00366,
+        lng: -2.547855
       };
       updatedNationalData.capacity += siteCapacity;
       updatedNationalData.actualPV += siteActualPV;

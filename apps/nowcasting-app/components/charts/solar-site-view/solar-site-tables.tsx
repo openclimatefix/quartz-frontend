@@ -84,7 +84,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
   //                   }
   return (
     <>
-      <div className="h-72 overflow-y-scroll">
+      <div className="flex-1 h-72 overflow-y-scroll">
         {rows?.sort(sortFn).map((site) => {
           const mostAccurateGeneration = site.actualPV || site.expectedPV;
           return (
@@ -124,7 +124,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                   </div>
                 </div>
                 <div
-                  className="flex items-end justify-end flex-row-reverse relative w-full 
+                  className="flex items-end justify-end flex-row-reverse relative w-full
                mb-0.5"
                 >
                   <div
@@ -156,7 +156,7 @@ export const AggregatedDataTable: React.FC<{
 }> = ({ className, title, tableData }) => {
   return (
     <>
-      <div className={`${className || ""}`}>
+      <div className={`flex-1 ${className || ""}`}>
         <TableHeader text={title} />
         <TableData rows={tableData} />
       </div>

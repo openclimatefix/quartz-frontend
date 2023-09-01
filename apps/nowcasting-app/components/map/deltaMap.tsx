@@ -152,51 +152,67 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     ]
   ];
 
-  const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(
+  const addOrUpdateFCData = (map: mapboxgl.Map) => {
+    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    if (!source) {
+      const { forecastGeoJson } = generateGeoJsonForecastData(
       initForecastData,
       selectedISOTime,
       combinedData,
       gspDeltas
     );
-
-    map.current.addSource("latestPV", {
-      type: "geojson",
-      data: forecastGeoJson
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast",
-      type: "fill",
-      source: "latestPV",
-      layout: { visibility: "visible" },
-      paint: {
-        "fill-color": getFillColor("delta"),
-        "fill-opacity": 0.7
+      map.addSource("latestPV", {
+        type: "geojson",
+        data: forecastGeoJson
+      });
+    } else {
+      if (generatedGeoJsonForecastData && source) {
+        source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+        map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));
       }
-    });
+    }
 
-    map.current.addLayer({
-      id: "latestPV-forecast-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 0.6,
-        "line-opacity": 0.2
-      }
-    });
+    const pvForecastLayer = map.getLayer("latestPV-forecast");
+    if (!pvForecastLayer) {
+      map.addLayer({
+        id: "latestPV-forecast",
+        type: "fill",
+        source: "latestPV",
+        layout: { visibility: "visible" },
+        paint: {
+          "fill-color": getFillColor("delta"),
+          "fill-opacity": 0.7
+        }
+      });
+    }
 
-    map.current.addLayer({
-      id: "latestPV-forecast-select-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 4,
-        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
-      }
-    });
+    const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
+    if (!pvForecastBordersLayer) {
+      map.addLayer({
+        id: "latestPV-forecast-borders",
+        type: "line",
+        source: "latestPV",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 0.6,
+          "line-opacity": 0.2
+        }
+      });
+    }
+
+    const pvForecastSelectLayer = map.getLayer("latestPV-forecast-select-borders");
+    if (!pvForecastSelectLayer) {
+      map.addLayer({
+        id: "latestPV-forecast-select-borders",
+        type: "line",
+        source: "latestPV",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 4,
+          "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+        }
+      });
+    }
     // Create a popup, but don't add it to the map yet.
     const popup = new mapboxgl.Popup({
       closeButton: false,
@@ -205,9 +221,9 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       maxWidth: "none"
     });
 
-    map.current.on("mousemove", "latestPV-forecast", (e) => {
+    map.on("mousemove", "latestPV-forecast", (e) => {
       // Change the cursor style as a UI indicator.
-      map.current.getCanvas().style.cursor = "pointer";
+      map.getCanvas().style.cursor = "pointer";
 
       // Copy coordinates array.
       const properties = e.features?.[0].properties;
@@ -235,11 +251,11 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
 
       // Populate the popup and set its coordinates
       // based on the feature found.
-      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
     });
 
-    map.current.on("mouseleave", "latestPV-forecast", () => {
-      map.current.getCanvas().style.cursor = "";
+    map.on("mouseleave", "latestPV-forecast", () => {
+      map.getCanvas().style.cursor = "";
       popup.remove();
     });
   };
@@ -254,10 +270,12 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         </LoadStateMap>
       ) : (
         <Map
-          loadDataOverlay={addFCData}
+          loadDataOverlay={(map: { current: mapboxgl.Map }) =>
+            safelyUpdateMapData(map.current, addOrUpdateFCData)
+          }
           updateData={{
             newData: !!initForecastData,
-            updateMapData: (map) => safelyUpdateMapData(map, updateMapData)
+            updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateFCData)
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>

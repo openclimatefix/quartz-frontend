@@ -1,6 +1,18 @@
 import axios from "axios";
 import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
-import { Bucket, CombinedLoading, CombinedValidating, GspDeltaValue, LoadingState } from "../types";
+import {
+  Bucket,
+  CombinedLoading,
+  CombinedSitesData,
+  CombinedValidating,
+  EndpointStates,
+  GspDeltaValue,
+  LoadingState,
+  SitesCombinedErrors,
+  SitesCombinedLoading,
+  SitesCombinedValidating,
+  SitesEndpointStates
+} from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 import createClient from "openapi-fetch";
@@ -33,9 +45,9 @@ export const classNames = (...classes: string[]) => {
 export const getLoadingState = (
   combinedLoading: CombinedLoading,
   combinedValidating: CombinedValidating
-): LoadingState => {
+): LoadingState<EndpointStates> => {
   let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
-  let showMessage = false;
+  let showMessage = true;
   let message = "";
   if (initialLoadComplete) {
     if (combinedValidating.nationalForecastValidating) {
@@ -67,6 +79,57 @@ export const getLoadingState = (
     initialLoadComplete,
     showMessage,
     message
+  };
+};
+
+export const getSitesLoadingState = (
+  combinedLoading: SitesCombinedLoading,
+  combinedValidating: SitesCombinedValidating,
+  combinedErrors: SitesCombinedErrors,
+  combinedData: CombinedSitesData
+): LoadingState<SitesEndpointStates> => {
+  let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
+  let showMessage = false;
+  let message = "";
+  if (initialLoadComplete) {
+    if (combinedValidating.allSitesValidating) {
+      message = "Loading sites";
+      showMessage = true;
+    }
+    if (combinedValidating.sitePvActualValidating) {
+      message = showMessage ? "Loading latest data" : "Loading sites PV Actual";
+      showMessage = true;
+    }
+    if (combinedValidating.sitePvForecastValidating) {
+      message = showMessage ? "Loading latest data" : "Loading sites PV Forecast";
+      showMessage = true;
+    }
+  }
+  const endpointStates: SitesEndpointStates = {
+    allSites: {
+      loading: combinedLoading.allSitesLoading,
+      validating: combinedValidating.allSitesValidating,
+      error: combinedErrors.allSitesError,
+      hasData: !!combinedData.allSitesData
+    },
+    sitePvActual: {
+      loading: combinedLoading.sitePvActualLoading,
+      validating: combinedValidating.sitePvActualValidating,
+      error: combinedErrors.sitesPvActualError,
+      hasData: !!combinedData.sitesPvActualData
+    },
+    sitePvForecast: {
+      loading: combinedLoading.sitePvForecastLoading,
+      validating: combinedValidating.sitePvForecastValidating,
+      error: combinedErrors.sitesPvForecastError,
+      hasData: !!combinedData.sitesPvForecastData
+    }
+  };
+  return {
+    initialLoadComplete,
+    showMessage,
+    message,
+    endpointStates
   };
 };
 

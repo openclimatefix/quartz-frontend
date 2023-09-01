@@ -12,7 +12,7 @@ import {
 } from "../../constant";
 import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
-import regionsGeoJSON from "../../data/dno_license_areas_20200506.json";
+import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import {
@@ -91,6 +91,19 @@ const SitesMap: React.FC<SitesMapProps> = ({
     isNormalized ? 1 : MAX_POWER_GENERATED,
     1
   ];
+
+  const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS) => {
+    switch (aggregationLevel) {
+      case AGGREGATION_LEVELS.SITE:
+        return 10;
+      case AGGREGATION_LEVELS.GSP:
+        return 5;
+      case AGGREGATION_LEVELS.REGION:
+        return 2;
+      case AGGREGATION_LEVELS.NATIONAL:
+        return 0.3;
+    }
+  };
 
   const generateGeoJsonForecastData: (
     forecastData?: FcAllResData,
@@ -191,31 +204,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
     setUpdatingMapData(true);
 
-    const regionsSource = map.getSource("regions") as mapboxgl.GeoJSONSource;
-    if (!regionsSource) {
-      map.addSource("regions", {
-        type: "geojson",
-        data: regionsGeoJSON as FeatureCollection
-      });
-    }
-    map.removeLayer("regions");
-    const regionLayer = map.getLayer("regions");
-    if (!regionLayer) {
-      map.addLayer({
-        id: "regions",
-        type: "line",
-        source: "regions",
-        layout: {},
-        paint: {
-          "line-color": "#ffffff",
-          "line-width": 3,
-          "line-opacity": 1
-        }
-      });
-      console.log("regions layer added");
-    }
-    console.log("regions layer", regionLayer);
-
     // Sites
     addOrUpdateMapGroup(
       map,
@@ -245,6 +233,17 @@ const SitesMap: React.FC<SitesMapProps> = ({
       AGGREGATION_LEVEL_MIN_ZOOM.REGION,
       AGGREGATION_LEVEL_MAX_ZOOM.REGION
     );
+
+    // National
+    addOrUpdateMapGroup(
+      map,
+      aggregatedSitesData.national,
+      "national",
+      AGGREGATION_LEVELS.NATIONAL,
+      AGGREGATION_LEVEL_MIN_ZOOM.NATIONAL,
+      AGGREGATION_LEVEL_MAX_ZOOM.NATIONAL
+    );
+
     setUpdatingMapData(false);
     setNewDataForMap(false);
     console.log("updated map data");
@@ -262,11 +261,67 @@ const SitesMap: React.FC<SitesMapProps> = ({
     console.log("start addOrUpdateMapGroup");
 
     const source = map.getSource(groupName) as unknown as mapboxgl.GeoJSONSource | undefined;
-    const sitesFeatureArray = generateFeatureArray(group);
+    const groupFeatureArray = generateFeatureArray(group);
     if (source) {
-      setSourceData(source, sitesFeatureArray);
+      setSourceData(source, groupFeatureArray);
     } else {
-      addGroupSource(map, groupName, sitesFeatureArray);
+      addGroupSource(map, groupName, groupFeatureArray);
+    }
+
+    if (groupName === "regions") {
+      let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
+        | mapboxgl.GeoJSONSource
+        | undefined;
+      if (!dnoBoundariesSource) {
+        map.addSource("dnoBoundaries", {
+          type: "geojson",
+          data: dnoShapeData as FeatureCollection
+        });
+      }
+
+      let dnoBoundariesLayer =
+        (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
+      if (!dnoBoundariesLayer) {
+        map.addLayer({
+          id: "dnoBoundaries",
+          type: "line",
+          source: "dnoBoundaries",
+          minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+          maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+          paint: {
+            "line-color": "#ffcc2d",
+            "line-width": 0.6,
+            "line-opacity": 0.5
+          }
+        });
+      }
+    }
+
+    if (groupName === "gsps") {
+      let gspBoundariesSource = map.getSource("gspBoundaries") as unknown as
+        | mapboxgl.GeoJSONSource
+        | undefined;
+      if (!gspBoundariesSource) {
+        map.addSource("gspBoundaries", {
+          type: "geojson",
+          data: gspShapeData as FeatureCollection
+        });
+      }
+
+      let gspBoundariesLayer =
+        (map.getLayer(`gspBoundaries`) as unknown as CircleLayer) || undefined;
+      if (!gspBoundariesLayer) {
+        map.addLayer({
+          id: "gspBoundaries",
+          type: "line",
+          source: "gspBoundaries",
+          paint: {
+            "line-color": "#ffffff",
+            "line-width": 0.6,
+            "line-opacity": 0.2
+          }
+        });
+      }
     }
 
     // Capacity ring
@@ -276,7 +331,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       map.setPaintProperty(`Capacity-${groupName}`, "circle-radius", [
         "*",
         ["to-number", ["get", "capacity"]],
-        5
+        getRingMultiplier(groupAggregationLevel)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
       const visibility = "visible";
@@ -293,7 +348,11 @@ const SitesMap: React.FC<SitesMapProps> = ({
           visibility: "visible"
         },
         paint: {
-          "circle-radius": ["*", ["to-number", ["get", "capacity"]], 5],
+          "circle-radius": [
+            "*",
+            ["to-number", ["get", "capacity"]],
+            getRingMultiplier(groupAggregationLevel)
+          ],
           "circle-stroke-color": [
             "case",
             ["boolean", ["get", "selected"], false],
@@ -338,7 +397,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       map.setPaintProperty(`Generation-${groupName}`, "circle-radius", [
         "*",
         ["to-number", ["get", "expectedPV"]],
-        5
+        getRingMultiplier(groupAggregationLevel)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
       const visibility = "visible";
@@ -355,7 +414,11 @@ const SitesMap: React.FC<SitesMapProps> = ({
           visibility: "visible"
         },
         paint: {
-          "circle-radius": ["*", ["to-number", ["get", "expectedPV"]], 5],
+          "circle-radius": [
+            "*",
+            ["to-number", ["get", "expectedPV"]],
+            getRingMultiplier(groupAggregationLevel)
+          ],
           "circle-color": [
             "case",
             ["boolean", ["get", "selected"], false],
@@ -369,23 +432,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
     console.log("end addOrUpdateMapGroup");
   };
 
-  const addFCData = (map: { current: mapboxgl.Map }) => {
+  const addFCData = (map: mapboxgl.Map) => {
     console.log("start addFCData");
-    if (
-      typeof map.current !== "object" ||
-      typeof map.current.getSource !== "function" ||
-      // @ts-ignore
-      map.current._removed
-    ) {
-      console.log("map not ready", map.current);
-      if (!map.current.isStyleLoaded()) {
-        setTimeout(() => {
-          addFCData(map);
-        }, 200);
-      }
-      return;
-    }
-    // const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
     // Create a popup, but don't add it to the map yet.
     const popup = new mapboxgl.Popup({
       closeButton: false,
@@ -396,7 +444,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
     // Sites
     addOrUpdateMapGroup(
-      map.current,
+      map,
       aggregatedSitesData.sites,
       "sites",
       AGGREGATION_LEVELS.SITE,
@@ -406,7 +454,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
     // GSPs
     addOrUpdateMapGroup(
-      map.current,
+      map,
       aggregatedSitesData.gsps,
       "gsps",
       AGGREGATION_LEVELS.GSP,
@@ -416,7 +464,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
     // Regions
     addOrUpdateMapGroup(
-      map.current,
+      map,
       aggregatedSitesData.regions,
       "regions",
       AGGREGATION_LEVELS.REGION,
@@ -443,7 +491,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
         </LoadStateMap>
       ) : (
         <MapComponent
-          loadDataOverlay={addFCData}
+          loadDataOverlay={(map: { current: mapboxgl.Map }) =>
+            safelyUpdateMapData(map.current, addFCData)
+          }
           updateData={{
             newData: newDataForMap,
             updateMapData: (map) => safelyUpdateMapData(map, updateMapData)

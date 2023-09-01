@@ -1,10 +1,30 @@
 import { DELTA_BUCKET } from "../constant";
 import { components } from "../types/quartz-api";
 
-export type LoadingState = {
+export type LoadingState<T> = {
   initialLoadComplete: boolean;
   showMessage: boolean;
   message: string;
+  endpointStates?: T;
+};
+export type EndpointStates = {
+  nationalForecast: EndpointState;
+  pvRealDayIn: EndpointState;
+  pvRealDayAfter: EndpointState;
+  national4Hour: EndpointState;
+  allGspForecast: EndpointState;
+  allGspReal: EndpointState;
+};
+export type SitesEndpointStates = {
+  allSites: EndpointState;
+  sitePvForecast: EndpointState;
+  sitePvActual: EndpointState;
+};
+export type EndpointState = {
+  loading: boolean;
+  validating: boolean;
+  error: any;
+  hasData: boolean;
 };
 export type FcAllResData = {
   type?: "FeatureCollection";
@@ -91,6 +111,21 @@ type CombinedErrors = {
   allGspSystemError: any;
   allGspForecastError: any;
   allGspRealError: any;
+};
+type SitesCombinedLoading = {
+  allSitesLoading: boolean;
+  sitePvForecastLoading: boolean;
+  sitePvActualLoading: boolean;
+};
+type SitesCombinedValidating = {
+  allSitesValidating: boolean;
+  sitePvForecastValidating: boolean;
+  sitePvActualValidating: boolean;
+};
+type SitesCombinedErrors = {
+  allSitesError: any;
+  sitesPvForecastError: any;
+  sitesPvActualError: any;
 };
 type GspEntity = {
   label: string;

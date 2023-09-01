@@ -11,13 +11,19 @@ import {
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { AggregatedSitesCombinedData, CombinedSitesData } from "../../types";
+import {
+  AggregatedSitesCombinedData,
+  CombinedSitesData,
+  LoadingState,
+  SitesEndpointStates
+} from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { ForecastWithActualPV } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
+import DataLoadingChartStatus from "../DataLoadingChartStatus";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -61,6 +67,7 @@ const SolarSiteChart: FC<{
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
+  const [sitesLoadingState] = useGlobalState("sitesLoadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const currentAggregation = (a: AGGREGATION_LEVELS) => a === aggregationLevel;
@@ -141,12 +148,30 @@ const SolarSiteChart: FC<{
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto mb-2">
+      <div className="flex-auto flex flex-col mb-2">
         <div className="flex content-between bg-ocf-gray-800 h-auto">
-          <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
+          <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex justify-evenly">
             All Sites
           </div>
-          <div className="flex justify-between flex-2 my-2 px-6">
+          <div className="flex-1 flex flex-col items-center justify-around text-2xs py-2 leading-none">
+            {Object.entries(
+              sitesLoadingState?.endpointStates || ({} as LoadingState<SitesEndpointStates>)
+            ).map(([key, state]) => (
+              <div key={`loading-${key}`} className="flex flex-row justify-between w-full">
+                <span className="block mr-2">{key}</span>
+                <div>
+                  {state.loading && <span className="mr-2 animate-pulse">🟠</span>}
+                  {state.hasData && <span className="mr-2">🟢</span>}
+                  {state.validating ? (
+                    <span className="mr-2 animate-pulse">🟠</span>
+                  ) : (
+                    <span className="mr-2">🟢</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-between flex-2 my-2 pr-6 pl-3">
             <div className="pr-8">
               <ForecastWithActualPV
                 forecast={`${nationalPVExpected?.toFixed(1)}`}
@@ -169,8 +194,8 @@ const SolarSiteChart: FC<{
           <div className="inline-flex h-full"></div>
           {/*<div className="inline-flex h-full">{children}</div>*/}
         </div>
-
-        <div className="h-60 mt-4 mb-10">
+        <div className="flex-1 relative h-60 mt-4 mb-3">
+          <DataLoadingChartStatus loadingState={sitesLoadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -182,33 +207,35 @@ const SolarSiteChart: FC<{
           />
         </div>
         {clickedSiteGroupId && (
-          <>
-            <ForecastHeaderSite
-              forecast={
-                getExpectedPowerGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) ||
-                "0"
-              }
-              pvActual={
-                getPvActualGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) || "0"
-              }
-              time={allSitesChartDateTime}
-              onClose={() => {
-                setClickedSiteGroupId(undefined);
-              }}
-              title={getSiteName(clickedSiteGroupId) || "No site name for this site group"}
-            ></ForecastHeaderSite>
-            <div className="h-60 mt-4 mb-10">
-              <RemixLine
-                resetTime={resetTime}
-                timeNow={formatISODateString(timeNow)}
-                timeOfInterest={selectedTime}
-                setTimeOfInterest={setSelectedTime}
-                data={filteredChartData}
-                yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
-                visibleLines={visibleLines}
-              />
-            </div>
-          </>
+          <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
+            <>
+              <ForecastHeaderSite
+                forecast={
+                  getExpectedPowerGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) ||
+                  "0"
+                }
+                pvActual={
+                  getPvActualGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) || "0"
+                }
+                time={allSitesChartDateTime}
+                onClose={() => {
+                  setClickedSiteGroupId(undefined);
+                }}
+                title={getSiteName(clickedSiteGroupId) || "No site name for this site group"}
+              ></ForecastHeaderSite>
+              <div className="h-60 mt-4 mb-10">
+                <RemixLine
+                  resetTime={resetTime}
+                  timeNow={formatISODateString(timeNow)}
+                  timeOfInterest={selectedTime}
+                  setTimeOfInterest={setSelectedTime}
+                  data={filteredChartData}
+                  yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
+                  visibleLines={visibleLines}
+                />
+              </div>
+            </>
+          </div>
         )}
       </div>
 
