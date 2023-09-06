@@ -85,6 +85,7 @@ export const useFormatSitesData = (
 
       // site level
       const siteName = site.client_site_name || site.client_site_id || site.site_uuid;
+      const siteId = site.site_uuid;
       let updatedSiteData = sitesTableData.sites.get(siteName) || {
         id: site.site_uuid,
         label: siteName,
@@ -102,53 +103,60 @@ export const useFormatSitesData = (
         ((updatedSiteData.actualPV || updatedSiteData.expectedPV) / updatedSiteData.capacity) * 100;
       updatedSiteData.lat = site.latitude;
       updatedSiteData.lng = site.longitude;
-      sitesTableData.sites.set(siteName, updatedSiteData);
+      sitesTableData.sites.set(siteId, updatedSiteData);
 
       // region level
       const region = JSON.parse(site.dno);
-      const regionName: string = region?.long_name || "";
-      const regionLatLong = dnoLatLongMap.get(region.dno_id);
-      const regionLat = regionLatLong?.lat || 0;
-      const regionLong = regionLatLong?.long || 0;
-      let updatedRegionData = sitesTableData.regions.get(regionName) || {
-        id: region.dno_id,
-        label: regionName,
-        capacity: 0,
-        actualPV: 0,
-        expectedPV: 0,
-        aggregatedYield: 0,
-        lat: regionLat,
-        lng: regionLong
-      };
-      updatedRegionData.capacity += siteCapacity;
-      updatedRegionData.actualPV += siteActualPV;
-      updatedRegionData.expectedPV += siteExpectedPV;
-      sitesTableData.regions.set(regionName, updatedRegionData);
+      if (region) {
+        const regionId: string = region?.dno_id || "";
+        const regionName: string = region?.long_name || "";
+        const regionLatLong = dnoLatLongMap.get(region.dno_id);
+        const regionLat = regionLatLong?.lat || 0;
+        const regionLong = regionLatLong?.long || 0;
+        let updatedRegionData = sitesTableData.regions.get(regionName) || {
+          id: regionId,
+          label: regionName,
+          capacity: 0,
+          actualPV: 0,
+          expectedPV: 0,
+          aggregatedYield: 0,
+          lat: regionLat,
+          lng: regionLong
+        };
+        updatedRegionData.capacity += siteCapacity;
+        updatedRegionData.actualPV += siteActualPV;
+        updatedRegionData.expectedPV += siteExpectedPV;
+        sitesTableData.regions.set(regionId, updatedRegionData);
+      }
 
       // gsp level
       const gsp = JSON.parse(site.gsp);
-      const gspName: string = gsp?.name || "";
-      const gspLatLong = gspLatLongMap.get(gsp.gsp_id);
-      const gspLat = gspLatLong?.lat || 0;
-      const gspLong = gspLatLong?.long || 0;
-      let updatedGspData = sitesTableData.gsps.get(gspName) || {
-        id: gsp.gsp_id,
-        label: gspName,
-        capacity: 0,
-        actualPV: 0,
-        expectedPV: 0,
-        aggregatedYield: 0,
-        lat: gspLat,
-        lng: gspLong
-      };
-      updatedGspData.capacity += siteCapacity;
-      updatedGspData.actualPV += siteActualPV;
-      updatedGspData.expectedPV += siteExpectedPV;
-      if (lastSite) {
-        updatedGspData.aggregatedYield =
-          ((updatedGspData.actualPV || updatedGspData.expectedPV) / updatedGspData.capacity) * 100;
+      if (gsp) {
+        const gspId: string = gsp?.gsp_id || "";
+        const gspName: string = gsp?.name || "";
+        const gspLatLong = gspLatLongMap.get(gsp.gsp_id);
+        const gspLat = gspLatLong?.lat || 0;
+        const gspLong = gspLatLong?.long || 0;
+        let updatedGspData = sitesTableData.gsps.get(gspName) || {
+          id: gspId,
+          label: gspName,
+          capacity: 0,
+          actualPV: 0,
+          expectedPV: 0,
+          aggregatedYield: 0,
+          lat: gspLat,
+          lng: gspLong
+        };
+        updatedGspData.capacity += siteCapacity;
+        updatedGspData.actualPV += siteActualPV;
+        updatedGspData.expectedPV += siteExpectedPV;
+        if (lastSite) {
+          updatedGspData.aggregatedYield =
+            ((updatedGspData.actualPV || updatedGspData.expectedPV) / updatedGspData.capacity) *
+            100;
+        }
+        sitesTableData.gsps.set(gspId, updatedGspData);
       }
-      sitesTableData.gsps.set(gspName, updatedGspData);
 
       // national level
       const national = "National";

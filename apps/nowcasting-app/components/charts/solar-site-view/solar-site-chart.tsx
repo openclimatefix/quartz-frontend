@@ -15,6 +15,7 @@ import {
   AggregatedSitesCombinedData,
   CombinedSitesData,
   LoadingState,
+  Site,
   SitesEndpointStates
 } from "../../types";
 import Tooltip from "../../tooltip";
@@ -78,12 +79,33 @@ const SolarSiteChart: FC<{
     pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
-  // TODO: this currently only works for sites;
-  //  need to add a helper function to filter sites by group to feed into here
-  const selectedSiteData = combinedSitesData.allSitesData?.filter(
-    (site) => site.site_uuid === clickedSiteGroupId
+
+  const getSelectedSitesData = (
+    sitesData: Site[],
+    aggregationLevel: AGGREGATION_LEVELS,
+    clickedGroupId: string
+  ) => {
+    switch (aggregationLevel) {
+      case AGGREGATION_LEVELS.NATIONAL:
+        return sitesData;
+      case AGGREGATION_LEVELS.REGION:
+        return sitesData.filter((site) => site.dno.includes(`\"dno_id\": \"${clickedGroupId}\"`));
+      case AGGREGATION_LEVELS.GSP:
+        return sitesData.filter((site) => site.gsp.includes(`\"gsp_id\": \"${clickedGroupId}\"`));
+      case AGGREGATION_LEVELS.SITE:
+        return sitesData.filter((site) => site.site_uuid === clickedGroupId);
+    }
+  };
+  const getSelectedSitesCapacity = (selectedSitesData: Site[]) => {
+    return selectedSitesData.reduce((acc, site) => acc + site.inverter_capacity_kw, 0);
+  };
+
+  const selectedSiteData = getSelectedSitesData(
+    combinedSitesData.allSitesData || [],
+    aggregationLevel,
+    String(clickedSiteGroupId) || ""
   );
-  const selectedSiteCapacity = selectedSiteData?.[0]?.inverter_capacity_kw || 0;
+  const selectedSiteCapacity = getSelectedSitesCapacity(selectedSiteData);
   const filteredChartData = useFormatChartDataSites({
     allSitesData: selectedSiteData,
     pvForecastData: combinedSitesData.sitesPvForecastData,
@@ -120,9 +142,56 @@ const SolarSiteChart: FC<{
     );
   };
 
-  const getSiteName = (site_uuid: string) => {
-    const site = combinedSitesData.allSitesData?.find((s) => s.site_uuid === clickedSiteGroupId);
-    return site?.client_site_id || "";
+  const getTotalPvActualGenerationForGroup = (site_uuids: string[], targetTime: string) => {
+    const sitesActuals = combinedSitesData.sitesPvActualData.filter((pv) =>
+      site_uuids.includes(pv.site_uuid)
+    );
+    return sitesActuals.reduce((acc, pv) => {
+      const actual = pv.pv_actual_values.find(
+        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
+      );
+      return acc + (actual?.actual_generation_kw || 0);
+    }, 0);
+  };
+
+  const getTotalPvForecastGenerationForGroup = (site_uuids: string[], targetTime: string) => {
+    const sitesForecasts = combinedSitesData.sitesPvForecastData.filter((pv) =>
+      site_uuids.includes(pv.site_uuid)
+    );
+    return sitesForecasts.reduce((acc, fc) => {
+      const actual = fc.forecast_values.find(
+        (pv) => formatISODateString(pv.target_datetime_utc) === formatISODateString(targetTime)
+      );
+      return acc + (actual?.expected_generation_kw || 0);
+    }, 0);
+  };
+
+  const getSiteName = (
+    filteredSites: Site[],
+    aggregationLevel: AGGREGATION_LEVELS,
+    clickedGroupId: string
+  ) => {
+    switch (aggregationLevel) {
+      case AGGREGATION_LEVELS.NATIONAL:
+        return "National";
+      case AGGREGATION_LEVELS.REGION:
+        const siteWithRegion = filteredSites.find((s) =>
+          s.dno.includes(`\"dno_id\": \"${clickedGroupId}\"`)
+        );
+        if (!siteWithRegion) return "";
+        const region = JSON.parse(siteWithRegion.dno);
+        return region.long_name || "";
+      case AGGREGATION_LEVELS.GSP:
+        const siteWithGsp = filteredSites.find((s) =>
+          s.gsp.includes(`\"gsp_id\": \"${clickedGroupId}\"`)
+        );
+        if (!siteWithGsp) return "";
+        const gsp = JSON.parse(siteWithGsp.gsp);
+        return gsp.name || "";
+      case AGGREGATION_LEVELS.SITE:
+        const site = filteredSites.find((s) => s.site_uuid === clickedGroupId);
+        return site?.client_site_id || "";
+    }
   };
 
   const allSitesYield = Array.from(aggregatedSitesData.national.values());
@@ -160,7 +229,9 @@ const SolarSiteChart: FC<{
               <div key={`loading-${key}`} className="flex flex-row justify-between w-full">
                 <span className="block mr-2">{key}</span>
                 <div>
-                  {state.loading && <span className="mr-2 animate-pulse">🟠</span>}
+                  {state.loading && !state.hasData && (
+                    <span className="mr-2 animate-pulse">🟠</span>
+                  )}
                   {state.hasData && <span className="mr-2">🟢</span>}
                   {state.validating ? (
                     <span className="mr-2 animate-pulse">🟠</span>
@@ -206,22 +277,30 @@ const SolarSiteChart: FC<{
             visibleLines={visibleLines}
           />
         </div>
-        {clickedSiteGroupId && (
+        {clickedSiteGroupId && aggregationLevel !== AGGREGATION_LEVELS.NATIONAL && (
           <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
             <>
               <ForecastHeaderSite
                 forecast={
-                  getExpectedPowerGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) ||
-                  "0"
+                  getTotalPvForecastGenerationForGroup(
+                    selectedSiteData.map((site) => site.site_uuid),
+                    selectedTime
+                  ).toFixed(1) || "0"
                 }
                 pvActual={
-                  getPvActualGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) || "0"
+                  getTotalPvActualGenerationForGroup(
+                    selectedSiteData.map((site) => site.site_uuid),
+                    selectedTime
+                  ).toFixed(1) || "0"
                 }
                 time={allSitesChartDateTime}
                 onClose={() => {
                   setClickedSiteGroupId(undefined);
                 }}
-                title={getSiteName(clickedSiteGroupId) || "No site name for this site group"}
+                title={
+                  getSiteName(selectedSiteData, aggregationLevel, clickedSiteGroupId) ||
+                  "No name found for selected group"
+                }
               ></ForecastHeaderSite>
               <div className="h-60 mt-4 mb-10">
                 <RemixLine
