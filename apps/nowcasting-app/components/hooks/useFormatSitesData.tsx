@@ -46,9 +46,10 @@ export const useFormatSitesData = (
   combinedSitesData: CombinedSitesData,
   selectedISOTime: string
 ) => {
-  const firstNonZeroForecastValue = combinedSitesData.sitesPvForecastData?.find(
-    (fc) => fc.forecast_values[0].expected_generation_kw > 0
-  );
+  const firstNonZeroForecastValue =
+    combinedSitesData.sitesPvForecastData?.[0]?.forecast_values.find(
+      (fcv) => fcv.expected_generation_kw > 0.01
+    );
   const firstForecastData = JSON.stringify(firstNonZeroForecastValue, null, 2) || "";
   return useMemo(() => {
     // const [sitesTableData, setSitesTableData] = useState<AggregatedSitesCombinedData>({

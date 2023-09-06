@@ -78,6 +78,14 @@ const SitesMap: React.FC<SitesMapProps> = ({
   //   error: forecastError
   // } = getForecastsData(isNormalized);
 
+  useEffect(() => {
+    setNewDataForMap(true);
+  }, [clickedSiteGroupId]);
+
+  useEffect(() => {
+    setClickedSiteGroupId(undefined);
+  }, [currentAggregationLevel, setClickedSiteGroupId]);
+
   const forecastLoading = false;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
@@ -93,13 +101,14 @@ const SitesMap: React.FC<SitesMapProps> = ({
   ];
 
   const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS) => {
+    // TODO: this will need to be dynamic depending on user's site capacities
     switch (aggregationLevel) {
       case AGGREGATION_LEVELS.SITE:
         return 10;
       case AGGREGATION_LEVELS.GSP:
-        return 5;
+        return 10;
       case AGGREGATION_LEVELS.REGION:
-        return 2;
+        return 10;
       case AGGREGATION_LEVELS.NATIONAL:
         return 0.3;
     }
@@ -286,8 +295,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
           id: "dnoBoundaries",
           type: "line",
           source: "dnoBoundaries",
-          minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-          maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+          // Test showing DNO region boundaries at all zoom levels
+          // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+          // maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
           paint: {
             "line-color": "#ffcc2d",
             "line-width": 0.6,
