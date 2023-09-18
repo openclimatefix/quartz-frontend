@@ -15,22 +15,9 @@ import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
+import { components } from "../../types/quartz-api";
+import { generateGeoJsonForecastData } from "../helpers/data";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-
-const getRoundedPv = (pv: number, round: boolean = true) => {
-  if (!round) return Math.round(pv);
-  // round To: 0, 100, 200, 300, 400, 500
-  return Math.round(pv / 100) * 100;
-};
-const getRoundedPvPercent = (per: number, round: boolean = true) => {
-  if (!round) return per;
-  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
-  let rounded = Math.round(per * 10);
-  if (rounded % 2) {
-    if (per * 10 > rounded) return (rounded + 1) / 10;
-    else return (rounded - 1) / 10;
-  } else return rounded / 10;
-};
 
 type PvLatestMapProps = {
   className?: string;
@@ -57,7 +44,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
   const forecastLoading = false;
-  const initForecastData = combinedData?.allGspForecastData;
+  const initForecastData =
+    combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
   const forecastError = combinedErrors?.allGspForecastError;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
@@ -72,53 +60,17 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     1
   ];
 
-  const generateGeoJsonForecastData: (
-    forecastData?: GspAllForecastData,
-    targetTime?: string
-  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    const gspForecastData = forecastData?.forecasts || [];
-    const gspShapeJson = gspShapeData as FeatureCollection;
-    const forecastGeoJson = {
-      ...gspShapeData,
-      type: "FeatureCollection" as "FeatureCollection",
-      features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = gspForecastData && gspForecastData[index];
-        let selectedFCValue;
-        if (gspForecastData && targetTime) {
-          selectedFCValue = forecastDatum?.forecastValues.find(
-            (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
-          );
-        } else if (gspForecastData) {
-          selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
-        }
-
-        return {
-          ...featureObj,
-          properties: {
-            ...featureObj.properties,
-            [SelectedData.expectedPowerGenerationMegawatts]:
-              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
-            [SelectedData.expectedPowerGenerationNormalized]:
-              selectedFCValue &&
-              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
-            [SelectedData.installedCapacityMw]: getRoundedPv(
-              forecastDatum?.location.installedCapacityMw || 0
-            )
-          }
-        };
-      })
-    };
-
-    return { forecastGeoJson };
-  };
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime);
+    return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData);
   }, [initForecastData, selectedISOTime]);
-
   const updateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
     if (!source) {
-      const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
+      const { forecastGeoJson } = generateGeoJsonForecastData(
+        initForecastData,
+        selectedISOTime,
+        combinedData
+      );
 
       map.addSource("latestPV", {
         type: "geojson",

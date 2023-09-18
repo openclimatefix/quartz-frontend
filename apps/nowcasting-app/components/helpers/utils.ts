@@ -3,6 +3,9 @@ import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import { Bucket, CombinedLoading, CombinedValidating, GspDeltaValue, LoadingState } from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
+import createClient from "openapi-fetch";
+import { paths } from "../../types/quartz-api";
+import { PathsWithMethod } from "openapi-typescript-helpers";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
@@ -173,15 +176,30 @@ export const getRounded4HoursAgoString = () => {
   return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
 };
 
+export const getRoundedPv = (pv: number, round: boolean = true) => {
+  if (!round) return Math.round(pv);
+  // round To: 0, 100, 200, 300, 400, 500
+  return Math.round(pv / 100) * 100;
+};
+export const getRoundedPvPercent = (per: number, round: boolean = true) => {
+  if (!round) return per;
+  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
+  let rounded = Math.round(per * 10);
+  if (rounded % 2) {
+    if (per * 10 > rounded) return (rounded + 1) / 10;
+    else return (rounded - 1) / 10;
+  } else return rounded / 10;
+};
+
 //this is the function I set up that would pass the accessToken from get_token.ts into the Authorization
 //header or the request to the API.
 
-export const axiosFetcherAuth = async (url: string) => {
+export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
   const response = await fetch("/api/get_token");
   const { accessToken } = await response.json();
   const router = Router;
 
-  return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+  return axios(url as string, { headers: { Authorization: `Bearer ${accessToken}` } })
     .then(async (res) => {
       return res.data;
     })
@@ -195,6 +213,19 @@ export const axiosFetcherAuth = async (url: string) => {
         router.push("/api/auth/logout?redirectToLogin=true");
       }
     });
+};
+
+// @ts-ignore
+export const openapiFetcherAuth = async (url: PathsWithMethod<paths, "get">) => {
+  // const response = await fetch("/api/get_token");
+  // const { accessToken } = await response.json();
+  // const router = Router;
+  const { GET, PUT } = createClient<paths>({
+    baseUrl: process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", ""),
+    fetch: axiosFetcherAuth
+  });
+
+  return GET(url, {});
 };
 
 // this is the previous fetcher
