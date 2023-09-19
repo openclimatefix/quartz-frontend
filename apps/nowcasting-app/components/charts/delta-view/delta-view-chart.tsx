@@ -57,13 +57,13 @@ const LegendItem: FC<{
 };
 
 const GspDeltaColumn: FC<{
-  gspDeltas: Map<number, GspDeltaValue>;
+  gspDeltas: Map<string, GspDeltaValue> | undefined;
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [clickedGspId] = useGlobalState("clickedGspId");
-  if (!gspDeltas.size) return null;
+  if (!gspDeltas?.size) return null;
 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
     if (negative) {
@@ -402,7 +402,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               [ Delta values not available until PV Live output available ]
             </div>
           )}
-          {hasGspPvInitialForSelectedTime && (
+          {hasGspPvInitialForSelectedTime && gspDeltas && (
             <>
               <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
               <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />

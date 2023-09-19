@@ -162,7 +162,7 @@ export type Bucket = {
   increment: number;
   textColor: string;
   altTextColor: string;
-  gspDeltas?: Map<number, GspDeltaValue>;
+  gspDeltas?: Map<string, GspDeltaValue>;
 };
 
 // Sites
