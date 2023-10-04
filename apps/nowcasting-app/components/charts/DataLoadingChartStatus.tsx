@@ -1,17 +1,49 @@
 import { EndpointStates, LoadingState, SitesEndpointStates } from "../types";
-import { SpinnerTextInline } from "../icons/icons";
-import { FC } from "react";
+import { CheckInlineSmall, SpinnerTextInline, SpinnerTextInlineSmall } from "../icons/icons";
+import React, { FC } from "react";
 
 const DataLoadingChartStatus: FC<{
   loadingState: LoadingState<EndpointStates | SitesEndpointStates>;
 }> = ({ loadingState }) => {
-  if (!loadingState.showMessage || !loadingState.message.length) return null;
+  const isLoadingData =
+    !loadingState.initialLoadComplete || (loadingState.showMessage && loadingState.message.length);
+  const loadingEndpoints = Object.entries(
+    loadingState?.endpointStates || ({} as LoadingState<SitesEndpointStates>)
+  );
 
   return (
     <div className="absolute -top-4 right-4 flex items-center h-9 z-50">
-      <div className="flex flex-row h-6 justify-between items-center bg-mapbox-black rounded-sm px-2 pl-1.5">
-        <SpinnerTextInline className="mr-2"></SpinnerTextInline>
-        <div className="text-sm text-ocf-gray-500">{loadingState.message}</div>
+      <div
+        className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-mapbox-black  ${
+          isLoadingData ? "pr-2 pl-1.5" : "bg-opacity-25 px-1.5"
+        }`}
+      >
+        {!!isLoadingData && <SpinnerTextInline className="mr-2"></SpinnerTextInline>}
+        <div className="text-sm text-ocf-gray-500">
+          {isLoadingData ? loadingState.message : "Data up-to-date"}
+        </div>
+        <div className="chart-data-loading-endpoints hidden absolute top-full min-w-fit right-0 items-center text-2xs pt-1">
+          <div className="py-1.5 px-2 bg-mapbox-black rounded-sm">
+            {!!loadingEndpoints.length &&
+              loadingEndpoints.map(([key, state]) => (
+                <div key={`loading-${key}`} className="flex flex-row justify-between">
+                  <span className="block mr-2">{key}</span>
+                  <div className="flex gap-2 items-center">
+                    {state.loading && !state.hasData && (
+                      <SpinnerTextInlineSmall title="Loading initial data" />
+                    )}
+                    {state.hasData && <CheckInlineSmall title={"Initial data loaded"} />}
+                    {!state.loading && !state.hasData && <span className="animate-pulse">🔴</span>}
+                    {state.validating ? (
+                      <SpinnerTextInlineSmall title="Fetching updated data" />
+                    ) : (
+                      <CheckInlineSmall title="Data up-to-date" />
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
     </div>
   );

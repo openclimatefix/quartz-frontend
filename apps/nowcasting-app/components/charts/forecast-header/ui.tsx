@@ -80,7 +80,7 @@ export const ForecastWithActualPV: React.FC<{
             style={{ color: color }}
           >
             <span className="text-black">{pv}</span>
-            <span className="text-ocf-gray-300"> / </span>
+            <span className="text-ocf-gray-300 px-0.5"> / </span>
             {forecast}
             <div className="flex flex-col items-start pl-2">
               <div className="flex items-center text-white">

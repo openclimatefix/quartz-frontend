@@ -64,28 +64,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData);
   }, [initForecastData, selectedISOTime]);
 
-  // const updateMapData = (map: mapboxgl.Map) => {
-  //   const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
-  //   if (!source) {
-  //     const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
-  //
-  //     map.addSource("latestPV", {
-  //       type: "geojson",
-  //       data: forecastGeoJson
-  //     });
-  //   }
-  //
-  //   if (generatedGeoJsonForecastData && source) {
-  //     source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-  //     map.setPaintProperty(
-  //       "latestPV-forecast",
-  //       "fill-opacity",
-  //       getFillOpacity(selectedDataName, isNormalized)
-  //     );
-  //   }
-  // };
-
-  const addOrUpdateFCData = (map: mapboxgl.Map) => {
+  const addOrUpdateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
 
     if (!source) {
@@ -163,11 +142,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         //   </LoadStateMap>
         <Map
           loadDataOverlay={(map: { current: mapboxgl.Map }) =>
-            safelyUpdateMapData(map.current, addOrUpdateFCData)
+            safelyUpdateMapData(map.current, addOrUpdateMapData)
           }
           updateData={{
             newData: !!initForecastData,
-            updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateFCData)
+            updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateMapData)
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>

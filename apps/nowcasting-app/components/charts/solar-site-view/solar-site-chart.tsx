@@ -219,31 +219,11 @@ const SolarSiteChart: FC<{
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto flex flex-col mb-2">
         <div className="flex content-between bg-ocf-gray-800 h-auto">
-          <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex justify-evenly">
+          <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
             All Sites
           </div>
-          <div className="flex-1 flex flex-col items-center justify-around text-2xs py-2 leading-none">
-            {Object.entries(
-              sitesLoadingState?.endpointStates || ({} as LoadingState<SitesEndpointStates>)
-            ).map(([key, state]) => (
-              <div key={`loading-${key}`} className="flex flex-row justify-between w-full">
-                <span className="block mr-2">{key}</span>
-                <div>
-                  {state.loading && !state.hasData && (
-                    <span className="mr-2 animate-pulse">🟠</span>
-                  )}
-                  {state.hasData && <span className="mr-2">🟢</span>}
-                  {state.validating ? (
-                    <span className="mr-2 animate-pulse">🟠</span>
-                  ) : (
-                    <span className="mr-2">🟢</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between flex-2 my-2 pr-6 pl-3">
-            <div className="pr-8">
+          <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
+            <div className="">
               <ForecastWithActualPV
                 forecast={`${nationalPVExpected?.toFixed(1)}`}
                 pv={`${nationalPVActual?.toFixed(1)}`}

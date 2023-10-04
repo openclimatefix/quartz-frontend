@@ -67,7 +67,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     clickedGspId: undefined,
     clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
-    view: VIEWS.SOLAR_SITES,
+    view: VIEWS.FORECAST,
     visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
       "GENERATION",
       "GENERATION_UPDATED",
@@ -81,7 +81,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     zoom: 5,
     autoZoom: false,
     showSiteCount: undefined,
-    aggregationLevel: AGGREGATION_LEVELS.SITE,
+    aggregationLevel: AGGREGATION_LEVELS.NATIONAL,
     sortBy: SORT_BY.CAPACITY,
     show4hView: enable4hView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW),
     dashboardMode: getBooleanSettingFromLocalStorage(CookieStorageKeys.DASHBOARD_MODE),

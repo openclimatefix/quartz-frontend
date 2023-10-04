@@ -42,7 +42,7 @@ const getPvActualGenerationForSite = (
   );
 };
 
-export const useFormatSitesData = (
+export const useAggregateSitesDataForTimestamp = (
   combinedSitesData: CombinedSitesData,
   selectedISOTime: string
 ) => {
@@ -52,12 +52,6 @@ export const useFormatSitesData = (
     );
   const firstForecastData = JSON.stringify(firstNonZeroForecastValue, null, 2) || "";
   return useMemo(() => {
-    // const [sitesTableData, setSitesTableData] = useState<AggregatedSitesCombinedData>({
-    //   sites: new Map(),
-    //   regions: new Map(),
-    //   gsps: new Map(),
-    //   national: new Map()
-    // });
     const sitesTableData: AggregatedSitesCombinedData = {
       sites: new Map(),
       regions: new Map(),

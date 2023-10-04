@@ -40,7 +40,7 @@ import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 import SitesMap from "../components/map/sitesMap";
-import { useFormatSitesData } from "../components/hooks/useFormatSitesData";
+import { useAggregateSitesDataForTimestamp } from "../components/hooks/useAggregateSitesDataForTimestamp";
 import {
   CookieStorageKeys,
   setArraySettingInCookieStorage
@@ -395,7 +395,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   console.log("sitePvForecastRevalidating", sitePvForecastValidating);
 
-  const aggregatedSitesData = useFormatSitesData(sitesData, selectedISOTime);
+  const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
 
   // Watch and update loading state
   useEffect(() => {
