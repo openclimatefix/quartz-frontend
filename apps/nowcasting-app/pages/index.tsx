@@ -397,10 +397,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
 
+  const combinedErrorsLength = Object.values(combinedErrors).filter((e) => !!e).length;
   // Watch and update loading state
   useEffect(() => {
-    setLoadingState(getLoadingState(combinedLoading, combinedValidating));
-  }, [combinedLoading, combinedValidating, setLoadingState]);
+    setLoadingState(
+      getLoadingState(combinedLoading, combinedValidating, combinedErrors, combinedData)
+    );
+  }, [combinedLoading, combinedValidating, combinedErrorsLength, setLoadingState]);
+
   const sitesCombinedErrorsLength = Object.values(sitesCombinedErrors).filter((e) => !!e).length;
 
   // Watch and update sites loading state

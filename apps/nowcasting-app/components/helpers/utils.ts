@@ -2,6 +2,8 @@ import axios from "axios";
 import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import {
   Bucket,
+  CombinedData,
+  CombinedErrors,
   CombinedLoading,
   CombinedSitesData,
   CombinedValidating,
@@ -44,7 +46,9 @@ export const classNames = (...classes: string[]) => {
 
 export const getLoadingState = (
   combinedLoading: CombinedLoading,
-  combinedValidating: CombinedValidating
+  combinedValidating: CombinedValidating,
+  combinedErrors: CombinedErrors,
+  combinedData: CombinedData
 ): LoadingState<EndpointStates> => {
   let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
   let showMessage = true;
@@ -75,10 +79,49 @@ export const getLoadingState = (
       showMessage = true;
     }
   }
+  const endpointStates: EndpointStates = {
+    nationalForecast: {
+      loading: combinedLoading.nationalForecastLoading,
+      validating: combinedValidating.nationalForecastValidating,
+      error: combinedErrors.nationalForecastError,
+      hasData: !!combinedData.nationalForecastData
+    },
+    pvRealDayIn: {
+      loading: combinedLoading.pvRealDayInLoading,
+      validating: combinedValidating.pvRealDayInValidating,
+      error: combinedErrors.pvRealDayInError,
+      hasData: !!combinedData.pvRealDayInData
+    },
+    pvRealDayAfter: {
+      loading: combinedLoading.pvRealDayAfterLoading,
+      validating: combinedValidating.pvRealDayAfterValidating,
+      error: combinedErrors.pvRealDayAfterError,
+      hasData: !!combinedData.pvRealDayAfterData
+    },
+    national4Hour: {
+      loading: combinedLoading.national4HourLoading,
+      validating: combinedValidating.national4HourValidating,
+      error: combinedErrors.national4HourError,
+      hasData: !!combinedData.national4HourData
+    },
+    allGspForecast: {
+      loading: combinedLoading.allGspForecastLoading,
+      validating: combinedValidating.allGspForecastValidating,
+      error: combinedErrors.allGspForecastError,
+      hasData: !!combinedData.allGspForecastData
+    },
+    allGspReal: {
+      loading: combinedLoading.allGspRealLoading,
+      validating: combinedValidating.allGspRealValidating,
+      error: combinedErrors.allGspRealError,
+      hasData: !!combinedData.allGspRealData
+    }
+  };
   return {
     initialLoadComplete,
     showMessage,
-    message
+    message,
+    endpointStates
   };
 };
 
