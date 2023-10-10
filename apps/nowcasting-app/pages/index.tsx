@@ -289,7 +289,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const { data: allSitesData, error: allSitesError } = useLoadDataFromApi<AllSites>(
     `${SITES_API_PREFIX}/sites?UI`,
     {
-      isPaused: () => !currentView(VIEWS.SOLAR_SITES)
+      // isPaused: () => !currentView(VIEWS.SOLAR_SITES)
     }
   );
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
@@ -299,16 +299,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const { data: sitePvForecastData, error: sitePvForecastError } =
     useLoadDataFromApi<SitesPvForecast>(
       `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}&UI`,
-      {
-        isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
-      }
+      {}
     );
 
   const { data: sitesPvActualData, error: sitePvActualError } = useLoadDataFromApi<SitesPvActual>(
     `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}&UI`,
-    {
-      isPaused: () => !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
-    }
+    {}
   );
 
   const sitesData: CombinedSitesData = {
