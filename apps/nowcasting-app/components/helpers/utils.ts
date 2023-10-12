@@ -95,7 +95,7 @@ export const convertISODateStringToLondonTime = (date: string) => {
   if (!date || date === ":00.000Z") return "00:00";
   // Changes the ISO date string to Europe London time, and return time only
   const d = new Date(date);
-  if (typeof d !== "object" || isNaN(d.getTime())) {
+  if (typeof d !== "object" || typeof d.getTime() !== "number") {
     throw new Error(`Invalid date: ${date}`);
   }
   return formatISODateAsLondonTime(d);
