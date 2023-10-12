@@ -54,14 +54,14 @@ const BucketItem: React.FC<Bucket> = ({
 };
 
 const DeltaBuckets: React.FC<{
-  gspDeltas: Map<number, GspDeltaValue>;
+  gspDeltas: Map<string, GspDeltaValue> | undefined;
   bucketSelection: string[];
   setClickedGspId?: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
   lowerBound?: number;
   upperBound?: number;
 }> = ({ gspDeltas, negative = false }) => {
-  if (!gspDeltas.size) return null;
+  if (!gspDeltas?.size) return null;
 
   const deltaArray = Array.from(gspDeltas.values());
 
