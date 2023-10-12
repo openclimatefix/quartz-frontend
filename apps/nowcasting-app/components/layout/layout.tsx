@@ -9,7 +9,7 @@ interface ILayout {
 }
 
 const Layout = ({ children }: ILayout) => {
-  const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status`);
+  const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status?UI`);
 
   return (
     <>
