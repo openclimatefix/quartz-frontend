@@ -3,7 +3,7 @@ import { Map } from "../map";
 import { CombinedData, GspDeltaValue, MapFeatureObject } from "../types";
 import { FeatureCollection } from "geojson";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
-import { formatISODateString, getRoundedPv, getRoundedPvPercent } from "./utils";
+import { formatISODateString, getRoundedPv, getRoundedPvNormalized } from "./utils";
 import { get30MinNow } from "./globalState";
 import { SelectedData } from "../map/types";
 
@@ -49,8 +49,9 @@ export const generateGeoJsonForecastData: (
             selectedFCValue && getRoundedPv(selectedFCValue),
           [SelectedData.expectedPowerGenerationNormalized]:
             selectedFCValue &&
-            // getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
-            getRoundedPvPercent(selectedFCValue || 0),
+            getRoundedPvNormalized(
+              (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0
+            ),
           [SelectedData.installedCapacityMw]: getRoundedPv(gspSystemInfo?.installedCapacityMw || 0),
           gspDisplayName: gspSystemInfo?.regionName || ""
         }
