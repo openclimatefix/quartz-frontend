@@ -3,9 +3,4 @@
 
 cd apps/nowcasting-app
 yarn lint
-
-cd ../nowcasting-website
-yarn lint
-
-cd ../ux-demos
-yarn lint
+yarn test

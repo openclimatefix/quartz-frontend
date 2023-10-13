@@ -95,7 +95,7 @@ export const convertISODateStringToLondonTime = (date: string) => {
   if (!date || date === ":00.000Z") return "00:00";
   // Changes the ISO date string to Europe London time, and return time only
   const d = new Date(date);
-  if (typeof d !== "object" || typeof d.getTime() !== "number") {
+  if (typeof d !== "object" || isNaN(d.getTime())) {
     throw new Error(`Invalid date: ${date}`);
   }
   return formatISODateAsLondonTime(d);
@@ -148,6 +148,17 @@ export const formatISODateStringHumanNumbersOnly = (date: string) => {
   // further formatting could be done to make it yyyy/mm/dd HH:MM
   return `${date_london} ${date_london_time}`;
 };
+
+export function prettyPrintChartAxisLabelDate(x: string | number) {
+  // Check if x is a number, if so then it might be a UNIX timestamp
+  if (!Number.isNaN(x)) {
+    if (!x) return "Invalid date";
+    const parsedDate = new Date(x);
+    if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date";
+    return convertISODateStringToLondonTime(parsedDate.toISOString());
+  }
+  return convertISODateStringToLondonTime(x + ":00+00:00");
+}
 
 export const MWtoGW = (MW: number) => {
   return (MW / 1000).toFixed(1);

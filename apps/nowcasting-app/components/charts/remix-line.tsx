@@ -18,7 +18,8 @@ import {
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
   getRounded4HoursAgoString,
-  getRoundedTickBoundary
+  getRoundedTickBoundary,
+  prettyPrintChartAxisLabelDate
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
@@ -138,12 +139,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
       showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-  function prettyPrintXdate(x: string | number) {
-    if (typeof x === "number") {
-      return convertISODateStringToLondonTime(new Date(x).toISOString());
-    }
-    return convertISODateStringToLondonTime(x + ":00+00:00");
-  }
 
   const CustomBar = (props: { DELTA: number }) => {
     const { DELTA } = props;
@@ -198,7 +193,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           <XAxis
             dataKey="formattedDate"
             xAxisId={"x-axis"}
-            tickFormatter={prettyPrintXdate}
+            tickFormatter={prettyPrintChartAxisLabelDate}
             scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={true}
@@ -210,7 +205,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           <XAxis
             dataKey="formattedDate"
             xAxisId={"x-axis-2"}
-            tickFormatter={prettyPrintXdate}
+            tickFormatter={prettyPrintChartAxisLabelDate}
             scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={true}
@@ -307,7 +302,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             label={
               <CustomizedLabel
                 className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
-                value={prettyPrintXdate(timeOfInterest)}
+                value={prettyPrintChartAxisLabelDate(timeOfInterest)}
                 solidLine={true}
               ></CustomizedLabel>
             }
