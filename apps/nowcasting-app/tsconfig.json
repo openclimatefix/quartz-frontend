@@ -5,7 +5,9 @@
     "rootDir": "",
     "outDir": "dist",
     "incremental": true,
-    "strict": true
+    "strict": true,
+    "target": "ES6",
+    "downlevelIteration": true
   },
   "include": ["**/*.ts", "**/*.tsx", "next-env.d.ts"]
 }

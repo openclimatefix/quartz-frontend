@@ -122,7 +122,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
   //             selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
   //           [SelectedData.expectedPowerGenerationNormalized]:
   //             selectedFCValue &&
-  //             getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
+  //             getRoundedPvNormalized(selectedFCValue?.expectedPowerGenerationNormalized || 0),
   //           [SelectedData.installedCapacityMw]: getRoundedPv(
   //             forecastDatum?.location.installedCapacityMw || 0
   //           )

@@ -3,6 +3,9 @@ import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import { Bucket, CombinedLoading, CombinedValidating, GspDeltaValue, LoadingState } from "../types";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
+import createClient from "openapi-fetch";
+import { paths } from "../../types/quartz-api";
+import { PathsWithMethod } from "openapi-typescript-helpers";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
@@ -146,6 +149,34 @@ export const formatISODateStringHumanNumbersOnly = (date: string) => {
   return `${date_london} ${date_london_time}`;
 };
 
+export function prettyPrintChartAxisLabelDate(x: string | number) {
+  // Check if x is a number, if so then it might be a UNIX timestamp
+  if (typeof x === "number") {
+    if (!Number.isNaN(x)) {
+      if (!x) return "Invalid date 1";
+      const parsedDate = new Date(x);
+      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 2";
+      return convertISODateStringToLondonTime(parsedDate.toISOString());
+    }
+  } else {
+    // x is a string, check if it is a valid ISO date string
+    if (x.includes("T")) {
+      // check if it is a valid ISO date string
+      const parsedDate = new Date(x);
+      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 3";
+
+      if (x.includes("+")) {
+        return convertISODateStringToLondonTime(x);
+      } else if (x.length > 16) {
+        return convertISODateStringToLondonTime(x + "+00:00");
+      } else {
+        return convertISODateStringToLondonTime(x + ":00+00:00");
+      }
+    }
+  }
+  return `Invalid datetime input: ${typeof x} – ${x}`;
+}
+
 export const MWtoGW = (MW: number) => {
   return (MW / 1000).toFixed(1);
 };
@@ -173,15 +204,40 @@ export const getRounded4HoursAgoString = () => {
   return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
 };
 
+export const getRoundedPv = (pv: number, round: boolean = true) => {
+  if (!round) return Math.round(pv);
+  // round To: 0, 100, 200, 300, 400, 500
+  return Math.round(pv / 100) * 100;
+};
+export const getRoundedPvNormalized = (val: number, round: boolean = true) => {
+  if (!round) return val;
+  const negative = val < 0;
+  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
+  const absVal = Math.abs(val);
+  let rounded = Math.round(absVal * 10);
+  let finalVal = 0;
+  // check if already even first decimal
+  if (!(rounded % 2)) {
+    finalVal = rounded / 10;
+  } else {
+    if (absVal * 10 >= rounded) {
+      finalVal = (rounded + 1) / 10;
+    } else {
+      finalVal = (rounded - 1) / 10;
+    }
+  }
+  return negative ? -finalVal : finalVal;
+};
+
 //this is the function I set up that would pass the accessToken from get_token.ts into the Authorization
 //header or the request to the API.
 
-export const axiosFetcherAuth = async (url: string) => {
+export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
   const response = await fetch("/api/get_token");
   const { accessToken } = await response.json();
   const router = Router;
 
-  return axios(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+  return axios(url as string, { headers: { Authorization: `Bearer ${accessToken}` } })
     .then(async (res) => {
       return res.data;
     })
@@ -195,6 +251,19 @@ export const axiosFetcherAuth = async (url: string) => {
         router.push("/api/auth/logout?redirectToLogin=true");
       }
     });
+};
+
+// @ts-ignore
+export const openapiFetcherAuth = async (url: PathsWithMethod<paths, "get">) => {
+  // const response = await fetch("/api/get_token");
+  // const { accessToken } = await response.json();
+  // const router = Router;
+  const { GET, PUT } = createClient<paths>({
+    baseUrl: process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", ""),
+    fetch: axiosFetcherAuth
+  });
+
+  return GET(url, {});
 };
 
 // this is the previous fetcher

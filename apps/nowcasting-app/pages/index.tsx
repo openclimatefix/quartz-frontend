@@ -27,6 +27,7 @@ import {
   SitesPvActual,
   SitesPvForecast
 } from "../components/types";
+import { components } from "../types/quartz-api";
 import {
   axiosFetcherAuth,
   formatISODateString,
@@ -151,68 +152,74 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       : null
   );
   const {
+    data: allGspSystemData,
+    isLoading: allGspSystemLoading,
+    isValidating: allGspSystemValidating,
+    error: allGspSystemError
+  } = useLoadDataFromApi<components["schemas"]["Location"][]>(`${API_PREFIX}/system/GB/gsp/`);
+  const {
     data: allGspForecastData,
     isLoading: allGspForecastLoading,
     isValidating: allGspForecastValidating,
     error: allGspForecastError
-  } = useLoadDataFromApi<GspAllForecastData>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true`
+  } = useLoadDataFromApi<
+    // TODO: see if we can fully integrate API paths/params into type safe functions
+    // paths["/v0/solar/GB/gsp/forecast/all/"]["get"]["responses"]["200"]["content"]["application/json"]
+    components["schemas"]["OneDatetimeManyForecastValues"][]
+  >(
+    // `/v0/solar/GB/gsp/forecast/all/`,
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&compact=true`,
+    {}
   );
   const {
     data: allGspRealData,
     isLoading: allGspRealLoading,
     isValidating: allGspRealValidating,
     error: allGspRealError
-  } = useLoadDataFromApi<AllGspRealData>(`${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day`);
+  } = useLoadDataFromApi<
+    components["schemas"]["GSPYieldGroupByDatetime"][]
+    // paths["/v0/solar/GB/gsp/pvlive/all"]["get"]["responses"]["200"]["content"]["application/json"]
+  >(`${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true`);
 
-  const currentYields =
-    allGspRealData?.map((datum) => {
-      const gspYield = datum.gspYields.find((yieldDatum, index) => {
-        return yieldDatum.datetimeUtc === `${selectedTime}:00+00:00`;
-      });
-      return {
-        gspId: datum.gspId,
-        gspRegion: datum.regionName,
-        gspCapacity: datum.installedCapacityMw,
-        yield: gspYield?.solarGenerationKw || 0
-      };
-    }) || [];
+  const currentYieldSet = allGspRealData?.find((datum) => {
+    return datum.datetimeUtc === `${selectedTime}:00+00:00`;
+  });
+  const currentYields = currentYieldSet
+    ? Object.entries(currentYieldSet.generationKwByGspId).map(([key, val]) => {
+        const gspLocationInfo = allGspSystemData?.find((gsp) => gsp.gspId === Number(key));
+        return {
+          gspId: key,
+          gspRegion: gspLocationInfo?.regionName || "No name",
+          gspCapacity: gspLocationInfo?.installedCapacityMw || 0,
+          yield: val
+        };
+      })
+    : [];
   const gspDeltas = useMemo(() => {
     let tempGspDeltas = new Map();
-
+    const currentForecasts = allGspForecastData?.find((forecast) => {
+      return forecast.datetimeUtc === `${selectedTime}:00+00:00`;
+    });
     for (let i = 0; i < currentYields.length; i++) {
       const currentYield = currentYields[i];
-      let gspForecastData = allGspForecastData?.forecasts[i];
-      if (gspForecastData?.location.gspId !== currentYield.gspId) {
-        gspForecastData = allGspForecastData?.forecasts.find((gspForecastDatum) => {
-          return gspForecastDatum.location.gspId === currentYield.gspId;
-        });
-      }
-      const currentGspForecast = gspForecastData?.forecastValues.find((forecastValue) => {
-        return forecastValue.targetTime === `${selectedTime}:00+00:00`;
-      });
+      const currentForecastMw = currentForecasts?.forecastValues[currentYield.gspId];
       const isFutureOrNoYield = `${selectedTime}:00.000Z` >= timeNow || !currentYield.yield;
       const delta = isFutureOrNoYield
         ? 0
-        : currentYield.yield / 1000 - (currentGspForecast?.expectedPowerGenerationMegawatts || 0);
+        : Number(currentYield.yield) / 1000 - (currentForecastMw || 0);
       const deltaNormalized = isFutureOrNoYield
         ? 0
-        : (currentYield.yield / 1000 -
-            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) /
+        : (Number(currentYield.yield) / 1000 - (currentForecastMw || 0)) /
             currentYield.gspCapacity || 0;
       const deltaBucket = getDeltaBucket(delta);
       tempGspDeltas.set(currentYield.gspId, {
         gspId: currentYield.gspId,
         gspRegion: currentYield.gspRegion,
         gspCapacity: currentYield.gspCapacity,
-        currentYield: currentYield.yield / 1000,
-        forecast: currentGspForecast?.expectedPowerGenerationMegawatts || 0,
+        currentYield: Number(currentYield.yield) / 1000,
+        forecast: currentForecastMw || 0,
         delta,
-        deltaPercentage:
-          (currentYield.yield /
-            1000 /
-            (currentGspForecast?.expectedPowerGenerationMegawatts || 0)) *
-          100,
+        deltaPercentage: (Number(currentYield.yield) / 1000 / (currentForecastMw || 0)) * 100,
         deltaNormalized,
         deltaBucket: deltaBucket,
         deltaBucketKey: DELTA_BUCKET[deltaBucket]
@@ -229,13 +236,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     //     })
     // );
     return tempGspDeltas;
-  }, [allGspForecastData, allGspRealData, selectedTime]);
+  }, [allGspForecastData, allGspRealData, currentYields, selectedTime]);
 
   const combinedData: CombinedData = {
     nationalForecastData,
     pvRealDayInData,
     pvRealDayAfterData,
     national4HourData,
+    allGspSystemData,
     allGspForecastData,
     allGspRealData,
     gspDeltas
@@ -246,6 +254,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       pvRealDayInLoading,
       pvRealDayAfterLoading,
       national4HourLoading,
+      allGspSystemLoading,
       allGspForecastLoading,
       allGspRealLoading
     }),
@@ -254,6 +263,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       pvRealDayInLoading,
       pvRealDayAfterLoading,
       national4HourLoading,
+      allGspSystemLoading,
       allGspForecastLoading,
       allGspRealLoading
     ]
@@ -264,6 +274,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       pvRealDayInValidating,
       pvRealDayAfterValidating,
       national4HourValidating,
+      allGspSystemValidating,
       allGspForecastValidating,
       allGspRealValidating
     }),
@@ -272,6 +283,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       pvRealDayInValidating,
       pvRealDayAfterValidating,
       national4HourValidating,
+      allGspSystemValidating,
       allGspForecastValidating,
       allGspRealValidating
     ]
@@ -281,6 +293,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     pvRealDayInError,
     pvRealDayAfterError,
     national4HourError,
+    allGspSystemError,
     allGspForecastError,
     allGspRealError
   };
@@ -293,8 +306,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
-  const siteUuids = slicedSitesData.map((site) => site.site_uuid);
-  const siteUuidsString = siteUuids?.join(",");
+  const siteUuids = slicedSitesData.map((site) => site.site_uuid) || [];
+  const siteUuidsString = siteUuids?.join(",") || "[]";
   const { data: sitePvForecastData, error: sitePvForecastError } =
     useLoadDataFromApi<SitesPvForecast>(
       `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
