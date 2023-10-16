@@ -62,12 +62,12 @@ describe("prettyPrintChartAxisLabelDate", () => {
 
   it("should handle an empty value", () => {
     const result = prettyPrintChartAxisLabelDate("");
-    expect(result).toBe("Invalid date");
+    expect(result).toBe("Invalid datetime input: string – ");
   });
 
   it("should handle an invalid UNIX timestamp", () => {
     const result = prettyPrintChartAxisLabelDate("invalid-timestamp");
-    expect(result).toBe("Invalid date");
+    expect(result).toBe("Invalid datetime input: string – invalid-timestamp");
   });
 
   it("should pretty print a valid UNIX timestamp", () => {
@@ -77,12 +77,43 @@ describe("prettyPrintChartAxisLabelDate", () => {
 
   it("should pretty print an ISO date string with timezone", () => {
     // Correct for London time
+    const result = prettyPrintChartAxisLabelDate("2023-10-12");
+    expect(result).toBe("Invalid datetime input: string – 2023-10-12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, no seconds", () => {
+    // Correct for London time
+    const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34+00:00");
+    expect(result).toBe("13:34");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, with seconds", () => {
+    // Correct for London time
+    const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34:56+00:00");
+    expect(result).toBe("13:34");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, with milliseconds", () => {
+    // Correct for London time
     const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34:56.789+00:00");
     expect(result).toBe("13:34");
   });
 
-  it("should pretty print an ISO date string without timezone", () => {
-    const result = prettyPrintChartAxisLabelDate("2023-10-12T23:45:56.789");
-    expect(result).toBe("23:45");
+  it("should pretty print an ISO datetime string without timezone, no seconds", () => {
+    // Correct for London time
+    const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34");
+    expect(result).toBe("13:34");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, with seconds", () => {
+    // Correct for London time
+    const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34:56");
+    expect(result).toBe("13:34");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, with milliseconds", () => {
+    // Correct for London time
+    const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34:56.789");
+    expect(result).toBe("13:34");
   });
 });
