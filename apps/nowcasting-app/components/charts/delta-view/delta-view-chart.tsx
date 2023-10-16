@@ -63,8 +63,8 @@ const GspDeltaColumn: FC<{
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [clickedGspId] = useGlobalState("clickedGspId");
-  const deltaArray = useMemo(() => Array.from(gspDeltas?.values()), [gspDeltas]);
-  if (!gspDeltas.size) return null;
+  const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
+  if (!gspDeltas?.size) return null;
 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
     if (negative) {

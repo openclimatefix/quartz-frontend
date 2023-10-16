@@ -310,7 +310,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites?UI`, {
     isPaused: () => {
       console.log("Sites API data paused?", !sitesViewSelected);
-      return !sitesViewSelected;
+      return false;
     }
   });
   const slicedSitesData = useMemo(

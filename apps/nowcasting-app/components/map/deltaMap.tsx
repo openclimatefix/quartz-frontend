@@ -156,11 +156,11 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
     if (!source) {
       const { forecastGeoJson } = generateGeoJsonForecastData(
-      initForecastData,
-      selectedISOTime,
-      combinedData,
-      gspDeltas
-    );
+        initForecastData,
+        selectedISOTime,
+        combinedData,
+        gspDeltas
+      );
       map.addSource("latestPV", {
         type: "geojson",
         data: forecastGeoJson
