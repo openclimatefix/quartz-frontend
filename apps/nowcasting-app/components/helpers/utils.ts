@@ -151,13 +151,30 @@ export const formatISODateStringHumanNumbersOnly = (date: string) => {
 
 export function prettyPrintChartAxisLabelDate(x: string | number) {
   // Check if x is a number, if so then it might be a UNIX timestamp
-  if (!Number.isNaN(x)) {
-    if (!x) return "Invalid date";
-    const parsedDate = new Date(x);
-    if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date";
-    return convertISODateStringToLondonTime(parsedDate.toISOString());
+  if (typeof x === "number") {
+    if (!Number.isNaN(x)) {
+      if (!x) return "Invalid date 1";
+      const parsedDate = new Date(x);
+      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 2";
+      return convertISODateStringToLondonTime(parsedDate.toISOString());
+    }
+  } else {
+    // x is a string, check if it is a valid ISO date string
+    if (x.includes("T")) {
+      // check if it is a valid ISO date string
+      const parsedDate = new Date(x);
+      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 3";
+
+      if (x.includes("+")) {
+        return convertISODateStringToLondonTime(x);
+      } else if (x.length > 16) {
+        return convertISODateStringToLondonTime(x + "+00:00");
+      } else {
+        return convertISODateStringToLondonTime(x + ":00+00:00");
+      }
+    }
   }
-  return convertISODateStringToLondonTime(x + ":00+00:00");
+  return `Invalid datetime input: ${typeof x} – ${x}`;
 }
 
 export const MWtoGW = (MW: number) => {
