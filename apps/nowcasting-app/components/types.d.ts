@@ -1,4 +1,5 @@
 import { DELTA_BUCKET } from "../constant";
+import { components } from "../types/quartz-api";
 
 export type LoadingState = {
   initialLoadComplete: boolean;
@@ -6,7 +7,7 @@ export type LoadingState = {
   message: string;
 };
 export type FcAllResData = {
-  type: "FeatureCollection";
+  type?: "FeatureCollection";
   forecasts: {
     location: {
       label: string;
@@ -54,15 +55,22 @@ type CombinedData = {
   pvRealDayInData: PvRealData | undefined;
   pvRealDayAfterData: PvRealData | undefined;
   national4HourData: National4HourData | undefined;
-  allGspForecastData: GspAllForecastData | undefined;
-  allGspRealData: AllGspRealData | undefined;
-  gspDeltas: GspDeltas | undefined;
+  allGspSystemData: components["schemas"]["Location"][] | undefined;
+  // TODO: slight mashup of custom and generated types atm,
+  //  ideally should be able to use just the generated for API typings
+  allGspForecastData:
+    | GspAllForecastData
+    | components["schemas"]["OneDatetimeManyForecastValues"][]
+    | undefined;
+  allGspRealData: AllGspRealData | components["schemas"]["GSPYieldGroupByDatetime"][] | undefined;
+  gspDeltas: Map<string, GspDeltaValue> | undefined;
 };
 type CombinedLoading = {
   nationalForecastLoading: boolean;
   pvRealDayInLoading: boolean;
   pvRealDayAfterLoading: boolean;
   national4HourLoading: boolean;
+  allGspSystemLoading: boolean;
   allGspForecastLoading: boolean;
   allGspRealLoading: boolean;
 };
@@ -71,6 +79,7 @@ type CombinedValidating = {
   pvRealDayInValidating: boolean;
   pvRealDayAfterValidating: boolean;
   national4HourValidating: boolean;
+  allGspSystemValidating: boolean;
   allGspForecastValidating: boolean;
   allGspRealValidating: boolean;
 };
@@ -79,6 +88,7 @@ type CombinedErrors = {
   pvRealDayInError: any;
   pvRealDayAfterError: any;
   national4HourError: any;
+  allGspSystemError: any;
   allGspForecastError: any;
   allGspRealError: any;
 };
@@ -152,7 +162,7 @@ export type Bucket = {
   increment: number;
   textColor: string;
   altTextColor: string;
-  gspDeltas?: Map<number, GspDeltaValue>;
+  gspDeltas?: Map<string, GspDeltaValue>;
 };
 
 // Sites
@@ -227,4 +237,19 @@ export type AggregatedSitesCombinedData = {
   regions: AggregatedSitesDataGroupMap;
   gsps: AggregatedSitesDataGroupMap;
   national: AggregatedSitesDataGroupMap;
+};
+
+export type MapFeatureObject = {
+  properties: {
+    expectedPowerGenerationMegawatts: number | undefined;
+    expectedPowerGenerationNormalized: number | undefined;
+    delta?: number;
+    deltaBucket?: number;
+    installedCapacityMw: number;
+    gspDisplayName: string;
+  };
+  type: "Feature";
+  geometry: Geometry;
+  id?: string | number | undefined;
+  bbox?: BBox | undefined;
 };
