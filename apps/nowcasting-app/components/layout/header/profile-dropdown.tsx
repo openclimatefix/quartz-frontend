@@ -58,20 +58,20 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                 tip={
                   <div
                     onClick={() => {
-                      var copyText = "ops@openclimatefix.org";
+                      var copyText = "quartz.support@openclimatefix.org";
                       navigator.clipboard.writeText(copyText);
                     }}
                     className="cursor-pointer"
                     title="Copy Email to Clipboard"
                   >
-                    Click to email OCF at <span>ops@openclimatefix.org</span>
+                    Click to email OCF at <span>quartz.support@openclimatefix.org</span>
                   </div>
                 }
                 position="left"
                 className={"text-right"}
                 fullWidth
               >
-                <a href="mailto:ops@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request">
+                <a href="mailto:quartz.support@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request">
                   Help{" "}
                   <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
                 </a>
