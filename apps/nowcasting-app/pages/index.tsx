@@ -64,6 +64,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [visibleLines] = useGlobalState("visibleLines");
   const [, setLoadingState] = useGlobalState("loadingState");
 
+  const [isOldNowcastingDomain, setIsOldNowcastingDomain] = useState(false);
+
+  useEffect(() => {
+    setIsOldNowcastingDomain(window.location.host.includes("nowcasting"));
+  }, []);
+
   // Local state used to set initial state on server side render, then updated by global state
   const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
     dashboardModeServer === "true"
@@ -398,6 +404,28 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
           />
         </SideLayout>
+        {isOldNowcastingDomain && (
+          // Tailwind popup with deprecated domain message
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-mapbox-black bg-opacity-75">
+            <div className="flex flex-col items-center justify-center">
+              <div className="flex flex-col items-center text-xs text-ocf-gray-500 px-8 py-12 bg-mapbox-black rounded-md">
+                <h3 className="text-xl mb-4 font-bold">We have moved.</h3>
+                <div className="text-lg mr-1 mb-6">nowcasting.io has now become Quartz Solar.</div>
+                <div className="text-lg mr-1 mb-6">
+                  This URL is deprecated, please move over to the new Quartz domain.
+                </div>
+                <div>
+                  <a
+                    className="text-lg uppercase btn hover:bd-ocf-yellow-500"
+                    href="https://app.quartz.solar"
+                  >
+                    Go to Quartz.solar
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
