@@ -307,7 +307,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
   const slicedSitesData = allSitesData?.site_list.slice(0, 100) || [];
   const siteUuids = slicedSitesData.map((site) => site.site_uuid) || [];
-  const siteUuidsString = siteUuids?.join(",") || "[]";
+  const siteUuidsString = siteUuids?.join(",") || "";
   const { data: sitePvForecastData, error: sitePvForecastError } =
     useLoadDataFromApi<SitesPvForecast>(
       `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
