@@ -7,18 +7,31 @@ export type LoadingState<T> = {
   message: string;
   endpointStates?: T;
 };
-export type EndpointStates = {
-  nationalForecast: EndpointState;
-  pvRealDayIn: EndpointState;
-  pvRealDayAfter: EndpointState;
-  national4Hour: EndpointState;
-  allGspForecast: EndpointState;
-  allGspReal: EndpointState;
+export enum NationalEndpointLabel {
+  nationalForecast = "National Forecast",
+  pvRealDayIn = "PV Live Estimate",
+  pvRealDayAfter = "PV Live Updated",
+  national4Hour = "4-hour forecast",
+  allGspForecast = "All GSP Forecast",
+  allGspReal = "All GSP PV Live"
+}
+export type NationalEndpointKeysType = keyof typeof NationalEndpointLabel;
+
+export enum SitesEndpointLabel {
+  allSites = "All Sites",
+  sitePvForecast = "Site PV Forecast",
+  sitePvActual = "Site PV Actual"
+}
+export type SitesEndpointKeysType = keyof typeof SitesEndpointLabel;
+export type NationalEndpointStates = {
+  type: "national";
+} & {
+  [key in NationalEndpointKeysType]: EndpointState;
 };
 export type SitesEndpointStates = {
-  allSites: EndpointState;
-  sitePvForecast: EndpointState;
-  sitePvActual: EndpointState;
+  type: "sites";
+} & {
+  [key in SitesEndpointKeysType]: EndpointState;
 };
 export type EndpointState = {
   loading: boolean;

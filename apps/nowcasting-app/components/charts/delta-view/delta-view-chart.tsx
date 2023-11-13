@@ -13,7 +13,7 @@ import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { CombinedData, CombinedErrors, GspDeltaValue } from "../../types";
+import { CombinedData, CombinedErrors, NationalEndpointStates, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
@@ -364,7 +364,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         ></ForecastHeader>
 
         <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto mt-4">
-          <DataLoadingChartStatus loadingState={loadingState} />
+          <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}

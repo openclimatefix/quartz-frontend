@@ -308,7 +308,12 @@ export const CrossInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title:
       xmlns="http://www.w3.org/2000/svg"
       className={props.className}
     >
-      <path d="M2 8l6-6M2 2l3 3 3 3" stroke="#000" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M2 8l6-6M2 2l3 3 3 3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   </span>
 );

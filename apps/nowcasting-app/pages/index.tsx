@@ -307,7 +307,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isLoading: allSitesLoading,
     isValidating: allSitesValidating,
     error: allSitesError
-  } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites?UI`, {
+  } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites`, {
     isPaused: () => {
       console.log("Sites API data paused?", !sitesViewSelected);
       return false;

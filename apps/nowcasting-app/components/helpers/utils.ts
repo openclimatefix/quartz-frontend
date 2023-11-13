@@ -7,14 +7,15 @@ import {
   CombinedLoading,
   CombinedSitesData,
   CombinedValidating,
-  EndpointStates,
+  NationalEndpointLabel,
+  NationalEndpointStates,
   GspDeltaValue,
   LoadingState,
   SitesCombinedErrors,
   SitesCombinedLoading,
   SitesCombinedValidating,
   SitesEndpointStates
-} from "../types";
+} from "../types.d";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 import createClient from "openapi-fetch";
@@ -49,37 +50,48 @@ export const getLoadingState = (
   combinedValidating: CombinedValidating,
   combinedErrors: CombinedErrors,
   combinedData: CombinedData
-): LoadingState<EndpointStates> => {
+): LoadingState<NationalEndpointStates> => {
   let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
-  let showMessage = true;
-  let message = "";
+  let showMessage = !initialLoadComplete;
+  let message = "Loading initial data";
   if (initialLoadComplete) {
     if (combinedValidating.nationalForecastValidating) {
-      message = "Loading latest National Forecast";
+      message = `Loading latest ${NationalEndpointLabel.nationalForecast}`;
       showMessage = true;
     }
     if (combinedValidating.pvRealDayInValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest PV Live Initial";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.pvRealDayIn}`;
       showMessage = true;
     }
     if (combinedValidating.pvRealDayAfterValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest PV Live Updated";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.pvRealDayAfter}`;
       showMessage = true;
     }
     if (combinedValidating.national4HourValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest National 4 Hour";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.national4Hour}`;
       showMessage = true;
     }
     if (combinedValidating.allGspForecastValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest GSP Forecast";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.allGspForecast}`;
       showMessage = true;
     }
     if (combinedValidating.allGspRealValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest GSP Actual";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.allGspReal}`;
       showMessage = true;
     }
   }
-  const endpointStates: EndpointStates = {
+  const endpointStates: NationalEndpointStates = {
+    type: "national",
     nationalForecast: {
       loading: combinedLoading.nationalForecastLoading,
       validating: combinedValidating.nationalForecastValidating,
@@ -149,6 +161,7 @@ export const getSitesLoadingState = (
     }
   }
   const endpointStates: SitesEndpointStates = {
+    type: "sites",
     allSites: {
       loading: combinedLoading.allSitesLoading,
       validating: combinedValidating.allSitesValidating,

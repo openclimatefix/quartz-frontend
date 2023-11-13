@@ -7,7 +7,7 @@ import {
   getBooleanSettingFromLocalStorage,
   CookieStorageKeys
 } from "./cookieStorage";
-import { EndpointStates, LoadingState, SitesEndpointStates } from "../types";
+import { NationalEndpointStates, LoadingState, SitesEndpointStates } from "../types";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -55,7 +55,7 @@ export type GlobalStateType = {
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
-  loadingState: LoadingState<EndpointStates>;
+  loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
 };
 
