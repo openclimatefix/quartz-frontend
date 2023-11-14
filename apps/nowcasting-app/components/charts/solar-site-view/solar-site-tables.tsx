@@ -118,7 +118,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                           mostAccurateGeneration < 10 ? 1 : 0
                         )}{" "}
                         / {Number(site.capacity).toFixed()}
-                        <span className="text-ocf-gray-400 text-xs font-thin pt-1">KW</span>
+                        <span className="text-ocf-gray-400 text-xs font-thin pt-1 pl-0.5">KW</span>
                       </div>
                     </div>
                   </div>

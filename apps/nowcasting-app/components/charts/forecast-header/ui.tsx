@@ -24,7 +24,7 @@ export const ForecastHeadlineFigure: React.FC<{
           <ForecastLabel
             position={"middle"}
             tip={
-              <div className="min-w-36">
+              <div className="min-w-36 whitespace-nowrap z-[100]">
                 <p>{tip}</p>
               </div>
             }

@@ -21,7 +21,7 @@ import {
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
-import { ForecastWithActualPV } from "../forecast-header/ui";
+import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
@@ -224,14 +224,16 @@ const SolarSiteChart: FC<{
           </div>
           <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
             <div className="">
-              <ForecastWithActualPV
-                forecast={`${nationalPVExpected?.toFixed(1)}`}
-                pv={`${nationalPVActual?.toFixed(1)}`}
+              <ForecastHeadlineFigure
                 tip={`PV Actual / OCF Forecast`}
-                sites={true}
                 time={allSitesChartDateTime}
                 color="ocf-yellow"
-              />
+                unit={"KW"}
+              >
+                <span className="text-black">{nationalPVActual?.toFixed(1)}</span>
+                <span className="text-ocf-gray-300 mx-1"> / </span>
+                {nationalPVExpected?.toFixed(1)}
+              </ForecastHeadlineFigure>
             </div>
             <div>
               {/*<NextForecast*/}
