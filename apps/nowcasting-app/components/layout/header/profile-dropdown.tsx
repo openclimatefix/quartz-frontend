@@ -46,11 +46,18 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
       >
         <Menu.Items className="absolute right-0 top-12 w-48 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <Menu.Item>
-            <div className="px-4 pt-2 text-ocf-black-600 text-right">
-              <Tooltip tip={<ChartInfo />} position="left" className={"text-right"} fullWidth>
-                Data
-              </Tooltip>
-            </div>
+            <Tooltip
+              tip={
+                <div className="w-64 rounded-md">
+                  <ChartInfo />
+                </div>
+              }
+              position="left"
+              className={"text-right"}
+              fullWidth
+            >
+              <div className="px-4 pt-2 text-ocf-black-600 text-right cursor-default">Data</div>
+            </Tooltip>
           </Menu.Item>
           <Menu.Item>
             <div className="px-4 pt-3 text-ocf-black-600 text-right">
@@ -67,7 +74,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                     Click to email OCF at <span>quartz.support@openclimatefix.org</span>
                   </div>
                 }
-                position="left"
+                position="middle"
                 className={"text-right"}
                 fullWidth
               >
