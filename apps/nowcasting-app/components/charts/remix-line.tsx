@@ -39,6 +39,8 @@ export type ChartData = {
   "4HR_PAST_FORECAST"?: number;
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
+  PROBABILISTIC_UPPER_BOUND?: number;
+  PROBABILISTIC_LOWER_BOUND?: number;
   PROBABILISTIC_RANGE?: Array<number>;
   formattedDate: string; // "2022-05-16T15:00",
 };
@@ -46,13 +48,14 @@ export type ChartData = {
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Actual",
+  PROBABILISTIC_UPPER_BOUND: "OCF 90%",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
   // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
+  PROBABILISTIC_LOWER_BOUND: "OCF 10%",
   "4HR_FORECAST": `OCF 4hr+ Forecast`,
   "4HR_PAST_FORECAST": "OCF 4hr Forecast",
-  DELTA: "Delta",
-  PROBABILISTIC_RANGE: "P"
+  DELTA: "Delta"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -63,7 +66,8 @@ const toolTipColors: Record<string, string> = {
   "4HR_FORECAST": orange,
   "4HR_PAST_FORECAST": orange,
   DELTA: deltaPos,
-  PROBABILISTIC_RANGE: yellow
+  PROBABILISTIC_UPPER_BOUND: yellow,
+  PROBABILISTIC_LOWER_BOUND: yellow
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -428,9 +432,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         return null;
                       if (key.includes("4HR") && (!show4hView || !visibleLines.includes(key)))
                         return null;
-
-                      const textClass = ["FORECAST", "PAST_FORECAST"].includes(name)
+                      if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0) return null;
+                      const textClass = ["FORECAST", "PAST_FORECAST"].includes(key)
                         ? "font-semibold"
+                        : ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
+                        ? "text-xs"
                         : "font-normal";
                       const sign = ["DELTA"].includes(key) ? (Number(value) > 0 ? "+" : "") : "";
                       const color = ["DELTA"].includes(key)
@@ -460,45 +466,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           </div>
                         </li>
                       );
-                    })}
-                    {/* adding probabilistic values to the tooltip */}
-                    {Object.entries(toolTiplabels).map(([key, name]) => {
-                      const value = data[key];
-                      const color = toolTipColors[key];
-                      const pLevelLabels = ["P 10%", "P 90%"];
-                      const pLevelComputed = pLevelLabels.map((pLevel: any) => (
-                        <li key={key + pLevel}>{pLevel}:</li>
-                      ));
-                      if (key === "PROBABILISTIC_RANGE" && !value) return null;
-                      if (key === "PROBABILISTIC_RANGE" && deltaView) return null;
-                      if (
-                        key === "PROBABILISTIC_RANGE" &&
-                        typeof value[0] !== "number" &&
-                        typeof value[1] !== "number"
-                      )
-                        return null;
-                      if (
-                        key === "PROBABILISTIC_RANGE" &&
-                        (Math.round(value[0] * 100) < 0 || Math.round(value[1] * 100) < 0)
-                      )
-                        return null;
-                      const pLevelValue =
-                        key === "PROBABILISTIC_RANGE" && value
-                          ? value.map((v: any, index: number) => (
-                              <li key={key + String(index)} className={`flex justify-end`}>
-                                {prettyPrintYNumberWithCommas(String(v), 1).replace("-", "")}
-                              </li>
-                            ))
-                          : null;
-                      if (key === "PROBABILISTIC_RANGE" && !deltaView)
-                        return (
-                          <li className={`font-sans`} style={{ color }}>
-                            <div className={`flex justify-between`}>
-                              <div className={`font-sans ml-14`}>{pLevelComputed}</div>
-                              <div>{pLevelValue}</div>
-                            </div>
-                          </li>
-                        );
                     })}
                     <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
                       <div className="pr-4">
