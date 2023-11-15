@@ -31,7 +31,7 @@ const Tooltip: React.FC<TooltipProps> = ({
       tipPositionClass = "-right-1 top-0";
       break;
     case "top":
-      containerPositionClass = "bottom-7 right-2";
+      containerPositionClass = "bottom-5 right-2";
       tipPositionClass = "-right-2 bottom-0";
   }
   return (
