@@ -79,9 +79,6 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
 
   const selectedSiteClass = `bg-ocf-gray-800 cursor-pointer`;
 
-  // const classes = {`${
-  //                     clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
-  //                   }
   return (
     <>
       <div className="flex-1 h-72 overflow-y-scroll">
@@ -109,14 +106,18 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                          justify-center py-3 pr-10 font-bold flex flex-row text-sm"
                       >
                         <p>
-                          {Number(site.aggregatedYield).toFixed()}
+                          <span className={!!site.actualPV ? "text-white" : "text-ocf-yellow"}>
+                            {Number(site.aggregatedYield).toFixed()}
+                          </span>
                           <span className="ocf-gray-400 text-xs">%</span>
                         </p>
                       </div>
                       <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
-                        {Number(mostAccurateGeneration).toFixed(
-                          mostAccurateGeneration < 10 ? 1 : 0
-                        )}{" "}
+                        <span className={`pr-1${site.actualPV ? "" : " text-ocf-yellow"}`}>
+                          {Number(mostAccurateGeneration).toFixed(
+                            mostAccurateGeneration < 10 ? 1 : 0
+                          )}
+                        </span>{" "}
                         / {Number(site.capacity).toFixed()}
                         <span className="text-ocf-gray-400 text-xs font-thin pt-1 pl-0.5">KW</span>
                       </div>

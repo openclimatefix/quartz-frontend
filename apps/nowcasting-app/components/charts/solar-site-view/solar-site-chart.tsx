@@ -159,10 +159,10 @@ const SolarSiteChart: FC<{
       site_uuids.includes(pv.site_uuid)
     );
     return sitesForecasts.reduce((acc, fc) => {
-      const actual = fc.forecast_values.find(
+      const forecastVal = fc.forecast_values.find(
         (pv) => formatISODateString(pv.target_datetime_utc) === formatISODateString(targetTime)
       );
-      return acc + (actual?.expected_generation_kw || 0);
+      return acc + (forecastVal?.expected_generation_kw || 0);
     }, 0);
   };
 

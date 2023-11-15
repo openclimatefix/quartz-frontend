@@ -81,7 +81,7 @@ export const useAggregateSitesDataForTimestamp = (
       // site level
       const siteName = site.client_site_name || site.client_site_id || site.site_uuid;
       const siteId = site.site_uuid;
-      let updatedSiteData = sitesTableData.sites.get(siteName) || {
+      let updatedSiteData = sitesTableData.sites.get(siteId) || {
         id: site.site_uuid,
         label: siteName,
         capacity: 0,
@@ -108,7 +108,7 @@ export const useAggregateSitesDataForTimestamp = (
         const regionLatLong = dnoLatLongMap.get(region.dno_id);
         const regionLat = regionLatLong?.lat || 0;
         const regionLong = regionLatLong?.long || 0;
-        let updatedRegionData = sitesTableData.regions.get(regionName) || {
+        let updatedRegionData = sitesTableData.regions.get(regionId) || {
           id: regionId,
           label: regionName,
           capacity: 0,
@@ -132,7 +132,7 @@ export const useAggregateSitesDataForTimestamp = (
         const gspLatLong = gspLatLongMap.get(gsp.gsp_id);
         const gspLat = gspLatLong?.lat || 0;
         const gspLong = gspLatLong?.long || 0;
-        let updatedGspData = sitesTableData.gsps.get(gspName) || {
+        let updatedGspData = sitesTableData.gsps.get(gspId) || {
           id: gspId,
           label: gspName,
           capacity: 0,

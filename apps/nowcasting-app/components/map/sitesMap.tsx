@@ -106,9 +106,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
       case AGGREGATION_LEVELS.SITE:
         return 10;
       case AGGREGATION_LEVELS.GSP:
-        return 10;
+        return 5;
       case AGGREGATION_LEVELS.REGION:
-        return 10;
+        return 1.5;
       case AGGREGATION_LEVELS.NATIONAL:
         return 0.3;
     }
