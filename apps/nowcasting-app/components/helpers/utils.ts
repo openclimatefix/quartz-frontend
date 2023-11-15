@@ -145,7 +145,7 @@ export const getSitesLoadingState = (
 ): LoadingState<SitesEndpointStates> => {
   let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
   let showMessage = false;
-  let message = "";
+  let message = "Loading initial data";
   if (initialLoadComplete) {
     if (combinedValidating.allSitesValidating) {
       message = "Loading sites";
