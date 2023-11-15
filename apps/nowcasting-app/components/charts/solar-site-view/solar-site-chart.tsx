@@ -263,19 +263,6 @@ const SolarSiteChart: FC<{
           <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
             <>
               <ForecastHeaderSite
-                forecast={
-                  getTotalPvForecastGenerationForGroup(
-                    selectedSiteData.map((site) => site.site_uuid),
-                    selectedTime
-                  ).toFixed(1) || "0"
-                }
-                pvActual={
-                  getTotalPvActualGenerationForGroup(
-                    selectedSiteData.map((site) => site.site_uuid),
-                    selectedTime
-                  ).toFixed(1) || "0"
-                }
-                time={allSitesChartDateTime}
                 onClose={() => {
                   setClickedSiteGroupId(undefined);
                 }}
@@ -283,8 +270,27 @@ const SolarSiteChart: FC<{
                   getSiteName(selectedSiteData, aggregationLevel, clickedSiteGroupId) ||
                   "No name found for selected group"
                 }
-              ></ForecastHeaderSite>
-              <div className="h-60 mt-4 mb-10">
+              >
+                <ForecastHeadlineFigure
+                  tip={`PV Actual / OCF Forecast`}
+                  time={allSitesChartDateTime}
+                  color="ocf-yellow"
+                  unit={"KW"}
+                >
+                  <span className="text-black">
+                    {getTotalPvActualGenerationForGroup(
+                      selectedSiteData.map((site) => site.site_uuid),
+                      selectedTime
+                    ).toFixed(1) || "0"}
+                  </span>
+                  <span className="text-ocf-gray-300 mx-1"> / </span>
+                  {getTotalPvForecastGenerationForGroup(
+                    selectedSiteData.map((site) => site.site_uuid),
+                    selectedTime
+                  ).toFixed(1) || "0"}
+                </ForecastHeadlineFigure>
+              </ForecastHeaderSite>
+              <div className="h-60 mt-4 mb-2">
                 <RemixLine
                   resetTime={resetTime}
                   timeNow={formatISODateString(timeNow)}

@@ -125,14 +125,14 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                   </div>
                 </div>
                 <div
-                  className="flex items-end justify-end flex-row-reverse relative w-full
-               mb-0.5"
+                  className="absolute bottom-0 flex items-end justify-end flex-row-reverse w-full
+               "
                 >
                   <div
                     className={`${
-                      clickedSiteGroupId === site.id ? "h-3" : "h-2.5"
+                      clickedSiteGroupId === site.id ? "h-2" : "h-2"
                     } bg-ocf-yellow-500`}
-                    style={{ width: `2px` }}
+                    style={{ width: `3px` }}
                   ></div>
                   <div
                     className={`h-1 bg-ocf-yellow-500`}
