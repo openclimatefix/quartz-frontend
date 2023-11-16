@@ -12,6 +12,7 @@ import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
+import Example from "./zoom-chart-example";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;

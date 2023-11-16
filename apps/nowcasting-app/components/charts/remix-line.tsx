@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useState } from "react";
 import {
   Area,
   Bar,
@@ -7,6 +7,7 @@ import {
   Line,
   Rectangle,
   ReferenceLine,
+  ReferenceArea,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -126,6 +127,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
+  const [refAreaLeft, setRefAreaLeft] = React.useState("");
+  const [refAreaRight, setRefAreaRight] = React.useState("");
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
   function prettyPrintYNumberWithCommas(
@@ -166,6 +169,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
+  const zoomIn = () => {
+    console.log("zoomIn");
+    if (refAreaLeft === refAreaRight || refAreaRight === "") {
+      setRefAreaLeft("");
+      setRefAreaRight("");
+      return;
+    }
+    // update the tick boundaries based on the two selected points
+  };
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       <ResponsiveContainer>
@@ -188,6 +201,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 : setTimeOfInterest(e.activeLabel);
             }
           }}
+          onMouseDown={(e?: { activeLabel?: string }) => setRefAreaLeft(e?.activeLabel || "")}
+          onMouseMove={(e?: { activeLabel?: string }) =>
+            refAreaLeft && setRefAreaRight(e?.activeLabel || "")
+          }
+          // on mouse move, if refAreaLeft is set, change the background color of the chart to indicate the selected area
+          // eslint-disable-next-line react/jsx-no-bind
+          onMouseUp={zoomIn}
         >
           <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
           <XAxis
@@ -511,6 +531,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
               );
             }}
           />
+          {refAreaLeft && refAreaRight ? (
+            <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
+          ) : null}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
