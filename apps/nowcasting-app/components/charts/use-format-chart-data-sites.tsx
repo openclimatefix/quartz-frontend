@@ -141,10 +141,11 @@ const useFormatChartDataSites = ({
       //   }
       // }
 
-      // Filter out data points without forecast data
-      const filteredData = Object.values(chartMap).filter((datum) => {
-        return datum.FORECAST !== undefined || datum.PAST_FORECAST !== undefined;
-      });
+      // Not certain why I filtered out data with actuals but no forecasts, reinstating for now.
+      const filteredData = Object.values(chartMap);
+      // const filteredData = Object.values(chartMap).filter((datum) => {
+      //   return datum.FORECAST !== undefined || datum.PAST_FORECAST !== undefined;
+      // });
 
       return filteredData;
     }
