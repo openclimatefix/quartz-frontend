@@ -1,6 +1,21 @@
 import axios from "axios";
 import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
-import { Bucket, CombinedLoading, CombinedValidating, GspDeltaValue, LoadingState } from "../types";
+import {
+  Bucket,
+  CombinedData,
+  CombinedErrors,
+  CombinedLoading,
+  CombinedSitesData,
+  CombinedValidating,
+  NationalEndpointLabel,
+  NationalEndpointStates,
+  GspDeltaValue,
+  LoadingState,
+  SitesCombinedErrors,
+  SitesCombinedLoading,
+  SitesCombinedValidating,
+  SitesEndpointStates
+} from "../types.d";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 import createClient from "openapi-fetch";
@@ -32,41 +47,145 @@ export const classNames = (...classes: string[]) => {
 
 export const getLoadingState = (
   combinedLoading: CombinedLoading,
-  combinedValidating: CombinedValidating
-): LoadingState => {
+  combinedValidating: CombinedValidating,
+  combinedErrors: CombinedErrors,
+  combinedData: CombinedData
+): LoadingState<NationalEndpointStates> => {
   let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
-  let showMessage = false;
-  let message = "";
+  let showMessage = !initialLoadComplete;
+  let message = "Loading initial data";
   if (initialLoadComplete) {
     if (combinedValidating.nationalForecastValidating) {
-      message = "Loading latest National Forecast";
+      message = `Loading latest ${NationalEndpointLabel.nationalForecast}`;
       showMessage = true;
     }
     if (combinedValidating.pvRealDayInValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest PV Live Initial";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.pvRealDayIn}`;
       showMessage = true;
     }
     if (combinedValidating.pvRealDayAfterValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest PV Live Updated";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.pvRealDayAfter}`;
       showMessage = true;
     }
     if (combinedValidating.national4HourValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest National 4 Hour";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.national4Hour}`;
       showMessage = true;
     }
     if (combinedValidating.allGspForecastValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest GSP Forecast";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.allGspForecast}`;
       showMessage = true;
     }
     if (combinedValidating.allGspRealValidating) {
-      message = showMessage ? "Loading latest data" : "Loading latest GSP Actual";
+      message = showMessage
+        ? "Loading latest data"
+        : `Loading latest ${NationalEndpointLabel.allGspReal}`;
       showMessage = true;
     }
   }
+  const endpointStates: NationalEndpointStates = {
+    type: "national",
+    nationalForecast: {
+      loading: combinedLoading.nationalForecastLoading,
+      validating: combinedValidating.nationalForecastValidating,
+      error: combinedErrors.nationalForecastError,
+      hasData: !!combinedData.nationalForecastData
+    },
+    pvRealDayIn: {
+      loading: combinedLoading.pvRealDayInLoading,
+      validating: combinedValidating.pvRealDayInValidating,
+      error: combinedErrors.pvRealDayInError,
+      hasData: !!combinedData.pvRealDayInData
+    },
+    pvRealDayAfter: {
+      loading: combinedLoading.pvRealDayAfterLoading,
+      validating: combinedValidating.pvRealDayAfterValidating,
+      error: combinedErrors.pvRealDayAfterError,
+      hasData: !!combinedData.pvRealDayAfterData
+    },
+    national4Hour: {
+      loading: combinedLoading.national4HourLoading,
+      validating: combinedValidating.national4HourValidating,
+      error: combinedErrors.national4HourError,
+      hasData: !!combinedData.national4HourData
+    },
+    allGspForecast: {
+      loading: combinedLoading.allGspForecastLoading,
+      validating: combinedValidating.allGspForecastValidating,
+      error: combinedErrors.allGspForecastError,
+      hasData: !!combinedData.allGspForecastData
+    },
+    allGspReal: {
+      loading: combinedLoading.allGspRealLoading,
+      validating: combinedValidating.allGspRealValidating,
+      error: combinedErrors.allGspRealError,
+      hasData: !!combinedData.allGspRealData
+    }
+  };
   return {
     initialLoadComplete,
     showMessage,
-    message
+    message,
+    endpointStates
+  };
+};
+
+export const getSitesLoadingState = (
+  combinedLoading: SitesCombinedLoading,
+  combinedValidating: SitesCombinedValidating,
+  combinedErrors: SitesCombinedErrors,
+  combinedData: CombinedSitesData
+): LoadingState<SitesEndpointStates> => {
+  let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
+  let showMessage = false;
+  let message = "Loading initial data";
+  if (initialLoadComplete) {
+    if (combinedValidating.allSitesValidating) {
+      message = "Loading sites";
+      showMessage = true;
+    }
+    if (combinedValidating.sitePvActualValidating) {
+      message = showMessage ? "Loading latest data" : "Loading sites PV Actual";
+      showMessage = true;
+    }
+    if (combinedValidating.sitePvForecastValidating) {
+      message = showMessage ? "Loading latest data" : "Loading sites PV Forecast";
+      showMessage = true;
+    }
+  }
+  const endpointStates: SitesEndpointStates = {
+    type: "sites",
+    allSites: {
+      loading: combinedLoading.allSitesLoading,
+      validating: combinedValidating.allSitesValidating,
+      error: combinedErrors.allSitesError,
+      hasData: !!combinedData.allSitesData
+    },
+    sitePvActual: {
+      loading: combinedLoading.sitePvActualLoading,
+      validating: combinedValidating.sitePvActualValidating,
+      error: combinedErrors.sitesPvActualError,
+      hasData: !!combinedData.sitesPvActualData
+    },
+    sitePvForecast: {
+      loading: combinedLoading.sitePvForecastLoading,
+      validating: combinedValidating.sitePvForecastValidating,
+      error: combinedErrors.sitesPvForecastError,
+      hasData: !!combinedData.sitesPvForecastData
+    }
+  };
+  return {
+    initialLoadComplete,
+    showMessage,
+    message,
+    endpointStates
   };
 };
 

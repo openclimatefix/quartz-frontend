@@ -200,7 +200,7 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
 
 export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    className={`animate-spin dark:text-gray-600 fill-white ${props.className}`}
+    className={`animate-spin fill-white ${props.className}`}
     width={24}
     height={24}
     fill="none"
@@ -228,7 +228,7 @@ export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const SpinnerTextInline = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    className={`animate-spin dark:text-gray-600 fill-white ${props.className}`}
+    className={`animate-spin fill-white ${props.className}`}
     width={14}
     height={14}
     fill="none"
@@ -252,4 +252,84 @@ export const SpinnerTextInline = (props: React.SVGProps<SVGSVGElement>) => (
       strokeLinejoin="round"
     />
   </svg>
+);
+export const SpinnerTextInlineSmall = (
+  props: React.SVGProps<SVGSVGElement> & { title?: string }
+) => (
+  <span title={props.title || "Loading..."}>
+    <svg
+      width={10}
+      height={10}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={`animate-spin fill-white ${props.className}`}
+    >
+      <circle
+        cx={5}
+        cy={5}
+        r={4}
+        stroke="currentColor"
+        fill="none"
+        strokeOpacity={0.25}
+        strokeWidth={2}
+      />
+      <path
+        d="M5 1a4 4 0 013.805 2.766"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </span>
+);
+
+export const CheckInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
+  <span title={props.title || ""}>
+    <svg
+      width={10}
+      height={10}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={props.className}
+    >
+      <path d="M1 5l3 3 5-5.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  </span>
+);
+
+export const CrossInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
+  <span title={props.title || ""}>
+    <svg
+      width={10}
+      height={10}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={props.className}
+    >
+      <path
+        d="M2 8l6-6M2 2l3 3 3 3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </span>
+);
+
+export const ClockInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
+  <span title={props.title || ""}>
+    <svg width={10} height={10} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <g clipPath="url(#prefix__clip0_2537_298)" stroke="currentColor">
+        <path d="M9.5 5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+        <path d="M5 2.5V5H3.5" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+      <defs>
+        <clipPath id="prefix__clip0_2537_298">
+          <path fill="currentColor" d="M0 0h10v10H0z" />
+        </clipPath>
+      </defs>
+    </svg>
+  </span>
 );
