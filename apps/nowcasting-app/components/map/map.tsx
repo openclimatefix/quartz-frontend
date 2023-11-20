@@ -102,17 +102,6 @@ const Map: FC<IMap> = ({
     // return () => map.current?.remove();
   }, []);
 
-  // useEffect(() => {
-  //   if (!map.current) return; // wait for map to initialize
-  //
-  //   map.current.on("moveend", () => {
-  //     console.log("setting map state");
-  //     setLng(Number(map.current?.getCenter().lng.toFixed(4)));
-  //     setLat(Number(map.current?.getCenter().lat.toFixed(4)));
-  //     setZoom(Number(map.current?.getZoom().toFixed(2)));
-  //   });
-  // }, [map]);
-
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full">
