@@ -98,7 +98,16 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ className }) => {
         )}
       </div>
       <div className="flex-initial flex items-center pb-3">
-        <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
+        <Tooltip
+          tip={
+            <div className="w-64 rounded-md">
+              <ChartInfo />
+            </div>
+          }
+          position="top"
+          className={"text-right"}
+          fullWidth
+        >
           <InfoIcon />
         </Tooltip>
       </div>

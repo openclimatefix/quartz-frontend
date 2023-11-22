@@ -133,10 +133,6 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             setViewFunc={setView}
             text="Delta"
           />
-          <HeaderLink
-            url="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
-            text="Documentation"
-          />
         </Menu>
       </div>
       <div className="py-1">
