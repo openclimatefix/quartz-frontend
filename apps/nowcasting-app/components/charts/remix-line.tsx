@@ -164,7 +164,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const roundTickMax = deltaYMax % 1000 === 0;
   const isGSP = !!deltaYMaxOverride && deltaYMaxOverride < 1000;
   const now = new Date();
-  const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
+  const offsets = [
+    -42, -36, -30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72
+  ];
   const ticks = offsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
