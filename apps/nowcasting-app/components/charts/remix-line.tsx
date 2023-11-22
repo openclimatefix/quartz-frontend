@@ -154,13 +154,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
     const roundedNumber =
       showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
 
-  function prettyPrintDate(x: string | number) {
+  const prettyPrintDate = (x: string | number) => {
     if (typeof x === "number") {
       return dateToLondonDateTimeOnlyString(new Date(x));
     }
     return dateToLondonDateTimeOnlyString(new Date(x));
-  }
+  };
 
   const CustomBar = (props: { DELTA: number }) => {
     const { DELTA } = props;
@@ -309,7 +310,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 domain={[-deltaYMax, deltaYMax]}
               />
               <ReferenceLine
-
                 yAxisId={"delta"}
                 xAxisId={"x-axis"}
                 y={0}
