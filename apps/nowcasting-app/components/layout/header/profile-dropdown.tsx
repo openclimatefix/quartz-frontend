@@ -45,69 +45,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="absolute right-0 top-12 w-48 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <Menu.Item>
-            <Tooltip
-              tip={
-                <div className="w-64 rounded-md">
-                  <ChartInfo />
-                </div>
-              }
-              position="left"
-              className={"text-right"}
-              fullWidth
-            >
-              <div className="px-4 pt-2 text-ocf-black-600 text-right cursor-default">Data</div>
-            </Tooltip>
-          </Menu.Item>
-          <Menu.Item>
-            <div className="px-4 pt-3 text-ocf-black-600 text-right">
-              <Tooltip
-                tip={
-                  <div
-                    onClick={() => {
-                      var copyText = "quartz.support@openclimatefix.org";
-                      navigator.clipboard.writeText(copyText);
-                    }}
-                    className="cursor-pointer"
-                    title="Copy Email to Clipboard"
-                  >
-                    Click to email OCF at <span>quartz.support@openclimatefix.org</span>
-                  </div>
-                }
-                position="middle"
-                className={"text-right"}
-                fullWidth
-              >
-                <a href="mailto:quartz.support@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request">
-                  Help{" "}
-                  <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
-                </a>
-              </Tooltip>
-            </div>
-          </Menu.Item>
-          <Menu.Item>
-            <div className="px-4 py-3 text-ocf-black-600 text-right">
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSf08XJPFwsNHxYiHUTV4g9CHWQzxAn0gSiAXXFkaI_3wjpNWw/viewform"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Give feedback{" "}
-                <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
-              </a>
-            </div>
-          </Menu.Item>
-
-          <div className="w-full border-t border-gray-300" />
-
-          <div className="px-4 pt-3">
-            <p className="text-xs font-medium text-ocf-black-300 truncate">Version {version}</p>
-          </div>
-          <div className="px-4 py-3">
-            <p className="text-xs text-ocf-black-300">Signed in as</p>
-            <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
-          </div>
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full" />
           {process.env.NEXT_PUBLIC_4H_VIEW === "true" && (
             <Menu.Item>
               {({ active }) => (
@@ -124,7 +62,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                   )}
                   <button
                     onClick={toggle4hView}
-                    className="ml-1 text-xs  font-medium text-ocf-black-300"
+                    className="ml-1 text-sm  font-medium text-ocf-black-600"
                   >
                     {`4-hour forecast`}
                   </button>
@@ -150,7 +88,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                     e.preventDefault();
                     toggleDashboardMode();
                   }}
-                  className="ml-1 text-xs font-medium text-ocf-black-300"
+                  className="ml-1 text-sm font-medium text-ocf-black-600"
                 >
                   {`Dashboard mode`}
                 </button>
@@ -158,11 +96,68 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
             )}
           </Menu.Item>
           <Menu.Item>
+            <div className="px-4 pt-3 text-ocf-black-600 text-right">
+              <a href="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf">
+                Documentation{" "}
+                <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
+              </a>
+            </div>
+          </Menu.Item>
+          <Menu.Item>
+            <div className="px-4 pt-3 text-ocf-black-600 text-right">
+              <Tooltip
+                tip={
+                  <div
+                    onClick={() => {
+                      var copyText = "quartz.support@openclimatefix.org";
+                      navigator.clipboard.writeText(copyText);
+                    }}
+                    className="cursor-pointer"
+                    title="Copy Email to Clipboard"
+                  >
+                    Click to email OCF at <span>quartz.support@openclimatefix.org</span>
+                  </div>
+                }
+                position="middle"
+                className={"text-right"}
+                fullWidth
+              >
+                <a href="mailto:quartz.support@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request">
+                  Contact{" "}
+                  <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
+                </a>
+              </Tooltip>
+            </div>
+          </Menu.Item>
+          <Menu.Item>
+            <div className="px-4 py-3 text-ocf-black-600 text-right">
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSf08XJPFwsNHxYiHUTV4g9CHWQzxAn0gSiAXXFkaI_3wjpNWw/viewform"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Give feedback{" "}
+                <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
+              </a>
+            </div>
+          </Menu.Item>
+
+          <div className="w-full border-t border-gray-300" />
+
+          <div className="px-4 pt-3">
+            <p className="text-xs font-medium text-ocf-black-300 truncate">Version {version}</p>
+          </div>
+          <div className="px-4 py-3 border-b border-gray-300">
+            <p className="text-xs text-ocf-black-300">Signed in as</p>
+            <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
+          </div>
+
+          <Menu.Item>
             {({ active }) => (
               <div
                 className={classNames(
                   active ? "bg-gray-100" : "",
-                  "block px-4 py-2 text-sm text-gray-700"
+                  "block px-4 py-2 text-sm text-ocf-black-600"
                 )}
               >
                 <Link href="/api/auth/logout">
