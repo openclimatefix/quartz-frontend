@@ -17,8 +17,8 @@ import {
   convertToLocaleDateString,
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
-  dateToLondonDateTimeOnlyString,
   getRounded4HoursAgoString,
+  dateToLondonDateTimeOnlyString,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate
 } from "../helpers/utils";
@@ -86,7 +86,6 @@ const CustomizedLabel: FC<any> = ({
   onClick
 }) => {
   const yy = -9;
-
   return (
     <g>
       <line
@@ -155,6 +154,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
     const roundedNumber =
       showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  function prettyPrintDate(x: string | number) {
+    if (typeof x === "number") {
+      return dateToLondonDateTimeOnlyString(new Date(x));
+    }
+    return dateToLondonDateTimeOnlyString(new Date(x));
+  }
 
   const CustomBar = (props: { DELTA: number }) => {
     const { DELTA } = props;
@@ -235,6 +241,25 @@ const RemixLine: React.FC<RemixLineProps> = ({
             interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
             orientation="top"
             hide={true}
+          />
+          <XAxis
+            dataKey="formattedDate"
+            xAxisId={"x-axis-3"}
+            tickFormatter={prettyPrintDate}
+            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+            tick={{ fill: "white", style: { fontSize: "12px" } }}
+            tickLine={true}
+            type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+            ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
+            domain={
+              view === VIEWS.SOLAR_SITES
+                ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
+                : undefined
+            }
+            interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
+            orientation="bottom"
+            tickMargin={-2}
+            hide={false}
           />
           <YAxis
             tickFormatter={
