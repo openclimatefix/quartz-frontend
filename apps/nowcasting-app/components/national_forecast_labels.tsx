@@ -14,7 +14,7 @@ const ForecastLabel: React.FC<ForecastLabelProps> = ({
     if (position === "left") return "-left-5";
     if (position === "right") return "-right-3";
     if (position === "middle")
-      return "-bottom-full left-1/2 transform -translate-x-1/2 translate-y-3";
+      return "-bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2";
   };
   return (
     <div className={`relative z-50 overflow-visible cursor-default flex group ${className || ""}`}>

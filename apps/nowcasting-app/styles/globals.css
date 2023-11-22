@@ -35,3 +35,7 @@
   border-width: 0.7rem 0.4rem 0;
   border-top-color: theme('colors.ocf-delta.100');
 }
+
+.chart-data-loading-message:hover .chart-data-loading-endpoints {
+  display: block;
+}

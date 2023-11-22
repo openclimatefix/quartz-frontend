@@ -11,13 +11,20 @@ import {
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { AggregatedSitesCombinedData, CombinedSitesData } from "../../types";
+import {
+  AggregatedSitesCombinedData,
+  CombinedSitesData,
+  LoadingState,
+  Site,
+  SitesEndpointStates
+} from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
-import { ForecastWithActualPV } from "../forecast-header/ui";
+import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
+import DataLoadingChartStatus from "../DataLoadingChartStatus";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -61,6 +68,7 @@ const SolarSiteChart: FC<{
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
+  const [sitesLoadingState] = useGlobalState("sitesLoadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const currentAggregation = (a: AGGREGATION_LEVELS) => a === aggregationLevel;
@@ -71,12 +79,33 @@ const SolarSiteChart: FC<{
     pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
-  // TODO: this currently only works for sites;
-  //  need to add a helper function to filter sites by group to feed into here
-  const selectedSiteData = combinedSitesData.allSitesData?.filter(
-    (site) => site.site_uuid === clickedSiteGroupId
+
+  const getSelectedSitesData = (
+    sitesData: Site[],
+    aggregationLevel: AGGREGATION_LEVELS,
+    clickedGroupId: string
+  ) => {
+    switch (aggregationLevel) {
+      case AGGREGATION_LEVELS.NATIONAL:
+        return sitesData;
+      case AGGREGATION_LEVELS.REGION:
+        return sitesData.filter((site) => site.dno.includes(`\"dno_id\": \"${clickedGroupId}\"`));
+      case AGGREGATION_LEVELS.GSP:
+        return sitesData.filter((site) => site.gsp.includes(`\"gsp_id\": \"${clickedGroupId}\"`));
+      case AGGREGATION_LEVELS.SITE:
+        return sitesData.filter((site) => site.site_uuid === clickedGroupId);
+    }
+  };
+  const getSelectedSitesCapacity = (selectedSitesData: Site[]) => {
+    return selectedSitesData.reduce((acc, site) => acc + site.inverter_capacity_kw, 0);
+  };
+
+  const selectedSiteData = getSelectedSitesData(
+    combinedSitesData.allSitesData || [],
+    aggregationLevel,
+    String(clickedSiteGroupId) || ""
   );
-  const selectedSiteCapacity = selectedSiteData?.[0]?.inverter_capacity_kw || 0;
+  const selectedSiteCapacity = getSelectedSitesCapacity(selectedSiteData);
   const filteredChartData = useFormatChartDataSites({
     allSitesData: selectedSiteData,
     pvForecastData: combinedSitesData.sitesPvForecastData,
@@ -113,9 +142,56 @@ const SolarSiteChart: FC<{
     );
   };
 
-  const getSiteName = (site_uuid: string) => {
-    const site = combinedSitesData.allSitesData?.find((s) => s.site_uuid === clickedSiteGroupId);
-    return site?.client_site_id || "";
+  const getTotalPvActualGenerationForGroup = (site_uuids: string[], targetTime: string) => {
+    const sitesActuals = combinedSitesData.sitesPvActualData.filter((pv) =>
+      site_uuids.includes(pv.site_uuid)
+    );
+    return sitesActuals.reduce((acc, pv) => {
+      const actual = pv.pv_actual_values.find(
+        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
+      );
+      return acc + (actual?.actual_generation_kw || 0);
+    }, 0);
+  };
+
+  const getTotalPvForecastGenerationForGroup = (site_uuids: string[], targetTime: string) => {
+    const sitesForecasts = combinedSitesData.sitesPvForecastData.filter((pv) =>
+      site_uuids.includes(pv.site_uuid)
+    );
+    return sitesForecasts.reduce((acc, fc) => {
+      const forecastVal = fc.forecast_values.find(
+        (pv) => formatISODateString(pv.target_datetime_utc) === formatISODateString(targetTime)
+      );
+      return acc + (forecastVal?.expected_generation_kw || 0);
+    }, 0);
+  };
+
+  const getSiteName = (
+    filteredSites: Site[],
+    aggregationLevel: AGGREGATION_LEVELS,
+    clickedGroupId: string
+  ) => {
+    switch (aggregationLevel) {
+      case AGGREGATION_LEVELS.NATIONAL:
+        return "National";
+      case AGGREGATION_LEVELS.REGION:
+        const siteWithRegion = filteredSites.find((s) =>
+          s.dno.includes(`\"dno_id\": \"${clickedGroupId}\"`)
+        );
+        if (!siteWithRegion) return "";
+        const region = JSON.parse(siteWithRegion.dno);
+        return region.long_name || "";
+      case AGGREGATION_LEVELS.GSP:
+        const siteWithGsp = filteredSites.find((s) =>
+          s.gsp.includes(`\"gsp_id\": \"${clickedGroupId}\"`)
+        );
+        if (!siteWithGsp) return "";
+        const gsp = JSON.parse(siteWithGsp.gsp);
+        return gsp.name || "";
+      case AGGREGATION_LEVELS.SITE:
+        const site = filteredSites.find((s) => s.site_uuid === clickedGroupId);
+        return site?.client_site_id || "";
+    }
   };
 
   const allSitesYield = Array.from(aggregatedSitesData.national.values());
@@ -141,21 +217,23 @@ const SolarSiteChart: FC<{
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto mb-2">
+      <div className="flex-auto flex flex-col mb-2">
         <div className="flex content-between bg-ocf-gray-800 h-auto">
-          <div className="text-white lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
+          <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
             All Sites
           </div>
-          <div className="flex justify-between flex-2 my-2 px-6">
-            <div className="pr-8">
-              <ForecastWithActualPV
-                forecast={`${nationalPVExpected?.toFixed(1)}`}
-                pv={`${nationalPVActual?.toFixed(1)}`}
+          <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
+            <div className="">
+              <ForecastHeadlineFigure
                 tip={`PV Actual / OCF Forecast`}
-                sites={true}
                 time={allSitesChartDateTime}
                 color="ocf-yellow"
-              />
+                unit={"KW"}
+              >
+                <span className="text-black">{nationalPVActual?.toFixed(1)}</span>
+                <span className="text-ocf-gray-300 mx-1"> / </span>
+                {nationalPVExpected?.toFixed(1)}
+              </ForecastHeadlineFigure>
             </div>
             <div>
               {/*<NextForecast*/}
@@ -169,8 +247,8 @@ const SolarSiteChart: FC<{
           <div className="inline-flex h-full"></div>
           {/*<div className="inline-flex h-full">{children}</div>*/}
         </div>
-
-        <div className="h-60 mt-4 mb-10">
+        <div className="flex-1 relative h-60 mt-4 mb-3">
+          <DataLoadingChartStatus loadingState={sitesLoadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -181,34 +259,50 @@ const SolarSiteChart: FC<{
             visibleLines={visibleLines}
           />
         </div>
-        {clickedSiteGroupId && (
-          <>
-            <ForecastHeaderSite
-              forecast={
-                getExpectedPowerGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) ||
-                "0"
-              }
-              pvActual={
-                getPvActualGenerationForSite(clickedSiteGroupId, selectedTime).toFixed(1) || "0"
-              }
-              time={allSitesChartDateTime}
-              onClose={() => {
-                setClickedSiteGroupId(undefined);
-              }}
-              title={getSiteName(clickedSiteGroupId) || "No site name for this site group"}
-            ></ForecastHeaderSite>
-            <div className="h-60 mt-4 mb-10">
-              <RemixLine
-                resetTime={resetTime}
-                timeNow={formatISODateString(timeNow)}
-                timeOfInterest={selectedTime}
-                setTimeOfInterest={setSelectedTime}
-                data={filteredChartData}
-                yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
-                visibleLines={visibleLines}
-              />
-            </div>
-          </>
+        {clickedSiteGroupId && aggregationLevel !== AGGREGATION_LEVELS.NATIONAL && (
+          <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
+            <>
+              <ForecastHeaderSite
+                onClose={() => {
+                  setClickedSiteGroupId(undefined);
+                }}
+                title={
+                  getSiteName(selectedSiteData, aggregationLevel, clickedSiteGroupId) ||
+                  "No name found for selected group"
+                }
+              >
+                <ForecastHeadlineFigure
+                  tip={`PV Actual / OCF Forecast`}
+                  time={allSitesChartDateTime}
+                  color="ocf-yellow"
+                  unit={"KW"}
+                >
+                  <span className="text-black">
+                    {getTotalPvActualGenerationForGroup(
+                      selectedSiteData.map((site) => site.site_uuid),
+                      selectedTime
+                    ).toFixed(1) || "0"}
+                  </span>
+                  <span className="text-ocf-gray-300 mx-1"> / </span>
+                  {getTotalPvForecastGenerationForGroup(
+                    selectedSiteData.map((site) => site.site_uuid),
+                    selectedTime
+                  ).toFixed(1) || "0"}
+                </ForecastHeadlineFigure>
+              </ForecastHeaderSite>
+              <div className="h-60 mt-4 mb-2">
+                <RemixLine
+                  resetTime={resetTime}
+                  timeNow={formatISODateString(timeNow)}
+                  timeOfInterest={selectedTime}
+                  setTimeOfInterest={setSelectedTime}
+                  data={filteredChartData}
+                  yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
+                  visibleLines={visibleLines}
+                />
+              </div>
+            </>
+          </div>
         )}
       </div>
 
@@ -217,7 +311,7 @@ const SolarSiteChart: FC<{
         title={"National"}
         tableData={Array.from(aggregatedSitesData.national.values())}
       />
-      {/* <AggregatedDataTable
+      <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
         title={"Region"}
         tableData={Array.from(aggregatedSitesData.regions.values())}
@@ -226,7 +320,7 @@ const SolarSiteChart: FC<{
         className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
         title={"GSP"}
         tableData={Array.from(aggregatedSitesData.gsps.values())}
-      /> */}
+      />
       <AggregatedDataTable
         className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
         title={"Sites"}
