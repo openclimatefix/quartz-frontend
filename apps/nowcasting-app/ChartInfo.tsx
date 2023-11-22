@@ -11,7 +11,6 @@ export const ChartInfo: React.FC = () => {
         <li>
           Following{" "}
           <span className="underline font-bold"><a
-            className="font-bold underline-blue"
             href="https://www.solar.sheffield.ac.uk/pvlive/"
             target="_blank"
             rel="noreferrer"
