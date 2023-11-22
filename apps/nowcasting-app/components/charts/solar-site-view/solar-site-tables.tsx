@@ -79,12 +79,9 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
 
   const selectedSiteClass = `bg-ocf-gray-800 cursor-pointer`;
 
-  // const classes = {`${
-  //                     clickedGspId === gspDelta.gspId ? `h-1.5` : `h-1`
-  //                   }
   return (
     <>
-      <div className="h-72 overflow-y-scroll">
+      <div className="flex-1 h-72 overflow-y-scroll">
         {rows?.sort(sortFn).map((site) => {
           const mostAccurateGeneration = site.actualPV || site.expectedPV;
           return (
@@ -109,29 +106,33 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                          justify-center py-3 pr-10 font-bold flex flex-row text-sm"
                       >
                         <p>
-                          {Number(site.aggregatedYield).toFixed()}
+                          <span className={!!site.actualPV ? "text-white" : "text-ocf-yellow"}>
+                            {Number(site.aggregatedYield).toFixed()}
+                          </span>
                           <span className="ocf-gray-400 text-xs">%</span>
                         </p>
                       </div>
                       <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
-                        {Number(mostAccurateGeneration).toFixed(
-                          mostAccurateGeneration < 10 ? 1 : 0
-                        )}{" "}
+                        <span className={`pr-1${site.actualPV ? "" : " text-ocf-yellow"}`}>
+                          {Number(mostAccurateGeneration).toFixed(
+                            mostAccurateGeneration < 10 ? 1 : 0
+                          )}
+                        </span>{" "}
                         / {Number(site.capacity).toFixed()}
-                        <span className="text-ocf-gray-400 text-xs font-thin pt-1">KW</span>
+                        <span className="text-ocf-gray-400 text-xs font-thin pt-1 pl-0.5">KW</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div
-                  className="flex items-end justify-end flex-row-reverse relative w-full 
-               mb-0.5"
+                  className="absolute bottom-0 flex items-end justify-end flex-row-reverse w-full
+               "
                 >
                   <div
                     className={`${
-                      clickedSiteGroupId === site.id ? "h-3" : "h-2.5"
+                      clickedSiteGroupId === site.id ? "h-2" : "h-2"
                     } bg-ocf-yellow-500`}
-                    style={{ width: `2px` }}
+                    style={{ width: `3px` }}
                   ></div>
                   <div
                     className={`h-1 bg-ocf-yellow-500`}
@@ -156,7 +157,7 @@ export const AggregatedDataTable: React.FC<{
 }> = ({ className, title, tableData }) => {
   return (
     <>
-      <div className={`${className || ""}`}>
+      <div className={`flex-1 ${className || ""}`}>
         <TableHeader text={title} />
         <TableData rows={tableData} />
       </div>

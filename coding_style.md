@@ -14,6 +14,11 @@ For now, we maintain the `.py` files, and try to ensure they're all internally c
 ## Spelling
 We use American English in our code (for example, so we use 'center' rather than 'centre').  This is true for variable namings and docstrings.
 
+## Repository Template
+If making a new OCF Repository, please try using our [template here](https://github.com/openclimatefix/ocf_template) which should help with boilerplate linting and setup. 
+
 ## TODO
 - publish black config file
 - find a good way to automatically check that docstrings comply with Google style
+- Change to using `ruff` for most linting
+- Repo template

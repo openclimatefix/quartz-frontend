@@ -44,9 +44,11 @@ const getDelta: (datum: ChartData) => number = (datum) => {
   }
   return 0;
 };
+
 const useFormatChartData = ({
   forecastData,
   fourHourData,
+  probabilisticRangeData,
   pvRealDayAfterData,
   pvRealDayInData,
   timeTrigger,
@@ -54,6 +56,7 @@ const useFormatChartData = ({
 }: {
   forecastData?: ForecastData;
   fourHourData?: ForecastData;
+  probabilisticRangeData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
@@ -89,7 +92,7 @@ const useFormatChartData = ({
           pva,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION_UPDATED: Math.round(db.solarGenerationKw / 1000)
+            GENERATION_UPDATED: db.solarGenerationKw / 1000
           })
         )
       );
@@ -98,17 +101,28 @@ const useFormatChartData = ({
           pvIn,
           (db) => db.datetimeUtc,
           (db) => ({
-            GENERATION: Math.round(db.solarGenerationKw / 1000)
+            GENERATION: db.solarGenerationKw / 1000
           })
         )
       );
-      forecastData.forEach((fc) =>
+      forecastData.forEach((fc) => {
         addDataToMap(
           fc,
           (db) => db.targetTime,
           (db) => getForecastChartData(timeNow, db)
-        )
-      );
+        );
+        if (fc.plevels) {
+          addDataToMap(
+            fc,
+            (db) => db.targetTime,
+            //add an array here for the probabilistic range. it'll be two numbers [lower, upper]
+            (db) => ({
+              PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
+            })
+          );
+        }
+      });
+
       if (fourHourData) {
         fourHourData.forEach((fc) =>
           addDataToMap(

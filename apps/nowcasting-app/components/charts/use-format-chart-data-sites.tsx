@@ -1,16 +1,6 @@
 import { useMemo } from "react";
 import { get30MinNow } from "../helpers/globalState";
-import {
-  AllSites,
-  ForecastData,
-  PvRealData,
-  Site,
-  SiteForecastValue,
-  SitePvActual,
-  SitePvForecast,
-  SitesPvActual,
-  SitesPvForecast
-} from "../types";
+import { Site, SiteForecastValue, SitePvActual, SitePvForecast } from "../types";
 import { convertToLocaleDateString, formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 import { DELTA_BUCKET } from "../../constant";
@@ -69,7 +59,7 @@ const useFormatChartDataSites = ({
   delta?: boolean;
 }) => {
   const data = useMemo(() => {
-    if (pvForecastData && pvActualData && timeTrigger) {
+    if ((pvForecastData || pvActualData) && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};
       const siteIds: string[] = allSitesData?.map((site) => site.site_uuid) || [];
@@ -114,7 +104,7 @@ const useFormatChartDataSites = ({
         }
       };
 
-      pvActualData.forEach((pva) => {
+      (pvActualData || []).forEach((pva) => {
         if (!siteIds.includes(pva.site_uuid)) return;
 
         pva.pv_actual_values.forEach((pvav) => {
@@ -129,7 +119,7 @@ const useFormatChartDataSites = ({
         });
       });
 
-      pvForecastData.forEach((fc) => {
+      (pvForecastData || []).forEach((fc) => {
         if (!siteIds.includes(fc.site_uuid)) return;
 
         fc.forecast_values.forEach((fcv) =>
@@ -151,10 +141,11 @@ const useFormatChartDataSites = ({
       //   }
       // }
 
-      // Filter out data points without forecast data
-      const filteredData = Object.values(chartMap).filter((datum) => {
-        return datum.FORECAST !== undefined || datum.PAST_FORECAST !== undefined;
-      });
+      // Not certain why I filtered out data with actuals but no forecasts, reinstating for now.
+      const filteredData = Object.values(chartMap);
+      // const filteredData = Object.values(chartMap).filter((datum) => {
+      //   return datum.FORECAST !== undefined || datum.PAST_FORECAST !== undefined;
+      // });
 
       return filteredData;
     }

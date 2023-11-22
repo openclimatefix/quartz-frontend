@@ -1,4 +1,4 @@
-import { classNames } from "../../helpers/utils";
+import { classNames, isProduction } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
@@ -28,9 +28,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 }) => {
   const computedClasses = classNames(
     className || "",
-    disabled
-      ? "text-gray-500 cursor-not-allowed"
-      : "text-white cursor-pointer hover:text-ocf-yellow-400",
+    disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
     "flex px-4 py-2 font-semibold text-sm"
   );
 
@@ -48,11 +46,15 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 
   if (setViewFunc && view) {
     const isCurrentView = currentView === view;
+    let textColorClasses = isCurrentView ? "text-ocf-yellow" : "text-white";
+    if (disabled) textColorClasses = "text-gray-500 cursor-not-allowed";
     return (
       <Menu.Item>
         <a
-          className={classNames(computedClasses, isCurrentView ? "text-ocf-yellow" : "")}
-          onClick={() => setViewFunc(view)}
+          className={classNames(computedClasses, textColorClasses)}
+          onClick={() => {
+            if (!disabled) setViewFunc(view);
+          }}
         >
           {text}
         </a>
@@ -63,7 +65,10 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   return (
     <Menu.Item>
       {({ active }) => (
-        <Link href={url} className={classNames(computedClasses, active ? "text-ocf-yellow" : "")}>
+        <Link
+          href={url}
+          className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+        >
           {text}
         </Link>
       )}
@@ -75,15 +80,29 @@ type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
   return (
-    <header className="text-white text-right pl-3 pr-4 bg-black flex absolute top-0 w-full h-16 p-1 text-sm items-center z-30">
-      <div className="p-1 mt-1 items-end flex flex-col">
+    <header className="h-16 text-white text-right px-4 bg-black flex absolute top-0 w-full p-1 text-sm items-center z-30">
+      <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
         <a
-          className="flex h-6 w-auto mr-2"
+          className="flex h-8 self-center w-auto"
           target="_blank"
-          href="https://nowcasting.io/"
+          href="https://quartz.solar/"
           rel="noreferrer"
         >
-          <img src="/NOWCASTING_Secondary-white.svg" alt="ofc" className="h-6 w-auto" />
+          <img src="/QUARTZSOLAR_LOGO_ICON.svg" alt="quartz_logo" className="h-8 w-auto" />
+        </a>
+      </div>
+      <div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">
+        <a
+          className="flex h-6 w-auto"
+          target="_blank"
+          href="https://quartz.solar/"
+          rel="noreferrer"
+        >
+          <img
+            src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"
+            alt="quartz_logo"
+            className="h-8 w-auto"
+          />
         </a>
         <div className="mr-[6px] flex items-center">
           <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>
@@ -105,6 +124,7 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             currentView={view}
             setViewFunc={setView}
             text="Solar Sites"
+            disabled={isProduction}
           />
           <HeaderLink
             url="/"
@@ -112,10 +132,6 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             currentView={view}
             setViewFunc={setView}
             text="Delta"
-          />
-          <HeaderLink
-            url="https://openclimatefix.notion.site/openclimatefix/Nowcasting-Documentation-0d718915650e4f098470d695aa3494bf"
-            text="Documentation"
           />
         </Menu>
       </div>

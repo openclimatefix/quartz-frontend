@@ -1,13 +1,12 @@
 // export const API_PREFIX = "http://localhost:8000/v0";
-export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.nowcasting.io/v0";
+export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.quartz.solar/v0";
 export const SITES_API_PREFIX =
-  process.env.NEXT_PUBLIC_SITES_API_PREFIX ||
-  "https://api-dev-site.nowcasting.io";
+  process.env.NEXT_PUBLIC_SITES_API_PREFIX || "https://api-site-dev.quartz.solar";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 12000;
 
 export const getAllForecastUrl = (isNormalized: boolean, isHistoric: boolean) =>
-  `${API_PREFIX}/solar/GB/gsp/forecast/all/?${isHistoric ? "historic=true" : ""}${
+  `${API_PREFIX}/solar/GB/gsp/forecast/all/?UI&${isHistoric ? "historic=true" : ""}${
     isNormalized ? "&normalize=true" : ""
   }`;
 
@@ -76,6 +75,12 @@ export enum AGGREGATION_LEVEL_MIN_ZOOM {
   REGION = 5,
   GSP = 7,
   SITE = 8.5
+}
+export enum AGGREGATION_LEVEL_MAX_ZOOM {
+  NATIONAL = AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+  REGION = AGGREGATION_LEVEL_MIN_ZOOM.GSP,
+  GSP = AGGREGATION_LEVEL_MIN_ZOOM.SITE,
+  SITE = 14
 }
 
 export enum SORT_BY {

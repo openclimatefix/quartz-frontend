@@ -4,16 +4,23 @@ import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
-import { formatISODateString, getRounded4HoursAgoString } from "../../helpers/utils";
+import {
+  convertISODateStringToLondonTime,
+  formatISODateString,
+  getRounded4HoursAgoString
+} from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { CombinedData, CombinedErrors, GspDeltaValue } from "../../types";
+import { CombinedData, CombinedErrors, NationalEndpointStates, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
+import useTimeNow from "../../hooks/use-time-now";
+import { ChartLegend } from "../ChartLegend";
+import DataLoadingChartStatus from "../DataLoadingChartStatus";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -50,13 +57,14 @@ const LegendItem: FC<{
 };
 
 const GspDeltaColumn: FC<{
-  gspDeltas: Map<number, GspDeltaValue>;
+  gspDeltas: Map<string, GspDeltaValue> | undefined;
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [clickedGspId] = useGlobalState("clickedGspId");
-  if (!gspDeltas.size) return null;
+  const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
+  if (!gspDeltas?.size) return null;
 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
     if (negative) {
@@ -66,8 +74,6 @@ const GspDeltaColumn: FC<{
     }
   };
 
-  const deltaArray = Array.from(gspDeltas.values());
-  console.log("deltaArray", deltaArray);
   let hasRows = false;
   return (
     <>
@@ -164,7 +170,7 @@ const GspDeltaColumn: FC<{
                 } ${gspDelta.delta > 0 ? `border-l-8` : `border-r-8`}`}
                 key={`gspCol${gspDelta.gspId}`}
               >
-                <div className="flex-initial pl-1 max-w-[35%] 2xl:max-w-full">
+                <div className="flex-initial pl-1 max-w-[35%] dash:max-w-full">
                   <span className="">{gspDelta.gspRegion}</span>
                 </div>
                 <div className="flex flex-initial flex-end justify-around items-center">
@@ -271,6 +277,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
+  const [loadingState] = useGlobalState("loadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const selectedTimeHalfHourSlot = getNext30MinSlot(new Date(selectedTime));
@@ -346,16 +353,18 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   };
   const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
+
   return (
     <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
       <div className="flex-auto flex flex-col mb-7">
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
-          deltaview={true}
+          deltaView={true}
         ></ForecastHeader>
 
-        <div className="h-60 mt-4 mb-6">
+        <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto mt-4">
+          <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
           <RemixLine
             resetTime={resetTime}
             timeNow={formatISODateString(timeNow)}
@@ -368,29 +377,31 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           />
         </div>
         {clickedGspId && (
-          <GspPvRemixChart
-            close={() => {
-              setClickedGspId(undefined);
-            }}
-            setTimeOfInterest={setSelectedTime}
-            selectedTime={selectedTime}
-            gspId={clickedGspId}
-            timeNow={formatISODateString(timeNow)}
-            resetTime={resetTime}
-            visibleLines={visibleLines}
-            deltaView={true}
-          ></GspPvRemixChart>
+          <div className="flex-1 flex flex-col relative min-h-[30vh] h-auto">
+            <GspPvRemixChart
+              close={() => {
+                setClickedGspId(undefined);
+              }}
+              setTimeOfInterest={setSelectedTime}
+              selectedTime={selectedTime}
+              gspId={clickedGspId}
+              timeNow={formatISODateString(timeNow)}
+              resetTime={resetTime}
+              visibleLines={visibleLines}
+              deltaView={true}
+            ></GspPvRemixChart>
+          </div>
         )}
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex flex-1 justify-between mb-15">
+        <div className="flex flex-initial justify-between mb-15">
           {!hasGspPvInitialForSelectedTime && (
             <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
               [ Delta values not available until PV Live output available ]
             </div>
           )}
-          {hasGspPvInitialForSelectedTime && (
+          {hasGspPvInitialForSelectedTime && gspDeltas && (
             <>
               <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
               <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
@@ -398,65 +409,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           )}
         </div>
       </div>
-      <div
-        className="absolute bottom-0 left-0 right-0 flex flex-none justify-start align-items:baseline
-                   px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible"
-      >
-        <div className={`flex flex-1 flex-row pb-3 overflow-x-scroll${show4hView ? "" : ""}`}>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              dashed
-              label={"PV live initial estimate"}
-              dataKey={`GENERATION`}
-              show4hrView={show4hView}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              label={"PV live updated"}
-              dataKey={`GENERATION_UPDATED`}
-              show4hrView={show4hView}
-            />
-          </div>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              dashed
-              label={"OCF Forecast"}
-              dataKey={`FORECAST`}
-              show4hrView={show4hView}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              label={"OCF Final Forecast"}
-              dataKey={`PAST_FORECAST`}
-              show4hrView={show4hView}
-            />
-          </div>
-          {show4hView && (
-            <div className={legendItemContainerClasses}>
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                dashed
-                label={`OCF ${fourHoursAgo} Forecast`}
-                dataKey={`4HR_FORECAST`}
-                show4hrView={show4hView}
-              />
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                label={"OCF 4hr Forecast"}
-                dataKey={`4HR_PAST_FORECAST`}
-                show4hrView={show4hView}
-              />
-            </div>
-          )}
-        </div>
-        <div className="flex-initial flex items-center pl-3 pb-3">
-          <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
-            <InfoIcon />
-          </Tooltip>
-        </div>
-      </div>
+      <ChartLegend />
     </div>
   );
 };

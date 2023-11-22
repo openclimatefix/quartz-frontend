@@ -1,7 +1,46 @@
 import { DELTA_BUCKET } from "../constant";
+import { components } from "../types/quartz-api";
 
+export type LoadingState<T> = {
+  initialLoadComplete: boolean;
+  showMessage: boolean;
+  message: string;
+  endpointStates?: T;
+};
+export enum NationalEndpointLabel {
+  nationalForecast = "National Forecast",
+  pvRealDayIn = "PV Live Estimate",
+  pvRealDayAfter = "PV Live Updated",
+  national4Hour = "4-hour forecast",
+  allGspForecast = "All GSP Forecast",
+  allGspReal = "All GSP PV Live"
+}
+export type NationalEndpointKeysType = keyof typeof NationalEndpointLabel;
+
+export enum SitesEndpointLabel {
+  allSites = "All Sites",
+  sitePvForecast = "Site PV Forecast",
+  sitePvActual = "Site PV Actual"
+}
+export type SitesEndpointKeysType = keyof typeof SitesEndpointLabel;
+export type NationalEndpointStates = {
+  type: "national";
+} & {
+  [key in NationalEndpointKeysType]: EndpointState;
+};
+export type SitesEndpointStates = {
+  type: "sites";
+} & {
+  [key in SitesEndpointKeysType]: EndpointState;
+};
+export type EndpointState = {
+  loading: boolean;
+  validating: boolean;
+  error: any;
+  hasData: boolean;
+};
 export type FcAllResData = {
-  type: "FeatureCollection";
+  type?: "FeatureCollection";
   forecasts: {
     location: {
       label: string;
@@ -29,13 +68,15 @@ export type FcAllResData = {
 type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
-  expectedPowerGenerationNormalized: null;
-};
-type ForecastData = {
-  targetTime: string;
-  expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized?: number | null;
-}[];
+  plevels?: {
+    plevel_10: number;
+    plevel_90: number;
+  };
+};
+
+type ForecastData = ForecastValue[];
+
 type PvRealData = {
   datetimeUtc: string;
   solarGenerationKw: number;
@@ -47,17 +88,57 @@ type CombinedData = {
   pvRealDayInData: PvRealData | undefined;
   pvRealDayAfterData: PvRealData | undefined;
   national4HourData: National4HourData | undefined;
-  allGspForecastData: GspAllForecastData | undefined;
-  allGspRealData: AllGspRealData | undefined;
-  gspDeltas: GspDeltas | undefined;
+  allGspSystemData: components["schemas"]["Location"][] | undefined;
+  // TODO: slight mashup of custom and generated types atm,
+  //  ideally should be able to use just the generated for API typings
+  allGspForecastData:
+    | GspAllForecastData
+    | components["schemas"]["OneDatetimeManyForecastValues"][]
+    | undefined;
+  allGspRealData: AllGspRealData | components["schemas"]["GSPYieldGroupByDatetime"][] | undefined;
+  gspDeltas: Map<string, GspDeltaValue> | undefined;
+};
+type CombinedLoading = {
+  nationalForecastLoading: boolean;
+  pvRealDayInLoading: boolean;
+  pvRealDayAfterLoading: boolean;
+  national4HourLoading: boolean;
+  allGspSystemLoading: boolean;
+  allGspForecastLoading: boolean;
+  allGspRealLoading: boolean;
+};
+type CombinedValidating = {
+  nationalForecastValidating: boolean;
+  pvRealDayInValidating: boolean;
+  pvRealDayAfterValidating: boolean;
+  national4HourValidating: boolean;
+  allGspSystemValidating: boolean;
+  allGspForecastValidating: boolean;
+  allGspRealValidating: boolean;
 };
 type CombinedErrors = {
   nationalForecastError: any;
   pvRealDayInError: any;
   pvRealDayAfterError: any;
   national4HourError: any;
+  allGspSystemError: any;
   allGspForecastError: any;
   allGspRealError: any;
+};
+type SitesCombinedLoading = {
+  allSitesLoading: boolean;
+  sitePvForecastLoading: boolean;
+  sitePvActualLoading: boolean;
+};
+type SitesCombinedValidating = {
+  allSitesValidating: boolean;
+  sitePvForecastValidating: boolean;
+  sitePvActualValidating: boolean;
+};
+type SitesCombinedErrors = {
+  allSitesError: any;
+  sitesPvForecastError: any;
+  sitesPvActualError: any;
 };
 type GspEntity = {
   label: string;
@@ -68,6 +149,8 @@ type GspEntity = {
   installedCapacityMw: number;
   rmMode: boolean;
 };
+type GspEntities = GspEntity[];
+
 type GspRealData = GspEntity & {
   gspYields: [
     {
@@ -111,6 +194,11 @@ type GspDeltaValue = {
   deltaNormalized: string;
 };
 
+export type SolarStatus = {
+  status: string;
+  message: string;
+};
+
 export type Bucket = {
   dataKey: string;
   quantity: number;
@@ -122,7 +210,7 @@ export type Bucket = {
   increment: number;
   textColor: string;
   altTextColor: string;
-  gspDeltas?: Map<number, GspDeltaValue>;
+  gspDeltas?: Map<string, GspDeltaValue>;
 };
 
 // Sites
@@ -138,7 +226,8 @@ export type Site = {
   tilt: string;
   latitude: number;
   longitude: number;
-  installed_capacity_kw: number;
+  inverter_capacity_kw: number;
+  module_capacity_kw: number;
 };
 
 export type AllSites = {
@@ -176,6 +265,13 @@ export type CombinedSitesData = {
   sitesPvForecastData: SitePvForecast[];
   sitesPvActualData: SitePvActual[];
 };
+export type SiteData = {
+  label: string;
+  capacity: number;
+  actualPV: number;
+  expectedPV: number;
+  aggregatedYield: number;
+};
 
 // Common object type across Sites, GSPs, Regions and National
 export type AggregatedSitesDatum = {
@@ -196,4 +292,19 @@ export type AggregatedSitesCombinedData = {
   regions: AggregatedSitesDataGroupMap;
   gsps: AggregatedSitesDataGroupMap;
   national: AggregatedSitesDataGroupMap;
+};
+
+export type MapFeatureObject = {
+  properties: {
+    expectedPowerGenerationMegawatts: number | undefined;
+    expectedPowerGenerationNormalized: number | undefined;
+    delta?: number;
+    deltaBucket?: number;
+    installedCapacityMw: number;
+    gspDisplayName: string;
+  };
+  type: "Feature";
+  geometry: Geometry;
+  id?: string | number | undefined;
+  bbox?: BBox | undefined;
 };

@@ -25,6 +25,9 @@ import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { FeatureCollection } from "geojson";
 import DeltaColorGuideBar from "./delta-color-guide-bar";
+import { safelyUpdateMapData } from "../helpers/mapUtils";
+import { generateGeoJsonForecastData } from "../helpers/data";
+import { components } from "../../types/quartz-api";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
@@ -44,7 +47,6 @@ const getRoundedPvPercent = (per: number, round: boolean = true) => {
 
 type DeltaMapProps = {
   className?: string;
-  getForecastsData: (isNormalized: boolean) => SWRResponse<FcAllResData, any>;
   combinedData: CombinedData;
   combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
@@ -53,8 +55,8 @@ type DeltaMapProps = {
 
 const DeltaMap: React.FC<DeltaMapProps> = ({
   className,
-  getForecastsData,
   combinedData,
+  combinedErrors,
   activeUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
@@ -63,61 +65,30 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   const isNormalized = activeUnit === ActiveUnit.percentage;
   const { gspDeltas } = combinedData;
 
-  const { data: initForecastData, error: forecastError } = getForecastsData(isNormalized);
   const forecastLoading = false;
+  const initForecastData =
+    combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
+  const forecastError = combinedErrors?.allGspForecastError;
 
-  const generateGeoJsonForecastData: (
-    forecastData?: FcAllResData,
-    targetTime?: string,
-    gspDeltas?: Map<string, number>
-  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    // Exclude first item as it's not representing gsp area
-    const gspForecastData = forecastData?.forecasts?.slice(1);
-    const gspShapeJson = gspShapeData as FeatureCollection;
-    const forecastGeoJson = {
-      ...gspShapeData,
-      type: "FeatureCollection" as "FeatureCollection",
-      features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = gspForecastData && gspForecastData[index];
-        let selectedFCValue;
-        if (gspForecastData && targetTime) {
-          selectedFCValue = forecastDatum?.forecastValues.find(
-            (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
-          );
-        } else if (gspForecastData) {
-          selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
-        }
-        const currentGspDelta: GspDeltaValue = gspDeltas.get(index + 1);
-
-        return {
-          ...featureObj,
-          properties: {
-            ...featureObj.properties,
-            [SelectedData.expectedPowerGenerationMegawatts]:
-              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
-            [SelectedData.expectedPowerGenerationNormalized]:
-              selectedFCValue &&
-              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
-            [SelectedData.installedCapacityMw]: getRoundedPv(
-              forecastDatum?.location.installedCapacityMw || 0
-            ),
-            [SelectedData.delta]: currentGspDelta?.delta || 0,
-            deltaBucket: currentGspDelta?.deltaBucket || 0,
-            gspDisplayName: forecastDatum?.location?.regionName || ""
-          }
-        };
-      })
-    };
-
-    return { forecastGeoJson };
-  };
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime, gspDeltas);
-  }, [initForecastData, selectedISOTime]);
+    return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData, gspDeltas);
+  }, [initForecastData, selectedISOTime, combinedData, gspDeltas]);
 
   const updateMapData = (map: mapboxgl.Map) => {
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource | undefined;
-    console.log("updateMapData", generatedGeoJsonForecastData);
+    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    if (!source) {
+      const { forecastGeoJson } = generateGeoJsonForecastData(
+        initForecastData,
+        selectedISOTime,
+        combinedData,
+        gspDeltas
+      );
+
+      map.addSource("latestPV", {
+        type: "geojson",
+        data: forecastGeoJson
+      });
+    }
     if (generatedGeoJsonForecastData && source) {
       source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
       map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));
@@ -181,46 +152,67 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     ]
   ];
 
-  const addFCData = (map: { current: mapboxgl.Map }) => {
-    const { forecastGeoJson } = generateGeoJsonForecastData(initForecastData, selectedISOTime);
-
-    map.current.addSource("latestPV", {
-      type: "geojson",
-      data: forecastGeoJson
-    });
-
-    map.current.addLayer({
-      id: "latestPV-forecast",
-      type: "fill",
-      source: "latestPV",
-      layout: { visibility: "visible" },
-      paint: {
-        "fill-color": getFillColor("delta"),
-        "fill-opacity": 0.7
+  const addOrUpdateFCData = (map: mapboxgl.Map) => {
+    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    if (!source) {
+      const { forecastGeoJson } = generateGeoJsonForecastData(
+        initForecastData,
+        selectedISOTime,
+        combinedData,
+        gspDeltas
+      );
+      map.addSource("latestPV", {
+        type: "geojson",
+        data: forecastGeoJson
+      });
+    } else {
+      if (generatedGeoJsonForecastData && source) {
+        source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+        map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));
       }
-    });
+    }
 
-    map.current.addLayer({
-      id: "latestPV-forecast-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 0.6,
-        "line-opacity": 0.2
-      }
-    });
+    const pvForecastLayer = map.getLayer("latestPV-forecast");
+    if (!pvForecastLayer) {
+      map.addLayer({
+        id: "latestPV-forecast",
+        type: "fill",
+        source: "latestPV",
+        layout: { visibility: "visible" },
+        paint: {
+          "fill-color": getFillColor("delta"),
+          "fill-opacity": 0.7
+        }
+      });
+    }
 
-    map.current.addLayer({
-      id: "latestPV-forecast-select-borders",
-      type: "line",
-      source: "latestPV",
-      paint: {
-        "line-color": "#ffffff",
-        "line-width": 4,
-        "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
-      }
-    });
+    const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
+    if (!pvForecastBordersLayer) {
+      map.addLayer({
+        id: "latestPV-forecast-borders",
+        type: "line",
+        source: "latestPV",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 0.6,
+          "line-opacity": 0.2
+        }
+      });
+    }
+
+    const pvForecastSelectLayer = map.getLayer("latestPV-forecast-select-borders");
+    if (!pvForecastSelectLayer) {
+      map.addLayer({
+        id: "latestPV-forecast-select-borders",
+        type: "line",
+        source: "latestPV",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 4,
+          "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+        }
+      });
+    }
     // Create a popup, but don't add it to the map yet.
     const popup = new mapboxgl.Popup({
       closeButton: false,
@@ -229,9 +221,9 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       maxWidth: "none"
     });
 
-    map.current.on("mousemove", "latestPV-forecast", (e) => {
+    map.on("mousemove", "latestPV-forecast", (e) => {
       // Change the cursor style as a UI indicator.
-      map.current.getCanvas().style.cursor = "pointer";
+      map.getCanvas().style.cursor = "pointer";
 
       // Copy coordinates array.
       const properties = e.features?.[0].properties;
@@ -259,11 +251,11 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
 
       // Populate the popup and set its coordinates
       // based on the feature found.
-      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
+      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
     });
 
-    map.current.on("mouseleave", "latestPV-forecast", () => {
-      map.current.getCanvas().style.cursor = "";
+    map.on("mouseleave", "latestPV-forecast", () => {
+      map.getCanvas().style.cursor = "";
       popup.remove();
     });
   };
@@ -278,8 +270,13 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         </LoadStateMap>
       ) : (
         <Map
-          loadDataOverlay={addFCData}
-          updateData={{ newData: !!initForecastData, updateMapData }}
+          loadDataOverlay={(map: { current: mapboxgl.Map }) =>
+            safelyUpdateMapData(map.current, addOrUpdateFCData)
+          }
+          updateData={{
+            newData: !!initForecastData,
+            updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateFCData)
+          }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
               <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />

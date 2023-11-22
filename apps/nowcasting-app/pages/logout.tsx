@@ -11,19 +11,19 @@ const links = [
     title: "Documentation",
     description: "Learn how to integrate our tools with your app",
     icon: BookOpenIcon,
-    url: "#"
+    url: "https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
   },
   {
     title: "API Reference",
     description: "A complete API reference for our library",
     icon: ViewListIcon,
-    url: "https://api.nowcasting.io/docs"
+    url: "https://api.quartz.solar/docs"
   },
   {
     title: "Support",
     description: "Get help with any problems you encounter",
     icon: SupportIcon,
-    url: "#"
+    url: "mailto:quartz.support@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request"
   }
 ];
 
@@ -31,7 +31,7 @@ const LogoutPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Logged out | Nowcasting App</title>
+        <title>Logged out | Quartz Solar UI</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -40,8 +40,8 @@ const LogoutPage: NextPage = () => {
           <div className="flex-shrink-0 pt-16">
             <img
               className="w-auto h-12 mx-auto"
-              src="https://nowcasting.io/nowcasting.svg"
-              alt="Nowcasting Logo"
+              src="/QUARTZSOLAR_LOGO_PRIMARY_BLACK_2.svg"
+              alt="Quartz Logo"
             />
           </div>
           <div className="max-w-xl py-16 mx-auto sm:py-24">

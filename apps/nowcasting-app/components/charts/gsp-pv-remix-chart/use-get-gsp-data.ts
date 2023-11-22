@@ -1,54 +1,47 @@
-import useSWR from "swr";
 import { API_PREFIX, getAllForecastUrl } from "../../../constant";
-import { FcAllResData, ForecastValue } from "../../types";
+import { FcAllResData, ForecastData, GspEntities, PvRealData } from "../../types";
 import useGlobalState from "../../helpers/globalState";
-import { axiosFetcherAuth } from "../../helpers/utils";
+import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 
-const t5min = 60 * 1000 * 5;
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
-  const { data: fcAll, error: fcAllError } = useSWR<FcAllResData>(
-    getAllForecastUrl(true, true),
-    axiosFetcherAuth,
-    {
-      refreshInterval: t5min
-    }
+
+  const { data: pvRealDataIn, error: pvRealInDat } = useLoadDataFromApi<PvRealData>(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`
   );
 
-  const { data: pvRealDataIn, error: pvRealInDat } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`, axiosFetcherAuth, {
-    refreshInterval: t5min
-  });
+  const { data: pvRealDataAfter, error: pvRealDayAfter } = useLoadDataFromApi<PvRealData>(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`
+  );
 
-  const { data: pvRealDataAfter, error: pvRealDayAfter } = useSWR<
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-    }[]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`, axiosFetcherAuth, {
-    refreshInterval: t5min
-  });
+  //add new useSWR for gspChartData
+  const { data: gspForecastDataOneGSP, error: gspForecastDataOneGSPError } =
+    useLoadDataFromApi<ForecastData>(`${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?UI`);
 
-  const { data: gsp4HourData, error: pv4HourError } = useSWR<ForecastValue[]>(
+  //add new useSWR for gspLocationInfo since this is not
+  const { data: gspLocationInfo, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
+    `${API_PREFIX}/system/GB/gsp/?gsp_id=${gspId}`
+  );
+
+  const { data: gsp4HourData, error: pv4HourError } = useLoadDataFromApi<ForecastData>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/gsp/forecast/${gspId}?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
-      : null,
-    axiosFetcherAuth,
-    {
-      refreshInterval: 60 * 1000 * 5 // 5min
-    }
+      ? `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      : null
   );
 
   return {
-    errors: [fcAllError, pvRealInDat, pvRealDayAfter, pv4HourError].filter((e) => !!e),
-    fcAll,
+    errors: [
+      pvRealInDat,
+      pvRealDayAfter,
+      gspForecastDataOneGSPError,
+      gspLocationError,
+      pv4HourError
+    ].filter((e) => !!e),
     gsp4HourData,
     pvRealDataIn,
-    pvRealDataAfter
+    pvRealDataAfter,
+    gspForecastDataOneGSP,
+    gspLocationInfo
   };
 };
 
