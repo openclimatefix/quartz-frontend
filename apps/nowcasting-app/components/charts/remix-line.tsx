@@ -121,12 +121,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
+  console.log("preppedData", preppedData.length);
   const [show4hView] = useGlobalState("show4hView");
   const [view] = useGlobalState("view");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
+  const [preppedDataState, setPreppedDataState] = useState(preppedData);
   const [refAreaLeft, setRefAreaLeft] = React.useState("");
   const [refAreaRight, setRefAreaRight] = React.useState("");
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
@@ -171,18 +173,53 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
+  // const initialState = {
+  // data: preppedData,
+  // left: "dataMin",
+  // right: "dataMax",
+  // refAreaLeft: "",
+  // refAreaRight: "",
+  // top: "dataMax+1",
+  // bottom: "dataMin-1",
+  // top2: "dataMax+20",
+  // bottom2: "dataMin-20",
+  // animation: true
+  // };
+
   const zoomIn = () => {
-    console.log("zoomIn");
+    if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
     if (refAreaLeft === refAreaRight || refAreaRight === "") {
       setRefAreaLeft("");
       setRefAreaRight("");
       return;
     }
+    // slice the data between the two selected points
+    setPreppedDataState(preppedData.slice(refAreaLeft, refAreaRight));
+    // set the state to the new sliced data
+    setRefAreaLeft("");
+    setRefAreaRight("");
     // update the tick boundaries based on the two selected points
+  };
+
+  const zoomOut = () => {
+    setPreppedDataState({
+      data: preppedData.slice(),
+      refAreaLeft: "",
+      refAreaRight: "",
+      left: "dataMin",
+      right: "dataMax",
+      top: "dataMax+1",
+      bottom: "dataMin",
+      top2: "dataMax+50",
+      bottom2: "dataMin+50"
+    });
   };
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <button type="button" className="btn update" onClick={zoomOut}>
+        Zoom Out
+      </button>
       <ResponsiveContainer>
         <ComposedChart
           width={500}
@@ -203,10 +240,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 : setTimeOfInterest(e.activeLabel);
             }
           }}
-          onMouseDown={(e?: { activeLabel?: string }) => setRefAreaLeft(e?.activeLabel || "")}
-          onMouseMove={(e?: { activeLabel?: string }) =>
-            refAreaLeft && setRefAreaRight(e?.activeLabel || "")
-          }
+          onMouseDown={(e?: { activeLabel?: string }) => {
+            setRefAreaLeft(e?.activeLabel || "");
+          }}
+          onMouseMove={(e?: { activeLabel?: string }) => {
+            refAreaLeft && setRefAreaRight(e?.activeLabel || "");
+            console.log("refAreaLeft", refAreaLeft, "RefAreaRight", refAreaRight);
+          }}
           // on mouse move, if refAreaLeft is set, change the background color of the chart to indicate the selected area
           // eslint-disable-next-line react/jsx-no-bind
           onMouseUp={zoomIn}
@@ -534,7 +574,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }}
           />
           {refAreaLeft && refAreaRight ? (
-            <ReferenceArea yAxisId="1" x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
+            <ReferenceArea x1={refAreaLeft} x2={refAreaRight} strokeOpacity={0.3} />
           ) : null}
         </ComposedChart>
       </ResponsiveContainer>
