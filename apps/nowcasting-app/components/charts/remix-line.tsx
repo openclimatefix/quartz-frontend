@@ -426,6 +426,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <ul className="">
                     {Object.entries(toolTiplabels).map(([key, name]) => {
                       const value = data[key];
+                      console.log("key", key, "value", value, "data", data[key]);
                       if (key === "DELTA" && !deltaView) return null;
                       if (typeof value !== "number") return null;
                       if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
@@ -438,6 +439,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         : ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
                         ? "text-xs"
                         : "font-normal";
+                      const pvLiveTextClass =
+                        data["GENERATION_UPDATED"] >= 0 &&
+                        data["GENERATION"] >= 0 &&
+                        key === "GENERATION"
+                          ? "text-xs"
+                          : "";
                       const sign = ["DELTA"].includes(key) ? (Number(value) > 0 ? "+" : "") : "";
                       const color = ["DELTA"].includes(key)
                         ? Number(value) > 0
@@ -457,7 +464,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
                       return (
                         <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
-                          <div className={`flex justify-between ${textClass}`}>
+                          <div className={`flex justify-between ${textClass} ${pvLiveTextClass}`}>
                             <div>{toolTiplabels[key]}: </div>
                             <div className={`font-sans ml-7`}>
                               {(show4hView || key !== "DELTA") && sign}
