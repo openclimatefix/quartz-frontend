@@ -426,7 +426,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <ul className="">
                     {Object.entries(toolTiplabels).map(([key, name]) => {
                       const value = data[key];
-                      console.log("key", key, "value", value, "data", data[key]);
                       if (key === "DELTA" && !deltaView) return null;
                       if (typeof value !== "number") return null;
                       if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
@@ -434,11 +433,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       if (key.includes("4HR") && (!show4hView || !visibleLines.includes(key)))
                         return null;
                       if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0) return null;
-                      const textClass = ["FORECAST", "PAST_FORECAST"].includes(key)
-                        ? "font-semibold"
-                        : ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
-                        ? "text-xs"
-                        : "font-normal";
+                      let textClass = "font-normal";
+                      if (["FORECAST", "PAST_FORECAST"].includes(key)) textClass = "font-semibold";
+                      if (["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key))
+                        textClass = "text-xs";
                       const pvLiveTextClass =
                         data["GENERATION_UPDATED"] >= 0 &&
                         data["GENERATION"] >= 0 &&
@@ -455,11 +453,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         key === "DELTA" &&
                         !show4hView &&
                         `${data["formattedDate"]}:00.000Z` >= currentTime
-                          ? // `${data["formattedDate"]}:00.000Z` >= currentTime ||
-                            // (show4hView &&
-                            //   key.includes("4HR") &&
-                            //   `${data["formattedDate"]}:00.000Z` >= fourHoursFromNow.toISOString())
-                            "-"
+                          ? "-"
                           : prettyPrintYNumberWithCommas(String(value), 1);
 
                       return (
