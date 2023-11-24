@@ -115,9 +115,29 @@ const useFormatChartData = ({
           addDataToMap(
             fc,
             (db) => db.targetTime,
-            //add an array here for the probabilistic range. it'll be two numbers [lower, upper]
+            //add an array here for the probabilistic area in the chart
             (db) => ({
               PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
+            })
+          );
+        }
+        if (fc.plevels?.plevel_10) {
+          addDataToMap(
+            fc,
+            (db) => db.targetTime,
+            // probabilistic lower bound for the tooltip to use
+            (db) => ({
+              PROBABILISTIC_LOWER_BOUND: db.plevels.plevel_10
+            })
+          );
+        }
+        if (fc.plevels?.plevel_90) {
+          addDataToMap(
+            fc,
+            (db) => db.targetTime,
+            (db) => ({
+              // probabilistic upper bound for the tooltip to use
+              PROBABILISTIC_UPPER_BOUND: db.plevels.plevel_90
             })
           );
         }
