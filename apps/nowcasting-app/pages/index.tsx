@@ -68,7 +68,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [isOldNowcastingDomain, setIsOldNowcastingDomain] = useState(false);
 
   useEffect(() => {
-    setIsOldNowcastingDomain(window.location.host.includes("nowcasting"));
+    setIsOldNowcastingDomain(window.location.host.includes("nowcasting.io"));
   }, []);
 
   // Local state used to set initial state on server side render, then updated by global state
