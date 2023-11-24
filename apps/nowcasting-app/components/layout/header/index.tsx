@@ -80,7 +80,7 @@ type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
 
 const Header: React.FC<HeaderProps> = ({ view, setView }) => {
   return (
-    <header className="text-white text-right px-4 bg-black flex absolute top-0 w-full p-1 text-sm items-center z-30">
+    <header className="h-16 text-white text-right px-4 bg-black flex absolute top-0 w-full p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
         <a
           className="flex h-8 self-center w-auto"
@@ -132,10 +132,6 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             currentView={view}
             setViewFunc={setView}
             text="Delta"
-          />
-          <HeaderLink
-            url="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
-            text="Documentation"
           />
         </Menu>
       </div>

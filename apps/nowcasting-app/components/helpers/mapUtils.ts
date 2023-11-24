@@ -14,10 +14,13 @@ export const safelyUpdateMapData = (
     console.log("map not ready", map);
     if (!map.isStyleLoaded()) {
       setTimeout(() => {
+        // console.log("map is not style loaded, trying again");
         safelyUpdateMapData(map, updateMapData);
-      }, 200);
+      }, 400);
     }
     return;
+  } else {
+    console.warn("🎉 map is ready, updating data");
+    updateMapData(map);
   }
-  updateMapData(map);
 };

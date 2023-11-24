@@ -1,10 +1,43 @@
 import { DELTA_BUCKET } from "../constant";
 import { components } from "../types/quartz-api";
 
-export type LoadingState = {
+export type LoadingState<T> = {
   initialLoadComplete: boolean;
   showMessage: boolean;
   message: string;
+  endpointStates?: T;
+};
+export enum NationalEndpointLabel {
+  nationalForecast = "National Forecast",
+  pvRealDayIn = "PV Live Estimate",
+  pvRealDayAfter = "PV Live Updated",
+  national4Hour = "4-hour forecast",
+  allGspForecast = "All GSP Forecast",
+  allGspReal = "All GSP PV Live"
+}
+export type NationalEndpointKeysType = keyof typeof NationalEndpointLabel;
+
+export enum SitesEndpointLabel {
+  allSites = "All Sites",
+  sitePvForecast = "Site PV Forecast",
+  sitePvActual = "Site PV Actual"
+}
+export type SitesEndpointKeysType = keyof typeof SitesEndpointLabel;
+export type NationalEndpointStates = {
+  type: "national";
+} & {
+  [key in NationalEndpointKeysType]: EndpointState;
+};
+export type SitesEndpointStates = {
+  type: "sites";
+} & {
+  [key in SitesEndpointKeysType]: EndpointState;
+};
+export type EndpointState = {
+  loading: boolean;
+  validating: boolean;
+  error: any;
+  hasData: boolean;
 };
 export type FcAllResData = {
   type?: "FeatureCollection";
@@ -91,6 +124,21 @@ type CombinedErrors = {
   allGspSystemError: any;
   allGspForecastError: any;
   allGspRealError: any;
+};
+type SitesCombinedLoading = {
+  allSitesLoading: boolean;
+  sitePvForecastLoading: boolean;
+  sitePvActualLoading: boolean;
+};
+type SitesCombinedValidating = {
+  allSitesValidating: boolean;
+  sitePvForecastValidating: boolean;
+  sitePvActualValidating: boolean;
+};
+type SitesCombinedErrors = {
+  allSitesError: any;
+  sitesPvForecastError: any;
+  sitesPvActualError: any;
 };
 type GspEntity = {
   label: string;
@@ -216,6 +264,13 @@ export type CombinedSitesData = {
   allSitesData: Site[] | undefined;
   sitesPvForecastData: SitePvForecast[];
   sitesPvActualData: SitePvActual[];
+};
+export type SiteData = {
+  label: string;
+  capacity: number;
+  actualPV: number;
+  expectedPV: number;
+  aggregatedYield: number;
 };
 
 // Common object type across Sites, GSPs, Regions and National
