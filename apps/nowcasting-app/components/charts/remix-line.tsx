@@ -128,7 +128,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
-  const [preppedDataState, setPreppedDataState] = useState(preppedData);
+  const minZoom = 1000 * 60 * 60 * 2; // 2 hours
+  const defaultZoom = { x1: "", x2: "" };
+  const [filteredData, setFilteredData] = useState(preppedData);
+  const [zoomArea, setZoomArea] = useState(defaultZoom);
+  const [isZooming, setIsZooming] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [refAreaLeft, setRefAreaLeft] = React.useState("");
   const [refAreaRight, setRefAreaRight] = React.useState("");
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
@@ -173,58 +178,34 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
-  // const initialState = {
-  // data: preppedData,
-  // left: "dataMin",
-  // right: "dataMax",
-  // refAreaLeft: "",
-  // refAreaRight: "",
-  // top: "dataMax+1",
-  // bottom: "dataMin-1",
-  // top2: "dataMax+20",
-  // bottom2: "dataMin-20",
-  // animation: true
-  // };
+  // area that will be the "reference area" for the zoom
+  const showZoomArea = isZooming && zoomArea.x1 && zoomArea.x2;
 
-  const zoomIn = () => {
-    if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
-    if (refAreaLeft === refAreaRight || refAreaRight === "") {
-      setRefAreaLeft("");
-      setRefAreaRight("");
-      return;
-    }
-    // slice the data between the two selected points
-    setPreppedDataState(preppedData.slice(refAreaLeft, refAreaRight));
-    // set the state to the new sliced data
-    setRefAreaLeft("");
-    setRefAreaRight("");
-    // update the tick boundaries based on the two selected points
-  };
-
-  const zoomOut = () => {
-    setPreppedDataState({
-      data: preppedData.slice(),
-      refAreaLeft: "",
-      refAreaRight: "",
-      left: "dataMin",
-      right: "dataMax",
-      top: "dataMax+1",
-      bottom: "dataMin",
-      top2: "dataMax+50",
-      bottom2: "dataMin+50"
-    });
-  };
+  //reset zoom state
+  function handleZoomOut() {
+    setIsZoomed(false);
+    setFilteredData(data);
+    setZoomArea(defaultZoom);
+  }
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <button type="button" className="btn update" onClick={zoomOut}>
-        Zoom Out
-      </button>
+      {isZoomed && (
+        <div className="pl-20">
+          <button
+            type="button"
+            className="btn update text-sm bg-ocf-gray-600 hover:bg-ocf-yellow-400 text-gray-800 py-.5 px-1 rounded inline-flex items-center"
+            onClick={handleZoomOut}
+          >
+            Reset
+          </button>
+        </div>
+      )}
       <ResponsiveContainer>
         <ComposedChart
           width={500}
           height={400}
-          data={preppedData}
+          data={isZoomed ? filteredData : preppedData}
           margin={{
             top: 20,
             right: 16,
@@ -240,16 +221,43 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 : setTimeOfInterest(e.activeLabel);
             }
           }}
+          //on mouse down set the refAreaLeft to the activeLabel
           onMouseDown={(e?: { activeLabel?: string }) => {
-            setRefAreaLeft(e?.activeLabel || "");
+            if (isZoomed) {
+              handleZoomOut();
+            } else {
+              setIsZooming(true);
+              let xValue = e?.activeLabel;
+              if (xValue) {
+                setZoomArea({ x1: xValue, x2: xValue });
+                setRefAreaLeft(xValue);
+              }
+            }
           }}
           onMouseMove={(e?: { activeLabel?: string }) => {
-            refAreaLeft && setRefAreaRight(e?.activeLabel || "");
-            console.log("refAreaLeft", refAreaLeft, "RefAreaRight", refAreaRight);
+            if (isZooming) {
+              console.log("zoom selecting");
+              setZoomArea((zoom) => ({ ...zoom, x2: e?.activeLabel || "" }));
+              refAreaLeft && setRefAreaRight(e?.activeLabel || "");
+              console.log("zoomArea", zoomArea);
+            }
           }}
-          // on mouse move, if refAreaLeft is set, change the background color of the chart to indicate the selected area
-          // eslint-disable-next-line react/jsx-no-bind
-          onMouseUp={zoomIn}
+          onMouseUp={(e?: { activeLabel?: string }) => {
+            if (isZooming) {
+              setIsZooming(false);
+              setIsZoomed(true);
+              let { x1, x2 } = zoomArea;
+              // ensure x1 <= x2
+              if (x1 > x2) [x1, x2] = [x2, x1];
+              console.log("ZoomArea", zoomArea);
+              const dataInAreaRange = preppedData.filter(
+                (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
+              );
+              console.log("dataInAreaRange", dataInAreaRange);
+              setFilteredData(dataInAreaRange);
+              setZoomArea(zoomArea);
+            }
+          }}
         >
           <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
           <XAxis
@@ -467,6 +475,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
+          {/* add reference area for chart zoom */}
+          {showZoomArea && (
+            <ReferenceArea
+              x1={zoomArea?.x1}
+              x2={zoomArea?.x2}
+              strokeOpacity={0.1}
+              fill="#FFF1CD"
+              fillOpacity={0.3}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+            />
+          )}
 
           <Tooltip
             content={({ payload, label }) => {
