@@ -245,6 +245,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
             interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
             orientation="top"
+            padding="no-gap"
             hide={true}
           />
           <XAxis
@@ -253,7 +254,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             tickFormatter={prettyPrintDate}
             scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
-            tickLine={true}
+            tickLine={false}
             type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
             ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
             domain={
@@ -263,9 +264,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }
             interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
             orientation="bottom"
+            axisLine={false}
             tickMargin={-2}
             hide={false}
           />
+
           <YAxis
             tickFormatter={
               view === VIEWS.SOLAR_SITES ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
