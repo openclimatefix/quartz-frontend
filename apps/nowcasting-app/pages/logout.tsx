@@ -23,7 +23,7 @@ const links = [
     title: "Support",
     description: "Get help with any problems you encounter",
     icon: SupportIcon,
-    url: "mailto:ops@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request"
+    url: "mailto:quartz.support@openclimatefix.org?subject=Quartz%20Solar%20Support%20Request"
   }
 ];
 
