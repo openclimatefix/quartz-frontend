@@ -74,3 +74,47 @@ export const generateGeoJsonForecastData: (
 
   return { forecastGeoJson };
 };
+
+export const filterHistoricDataCompact = (
+  data: components["schemas"]["OneDatetimeManyForecastValues"][],
+  filterHistoricStart: string,
+  prev30MinFromNowISO: string
+) => {
+  return (
+    data?.filter((fc) => {
+      if (!filterHistoricStart) return false;
+
+      if (fc.datetimeUtc < filterHistoricStart) return false;
+
+      return fc.datetimeUtc <= `${prev30MinFromNowISO}`;
+    }) || []
+  );
+};
+
+export const filterFutureDataCompact = (
+  data: components["schemas"]["OneDatetimeManyForecastValues"][],
+  prev30MinFromNowISO: string
+) => {
+  return data.filter((fc) => {
+    if (!prev30MinFromNowISO) return false;
+
+    return fc.datetimeUtc > `${prev30MinFromNowISO}`;
+  });
+};
+
+export const getOldestTimestamp = (
+  data: components["schemas"]["OneDatetimeManyForecastValues"][]
+) => {
+  return data.sort((a, b) => {
+    return a.datetimeUtc > b.datetimeUtc ? 1 : -1;
+  })?.[0]?.datetimeUtc;
+};
+
+export const getHistoricBackwardIntervalMinutes = (
+  data: components["schemas"]["OneDatetimeManyForecastValues"][]
+) => {
+  const oldestTimestamp = getOldestTimestamp(data);
+  const oldestDate = new Date(oldestTimestamp || "");
+  const historicBackwardInterval = oldestDate.getTime() - new Date(get30MinNow(-30)).getTime();
+  return historicBackwardInterval / 1000 / 60;
+};

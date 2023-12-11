@@ -11,7 +11,7 @@ export const safelyUpdateMapData = (
     map._removed ||
     !map.isStyleLoaded()
   ) {
-    console.log("map not ready", map);
+    // console.log("map not ready", map);
     if (!map.isStyleLoaded()) {
       setTimeout(() => {
         // console.log("map is not style loaded, trying again");
