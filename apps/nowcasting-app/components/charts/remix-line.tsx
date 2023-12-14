@@ -153,10 +153,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [zoomArea, setZoomArea] = useState(defaultZoom);
   const [isZooming, setIsZooming] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [xAxisDomain, setXAxisDomain] = useState([0, 0]);
-  const [yAxisBoundary, setYAxisBoundary] = useState("");
-  const [refAreaLeft, setRefAreaLeft] = React.useState("");
-  const [refAreaRight, setRefAreaRight] = React.useState("");
+  // const [refAreaLeft, setRefAreaLeft] = React.useState("");
+  // const [refAreaRight, setRefAreaRight] = React.useState("");
 
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
@@ -194,15 +192,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
     .filter((n) => typeof n === "number")
     .sort((a, b) => Number(a) - Number(b))[0];
 
-  const yZoomMax = filteredData
-    .map((d) => d.PROBABILISTIC_UPPER_BOUND)
-    .filter((n) => typeof n === "number")
-    .sort((a, b) => Number(b) - Number(a))[0];
-  console.log("yZoomMax", yZoomMax);
   // Take the max absolute value of the delta min and max as the y-axis max
   const deltaYMax =
     deltaYMaxOverride ||
     getRoundedTickBoundary(Math.max(Number(deltaMax), 0 - Number(deltaMin)) || 0, deltaMaxTicks);
+
   const roundTickMax = deltaYMax % 1000 === 0;
   const isGSP = !!deltaYMaxOverride && deltaYMaxOverride < 1000;
   const now = new Date();
@@ -219,6 +213,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const showZoomArea = isZooming && zoomArea.x1 && zoomArea.x2 && zoomArea.y1 && zoomArea.y2;
 
   //get Y axis boundary
+
+  const zoomMax = filteredData
+    .map((d) => d.PROBABILISTIC_UPPER_BOUND)
+    .filter((n) => typeof n === "number")
+    .sort((a, b) => Number(b) - Number(a))[0];
+
+  const zoomMaxTickBoundaries = [
+    1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000
+  ];
+  const zoomYMax = getRoundedTickBoundary(Math.max(Number(zoomMax), 0), zoomMaxTickBoundaries);
 
   //reset zoom state
   function handleZoomOut() {
@@ -267,7 +271,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (xValue) {
               setZoomArea({ x1: xValue, x2: xValue, y1: yValue, y2: yValue });
               console.log("Mouse down zoomArea", zoomArea.x1, zoomArea.x2);
-              setRefAreaLeft(xValue);
             }
           }}
           onMouseMove={(e?: { activeLabel?: string; chartY?: number | undefined }) => {
@@ -276,7 +279,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               let yValue = e?.chartY;
               console.log("Mouse move zoomArea", zoomArea.x1, zoomArea.x2);
               setZoomArea((zoom) => ({ ...zoom, x2: xValue || "", y2: yValue || "" }));
-              refAreaLeft && setRefAreaRight(e?.activeLabel || "");
             }
           }}
           onMouseUp={(e?: { activeLabel?: string; yMaxZoom?: number }) => {
@@ -285,8 +287,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               if (zoomArea.x1 == zoomArea.x2) {
                 console.log("Mouse up");
                 setZoomArea(defaultZoom);
-                setRefAreaLeft("");
-                setRefAreaRight("");
               } else {
                 setIsZoomed(true);
                 let { x1, x2 } = zoomArea;
@@ -358,7 +358,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={isZoomed ? [0, Number(yZoomMax) + 100] : [0, yMax]}
+            domain={isZoomed ? [0, Number(zoomYMax)] : [0, yMax]}
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
