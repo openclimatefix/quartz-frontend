@@ -148,13 +148,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
-  const defaultZoom = { x1: "", x2: "", y1: undefined, y2: undefined };
-  const [filteredData, setFilteredData] = useState(preppedData);
+  const defaultZoom = { x1: "", x2: "" };
+  const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
   const [zoomArea, setZoomArea] = useState(defaultZoom);
   const [isZooming, setIsZooming] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
-  // const [refAreaLeft, setRefAreaLeft] = React.useState("");
-  // const [refAreaRight, setRefAreaRight] = React.useState("");
 
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
@@ -209,25 +207,24 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
-  // zoom area for the chart
-  const showZoomArea = isZooming && zoomArea.x1 && zoomArea.x2 && zoomArea.y1 && zoomArea.y2;
-
   //get Y axis boundary
 
-  const zoomMax = filteredData
+  const yMaxZoom_Levels = [
+    10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000,
+    9000, 10000, 11000, 12000
+  ];
+
+  let zoomYMax = filteredPreppedData
     .map((d) => d.PROBABILISTIC_UPPER_BOUND)
     .filter((n) => typeof n === "number")
     .sort((a, b) => Number(b) - Number(a))[0];
 
-  const zoomMaxTickBoundaries = [
-    1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000
-  ];
-  const zoomYMax = getRoundedTickBoundary(Math.max(Number(zoomMax), 0), zoomMaxTickBoundaries);
+  zoomYMax = getRoundedTickBoundary(zoomYMax || 0, yMaxZoom_Levels);
 
   //reset zoom state
   function handleZoomOut() {
     setIsZoomed(false);
-    setFilteredData(data);
+    setFilteredPreppedData(data);
     setZoomArea(defaultZoom);
   }
 
@@ -237,7 +234,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
         <div className="pl-16">
           <button
             type="button"
-            className="btn ml-3 update text-sm bg-ocf-gray-600 hover:bg-ocf-yellow-500 text-black py-1 px-1.5 mr-1 rounded inline-flex items-center"
+            className="btn ml-3 update text-sm bg-ocf-gray-600 hover:bg-ocf-yellow-500 text-black py-.5 px-1 mr-1 rounded inline-flex items-center"
             onClick={handleZoomOut}
           >
             Reset
@@ -248,7 +245,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
         <ComposedChart
           width={500}
           height={400}
-          data={isZoomed ? filteredData : preppedData}
+          data={isZoomed ? filteredPreppedData : preppedData}
           margin={{
             top: 20,
             right: 16,
@@ -264,28 +261,23 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 : setTimeOfInterest(e.activeLabel);
             }
           }}
-          onMouseDown={(e?: { activeLabel?: string; chartY?: number | undefined }) => {
+          onMouseDown={(e?: { activeLabel?: string }) => {
             setIsZooming(true);
             let xValue = e?.activeLabel;
-            let yValue = e?.chartY;
             if (xValue) {
-              setZoomArea({ x1: xValue, x2: xValue, y1: yValue, y2: yValue });
-              console.log("Mouse down zoomArea", zoomArea.x1, zoomArea.x2);
+              setZoomArea({ x1: xValue, x2: xValue });
             }
           }}
-          onMouseMove={(e?: { activeLabel?: string; chartY?: number | undefined }) => {
+          onMouseMove={(e?: { activeLabel?: string }) => {
             if (isZooming) {
               let xValue = e?.activeLabel;
-              let yValue = e?.chartY;
-              console.log("Mouse move zoomArea", zoomArea.x1, zoomArea.x2);
-              setZoomArea((zoom) => ({ ...zoom, x2: xValue || "", y2: yValue || "" }));
+              setZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
             }
           }}
-          onMouseUp={(e?: { activeLabel?: string; yMaxZoom?: number }) => {
+          onMouseUp={(e?: { activeLabel?: string }) => {
             if (isZooming) {
               setIsZooming(false);
               if (zoomArea.x1 == zoomArea.x2) {
-                console.log("Mouse up");
                 setZoomArea(defaultZoom);
               } else {
                 setIsZoomed(true);
@@ -295,8 +287,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const dataInAreaRange = preppedData.filter(
                   (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
                 );
-                setFilteredData(dataInAreaRange);
-
+                setFilteredPreppedData(dataInAreaRange);
                 setZoomArea(zoomArea);
               }
             }
@@ -358,7 +349,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={isZoomed ? [0, Number(zoomYMax)] : [0, yMax]}
+            domain={isZoomed ? [0, Number(zoomYMax + zoomYMax * 0.2)] : [0, yMax]}
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
@@ -370,6 +361,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dy: 0
             }}
           />
+
           {deltaView && (
             <>
               <YAxis
@@ -442,6 +434,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               ></CustomizedLabel>
             }
           />
+
           {deltaView && (
             <Bar
               type="monotone"
@@ -540,7 +533,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
-          {showZoomArea && (
+          {isZooming && (
             <ReferenceArea
               x1={zoomArea?.x1}
               x2={zoomArea?.x2}
@@ -550,7 +543,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               yAxisId={"y-axis"}
             />
           )}
-
           <Tooltip
             content={({ payload, label }) => {
               const data = payload && payload[0]?.payload;
