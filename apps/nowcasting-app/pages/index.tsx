@@ -50,7 +50,7 @@ import {
   filterFutureDataCompact,
   filterHistoricDataCompact,
   getHistoricBackwardIntervalMinutes,
-  getOldestTimestamp
+  getOldestTimestampFromCompactForecastValues
 } from "../components/helpers/data";
 
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
@@ -227,7 +227,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       onSuccess: (data) => {
         if (!data) return;
 
-        const oldestTimestamp = getOldestTimestamp(data);
+        const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
         const historicBackwardIntervalMinutes = getHistoricBackwardIntervalMinutes(data);
         const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
         setForecastLastFetch30MinISO(prev30MinNowISO);

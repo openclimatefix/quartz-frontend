@@ -102,7 +102,7 @@ export const filterFutureDataCompact = (
   });
 };
 
-export const getOldestTimestamp = (
+export const getOldestTimestampFromCompactForecastValues = (
   data: components["schemas"]["OneDatetimeManyForecastValues"][]
 ) => {
   return data.sort((a, b) => {
@@ -113,7 +113,7 @@ export const getOldestTimestamp = (
 export const getHistoricBackwardIntervalMinutes = (
   data: components["schemas"]["OneDatetimeManyForecastValues"][]
 ) => {
-  const oldestTimestamp = getOldestTimestamp(data);
+  const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
   const oldestDate = new Date(oldestTimestamp || "");
   const historicBackwardInterval = oldestDate.getTime() - new Date(get30MinNow(-30)).getTime();
   return historicBackwardInterval / 1000 / 60;

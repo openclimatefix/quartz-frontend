@@ -1,5 +1,9 @@
-import { describe, test } from "@jest/globals";
-import { filterFutureDataCompact, filterHistoricDataCompact } from "./data";
+import { describe, expect, test } from "@jest/globals";
+import {
+  filterFutureDataCompact,
+  filterHistoricDataCompact,
+  getOldestTimestampFromCompactForecastValues
+} from "./data";
 import allGspForecastHistoricalDataCompact from "../../data/updatedDummyApiResponses/allGspForecastHistoricCompact.json";
 
 describe("check func filters fake historical data", () => {
@@ -109,9 +113,7 @@ describe("check filter functions combine back into correct full timestamp data",
       "2023-12-06T12:00:00+00:00"
     );
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
-    expect(filteredData.map((fc) => fc.datetimeUtc)).toMatchObject(
-      allGspForecastHistoricalDataCompact.map((fc) => fc.datetimeUtc)
-    );
+    expect(filteredData).toMatchObject(allGspForecastHistoricalDataCompact);
     expect(filteredData.length).toBe(allGspForecastHistoricalDataCompact.length);
     expect(filteredData[0].datetimeUtc).toBe("2023-12-05T12:00:00+00:00");
     expect(filteredData[1].datetimeUtc).toBe("2023-12-05T12:30:00+00:00");
@@ -130,9 +132,7 @@ describe("check filter functions combine back into correct full timestamp data",
     );
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
     expect(filteredData.length).toBe(allGspForecastHistoricalDataCompact.length);
-    expect(filteredData.map((fc) => fc.datetimeUtc)).toMatchObject(
-      allGspForecastHistoricalDataCompact.map((fc) => fc.datetimeUtc)
-    );
+    expect(filteredData).toMatchObject(allGspForecastHistoricalDataCompact);
   });
   test("check 'now' timestamp at end of data window", () => {
     const filteredHistoricData = filterHistoricDataCompact(
@@ -146,9 +146,7 @@ describe("check filter functions combine back into correct full timestamp data",
     );
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
     expect(filteredData.length).toBe(allGspForecastHistoricalDataCompact.length);
-    expect(filteredData.map((fc) => fc.datetimeUtc)).toMatchObject(
-      allGspForecastHistoricalDataCompact.map((fc) => fc.datetimeUtc)
-    );
+    expect(filteredData).toMatchObject(allGspForecastHistoricalDataCompact);
   });
 });
 
@@ -165,10 +163,10 @@ describe("check funcs filter into subset data correctly", () => {
     );
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
     expect(filteredData.length).toBe(55);
-    expect(filteredData.map((fc) => fc.datetimeUtc)).toMatchObject(
-      allGspForecastHistoricalDataCompact
-        .filter((fc) => fc.datetimeUtc >= "2023-12-06T12:00:00+00:00")
-        .map((fc) => fc.datetimeUtc)
+    expect(filteredData).toMatchObject(
+      allGspForecastHistoricalDataCompact.filter(
+        (fc) => fc.datetimeUtc >= "2023-12-06T12:00:00+00:00"
+      )
     );
     expect(filteredData[0].datetimeUtc).toBe("2023-12-06T12:00:00+00:00");
     expect(filteredData[1].datetimeUtc).toBe("2023-12-06T12:30:00+00:00");
@@ -187,9 +185,7 @@ describe("check funcs filter into subset data correctly", () => {
     const filteredFutureData = filterFutureDataCompact(initialFetchedData, lastFetched30PreNowISO);
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
     expect(filteredData.length).toBe(103);
-    expect(filteredData.map((fc) => fc.datetimeUtc)).toMatchObject(
-      initialFetchedData.map((fc) => fc.datetimeUtc)
-    );
+    expect(filteredData).toMatchObject(initialFetchedData);
     expect(filteredData[0].datetimeUtc).toBe("2023-12-05T12:00:00+00:00");
     expect(filteredData[1].datetimeUtc).toBe("2023-12-05T12:30:00+00:00");
     expect(filteredData[filteredData.length - 2].datetimeUtc).toBe("2023-12-07T14:30:00+00:00");
@@ -236,10 +232,26 @@ describe("check funcs filter into subset data correctly", () => {
     const newCombinedData = [...newHistory, ...newFutureData];
     expect(newCombinedData.length).toBe(102); // lost 1 timestamp point due to mock refetching
     expect(newCombinedData[0].datetimeUtc).toBe("2023-12-05T12:30:00+00:00");
-    expect(newCombinedData.map((fc) => fc.datetimeUtc)).toMatchObject(
-      initialFetchedData
-        .filter((fc) => fc.datetimeUtc >= "2023-12-05T12:30:00+00:00")
-        .map((fc) => fc.datetimeUtc)
+    expect(newCombinedData).toMatchObject(
+      initialFetchedData.filter((fc) => fc.datetimeUtc >= "2023-12-05T12:30:00+00:00")
     );
+  });
+});
+
+describe("check oldest timestamp function returns correct timestamp", () => {
+  test("check oldest timestamp function returns correct timestamp", () => {
+    const oldestTimestamp = getOldestTimestampFromCompactForecastValues(
+      allGspForecastHistoricalDataCompact
+    );
+    expect(oldestTimestamp).toBe("2023-12-05T12:00:00+00:00");
+    const evenOlderTimestampData = [
+      ...allGspForecastHistoricalDataCompact,
+      {
+        datetimeUtc: "2023-12-04T12:00:00+00:00",
+        forecastValues: { "1": 1, "2": 2, "3": 3, "4": 4, "5": 5 }
+      }
+    ];
+    const evenOlderTimestamp = getOldestTimestampFromCompactForecastValues(evenOlderTimestampData);
+    expect(evenOlderTimestamp).toBe("2023-12-04T12:00:00+00:00");
   });
 });
