@@ -75,11 +75,13 @@ export const generateGeoJsonForecastData: (
   return { forecastGeoJson };
 };
 
-export const filterHistoricDataCompact = (
-  data: components["schemas"]["OneDatetimeManyForecastValues"][],
+export const filterHistoricDataCompact = <
+  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
+>(
+  data: T[],
   filterHistoricStart: string,
   prev30MinFromNowISO: string
-) => {
+): T[] => {
   return (
     data?.filter((fc) => {
       if (!filterHistoricStart) return false;
@@ -91,10 +93,12 @@ export const filterHistoricDataCompact = (
   );
 };
 
-export const filterFutureDataCompact = (
-  data: components["schemas"]["OneDatetimeManyForecastValues"][],
+export const filterFutureDataCompact = <
+  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
+>(
+  data: T[],
   prev30MinFromNowISO: string
-) => {
+): T[] => {
   return data.filter((fc) => {
     if (!prev30MinFromNowISO) return false;
 
@@ -102,17 +106,23 @@ export const filterFutureDataCompact = (
   });
 };
 
-export const getOldestTimestampFromCompactForecastValues = (
-  data: components["schemas"]["OneDatetimeManyForecastValues"][]
-) => {
-  return data.sort((a, b) => {
-    return a.datetimeUtc > b.datetimeUtc ? 1 : -1;
-  })?.[0]?.datetimeUtc;
+export const getOldestTimestampFromCompactForecastValues = <
+  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
+>(
+  data: T[]
+): string => {
+  return (
+    data.sort((a, b) => {
+      return a.datetimeUtc > b.datetimeUtc ? 1 : -1;
+    })?.[0]?.datetimeUtc || ""
+  );
 };
 
-export const getHistoricBackwardIntervalMinutes = (
-  data: components["schemas"]["OneDatetimeManyForecastValues"][]
-) => {
+export const getHistoricBackwardIntervalMinutes = <
+  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
+>(
+  data: T[]
+): number => {
   const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
   const oldestDate = new Date(oldestTimestamp || "");
   const historicBackwardInterval = oldestDate.getTime() - new Date(get30MinNow(-30)).getTime();

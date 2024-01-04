@@ -79,6 +79,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [allGspForecastHistory, setAllGspForecastHistory] =
     useState<components["schemas"]["OneDatetimeManyForecastValues"][]>();
 
+  const [actualsLastFetch30MinISO, setActualsLastFetch30MinISO] = useState(get30MinNow(-30));
+  const [actualsHistoricBackwardIntervalMinutes, setActualsHistoricBackwardIntervalMinutes] =
+    useState(0);
+  const [allGspActualFuture, setAllGspActualFuture] =
+    useState<components["schemas"]["GSPYieldGroupByDatetime"][]>();
+  const [allGspActualHistory, setAllGspActualHistory] =
+    useState<components["schemas"]["GSPYieldGroupByDatetime"][]>();
+
   const [isOldNowcastingDomain, setIsOldNowcastingDomain] = useState(false);
 
   useEffect(() => {
@@ -179,6 +187,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     error: allGspSystemError
   } = useLoadDataFromApi<components["schemas"]["Location"][]>(`${API_PREFIX}/system/GB/gsp/`);
 
+  //////////////////////////////////////
+  // ALL GSP FORECAST DATA
+  //////////////////////////////////////
   // Load future all GSP forecast data (every 5 minutes)
   const {
     data: allGspForecastFutureData,
@@ -238,15 +249,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
   console.log("allGspForecastFuture", allGspForecastFuture);
   console.log("allGspForecastHistory", allGspForecastHistory);
-  const {
-    data: allGspRealData,
-    isLoading: allGspRealLoading,
-    isValidating: allGspRealValidating,
-    error: allGspRealError
-  } = useLoadDataFromApi<
-    components["schemas"]["GSPYieldGroupByDatetime"][]
-    // paths["/v0/solar/GB/gsp/pvlive/all"]["get"]["responses"]["200"]["content"]["application/json"]
-  >(`${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true`);
 
   // Combine historic and future forecast data & fetch states
   const allGspForecastData = useMemo(() => {
@@ -263,6 +265,109 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const allGspForecastError = useMemo(() => {
     return allGspForecastHistoricError || allGspForecastFutureError;
   }, [allGspForecastHistoricError, allGspForecastFutureError]);
+
+  //////////////////////////////////////
+  // ALL GSP REAL DATA
+  //////////////////////////////////////
+
+  // Load all new GSP real data (every 5 minutes)
+  const {
+    data: allGspActualFutureData,
+    isLoading: allGspActualFutureLoading,
+    isValidating: allGspActualFutureValidating,
+    error: allGspActualFutureError
+  } = useLoadDataFromApi<
+    components["schemas"]["GSPYieldGroupByDatetime"][]
+    // paths["/v0/solar/GB/gsp/pvlive/all"]["get"]["responses"]["200"]["content"]["application/json"]
+  >(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true&compact=true&start_datetime_utc=${encodeURIComponent(
+      `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`
+    )}`,
+    {
+      onSuccess: (data) => {
+        const forecastHistoricStart = get30MinNow(actualsHistoricBackwardIntervalMinutes);
+        const prev30MinFromNowISO = `${get30MinNow(-30)}:00+00:00`;
+        setActualsLastFetch30MinISO(prev30MinFromNowISO);
+        setAllGspActualHistory(
+          allGspActualHistory
+            ? filterHistoricDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+                [...allGspActualHistory, ...data],
+                forecastHistoricStart,
+                prev30MinFromNowISO
+              )
+            : filterHistoricDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+                data,
+                forecastHistoricStart,
+                prev30MinFromNowISO
+              )
+        );
+        setAllGspActualFuture(
+          filterFutureDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+            data,
+            prev30MinFromNowISO
+          )
+        );
+      }
+    }
+  );
+
+  // Load historic all GSP real data (once, at page load)
+  const {
+    data: allGspActualHistoricData,
+    isLoading: allGspActualHistoricLoading,
+    isValidating: allGspActualHistoricValidating,
+    error: allGspActualHistoricError
+  } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true&end_datetime_utc=${encodeURIComponent(
+      `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`
+    )}`,
+    {
+      refreshInterval: 0, // Only load this once at beginning
+      onSuccess: (data) => {
+        if (!data) return;
+
+        const oldestTimestamp =
+          getOldestTimestampFromCompactForecastValues<
+            components["schemas"]["GSPYieldGroupByDatetime"]
+          >(data);
+        const historicBackwardIntervalMinutes =
+          getHistoricBackwardIntervalMinutes<components["schemas"]["GSPYieldGroupByDatetime"]>(
+            data
+          );
+        const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
+        setActualsLastFetch30MinISO(prev30MinNowISO);
+        setActualsHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
+        setAllGspActualHistory(
+          filterHistoricDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+            data,
+            oldestTimestamp,
+            prev30MinNowISO
+          )
+        );
+      }
+    }
+  );
+  console.log("allGspActualFuture", allGspActualFuture);
+  console.log("allGspActualHistory", allGspActualHistory);
+
+  // Combine historic and future real data & fetch states
+  const allGspRealData = useMemo(() => {
+    return allGspActualHistory && allGspActualFuture
+      ? [...allGspActualHistory, ...allGspActualFuture]
+      : [];
+  }, [allGspActualHistory, allGspActualFuture]);
+  const allGspRealLoading = useMemo(() => {
+    return allGspActualHistoricLoading || allGspActualFutureLoading;
+  }, [allGspActualHistoricLoading, allGspActualFutureLoading]);
+  const allGspActualValidating = useMemo(() => {
+    return allGspActualHistoricValidating || allGspActualFutureValidating;
+  }, [allGspActualHistoricValidating, allGspActualFutureValidating]);
+  const allGspActualError = useMemo(() => {
+    return allGspActualHistoricError || allGspActualFutureError;
+  }, [allGspActualHistoricError, allGspActualFutureError]);
+  console.log("allGspRealData", allGspRealData);
+
+  //////////////////////////////////////
 
   const currentYieldSet = allGspRealData?.find((datum) => {
     return datum.datetimeUtc === `${selectedTime}:00+00:00`;
@@ -359,7 +464,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       national4HourValidating,
       allGspSystemValidating,
       allGspForecastValidating,
-      allGspRealValidating
+      allGspRealValidating: allGspActualValidating
     }),
     [
       nationalForecastValidating,
@@ -368,7 +473,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       national4HourValidating,
       allGspSystemValidating,
       allGspForecastValidating,
-      allGspRealValidating
+      allGspActualValidating
     ]
   );
   const combinedErrors: CombinedErrors = {
@@ -378,7 +483,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     national4HourError,
     allGspSystemError,
     allGspForecastError,
-    allGspRealError
+    allGspRealError: allGspActualError
   };
 
   const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
