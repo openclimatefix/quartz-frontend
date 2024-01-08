@@ -18,6 +18,7 @@ import {
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
   getRounded4HoursAgoString,
+  dateToLondonDateTimeOnlyString,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate
 } from "../helpers/utils";
@@ -111,6 +112,21 @@ const CustomizedLabel: FC<any> = ({
     </g>
   );
 };
+
+const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLine, onClick }) => {
+  const yy = -9;
+  return (
+    <g>
+      <g className={`fill-white ${className || ""}`} onClick={onClick}>
+        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
+        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
+          {value}
+        </text>
+      </g>
+    </g>
+  );
+};
+
 const RemixLine: React.FC<RemixLineProps> = ({
   timeOfInterest,
   data,
@@ -144,6 +160,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
+  const prettyPrintDate = (x: string | number) => {
+    if (typeof x === "number") {
+      return dateToLondonDateTimeOnlyString(new Date(x));
+    }
+    return dateToLondonDateTimeOnlyString(new Date(x));
+  };
+
   const CustomBar = (props: { DELTA: number }) => {
     const { DELTA } = props;
     let fill = DELTA > 0 ? deltaPos : deltaNeg;
@@ -167,6 +190,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const now = new Date();
   const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
   const ticks = offsets.map((o) => {
+    return new Date(now).setHours(o, 0, 0, 0);
+  });
+  const timeOffsets = [-10, 13, 37, 61];
+  const timeTicks = timeOffsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
@@ -218,8 +245,30 @@ const RemixLine: React.FC<RemixLineProps> = ({
             domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
             interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
             orientation="top"
+            padding="no-gap"
             hide={true}
           />
+          <XAxis
+            dataKey="formattedDate"
+            xAxisId={"x-axis-3"}
+            tickFormatter={prettyPrintDate}
+            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+            tick={{ fill: "white", style: { fontSize: "12px" } }}
+            tickLine={false}
+            type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+            ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
+            domain={
+              view === VIEWS.SOLAR_SITES
+                ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
+                : undefined
+            }
+            interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
+            orientation="bottom"
+            axisLine={false}
+            tickMargin={-2}
+            hide={false}
+          />
+
           <YAxis
             tickFormatter={
               view === VIEWS.SOLAR_SITES ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
