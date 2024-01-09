@@ -10,15 +10,15 @@ Sentry.init({
   dsn: SENTRY_DSN || "https://73795b548c864e1ea5c4d2aa699db870@o400768.ingest.sentry.io/6149810",
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: (samplingContext) => {
+    if (samplingContext.location?.search("localhost")) {
+      return 0;
+    }
     if (samplingContext.transactionContext.name.search("error")) {
       // These are important - take a big sample
       return 1;
     }
     if (samplingContext.transactionContext.status?.search("error")) {
       return 1;
-    }
-    if (samplingContext.request?.headers?.host?.search("localhost")) {
-      return 0;
     }
     // Default sample rate
     return 0.01;
