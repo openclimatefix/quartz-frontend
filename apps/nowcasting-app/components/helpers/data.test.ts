@@ -1,16 +1,19 @@
 import { describe, expect, test } from "@jest/globals";
 import {
-  filterFutureDataCompact,
-  filterHistoricDataCompact,
+  filterCompactFutureData,
+  filterCompactHistoricData,
   getOldestTimestampFromCompactForecastValues
 } from "./data";
 import allGspForecastHistoricalDataCompact from "../../data/updatedDummyApiResponses/allGspForecastHistoricCompact.json";
 import allGspActualHistoricCompact from "../../data/updatedDummyApiResponses/allGspActualHistoricCompact.json";
 import { components } from "../../types/quartz-api";
 
+/////////////////////////////////////////////////////////
+// filterCompactHistoricData & filterCompactFutureData //
+/////////////////////////////////////////////////////////
 describe("check func filters fake historical forecast data", () => {
   test("check func filters out data after prev30MinNow", () => {
-    const filteredData = filterHistoricDataCompact<
+    const filteredData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       [
@@ -42,7 +45,7 @@ describe("check func filters fake historical forecast data", () => {
     ]);
   });
   test("check func filters out data before filterHistoricStart", () => {
-    const filteredData = filterHistoricDataCompact<
+    const filteredData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       [
@@ -93,7 +96,7 @@ describe("check func filters fake historical forecast data", () => {
 
 describe("check func filters static historical forecast data", () => {
   test("check func filters out data before historic start & after prev30MinNow", () => {
-    const filteredData = filterHistoricDataCompact<
+    const filteredData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       allGspForecastHistoricalDataCompact,
@@ -110,15 +113,15 @@ describe("check func filters static historical forecast data", () => {
 });
 
 describe("check filter functions combine back into correct full timestamped forecast data", () => {
-  test("check filterHistoricDataCompact + filterFutureDataCompact", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+  test("check filterCompactHistoricData + filterCompactFutureData", () => {
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       allGspForecastHistoricalDataCompact,
       "2023-12-05T12:00:00+00:00",
       "2023-12-06T12:00:00+00:00"
     );
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(allGspForecastHistoricalDataCompact, "2023-12-06T12:00:00+00:00");
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
@@ -130,14 +133,14 @@ describe("check filter functions combine back into correct full timestamped fore
     expect(filteredData[filteredData.length - 1].datetimeUtc).toBe("2023-12-07T15:00:00+00:00");
   });
   test("check 'now' timestamp at beginning of data window", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       allGspForecastHistoricalDataCompact,
       "2023-12-05T12:00:00+00:00",
       "2023-12-05T12:00:00+00:00"
     );
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(allGspForecastHistoricalDataCompact, "2023-12-05T12:00:00+00:00");
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
@@ -145,14 +148,14 @@ describe("check filter functions combine back into correct full timestamped fore
     expect(filteredData).toMatchObject(allGspForecastHistoricalDataCompact);
   });
   test("check 'now' timestamp at end of data window", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       allGspForecastHistoricalDataCompact,
       "2023-12-05T12:00:00+00:00",
       "2023-12-07T15:00:00+00:00"
     );
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(allGspForecastHistoricalDataCompact, "2023-12-07T15:00:00+00:00");
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
@@ -162,11 +165,11 @@ describe("check filter functions combine back into correct full timestamped fore
 });
 
 describe("check filter functions return empty array when no data", () => {
-  test("check filterHistoricDataCompact + filterFutureDataCompact", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+  test("check filterCompactHistoricData + filterCompactFutureData", () => {
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >([], "2023-12-05T12:00:00+00:00", "2023-12-06T12:00:00+00:00");
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >([], "2023-12-06T12:00:00+00:00");
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
@@ -176,8 +179,8 @@ describe("check filter functions return empty array when no data", () => {
 });
 
 describe("check filter functions return correct data when only 1 timestamp", () => {
-  test("check filterHistoricDataCompact + filterFutureDataCompact", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+  test("check filterCompactHistoricData + filterCompactFutureData", () => {
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       [
@@ -189,7 +192,7 @@ describe("check filter functions return correct data when only 1 timestamp", () 
       "2023-12-05T12:00:00+00:00",
       "2023-12-06T12:00:00+00:00"
     );
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       [
@@ -213,10 +216,10 @@ describe("check filter functions return correct data when only 1 timestamp", () 
 
 // Actuals
 describe("check filter func filters dummy historical actual data", () => {
-  test("check filterHistoricDataCompact + filterFutureDataCompact", () => {
+  test("check filterCompactHistoricData + filterCompactFutureData", () => {
     const historicStartISO = "2023-12-05T12:30:00+00:00";
     const prev30MinFromNowISO = "2023-12-05T13:30:00+00:00";
-    const filteredHistoricData = filterHistoricDataCompact<
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["GSPYieldGroupByDatetime"]
     >(
       [
@@ -244,7 +247,7 @@ describe("check filter func filters dummy historical actual data", () => {
       historicStartISO,
       prev30MinFromNowISO
     );
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["GSPYieldGroupByDatetime"]
     >(
       [
@@ -336,12 +339,12 @@ describe("check filter func filters dummy historical actual data", () => {
   });
 });
 describe("check filter func filters static historical actual data", () => {
-  test("check filterHistoricDataCompact + filterFutureDataCompact", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+  test("check filterCompactHistoricData + filterCompactFutureData", () => {
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["GSPYieldGroupByDatetime"]
       // @ts-ignore
     >(allGspActualHistoricCompact, "2023-12-05T12:00:00+00:00", "2023-12-06T12:00:00+00:00");
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["GSPYieldGroupByDatetime"]
       // @ts-ignore
     >(allGspActualHistoricCompact, "2023-12-06T12:00:00+00:00");
@@ -361,14 +364,14 @@ describe("check filter func filters static historical actual data", () => {
 
 describe("check funcs filter into subset forecast data correctly", () => {
   test("check trim to 24h before 'now'", () => {
-    const filteredHistoricData = filterHistoricDataCompact<
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       allGspForecastHistoricalDataCompact,
       "2023-12-06T12:00:00+00:00",
       "2023-12-07T12:00:00+00:00"
     );
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(allGspForecastHistoricalDataCompact, "2023-12-07T12:00:00+00:00");
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
@@ -387,10 +390,10 @@ describe("check funcs filter into subset forecast data correctly", () => {
     // mock fetching data at 2023-12-06T12:10:00+00:00
     const initialFetchedData = allGspForecastHistoricalDataCompact;
     let lastFetched30PreNowISO = "2023-12-06T12:00:00+00:00";
-    const filteredHistoricData = filterHistoricDataCompact<
+    const filteredHistoricData = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(initialFetchedData, "2023-12-05T12:00:00+00:00", lastFetched30PreNowISO);
-    const filteredFutureData = filterFutureDataCompact<
+    const filteredFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(initialFetchedData, lastFetched30PreNowISO);
     const filteredData = [...filteredHistoricData, ...filteredFutureData];
@@ -415,7 +418,7 @@ describe("check funcs filter into subset forecast data correctly", () => {
     expect(filteredFutureData[0].forecastValues["1"]).toBe(29.58);
 
     // mock refetching data at 2023-12-06T12:40:00+00:00
-    const refetchedData = filterFutureDataCompact<
+    const refetchedData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(allGspForecastHistoricalDataCompact, lastFetched30PreNowISO);
     lastFetched30PreNowISO = "2023-12-06T12:30:00+00:00";
@@ -424,7 +427,7 @@ describe("check funcs filter into subset forecast data correctly", () => {
     expect(refetchedData[0].datetimeUtc).toBe("2023-12-06T12:30:00+00:00");
     expect(refetchedData[0].forecastValues["1"]).toBe(29.58);
     refetchedData[0].forecastValues["1"] = 100;
-    const newHistory = filterHistoricDataCompact<
+    const newHistory = filterCompactHistoricData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(
       [...filteredHistoricData, ...refetchedData],
@@ -439,7 +442,7 @@ describe("check funcs filter into subset forecast data correctly", () => {
     expect(newHistory[newHistory.length - 1].datetimeUtc).toBe("2023-12-06T12:30:00+00:00");
     expect(newHistory[newHistory.length - 1].forecastValues["1"]).toBe(100);
     expect(newHistory[newHistory.length - 1].forecastValues["2"]).toBe(4.31);
-    const newFutureData = filterFutureDataCompact<
+    const newFutureData = filterCompactFutureData<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(refetchedData, lastFetched30PreNowISO);
     const newCombinedData = [...newHistory, ...newFutureData];
@@ -451,8 +454,11 @@ describe("check funcs filter into subset forecast data correctly", () => {
   });
 });
 
-describe("check oldest timestamp function returns correct timestamp", () => {
-  test("check oldest timestamp function returns correct timestamp", () => {
+/////////////////////////////////////////////////
+// getOldestTimestampFromCompactForecastValues //
+/////////////////////////////////////////////////
+describe("check func returns correct timestamp", () => {
+  test("check func returns correct timestamp", () => {
     const oldestTimestamp = getOldestTimestampFromCompactForecastValues<
       components["schemas"]["OneDatetimeManyForecastValues"]
     >(allGspForecastHistoricalDataCompact);

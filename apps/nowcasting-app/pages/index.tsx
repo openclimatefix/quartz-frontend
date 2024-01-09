@@ -47,9 +47,9 @@ import {
 } from "../components/helpers/cookieStorage";
 import { useLoadDataFromApi } from "../components/hooks/useLoadDataFromApi";
 import {
-  filterFutureDataCompact,
-  filterHistoricDataCompact,
-  getHistoricBackwardIntervalMinutes,
+  filterCompactFutureData,
+  filterCompactHistoricData,
+  calculateHistoricDataStartIntervalInMinutes,
   getOldestTimestampFromCompactForecastValues
 } from "../components/helpers/data";
 
@@ -212,14 +212,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         setForecastLastFetch30MinISO(prev30MinFromNowISO);
         setAllGspForecastHistory(
           allGspForecastHistory
-            ? filterHistoricDataCompact(
+            ? filterCompactHistoricData(
                 [...allGspForecastHistory, ...data],
                 forecastHistoricStart,
                 prev30MinFromNowISO
               )
-            : filterHistoricDataCompact(data, forecastHistoricStart, prev30MinFromNowISO)
+            : filterCompactHistoricData(data, forecastHistoricStart, prev30MinFromNowISO)
         );
-        setAllGspForecastFuture(filterFutureDataCompact(data, prev30MinFromNowISO));
+        setAllGspForecastFuture(filterCompactFutureData(data, prev30MinFromNowISO));
       }
     }
   );
@@ -239,16 +239,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         if (!data) return;
 
         const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
-        const historicBackwardIntervalMinutes = getHistoricBackwardIntervalMinutes(data);
+        const historicBackwardIntervalMinutes = calculateHistoricDataStartIntervalInMinutes(data);
         const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
         setForecastLastFetch30MinISO(prev30MinNowISO);
         setForecastHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
-        setAllGspForecastHistory(filterHistoricDataCompact(data, oldestTimestamp, prev30MinNowISO));
+        setAllGspForecastHistory(filterCompactHistoricData(data, oldestTimestamp, prev30MinNowISO));
       }
     }
   );
-  console.log("allGspForecastFuture", allGspForecastFuture);
-  console.log("allGspForecastHistory", allGspForecastHistory);
 
   // Combine historic and future forecast data & fetch states
   const allGspForecastData = useMemo(() => {
@@ -290,19 +288,19 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         setActualsLastFetch30MinISO(prev30MinFromNowISO);
         setAllGspActualHistory(
           allGspActualHistory
-            ? filterHistoricDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+            ? filterCompactHistoricData<components["schemas"]["GSPYieldGroupByDatetime"]>(
                 [...allGspActualHistory, ...data],
                 forecastHistoricStart,
                 prev30MinFromNowISO
               )
-            : filterHistoricDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+            : filterCompactHistoricData<components["schemas"]["GSPYieldGroupByDatetime"]>(
                 data,
                 forecastHistoricStart,
                 prev30MinFromNowISO
               )
         );
         setAllGspActualFuture(
-          filterFutureDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+          filterCompactFutureData<components["schemas"]["GSPYieldGroupByDatetime"]>(
             data,
             prev30MinFromNowISO
           )
@@ -331,14 +329,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             components["schemas"]["GSPYieldGroupByDatetime"]
           >(data);
         const historicBackwardIntervalMinutes =
-          getHistoricBackwardIntervalMinutes<components["schemas"]["GSPYieldGroupByDatetime"]>(
-            data
-          );
+          calculateHistoricDataStartIntervalInMinutes<
+            components["schemas"]["GSPYieldGroupByDatetime"]
+          >(data);
         const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
         setActualsLastFetch30MinISO(prev30MinNowISO);
         setActualsHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
         setAllGspActualHistory(
-          filterHistoricDataCompact<components["schemas"]["GSPYieldGroupByDatetime"]>(
+          filterCompactHistoricData<components["schemas"]["GSPYieldGroupByDatetime"]>(
             data,
             oldestTimestamp,
             prev30MinNowISO
@@ -347,8 +345,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       }
     }
   );
-  console.log("allGspActualFuture", allGspActualFuture);
-  console.log("allGspActualHistory", allGspActualHistory);
 
   // Combine historic and future real data & fetch states
   const allGspRealData = useMemo(() => {
@@ -365,7 +361,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const allGspActualError = useMemo(() => {
     return allGspActualHistoricError || allGspActualFutureError;
   }, [allGspActualHistoricError, allGspActualFutureError]);
-  console.log("allGspRealData", allGspRealData);
 
   //////////////////////////////////////
 
@@ -579,8 +574,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     sitesPvForecastError: sitePvForecastError,
     sitesPvActualError: sitePvActualError
   };
-
-  console.log("sitePvForecastRevalidating", sitePvForecastValidating);
 
   const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
 
