@@ -28,6 +28,7 @@ import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
 import { CloseButtonIcon, CloseButtonIconForZoom } from "../icons/icons";
+import { getZoomYMax } from "../helpers/chartUtils";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -215,10 +216,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
     9000, 10000, 11000, 12000
   ];
 
-  let zoomYMax = filteredPreppedData
-    .map((d) => d.PROBABILISTIC_UPPER_BOUND)
-    .filter((n) => typeof n === "number")
-    .sort((a, b) => Number(b) - Number(a))[0];
+  let zoomYMax = getZoomYMax(filteredPreppedData);
 
   zoomYMax = getRoundedTickBoundary(zoomYMax || 0, yMaxZoom_Levels);
 
@@ -232,7 +230,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {isZoomed && (
-        //put button at top right corner of chart and change location for delta view
         <div
           className={
             deltaView ? `absolute top-5 right-16 mr-3 z-10` : `absolute top-5 right-4 z-10`
@@ -358,7 +355,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={isZoomed ? [0, Number(zoomYMax + zoomYMax * 0.2)] : [0, yMax]}
+            domain={isZoomed ? [0, Number(zoomYMax + zoomYMax * 0.1)] : [0, yMax]}
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
