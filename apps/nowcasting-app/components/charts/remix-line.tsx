@@ -27,6 +27,7 @@ import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
+import { CloseButtonIcon } from "../icons/icons";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -231,18 +232,27 @@ const RemixLine: React.FC<RemixLineProps> = ({
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {isZoomed && (
-        <div className="pl-16">
+        <div className="flex">
           <button
+            type="button"
+            onClick={handleZoomOut}
+            style={{ position: "relative", top: "0", left: "20" }}
+            className="flex ml-96 mt-5 font-bold items-center p-0.5 text-xl border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+          >
+            <CloseButtonIcon />
+          </button>
+          {/* <button
             type="button"
             className="btn ml-3 update text-sm bg-ocf-gray-600 hover:bg-ocf-yellow-500 text-black py-.5 px-1 mr-1 rounded inline-flex items-center"
             onClick={handleZoomOut}
           >
             Reset
-          </button>
+          </button> */}
         </div>
       )}
       <ResponsiveContainer>
         <ComposedChart
+          className="select-none"
           width={500}
           height={400}
           data={isZoomed ? filteredPreppedData : preppedData}
@@ -307,6 +317,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
           />
           <XAxis
+            className="select-none"
             dataKey="formattedDate"
             xAxisId={"x-axis-2"}
             tickFormatter={prettyPrintChartAxisLabelDate}
