@@ -27,7 +27,7 @@ import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
-import { CloseButtonIcon } from "../icons/icons";
+import { CloseButtonIcon, CloseButtonIconForZoom } from "../icons/icons";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -232,22 +232,20 @@ const RemixLine: React.FC<RemixLineProps> = ({
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {isZoomed && (
-        <div className="flex">
+        //put button at top right corner of chart and change location for delta view
+        <div
+          className={
+            deltaView ? `absolute top-5 right-16 mr-3 z-10` : `absolute top-5 right-4 z-10`
+          }
+        >
           <button
             type="button"
             onClick={handleZoomOut}
             style={{ position: "relative", top: "0", left: "20" }}
-            className="flex ml-96 mt-5 font-bold items-center p-0.5 text-xl border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+            className="flex font-bold items-center p-0.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
           >
-            <CloseButtonIcon />
+            <CloseButtonIconForZoom />
           </button>
-          {/* <button
-            type="button"
-            className="btn ml-3 update text-sm bg-ocf-gray-600 hover:bg-ocf-yellow-500 text-black py-.5 px-1 mr-1 rounded inline-flex items-center"
-            onClick={handleZoomOut}
-          >
-            Reset
-          </button> */}
         </div>
       )}
       <ResponsiveContainer>
