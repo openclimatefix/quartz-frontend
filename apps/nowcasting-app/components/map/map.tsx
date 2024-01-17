@@ -107,7 +107,7 @@ const Map: FC<IMap> = ({
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full">
         {controlOverlay(map)}
       </div>
-      <div ref={mapContainer} data-title={title} className="h-full w-full" />
+      <div ref={mapContainer} id={`Map-${title}`} data-title={title} className="h-full w-full" />
       <div className="map-overlay top">{children}</div>
     </div>
   );

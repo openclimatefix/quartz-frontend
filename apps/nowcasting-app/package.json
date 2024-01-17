@@ -8,10 +8,9 @@
     "start": "next start",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "test": "jest",
     "lint": "next lint",
     "pre-commit": "pre-commit run",
-    "test": "cypress run"
+    "test": "cypress run --browser chrome && jest"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^1.8.0",
