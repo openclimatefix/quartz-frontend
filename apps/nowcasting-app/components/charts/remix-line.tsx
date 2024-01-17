@@ -223,7 +223,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
     9000, 10000, 11000, 12000
   ];
 
-  let zoomYMax = getZoomYMax(globalFilteredPreppedData);
+  let zoomYMax = getZoomYMax(filteredPreppedData);
 
   zoomYMax = getRoundedTickBoundary(zoomYMax || 0, yMaxZoom_Levels);
 
@@ -257,7 +257,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           className="select-none"
           width={500}
           height={400}
-          data={globalIsZoomed ? globalFilteredPreppedData : preppedData}
+          data={globalIsZoomed ? filteredPreppedData : preppedData}
           margin={{
             top: 20,
             right: 16,
@@ -299,7 +299,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const dataInAreaRange = preppedData.filter(
                   (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
                 );
-                setGlobalFilteredPreppedData(dataInAreaRange);
+                setFilteredPreppedData(dataInAreaRange);
                 setGlobalZoomArea(globalZoomArea);
               }
             }
@@ -362,7 +362,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={isZoomed ? [0, Number(zoomYMax + zoomYMax * 0.1)] : [0, yMax]}
+            domain={globalIsZoomed ? [0, Number(zoomYMax + zoomYMax * 0.1)] : [0, yMax]}
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
