@@ -82,6 +82,7 @@ type RemixLineProps = {
   timeNow: string;
   resetTime?: () => void;
   visibleLines: string[];
+  zoomArea: { x1: string; x2: string };
   deltaView?: boolean;
   deltaYMaxOverride?: number;
 };
@@ -139,6 +140,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   timeNow,
   resetTime,
   visibleLines,
+  zoomArea,
   deltaView = false,
   deltaYMaxOverride
 }) => {
@@ -151,12 +153,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
   const defaultZoom = { x1: "", x2: "" };
-  const [defaultChartZoom] = useGlobalState("defaultChartZoom");
+  const [defaultChartZoom] = useGlobalState("globalZoomArea");
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
-  const [globalFilteredPreppedData, setGlobalFilteredPreppedData] = useGlobalState(
-    "globalFilteredPreppedData"
-  );
-  const [zoomArea, setZoomArea] = useState(defaultZoom);
+  // const [globalFilteredPreppedData, setGlobalFilteredPreppedData] = useGlobalState(
+  //   "globalFilteredPreppedData"
+  // );
+  // const [zoomArea, setZoomArea] = useState(defaultZoom);
   const [globalZoomArea, setGlobalZoomArea] = useGlobalState("defaultChartZoom");
   const [isZooming, setIsZooming] = useState(false);
   const [globalIsZooming, setGlobalIsZooming] = useGlobalState("globalChartIsZooming");
@@ -230,8 +232,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   //reset zoom state
   function handleZoomOut() {
     setGlobalIsZoomed(false);
-    setFilteredPreppedData(data);
-    setGlobalZoomArea(globalZoomArea);
+    setFilteredPreppedData(preppedData);
+    setGlobalZoomArea(defaultChartZoom);
   }
 
   return (
@@ -292,15 +294,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
               if (globalZoomArea.x1 == globalZoomArea.x2) {
                 setGlobalZoomArea(defaultChartZoom);
               } else {
-                setGlobalIsZoomed(true);
                 let { x1, x2 } = globalZoomArea;
                 // make sure x1 <= x2
                 if (x1 > x2) [x1, x2] = [x2, x1];
                 const dataInAreaRange = preppedData.filter(
                   (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
                 );
-                setFilteredPreppedData(dataInAreaRange);
                 setGlobalZoomArea(globalZoomArea);
+                setFilteredPreppedData(dataInAreaRange);
+                setGlobalIsZoomed(true);
+                console.log("globalZoomArea", globalZoomArea);
               }
             }
           }}

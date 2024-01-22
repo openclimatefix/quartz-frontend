@@ -15,12 +15,14 @@ export const getZoomYMax = (filteredPreppedData: ChartData[]) => {
         .map((d) => d.PAST_FORECAST || d.FORECAST)
         .sort((a, b) => Number(b) - Number(a))[0] || 0;
     let calculatedYMax = Math.max(genMax, forecastMax);
+    console.log("calculatedYMax", calculatedYMax);
     return calculatedYMax;
   } else {
     let calculatedYMax = filteredPreppedData
       .map((d) => d.PROBABILISTIC_UPPER_BOUND || d.GENERATION)
       .filter((n) => typeof n === "number")
       .sort((a, b) => Number(b) - Number(a))[0];
+    console.log("calculatedYMax", calculatedYMax);
     return calculatedYMax;
   }
 };

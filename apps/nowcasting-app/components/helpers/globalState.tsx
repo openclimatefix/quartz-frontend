@@ -59,7 +59,7 @@ export type GlobalStateType = {
   defaultChartZoom: { x1: string; x2: string };
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
-  globalFilteredPreppedData: ChartData[];
+  globalZoomArea: { x1: string; x2: string };
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
 };
@@ -88,7 +88,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     defaultChartZoom: { x1: "", x2: "" },
-    globalFilteredPreppedData: [],
+    globalZoomArea: { x1: "", x2: "" },
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
