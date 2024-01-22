@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Area,
   Bar,
@@ -82,7 +82,7 @@ type RemixLineProps = {
   timeNow: string;
   resetTime?: () => void;
   visibleLines: string[];
-  zoomArea: { x1: string; x2: string };
+  zoomEnabled?: boolean;
   deltaView?: boolean;
   deltaYMaxOverride?: number;
 };
@@ -140,7 +140,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   timeNow,
   resetTime,
   visibleLines,
-  zoomArea,
+  zoomEnabled = true,
   deltaView = false,
   deltaYMaxOverride
 }) => {
@@ -153,13 +153,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
   const defaultZoom = { x1: "", x2: "" };
-  const [defaultChartZoom] = useGlobalState("globalZoomArea");
+  const [defaultChartZoom] = useGlobalState("defaultChartZoom");
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
   // const [globalFilteredPreppedData, setGlobalFilteredPreppedData] = useGlobalState(
   //   "globalFilteredPreppedData"
   // );
   // const [zoomArea, setZoomArea] = useState(defaultZoom);
-  const [globalZoomArea, setGlobalZoomArea] = useGlobalState("defaultChartZoom");
+  const [globalZoomArea, setGlobalZoomArea] = useGlobalState("globalZoomArea");
   const [isZooming, setIsZooming] = useState(false);
   const [globalIsZooming, setGlobalIsZooming] = useGlobalState("globalChartIsZooming");
   const [isZoomed, setIsZoomed] = useState(false);
@@ -236,9 +236,21 @@ const RemixLine: React.FC<RemixLineProps> = ({
     setGlobalZoomArea(defaultChartZoom);
   }
 
+  useEffect(() => {
+    if (!zoomEnabled) return;
+
+    if (!globalIsZooming) {
+      const { x1, x2 } = globalZoomArea;
+      const dataInAreaRange = preppedData.filter(
+        (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
+      );
+      setFilteredPreppedData(dataInAreaRange);
+    }
+  }, [globalZoomArea, globalIsZooming, preppedData, zoomEnabled]);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      {globalIsZoomed && (
+      {zoomEnabled && globalIsZoomed && (
         <div
           className={
             deltaView ? `absolute top-5 right-16 mr-3 z-10` : `absolute top-5 right-4 z-10`
@@ -259,7 +271,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           className="select-none"
           width={500}
           height={400}
-          data={globalIsZoomed ? filteredPreppedData : preppedData}
+          data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
           margin={{
             top: 20,
             right: 16,
@@ -276,6 +288,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }
           }}
           onMouseDown={(e?: { activeLabel?: string }) => {
+            if (!zoomEnabled) return;
+
             setGlobalIsZooming(true);
             let xValue = e?.activeLabel;
             if (xValue) {
@@ -283,28 +297,29 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }
           }}
           onMouseMove={(e?: { activeLabel?: string }) => {
+            if (!zoomEnabled) return;
+
             if (globalIsZooming) {
               let xValue = e?.activeLabel;
               setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
             }
           }}
           onMouseUp={(e?: { activeLabel?: string }) => {
+            if (!zoomEnabled) return;
+
             if (globalIsZooming) {
-              setGlobalIsZooming(false);
               if (globalZoomArea.x1 == globalZoomArea.x2) {
                 setGlobalZoomArea(defaultChartZoom);
               } else {
-                let { x1, x2 } = globalZoomArea;
+                let { x1 } = globalZoomArea;
+                let x2 = e?.activeLabel || "";
                 // make sure x1 <= x2
                 if (x1 > x2) [x1, x2] = [x2, x1];
-                const dataInAreaRange = preppedData.filter(
-                  (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
-                );
-                setGlobalZoomArea(globalZoomArea);
-                setFilteredPreppedData(dataInAreaRange);
+                setGlobalZoomArea((zoom) => ({ ...zoom, x2 }));
                 setGlobalIsZoomed(true);
                 console.log("globalZoomArea", globalZoomArea);
               }
+              setGlobalIsZooming(false);
             }
           }}
         >
@@ -365,7 +380,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={globalIsZoomed ? [0, Number(zoomYMax + zoomYMax * 0.1)] : [0, yMax]}
+            domain={globalIsZoomed ? [0, Number(zoomYMax * 1.1)] : [0, yMax]}
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
@@ -549,7 +564,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
-          {globalIsZooming && (
+          {zoomEnabled && globalIsZooming && (
             <ReferenceArea
               x1={globalZoomArea?.x1}
               x2={globalZoomArea?.x2}

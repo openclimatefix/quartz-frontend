@@ -63,7 +63,6 @@ const GspPvRemixChart: FC<{
     console.log(errors);
     return <div>failed to load</div>;
   }
-  const [globalZoomArea] = useGlobalState("globalZoomArea");
   const now30min = formatISODateString(get30MinNow());
   const dataMissing = !gspForecastDataOneGSP || !pvRealDataIn || !pvRealDataAfter;
   const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =
@@ -156,7 +155,6 @@ const GspPvRemixChart: FC<{
           timeNow={timeNow}
           resetTime={resetTime}
           visibleLines={visibleLines}
-          zoomArea={globalZoomArea}
           deltaView={deltaView}
           deltaYMaxOverride={Math.ceil(Number(gspInstalledCapacity) / 200) * 100 || 500}
         />

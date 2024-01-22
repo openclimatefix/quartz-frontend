@@ -104,7 +104,6 @@ const PvRemixChart: FC<{
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
-            zoomArea={globalZoomArea}
             yMax={MAX_NATIONAL_GENERATION_MW}
             visibleLines={visibleLines}
           />

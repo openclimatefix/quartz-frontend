@@ -372,7 +372,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
-            zoomArea={globalZoomArea}
             yMax={MAX_NATIONAL_GENERATION_MW}
             visibleLines={visibleLines}
             deltaView={true}
