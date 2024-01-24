@@ -100,8 +100,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
     1
   ];
 
-  const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS, maxCapacity) => {
-    return 1 / maxCapacity;
+  const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS, maxCapacity: number) => {
+    return 4 / maxCapacity;
   };
 
   const generateGeoJsonForecastData: (
