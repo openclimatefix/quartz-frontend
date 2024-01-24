@@ -195,7 +195,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
           // Make the radius of the circle where the area is proportional to the expectedPV
           // We know expectedPVRadius has to be proportional to sqrt(expectedPV),
           // and if expectedPV == capacity, then expectedPVRadius == capacity, therefore
-          expectedPVRadius: (site.expectedPV * site.capacity) ^ 0.5,
+          expectedPVRadius: Math.sqrt(site.expectedPV * site.capacity),
           selected: site.id === clickedSiteGroupId
         }
       };
