@@ -101,7 +101,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
   ];
 
   const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS, maxCapacity: number) => {
-    return 4 / maxCapacity;
+    return 4000 / maxCapacity;
   };
 
   const generateGeoJsonForecastData: (
@@ -267,9 +267,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
       addGroupSource(map, groupName, groupFeatureArray);
     }
 
-    // get the maximum capacity in all the FeatureArrays
+    // get the maximum capacity in all the FeatureArrays, but feature.properties might be null, if so us 1
     const maxCapacity = Math.max(
-      ...groupFeatureArray.map((feature) => feature.properties.capacity)
+      ...groupFeatureArray.map((feature) => feature.properties?.capacity || 1)
     );
 
     if (groupName === "regions") {
