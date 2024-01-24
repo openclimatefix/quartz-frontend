@@ -25,7 +25,7 @@ import { theme } from "../../tailwind.config";
 import { Feature, FeatureCollection } from "geojson";
 import Slider from "./sitesMapFeatures/sitesZoomSlider";
 import SitesLegend from "./sitesMapFeatures/sitesLegend";
-import getRingMultiplier from "./sitesMapFeatures/utils";
+import { getRingMultiplier } from "./sitesMapFeatures/utils";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
