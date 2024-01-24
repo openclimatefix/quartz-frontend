@@ -330,22 +330,18 @@ export const getRoundedPv = (pv: number, round: boolean = true) => {
 };
 export const getRoundedPvNormalized = (val: number, round: boolean = true) => {
   if (!round) return val;
-  const negative = val < 0;
-  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
-  const absVal = Math.abs(val);
-  let rounded = Math.round(absVal * 10);
-  let finalVal = 0;
-  // check if already even first decimal
-  if (!(rounded % 2)) {
-    finalVal = rounded / 10;
-  } else {
-    if (absVal * 10 >= rounded) {
-      finalVal = (rounded + 1) / 10;
-    } else {
-      finalVal = (rounded - 1) / 10;
+  // round down to 0, 0.1, 0.2, 0.35 0.5, 0.7, 1
+  const value = [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1]
+
+  // loop through the array to find the lower bound value
+  let finalVal = value[0];
+    for (let i = 0; i < value.length; i++) {
+        if (val > value[i]) {
+        finalVal = value[i];
+        }
     }
-  }
-  return negative ? -finalVal : finalVal;
+
+  return finalVal;
 };
 
 //this is the function I set up that would pass the accessToken from get_token.ts into the Authorization
