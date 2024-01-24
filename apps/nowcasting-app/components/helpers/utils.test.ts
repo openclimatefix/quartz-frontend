@@ -7,18 +7,18 @@ import {
 import * as utils from "./utils";
 
 describe("check getRoundedPvNormalized with valid values", () => {
-  test("check rounding to 0, 0.1, 0.2, 0.35, 0.5, 0.7, 1.0 etc.", () => {
-    expect(getRoundedPvNormalized(0.9)).toBe(0.7);
-    expect(getRoundedPvNormalized(0.55)).toBe(0.5);
-    expect(getRoundedPvNormalized(0.44)).toBe(0.35);
-    expect(getRoundedPvNormalized(0.45)).toBe(0.35);
-    expect(getRoundedPvNormalized(0.46)).toBe(0.35);
-    expect(getRoundedPvNormalized(0.333333)).toBe(0.2);
+  test("check rounding to [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1.0] and then selecting the correct opacity from [0.03, 0.2, 0.4, 0.6, 0.8, 1, 1]", () => {
+    expect(getRoundedPvNormalized(0.9)).toBe(1);
+    expect(getRoundedPvNormalized(0.55)).toBe(0.8);
+    expect(getRoundedPvNormalized(0.44)).toBe(0.6);
+    expect(getRoundedPvNormalized(0.45)).toBe(0.6);
+    expect(getRoundedPvNormalized(0.46)).toBe(0.6);
+    expect(getRoundedPvNormalized(0.333333)).toBe(0.4);
     expect(getRoundedPvNormalized(4.5)).toBe(1.0);
-    expect(getRoundedPvNormalized(0.09)).toBe(0);
-    expect(getRoundedPvNormalized(0.11)).toBe(0.1);
-    expect(getRoundedPvNormalized(-0.35)).toBe(0.0);
-    expect(getRoundedPvNormalized(-0.3)).toBe(0.0);
+    expect(getRoundedPvNormalized(0.09)).toBe(0.03);
+    expect(getRoundedPvNormalized(0.11)).toBe(0.2);
+    expect(getRoundedPvNormalized(-0.35)).toBe(0.03);
+    expect(getRoundedPvNormalized(-0.3)).toBe(0.03);
   });
 });
 
