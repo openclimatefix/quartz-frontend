@@ -328,7 +328,7 @@ export const getRoundedPv = (pv: number, round: boolean = true) => {
   // round To: 0, 100, 200, 300, 400, 500
   return Math.round(pv / 100) * 100;
 };
-export const getRoundedPvNormalized = (val: number, round: boolean = true) => {
+export const getOpacityValueFromPVNormalized = (val: number, round: boolean = true) => {
   if (!round) return val;
   // This function is to rounds the value down and then select the correct opacity
 
