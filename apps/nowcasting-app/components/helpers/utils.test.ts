@@ -117,3 +117,67 @@ describe("prettyPrintChartAxisLabelDate", () => {
     expect(result).toBe("13:34");
   });
 });
+
+describe("prettyPrintDayLabelWithDate", () => {
+  it("should handle an empty value", () => {
+    const result = utils.prettyPrintDayLabelWithDate("");
+    expect(result).toBe("Invalid date");
+  });
+
+  it("should handle an invalid UNIX timestamp", () => {
+    const result = utils.prettyPrintDayLabelWithDate("invalid-timestamp");
+    expect(result).toBe("Invalid date");
+  });
+
+  it("should pretty print a valid UNIX timestamp", () => {
+    const result = utils.prettyPrintDayLabelWithDate(1697117640000); // October 12, 2023 14:34
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO date string with timezone", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, no seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34+00:00");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, with seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56+00:00");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, with milliseconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56.789+00:00");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, no seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, with seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, with milliseconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56.789");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should print 'Today' for today's date", () => {
+    const result = utils.prettyPrintDayLabelWithDate(new Date().toISOString());
+    expect(result).toBe("Today");
+  });
+});

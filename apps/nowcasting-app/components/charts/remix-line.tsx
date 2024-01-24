@@ -20,7 +20,8 @@ import {
   getRounded4HoursAgoString,
   dateToLondonDateTimeOnlyString,
   getRoundedTickBoundary,
-  prettyPrintChartAxisLabelDate
+  prettyPrintChartAxisLabelDate,
+  prettyPrintDayLabelWithDate
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
@@ -251,7 +252,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
           <XAxis
             dataKey="formattedDate"
             xAxisId={"x-axis-3"}
-            tickFormatter={prettyPrintDate}
+            tickFormatter={prettyPrintDayLabelWithDate}
             scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
@@ -265,7 +266,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
             orientation="bottom"
             axisLine={false}
-            tickMargin={-2}
+            tickMargin={-12}
             hide={false}
           />
 
