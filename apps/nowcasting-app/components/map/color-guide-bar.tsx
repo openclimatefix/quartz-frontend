@@ -26,11 +26,11 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
     } else {
       return [
         { value: "0-10", opacity: 3, textColor: "ocf-gray-300" },
-        { value: "10-30", opacity: 20, textColor: "ocf-gray-300" },
-        { value: "30-50", opacity: 40, textColor: "ocf-gray-300" },
-        { value: "50-70", opacity: 60, textColor: "black" },
-        { value: "70-90", opacity: 80, textColor: "black" },
-        { value: "90+", opacity: 100, textColor: "black" }
+        { value: "10-20", opacity: 20, textColor: "ocf-gray-300" },
+        { value: "20-35", opacity: 40, textColor: "ocf-gray-300" },
+        { value: "35-50", opacity: 60, textColor: "black" },
+        { value: "50-70", opacity: 80, textColor: "black" },
+        { value: "70+", opacity: 100, textColor: "black" }
       ];
     }
   }, [unit]);
