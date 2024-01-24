@@ -331,15 +331,15 @@ export const getRoundedPv = (pv: number, round: boolean = true) => {
 export const getRoundedPvNormalized = (val: number, round: boolean = true) => {
   if (!round) return val;
   // round down to 0, 0.1, 0.2, 0.35 0.5, 0.7, 1
-  const value = [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1]
+  const value = [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1];
 
   // loop through the array to find the lower bound value
   let finalVal = value[0];
-    for (let i = 0; i < value.length; i++) {
-        if (val > value[i]) {
-        finalVal = value[i];
-        }
+  for (let i = 0; i < value.length; i++) {
+    if (val > value[i]) {
+      finalVal = value[i];
     }
+  }
 
   return finalVal;
 };
