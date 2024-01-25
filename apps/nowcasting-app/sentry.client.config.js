@@ -7,12 +7,20 @@ import * as Sentry from "@sentry/nextjs";
 const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 
 Sentry.init({
+  // Disable Sentry if on local dev
+  enabled:
+    process.env.NEXT_PUBLIC_SENTRY_DISABLED !== "true" && process.env.NODE_ENV !== "development",
   dsn: SENTRY_DSN || "https://73795b548c864e1ea5c4d2aa699db870@o400768.ingest.sentry.io/6149810",
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampleRate: (samplingContext) => {
+    // Exclude localhost traffic from being sampled in Sentry
     if (samplingContext.location?.search("localhost")) {
       return 0;
     }
+    if (samplingContext.request?.headers?.host?.search("localhost")) {
+      return 0;
+    }
+    // Sample errors at 100%
     if (samplingContext.transactionContext.name.search("error")) {
       // These are important - take a big sample
       return 1;
