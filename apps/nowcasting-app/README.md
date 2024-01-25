@@ -34,6 +34,9 @@ AUTH0_ISSUER_BASE_URL='https://nowcasting-dev.eu.auth0.com'
 AUTH0_CLIENT_ID='<client id>'
 # Your Auth0 application's Client Secret
 AUTH0_CLIENT_SECRET='<client secret>'
+# Disable Sentry on local to avoid noise 
+# (should default to off in development env anyway but just to make sure)
+NEXT_PUBLIC_SENTRY_DISABLED='true'
 ```
 
 ### Running the App
