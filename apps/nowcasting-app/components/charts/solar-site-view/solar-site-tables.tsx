@@ -85,7 +85,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
         {rows?.sort(sortFn).map((site) => {
           const mostAccurateGeneration = site.actualPV || site.expectedPV;
           return (
-            <>
+            <React.Fragment key={`site-row-${site.id}`}>
               <div
                 className={`${
                   clickedSiteGroupId === site.id
@@ -142,7 +142,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                   ></div>
                 </div>
               </div>
-            </>
+            </React.Fragment>
           );
         })}
       </div>

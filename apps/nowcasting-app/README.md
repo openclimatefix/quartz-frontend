@@ -56,3 +56,9 @@ The app gets automatically deployed to Vercel, on each push to the `main` branch
 ```bash
 yarn run storybook
 ```
+
+## How to run the tests
+
+```bash
+yarn test
+```

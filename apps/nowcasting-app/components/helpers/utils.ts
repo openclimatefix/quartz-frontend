@@ -254,6 +254,16 @@ export const dateToLondonDateTimeString = (date: Date) => {
   return `${date_london}, ${date_london_time}`;
 };
 
+export const dateToLondonDateTimeOnlyString = (date: Date) => {
+  const date_london = date.toLocaleString("en-GB", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    timeZone: "Europe/London"
+  });
+  return date_london + " ";
+};
+
 export const formatISODateStringHumanNumbersOnly = (date: string) => {
   // Change date to nice human readable format.
   // Note that this converts the string to Europe London Time
@@ -266,6 +276,18 @@ export const formatISODateStringHumanNumbersOnly = (date: string) => {
 
   // further formatting could be done to make it yyyy/mm/dd HH:MM
   return `${date_london} ${date_london_time}`;
+};
+
+export const prettyPrintDayLabelWithDate = (d: string | number) => {
+  const parsedDate = new Date(d);
+  // check if date is valid
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date";
+  // if date is today, return "Today"
+  if (parsedDate.toDateString() === new Date().toDateString()) return "Today";
+  // otherwise return day of the week and short date
+  return `${parsedDate.toLocaleDateString("en-GB", {
+    weekday: "short"
+  })} ${parsedDate.toLocaleDateString("en-GB", { day: "numeric" })}`;
 };
 
 export function prettyPrintChartAxisLabelDate(x: string | number) {
@@ -328,24 +350,22 @@ export const getRoundedPv = (pv: number, round: boolean = true) => {
   // round To: 0, 100, 200, 300, 400, 500
   return Math.round(pv / 100) * 100;
 };
-export const getRoundedPvNormalized = (val: number, round: boolean = true) => {
+export const getOpacityValueFromPVNormalized = (val: number, round: boolean = true) => {
   if (!round) return val;
-  const negative = val < 0;
-  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
-  const absVal = Math.abs(val);
-  let rounded = Math.round(absVal * 10);
-  let finalVal = 0;
-  // check if already even first decimal
-  if (!(rounded % 2)) {
-    finalVal = rounded / 10;
-  } else {
-    if (absVal * 10 >= rounded) {
-      finalVal = (rounded + 1) / 10;
-    } else {
-      finalVal = (rounded - 1) / 10;
+  // This function is to rounds the value down and then select the correct opacity
+
+  const value = [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1];
+  const opacity = [0.03, 0.2, 0.4, 0.6, 0.8, 1, 1];
+
+  // loop through the array to find the lower bound value and then select the correct opacity
+  let finalVal = opacity[0];
+  for (let i = 0; i < value.length; i++) {
+    if (val > value[i]) {
+      finalVal = opacity[i];
     }
   }
-  return negative ? -finalVal : finalVal;
+
+  return finalVal;
 };
 
 //this is the function I set up that would pass the accessToken from get_token.ts into the Authorization

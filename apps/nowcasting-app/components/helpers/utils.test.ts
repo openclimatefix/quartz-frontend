@@ -1,24 +1,24 @@
 import { describe, expect, test } from "@jest/globals";
 import {
   convertISODateStringToLondonTime,
-  getRoundedPvNormalized,
+  getOpacityValueFromPVNormalized,
   prettyPrintChartAxisLabelDate
 } from "./utils";
 import * as utils from "./utils";
 
-describe("check getRoundedPvNormalized with valid values", () => {
-  test("check rounding to 0, 0.2, 0.4 etc.", () => {
-    expect(getRoundedPvNormalized(0.9)).toBe(1);
-    expect(getRoundedPvNormalized(0.55)).toBe(0.6);
-    expect(getRoundedPvNormalized(0.44)).toBe(0.4);
-    expect(getRoundedPvNormalized(0.45)).toBe(0.4);
-    expect(getRoundedPvNormalized(0.46)).toBe(0.4);
-    expect(getRoundedPvNormalized(0.333333)).toBe(0.4);
-    expect(getRoundedPvNormalized(4.5)).toBe(4.6);
-    expect(getRoundedPvNormalized(0.09)).toBe(0);
-    expect(getRoundedPvNormalized(0.11)).toBe(0.2);
-    expect(getRoundedPvNormalized(-0.35)).toBe(-0.4);
-    expect(getRoundedPvNormalized(-0.3)).toBe(-0.4);
+describe("check getOpacityValueFromPVNormalized with valid values", () => {
+  test("check rounding to [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1.0] and then selecting the correct opacity from [0.03, 0.2, 0.4, 0.6, 0.8, 1, 1]", () => {
+    expect(getOpacityValueFromPVNormalized(0.9)).toBe(1);
+    expect(getOpacityValueFromPVNormalized(0.55)).toBe(0.8);
+    expect(getOpacityValueFromPVNormalized(0.44)).toBe(0.6);
+    expect(getOpacityValueFromPVNormalized(0.45)).toBe(0.6);
+    expect(getOpacityValueFromPVNormalized(0.46)).toBe(0.6);
+    expect(getOpacityValueFromPVNormalized(0.333333)).toBe(0.4);
+    expect(getOpacityValueFromPVNormalized(4.5)).toBe(1.0);
+    expect(getOpacityValueFromPVNormalized(0.09)).toBe(0.03);
+    expect(getOpacityValueFromPVNormalized(0.11)).toBe(0.2);
+    expect(getOpacityValueFromPVNormalized(-0.35)).toBe(0.03);
+    expect(getOpacityValueFromPVNormalized(-0.3)).toBe(0.03);
   });
 });
 
@@ -115,5 +115,69 @@ describe("prettyPrintChartAxisLabelDate", () => {
     // Correct for London time
     const result = prettyPrintChartAxisLabelDate("2023-10-12T12:34:56.789");
     expect(result).toBe("13:34");
+  });
+});
+
+describe("prettyPrintDayLabelWithDate", () => {
+  it("should handle an empty value", () => {
+    const result = utils.prettyPrintDayLabelWithDate("");
+    expect(result).toBe("Invalid date");
+  });
+
+  it("should handle an invalid UNIX timestamp", () => {
+    const result = utils.prettyPrintDayLabelWithDate("invalid-timestamp");
+    expect(result).toBe("Invalid date");
+  });
+
+  it("should pretty print a valid UNIX timestamp", () => {
+    const result = utils.prettyPrintDayLabelWithDate(1697117640000); // October 12, 2023 14:34
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO date string with timezone", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, no seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34+00:00");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, with seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56+00:00");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string with timezone, with milliseconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56.789+00:00");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, no seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, with seconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should pretty print an ISO datetime string without timezone, with milliseconds", () => {
+    // Correct for London time
+    const result = utils.prettyPrintDayLabelWithDate("2023-10-12T12:34:56.789");
+    expect(result).toBe("Thu 12");
+  });
+
+  it("should print 'Today' for today's date", () => {
+    const result = utils.prettyPrintDayLabelWithDate(new Date().toISOString());
+    expect(result).toBe("Today");
   });
 });
