@@ -87,6 +87,7 @@ const Map: FC<IMap> = ({
     });
   }, [map]);
 
+  
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full">
