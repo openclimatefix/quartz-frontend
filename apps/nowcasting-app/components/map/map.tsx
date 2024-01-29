@@ -73,7 +73,7 @@ const Map: FC<IMap> = ({
     }
     // TODO: unsure as to whether react cleans up/ends up with multiple maps when re-rendering
     // or whether removing will cause more issues elsewhere in the app.
-    // Will just keep an eye on performance etc. for now.
+    // Will just keep an eye on performance etc. for now. D
     // return () => map.current?.remove();
   }, []);
 
