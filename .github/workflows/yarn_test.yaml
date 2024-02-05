@@ -22,6 +22,6 @@ jobs:
         cd apps/nowcasting-app
         yarn install
     - name: run tests
-      run:
+      run: |
         cd apps/nowcasting-app
         yarn test
