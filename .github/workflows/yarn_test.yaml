@@ -25,5 +25,3 @@ jobs:
       run: |
         cd apps/nowcasting-app
         yarn test --coverage --coverageDirectory=../..
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2
