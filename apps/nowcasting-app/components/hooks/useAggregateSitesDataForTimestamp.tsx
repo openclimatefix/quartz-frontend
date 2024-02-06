@@ -227,4 +227,3 @@ export const useAggregateSitesDataForTimestamp = (
     return sitesTableData;
   }, [firstForecastData, selectedISOTime]);
 };
-
