@@ -278,6 +278,18 @@ export const formatISODateStringHumanNumbersOnly = (date: string) => {
   return `${date_london} ${date_london_time}`;
 };
 
+export const prettyPrintDayLabelWithDate = (d: string | number) => {
+  const parsedDate = new Date(d);
+  // check if date is valid
+  if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date";
+  // if date is today, return "Today"
+  if (parsedDate.toDateString() === new Date().toDateString()) return "Today";
+  // otherwise return day of the week and short date
+  return `${parsedDate.toLocaleDateString("en-GB", {
+    weekday: "short"
+  })} ${parsedDate.toLocaleDateString("en-GB", { day: "numeric" })}`;
+};
+
 export function prettyPrintChartAxisLabelDate(x: string | number) {
   // Check if x is a number, if so then it might be a UNIX timestamp
   if (typeof x === "number") {

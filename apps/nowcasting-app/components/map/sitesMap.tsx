@@ -179,6 +179,11 @@ const SitesMap: React.FC<SitesMapProps> = ({
           label: site.label,
           capacity: site.capacity,
           expectedPV: site.expectedPV,
+          // Make the radius of the circle where the area is proportional to the expectedPV
+          // We know expectedPVRadius has to be proportional to sqrt(expectedPV),
+          // But this didn't look good, so took took halfway between linear and area
+          // and if expectedPV == capacity, then expectedPVRadius == capacity, therefore
+          expectedPVRadius: Math.pow(site.expectedPV, 0.67) * Math.pow(site.capacity, 0.34),
           selected: site.id === clickedSiteGroupId
         }
       };
@@ -398,7 +403,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
     if (generationLayer) {
       map.setPaintProperty(`Generation-${groupName}`, "circle-radius", [
         "*",
-        ["to-number", ["get", "expectedPV"]],
+        ["to-number", ["get", "expectedPVRadius"]],
         getRingMultiplier(groupAggregationLevel, maxCapacity)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
@@ -418,7 +423,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
         paint: {
           "circle-radius": [
             "*",
-            ["to-number", ["get", "expectedPV"]],
+            ["to-number", ["get", "expectedPVRadius"]],
             getRingMultiplier(groupAggregationLevel, maxCapacity)
           ],
           "circle-color": [
