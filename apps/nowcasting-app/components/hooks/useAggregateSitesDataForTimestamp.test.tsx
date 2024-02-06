@@ -1,7 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import {
-  formatDNORegionName,
-} from "./useAggregateSitesDataForTimestamp";
+import { formatDNORegionName } from "./useAggregateSitesDataForTimestamp";
 
 describe("check formatDNORegionName ", () => {
   test("Check we are getting the correct respsonse", () => {

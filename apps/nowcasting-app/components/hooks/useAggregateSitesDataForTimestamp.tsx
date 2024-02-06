@@ -47,16 +47,16 @@ export const formatDNORegionName = (regionName: string) => {
   We want to change this to "East (UKPN)" or just "SSE" */
 
   // if regionName is empty then return now
-    if (!regionName) return regionName;
+  if (!regionName) return regionName;
 
   const regionNameParts = regionName.split(" ");
   if (regionNameParts.length > 1) {
     // Strip out the brackets
-    regionName = `${regionNameParts[1].replace('(','').replace(')','')}`;
+    regionName = `${regionNameParts[1].replace("(", "").replace(")", "")}`;
 
     // join names back together
     regionName = `${regionName} (${regionNameParts[0]})`;
-    }
+  }
 
   return regionName;
 };
