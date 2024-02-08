@@ -1,4 +1,3 @@
-import React from "react";
 import { theme } from "../../../tailwind.config";
 import { ClockIcon } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
@@ -146,6 +145,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
 };
 
 type ForecastHeaderProps = {
+  children: React.ReactNode;
   forecastNextPV: string;
   forecastPV: string;
   actualPV: string;
