@@ -1,4 +1,5 @@
 type DeltaForecastLabelProps = {
+  children: React.ReactNode;
   tip: string | React.ReactNode;
   position?: "left" | "right" | "middle";
   className?: string;

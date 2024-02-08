@@ -113,7 +113,7 @@ const Header: React.FC<HeaderProps> = () => {
           rel="noreferrer"
         >
           <img
-            src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"
+            src="/QUARTZENERGY_LOGO_TEXTONLY_WHITE.svg"
             alt="quartz_logo"
             className="h-8 w-auto"
           />
