@@ -359,48 +359,47 @@ export const ClockInlineSmall = (props:React.SVGProps<SVGSVGElement> & { title: 
 
 // right arrow 
 
-export const RightArrow = (props: React.SVGProps<SVGSVGElement>) => {
-  return (
+export const RightArrow: React.FC<IconProps> = ({ className }) => (
+  <span>
     <svg
+      className={className || ""}
       width={28}
       height={8}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
     >
       <path
         d="M20.354 4.354a.5.5 0 000-.708L17.172.464a.5.5 0 10-.707.708L19.293 4l-2.828 2.828a.5.5 0 10.707.708l3.182-3.182zM8 4.5h12v-1H8v1z"
         fill="#fff"
       />
     </svg>
-  );
-}
+  </span>
+)
 
 // chevron double right
-export const ChevronRight = (props: React.SVGProps<SVGSVGElement>) => {
-  return (
+export const ChevronRight: React.FC<IconProps> = ({ className }) => (
+  <span>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
       strokeWidth={1.5}
-      stroke="currentColor"
-      className="w-6 h-6">
+      className="w-6 h-6"
+      stroke="white">
       <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
     </svg>
+    </span>
   )
-}
 
 // chevron double left
 
-export const ChevronLeft = (props: React.SVGProps<SVGSVGElement>) => {
-  return (
+export const ChevronLeft: React.FC<IconProps> = ({ className }) => (
+  <span>
     <svg
       width={24}
       height={24}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
     >
       <rect width={24} height={24} rx={8} fill="#fff" fillOpacity={0.4} />
       <path
@@ -412,27 +411,28 @@ export const ChevronLeft = (props: React.SVGProps<SVGSVGElement>) => {
         fill="#fff"
       />
     </svg>
+    </span>
   );
-}
+
 
 // hamburger menu
 
-export const HamburgerMenu = (props: React.SVGProps<SVGSVGElement>) => {
-  return (
+export const HamburgerMenu: React.FC<IconProps> = ({ className }) => (
+  <span>
     <svg
       width={24}
       height={24}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      {...props}
     >
       <path
         d="M3 5a1 1 0 000 2h18a1 1 0 100-2H3zM3 11a1 1 0 100 2h18a1 1 0 100-2H3zM3 17a1 1 0 100 2h18a1 1 0 100-2H3z"
         fill="#fff"
       />
     </svg>
+    </span>
   );
-}
+
 
 // info icon
 
