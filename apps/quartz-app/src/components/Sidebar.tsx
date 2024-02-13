@@ -94,7 +94,7 @@ function Sidebar() {
   }
   else {
     return (
-      <div className="flex-0 w-96 justify-center items-center bg-444444">
+      <div className="flex-0 justify-center items-center bg-444444">
       <div className="w-14 h-full px-2 py-4 bg-neutral-700 flex-col justify-start items-center gap-5 inline-flex">
         <div className="justify-start items-start gap-[110px] inline-flex">
     <button className="w-6 h-6 relative rounded-lg" onClick={handleClick}><HamburgerMenu/></button>
