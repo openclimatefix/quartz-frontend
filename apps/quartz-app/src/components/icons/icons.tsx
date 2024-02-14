@@ -483,7 +483,7 @@ export const PowerIcon: React.FC<IconProps> = ({className}) => (
 
 
 // solar
-export const WindIcon: React.FC<IconProps> = ({className}) => (
+export const SolarIcon: React.FC<IconProps> = ({className}) => (
   <span>
     <svg
       className={className || ""}
@@ -513,14 +513,13 @@ export const WindIcon: React.FC<IconProps> = ({className}) => (
 
 // wind
 
-export const SolarIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const WindIcon: React.FC<IconProps> = ({className}) => (
   <span>
     <svg
       width={32}
       height={32}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-   
     >
       <path
         d="M15.754 9.2a2.343 2.343 0 112.343 2.343H2.589v1.714h15.508A4.057 4.057 0 1014.04 9.2h1.714z"
