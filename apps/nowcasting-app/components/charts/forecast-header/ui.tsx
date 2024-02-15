@@ -18,7 +18,10 @@ export const ForecastHeadlineFigure: React.FC<{
       : "dash:3xl:text-6xl dash:xl:text-5xl lg:text-3xl"
   }`;
   return (
-    <div className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between">
+    <div
+      data-test="pvlive-ocf-headline-figure"
+      className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
+    >
       <div className="flex flex-1 self-center items-center justify-center">
         <div className={`flex items-center ${textSizeClasses}`}>
           <ForecastLabel
@@ -105,7 +108,10 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
   color = yellow
 }) => {
   return (
-    <div className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between">
+    <div
+      data-test="forecast-label-tooltip"
+      className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
+    >
       <ForecastLabel
         className="dash:order-2"
         tip={
@@ -158,7 +164,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextTimeOnly
 }) => {
   return (
-    <div className="flex content-between bg-ocf-gray-800 h-auto">
+    <div data-test="national-chart-header" className="flex content-between bg-ocf-gray-800 h-auto">
       <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>

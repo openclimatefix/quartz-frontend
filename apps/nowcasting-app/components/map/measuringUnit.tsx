@@ -26,6 +26,7 @@ const MeasuringUnit = ({
         <button
           onClick={(event) => onToggle(event, ActiveUnit.MW)}
           disabled={isLoading}
+          id="MapButtonMW"
           type="button"
           className={`${buttonClasses}  ${
             activeUnit === ActiveUnit.MW
@@ -38,6 +39,7 @@ const MeasuringUnit = ({
         <button
           onClick={(event) => onToggle(event, ActiveUnit.percentage)}
           disabled={isLoading}
+          id="MapButtonPercentage"
           type="button"
           className={`${buttonClasses} px-5 ${
             activeUnit === ActiveUnit.percentage
@@ -51,6 +53,7 @@ const MeasuringUnit = ({
         <button
           onClick={(event) => onToggle(event, ActiveUnit.capacity)}
           disabled={isLoading}
+          id="MapButtonCapacity"
           type="button"
           className={`${buttonClasses}  ${
             activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"
