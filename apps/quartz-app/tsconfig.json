@@ -13,6 +13,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "rootDir": "",
+    "outDir": ".next",
+    "downlevelIteration": true,
     "plugins": [
       {
         "name": "next"
