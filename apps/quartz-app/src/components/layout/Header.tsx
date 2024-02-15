@@ -84,7 +84,7 @@
 // };
 
 // type SidebarProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
-import { OCFlogo } from "../../../../nowcasting-app/components/icons/logo";
+import { OCFLogo } from "@/src/assets/logo";
 
 type HeaderProps = {};
 
@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = () => {
           <span className="block mr-[1px] font-light tracking-wide text-[10px]">
             powered by
           </span>
-          <OCFlogo />
+          <OCFLogo />
         </div>
       </div>
       <div className="grow text-center inline-flex px-8 gap-5 items-center">

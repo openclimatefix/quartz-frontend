@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-export const OCFlogo: FC = () => (
+export const OCFLogo: FC = () => (
   <a
     className="max-h-full z-20"
     href="https://www.openclimatefix.org/"
