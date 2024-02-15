@@ -33,8 +33,11 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
       <div className="flex-0 w-96 justify-center items-center bg-444444">
         <div className="w-full h-full p-4 bg-neutral-700 flex-col justify-start items-start gap-5 inline-flex">
           <div className="justify-start items-start gap-[110px] flex-col">
-          <div className="text-white text-lg font-bold font-sans leading-normal">{title}</div>
-            <button className="w-8 h-8 relative" onClick={handleClick}><ChevronLeft /></button>
+            <div className="flex justify-between"><
+              div className="text-white text-lg font-bold font-sans leading-normal">{title}</div>
+              <button className="w-8 h-8 relative" onClick={handleClick}><ChevronLeft /></button>
+            </div>
+          
             <div className="self-stretch h-[465px] flex-col justify-start items-start gap-4 flex">
               {/* start card */}
               <WideCard
@@ -43,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
                 currentForecast={data.currentPowerForecast}
                 nextForecast={data.nextPowerForecast}
                 energyTag="Power"
-                theme="green-200" />
+                theme={"green-200"} />
               {/* end card */}
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
                <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
@@ -85,21 +88,26 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
     <button className="w-6 h-6 relative rounded-lg" onClick={handleClick}><HamburgerMenu/></button>
      </div>
           <div className="self-stretch h-[354px] flex-col justify-start items-start gap-4 flex">
-            {/* start card */}
             <MiniCard
               icon={<PowerIcon />}
               theme={"green-200"}
               actualGeneration={data.actualPowerGeneration}
               nextForecast={data.nextPowerForecast}
               toggle={false} />
-            <div className="w-[30px] h-px border border-white border-opacity-40"></div>
+            <div className="pt-2">
+              <div className="w-full h-px border border-white border-opacity-40"></div>
+            </div>
+             <div className="w-full h-px border border-white border-opacity-40"></div>
             <MiniCard
               icon={<WindIcon/>}
               theme={"cyan-300"}
               actualGeneration={data.actualWindGeneration}
               nextForecast={data.nextPowerForecast}
               toggle={true} />
-            <div className="w-[30px] h-px border border-white border-opacity-40"></div>
+            <div className="pt-2">
+              <div className="w-full h-px border border-white border-opacity-40"></div>
+            </div>
+            <div className="w-full h-px border border-white border-opacity-40"></div>
             <MiniCard
               icon={<SolarIcon />}
               theme={"amber-300"}

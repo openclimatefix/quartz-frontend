@@ -14,7 +14,7 @@ type MiniCardProps = {
 const MiniCard: React.FC<MiniCardProps> = ({icon, theme, actualGeneration, currentForecast, nextForecast, toggle}) =>
 {
   return (
-    <div className="self-stretch h-[84px] flex-col justify-start items-start gap-4 flex">
+    <div className="self-stretch h-[84px] flex-col justify-start items-start gap-8 flex">
       <div className="self-stretch h-10 flex-col justify-start items-start gap-2 flex">
         <div className="self-stretch justify-center items-center gap-2 inline-flex">
           {icon}
@@ -24,7 +24,7 @@ const MiniCard: React.FC<MiniCardProps> = ({icon, theme, actualGeneration, curre
       </div>
       <div className="self-stretch h-7 flex-col justify-start items-center gap-1 flex">
         <div className="h-2 px-2 pb-1 justify-center items-center inline-flex"><RightArrow/></div>
-        <div className={`text-center text-${theme} text-base font-bold font-sans leading-none mb-2"`}>{nextForecast}</div>
+        <div className={`text-center text-${theme} text-base  pb-4 font-bold font-sans leading-none mb-2"`}>{nextForecast}</div>
       </div>
       </div>
     

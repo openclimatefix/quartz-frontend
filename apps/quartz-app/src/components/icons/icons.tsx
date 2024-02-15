@@ -8,6 +8,8 @@ type LegendLineGraphIconProps = {
 
 type IconProps = {
   className?: string;
+  size: number;
+  strokeWidth: number;
 };
 
 type InfoIconProps = {
@@ -366,6 +368,7 @@ export const RightArrow: React.FC<IconProps> = ({ className }) => (
       width={28}
       height={8}
       fill="none"
+      viewBox={`0 0 28 8`}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
@@ -470,7 +473,8 @@ export const PowerIcon: React.FC<IconProps> = ({className}) => (
       width={32}
       height={32}
       fill="none"
-      stroke="white"
+      strokeWith={2}
+      stroke={"white"}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
@@ -513,11 +517,13 @@ export const SolarIcon: React.FC<IconProps> = ({className}) => (
 
 // wind
 
-export const WindIcon: React.FC<IconProps> = ({className}) => (
+export const WindIcon: React.FC<IconProps> = ({className, strokeWidth}) => (
   <span>
     <svg
       width={32}
       height={32}
+      viewBox="0 0 32 32"
+      strokeWidth={strokeWidth || 2}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
