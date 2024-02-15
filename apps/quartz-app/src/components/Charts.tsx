@@ -163,15 +163,6 @@ const Charts: React.FC<ChartsProps> = ({
             <Area
               type="monotone"
               stackId={"1"}
-              dataKey="wind_forecast"
-              stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-              strokeWidth={2}
-              fillOpacity={0.75}
-              fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-            />
-            <Area
-              type="monotone"
-              stackId={"1"}
               dataKey="solar_forecast"
               stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
               strokeWidth={2}
@@ -180,16 +171,25 @@ const Charts: React.FC<ChartsProps> = ({
             />
             <Area
               type="monotone"
-              stackId={"2"}
-              dataKey="wind_generation"
-              stroke="#ffffff"
-              fillOpacity={0}
+              stackId={"1"}
+              dataKey="wind_forecast"
+              stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
+              strokeWidth={2}
+              fillOpacity={0.75}
+              fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
             />
             <Area
               type="monotone"
               stackId={"2"}
               dataKey="solar_generation"
               stroke={"#ffffff"}
+              fillOpacity={0}
+            />
+            <Area
+              type="monotone"
+              stackId={"2"}
+              dataKey="wind_generation"
+              stroke="#ffffff"
               fillOpacity={0}
             />
           </ComposedChart>
