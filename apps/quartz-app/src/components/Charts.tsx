@@ -86,11 +86,11 @@ const Charts: React.FC<ChartsProps> = ({
         (data) => data.timestamp === timestamp
       );
       if (solarData) {
-        solarData.solar_forecast = value.PowerKW;
+        solarData.solar_forecast = value.PowerKW / 1000;
       } else {
         formattedGenerationData?.push({
           timestamp,
-          solar_forecast: value.PowerKW,
+          solar_forecast: value.PowerKW / 1000,
         });
       }
     }
@@ -104,11 +104,11 @@ const Charts: React.FC<ChartsProps> = ({
         (data) => data.timestamp === timestamp
       );
       if (solarData) {
-        solarData.wind_forecast = value.PowerKW;
+        solarData.wind_forecast = value.PowerKW / 1000;
       } else {
         formattedGenerationData?.push({
           timestamp,
-          wind_forecast: value.PowerKW,
+          wind_forecast: value.PowerKW / 1000,
         });
       }
     }
