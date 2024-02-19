@@ -1,6 +1,5 @@
 import React from "react";
 
-
 type LegendLineGraphIconProps = {
   className?: string;
   dashed?: boolean;
@@ -18,7 +17,7 @@ type InfoIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashed = false
+  dashed = false,
 }) => (
   <svg
     className={className}
@@ -53,15 +52,9 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-
 export const ClockIcon: React.FC<IconProps> = ({ className }) => (
- <span>
-    <svg
-      width={20}
-      height={16}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+  <span>
+    <svg width={20} height={16} fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -69,9 +62,8 @@ export const ClockIcon: React.FC<IconProps> = ({ className }) => (
         fill="#fff"
       />
     </svg>
-    </span>
-  );
-
+  </span>
+);
 
 export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
   <svg
@@ -113,8 +105,7 @@ export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-
-export const UpArrow: React.FC<IconProps> = ({size = 22 }) => (
+export const UpArrow: React.FC<IconProps> = ({ size = 22 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     height={size}
@@ -138,14 +129,27 @@ export const DownArrow: React.FC<IconProps> = ({ size = 22 }) => (
   </svg>
 );
 
-export const SitesDownArrow: React.FC<IconProps> = ({ className, size = 16 }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" height={size} viewBox="0 0 36 25" width={size}>
+export const SitesDownArrow: React.FC<IconProps> = ({
+  className,
+  size = 16,
+}) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height={size}
+    viewBox="0 0 36 25"
+    width={size}
+  >
     <path d="M4 8 H28 L16 26 z" />
   </svg>
 );
 
 export const SitesUpArrow: React.FC<IconProps> = ({ className, size = 16 }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" height={size} viewBox="0 0 36 16" width={size}>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    height={size}
+    viewBox="0 0 36 16"
+    width={size}
+  >
     <path d="M4 24 H28 L16 6 z" />
   </svg>
 );
@@ -187,7 +191,12 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
     stroke="currentColor"
     viewBox="0 0 24 24"
   >
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M5 13l4 4L19 7"
+    />
   </svg>
 );
 
@@ -279,7 +288,9 @@ export const SpinnerTextInlineSmall = (
   </span>
 );
 
-export const CheckInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
+export const CheckInlineSmall = (
+  props: React.SVGProps<SVGSVGElement> & { title: string }
+) => (
   <span title={props.title || ""}>
     <svg
       width={10}
@@ -288,12 +299,19 @@ export const CheckInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title:
       xmlns="http://www.w3.org/2000/svg"
       className={props.className}
     >
-      <path d="M1 5l3 3 5-5.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M1 5l3 3 5-5.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   </span>
 );
 
-export const CrossInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
+export const CrossInlineSmall = (
+  props: React.SVGProps<SVGSVGElement> & { title: string }
+) => (
   <span title={props.title || ""}>
     <svg
       width={10}
@@ -312,9 +330,17 @@ export const CrossInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title:
   </span>
 );
 
-export const ClockInlineSmall = (props:React.SVGProps<SVGSVGElement> & { title: string }) => (
-  <span >
-    <svg width={10} height={10} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+export const ClockInlineSmall = (
+  props: React.SVGProps<SVGSVGElement> & { title: string }
+) => (
+  <span>
+    <svg
+      width={10}
+      height={10}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
       <g clipPath="url(#prefix__clip0_2537_298)" stroke="currentColor">
         <path d="M9.5 5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
         <path d="M5 2.5V5H3.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -328,8 +354,7 @@ export const ClockInlineSmall = (props:React.SVGProps<SVGSVGElement> & { title: 
   </span>
 );
 
-
-// right arrow 
+// right arrow
 
 export const RightArrow: React.FC<IconProps> = ({ className }) => (
   <span>
@@ -347,7 +372,7 @@ export const RightArrow: React.FC<IconProps> = ({ className }) => (
       />
     </svg>
   </span>
-)
+);
 
 // chevron double right
 export const ChevronRight: React.FC<IconProps> = ({ className }) => (
@@ -358,22 +383,22 @@ export const ChevronRight: React.FC<IconProps> = ({ className }) => (
       viewBox="0 0 24 24"
       strokeWidth={1.5}
       className="w-6 h-6"
-      stroke="white">
-      <path strokeLinecap="round" strokeLinejoin="round" d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5" />
+      stroke="white"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+      />
     </svg>
-    </span>
-  )
+  </span>
+);
 
 // chevron double left
 
 export const ChevronLeft: React.FC<IconProps> = ({ className }) => (
   <span>
-    <svg
-      width={24}
-      height={24}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width={24} height={24} fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect width={24} height={24} rx={8} fill="#fff" fillOpacity={0.4} />
       <path
         d="M18.707 6.293a1 1 0 00-1.414 0l-5 5a1 1 0 000 1.414l5 5a1 1 0 001.414-1.414L14.414 12l4.293-4.293a1 1 0 000-1.414z"
@@ -384,59 +409,52 @@ export const ChevronLeft: React.FC<IconProps> = ({ className }) => (
         fill="#fff"
       />
     </svg>
-    </span>
-  );
-
+  </span>
+);
 
 // hamburger menu
 
 export const HamburgerMenu: React.FC<IconProps> = ({ className }) => (
   <span>
-    <svg
-      width={24}
-      height={24}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg width={24} height={24} fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M3 5a1 1 0 000 2h18a1 1 0 100-2H3zM3 11a1 1 0 100 2h18a1 1 0 100-2H3zM3 17a1 1 0 100 2h18a1 1 0 100-2H3z"
         fill="#fff"
       />
     </svg>
-    </span>
-  );
-
+  </span>
+);
 
 // info icon
 
 export const InfoIcon = (props: React.SVGProps<SVGSVGElement>) => {
-    <svg
-      width={24}
-      height={24}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path
-        d="M12 21a9 9 0 100-18 9 9 0 000 18zM12 8h.01"
-        stroke="#fff"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M11 12h1v4h1"
-        stroke="#fff"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-}
+  <svg
+    width={24}
+    height={24}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <path
+      d="M12 21a9 9 0 100-18 9 9 0 000 18zM12 8h.01"
+      stroke="#fff"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M11 12h1v4h1"
+      stroke="#fff"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>;
+};
 
 // power
 
-export const PowerIcon: React.FC<IconProps> = ({className}) => (
+export const PowerIcon: React.FC<IconProps> = ({ className }) => (
   <span>
     <svg
       className={className || ""}
@@ -451,12 +469,11 @@ export const PowerIcon: React.FC<IconProps> = ({className}) => (
         fill="white"
       />
     </svg>
-    </span>
-)
-
+  </span>
+);
 
 // solar
-export const SolarIcon: React.FC<IconProps> = ({className}) => (
+export const SolarIcon: React.FC<IconProps> = ({ className }) => (
   <span>
     <svg
       className={className || ""}
@@ -480,13 +497,12 @@ export const SolarIcon: React.FC<IconProps> = ({className}) => (
         fill="#fff"
       />
     </svg>
-    </span>
-  );
-
+  </span>
+);
 
 // wind
 
-export const WindIcon: React.FC<IconProps> = ({className, strokeWidth}) => (
+export const WindIcon: React.FC<IconProps> = ({ className, strokeWidth }) => (
   <span>
     <svg
       width={32}
@@ -504,9 +520,5 @@ export const WindIcon: React.FC<IconProps> = ({className, strokeWidth}) => (
         fill="#fff"
       />
     </svg>
-    </span>
-  );
-
-
-
-
+  </span>
+);
