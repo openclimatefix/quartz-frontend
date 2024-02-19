@@ -48,8 +48,11 @@ const Charts: React.FC<ChartsProps> = ({
 
   const formatDate = (time: number) => {
     const date = new Date(time);
-    return date.toLocaleString();
+    date.setMinutes(date.getMinutes() + 30);
+    return date.toISOString();
   };
+  formatDate(1708135056000)
+  console.log((formatDate(1708135056000)))
 
   const getNowInTimezone = () => {
     const now = DateTime.now().setZone("ist");
