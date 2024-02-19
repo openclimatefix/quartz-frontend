@@ -1,5 +1,3 @@
-import ForecastTimeDisplay from "./forecast-time";
-
 interface CardProps {
   energyTag: string;
   icon: JSX.Element;
