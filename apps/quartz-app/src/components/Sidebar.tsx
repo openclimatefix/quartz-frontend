@@ -5,6 +5,7 @@ import { useState } from "react";
 import WideCard from "./sidebar-components/card";
 import ForecastTimeDisplay from "./sidebar-components/time-label";
 import MiniCard from "./sidebar-components/mini-card";
+import { text } from "stream/consumers";
 
 type SidebarProps = {
   title : string;
@@ -46,7 +47,8 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
                 currentForecast={data.currentPowerForecast}
                 nextForecast={data.nextPowerForecast}
                 energyTag="Power"
-                theme={"green-200"} />
+                bgTheme="bg-quartz-energy-100"
+                textTheme="text-quartz-energy-100"/>
               {/* end card */}
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
                <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
@@ -65,7 +67,8 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
                 currentForecast={data.currentWindForecast}
                 nextForecast={data.nextWindForecast}
                 energyTag="Wind"
-                theme="cyan-300" />
+                textTheme="text-quartz-energy-200"
+                bgTheme="bg-quartz-energy-200"/>
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <WideCard
                 icon={<SolarIcon />}
@@ -73,7 +76,8 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
                 currentForecast={data.currentSolarForecast}
                 nextForecast={data.nextSolarForecast}
                 energyTag="Solar"
-                theme="amber-300" />
+                textTheme="text-quartz-energy-300"
+                bgTheme="bg-quartz-energy-300"/>
               </div>
             </div>
           </div>
@@ -90,31 +94,27 @@ const Sidebar: React.FC<SidebarProps> = ({title}) => {
           <div className="self-stretch h-[354px] flex-col justify-start items-start gap-4 flex">
             <MiniCard
               icon={<PowerIcon />}
-              theme={"green-200"}
+              textTheme={"text-quartz-energy-100"}
+              bgTheme={"bg-quartz-energy-100"}
               actualGeneration={data.actualPowerGeneration}
               nextForecast={data.nextPowerForecast}
-              toggle={false} />
-            <div className="pt-2">
-              <div className="w-full h-px border border-white border-opacity-40"></div>
-            </div>
-             <div className="w-full h-px border border-white border-opacity-40"></div>
+              />
+             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
               icon={<WindIcon/>}
-              theme={"cyan-300"}
+              textTheme={"text-quartz-energy-200"}
+              bgTheme={"bg-quartz-energy-200"}
               actualGeneration={data.actualWindGeneration}
               nextForecast={data.nextPowerForecast}
-              toggle={true} />
-            <div className="pt-2">
-              <div className="w-full h-px border border-white border-opacity-40"></div>
-            </div>
-            <div className="w-full h-px border border-white border-opacity-40"></div>
+               />
+            <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
               icon={<SolarIcon />}
-              theme={"amber-300"}
+              textTheme={"text-quartz-energy-300"}
+              bgTheme={"bg-quartz-energy-300"}
               actualGeneration={data.actualSolarGeneration}
               nextForecast={data.nextSolarForecast}
-              toggle={true} />
-            
+              />
           </div>
         </div>
       </div>
