@@ -39,7 +39,7 @@ const Charts: React.FC<ChartsProps> = ({
   console.log("Charts data test", data);
 
   const convertDatestampToEpoch = (time: string) => {
-    const date = new Date(time);
+    const date = new Date(time.slice(0, 16));
     return date.getTime();
   };
 
@@ -114,7 +114,13 @@ const Charts: React.FC<ChartsProps> = ({
     }
   }
 
-  console.log("formattedGenerationData", formattedGenerationData);
+  console.log(
+    "formattedGenerationData",
+    formattedGenerationData.map((d) => ({
+      prettyPrint: new Date(d.timestamp).toLocaleString(),
+      ...d,
+    }))
+  );
   const now = new Date();
   const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
   const ticks = offsets.map((o) => {
@@ -183,6 +189,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="solar_generation"
               stroke={"#ffffff"}
+              dot={true}
               fillOpacity={0}
             />
             <Area
@@ -190,6 +197,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="wind_generation"
               stroke="#ffffff"
+              dot={true}
               fillOpacity={0}
             />
           </ComposedChart>
