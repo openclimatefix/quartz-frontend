@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ title }) => {
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
                 <ForecastTimeDisplay
-                  time="09:00"
+                  time="09:05"
                   icon={<ClockIcon />}
                   forecastTag="NOW GW"
                 />
