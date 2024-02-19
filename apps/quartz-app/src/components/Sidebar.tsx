@@ -1,13 +1,11 @@
 "use client";
-
+import { useGetRegionsQuery } from "@/src/hooks/queries";
+import { components } from "@/src/types/schema";
 import {
   ChevronLeft,
-  ChevronRight,
   ClockIcon,
-  ClockInlineSmall,
   HamburgerMenu,
   PowerIcon,
-  RightArrow,
   SolarIcon,
   WindIcon,
 } from "./icons/icons";
@@ -19,21 +17,76 @@ import { text } from "stream/consumers";
 
 type SidebarProps = {
   title: string;
+  solarForecastData:
+   | components["schemas"]["GetForecastGenerationResponse"]
+    | undefined;
 };
 
-const data = {
-  actualPowerGeneration: 5.8,
-  currentPowerForecast: 6.7,
-  nextPowerForecast: 4.2,
-  actualWindGeneration: 5.4,
-  currentWindForecast: 5.6,
-  nextWindForecast: 2.1,
-  actualSolarGeneration: 0.4,
-  currentSolarForecast: 0.9,
-  nextSolarForecast: 2.1,
-};
 
-const Sidebar: React.FC<SidebarProps> = ({ title }) => {
+// const data = {
+//   actualPowerGeneration: 5.8,
+//   currentPowerForecast: 6.7,
+//   nextPowerForecast: 4.2,
+//   actualWindGeneration: 5.4,
+//   currentWindForecast: 5.6,
+//   nextWindForecast: 2.1,
+//   actualSolarGeneration: 0.4,
+//   currentSolarForecast: 0.9,
+//   nextSolarForecast: 2.1,
+// };
+
+const Sidebar: React.FC<SidebarProps> = ({
+  solarForecastData, title }) => {
+  const { data, error } = useGetRegionsQuery("solar");
+  console.log("Sidebar data test", data);
+
+   const convertDatestampToEpoch = (time: string) => {
+    const date = new Date(time);
+    return date.getTime()
+   };
+  
+  const formatDate = (time: number) => {
+    const date = new Date(time);
+    date.setMinutes(date.getMinutes() + 30);
+    return date.toISOString();
+  };
+
+  // functions to 
+  
+  const formattedGenerationData: {
+    timestamp: number;
+    solar_generation?: number;
+    wind_generation?: number;
+    solar_forecast?: number;
+    wind_forecast?: number;
+  }[] =
+    solarForecastData?.values?.map((value) => {
+      return {
+        timestamp: convertDatestampToEpoch(value.Time),
+        solar_generation: value.PowerKW / 1000,
+      };
+    }) || [];
+  
+    if (solarForecastData?.values) {
+    for (const value of solarForecastData?.values) {
+      const timestamp = convertDatestampToEpoch(value.Time);
+      const solarData = formattedGenerationData?.find(
+        (data) => data.timestamp === timestamp
+      );
+      if (solarData) {
+        solarData.solar_forecast = value.PowerKW;
+      } else {
+        formattedGenerationData?.push({
+          timestamp,
+          solar_forecast: value.PowerKW,
+        });
+      }
+    }
+  }
+  
+  console.log("formattedGenerationData", formattedGenerationData);
+
+
   let [expanded, setExpanded] = useState(true);
   function handleClick() {
     setExpanded(!expanded);
@@ -56,9 +109,9 @@ const Sidebar: React.FC<SidebarProps> = ({ title }) => {
               {/* start card */}
               <WideCard
                 icon={<PowerIcon />}
-                actualGeneration={data.actualPowerGeneration}
-                currentForecast={data.currentPowerForecast}
-                nextForecast={data.nextPowerForecast}
+                actualGeneration={solarForecastData?.values[67].PowerKW}
+                currentForecast={solarForecastData?.values[67].PowerKW}
+                nextForecast={solarForecastData?.values[68].PowerKW}
                 energyTag="Power"
                 bgTheme="bg-quartz-energy-100"
                 textTheme="text-quartz-energy-100"
@@ -67,21 +120,21 @@ const Sidebar: React.FC<SidebarProps> = ({ title }) => {
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
                 <ForecastTimeDisplay
-                  time="09:05"
+                  time={solarForecastData?.values[67].Time}
                   icon={<ClockIcon />}
                   forecastTag="NOW GW"
                 />
                 <ForecastTimeDisplay
-                  time="09:15"
+                  time={solarForecastData?.values[68].Time[3]}
                   icon={<ClockIcon />}
                   forecastTag="NEXT GW"
                 />
               </div>
               <WideCard
                 icon={<WindIcon />}
-                actualGeneration={data.actualWindGeneration}
-                currentForecast={data.currentWindForecast}
-                nextForecast={data.nextWindForecast}
+                actualGeneration={5}
+                currentForecast={5}
+                nextForecast={5}
                 energyTag="Wind"
                 textTheme="text-quartz-energy-200"
                 bgTheme="bg-quartz-energy-200"
@@ -89,9 +142,9 @@ const Sidebar: React.FC<SidebarProps> = ({ title }) => {
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <WideCard
                 icon={<SolarIcon />}
-                actualGeneration={data.actualSolarGeneration}
-                currentForecast={data.currentSolarForecast}
-                nextForecast={data.nextSolarForecast}
+                actualGeneration={5}
+                currentForecast={5}
+                nextForecast={5}
                 energyTag="Solar"
                 textTheme="text-quartz-energy-300"
                 bgTheme="bg-quartz-energy-300"
