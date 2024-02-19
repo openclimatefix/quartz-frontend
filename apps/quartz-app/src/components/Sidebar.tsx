@@ -35,6 +35,9 @@ type SidebarProps = {
   windForecastData:
     | components["schemas"]["GetForecastGenerationResponse"]
     | undefined;
+  solarForecastData:
+   | components["schemas"]["GetForecastGenerationResponse"]
+    | undefined;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -302,12 +305,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
                 <ForecastTimeDisplay
-                  time={prettyPrintNowTime()}
+                  time="09:05"
                   icon={<ClockIcon />}
                   forecastTag="NOW GW"
                 />
                 <ForecastTimeDisplay
-                  time={prettyPrintNextTime()}
+                  time="09:15"
                   icon={<ClockIcon />}
                   forecastTag="NEXT GW"
                 />
