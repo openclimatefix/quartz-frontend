@@ -1,6 +1,8 @@
 "use client";
 import { useGetRegionsQuery } from "@/src/hooks/queries";
 import { components } from "@/src/types/schema";
+import { useGetRegionsQuery } from "@/src/hooks/queries";
+import { components } from "@/src/types/schema";
 import {
   ChevronLeft,
   ClockIcon,
@@ -30,6 +32,9 @@ type SidebarProps = {
     | undefined;
   windForecastData:
     | components["schemas"]["GetForecastGenerationResponse"]
+    | undefined;
+  solarForecastData:
+   | components["schemas"]["GetForecastGenerationResponse"]
     | undefined;
 };
 
@@ -230,9 +235,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               {/* start card */}
               <WideCard
                 icon={<PowerIcon />}
-                actualGeneration={actualPowerGeneration.toFixed(2) || "--"}
-                currentForecast={powerForecastNow.toFixed(2) || 0}
-                nextForecast={powerForecastNext.toFixed(2) || 0}
+                actualGeneration={data.actualPowerGeneration}
+                currentForecast={data.currentPowerForecast}
+                nextForecast={data.nextPowerForecast}
                 energyTag="Power"
                 bgTheme="bg-quartz-energy-100"
                 textTheme="text-quartz-energy-100"
@@ -241,21 +246,21 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
                 <ForecastTimeDisplay
-                  time={prettyPrintNowTime()}
+                  time="09:05"
                   icon={<ClockIcon />}
                   forecastTag="NOW GW"
                 />
                 <ForecastTimeDisplay
-                  time={prettyPrintNextTime()}
+                  time="09:15"
                   icon={<ClockIcon />}
                   forecastTag="NEXT GW"
                 />
               </div>
               <WideCard
                 icon={<WindIcon />}
-                actualGeneration={actualWindGeneration.toFixed(2) || "--"}
-                currentForecast={windForecastNow.toFixed(2) || 0}
-                nextForecast={windForecastNext.toFixed(2) || 0}
+                actualGeneration={data.actualWindGeneration}
+                currentForecast={data.currentWindForecast}
+                nextForecast={data.nextWindForecast}
                 energyTag="Wind"
                 textTheme="text-quartz-energy-200"
                 bgTheme="bg-quartz-energy-200"
@@ -263,9 +268,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <WideCard
                 icon={<SolarIcon />}
-                actualGeneration={actualSolarGeneration.toFixed(2) || "--"}
-                currentForecast={solarForecastNow.toFixed(2) || 0}
-                nextForecast={solarForecastNext.toFixed(2) || 0}
+                actualGeneration={data.actualSolarGeneration}
+                currentForecast={data.currentSolarForecast}
+                nextForecast={data.nextSolarForecast}
                 energyTag="Solar"
                 textTheme="text-quartz-energy-300"
                 bgTheme="bg-quartz-energy-300"
