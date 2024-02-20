@@ -10,7 +10,6 @@ The code is as open source as we can possibly make it (safely) and is powered by
 Head to [quartz.solar](https://quartz.solar) to find out more or to get in touch about using our Production services.
 
 
-
 ## Solar Electricity Nowcasting UI
 
 The `nowcasting-app` is the repository for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project. See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to solar electricity nowcasting.
