@@ -114,6 +114,16 @@ const Charts: React.FC<ChartsProps> = ({
     }
   }
 
+  //sort formattedGenerationData by timestamp
+  formattedGenerationData.sort((a, b) => a.timestamp - b.timestamp);
+
+  // drop data row if wind_forecast and solar_forecast dont exist
+  for (let i = formattedGenerationData.length - 1; i >= 0; i--) {
+      if (formattedGenerationData[i].solar_forecast === undefined && formattedGenerationData[i].wind_forecast === undefined) {
+          formattedGenerationData.splice(i, 1);
+      }
+    }
+
   console.log(
     "formattedGenerationData",
     formattedGenerationData.map((d) => ({
