@@ -39,6 +39,9 @@ export const getGenerationQuery = (
           source,
           region,
         },
+        query: {
+          resample_minutes: 15,
+        },
       },
       signal,
     });
