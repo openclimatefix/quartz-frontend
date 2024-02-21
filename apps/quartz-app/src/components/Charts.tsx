@@ -10,9 +10,11 @@ import {
   Tooltip,
   Legend,
   Area,
+  ReferenceLine,
 } from "recharts";
 // @ts-ignore
 import { theme } from "@/tailwind.config";
+import { DateTime } from "luxon";
 
 type ChartsProps = {
   solarGenerationData:
@@ -46,6 +48,17 @@ const Charts: React.FC<ChartsProps> = ({
   const formatDate = (time: number) => {
     const date = new Date(time);
     return date.toLocaleString();
+  };
+
+  const getNowInTimezone = () => {
+    const now = DateTime.now().setZone("ist");
+    const dateInTimezone = DateTime.fromISO(now.toString().slice(0, 16)).set({
+      hour: now.minute >= 45 ? now.hour + 1 : now.hour,
+      minute: now.minute < 45 ? Math.floor(now.minute / 15) : 0,
+      second: 0,
+      millisecond: 0,
+    });
+    return dateInTimezone.toMillis();
   };
 
   let formattedChartData: {
@@ -212,6 +225,12 @@ const Charts: React.FC<ChartsProps> = ({
               stroke="#ffffff"
               connectNulls={true}
               fillOpacity={0}
+            />
+            <ReferenceLine
+              x={getNowInTimezone()}
+              stroke="white"
+              strokeWidth={2}
+              strokeOpacity={0.5}
             />
           </ComposedChart>
         </ResponsiveContainer>
