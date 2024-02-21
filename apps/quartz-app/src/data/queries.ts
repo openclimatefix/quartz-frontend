@@ -5,8 +5,7 @@ import client from "./apiClient";
 
 // paths
 export const GET_REGIONS = "/{source}/regions";
-export const GET_GENERATION =
-  "/{source}/{region}/generation?resample_minutes=15";
+export const GET_GENERATION = "/{source}/{region}/generation";
 export const GET_FORECAST = "/{source}/{region}/forecast";
 
 export const getRegionsQuery = (
@@ -39,6 +38,9 @@ export const getGenerationQuery = (
         path: {
           source,
           region,
+        },
+        query: {
+          resample_minutes: 15,
         },
       },
       signal,
