@@ -158,6 +158,9 @@ export interface operations {
    */
   get_historic_timeseries_route__source___region__generation_get: {
     parameters: {
+      query?: {
+        resample_minutes?: number | null;
+      };
       path: {
         region: string;
         source: string;
