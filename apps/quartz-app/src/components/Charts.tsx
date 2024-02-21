@@ -48,32 +48,27 @@ const Charts: React.FC<ChartsProps> = ({
     return date.toLocaleString();
   };
 
-  const formattedGenerationData: {
+  let formattedChartData: {
     timestamp: number;
     solar_generation?: number;
     wind_generation?: number;
     solar_forecast?: number;
     wind_forecast?: number;
-  }[] =
-    solarGenerationData?.values.map((value) => {
-      return {
-        timestamp: convertDatestampToEpoch(value.Time),
-        solar_generation: value.PowerKW / 1000,
-      };
-    }) || [];
-  // Loop through wind generation and add to formattedSolarData
-  if (windGenerationData?.values) {
-    for (const value of windGenerationData?.values) {
+  }[] = [];
+
+  // Loop through wind forecast and add to formattedSolarData
+  if (windForecastData?.values) {
+    for (const value of windForecastData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const solarData = formattedGenerationData?.find(
+      const existingData = formattedChartData?.find(
         (data) => data.timestamp === timestamp
       );
-      if (solarData) {
-        solarData.wind_generation = value.PowerKW / 1000;
+      if (existingData) {
+        existingData.wind_forecast = value.PowerKW / 1000;
       } else {
-        formattedGenerationData?.push({
+        formattedChartData?.push({
           timestamp,
-          wind_generation: value.PowerKW / 1000,
+          wind_forecast: value.PowerKW / 1000,
         });
       }
     }
@@ -82,13 +77,13 @@ const Charts: React.FC<ChartsProps> = ({
   if (solarForecastData?.values) {
     for (const value of solarForecastData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const solarData = formattedGenerationData?.find(
+      const existingData = formattedChartData?.find(
         (data) => data.timestamp === timestamp
       );
-      if (solarData) {
-        solarData.solar_forecast = value.PowerKW / 1000;
+      if (existingData) {
+        existingData.solar_forecast = value.PowerKW / 1000;
       } else {
-        formattedGenerationData?.push({
+        formattedChartData?.push({
           timestamp,
           solar_forecast: value.PowerKW / 1000,
         });
@@ -96,27 +91,45 @@ const Charts: React.FC<ChartsProps> = ({
     }
   }
 
-  // Loop through wind forecast and add to formattedSolarData
-  if (windForecastData?.values) {
-    for (const value of windForecastData?.values) {
+  // Loop through solar generation and add to formattedSolarData
+  if (solarGenerationData?.values) {
+    for (const value of solarGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const solarData = formattedGenerationData?.find(
+      const existingData = formattedChartData?.find(
         (data) => data.timestamp === timestamp
       );
-      if (solarData) {
-        solarData.wind_forecast = value.PowerKW / 1000;
-      } else {
-        formattedGenerationData?.push({
-          timestamp,
-          wind_forecast: value.PowerKW / 1000,
-        });
+      if (
+        existingData &&
+        (existingData.solar_forecast || existingData.wind_forecast)
+      ) {
+        existingData.solar_generation = value.PowerKW / 1000;
       }
     }
   }
 
+  // Loop through wind generation and add to formattedSolarData
+  if (windGenerationData?.values) {
+    for (const value of windGenerationData?.values) {
+      const timestamp = convertDatestampToEpoch(value.Time);
+      const existingData = formattedChartData?.find(
+        (data) => data.timestamp === timestamp
+      );
+      if (
+        existingData &&
+        (existingData.solar_forecast || existingData.wind_forecast)
+      ) {
+        existingData.wind_generation = value.PowerKW / 1000;
+      }
+    }
+  }
+
+  formattedChartData = formattedChartData.sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
+
   console.log(
     "formattedGenerationData",
-    formattedGenerationData.map((d) => ({
+    formattedChartData.map((d) => ({
       prettyPrint: new Date(d.timestamp).toLocaleString(),
       ...d,
     }))
@@ -135,7 +148,7 @@ const Charts: React.FC<ChartsProps> = ({
             title={"Solar Generation"}
             // width={730}
             // height={550}
-            data={formattedGenerationData}
+            data={formattedChartData}
             margin={{ top: 25, right: 30, left: 20, bottom: 25 }}
           >
             <CartesianGrid strokeDasharray="3 3" />
@@ -189,7 +202,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="solar_generation"
               stroke={"#ffffff"}
-              dot={true}
+              connectNulls={true}
               fillOpacity={0}
             />
             <Area
@@ -197,7 +210,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="wind_generation"
               stroke="#ffffff"
-              dot={true}
+              connectNulls={true}
               fillOpacity={0}
             />
           </ComposedChart>
