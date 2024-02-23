@@ -130,6 +130,16 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [view, maps]);
 
   useEffect(() => {
+    // Clear any previous map timeouts on initial page load
+    for (const map of maps) {
+      localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`) &&
+        clearTimeout(
+          Number(localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`))
+        );
+    }
+  }, [maps]);
+
+  useEffect(() => {
     maps.forEach((map) => {
       console.log("-- -- -- resizing map");
       map.resize();
