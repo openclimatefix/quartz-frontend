@@ -417,37 +417,17 @@ const Charts: React.FC<ChartsProps> = ({
               type="monotone"
               name={"solar_forecast_past"}
               stackId={"1"}
-              dataKey="solar_forecast_past"
-              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              dataKey="wind_forecast_past"
+              stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
               strokeWidth={2}
+              fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
               fillOpacity={0.6}
-              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
               onMouseEnter={(e) => console.log("Mouse enter", e)}
               onMouseLeave={(e) => console.log("Mouse leave", e)}
             />
             <Area
               type="monotone"
               name={"solar_forecast_future"}
-              stackId={"1"}
-              dataKey="solar_forecast_future"
-              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-              strokeWidth={2}
-              strokeDasharray={"10 5"}
-              // strokeOpacity={0.75}
-              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-              fillOpacity={0.3}
-            />
-            <Area
-              type="monotone"
-              stackId={"1"}
-              dataKey="wind_forecast_past"
-              stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-              strokeWidth={2}
-              fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-              fillOpacity={0.6}
-            />
-            <Area
-              type="monotone"
               stackId={"1"}
               dataKey="wind_forecast_future"
               stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
@@ -459,8 +439,28 @@ const Charts: React.FC<ChartsProps> = ({
             />
             <Area
               type="monotone"
+              stackId={"1"}
+              dataKey="solar_forecast_past"
+              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              strokeWidth={2}
+              fillOpacity={0.6}
+              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+            />
+            <Area
+              type="monotone"
+              stackId={"1"}
+              dataKey="solar_forecast_future"
+              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              strokeWidth={2}
+              strokeDasharray={"10 5"}
+              // strokeOpacity={0.75}
+              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              fillOpacity={0.3}
+            />
+            <Area
+              type="monotone"
               stackId={"2"}
-              dataKey="solar_generation"
+              dataKey="wind_generation"
               stroke={"#ffffff"}
               // dot={true}
               // connectNulls={true}
@@ -469,7 +469,7 @@ const Charts: React.FC<ChartsProps> = ({
             <Area
               type="monotone"
               stackId={"2"}
-              dataKey="wind_generation"
+              dataKey="solar_generation"
               stroke="#ffffff"
               // dot={true}
               // connectNulls={true}
