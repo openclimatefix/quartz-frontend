@@ -264,26 +264,6 @@ const Charts: React.FC<ChartsProps> = ({
             <Area
               type="monotone"
               stackId={"1"}
-              dataKey="solar_forecast_past"
-              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-              strokeWidth={2}
-              fillOpacity={0.6}
-              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-            />
-            <Area
-              type="monotone"
-              stackId={"1"}
-              dataKey="solar_forecast_future"
-              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-              strokeWidth={2}
-              strokeDasharray={"10 5"}
-              // strokeOpacity={0.75}
-              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-              fillOpacity={0.3}
-            />
-            <Area
-              type="monotone"
-              stackId={"1"}
               dataKey="wind_forecast_past"
               stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
               strokeWidth={2}
@@ -303,8 +283,28 @@ const Charts: React.FC<ChartsProps> = ({
             />
             <Area
               type="monotone"
+              stackId={"1"}
+              dataKey="solar_forecast_past"
+              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              strokeWidth={2}
+              fillOpacity={0.6}
+              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+            />
+            <Area
+              type="monotone"
+              stackId={"1"}
+              dataKey="solar_forecast_future"
+              stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              strokeWidth={2}
+              strokeDasharray={"10 5"}
+              // strokeOpacity={0.75}
+              fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              fillOpacity={0.3}
+            />
+            <Area
+              type="monotone"
               stackId={"2"}
-              dataKey="solar_generation"
+              dataKey="wind_generation"
               stroke={"#ffffff"}
               connectNulls={true}
               fillOpacity={0}
@@ -312,7 +312,7 @@ const Charts: React.FC<ChartsProps> = ({
             <Area
               type="monotone"
               stackId={"2"}
-              dataKey="wind_generation"
+              dataKey="solar_generation"
               stroke="#ffffff"
               connectNulls={true}
               fillOpacity={0}
