@@ -253,10 +253,15 @@ const Charts: React.FC<ChartsProps> = ({
               tickFormatter={formatTick}
               scale={"time"}
               type={"number"}
-              domain={[
-                formattedChartData[0].timestamp,
-                formattedChartData[formattedChartData.length - 1].timestamp,
-              ]}
+              domain={
+                formattedChartData?.length
+                  ? [
+                      formattedChartData[0]?.timestamp,
+                      formattedChartData[formattedChartData.length - 1]
+                        .timestamp,
+                    ]
+                  : ["auto", "auto"]
+              }
               ticks={ticks}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
             />
