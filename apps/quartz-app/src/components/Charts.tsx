@@ -51,6 +51,11 @@ const Charts: React.FC<ChartsProps> = ({
     return date.toLocaleString();
   };
 
+  const formatTick = (time: number) => {
+    const date = DateTime.fromMillis(time);
+    return date.toFormat("HH:mm");
+  };
+
   const getNowInTimezone = () => {
     const now = DateTime.now().setZone("ist");
     return DateTime.fromISO(now.toString().slice(0, 16)).set({
@@ -172,7 +177,10 @@ const Charts: React.FC<ChartsProps> = ({
     }))
   );
   const now = new Date();
-  const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
+  const offsets = [
+    -42, -36, -30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60,
+    66,
+  ];
   const ticks = offsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
@@ -233,19 +241,38 @@ const Charts: React.FC<ChartsProps> = ({
             data={formattedChartData}
             margin={{ top: 25, right: 30, left: 20, bottom: 25 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid
+              verticalFill={[
+                theme.extend.colors["ocf-grey"]["900"],
+                theme.extend.colors["ocf-grey"]["800"],
+              ]}
+              fillOpacity={0.5}
+            />
             <XAxis
               dataKey="timestamp"
-              interval={11}
-              // type={"number"}
-              // domain={["auto", "auto"]}
-              tickFormatter={formatDate}
+              tickFormatter={formatTick}
               scale={"time"}
-              tickCount={5}
+              type={"number"}
+              domain={[
+                formattedChartData[0].timestamp,
+                formattedChartData[formattedChartData.length - 1].timestamp,
+              ]}
               ticks={ticks}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
             />
-            <YAxis tick={{ fill: "white", style: { fontSize: "12px" } }} />
+            <YAxis
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              label={{
+                value: "Generation ( MW )",
+                angle: 270,
+                position: "outsideLeft",
+                fill: "white",
+                style: { fontSize: "12px" },
+                offset: 0,
+                dx: -26,
+                dy: 0,
+              }}
+            />
             <Tooltip
               content={({ payload, label }) => {
                 return (
@@ -260,7 +287,6 @@ const Charts: React.FC<ChartsProps> = ({
                 );
               }}
             />
-            <Legend />
             <Area
               type="monotone"
               stackId={"1"}
