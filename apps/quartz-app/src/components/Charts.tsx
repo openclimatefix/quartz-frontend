@@ -48,11 +48,8 @@ const Charts: React.FC<ChartsProps> = ({
 
   const formatDate = (time: number) => {
     const date = new Date(time);
-    date.setMinutes(date.getMinutes() + 30);
-    return date.toISOString();
+    date.toLocaleString();
   };
-  formatDate(1708135056000)
-  console.log((formatDate(1708135056000)))
 
   const getNowInTimezone = () => {
     const now = DateTime.now().setZone("ist");
@@ -309,7 +306,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="solar_generation"
               stroke={"#ffffff"}
-              connectNulls={true}
+              connectNulls={false}
               fillOpacity={0}
             />
             <Area
@@ -317,7 +314,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="wind_generation"
               stroke="#ffffff"
-              connectNulls={true}
+              connectNulls={false}
               fillOpacity={0}
             />
             <ReferenceLine
