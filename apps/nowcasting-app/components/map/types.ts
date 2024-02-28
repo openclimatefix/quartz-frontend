@@ -12,6 +12,7 @@ export enum SelectedData {
 }
 
 export interface IMap {
+  children: React.ReactNode;
   loadDataOverlay: any;
   controlOverlay: any;
   bearing?: number;

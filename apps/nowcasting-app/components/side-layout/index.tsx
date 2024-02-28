@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ExpandButton from "./expand-button";
 import useGlobalState from "../helpers/globalState";
 
 type SideLayoutProps = {
+  children: React.ReactNode;
   className?: string;
   dashboardModeActive?: boolean;
   bottomPadding?: boolean;

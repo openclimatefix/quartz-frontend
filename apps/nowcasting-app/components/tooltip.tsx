@@ -1,6 +1,5 @@
-import React from "react";
-
 type TooltipProps = {
+  children: React.ReactNode;
   tip: string | React.ReactNode;
   position?: "left" | "right" | "middle" | "top";
   className?: string;

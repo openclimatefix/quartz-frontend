@@ -25,8 +25,8 @@ describe("check getOpacityValueFromPVNormalized with valid values", () => {
 describe("check convertISODateStringToLondonTime", () => {
   test("check convertISODateStringToLondonTime with valid date strings", () => {
     expect(convertISODateStringToLondonTime("2021-01-01T03:00:00.000Z")).toBe("03:00");
-    expect(convertISODateStringToLondonTime("2021-01-01T03:21:00.000")).toBe("03:21");
-    expect(convertISODateStringToLondonTime("2021-01-01T03:50:11")).toBe("03:50");
+    expect(convertISODateStringToLondonTime("2021-01-01T03:21:00.000Z")).toBe("03:21");
+    expect(convertISODateStringToLondonTime("2021-01-01T03:50:11Z")).toBe("03:50");
   });
 
   it("should handle an empty date string", () => {
