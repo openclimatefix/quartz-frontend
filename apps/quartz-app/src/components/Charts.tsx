@@ -118,6 +118,8 @@ const Charts: React.FC<ChartsProps> = ({
         formattedChartData?.push({
           timestamp,
           [key]: value.PowerKW / 1000,
+          solar_generation: null,
+          wind_generation: null,
         });
       }
     }
@@ -204,6 +206,10 @@ const Charts: React.FC<ChartsProps> = ({
   const SOLAR_COLOR = theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053";
   const WIND_COLOR = theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF";
 
+  const isPast = (timestamp: number) => {
+    return timestamp < getEpochNowInTimezone();
+  };
+
   const TooltipContent: FC<{
     payload?: Payload<ValueType, NameType>[];
     label?: number;
@@ -224,23 +230,31 @@ const Charts: React.FC<ChartsProps> = ({
       name: keyof typeof TOOLTIP_DISPLAY_NAMES;
       generationType: "solar" | "wind";
       dataType: "forecast" | "generation";
+      timestamp?: number;
       payload?: Payload<ValueType, NameType>[];
-    }> = ({ name, generationType, dataType, payload }) => {
+    }> = ({ name, generationType, dataType, timestamp, payload }) => {
       const rowData = payload?.find((item) => item.dataKey === name);
       if (!rowData) return null;
+      if (!timestamp) return null;
+      if (isPast(timestamp) && name.includes("future")) return null;
+      if (!isPast(timestamp) && name.includes("past")) return null;
 
       const prettyName = TOOLTIP_DISPLAY_NAMES[name];
       let color = generationType === "solar" ? SOLAR_COLOR : WIND_COLOR;
       if (dataType === "generation") color = "white";
 
+      let formattedValue = rowData.value;
+      if (typeof rowData.value === "number") {
+        formattedValue = rowData.value?.toFixed(0);
+      }
+      if (!rowData.value) {
+        formattedValue = "–";
+      }
+
       return (
         <div className="text-sm flex justify-between" style={{ color }}>
           <span>{prettyName}</span>
-          <span>
-            {typeof rowData.value === "number"
-              ? rowData.value?.toFixed(0)
-              : rowData.value}
-          </span>
+          <span>{formattedValue}</span>
         </div>
       );
     };
@@ -257,18 +271,21 @@ const Charts: React.FC<ChartsProps> = ({
           name="wind_generation"
           generationType={"wind"}
           dataType={"generation"}
+          timestamp={label}
           payload={payload}
         />
         <TooltipRow
           name="wind_forecast_past"
           generationType={"wind"}
           dataType={"forecast"}
+          timestamp={label}
           payload={payload}
         />
         <TooltipRow
           name="wind_forecast_future"
           generationType={"wind"}
           dataType={"forecast"}
+          timestamp={label}
           payload={payload}
         />
         {/* Solar Values */}
@@ -277,18 +294,21 @@ const Charts: React.FC<ChartsProps> = ({
           name="solar_generation"
           generationType={"solar"}
           dataType={"generation"}
+          timestamp={label}
           payload={payload}
         />
         <TooltipRow
           name="solar_forecast_past"
           generationType={"solar"}
           dataType={"forecast"}
+          timestamp={label}
           payload={payload}
         />
         <TooltipRow
           name="solar_forecast_future"
           generationType={"solar"}
           dataType={"forecast"}
+          timestamp={label}
           payload={payload}
         />
       </div>
@@ -390,19 +410,24 @@ const Charts: React.FC<ChartsProps> = ({
             />
             <Tooltip
               cursor={{ stroke: "#EEEEEE", strokeDasharray: 5 }}
+              filterNull={false}
               content={(props) => <TooltipContent {...props} />}
             />
             <Area
               type="monotone"
+              name={"solar_forecast_past"}
               stackId={"1"}
               dataKey="solar_forecast_past"
               stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
               strokeWidth={2}
               fillOpacity={0.6}
               fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              onMouseEnter={(e) => console.log("Mouse enter", e)}
+              onMouseLeave={(e) => console.log("Mouse leave", e)}
             />
             <Area
               type="monotone"
+              name={"solar_forecast_future"}
               stackId={"1"}
               dataKey="solar_forecast_future"
               stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
@@ -437,7 +462,8 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="solar_generation"
               stroke={"#ffffff"}
-              connectNulls={false}
+              // dot={true}
+              // connectNulls={true}
               fillOpacity={0}
             />
             <Area
@@ -445,7 +471,8 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="wind_generation"
               stroke="#ffffff"
-              connectNulls={false}
+              // dot={true}
+              // connectNulls={true}
               fillOpacity={0}
             />
             <ReferenceLine
