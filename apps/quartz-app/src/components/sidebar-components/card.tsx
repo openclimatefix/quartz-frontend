@@ -1,9 +1,9 @@
 interface CardProps {
   energyTag: string;
   icon: JSX.Element;
-  actualGeneration: number;
-  currentForecast?: number;
-  nextForecast?: number;
+  actualGeneration?: number | string;
+  currentForecast?: number | string;
+  nextForecast?: number | string;
   bgTheme: string;
   textTheme: string;
   largeText?: string;

@@ -90,8 +90,13 @@ export default function Home() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main className="flex min-h-screen bg-ocf-gray-900 flex-row items-stretch justify-between pt-16">
-        <Sidebar title={"Rajasthan"}
-        solarForecastData={solarGenerationData}/>
+        <Sidebar
+          title={"Rajasthan"}
+          solarForecastData={solarForecastData}
+          windForecastData={windForecastData}
+          solarGenerationData={solarGenerationData}
+          windGenerationData={windGenerationData}
+        />
         <Charts
           solarGenerationData={solarGenerationData}
           windGenerationData={windGenerationData}

@@ -6,9 +6,9 @@ type MiniCardProps = {
   icon: JSX.Element;
   bgTheme: string;
   textTheme: string;
-  actualGeneration: number;
-  currentForecast?: number;
-  nextForecast?: number;
+  actualGeneration?: number | string;
+  currentForecast?: number | string;
+  nextForecast?: number | string;
   toggle?: boolean;
 };
 
@@ -41,7 +41,6 @@ const MiniCard: React.FC<MiniCardProps> = ({
       </div>
     </div>
   );
-  
 };
 
 export default MiniCard;
