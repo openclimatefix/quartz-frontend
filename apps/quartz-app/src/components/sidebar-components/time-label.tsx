@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 type ForecastTimeDisplayProps = {
-  time: string;
+  time?: string | undefined;
   icon: JSX.Element;
   forecastTag: string;
 };
+
 const ForecastTimeDisplay: React.FC<ForecastTimeDisplayProps> = ({
   time,
   icon,
