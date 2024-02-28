@@ -427,7 +427,7 @@ export const HamburgerMenu: React.FC<IconProps> = ({ className }) => (
 
 // info icon
 
-export const InfoIcon = (props: React.SVGProps<SVGSVGElement>) => {
+export const InfoIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     width={24}
     height={24}
@@ -449,8 +449,8 @@ export const InfoIcon = (props: React.SVGProps<SVGSVGElement>) => {
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-  </svg>;
-};
+  </svg>
+);
 
 // power
 
@@ -474,51 +474,90 @@ export const PowerIcon: React.FC<IconProps> = ({ className }) => (
 
 // solar
 export const SolarIcon: React.FC<IconProps> = ({ className }) => (
-  <span>
-    <svg
-      className={className || ""}
-      width={32}
-      height={33}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M15.069.714v4.932h1.862V.714h-1.863zM15.069 27.783v4.931h1.862v-4.931h-1.863z"
-        fill="#fff"
-      />
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M15.945 24.824a8.055 8.055 0 100-16.11 8.055 8.055 0 000 16.11zm0-1.863a6.192 6.192 0 100-12.384 6.192 6.192 0 000 12.384z"
-        fill="#fff"
-      />
-      <path
-        d="M27.069 15.783H32v1.863h-4.931v-1.863zM0 15.783h4.932v1.863H0v-1.863zM23.142 8.255l3.487-3.487 1.317 1.317-3.487 3.487-1.317-1.317zM4.002 27.395l3.487-3.487 1.317 1.318-3.487 3.487-1.317-1.318zM27.946 27.343l-3.487-3.487-1.317 1.318 3.487 3.487 1.317-1.318zM8.806 8.203L5.319 4.716 4.002 6.033 7.489 9.52l1.317-1.317z"
-        fill="#fff"
-      />
-    </svg>
-  </span>
+  <svg
+    className={className || ""}
+    width={32}
+    height={33}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M15.069.714v4.932h1.862V.714h-1.863zM15.069 27.783v4.931h1.862v-4.931h-1.863z"
+      fill="#fff"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M15.945 24.824a8.055 8.055 0 100-16.11 8.055 8.055 0 000 16.11zm0-1.863a6.192 6.192 0 100-12.384 6.192 6.192 0 000 12.384z"
+      fill="#fff"
+    />
+    <path
+      d="M27.069 15.783H32v1.863h-4.931v-1.863zM0 15.783h4.932v1.863H0v-1.863zM23.142 8.255l3.487-3.487 1.317 1.317-3.487 3.487-1.317-1.317zM4.002 27.395l3.487-3.487 1.317 1.318-3.487 3.487-1.317-1.318zM27.946 27.343l-3.487-3.487-1.317 1.318 3.487 3.487 1.317-1.318zM8.806 8.203L5.319 4.716 4.002 6.033 7.489 9.52l1.317-1.317z"
+      fill="#fff"
+    />
+  </svg>
+);
+export const SolarIcon24: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className || ""}
+    width={24}
+    height={25}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M11.301.786v3.698H12.7V.786H11.3zM11.301 21.087v3.699H12.7v-3.699H11.3z"
+      fill="#fff"
+    />
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M11.959 18.868a6.041 6.041 0 100-12.082 6.041 6.041 0 000 12.082zm0-1.397a4.644 4.644 0 100-9.288 4.644 4.644 0 000 9.288z"
+      fill="#fff"
+    />
+    <path
+      d="M20.301 12.087H24v1.397h-3.699v-1.397zM0 12.087h3.699v1.397H0v-1.397zM17.356 6.441l2.616-2.615.988.988-2.616 2.615-.988-.988zM3.001 20.797l2.616-2.616.988.988-2.616 2.616-.988-.988zM20.96 20.758l-2.616-2.616-.988.988 2.616 2.616.988-.988zM6.605 6.402L3.989 3.787l-.988.988L5.617 7.39l.988-.988z"
+      fill="#fff"
+    />
+  </svg>
 );
 
 // wind
 
 export const WindIcon: React.FC<IconProps> = ({ className, strokeWidth }) => (
-  <span>
-    <svg
-      width={32}
-      height={32}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M15.754 9.2a2.343 2.343 0 112.343 2.343H2.589v1.714h15.508A4.057 4.057 0 1014.04 9.2h1.714z"
-        fill="#fff"
-      />
-      <path
-        d="M25.6 12.646a2.343 2.343 0 112.343 2.343H0v1.714h27.943a4.057 4.057 0 10-4.057-4.057H25.6zM25.6 22.492a4.057 4.057 0 00-4.057-4.057H2.589v1.715h18.954a2.343 2.343 0 11-2.343 2.343h-1.714a4.057 4.057 0 008.114 0z"
-        fill="#fff"
-      />
-    </svg>
-  </span>
+  <svg
+    className={className || ""}
+    width={32}
+    height={32}
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M15.754 9.2a2.343 2.343 0 112.343 2.343H2.589v1.714h15.508A4.057 4.057 0 1014.04 9.2h1.714z"
+      fill="#fff"
+    />
+    <path
+      d="M25.6 12.646a2.343 2.343 0 112.343 2.343H0v1.714h27.943a4.057 4.057 0 10-4.057-4.057H25.6zM25.6 22.492a4.057 4.057 0 00-4.057-4.057H2.589v1.715h18.954a2.343 2.343 0 11-2.343 2.343h-1.714a4.057 4.057 0 008.114 0z"
+      fill="#fff"
+    />
+  </svg>
+);
+export const WindIcon24: React.FC<IconProps> = ({ className, strokeWidth }) => (
+  <svg
+    className={className || ""}
+    width={24}
+    height={24}
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M11.815 6.9a1.757 1.757 0 111.758 1.757H1.941v1.286h11.63A3.043 3.043 0 1010.53 6.9h1.285z"
+      fill="#fff"
+    />
+    <path
+      d="M19.2 9.485a1.757 1.757 0 111.757 1.757H0v1.285h20.957a3.043 3.043 0 10-3.043-3.042H19.2zM19.2 16.87a3.043 3.043 0 00-3.043-3.044H1.942v1.286h14.215A1.757 1.757 0 1114.4 16.87h-1.286a3.043 3.043 0 106.086 0z"
+      fill="#fff"
+    />
+  </svg>
 );

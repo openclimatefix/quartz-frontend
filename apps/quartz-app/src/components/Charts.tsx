@@ -15,7 +15,13 @@ import {
 // @ts-ignore
 import { theme } from "@/tailwind.config";
 import { DateTime } from "luxon";
-import { FC } from "react";
+import { FC, ReactNode } from "react";
+import {
+  NameType,
+  Payload,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
+import { SolarIcon24, WindIcon24 } from "@/src/components/icons/icons";
 
 type ChartsProps = {
   solarGenerationData:
@@ -47,8 +53,13 @@ const Charts: React.FC<ChartsProps> = ({
   };
 
   const formatDate = (time: number) => {
-    const date = new Date(time);
-    date.toLocaleString();
+    const date = DateTime.fromMillis(time);
+    return date.toFormat("dd/MM/yyyy HH:mm");
+  };
+
+  const formatTick = (time: number) => {
+    const date = DateTime.fromMillis(time);
+    return date.toFormat("HH:mm");
   };
 
   const getNowInTimezone = () => {
@@ -69,15 +80,26 @@ const Charts: React.FC<ChartsProps> = ({
     return getNowInTimezone().toFormat("HH:mm");
   };
 
-  let formattedChartData: {
+  type ChartDatum = {
     timestamp: number;
-    solar_generation?: number;
-    wind_generation?: number;
+    solar_generation?: number | null;
+    wind_generation?: number | null;
     solar_forecast_past?: number;
     solar_forecast_future?: number;
     wind_forecast_past?: number;
     wind_forecast_future?: number;
-  }[] = [];
+  };
+
+  const TOOLTIP_DISPLAY_NAMES = {
+    solar_forecast_past: "OCF Forecast",
+    solar_forecast_future: "OCF Forecast",
+    wind_forecast_past: "OCF Forecast",
+    wind_forecast_future: "OCF Forecast",
+    solar_generation: "Actual",
+    wind_generation: "Actual",
+  };
+
+  let formattedChartData: ChartDatum[] = [];
 
   // Loop through wind forecast and add to formattedSolarData
   if (windForecastData?.values) {
@@ -96,6 +118,8 @@ const Charts: React.FC<ChartsProps> = ({
         formattedChartData?.push({
           timestamp,
           [key]: value.PowerKW / 1000,
+          solar_generation: null,
+          wind_generation: null,
         });
       }
     }
@@ -172,10 +196,124 @@ const Charts: React.FC<ChartsProps> = ({
     }))
   );
   const now = new Date();
-  const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
+  const offsets = [
+    -42, -36, -30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60,
+    66,
+  ];
   const ticks = offsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
+  const SOLAR_COLOR = theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053";
+  const WIND_COLOR = theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF";
+
+  const isPast = (timestamp: number) => {
+    return timestamp < getEpochNowInTimezone();
+  };
+
+  const TooltipContent: FC<{
+    payload?: Payload<ValueType, NameType>[];
+    label?: number;
+  }> = ({ payload, label }) => {
+    const TooltipHeader: FC<{ title: string; icon: ReactNode }> = ({
+      title,
+      icon,
+    }) => {
+      return (
+        <div className="text-lg flex justify-between items-center mt-2 mb-1">
+          <span className="flex-initial">{title}</span>
+          <hr className="flex-1 mx-2" />
+          <span className="flex-initial">{icon}</span>
+        </div>
+      );
+    };
+    const TooltipRow: FC<{
+      name: keyof typeof TOOLTIP_DISPLAY_NAMES;
+      generationType: "solar" | "wind";
+      dataType: "forecast" | "generation";
+      timestamp?: number;
+      payload?: Payload<ValueType, NameType>[];
+    }> = ({ name, generationType, dataType, timestamp, payload }) => {
+      const rowData = payload?.find((item) => item.dataKey === name);
+      if (!rowData) return null;
+      if (!timestamp) return null;
+      if (isPast(timestamp) && name.includes("future")) return null;
+      if (!isPast(timestamp) && name.includes("past")) return null;
+
+      const prettyName = TOOLTIP_DISPLAY_NAMES[name];
+      let color = generationType === "solar" ? SOLAR_COLOR : WIND_COLOR;
+      if (dataType === "generation") color = "white";
+
+      let formattedValue = rowData.value;
+      if (typeof rowData.value === "number") {
+        formattedValue = rowData.value?.toFixed(0);
+      }
+      if (!rowData.value) {
+        formattedValue = "–";
+      }
+
+      return (
+        <div className="text-sm flex justify-between" style={{ color }}>
+          <span>{prettyName}</span>
+          <span>{formattedValue}</span>
+        </div>
+      );
+    };
+
+    return (
+      <div className="flex flex-col bg-ocf-grey-900/60 text-white p-3 w-64">
+        <div className="text-sm flex items-stretch justify-between">
+          <span>{label ? formatDate(label) : "No timestamp"}</span>
+          <span>MW</span>
+        </div>
+        {/* Wind Values */}
+        <TooltipHeader title={"Wind"} icon={<WindIcon24 />} />
+        <TooltipRow
+          name="wind_generation"
+          generationType={"wind"}
+          dataType={"generation"}
+          timestamp={label}
+          payload={payload}
+        />
+        <TooltipRow
+          name="wind_forecast_past"
+          generationType={"wind"}
+          dataType={"forecast"}
+          timestamp={label}
+          payload={payload}
+        />
+        <TooltipRow
+          name="wind_forecast_future"
+          generationType={"wind"}
+          dataType={"forecast"}
+          timestamp={label}
+          payload={payload}
+        />
+        {/* Solar Values */}
+        <TooltipHeader title={"Solar"} icon={<SolarIcon24 />} />
+        <TooltipRow
+          name="solar_generation"
+          generationType={"solar"}
+          dataType={"generation"}
+          timestamp={label}
+          payload={payload}
+        />
+        <TooltipRow
+          name="solar_forecast_past"
+          generationType={"solar"}
+          dataType={"forecast"}
+          timestamp={label}
+          payload={payload}
+        />
+        <TooltipRow
+          name="solar_forecast_future"
+          generationType={"solar"}
+          dataType={"forecast"}
+          timestamp={label}
+          payload={payload}
+        />
+      </div>
+    );
+  };
 
   const CustomizedLabel: FC<any> = ({
     value,
@@ -233,45 +371,63 @@ const Charts: React.FC<ChartsProps> = ({
             data={formattedChartData}
             margin={{ top: 25, right: 30, left: 20, bottom: 25 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid
+              verticalFill={[
+                theme.extend.colors["ocf-grey"]["900"],
+                theme.extend.colors["ocf-grey"]["800"],
+              ]}
+              fillOpacity={0.5}
+            />
             <XAxis
               dataKey="timestamp"
-              interval={11}
-              // type={"number"}
-              // domain={["auto", "auto"]}
-              tickFormatter={formatDate}
+              tickFormatter={formatTick}
               scale={"time"}
-              tickCount={5}
+              type={"number"}
+              domain={
+                formattedChartData?.length
+                  ? [
+                      formattedChartData[0]?.timestamp,
+                      formattedChartData[formattedChartData.length - 1]
+                        .timestamp,
+                    ]
+                  : ["auto", "auto"]
+              }
               ticks={ticks}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
             />
-            <YAxis tick={{ fill: "white", style: { fontSize: "12px" } }} />
-            <Tooltip
-              content={({ payload, label }) => {
-                return (
-                  <div className="flex flex-col bg-gray-900/50 text-white px-3 py-2">
-                    <span>{formatDate(label)}</span>
-                    {payload?.map((item) => (
-                      <span key={`TooltipKey-${item.dataKey}-${item.name}`}>
-                        {item.name}: {item.value}
-                      </span>
-                    ))}
-                  </div>
-                );
+            <YAxis
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              label={{
+                value: "Generation ( MW )",
+                angle: 270,
+                position: "outsideLeft",
+                fill: "white",
+                style: { fontSize: "12px" },
+                offset: 0,
+                dx: -26,
+                dy: 0,
               }}
             />
-            <Legend />
+            <Tooltip
+              cursor={{ stroke: "#EEEEEE", strokeDasharray: 5 }}
+              filterNull={false}
+              content={(props) => <TooltipContent {...props} />}
+            />
             <Area
               type="monotone"
+              name={"solar_forecast_past"}
               stackId={"1"}
               dataKey="solar_forecast_past"
               stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
               strokeWidth={2}
               fillOpacity={0.6}
               fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
+              onMouseEnter={(e) => console.log("Mouse enter", e)}
+              onMouseLeave={(e) => console.log("Mouse leave", e)}
             />
             <Area
               type="monotone"
+              name={"solar_forecast_future"}
               stackId={"1"}
               dataKey="solar_forecast_future"
               stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
@@ -306,7 +462,8 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="solar_generation"
               stroke={"#ffffff"}
-              connectNulls={false}
+              // dot={true}
+              // connectNulls={true}
               fillOpacity={0}
             />
             <Area
@@ -314,7 +471,8 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"2"}
               dataKey="wind_generation"
               stroke="#ffffff"
-              connectNulls={false}
+              // dot={true}
+              // connectNulls={true}
               fillOpacity={0}
             />
             <ReferenceLine
