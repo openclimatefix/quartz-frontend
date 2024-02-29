@@ -1,6 +1,6 @@
 {
   "name": "@openclimatefix/nowcasting-app",
-  "version": "0.4.8",
+  "version": "0.4.9",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
@@ -17,7 +17,7 @@
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
     "@react-icons/all-files": "^4.1.0",
-    "@sentry/nextjs": "^6.19.7",
+    "@sentry/nextjs": "^7.102.1",
     "@tailwindcss/container-queries": "^0.1.1",
     "@types/cookies": "^0.7.7",
     "axios": "^0.27.2",
