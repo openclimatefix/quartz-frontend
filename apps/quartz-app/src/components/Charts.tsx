@@ -419,7 +419,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"1"}
               dataKey="wind_forecast_past"
               // stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-              strokeWidth={0}
+              strokeWidth={1}
               fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
               fillOpacity={0.6}
               onMouseEnter={(e) => console.log("Mouse enter", e)}
@@ -442,7 +442,7 @@ const Charts: React.FC<ChartsProps> = ({
               stackId={"1"}
               dataKey="solar_forecast_past"
               stroke={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
-              strokeWidth={2}
+              strokeWidth={1}
               fillOpacity={0.6}
               fill={theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053"}
             />
@@ -458,15 +458,16 @@ const Charts: React.FC<ChartsProps> = ({
               fillOpacity={0.3}
             />
             {/* Extra line to bring blue wind line in front of yellow solar */}
-            <Area
-              type="monotone"
-              stackId={"3"}
-              dataKey="wind_forecast_past"
-              stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-              strokeWidth={2}
-              // fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}
-              fillOpacity={0}
-            />
+            {/*<Area*/}
+            {/*  type="monotone"*/}
+            {/*  stackId={"3"}*/}
+            {/*  dataKey="wind_forecast_past"*/}
+            {/*  stroke={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}*/}
+            {/*  strokeWidth={2}*/}
+            {/*  // strokeDasharray={"5 5"}*/}
+            {/*  // fill={theme.extend.colors["ocf-blue"].DEFAULT || "#48B0DF"}*/}
+            {/*  fillOpacity={0}*/}
+            {/*/>*/}
             <Area
               type="monotone"
               stackId={"2"}
