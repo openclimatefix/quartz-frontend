@@ -1,6 +1,7 @@
 "use client";
 import { useGetRegionsQuery } from "@/src/hooks/queries";
 import { components } from "@/src/types/schema";
+import { useGlobalState } from "../components/helpers/globalState";
 import {
   ChevronLeft,
   ClockIcon,
@@ -46,6 +47,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   const convertDatestampToEpoch = (time: string) => {
     const date = new Date(time.slice(0, 16));
     return date.getTime();
+  };
+
+  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
+  console.log("visibleLines", visibleLines);
+
+  const isVisible = visibleLines.includes("Solar");
+
+  const clickSolarToggle = (): void => {
+    if (visibleLines.includes("Solar")) {
+      setVisibleLines(visibleLines.filter((line: string) => line !== "Solar"));
+    } else {
+      setVisibleLines([...visibleLines, "Solar"]);
+    }
+  };
+
+  const clickWindToggle = (): void => {
+    if (visibleLines.includes("Wind")) {
+      setVisibleLines(visibleLines.filter((line: string) => line !== "WIND"));
+    } else {
+      setVisibleLines([...visibleLines, "Wind"]);
+    }
   };
 
   const getNowInTimezone = () => {
@@ -302,6 +324,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 energyTag="Wind"
                 textTheme="text-quartz-energy-200"
                 bgTheme="bg-quartz-energy-200"
+                toggle={true}
               />
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <WideCard
@@ -316,6 +339,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 energyTag="Solar"
                 textTheme="text-quartz-energy-300"
                 bgTheme="bg-quartz-energy-300"
+                toggle={true}
               />
             </div>
           </div>
