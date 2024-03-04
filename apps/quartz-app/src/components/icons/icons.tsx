@@ -376,13 +376,13 @@ export const RightArrow: React.FC<IconProps> = ({ className }) => (
 
 // chevron double right
 export const ChevronRight: React.FC<IconProps> = ({ className }) => (
- <span>
+  <span>
     <svg
       width={15}
       height={15}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className = {className || ""}
+      className={className || ""}
     >
       <path
         d="M.787.945a1 1 0 011.415 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.415-1.414L5.08 6.652.787 2.36a1 1 0 010-1.414z"
@@ -392,8 +392,8 @@ export const ChevronRight: React.FC<IconProps> = ({ className }) => (
         d="M7.787.945a1 1 0 011.415 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.415-1.414l4.293-4.293L7.787 2.36a1 1 0 010-1.414z"
         fill="#fff"
       />
-      </svg>
-      </span>
+    </svg>
+  </span>
 );
 
 // chevron double left
@@ -404,7 +404,7 @@ export const ChevronLeft: React.FC<IconProps> = ({ className }) => (
       width={15}
       height={15}
       xmlns="http://www.w3.org/2000/svg"
-      className = {className || ""}
+      className={className || ""}
     >
       <path
         d="M13.707.293a1 1 0 00-1.414 0l-5 5a1 1 0 000 1.414l5 5a1 1 0 001.414-1.414L9.414 6l4.293-4.293a1 1 0 000-1.414z"
@@ -476,7 +476,6 @@ export const PowerIcon: React.FC<IconProps> = ({ className }) => (
     </svg>
   </span>
 );
-
 
 // solar
 export const SolarIcon: React.FC<IconProps> = ({ className }) => (
