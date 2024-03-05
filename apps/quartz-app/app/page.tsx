@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Sidebar from "../src/components/Sidebar";
-import Charts from "../src/components/Charts";
+import Charts from "../src/components/charts/Charts";
 import {
   dehydrate,
   HydrationBoundary,
@@ -13,6 +13,7 @@ import {
   useGetGenerationForRegionQuery,
   useGetRegionsQuery,
 } from "@/src/hooks/queries";
+import { CombinedData } from "@/src/types/data";
 
 export default function Home() {
   const queryClient = new QueryClient({
@@ -87,6 +88,13 @@ export default function Home() {
   console.log("page solarGenerationData", solarGenerationData);
   console.log("page windGenerationData", windGenerationData);
 
+  const combinedData: CombinedData = {
+    solarGenerationData,
+    windGenerationData,
+    solarForecastData,
+    windForecastData,
+  };
+
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main className="flex min-h-screen bg-ocf-gray-900 flex-row items-stretch justify-between pt-16">
@@ -97,12 +105,7 @@ export default function Home() {
           solarGenerationData={solarGenerationData}
           windGenerationData={windGenerationData}
         />
-        <Charts
-          solarGenerationData={solarGenerationData}
-          windGenerationData={windGenerationData}
-          solarForecastData={solarForecastData}
-          windForecastData={windForecastData}
-        />
+        <Charts combinedData={combinedData} />
       </main>
     </HydrationBoundary>
   );
