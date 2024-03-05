@@ -25,17 +25,24 @@ const WideCard: React.FC<CardProps> = ({
   textTheme,
 }) => {
   const textClass = energyTag !== "Power" ? `text-5xl` : `text-6xl`;
-  const energyTagNotPower = energyTag !== "Power";
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(energyTag);
+  const formatToggle = visibleLines.includes(energyTag)
+    ? `after:end-[-2px]`
+    : `after:start-[-2px]`;
+  const formatBackground = !visibleLines.includes(energyTag)
+    ? (bgTheme = `bg-quartz-energy-100`)
+    : bgTheme == bgTheme;
 
   const toggleLineVisibility = () => {
     if (isVisible) {
       setVisibleLines(
         visibleLines.filter((line: string) => line !== energyTag)
       );
+      console.log(visibleLines, "visibleLines");
     } else {
       setVisibleLines([...visibleLines, energyTag]);
+      console.log(visibleLines, "visibleLines");
     }
   };
 
@@ -54,10 +61,10 @@ const WideCard: React.FC<CardProps> = ({
             {energyTag}
           </div>
           {toggle ? (
-            <label className="inline-flex items-center mb-5 cursor-pointer">
+            <label className="inline-flex items-center cursor-pointer ">
               <div
                 onClick={toggleLineVisibility}
-                className={`relative w-12 h-3 ${bgTheme} rounded-full peer dark:${bgTheme}peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600`}
+                className={`relative w-12 h-2 ${bgTheme} rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute ${formatToggle} after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:mt-[-3.5px] after:transition-slow `}
               ></div>
             </label>
           ) : null}
