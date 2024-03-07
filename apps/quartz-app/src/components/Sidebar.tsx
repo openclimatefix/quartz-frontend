@@ -64,7 +64,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const clickWindToggle = (): void => {
     if (visibleLines.includes("Wind")) {
-      setVisibleLines(visibleLines.filter((line: string) => line !== "WIND"));
+      setVisibleLines(visibleLines.filter((line: string) => line !== "Wind"));
     } else {
       setVisibleLines([...visibleLines, "Wind"]);
     }
@@ -382,6 +382,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : "--"
               }
               nextForecast={powerForecastNext.toFixed(1) || 0}
+              energyTag="Power"
             />
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
