@@ -39,10 +39,8 @@ const WideCard: React.FC<CardProps> = ({
       setVisibleLines(
         visibleLines.filter((line: string) => line !== energyTag)
       );
-      console.log(visibleLines, "visibleLines");
     } else {
       setVisibleLines([...visibleLines, energyTag]);
-      console.log(visibleLines, "visibleLines");
     }
   };
 

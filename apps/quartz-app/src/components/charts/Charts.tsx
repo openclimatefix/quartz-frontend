@@ -24,6 +24,7 @@ import { TooltipContent } from "@/src/components/charts/Tooltip";
 import { CombinedData } from "@/src/types/data";
 import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
+import { useGlobalState } from "../helpers/globalState";
 
 type ChartsProps = {
   combinedData: CombinedData;
@@ -47,6 +48,8 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
   // Useful shared constants for the chart
   const forecastsStrokeWidth = 2;
   const actualsStrokeWidth = 1;
+
+  const [visibleLines] = useGlobalState("visibleLines");
 
   return (
     <div className="flex-1 flex flex-col justify-center items-center bg-ocf-grey-800">
@@ -119,6 +122,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 fill={SOLAR_COLOR}
                 onMouseEnter={(e) => console.log("Mouse enter", e)}
                 onMouseLeave={(e) => console.log("Mouse leave", e)}
+                hide={!visibleLines.includes("Solar")}
               />
               <Area
                 type="monotone"
@@ -131,6 +135,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 // strokeOpacity={0.75}
                 fill={SOLAR_COLOR}
                 fillOpacity={0.3}
+                hide={!visibleLines.includes("Solar")}
               />
               <Area
                 type="monotone"
@@ -140,6 +145,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 strokeWidth={forecastsStrokeWidth}
                 fill={WIND_COLOR}
                 fillOpacity={0.6}
+                hide={!visibleLines.includes("Wind")}
               />
               <Area
                 type="monotone"
@@ -151,6 +157,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 // strokeOpacity={0.75}
                 fill={WIND_COLOR}
                 fillOpacity={0.3}
+                hide={!visibleLines.includes("Wind")}
               />
               <Area
                 type="monotone"
@@ -164,6 +171,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 // dot={true}
                 // connectNulls={true}
                 fillOpacity={0}
+                hide={!visibleLines.includes("Solar")}
               />
               <Area
                 type="monotone"
@@ -173,6 +181,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 strokeWidth={actualsStrokeWidth}
                 // connectNulls={true}
                 fillOpacity={0}
+                hide={!visibleLines.includes("Wind")}
               />
               <ReferenceLine
                 x={getEpochNowInTimezone()}
