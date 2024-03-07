@@ -29,9 +29,6 @@ type SidebarProps = {
   windGenerationData:
     | components["schemas"]["GetHistoricGenerationResponse"]
     | undefined;
-  solarForecastData:
-    | components["schemas"]["GetForecastGenerationResponse"]
-    | undefined;
   windForecastData:
     | components["schemas"]["GetForecastGenerationResponse"]
     | undefined;
