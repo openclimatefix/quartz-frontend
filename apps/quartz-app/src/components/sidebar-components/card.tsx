@@ -31,7 +31,7 @@ const WideCard: React.FC<CardProps> = ({
     ? `after:end-[-2px]`
     : `after:start-[-2px]`;
   const formatBackground = !visibleLines.includes(energyTag)
-    ? (bgTheme = `bg-quartz-energy-100`)
+    ? (bgTheme = `bg-ocf-grey-400`)
     : bgTheme == bgTheme;
 
   const toggleLineVisibility = () => {
