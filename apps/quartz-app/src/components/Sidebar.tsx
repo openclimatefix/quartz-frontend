@@ -390,6 +390,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               bgTheme={"bg-quartz-energy-200"}
               actualGeneration={actualWindGeneration.toFixed(1) || "--"}
               nextForecast={windForecastNext.toFixed(1) || 0}
+              toggle={true}
+              energyTag="Wind"
             />
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
@@ -398,6 +400,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               bgTheme={"bg-quartz-energy-300"}
               actualGeneration={actualSolarGeneration.toFixed(1) || "--"}
               nextForecast={solarForecastNext.toFixed(1) || 0}
+              toggle={true}
+              energyTag="Solar"
             />
           </div>
         </div>
