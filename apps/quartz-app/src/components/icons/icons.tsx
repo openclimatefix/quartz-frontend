@@ -378,17 +378,19 @@ export const RightArrow: React.FC<IconProps> = ({ className }) => (
 export const ChevronRight: React.FC<IconProps> = ({ className }) => (
   <span>
     <svg
-      xmlns="http://www.w3.org/2000/svg"
+      width={15}
+      height={15}
       fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth={1.5}
-      className="w-6 h-6"
-      stroke="white"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className || ""}
     >
       <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+        d="M.787.945a1 1 0 011.415 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.415-1.414L5.08 6.652.787 2.36a1 1 0 010-1.414z"
+        fill="#fff"
+      />
+      <path
+        d="M7.787.945a1 1 0 011.415 0l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.415-1.414l4.293-4.293L7.787 2.36a1 1 0 010-1.414z"
+        fill="#fff"
       />
     </svg>
   </span>
@@ -398,14 +400,18 @@ export const ChevronRight: React.FC<IconProps> = ({ className }) => (
 
 export const ChevronLeft: React.FC<IconProps> = ({ className }) => (
   <span>
-    <svg width={24} height={24} fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width={24} height={24} rx={8} fill="#fff" fillOpacity={0.4} />
+    <svg
+      width={15}
+      height={15}
+      xmlns="http://www.w3.org/2000/svg"
+      className={className || ""}
+    >
       <path
-        d="M18.707 6.293a1 1 0 00-1.414 0l-5 5a1 1 0 000 1.414l5 5a1 1 0 001.414-1.414L14.414 12l4.293-4.293a1 1 0 000-1.414z"
+        d="M13.707.293a1 1 0 00-1.414 0l-5 5a1 1 0 000 1.414l5 5a1 1 0 001.414-1.414L9.414 6l4.293-4.293a1 1 0 000-1.414z"
         fill="#fff"
       />
       <path
-        d="M11.707 6.293a1 1 0 00-1.414 0l-5 5a1 1 0 000 1.414l5 5a1 1 0 001.414-1.414L7.414 12l4.293-4.293a1 1 0 000-1.414z"
+        d="M6.707.293a1 1 0 00-1.414 0l-5 5a1 1 0 000 1.414l5 5a1 1 0 001.414-1.414L2.414 6l4.293-4.293a1 1 0 000-1.414z"
         fill="#fff"
       />
     </svg>
@@ -461,7 +467,6 @@ export const PowerIcon: React.FC<IconProps> = ({ className }) => (
       width={32}
       height={32}
       fill="none"
-      stroke={"white"}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
@@ -501,7 +506,7 @@ export const SolarIcon24: React.FC<IconProps> = ({ className }) => (
   <svg
     className={className || ""}
     width={24}
-    height={25}
+    height={24}
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >

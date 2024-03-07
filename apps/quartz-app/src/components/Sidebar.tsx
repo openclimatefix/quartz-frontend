@@ -1,6 +1,7 @@
 "use client";
 import { useGetRegionsQuery } from "@/src/hooks/queries";
 import { components } from "@/src/types/schema";
+import { useGlobalState } from "../components/helpers/globalState";
 import {
   ChevronLeft,
   ClockIcon,
@@ -8,6 +9,9 @@ import {
   PowerIcon,
   SolarIcon,
   WindIcon,
+  SolarIcon24,
+  WindIcon24,
+  ChevronRight,
 } from "./icons/icons";
 import { useState } from "react";
 import WideCard from "./sidebar-components/card";
@@ -43,6 +47,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   const convertDatestampToEpoch = (time: string) => {
     const date = new Date(time.slice(0, 16));
     return date.getTime();
+  };
+
+  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
+  console.log("visibleLines", visibleLines);
+
+  const isVisible = visibleLines.includes("Solar");
+
+  const clickSolarToggle = (): void => {
+    if (visibleLines.includes("Solar")) {
+      setVisibleLines(visibleLines.filter((line: string) => line !== "Solar"));
+    } else {
+      setVisibleLines([...visibleLines, "Solar"]);
+    }
+  };
+
+  const clickWindToggle = (): void => {
+    if (visibleLines.includes("Wind")) {
+      setVisibleLines(visibleLines.filter((line: string) => line !== "Wind"));
+    } else {
+      setVisibleLines([...visibleLines, "Wind"]);
+    }
   };
 
   const getNowInTimezone = () => {
@@ -209,28 +234,64 @@ const Sidebar: React.FC<SidebarProps> = ({
     Number(actualWindGeneration + actualSolarGeneration) || 0;
 
   let [expanded, setExpanded] = useState(true);
+
   function handleClick() {
     setExpanded(!expanded);
+    setShowChevronRight(false);
   }
+
+  const [showChevronLeft, setShowChevronLeft] = useState(false);
+  const [showChevronRight, setShowChevronRight] = useState(false);
+
+  function handleMouseEnterExpanded() {
+    setShowChevronLeft(true);
+  }
+
+  function handleMouseLeaveExpanded() {
+    setShowChevronLeft(false);
+  }
+
+  function handleMouseEnterCollapsed() {
+    setShowChevronRight(true);
+  }
+
+  function handleMouseLeaveCollapsed() {
+    setShowChevronRight(false);
+  }
+
   if (expanded) {
+    // make mouse leave transtion slower
+    // on hover for the chevron, change the background color
     return (
-      <div className="flex-0 w-96 justify-center items-center bg-444444">
+      <div
+        className="flex-0 w-96 justify-center items-center bg-444444"
+        onMouseEnter={handleMouseEnterExpanded}
+        onMouseLeave={handleMouseLeaveExpanded}
+      >
         <div className="w-full h-full p-4 bg-neutral-700 flex-col justify-start items-start gap-5 inline-flex">
           <div className="justify-start items-start gap-[110px] flex-col">
-            <div className="flex justify-between">
+            <div className="flex justify-between mb-3">
               <div className="text-white text-lg font-bold font-sans leading-normal">
                 {title}
               </div>
-              <button className="w-8 h-8 relative" onClick={handleClick}>
-                <ChevronLeft />
-              </button>
+              {showChevronLeft ? (
+                <button
+                  className="w-6 h-6 flex items-center justify-center hover:bg-ocf-grey-400 hover:duration-500 rounded-lg"
+                  onClick={handleClick}
+                >
+                  <ChevronLeft />
+                </button>
+              ) : null}
             </div>
-
             <div className="self-stretch h-[465px] flex-col justify-start items-start gap-4 flex">
               {/* start card */}
               <WideCard
                 icon={<PowerIcon />}
-                actualGeneration={actualPowerGeneration.toFixed(2) || "--"}
+                actualGeneration={
+                  actualPowerGeneration > 0
+                    ? actualPowerGeneration.toFixed(2)
+                    : "--"
+                }
                 currentForecast={powerForecastNow.toFixed(2) || 0}
                 nextForecast={powerForecastNext.toFixed(2) || 0}
                 energyTag="Power"
@@ -253,22 +314,32 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <WideCard
                 icon={<WindIcon />}
-                actualGeneration={actualWindGeneration.toFixed(2) || "--"}
+                actualGeneration={
+                  actualWindGeneration > 0
+                    ? actualWindGeneration.toFixed(2)
+                    : "--"
+                }
                 currentForecast={windForecastNow.toFixed(2) || 0}
                 nextForecast={windForecastNext.toFixed(2) || 0}
                 energyTag="Wind"
                 textTheme="text-quartz-energy-200"
                 bgTheme="bg-quartz-energy-200"
+                toggle={true}
               />
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
               <WideCard
                 icon={<SolarIcon />}
-                actualGeneration={actualSolarGeneration.toFixed(2) || "--"}
+                actualGeneration={
+                  actualSolarGeneration > 0
+                    ? actualPowerGeneration.toFixed(2)
+                    : "--"
+                }
                 currentForecast={solarForecastNow.toFixed(2) || 0}
                 nextForecast={solarForecastNext.toFixed(2) || 0}
                 energyTag="Solar"
                 textTheme="text-quartz-energy-300"
                 bgTheme="bg-quartz-energy-300"
+                toggle={true}
               />
             </div>
           </div>
@@ -277,39 +348,61 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   } else {
     return (
-      <div className="flex-0 justify-center items-center bg-444444">
+      <div
+        className="flex-0 justify-center items-center bg-444444"
+        onMouseEnter={handleMouseEnterCollapsed}
+        onMouseLeave={handleMouseLeaveCollapsed}
+      >
         <div className="w-14 h-full px-2 py-4 bg-neutral-700 flex-col justify-start items-center gap-5 inline-flex">
           <div className="justify-start items-start gap-[110px] inline-flex ">
-            <button
-              className="w-6 h-6 relative rounded-lg"
-              onClick={handleClick}
-            >
-              <HamburgerMenu />
-            </button>
+            {/* // on hover, set showChevronRight to true show the chevron, otherwise show the hamburger menu*/}
+            {/* // change the chevron icon to not be black*/}
+            {/* create the transition for this */}
+            {showChevronRight ? (
+              <button
+                className="w-6 h-6 flex justify-center items-center rounded-lg hover:bg-ocf-grey-400 hover:duration-500"
+                onClick={handleClick}
+              >
+                <ChevronRight />
+              </button>
+            ) : (
+              <div className="w-6 h-6 flex justify-center items-center rounded-lg">
+                <HamburgerMenu />
+              </div>
+            )}
           </div>
           <div className="self-stretch h-[354px] flex-col justify-start items-start gap-4 flex">
             <MiniCard
               icon={<PowerIcon />}
               textTheme={"text-quartz-energy-100"}
               bgTheme={"bg-quartz-energy-100"}
-              actualGeneration={actualPowerGeneration.toFixed(1) || "--"}
+              actualGeneration={
+                actualPowerGeneration > 0
+                  ? actualPowerGeneration.toFixed(1)
+                  : "--"
+              }
               nextForecast={powerForecastNext.toFixed(1) || 0}
+              energyTag="Power"
             />
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
-              icon={<WindIcon />}
+              icon={<WindIcon24 />}
               textTheme={"text-quartz-energy-200"}
               bgTheme={"bg-quartz-energy-200"}
               actualGeneration={actualWindGeneration.toFixed(1) || "--"}
               nextForecast={windForecastNext.toFixed(1) || 0}
+              toggle={true}
+              energyTag="Wind"
             />
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
-              icon={<SolarIcon />}
+              icon={<SolarIcon24 />}
               textTheme={"text-quartz-energy-300"}
               bgTheme={"bg-quartz-energy-300"}
               actualGeneration={actualSolarGeneration.toFixed(1) || "--"}
               nextForecast={solarForecastNext.toFixed(1) || 0}
+              toggle={true}
+              energyTag="Solar"
             />
           </div>
         </div>
