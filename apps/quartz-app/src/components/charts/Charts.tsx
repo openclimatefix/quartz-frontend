@@ -13,7 +13,12 @@ import {
 // @ts-ignore
 import { theme } from "@/tailwind.config";
 import { FC, ReactNode } from "react";
-import { ACTUAL_COLOR, SOLAR_COLOR, WIND_COLOR } from "@/src/constants";
+import {
+  ACTUAL_SOLAR_COLOR,
+  ACTUAL_WIND_COLOR,
+  SOLAR_COLOR,
+  WIND_COLOR,
+} from "@/src/constants";
 import { LegendContainer } from "@/src/components/charts/legend/LegendContainer";
 import {
   formatEpochToPrettyTime,
@@ -46,8 +51,12 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
   });
 
   // Useful shared constants for the chart
-  const forecastsStrokeWidth = 2;
-  const actualsStrokeWidth = 1;
+  const forecastsStrokeWidth = 1;
+  const actualsStrokeWidth = 3.5;
+  const futureAreaOpacity = 0.8;
+  const futureStrokeOpacity = 1;
+  const pastAreaOpacity = 0.6;
+  const pastStrokeOpacity = 1;
 
   const [visibleLines] = useGlobalState("visibleLines");
 
@@ -67,7 +76,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
           <ResponsiveContainer>
             <ComposedChart
               data={formattedChartData}
-              margin={{ top: 25, right: 30, left: 20, bottom: 0 }}
+              margin={{ top: 25, right: 30, left: 20, bottom: 20 }}
             >
               <CartesianGrid
                 verticalFill={[
@@ -113,15 +122,39 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               />
               <Area
                 type="monotone"
+                name={"wind_forecast_past"}
+                stackId={"1"}
+                dataKey="wind_forecast_past"
+                stroke={WIND_COLOR}
+                strokeWidth={forecastsStrokeWidth}
+                strokeOpacity={pastStrokeOpacity}
+                fill={WIND_COLOR}
+                fillOpacity={pastAreaOpacity}
+                hide={!visibleLines.includes("Wind")}
+              />
+              <Area
+                type="monotone"
+                name={"wind_forecast_future"}
+                stackId={"1"}
+                dataKey="wind_forecast_future"
+                stroke={WIND_COLOR}
+                strokeWidth={forecastsStrokeWidth}
+                strokeDasharray={"10 5"}
+                strokeOpacity={futureStrokeOpacity}
+                fill={WIND_COLOR}
+                fillOpacity={futureAreaOpacity}
+                hide={!visibleLines.includes("Wind")}
+              />
+              <Area
+                type="monotone"
                 name={"solar_forecast_past"}
                 stackId={"1"}
                 dataKey="solar_forecast_past"
                 stroke={SOLAR_COLOR}
                 strokeWidth={forecastsStrokeWidth}
-                fillOpacity={0.6}
+                strokeOpacity={pastStrokeOpacity}
+                fillOpacity={pastAreaOpacity}
                 fill={SOLAR_COLOR}
-                onMouseEnter={(e) => console.log("Mouse enter", e)}
-                onMouseLeave={(e) => console.log("Mouse leave", e)}
                 hide={!visibleLines.includes("Solar")}
               />
               <Area
@@ -132,56 +165,38 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 stroke={SOLAR_COLOR}
                 strokeWidth={forecastsStrokeWidth}
                 strokeDasharray={"10 5"}
-                // strokeOpacity={0.75}
+                strokeOpacity={futureStrokeOpacity}
                 fill={SOLAR_COLOR}
-                fillOpacity={0.3}
+                fillOpacity={futureAreaOpacity}
                 hide={!visibleLines.includes("Solar")}
               />
               <Area
                 type="monotone"
-                stackId={"1"}
-                dataKey="wind_forecast_past"
-                stroke={WIND_COLOR}
-                strokeWidth={forecastsStrokeWidth}
-                fill={WIND_COLOR}
-                fillOpacity={0.6}
-                hide={!visibleLines.includes("Wind")}
-              />
-              <Area
-                type="monotone"
-                stackId={"1"}
-                dataKey="wind_forecast_future"
-                stroke={WIND_COLOR}
-                strokeWidth={forecastsStrokeWidth}
-                strokeDasharray={"10 5"}
-                // strokeOpacity={0.75}
-                fill={WIND_COLOR}
-                fillOpacity={0.3}
-                hide={!visibleLines.includes("Wind")}
-              />
-              <Area
-                type="monotone"
-                stackId={"2"}
-                dataKey="solar_generation"
-                stroke={ACTUAL_COLOR}
-                strokeWidth={actualsStrokeWidth}
-                strokeDasharray={"20 4 2 4"}
-                strokeLinejoin={"round"}
-                strokeLinecap={"square"}
-                // dot={true}
-                // connectNulls={true}
-                fillOpacity={0}
-                hide={!visibleLines.includes("Solar")}
-              />
-              <Area
-                type="monotone"
+                name={"wind_generation"}
                 stackId={"2"}
                 dataKey="wind_generation"
-                stroke={ACTUAL_COLOR}
+                stroke={ACTUAL_WIND_COLOR}
                 strokeWidth={actualsStrokeWidth}
+                strokeOpacity={pastStrokeOpacity}
                 // connectNulls={true}
-                fillOpacity={0}
+                fill={"none"}
                 hide={!visibleLines.includes("Wind")}
+              />
+              <Area
+                type="monotone"
+                name={"solar_generation"}
+                stackId={"2"}
+                dataKey="solar_generation"
+                stroke={ACTUAL_SOLAR_COLOR}
+                strokeWidth={actualsStrokeWidth}
+                // strokeDasharray={"20 4 2 4"}
+                strokeLinejoin={"round"}
+                strokeLinecap={"square"}
+                strokeOpacity={pastStrokeOpacity}
+                // dot={true}
+                // connectNulls={true}
+                fill={"none"}
+                hide={!visibleLines.includes("Solar")}
               />
               <ReferenceLine
                 x={getEpochNowInTimezone()}
@@ -194,7 +209,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 }
                 offset={"20"}
                 stroke="white"
-                strokeWidth={2}
+                strokeWidth={3}
                 strokeDasharray={"20 5"}
                 strokeOpacity={0.75}
               />
@@ -202,7 +217,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
           </ResponsiveContainer>
         </div>
       </div>
-      <LegendContainer />
+      {/*<LegendContainer />*/}
     </div>
   );
 };

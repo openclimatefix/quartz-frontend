@@ -295,8 +295,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 currentForecast={powerForecastNow.toFixed(2) || 0}
                 nextForecast={powerForecastNext.toFixed(2) || 0}
                 energyTag="Power"
-                bgTheme="bg-quartz-energy-100"
-                textTheme="text-quartz-energy-100"
+                bgTheme="bg-quartz-mint-green"
+                textTheme="text-quartz-mint-green"
               />
               {/* end card */}
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
@@ -304,7 +304,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <ForecastTimeDisplay
                   time={prettyPrintNowTime()}
                   icon={<ClockIcon />}
-                  forecastTag="NOW GW"
+                  forecastTag="LATEST GW"
                 />
                 <ForecastTimeDisplay
                   time={prettyPrintNextTime()}
@@ -322,8 +322,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 currentForecast={windForecastNow.toFixed(2) || 0}
                 nextForecast={windForecastNext.toFixed(2) || 0}
                 energyTag="Wind"
-                textTheme="text-quartz-energy-200"
-                bgTheme="bg-quartz-energy-200"
+                textTheme="text-quartz-blue"
+                bgTheme="bg-quartz-blue"
                 toggle={true}
               />
               <div className="w-[350px] h-px border border-white border-opacity-40"></div>
@@ -337,8 +337,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 currentForecast={solarForecastNow.toFixed(2) || 0}
                 nextForecast={solarForecastNext.toFixed(2) || 0}
                 energyTag="Solar"
-                textTheme="text-quartz-energy-300"
-                bgTheme="bg-quartz-energy-300"
+                textTheme="text-ocf-yellow"
+                bgTheme="bg-ocf-yellow"
                 toggle={true}
               />
             </div>
@@ -374,8 +374,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="self-stretch h-[354px] flex-col justify-start items-start gap-4 flex">
             <MiniCard
               icon={<PowerIcon />}
-              textTheme={"text-quartz-energy-100"}
-              bgTheme={"bg-quartz-energy-100"}
+              textTheme={"text-quartz-mint-green"}
+              bgTheme={"bg-quartz-mint-green"}
               actualGeneration={
                 actualPowerGeneration > 0
                   ? actualPowerGeneration.toFixed(1)
@@ -387,8 +387,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
               icon={<WindIcon24 />}
-              textTheme={"text-quartz-energy-200"}
-              bgTheme={"bg-quartz-energy-200"}
+              textTheme={"text-quartz-blue"}
+              bgTheme={"bg-quartz-blue"}
               actualGeneration={actualWindGeneration.toFixed(1) || "--"}
               nextForecast={windForecastNext.toFixed(1) || 0}
               toggle={true}
@@ -397,8 +397,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
               icon={<SolarIcon24 />}
-              textTheme={"text-quartz-energy-300"}
-              bgTheme={"bg-quartz-energy-300"}
+              textTheme={"text-ocf-yellow"}
+              bgTheme={"bg-ocf-yellow"}
               actualGeneration={actualSolarGeneration.toFixed(1) || "--"}
               nextForecast={solarForecastNext.toFixed(1) || 0}
               toggle={true}
