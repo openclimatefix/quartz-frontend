@@ -19,7 +19,7 @@ export const useChartData = (combinedData: CombinedData) => {
           ? "wind_forecast_past"
           : "wind_forecast_future";
       if (existingData) {
-        existingData[key] = value.PowerKW / 1000;
+        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
       } else {
         formattedChartData?.push({
           timestamp,
@@ -42,7 +42,7 @@ export const useChartData = (combinedData: CombinedData) => {
           ? "solar_forecast_past"
           : "solar_forecast_future";
       if (existingData) {
-        existingData[key] = value.PowerKW / 1000;
+        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
       } else {
         formattedChartData?.push({
           timestamp,

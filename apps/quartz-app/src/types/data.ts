@@ -18,8 +18,8 @@ export type ChartDatum = {
   timestamp: number;
   solar_generation?: number | null;
   wind_generation?: number | null;
-  solar_forecast_past?: number;
-  solar_forecast_future?: number;
-  wind_forecast_past?: number;
-  wind_forecast_future?: number;
+  solar_forecast_past?: number | null;
+  solar_forecast_future?: number | null;
+  wind_forecast_past?: number | null;
+  wind_forecast_future?: number | null;
 };

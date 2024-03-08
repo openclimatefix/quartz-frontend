@@ -209,11 +209,14 @@ module.exports = {
           DEFAULT: "#6C6C6C",
           100: "#444444",
         },
-        "quartz-energy": {
+        "quartz-green": {
+          DEFAULT: "#49CD8D",
+        },
+        "quartz-mint-green": {
           DEFAULT: "#B5F5AA",
-          100: "#B5F5AA",
-          200: "#53D6FF",
-          300: "#FFD053",
+        },
+        "quartz-blue": {
+          DEFAULT: "#53D6FF",
         },
       },
     },
