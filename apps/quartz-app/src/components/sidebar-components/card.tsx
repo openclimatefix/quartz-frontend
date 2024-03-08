@@ -59,10 +59,10 @@ const WideCard: React.FC<CardProps> = ({
 
   return (
     // add clock component here and pass the time as props
-    <div className="self-stretch h-[136px] flex-col justify-start items-start gap-2 flex">
-      <div className="self-stretch justify-between items-start inline-flex">
+    <div className="self-stretch flex-col justify-start items-start flex">
+      <div className="self-stretch justify-between items-center inline-flex">
         <div
-          className={`${textClass} font-bold font-sans leading-[64px] ${actualGenerationColor}`}
+          className={`${textClass} font-bold font-sans leading-10 ${actualGenerationColor}`}
         >
           {actualGeneration}
         </div>
@@ -75,7 +75,7 @@ const WideCard: React.FC<CardProps> = ({
             <label className="inline-flex items-center cursor-pointer ">
               <div
                 onClick={toggleLineVisibility}
-                className={`relative w-12 h-2 ${bgTheme} rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute ${formatToggle} after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:mt-[-3.5px] after:transition-slow `}
+                className={`relative w-8 h-2 ${bgTheme} rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute ${formatToggle} after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:mt-[-3.5px] after:transition-slow `}
               ></div>
             </label>
           ) : null}
