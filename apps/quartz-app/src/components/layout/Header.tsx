@@ -30,7 +30,7 @@
 //     className || "",
 //     disabled
 //       ? "text-gray-500 cursor-not-allowed"
-//       : "cursor-pointer hover:text-ocf-yellow-400",
+//       : "cursor-pointer hover:text-quartz-yellow-400",
 //     "flex px-4 py-2 font-semibold text-sm"
 //   );
 //
@@ -53,7 +53,7 @@
 //
 //   if (setViewFunc && view) {
 //     const isCurrentView = currentView === view;
-//     let textColorClasses = isCurrentView ? "text-ocf-yellow" : "text-white";
+//     let textColorClasses = isCurrentView ? "text-quartz-yellow" : "text-white";
 //     if (disabled) textColorClasses = "text-gray-500 cursor-not-allowed";
 //     return (
 //       <Menu.Item>
@@ -74,7 +74,7 @@
 //       {({ active }) => (
 //         <Link
 //           href={url}
-//           // className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+//           // className={classNames(computedClasses, active ? "text-quartz-yellow" : "text-white")}
 //         >
 //           {text}
 //         </Link>

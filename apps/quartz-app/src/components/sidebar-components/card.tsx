@@ -1,7 +1,7 @@
 import { useGlobalState } from "../helpers/globalState";
 
 interface CardProps {
-  energyTag: string;
+  energyTag: "Wind" | "Solar" | "Power";
   icon: JSX.Element;
   actualGeneration?: number | string;
   currentForecast?: number | string;
@@ -44,12 +44,20 @@ const WideCard: React.FC<CardProps> = ({
     }
   };
 
+  let actualGenerationColor = "text-white";
+  if (energyTag === "Wind") {
+    actualGenerationColor = `text-quartz-blue-100`;
+  }
+  if (energyTag === "Solar") {
+    actualGenerationColor = `text-quartz-yellow-100`;
+  }
+
   return (
     // add clock component here and pass the time as props
     <div className="self-stretch h-[136px] flex-col justify-start items-start gap-2 flex">
       <div className="self-stretch justify-between items-start inline-flex">
         <div
-          className={`text-white ${textClass} font-bold font-sans leading-[64px]`}
+          className={`${textClass} font-bold font-sans leading-[64px] ${actualGenerationColor}`}
         >
           {actualGeneration}
         </div>

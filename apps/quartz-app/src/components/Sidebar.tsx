@@ -337,8 +337,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 currentForecast={solarForecastNow.toFixed(2) || 0}
                 nextForecast={solarForecastNext.toFixed(2) || 0}
                 energyTag="Solar"
-                textTheme="text-ocf-yellow"
-                bgTheme="bg-ocf-yellow"
+                textTheme="text-quartz-yellow"
+                bgTheme="bg-quartz-yellow"
                 toggle={true}
               />
             </div>
@@ -397,8 +397,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
             <MiniCard
               icon={<SolarIcon24 />}
-              textTheme={"text-ocf-yellow"}
-              bgTheme={"bg-ocf-yellow"}
+              textTheme={"text-quartz-yellow"}
+              bgTheme={"bg-quartz-yellow"}
               actualGeneration={actualSolarGeneration.toFixed(1) || "--"}
               nextForecast={solarForecastNext.toFixed(1) || 0}
               toggle={true}
