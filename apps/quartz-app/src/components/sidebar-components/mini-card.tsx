@@ -34,13 +34,16 @@ const MiniCard: React.FC<MiniCardProps> = ({
 
   const toggleLineVisibility = () => {
     if (isVisible) {
-      setVisibleLines(
-        visibleLines.filter((line: string) => line !== energyTag)
+      const newVisibleLines = visibleLines.filter(
+        (line: string) => line !== energyTag
       );
-      console.log(visibleLines, "visibleLines");
+      if (newVisibleLines.length === 0) {
+        setVisibleLines(energyTag === "Solar" ? ["Wind"] : ["Solar"]);
+      } else {
+        setVisibleLines(newVisibleLines);
+      }
     } else {
       setVisibleLines([...visibleLines, energyTag]);
-      console.log(visibleLines, "visibleLines");
     }
   };
 
