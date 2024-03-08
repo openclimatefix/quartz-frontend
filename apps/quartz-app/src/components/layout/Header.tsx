@@ -151,7 +151,14 @@ const Header: React.FC<HeaderProps> = () => {
         {/*  />*/}
         {/*</Menu>*/}
       </div>
-      <div className="py-1">{/*<ProfileDropDown />*/}</div>
+      <div className="py-1">
+        {/*<ProfileDropDown />*/}
+        {/*<div className="flex text-sm bg-white rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">*/}
+        {/*  <span className="sr-only">Open user menu</span>*/}
+        {/*  <img className="w-8 h-8" src={(user && user.picture) || ""} alt="" />*/}
+        {/*</div>*/}
+        <span className="block w-8 h-8 rounded-full bg-gradient-to-br from-quartz-yellow to-quartz-blue"></span>
+      </div>
     </header>
   );
 };
