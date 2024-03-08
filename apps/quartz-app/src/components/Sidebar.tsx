@@ -283,7 +283,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </button>
               ) : null}
             </div>
-            <div className="self-stretch h-[465px] flex-col justify-start items-start gap-4 flex">
+            <div className="self-stretch h-[465px] flex-col justify-start items-start gap-5 flex">
               {/* start card */}
               <WideCard
                 icon={<PowerIcon />}
@@ -371,7 +371,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
             )}
           </div>
-          <div className="self-stretch h-[354px] flex-col justify-start items-start gap-4 flex">
+          <div className="self-stretch flex-col justify-start items-start flex">
             <MiniCard
               icon={<PowerIcon />}
               textTheme={"text-quartz-mint-green"}
@@ -384,7 +384,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               nextForecast={powerForecastNext.toFixed(1) || 0}
               energyTag="Power"
             />
-            <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
+            <div className="w-full mb-4 h-px border border-white border-opacity-40"></div>
             <MiniCard
               icon={<WindIcon24 />}
               textTheme={"text-quartz-blue"}
@@ -394,7 +394,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               toggle={true}
               energyTag="Wind"
             />
-            <div className="w-full h-px mt-4 border border-white border-opacity-40"></div>
+            <div className="w-full mb-4 h-px border border-white border-opacity-40"></div>
             <MiniCard
               icon={<SolarIcon24 />}
               textTheme={"text-quartz-yellow"}
