@@ -9,7 +9,7 @@ type MiniCardProps = {
   textTheme: string;
   actualGeneration?: number | string;
   currentForecast?: number | string;
-  energyTag: string;
+  energyTag: "Wind" | "Solar" | "Power";
   nextForecast?: number | string;
   toggle?: boolean;
 };
@@ -43,6 +43,15 @@ const MiniCard: React.FC<MiniCardProps> = ({
       console.log(visibleLines, "visibleLines");
     }
   };
+
+  let actualGenerationColor = "text-white";
+  if (energyTag === "Wind") {
+    actualGenerationColor = `text-quartz-blue-100`;
+  }
+  if (energyTag === "Solar") {
+    actualGenerationColor = `text-quartz-yellow-100`;
+  }
+
   return (
     <div className="self-stretch h-[84px] flex-col justify-start items-start gap-8 flex">
       <div className="self-stretch h-10 flex-col justify-start items-start gap-2 flex">
@@ -57,7 +66,9 @@ const MiniCard: React.FC<MiniCardProps> = ({
             ></div>
           </label>
         ) : null}
-        <div className="self-stretch text-center text-white text-base font-bold font-sans leading-none">
+        <div
+          className={`self-stretch text-center text-base font-bold font-sans leading-none ${actualGenerationColor}`}
+        >
           {actualGeneration}
         </div>
       </div>

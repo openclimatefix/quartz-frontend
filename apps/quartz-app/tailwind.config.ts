@@ -217,6 +217,11 @@ module.exports = {
         },
         "quartz-blue": {
           DEFAULT: "#53D6FF",
+          100: "#c7dcf2",
+        },
+        "quartz-yellow": {
+          DEFAULT: "#FFD053",
+          100: "#ffddb1",
         },
       },
     },

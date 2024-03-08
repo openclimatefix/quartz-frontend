@@ -4,7 +4,7 @@ import { theme } from "@/tailwind.config";
 export const WIND_COLOR =
   theme.extend.colors["quartz-blue"].DEFAULT || "#48B0DF";
 export const SOLAR_COLOR =
-  theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD166";
+  theme.extend.colors["quartz-yellow"].DEFAULT || "#FFD166";
 export const COMBINED_COLOR =
   theme.extend.colors["quartz-mint-green"].DEFAULT || "#06D6A0";
 export const ACTUAL_COLOR = "#FFFFFF";
