@@ -202,7 +202,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 x={getEpochNowInTimezone()}
                 label={
                   <CustomLabel
-                    className={`fill-white cursor-pointer text-sm`}
+                    className={`fill-white text-sm`}
                     solidLine={true}
                     value={prettyPrintNowTime()}
                   />
