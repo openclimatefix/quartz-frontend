@@ -1,9 +1,11 @@
 // Purpose: Global state management using react-hooks-global-state.
 
+import { CombinedData } from "@/src/types/data";
 import { createGlobalState } from "react-hooks-global-state";
 
 export type GlobalStateType = {
   visibleLines: string[];
+  combinedData: CombinedData;
 };
 
 export const {
@@ -36,6 +38,7 @@ export const {
   | "setGlobalState"
 > = createGlobalState<GlobalStateType>({
   visibleLines: ["Solar", "Wind"],
+  combinedData: {} as CombinedData,
 });
 
 export default useGlobalState;
