@@ -195,7 +195,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     )?.wind_forecast || 0;
   windForecastNext = Number(windForecastNext / 1000) || 0;
 
-  // let actualPowerGeneration = Number(actualWindGeneration + 0).toFixed(2) || 0;
   const powerForecastNow = Number(windForecastNow + solarForecastNow) || 0;
   const powerForecastNext = Number(windForecastNext + solarForecastNext) || 0;
 
@@ -208,7 +207,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     formattedSideBarData.find(
       (data) => data.timestamp === getEpochNowInTimezone()
     )?.solar_generation || 0;
-  actualSolarGeneration = Number(actualSolarGeneration) / 100 || 0;
+  actualSolarGeneration = Number(actualSolarGeneration) / 1000 || 0;
 
   let actualPowerGeneration =
     Number(actualWindGeneration + actualSolarGeneration) || 0;
@@ -240,8 +239,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   if (expanded) {
-    // make mouse leave transtion slower
-    // on hover for the chevron, change the background color
     return (
       <div
         className="flex-0 w-96 justify-center items-center bg-444444"
