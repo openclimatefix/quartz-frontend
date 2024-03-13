@@ -50,25 +50,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
-  console.log("visibleLines", visibleLines);
-
-  const isVisible = visibleLines.includes("Solar");
-
-  const clickSolarToggle = (): void => {
-    if (visibleLines.includes("Solar")) {
-      setVisibleLines(visibleLines.filter((line: string) => line !== "Solar"));
-    } else {
-      setVisibleLines([...visibleLines, "Solar"]);
-    }
-  };
-
-  const clickWindToggle = (): void => {
-    if (visibleLines.includes("Wind")) {
-      setVisibleLines(visibleLines.filter((line: string) => line !== "Wind"));
-    } else {
-      setVisibleLines([...visibleLines, "Wind"]);
-    }
-  };
 
   const getNowInTimezone = () => {
     const now = DateTime.now().setZone("ist");
@@ -214,7 +195,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     )?.wind_forecast || 0;
   windForecastNext = Number(windForecastNext / 1000) || 0;
 
-  // let actualPowerGeneration = Number(actualWindGeneration + 0).toFixed(2) || 0;
   const powerForecastNow = Number(windForecastNow + solarForecastNow) || 0;
   const powerForecastNext = Number(windForecastNext + solarForecastNext) || 0;
 
@@ -223,11 +203,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   )?.wind_generation;
   actualWindGeneration = Number(actualWindGeneration) / 1000 || 0;
 
-  console.log("actualWindGeneration", actualWindGeneration);
-
-  let actualSolarGeneration = formattedSideBarData.find(
-    (data) => data.timestamp === getEpochNowInTimezone()
-  )?.solar_generation;
+  let actualSolarGeneration =
+    formattedSideBarData.find(
+      (data) => data.timestamp === getEpochNowInTimezone()
+    )?.solar_generation || 0;
   actualSolarGeneration = Number(actualSolarGeneration) / 1000 || 0;
 
   let actualPowerGeneration =
@@ -260,8 +239,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   if (expanded) {
-    // make mouse leave transtion slower
-    // on hover for the chevron, change the background color
     return (
       <div
         className="flex-0 w-96 justify-center items-center bg-444444"
@@ -331,7 +308,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 icon={<SolarIcon />}
                 actualGeneration={
                   actualSolarGeneration > 0
-                    ? actualPowerGeneration.toFixed(2)
+                    ? actualSolarGeneration.toFixed(2)
                     : "--"
                 }
                 currentForecast={solarForecastNow.toFixed(2) || 0}
@@ -356,8 +333,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="w-14 h-full px-2 py-4 bg-neutral-700 flex-col justify-start items-center gap-5 inline-flex">
           <div className="justify-start items-start gap-[110px] inline-flex ">
             {/* // on hover, set showChevronRight to true show the chevron, otherwise show the hamburger menu*/}
-            {/* // change the chevron icon to not be black*/}
-            {/* create the transition for this */}
             {showChevronRight ? (
               <button
                 className="w-6 h-6 flex justify-center items-center rounded-lg hover:bg-ocf-grey-400 hover:duration-500"
