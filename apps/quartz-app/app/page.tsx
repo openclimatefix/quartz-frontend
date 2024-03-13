@@ -14,8 +14,12 @@ import {
   useGetRegionsQuery,
 } from "@/src/hooks/queries";
 import { CombinedData } from "@/src/types/data";
+import { useEffect, useMemo } from "react";
+import useGlobalState from "@/src/components/helpers/globalState";
 
 export default function Home() {
+  const [combinedData, setCombinedData] = useGlobalState("combinedData");
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -65,6 +69,26 @@ export default function Home() {
       windRegionsData?.regions[0] || "",
       !!windRegionsData?.regions[0]
     );
+
+  const latestCombinedData: CombinedData = useMemo(() => {
+    return {
+      solarGenerationData,
+      windGenerationData,
+      solarForecastData,
+      windForecastData,
+    };
+  }, [
+    solarGenerationData,
+    windGenerationData,
+    solarForecastData,
+    windForecastData,
+  ]);
+
+  useEffect(() => {
+    console.log("combinedData updated", latestCombinedData);
+    setCombinedData(latestCombinedData);
+  }, [latestCombinedData]);
+
   if (
     solarRegionsError ||
     windRegionsError ||
@@ -87,13 +111,6 @@ export default function Home() {
 
   console.log("page solarGenerationData", solarGenerationData);
   console.log("page windGenerationData", windGenerationData);
-
-  const combinedData: CombinedData = {
-    solarGenerationData,
-    windGenerationData,
-    solarForecastData,
-    windForecastData,
-  };
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
