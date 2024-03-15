@@ -10,18 +10,54 @@ const Header: React.FC<HeaderProps> = () => {
   const { showUserMenu, setShowUserMenu } = useUserMenu();
   const [combinedData] = useGlobalState("combinedData");
   const downloadCsv = async () => {
-    // TODO: Implement download csv
     console.log("Download CSV");
-    console.log(combinedData);
     if (!combinedData) return;
+    // Remap combined data into array of objects with same timestamp and values for each key
+    type CombinedDatumWithTimestamp = {
+      solarForecastData?: number | null;
+      solarGenerationData?: number | null;
+      windForecastData?: number | null;
+      windGenerationData?: number | null;
+      time: string;
+    };
+    const combinedDataByTimestampMap: Map<string, CombinedDatumWithTimestamp> =
+      new Map();
+    for (const [type, values] of Object.entries(combinedData)) {
+      if (!type) continue;
+      const data = combinedData[type as keyof typeof combinedData];
 
-    // const a = document.createElement("a");
-    // a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    // a.setAttribute("download", "combinedData.csv");
-    // document.body.appendChild(a);
-    // a.click();
-    // document.body.removeChild(a);
-    //
+      if (data?.values.length) {
+        for (const value of data.values) {
+          if (!value.Time) continue;
+          const existingEntry = combinedDataByTimestampMap.get(value.Time);
+          if (existingEntry) {
+            existingEntry[type as keyof typeof combinedData] =
+              value.PowerKW || null;
+            combinedDataByTimestampMap.set(value.Time, existingEntry);
+          } else {
+            combinedDataByTimestampMap.set(value.Time, {
+              time: value.Time,
+              [type]: value.PowerKW || null,
+            });
+          }
+        }
+      }
+    }
+    let csvHeader =
+      Object.keys(combinedDataByTimestampMap.values().next().value).join(",") +
+      "\n"; // header row
+    let csvBody = "";
+    for (const row of combinedDataByTimestampMap.values()) {
+      csvBody += Object.values(row).join(",") + "\n";
+    }
+    let csv = csvHeader + csvBody;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.setAttribute("download", "combinedData.csv");
+    document.body.appendChild(a);
+    // console.log("csv", csv);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
