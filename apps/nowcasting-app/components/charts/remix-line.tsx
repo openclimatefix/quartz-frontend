@@ -221,8 +221,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   //get Y axis boundary
 
   const yMaxZoom_Levels = [
-    10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000,
-    9000, 10000, 11000, 12000
+    10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000, 6000,
+    7000, 8000, 9000, 10000, 11000, 12000
   ];
 
   let zoomYMax = getZoomYMax(filteredPreppedData);
@@ -380,7 +380,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={globalIsZoomed ? [0, Number(zoomYMax * 1.1)] : [0, yMax]}
+            domain={
+              globalIsZoomed && view !== VIEWS.SOLAR_SITES ? [0, Number(zoomYMax * 1.1)] : [0, yMax]
+            }
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
