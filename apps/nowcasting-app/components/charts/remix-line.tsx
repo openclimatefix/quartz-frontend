@@ -241,6 +241,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
     if (!globalIsZooming) {
       const { x1, x2 } = globalZoomArea;
+
       const dataInAreaRange = preppedData.filter(
         (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
       );
@@ -313,14 +314,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
               } else {
                 let { x1 } = globalZoomArea;
                 let x2 = e?.activeLabel || "";
-                // make sure x1 <= x2
-                if (x1 > x2) [x1, x2] = [x2, x1];
-                setGlobalZoomArea((zoom) => ({ ...zoom, x2 }));
+                if (x1 > x2) {
+                  [x1, x2] = [x2, x1];
+                }
+                setGlobalZoomArea({ x1, x2 });
                 setGlobalIsZoomed(true);
-                console.log("globalZoomArea", globalZoomArea);
               }
               setGlobalIsZooming(false);
             }
+            console.log("zoom area", globalZoomArea);
           }}
         >
           <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
