@@ -118,7 +118,9 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               <Tooltip
                 cursor={{ stroke: "#EEEEEE", strokeDasharray: 5 }}
                 filterNull={false}
-                content={(props) => <TooltipContent {...props} />}
+                content={(props) => (
+                  <TooltipContent {...props} visibleLines={visibleLines} />
+                )}
               />
               <Area
                 type="monotone"

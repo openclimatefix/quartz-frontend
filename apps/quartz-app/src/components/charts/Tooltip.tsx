@@ -112,7 +112,11 @@ const TooltipRow: FC<{
 export const TooltipContent: FC<{
   payload?: Payload<ValueType, NameType>[];
   label?: number;
-}> = ({ payload, label }) => {
+  visibleLines?: string[];
+}> = ({ payload, label, visibleLines }) => {
+  const showCombined =
+    visibleLines?.includes("Solar") && visibleLines.includes("Wind");
+  console.log("showCombined", showCombined);
   return (
     <div className="flex flex-col bg-ocf-grey-900/60 text-white p-3 w-64">
       <div className="text-sm flex items-stretch justify-between">
@@ -120,74 +124,86 @@ export const TooltipContent: FC<{
         <span>MW</span>
       </div>
       {/* Combined Values */}
-      <TooltipHeader title={"Combined"} icon={<PowerIcon24 />} />
-      <TooltipRow
-        name="combined_generation"
-        generationType={"combined"}
-        dataType={"generation"}
-        timestamp={label}
-        payload={payload}
-      />
-      <TooltipRow
-        name="combined_forecast_past"
-        generationType={"combined"}
-        dataType={"forecast"}
-        timestamp={label}
-        payload={payload}
-      />
-      <TooltipRow
-        name="combined_forecast_future"
-        generationType={"combined"}
-        dataType={"forecast"}
-        timestamp={label}
-        payload={payload}
-      />
+      {showCombined && (
+        <>
+          <TooltipHeader title={"Combined"} icon={<PowerIcon24 />} />
+          <TooltipRow
+            name="combined_generation"
+            generationType={"combined"}
+            dataType={"generation"}
+            timestamp={label}
+            payload={payload}
+          />
+          <TooltipRow
+            name="combined_forecast_past"
+            generationType={"combined"}
+            dataType={"forecast"}
+            timestamp={label}
+            payload={payload}
+          />
+          <TooltipRow
+            name="combined_forecast_future"
+            generationType={"combined"}
+            dataType={"forecast"}
+            timestamp={label}
+            payload={payload}
+          />
+        </>
+      )}
       {/* Wind Values */}
-      <TooltipHeader title={"Wind"} icon={<WindIcon24 />} />
-      <TooltipRow
-        name="wind_generation"
-        generationType={"wind"}
-        dataType={"generation"}
-        timestamp={label}
-        payload={payload}
-      />
-      <TooltipRow
-        name="wind_forecast_past"
-        generationType={"wind"}
-        dataType={"forecast"}
-        timestamp={label}
-        payload={payload}
-      />
-      <TooltipRow
-        name="wind_forecast_future"
-        generationType={"wind"}
-        dataType={"forecast"}
-        timestamp={label}
-        payload={payload}
-      />
+      {visibleLines?.includes("Wind") && (
+        <>
+          <TooltipHeader title={"Wind"} icon={<WindIcon24 />} />
+          <TooltipRow
+            name="wind_generation"
+            generationType={"wind"}
+            dataType={"generation"}
+            timestamp={label}
+            payload={payload}
+          />
+          <TooltipRow
+            name="wind_forecast_past"
+            generationType={"wind"}
+            dataType={"forecast"}
+            timestamp={label}
+            payload={payload}
+          />
+          <TooltipRow
+            name="wind_forecast_future"
+            generationType={"wind"}
+            dataType={"forecast"}
+            timestamp={label}
+            payload={payload}
+          />
+        </>
+      )}
       {/* Solar Values */}
-      <TooltipHeader title={"Solar"} icon={<SolarIcon24 />} />
-      <TooltipRow
-        name="solar_generation"
-        generationType={"solar"}
-        dataType={"generation"}
-        timestamp={label}
-        payload={payload}
-      />
-      <TooltipRow
-        name="solar_forecast_past"
-        generationType={"solar"}
-        dataType={"forecast"}
-        timestamp={label}
-        payload={payload}
-      />
-      <TooltipRow
-        name="solar_forecast_future"
-        generationType={"solar"}
-        dataType={"forecast"}
-        timestamp={label}
-        payload={payload}
-      />
+      {visibleLines?.includes("Solar") && (
+        <>
+          <TooltipHeader title={"Solar"} icon={<SolarIcon24 />} />
+          <TooltipRow
+            name="solar_generation"
+            generationType={"solar"}
+            dataType={"generation"}
+            timestamp={label}
+            payload={payload}
+          />
+          <TooltipRow
+            name="solar_forecast_past"
+            generationType={"solar"}
+            dataType={"forecast"}
+            timestamp={label}
+            payload={payload}
+          />
+          <TooltipRow
+            name="solar_forecast_future"
+            generationType={"solar"}
+            dataType={"forecast"}
+            timestamp={label}
+            payload={payload}
+          />
+        </>
+      )}
     </div>
   );
 };
