@@ -255,6 +255,7 @@ const SolarSiteChart: FC<{
             timeOfInterest={selectedTime}
             setTimeOfInterest={setSelectedTime}
             data={chartData}
+            zoomEnabled={false}
             yMax={yMax}
             visibleLines={visibleLines}
           />

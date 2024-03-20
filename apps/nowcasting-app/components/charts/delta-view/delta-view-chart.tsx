@@ -273,6 +273,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
+  const [globalZoomArea] = useGlobalState("globalZoomArea");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");

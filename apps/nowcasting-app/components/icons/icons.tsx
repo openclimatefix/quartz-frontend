@@ -51,6 +51,22 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+export const CloseButtonIconForZoom: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    version="1.1"
+    width="1.5rem"
+    height="1.5rem"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeWidth={2}
+      d="M20.030 5.030l-1.061-1.061-6.97 6.97-6.97-6.97-1.061 1.061 6.97 6.97-6.97 6.97 1.061 1.061 6.97-6.97 6.97 6.97 1.061-1.061-6.97-6.97 6.97-6.97z"
+      fill="white"
+    />
+  </svg>
+);
+
 export const ClockIcon: React.FC<IconProps> = ({ className }) => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -333,3 +349,26 @@ export const ClockInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title:
     </svg>
   </span>
 );
+
+export const ZoomOutIcon = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
+  <span title={props.title || ""}>
+    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg" {...props}>
+      <defs>
+        <style>
+          {
+            ".cls-1,.cls-2{fill:none;}.cls-2{stroke:#FFFF;stroke-linecap:round;stroke-linejoin:round;}"
+          }
+        </style>
+      </defs>
+      <g data-name="Layer 2" id="Layer_2">
+        <g id="Workspace">
+          <rect className="cls-1" height={24} width={24} />
+          <circle className="cls-2" cx={11.5} cy={11.5} r={4.5} />
+          <line className="cls-2" x1={18} x2={14.68} y1={18} y2={14.68} />
+          <line className="cls-2" x1={9.5} x2={13.5} y1={11.5} y2={11.5} />
+        </g>
+      </g>
+    </svg>
+  </span>
+);
+export default ZoomOutIcon;
