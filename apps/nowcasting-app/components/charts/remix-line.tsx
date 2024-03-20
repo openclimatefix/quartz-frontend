@@ -27,8 +27,9 @@ import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
-import { CloseButtonIcon, CloseButtonIconForZoom } from "../icons/icons";
+import SVGComponent, { CloseButtonIcon, CloseButtonIconForZoom } from "../icons/icons";
 import { getZoomYMax } from "../helpers/chartUtils";
+import { ZoomOutIcon } from "@heroicons/react/solid";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -261,9 +262,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             type="button"
             onClick={handleZoomOut}
             style={{ position: "relative", top: "0", left: "20" }}
-            className="flex font-bold items-center p-0.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+            className="flex font-bold items-center p-1.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
           >
-            <CloseButtonIconForZoom />
+            <ZoomOutIcon className="w-8 h-8" />
           </button>
         </div>
       )}
