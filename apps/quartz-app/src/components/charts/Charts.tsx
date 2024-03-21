@@ -2,6 +2,8 @@
 import { useGetRegionsQuery } from "@/src/hooks/queries";
 import {
   Area,
+  Bar,
+  BarChart,
   CartesianGrid,
   ComposedChart,
   ReferenceLine,
@@ -53,9 +55,9 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
   // Useful shared constants for the chart
   const forecastsStrokeWidth = 1;
   const actualsStrokeWidth = 3;
-  const futureAreaOpacity = 0.8;
+  const futureAreaOpacity = 1;
   const futureStrokeOpacity = 1;
-  const pastAreaOpacity = 0.5;
+  const pastAreaOpacity = 0.7;
   const pastStrokeOpacity = 1;
 
   const [visibleLines] = useGlobalState("visibleLines");
@@ -122,53 +124,57 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                   <TooltipContent {...props} visibleLines={visibleLines} />
                 )}
               />
-              <Area
+              <Bar
                 type="monotone"
                 name={"wind_forecast_past"}
                 stackId={"1"}
                 dataKey="wind_forecast_past"
-                stroke={WIND_COLOR}
-                strokeWidth={forecastsStrokeWidth}
+                // stroke={WIND_COLOR}
+                // strokeWidth={forecastsStrokeWidth}
                 strokeOpacity={pastStrokeOpacity}
                 fill={WIND_COLOR}
+                // opacity={pastAreaOpacity}
                 fillOpacity={pastAreaOpacity}
                 hide={!visibleLines.includes("Wind")}
               />
-              <Area
+              <Bar
                 type="monotone"
                 name={"wind_forecast_future"}
                 stackId={"1"}
                 dataKey="wind_forecast_future"
-                stroke={WIND_COLOR}
+                // stroke={WIND_COLOR}
                 strokeWidth={forecastsStrokeWidth}
                 // strokeDasharray={"10 5"}
                 strokeOpacity={futureStrokeOpacity}
                 fill={WIND_COLOR}
+                // opacity={futureAreaOpacity}
                 fillOpacity={futureAreaOpacity}
                 hide={!visibleLines.includes("Wind")}
               />
-              <Area
+              <Bar
                 type="monotone"
                 name={"solar_forecast_past"}
                 stackId={"1"}
                 dataKey="solar_forecast_past"
-                stroke={SOLAR_COLOR}
-                strokeWidth={forecastsStrokeWidth}
-                strokeOpacity={pastStrokeOpacity}
+                // stroke={SOLAR_COLOR}
+                // strokeWidth={forecastsStrokeWidth}
+                // strokeOpacity={pastStrokeOpacity}
                 fillOpacity={pastAreaOpacity}
                 fill={SOLAR_COLOR}
+                // opacity={pastAreaOpacity}
                 hide={!visibleLines.includes("Solar")}
               />
-              <Area
+              <Bar
                 type="monotone"
                 name={"solar_forecast_future"}
                 stackId={"1"}
                 dataKey="solar_forecast_future"
-                stroke={SOLAR_COLOR}
-                strokeWidth={forecastsStrokeWidth}
+                // stroke={SOLAR_COLOR}
+                // strokeWidth={forecastsStrokeWidth}
                 // strokeDasharray={"10 5"}
                 strokeOpacity={futureStrokeOpacity}
                 fill={SOLAR_COLOR}
+                // opacity={futureAreaOpacity}
                 fillOpacity={futureAreaOpacity}
                 hide={!visibleLines.includes("Solar")}
               />
