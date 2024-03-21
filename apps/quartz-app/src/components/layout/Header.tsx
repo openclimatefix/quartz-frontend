@@ -71,12 +71,7 @@ const Header: React.FC<HeaderProps> = () => {
       ></div>
       <header className="h-16 text-white px-4 bg-black flex absolute top-0 w-full p-1 text-sm items-center z-30">
         <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
-          <a
-            className="flex h-8 self-center w-auto"
-            target="_blank"
-            href="https://quartz.solar/"
-            rel="noreferrer"
-          >
+          <a className="flex h-8 self-center w-auto" href="/" rel="noreferrer">
             <img
               src="/QUARTZSOLAR_LOGO_ICON.svg"
               alt="quartz_logo"
@@ -85,12 +80,7 @@ const Header: React.FC<HeaderProps> = () => {
           </a>
         </div>
         <div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">
-          <a
-            className="flex h-6 w-auto"
-            target="_blank"
-            href="https://quartz.solar/"
-            rel="noreferrer"
-          >
+          <a className="flex h-6 w-auto" href="/" rel="noreferrer">
             <img
               src="/QUARTZENERGY_LOGO_TEXTONLY_WHITE.svg"
               alt="quartz_logo"

@@ -52,10 +52,10 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
 
   // Useful shared constants for the chart
   const forecastsStrokeWidth = 1;
-  const actualsStrokeWidth = 3.5;
+  const actualsStrokeWidth = 3;
   const futureAreaOpacity = 0.8;
   const futureStrokeOpacity = 1;
-  const pastAreaOpacity = 0.6;
+  const pastAreaOpacity = 0.5;
   const pastStrokeOpacity = 1;
 
   const [visibleLines] = useGlobalState("visibleLines");
@@ -141,7 +141,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 dataKey="wind_forecast_future"
                 stroke={WIND_COLOR}
                 strokeWidth={forecastsStrokeWidth}
-                strokeDasharray={"10 5"}
+                // strokeDasharray={"10 5"}
                 strokeOpacity={futureStrokeOpacity}
                 fill={WIND_COLOR}
                 fillOpacity={futureAreaOpacity}
@@ -166,7 +166,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 dataKey="solar_forecast_future"
                 stroke={SOLAR_COLOR}
                 strokeWidth={forecastsStrokeWidth}
-                strokeDasharray={"10 5"}
+                // strokeDasharray={"10 5"}
                 strokeOpacity={futureStrokeOpacity}
                 fill={SOLAR_COLOR}
                 fillOpacity={futureAreaOpacity}
@@ -178,6 +178,8 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 stackId={"2"}
                 dataKey="wind_generation"
                 stroke={ACTUAL_WIND_COLOR}
+                strokeLinecap={"round"}
+                strokeLinejoin={"bevel"}
                 strokeWidth={actualsStrokeWidth}
                 strokeOpacity={pastStrokeOpacity}
                 // connectNulls={true}
@@ -193,7 +195,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 strokeWidth={actualsStrokeWidth}
                 // strokeDasharray={"20 4 2 4"}
                 strokeLinejoin={"round"}
-                strokeLinecap={"square"}
+                strokeLinecap={"round"}
                 strokeOpacity={pastStrokeOpacity}
                 // dot={true}
                 // connectNulls={true}
