@@ -116,7 +116,6 @@ export const TooltipContent: FC<{
 }> = ({ payload, label, visibleLines }) => {
   const showCombined =
     visibleLines?.includes("Solar") && visibleLines.includes("Wind");
-  console.log("showCombined", showCombined);
   return (
     <div className="flex flex-col bg-ocf-grey-900/60 text-white p-3 w-64">
       <div className="text-sm flex items-stretch justify-between">

@@ -245,29 +245,56 @@ const Sidebar: React.FC<SidebarProps> = ({
         onMouseEnter={handleMouseEnterExpanded}
         onMouseLeave={handleMouseLeaveExpanded}
       >
-        <div className="w-full h-full p-4 bg-neutral-700 flex-col justify-start items-start gap-5 inline-flex">
-          <div className="justify-start items-start gap-[110px] flex-col">
+        <div className="w-full h-full p-4 bg-neutral-700 flex-col justify-start items-start gap-5 flex">
+          <div className="self-stretch gap-[110px] flex-col">
             <div className="flex justify-between mb-3">
+              <button
+                className={`flex items-center justify-center p-2 -mt-1 -ml-1 hover:bg-ocf-grey-400 hover:duration-500 rounded-lg ${
+                  showChevronLeft ? "" : "opacity-0"
+                }`}
+                onClick={handleClick}
+              >
+                <ChevronLeft />
+              </button>
               <div className="text-white text-lg font-bold font-sans leading-normal">
-                {title}
+                {/*{title}*/}
+                {/* Date in format Wed, 20 March 2024 */}
+                {DateTime.now().toLocaleString({
+                  weekday: "short",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
               </div>
-              {showChevronLeft ? (
-                <button
-                  className="w-6 h-6 flex items-center justify-center hover:bg-ocf-grey-400 hover:duration-500 rounded-lg"
-                  onClick={handleClick}
-                >
-                  <ChevronLeft />
-                </button>
-              ) : null}
             </div>
-            <div className="self-stretch h-[465px] flex-col justify-start items-start gap-5 flex">
+            <hr className="border-white/50 my-3 mb-5" />
+
+            <div className="flex-1 self-stretch h-[39px] justify-between mb-6 items-start gap-16 flex">
+              <ForecastTimeDisplay
+                time={prettyPrintNowTime()}
+                icon={<ClockIcon />}
+                forecastTag="LATEST GW"
+              />
+              <ForecastTimeDisplay
+                time={prettyPrintNextTime()}
+                icon={<ClockIcon />}
+                forecastTag="NEXT GW"
+                alignRight={true}
+              />
+            </div>
+            <div className="self-stretch flex-col justify-start items-start gap-5 flex">
               {/* start card */}
               <WideCard
                 icon={<PowerIcon />}
                 actualGeneration={
-                  actualPowerGeneration > 0
-                    ? actualPowerGeneration.toFixed(2)
-                    : "--"
+                  actualPowerGeneration > 0 ? (
+                    actualPowerGeneration.toFixed(2)
+                  ) : (
+                    <div className="flex flex-col mb-2 text-base text-gray-300 leading-tight break-word border border-dashed border-gray-300 p-2 px-3 rounded-md">
+                      <span>Generation Data</span>
+                      <span>Unavailable</span>
+                    </div>
+                  )
                 }
                 currentForecast={powerForecastNow.toFixed(2) || 0}
                 nextForecast={powerForecastNext.toFixed(2) || 0}
@@ -276,25 +303,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                 textTheme="text-quartz-mint-green"
               />
               {/* end card */}
-              <div className="w-[350px] h-px border border-white border-opacity-40"></div>
-              <div className="self-stretch h-[39px] justify-start items-start gap-4 inline-flex">
-                <ForecastTimeDisplay
-                  time={prettyPrintNowTime()}
-                  icon={<ClockIcon />}
-                  forecastTag="LATEST GW"
-                />
-                <ForecastTimeDisplay
-                  time={prettyPrintNextTime()}
-                  icon={<ClockIcon />}
-                  forecastTag="NEXT GW"
-                />
-              </div>
+              <hr className="w-full border-white/50" />
+
               <WideCard
                 icon={<WindIcon />}
                 actualGeneration={
                   actualWindGeneration > 0
                     ? actualWindGeneration.toFixed(2)
-                    : "--"
+                    : "-.--"
                 }
                 currentForecast={windForecastNow.toFixed(2) || 0}
                 nextForecast={windForecastNext.toFixed(2) || 0}
@@ -303,13 +319,13 @@ const Sidebar: React.FC<SidebarProps> = ({
                 bgTheme="bg-quartz-blue"
                 toggle={true}
               />
-              <div className="w-[350px] h-px border border-white border-opacity-40"></div>
+              <hr className="w-full border-white/50" />
               <WideCard
                 icon={<SolarIcon />}
                 actualGeneration={
                   actualSolarGeneration > 0
                     ? actualSolarGeneration.toFixed(2)
-                    : "--"
+                    : "-.--"
                 }
                 currentForecast={solarForecastNow.toFixed(2) || 0}
                 nextForecast={solarForecastNext.toFixed(2) || 0}
@@ -335,14 +351,14 @@ const Sidebar: React.FC<SidebarProps> = ({
             {/* // on hover, set showChevronRight to true show the chevron, otherwise show the hamburger menu*/}
             {showChevronRight ? (
               <button
-                className="w-6 h-6 flex justify-center items-center rounded-lg hover:bg-ocf-grey-400 hover:duration-500"
+                className="p-2 -mt-1 -ml-1 flex justify-center items-center rounded-lg hover:bg-ocf-grey-400 hover:duration-300"
                 onClick={handleClick}
               >
                 <ChevronRight />
               </button>
             ) : (
-              <div className="w-6 h-6 flex justify-center items-center rounded-lg">
-                <HamburgerMenu />
+              <div className="p-2 -mt-1 -ml-1 flex justify-center items-center rounded-lg">
+                <HamburgerMenu className="text-white" />
               </div>
             )}
           </div>
@@ -354,7 +370,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               actualGeneration={
                 actualPowerGeneration > 0
                   ? actualPowerGeneration.toFixed(1)
-                  : "--"
+                  : "-.-"
               }
               nextForecast={powerForecastNext.toFixed(1) || 0}
               energyTag="Power"
@@ -364,7 +380,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               icon={<WindIcon24 />}
               textTheme={"text-quartz-blue"}
               bgTheme={"bg-quartz-blue"}
-              actualGeneration={actualWindGeneration.toFixed(1) || "--"}
+              actualGeneration={
+                actualWindGeneration > 0
+                  ? actualWindGeneration.toFixed(1)
+                  : "-.-"
+              }
               nextForecast={windForecastNext.toFixed(1) || 0}
               toggle={true}
               energyTag="Wind"
@@ -374,7 +394,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               icon={<SolarIcon24 />}
               textTheme={"text-quartz-yellow"}
               bgTheme={"bg-quartz-yellow"}
-              actualGeneration={actualSolarGeneration.toFixed(1) || "--"}
+              actualGeneration={
+                actualSolarGeneration > 0
+                  ? actualSolarGeneration.toFixed(1)
+                  : "-.-"
+              }
               nextForecast={solarForecastNext.toFixed(1) || 0}
               toggle={true}
               energyTag="Solar"
