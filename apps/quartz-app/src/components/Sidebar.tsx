@@ -306,21 +306,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               <hr className="w-full border-white/50" />
 
               <WideCard
-                icon={<WindIcon />}
-                actualGeneration={
-                  actualWindGeneration > 0
-                    ? actualWindGeneration.toFixed(2)
-                    : "-.--"
-                }
-                currentForecast={windForecastNow.toFixed(2) || 0}
-                nextForecast={windForecastNext.toFixed(2) || 0}
-                energyTag="Wind"
-                textTheme="text-quartz-blue"
-                bgTheme="bg-quartz-blue"
-                toggle={true}
-              />
-              <hr className="w-full border-white/50" />
-              <WideCard
                 icon={<SolarIcon />}
                 actualGeneration={
                   actualSolarGeneration > 0
@@ -332,6 +317,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                 energyTag="Solar"
                 textTheme="text-quartz-yellow"
                 bgTheme="bg-quartz-yellow"
+                toggle={true}
+              />
+
+              <hr className="w-full border-white/50" />
+              <WideCard
+                icon={<WindIcon />}
+                actualGeneration={
+                  actualWindGeneration > 0
+                    ? actualWindGeneration.toFixed(2)
+                    : "-.--"
+                }
+                currentForecast={windForecastNow.toFixed(2) || 0}
+                nextForecast={windForecastNext.toFixed(2) || 0}
+                energyTag="Wind"
+                textTheme="text-quartz-blue"
+                bgTheme="bg-quartz-blue"
                 toggle={true}
               />
             </div>
