@@ -314,32 +314,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
               {/* end card */}
               <hr className="w-full border-white/50" />
-
-              <WideCard
-                icon={<WindIcon />}
-                actualGeneration={
-                  actualWindGeneration > 0
-                    ? actualWindGeneration.toLocaleString("hi-IN", {
-                        maximumFractionDigits: 0,
-                      })
-                    : "-.--"
-                }
-                currentForecast={
-                  windForecastNow.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
-                  }) || 0
-                }
-                nextForecast={
-                  windForecastNext.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
-                  }) || 0
-                }
-                energyTag="Wind"
-                textTheme="text-quartz-blue"
-                bgTheme="bg-quartz-blue"
-                toggle={true}
-              />
-              <hr className="w-full border-white/50" />
               <WideCard
                 icon={<SolarIcon />}
                 actualGeneration={
@@ -362,6 +336,31 @@ const Sidebar: React.FC<SidebarProps> = ({
                 energyTag="Solar"
                 textTheme="text-quartz-yellow"
                 bgTheme="bg-quartz-yellow"
+                toggle={true}
+              />
+              <hr className="w-full border-white/50" />
+              <WideCard
+                icon={<WindIcon />}
+                actualGeneration={
+                  actualWindGeneration > 0
+                    ? actualWindGeneration.toLocaleString("hi-IN", {
+                        maximumFractionDigits: 0,
+                      })
+                    : "-.--"
+                }
+                currentForecast={
+                  windForecastNow.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
+                nextForecast={
+                  windForecastNext.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
+                energyTag="Wind"
+                textTheme="text-quartz-blue"
+                bgTheme="bg-quartz-blue"
                 toggle={true}
               />
             </div>
