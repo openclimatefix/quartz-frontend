@@ -243,8 +243,8 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 }
                 offset={"20"}
                 stroke="white"
-                strokeWidth={3}
-                strokeDasharray={"20 5"}
+                strokeWidth={2}
+                // strokeDasharray={"20 5"}
                 strokeOpacity={0.75}
               />
             </ComposedChart>
