@@ -3,6 +3,8 @@
 import { OCFLogo } from "@/src/assets/logo";
 import { useUserMenu } from "@/src/hooks/useUserMenu";
 import useGlobalState from "../helpers/globalState";
+import { DownloadIcon } from "@/src/components/icons/icons";
+import { DateTime } from "luxon";
 
 type HeaderProps = {};
 
@@ -20,14 +22,29 @@ const Header: React.FC<HeaderProps> = () => {
       windGenerationData?: number | null;
       time: string;
     };
+    const csvProperties = {
+      solarForecastData: null,
+      solarGenerationData: null,
+      windForecastData: null,
+      windGenerationData: null,
+    };
+    const csvHeaderLabels = {
+      solarForecastData: "Solar Forecast",
+      solarGenerationData: "Solar Generation",
+      windForecastData: "Wind Forecast",
+      windGenerationData: "Wind Generation",
+      time: "Time",
+    };
     const combinedDataByTimestampMap: Map<string, CombinedDatumWithTimestamp> =
       new Map();
     for (const [type, values] of Object.entries(combinedData)) {
       if (!type) continue;
+      if (!Object.keys(csvProperties).includes(type)) continue;
+
       const data = combinedData[type as keyof typeof combinedData];
 
       if (data?.values.length) {
-        for (const value of data.values) {
+        for (const value of data.values.sort()) {
           if (!value.Time) continue;
           const existingEntry = combinedDataByTimestampMap.get(value.Time);
           if (existingEntry) {
@@ -37,23 +54,30 @@ const Header: React.FC<HeaderProps> = () => {
           } else {
             combinedDataByTimestampMap.set(value.Time, {
               time: value.Time,
+              ...csvProperties,
               [type]: value.PowerKW || null,
             });
           }
         }
       }
     }
+    const sortedMap = new Map([...combinedDataByTimestampMap].sort());
     let csvHeader =
-      Object.keys(combinedDataByTimestampMap.values().next().value).join(",") +
-      "\n"; // header row
+      Object.keys(sortedMap.values().next().value)
+        .map((key) => csvHeaderLabels[key as keyof typeof csvHeaderLabels])
+        .join(",") + "\n"; // header row
     let csvBody = "";
-    for (const row of combinedDataByTimestampMap.values()) {
+    for (const row of sortedMap.values()) {
       csvBody += Object.values(row).join(",") + "\n";
     }
     let csv = csvHeader + csvBody;
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    a.setAttribute("download", "combinedData.csv");
+    const now = DateTime.now().setZone("ist");
+    a.download = `Quartz-Data_${now
+      .toString()
+      .slice(0, 16)
+      .replaceAll("T", "_")}.csv`;
     document.body.appendChild(a);
     // console.log("csv", csv);
     a.click();
@@ -95,7 +119,16 @@ const Header: React.FC<HeaderProps> = () => {
           </div>
         </div>
         <div className="grow text-center inline-flex px-8 gap-5 items-center"></div>
-        <div className="py-1">
+        <div className="flex items-center gap-5 py-1">
+          <button
+            id="DownloadCsvButton"
+            className="text-sm p-2"
+            title={"Download CSV"}
+            tabIndex={0}
+            onClick={downloadCsv}
+          >
+            <DownloadIcon />
+          </button>
           <span
             onClick={() => {
               setShowUserMenu(() => !showUserMenu);
@@ -111,15 +144,6 @@ const Header: React.FC<HeaderProps> = () => {
             }`}
           >
             <div className="absolute right-0 flex flex-col mt-2 w-48 py-1 bg-white text-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-              <button
-                id="DownloadCsvButton"
-                onClick={downloadCsv}
-                className="text-left disabled block px-4 py-2 text-sm hover:bg-gray-100"
-                tabIndex={1}
-              >
-                Download CSV
-              </button>
-              <hr />
               <span className="block px-4 py-2 text-xs ">
                 Signed in as example@email.com
               </span>
