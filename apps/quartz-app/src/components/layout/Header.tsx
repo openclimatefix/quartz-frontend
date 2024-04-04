@@ -119,7 +119,7 @@ const Header: React.FC<HeaderProps> = () => {
           </div>
         </div>
         <div className="grow text-center inline-flex px-8 gap-5 items-center"></div>
-        <div className="flex items-center gap-5 py-1">
+        <div className="flex items-center relative gap-5 py-1">
           <button
             id="DownloadCsvButton"
             className="text-sm p-2"
@@ -129,18 +129,19 @@ const Header: React.FC<HeaderProps> = () => {
           >
             <DownloadIcon />
           </button>
-          <span
+          <button
             onClick={() => {
               setShowUserMenu(() => !showUserMenu);
             }}
+            tabIndex={0}
             className="w-8 h-8 flex items-center justify-center text-lg rounded-full cursor-pointer bg-gradient-to-br from-quartz-yellow to-quartz-blue"
           >
             E
-          </span>
+          </button>
           <div
             id="ProfileDropdown"
-            className={`flex ${
-              showUserMenu ? "relative" : "absolute -top-40 -right-40 z-40"
+            className={`flex absolute right-0 ${
+              showUserMenu ? "top-10" : "absolute -top-40"
             }`}
           >
             <div className="absolute right-0 flex flex-col mt-2 w-48 py-1 bg-white text-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
