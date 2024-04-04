@@ -21,6 +21,7 @@ import {
 } from "@/src/constants";
 import { LegendContainer } from "@/src/components/charts/legend/LegendContainer";
 import {
+  formatEpochToHumanDayName,
   formatEpochToPrettyTime,
   getEpochNowInTimezone,
   prettyPrintNowTime,
@@ -30,6 +31,7 @@ import { CombinedData } from "@/src/types/data";
 import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
 import { useGlobalState } from "../helpers/globalState";
+import { DateTime } from "luxon";
 
 type ChartsProps = {
   combinedData: CombinedData;
@@ -41,13 +43,19 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
   const formattedChartData = useChartData(combinedData);
 
   // Create array of ticks for the x-axis
-  const now = new Date();
+  const now = DateTime.now();
   const offsets = [
     -42, -36, -30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60,
     66,
   ];
   const ticks = offsets.map((o) => {
-    return new Date(now).setHours(o, 0, 0, 0);
+    return now.set({ hour: o, minute: 0, second: 0 }).toMillis();
+  });
+  const dayTicks = offsets.map((tick) => {
+    const epoch = now.set({ hour: tick, minute: 0, second: 0 }).toMillis();
+    const time = formatEpochToPrettyTime(epoch);
+    if (time === "12:00") return epoch;
+    return "";
   });
 
   // Useful shared constants for the chart
@@ -101,6 +109,28 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 }
                 ticks={ticks}
                 tick={{ fill: "white", style: { fontSize: "12px" } }}
+              />
+              <XAxis
+                dataKey="timestamp"
+                tickFormatter={formatEpochToHumanDayName}
+                scale={"time"}
+                type={"number"}
+                xAxisId={"x-axis-3"}
+                orientation="bottom"
+                domain={
+                  formattedChartData?.length
+                    ? [
+                        formattedChartData[0]?.timestamp,
+                        formattedChartData[formattedChartData.length - 1]
+                          .timestamp,
+                      ]
+                    : ["auto", "auto"]
+                }
+                tickLine={false}
+                ticks={dayTicks}
+                tick={{ fill: "white", style: { fontSize: "12px" } }}
+                tickMargin={-10}
+                axisLine={false}
               />
               <YAxis
                 tick={{ fill: "white", style: { fontSize: "12px" } }}
