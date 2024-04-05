@@ -24,7 +24,7 @@ const WideCard: React.FC<CardProps> = ({
   toggle,
   textTheme,
 }) => {
-  const textClass = energyTag !== "Power" ? `text-5xl` : `text-6xl`;
+  const textClass = energyTag !== "Power" ? `text-5xl` : `text-5xl`;
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(energyTag);
   const formatToggle = visibleLines.includes(energyTag)
