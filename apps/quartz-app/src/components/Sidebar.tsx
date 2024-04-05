@@ -173,13 +173,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   let solarForecastNow = formattedSideBarData.find(
     (data) => data.timestamp === getEpochNowInTimezone()
   )?.solar_forecast;
-  solarForecastNow = Number(solarForecastNow) / 1000 || 0;
+  solarForecastNow = Number(solarForecastNow) || 0;
 
   let windForecastNow =
     formattedSideBarData.find(
       (data) => data.timestamp === getEpochNowInTimezone()
     )?.wind_forecast || 0;
-  windForecastNow = Number(windForecastNow) / 1000 || 0;
+  windForecastNow = Number(windForecastNow) || 0;
 
   // get the next 15 min slot solar forecast
 
@@ -187,13 +187,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     formattedSideBarData.find(
       (data) => data.timestamp === getEpochNowInTimezonePlus15()
     )?.solar_forecast || 0;
-  solarForecastNext = Number(solarForecastNext / 1000) || 0;
+  solarForecastNext = Number(solarForecastNext) || 0;
 
   let windForecastNext =
     formattedSideBarData.find(
       (data) => data.timestamp === getEpochNowInTimezonePlus15()
     )?.wind_forecast || 0;
-  windForecastNext = Number(windForecastNext / 1000) || 0;
+  windForecastNext = Number(windForecastNext) || 0;
 
   const powerForecastNow = Number(windForecastNow + solarForecastNow) || 0;
   const powerForecastNext = Number(windForecastNext + solarForecastNext) || 0;
@@ -201,13 +201,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   let actualWindGeneration = formattedSideBarData.find(
     (data) => data.timestamp === getEpochNowInTimezone()
   )?.wind_generation;
-  actualWindGeneration = Number(actualWindGeneration) / 1000 || 0;
+  actualWindGeneration = Number(actualWindGeneration) || 0;
 
   let actualSolarGeneration =
     formattedSideBarData.find(
       (data) => data.timestamp === getEpochNowInTimezone()
     )?.solar_generation || 0;
-  actualSolarGeneration = Number(actualSolarGeneration) / 1000 || 0;
+  actualSolarGeneration = Number(actualSolarGeneration) || 0;
 
   let actualPowerGeneration =
     Number(actualWindGeneration + actualSolarGeneration) || 0;
@@ -273,12 +273,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               <ForecastTimeDisplay
                 time={prettyPrintNowTime()}
                 icon={<ClockIcon />}
-                forecastTag="LATEST GW"
+                forecastTag="LATEST MW"
               />
               <ForecastTimeDisplay
                 time={prettyPrintNextTime()}
                 icon={<ClockIcon />}
-                forecastTag="NEXT GW"
+                forecastTag="NEXT MW"
                 alignRight={true}
               />
             </div>
@@ -288,7 +288,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 icon={<PowerIcon />}
                 actualGeneration={
                   actualPowerGeneration > 0 ? (
-                    actualPowerGeneration.toFixed(2)
+                    actualPowerGeneration.toLocaleString("hi-IN", {
+                      maximumFractionDigits: 0,
+                    })
                   ) : (
                     <div className="flex flex-col mb-2 text-base text-gray-300 leading-tight break-word border border-dashed border-gray-300 p-2 px-3 rounded-md">
                       <span>Generation Data</span>
@@ -296,8 +298,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   )
                 }
-                currentForecast={powerForecastNow.toFixed(2) || 0}
-                nextForecast={powerForecastNext.toFixed(2) || 0}
+                currentForecast={
+                  powerForecastNow.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
+                nextForecast={
+                  powerForecastNext.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
                 energyTag="Power"
                 bgTheme="bg-quartz-mint-green"
                 textTheme="text-quartz-mint-green"
@@ -309,11 +319,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                 icon={<WindIcon />}
                 actualGeneration={
                   actualWindGeneration > 0
-                    ? actualWindGeneration.toFixed(2)
+                    ? actualWindGeneration.toLocaleString("hi-IN", {
+                        maximumFractionDigits: 0,
+                      })
                     : "-.--"
                 }
-                currentForecast={windForecastNow.toFixed(2) || 0}
-                nextForecast={windForecastNext.toFixed(2) || 0}
+                currentForecast={
+                  windForecastNow.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
+                nextForecast={
+                  windForecastNext.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
                 energyTag="Wind"
                 textTheme="text-quartz-blue"
                 bgTheme="bg-quartz-blue"
@@ -324,11 +344,21 @@ const Sidebar: React.FC<SidebarProps> = ({
                 icon={<SolarIcon />}
                 actualGeneration={
                   actualSolarGeneration > 0
-                    ? actualSolarGeneration.toFixed(2)
+                    ? actualSolarGeneration.toLocaleString("hi-IN", {
+                        maximumFractionDigits: 0,
+                      })
                     : "-.--"
                 }
-                currentForecast={solarForecastNow.toFixed(2) || 0}
-                nextForecast={solarForecastNext.toFixed(2) || 0}
+                currentForecast={
+                  solarForecastNow.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
+                nextForecast={
+                  solarForecastNext.toLocaleString("hi-IN", {
+                    maximumFractionDigits: 0,
+                  }) || 0
+                }
                 energyTag="Solar"
                 textTheme="text-quartz-yellow"
                 bgTheme="bg-quartz-yellow"
