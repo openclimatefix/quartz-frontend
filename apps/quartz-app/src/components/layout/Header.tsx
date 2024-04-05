@@ -5,6 +5,7 @@ import { useUserMenu } from "@/src/hooks/useUserMenu";
 import useGlobalState from "../helpers/globalState";
 import { DownloadIcon } from "@/src/components/icons/icons";
 import { DateTime } from "luxon";
+import { KWtoMW } from "@/src/helpers/dataFormats";
 
 type HeaderProps = {};
 
@@ -48,14 +49,15 @@ const Header: React.FC<HeaderProps> = () => {
           if (!value.Time) continue;
           const existingEntry = combinedDataByTimestampMap.get(value.Time);
           if (existingEntry) {
-            existingEntry[type as keyof typeof combinedData] =
-              value.PowerKW || null;
+            existingEntry[type as keyof typeof combinedData] = value.PowerKW
+              ? KWtoMW(value.PowerKW, 2)
+              : null;
             combinedDataByTimestampMap.set(value.Time, existingEntry);
           } else {
             combinedDataByTimestampMap.set(value.Time, {
               time: value.Time,
               ...csvProperties,
-              [type]: value.PowerKW || null,
+              [type]: value.PowerKW ? KWtoMW(value.PowerKW, 2) : null,
             });
           }
         }
