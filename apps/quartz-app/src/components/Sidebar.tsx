@@ -399,10 +399,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               bgTheme={"bg-quartz-mint-green"}
               actualGeneration={
                 actualPowerGeneration > 0
-                  ? actualPowerGeneration.toFixed(1)
+                  ? actualPowerGeneration.toFixed(0)
                   : "-.-"
               }
-              nextForecast={powerForecastNext.toFixed(1) || 0}
+              nextForecast={powerForecastNext.toFixed(0) || 0}
               energyTag="Power"
             />
             <div className="w-full mb-4 h-px border border-white border-opacity-40"></div>
@@ -412,10 +412,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               bgTheme={"bg-quartz-blue"}
               actualGeneration={
                 actualWindGeneration > 0
-                  ? actualWindGeneration.toFixed(1)
+                  ? actualWindGeneration.toFixed(0)
                   : "-.-"
               }
-              nextForecast={windForecastNext.toFixed(1) || 0}
+              nextForecast={windForecastNext.toFixed(0) || 0}
               toggle={true}
               energyTag="Wind"
             />
@@ -426,10 +426,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               bgTheme={"bg-quartz-yellow"}
               actualGeneration={
                 actualSolarGeneration > 0
-                  ? actualSolarGeneration.toFixed(1)
+                  ? actualSolarGeneration.toFixed(0)
                   : "-.-"
               }
-              nextForecast={solarForecastNext.toFixed(1) || 0}
+              nextForecast={solarForecastNext.toFixed(0) || 0}
               toggle={true}
               energyTag="Solar"
             />
