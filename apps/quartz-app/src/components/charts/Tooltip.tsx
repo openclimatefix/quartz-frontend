@@ -67,7 +67,7 @@ const TooltipRow: FC<{
       formattedValue = rowData.value?.toFixed(0);
     }
     if (!rowData.value) {
-      formattedValue = "–";
+      formattedValue = typeof rowData.value === "number" ? "0" : "No data";
     }
   } else {
     if (generationType === "combined") {
