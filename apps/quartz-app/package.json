@@ -7,18 +7,28 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pre-commit": "pre-commit run"
+    "pre-commit": "pre-commit run",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@babel/eslint-parser": "^7.18.9",
     "@tanstack/react-query": "^5.20.2",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": ">=6",
+    "lint-staged": ">=10",
     "luxon": "^3.4.4",
     "next": "14.1.0",
     "openapi-fetch": "^0.8.2",
     "react": "^18",
     "react-dom": "^18",
-    "recharts": "^2.12.0"
+    "recharts": "^2.12.0",
+    "turbo": "^1.0.26"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^14.2.2",
+    "@types/jest": "^29.5.12",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20",
     "@types/react": "^18",
@@ -26,9 +36,14 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "node-gyp": "^10.1.0",
     "openapi-typescript": "^6.7.4",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

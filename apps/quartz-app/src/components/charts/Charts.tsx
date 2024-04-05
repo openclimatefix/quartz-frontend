@@ -167,7 +167,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               <Area
                 type="monotone"
                 name={"wind_forecast_future"}
-                stackId={"1"}
+                stackId={"2"}
                 dataKey="wind_forecast_future"
                 stroke={WIND_COLOR}
                 strokeWidth={forecastsStrokeWidth}
@@ -192,7 +192,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               <Area
                 type="monotone"
                 name={"solar_forecast_future"}
-                stackId={"1"}
+                stackId={"2"}
                 dataKey="solar_forecast_future"
                 stroke={SOLAR_COLOR}
                 strokeWidth={forecastsStrokeWidth}
@@ -205,7 +205,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               <Area
                 type="monotone"
                 name={"wind_generation"}
-                stackId={"2"}
+                stackId={"3"}
                 dataKey="wind_generation"
                 stroke={ACTUAL_WIND_COLOR}
                 strokeLinecap={"round"}
@@ -219,7 +219,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               <Area
                 type="monotone"
                 name={"solar_generation"}
-                stackId={"2"}
+                stackId={"3"}
                 dataKey="solar_generation"
                 stroke={ACTUAL_SOLAR_COLOR}
                 strokeWidth={actualsStrokeWidth}

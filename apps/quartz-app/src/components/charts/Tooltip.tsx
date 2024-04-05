@@ -13,7 +13,7 @@ import {
   TOOLTIP_DISPLAY_NAMES,
   WIND_COLOR,
 } from "@/src/constants";
-import { formatEpochToDateTime, isPast } from "@/src/helpers/datetime";
+import { formatEpochToDateTime, isNow, isPast } from "@/src/helpers/datetime";
 import {
   PowerIcon24,
   SolarIcon24,
@@ -43,7 +43,8 @@ const TooltipRow: FC<{
   const rowData = payload?.find((item) => item.dataKey === name);
   if (!rowData && generationType !== "combined") return null;
   if (!timestamp) return null;
-  if (isPast(timestamp) && name.includes("future")) return null;
+  if (!isNow(timestamp) && isPast(timestamp) && name.includes("future"))
+    return null;
   if (!isPast(timestamp) && name.includes("past")) return null;
 
   const prettyName = TOOLTIP_DISPLAY_NAMES[name];
@@ -87,11 +88,20 @@ const TooltipRow: FC<{
       }
       const windRow = payload?.find((item) => item.dataKey === windKey);
       const solarRow = payload?.find((item) => item.dataKey === solarKey);
-      if (windRow) {
+      if (windRow?.value) {
         formattedValue = Number(windRow.value);
       }
-      if (solarRow) {
+      if (solarRow?.value) {
         formattedValue = formattedValue += Number(solarRow.value);
+      }
+      if (isNow(timestamp) && name === "combined_forecast_future") {
+        formattedValue = 0;
+        formattedValue += Number(
+          payload?.find((item) => item.dataKey === "wind_forecast_past")?.value
+        );
+        formattedValue += Number(
+          payload?.find((item) => item.dataKey === "solar_forecast_past")?.value
+        );
       }
       if (formattedValue === 0) {
         formattedValue = "–";

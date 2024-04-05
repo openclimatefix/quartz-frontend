@@ -62,3 +62,7 @@ export const prettyPrintNowTime = () => {
 export const isPast = (timestamp: number) => {
   return timestamp < getEpochNowInTimezone();
 };
+
+export const isNow = (timestamp: number) => {
+  return timestamp === getEpochNowInTimezone();
+};

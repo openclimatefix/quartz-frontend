@@ -20,29 +20,25 @@ export const useChartData = (combinedData: CombinedData) => {
           : "wind_forecast_future";
       // if the timestamp is now, add to both wind_forecast_past and wind_forecast_future
       // so that the area chart doesn't have a gap
-      const isNow = timestamp === getEpochNowInTimezone();
+      const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
         existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
-        if (isNow) {
+        if (isNowEntry) {
           existingData["wind_forecast_future"] = value.PowerKW
             ? value.PowerKW / 1000
             : null;
         }
       } else {
-        formattedChartData?.push({
+        const newEntry = {
           timestamp,
           [key]: value.PowerKW / 1000,
           solar_generation: null,
           wind_generation: null,
-        });
-        if (isNow) {
-          formattedChartData?.push({
-            timestamp,
-            wind_forecast_future: value.PowerKW / 1000,
-            solar_generation: null,
-            wind_generation: null,
-          });
+        };
+        if (isNowEntry) {
+          newEntry["wind_forecast_future"] = value.PowerKW / 1000;
         }
+        formattedChartData?.push(newEntry);
       }
     }
   }
@@ -59,25 +55,25 @@ export const useChartData = (combinedData: CombinedData) => {
           : "solar_forecast_future";
       // if the timestamp is now, add to both solar_forecast_past and solar_forecast_future
       // so that the area chart doesn't have a gap
-      const isNow = timestamp === getEpochNowInTimezone();
+      const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
-        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
-        if (isNow) {
+        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : 0;
+        if (isNowEntry) {
           existingData["solar_forecast_future"] = value.PowerKW
             ? value.PowerKW / 1000
             : null;
         }
       } else {
-        formattedChartData?.push({
+        const newEntry = {
           timestamp,
           [key]: value.PowerKW / 1000,
-        });
-        if (isNow) {
-          formattedChartData?.push({
-            timestamp,
-            solar_forecast_future: value.PowerKW / 1000,
-          });
+          solar_generation: null,
+          wind_generation: null,
+        };
+        if (isNowEntry) {
+          newEntry["solar_forecast_future"] = value.PowerKW / 1000;
         }
+        formattedChartData?.push(newEntry);
       }
     }
   }
