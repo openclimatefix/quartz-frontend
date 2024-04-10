@@ -56,7 +56,6 @@ export type GlobalStateType = {
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
-  defaultChartZoom: { x1: string; x2: string };
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
@@ -87,7 +86,6 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     autoZoom: false,
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
-    defaultChartZoom: { x1: "", x2: "" },
     globalZoomArea: { x1: "", x2: "" },
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,

@@ -154,17 +154,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
   const defaultZoom = { x1: "", x2: "" };
-  const [defaultChartZoom] = useGlobalState("defaultChartZoom");
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
-  // const [globalFilteredPreppedData, setGlobalFilteredPreppedData] = useGlobalState(
-  //   "globalFilteredPreppedData"
-  // );
-  // const [zoomArea, setZoomArea] = useState(defaultZoom);
   const [globalZoomArea, setGlobalZoomArea] = useGlobalState("globalZoomArea");
-  const [isZooming, setIsZooming] = useState(false);
   const [globalIsZooming, setGlobalIsZooming] = useGlobalState("globalChartIsZooming");
-  const [isZoomed, setIsZoomed] = useState(false);
   const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
+  const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
 
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
@@ -234,7 +228,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
   function handleZoomOut() {
     setGlobalIsZoomed(false);
     setFilteredPreppedData(preppedData);
-    setGlobalZoomArea(defaultChartZoom);
   }
 
   useEffect(() => {
@@ -281,6 +274,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             left: 16
           }}
           onClick={(e?: { activeLabel?: string }) => {
+            console.log("click onclick clicked", e?.activeLabel, timeOfInterest);
             if (setTimeOfInterest && e?.activeLabel) {
               view === VIEWS.SOLAR_SITES
                 ? setTimeOfInterest(
@@ -290,8 +284,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }
           }}
           onMouseDown={(e?: { activeLabel?: string }) => {
+            console.log("click onmousedown clicked");
             if (!zoomEnabled) return;
-
+            setTemporaryZoomArea(globalZoomArea);
             setGlobalIsZooming(true);
             let xValue = e?.activeLabel;
             if (xValue) {
@@ -302,6 +297,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (!zoomEnabled) return;
 
             if (globalIsZooming) {
+              console.log("click onmousemove clicked");
               let xValue = e?.activeLabel;
               setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
             }
@@ -310,8 +306,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (!zoomEnabled) return;
 
             if (globalIsZooming) {
-              if (globalZoomArea.x1 == globalZoomArea.x2) {
-                setGlobalZoomArea(defaultChartZoom);
+              if (globalZoomArea.x1 == globalZoomArea.x2 && e?.activeLabel && setTimeOfInterest) {
+                setGlobalZoomArea(temporaryZoomArea);
+                setTimeOfInterest(e?.activeLabel);
               } else {
                 let { x1 } = globalZoomArea;
                 let x2 = e?.activeLabel || "";
@@ -323,7 +320,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
               setGlobalIsZooming(false);
             }
-            console.log("zoom area", globalZoomArea);
           }}
         >
           <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
@@ -453,6 +449,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             }
           />
+
           <ReferenceLine
             x={
               view === VIEWS.SOLAR_SITES ? new Date(localeTimeOfInterest).getTime() : timeOfInterest
