@@ -51,22 +51,6 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const CloseButtonIconForZoom: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    version="1.1"
-    width="1.5rem"
-    height="1.5rem"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeWidth={2}
-      d="M20.030 5.030l-1.061-1.061-6.97 6.97-6.97-6.97-1.061 1.061 6.97 6.97-6.97 6.97 1.061 1.061 6.97-6.97 6.97 6.97 1.061-1.061-6.97-6.97 6.97-6.97z"
-      fill="white"
-    />
-  </svg>
-);
-
 export const ClockIcon: React.FC<IconProps> = ({ className }) => (
   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path

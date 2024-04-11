@@ -27,7 +27,7 @@ import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
-import SVGComponent, { CloseButtonIcon, CloseButtonIconForZoom } from "../icons/icons";
+import SVGComponent, { CloseButtonIcon } from "../icons/icons";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
@@ -221,7 +221,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
   ];
 
   let zoomYMax = getZoomYMax(filteredPreppedData);
-
   zoomYMax = getRoundedTickBoundary(zoomYMax || 0, yMaxZoom_Levels);
 
   //reset zoom state
@@ -246,11 +245,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
-        <div
-          className={
-            deltaView ? `absolute top-5 right-16 mr-3 z-10` : `absolute top-5 right-4 z-10`
-          }
-        >
+        <div className={`absolute top-5 z-10 ${deltaView ? `right-16 mr-3` : `right-4`}`}>
           <button
             type="button"
             onClick={handleZoomOut}
@@ -274,7 +269,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             left: 16
           }}
           onClick={(e?: { activeLabel?: string }) => {
-            console.log("click onclick clicked", e?.activeLabel, timeOfInterest);
             if (setTimeOfInterest && e?.activeLabel) {
               view === VIEWS.SOLAR_SITES
                 ? setTimeOfInterest(
@@ -284,7 +278,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }
           }}
           onMouseDown={(e?: { activeLabel?: string }) => {
-            console.log("click onmousedown clicked");
             if (!zoomEnabled) return;
             setTemporaryZoomArea(globalZoomArea);
             setGlobalIsZooming(true);
@@ -297,7 +290,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (!zoomEnabled) return;
 
             if (globalIsZooming) {
-              console.log("click onmousemove clicked");
               let xValue = e?.activeLabel;
               setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
             }
