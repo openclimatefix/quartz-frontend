@@ -38,17 +38,17 @@ describe("Load the page", () => {
       .first()
       .should("have.attr", "href", "https://www.openclimatefix.org/");
     // Profile dropdown menu
-    cy.get("header #headlessui-menu-item-6").should("not.exist");
+    cy.get("header #UserMenu-4hViewBtn").should("not.exist");
     cy.get("header button").contains("Open user menu").should("exist");
     cy.get("header button").contains("Open user menu").parent().click();
-    cy.get("header #headlessui-menu-item-6").should("exist");
-    cy.get("header #headlessui-menu-item-6").should("be.visible");
-    cy.get("header #headlessui-menu-item-6").should("contain", "4-hour forecast");
-    cy.get("header #headlessui-menu-item-7").should("contain", "Dashboard mode");
-    cy.get("header #headlessui-menu-item-8").should("contain", "Documentation");
-    cy.get("header #headlessui-menu-item-9").should("contain", "Contact");
-    cy.get("header #headlessui-menu-item-10").should("contain", "Give feedback");
-    cy.get("header #headlessui-menu-item-11").should("contain", "Sign out");
+    cy.get("header #UserMenu-4hViewBtn").should("exist");
+    cy.get("header #UserMenu-4hViewBtn").should("be.visible");
+    cy.get("header #UserMenu-4hViewBtn").should("contain", "4-hour forecast");
+    cy.get("header #UserMenu-DashboardModeBtn").should("contain", "Dashboard mode");
+    cy.get("header #UserMenu-DocumentationBtn").should("contain", "Documentation");
+    cy.get("header #UserMenu-ContactBtn").should("contain", "Contact");
+    cy.get("header #UserMenu-FeedbackBtn").should("contain", "Give feedback");
+    cy.get("header #UserMenu-LogoutBtn").should("contain", "Sign out");
   });
 
   ////////////////////////////////
