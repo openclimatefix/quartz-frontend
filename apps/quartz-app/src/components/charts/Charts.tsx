@@ -4,6 +4,7 @@ import {
   Area,
   CartesianGrid,
   ComposedChart,
+  ReferenceArea,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -12,7 +13,7 @@ import {
 } from "recharts";
 // @ts-ignore
 import { theme } from "@/tailwind.config";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useState, useEffect } from "react";
 import {
   ACTUAL_SOLAR_COLOR,
   ACTUAL_WIND_COLOR,
@@ -21,6 +22,7 @@ import {
 } from "@/src/constants";
 import { LegendContainer } from "@/src/components/charts/legend/LegendContainer";
 import {
+  formatEpochToDateTime,
   formatEpochToHumanDayName,
   formatEpochToPrettyTime,
   getEpochNowInTimezone,
@@ -32,12 +34,15 @@ import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
 import { useGlobalState } from "../helpers/globalState";
 import { DateTime } from "luxon";
+import { ZoomOutIcon } from "@heroicons/react/solid";
+import { format } from "path";
 
 type ChartsProps = {
   combinedData: CombinedData;
+  zoomEnabled?: boolean;
 };
 
-const Charts: FC<ChartsProps> = ({ combinedData }) => {
+const Charts: FC<ChartsProps> = ({ combinedData, zoomEnabled = true }) => {
   const { data, error } = useGetRegionsQuery("solar");
   console.log("Charts data test", data);
   const formattedChartData = useChartData(combinedData);
@@ -58,6 +63,51 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
     return "";
   });
 
+  // Useful for the chart Zoom Feature
+  const [filteredPreppedData, setFilteredPreppedData] =
+    useState(formattedChartData);
+  const defaultZoom = { x1: "", x2: "" };
+  const [selectingZoomArea, setSelectingZoomArea] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
+
+  //get Y axis boundary
+
+  // const yMaxZoom_Levels = [
+  //   10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000, 6000,
+  //   7000, 8000, 9000, 10000, 11000, 12000
+  // ];
+
+  // let zoomYMax = getZoomYMax(filteredPreppedData);
+  // zoomYMax = getRoundedTickBoundary(zoomYMax || 0, yMaxZoom_Levels);
+
+  // reset chart to default zoom level
+
+  function handleZoomOut() {
+    setIsZoomed(false);
+    setFilteredPreppedData(formattedChartData);
+  }
+
+  // useEffect(() => {
+  //   if (!zoomEnabled) return;
+
+  //   if (!setSelectingZoomArea) {
+  //     const { x1, x2 } = temporaryZoomArea;
+
+  //     const dataInAreaRange = formattedChartData.filter(
+  //       (d) => (formatEpochToDateTime(d?.timestamp) <= x1 && formatEpochToDateTime(d?.timestamp) >= x2)
+  //     );
+  //     setFilteredPreppedData(dataInAreaRange);
+
+  //   }
+  // }, [
+  //   temporaryZoomArea,
+  //   setSelectingZoomArea,
+  //   formattedChartData,
+  //   filteredPreppedData,
+  //   zoomEnabled,
+  // ]);
+
   // Useful shared constants for the chart
   const forecastsStrokeWidth = 1;
   const actualsStrokeWidth = 3;
@@ -69,7 +119,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
   const [visibleLines] = useGlobalState("visibleLines");
 
   return (
-    <div className="flex-1 flex flex-col justify-center items-center bg-ocf-grey-800">
+    <div className="flex-1 flex flex-col justify-center items-center bg-ocf-grey-800 select-none">
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
         {/* Helps with the resizing of the chart in both axes */}
         <div
@@ -81,10 +131,71 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
             top: 0,
           }}
         >
+          {zoomEnabled && isZoomed && (
+            <div className={`absolute top-5 z-10 right-4`}>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                style={{ position: "relative", top: "0", left: "20" }}
+                className="flex font-bold items-center p-1.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+              >
+                <ZoomOutIcon className="w-8 h-8" />
+              </button>
+            </div>
+          )}
           <ResponsiveContainer>
             <ComposedChart
-              data={formattedChartData}
+              data={
+                zoomEnabled && isZoomed
+                  ? filteredPreppedData
+                  : formattedChartData
+              }
+              //data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
               margin={{ top: 25, right: 30, left: 20, bottom: 20 }}
+              onMouseDown={(e?: { activeLabel?: string }) => {
+                if (!zoomEnabled) return;
+                setSelectingZoomArea(true);
+                let xValue = e?.activeLabel;
+                if (xValue) {
+                  setTemporaryZoomArea({ x1: xValue, x2: xValue });
+                }
+              }}
+              onMouseMove={(e?: { activeLabel?: string }) => {
+                if (!zoomEnabled) return;
+
+                if (selectingZoomArea) {
+                  let xValue = e?.activeLabel;
+                  setTemporaryZoomArea((zoom) => ({
+                    ...zoom,
+                    x2: xValue || "",
+                  }));
+                }
+              }}
+              onMouseUp={(e?: { activeLabel?: string }) => {
+                if (!zoomEnabled) return;
+
+                if (selectingZoomArea) {
+                  if (temporaryZoomArea.x1 === temporaryZoomArea.x2) {
+                    setTemporaryZoomArea(defaultZoom);
+                  } else {
+                    let { x1 } = temporaryZoomArea;
+                    let x2 =
+                      formatEpochToDateTime(Number(e?.activeLabel)) || "";
+                    if (x1 > x2) {
+                      [x1, x2] = [x2, x1];
+                    }
+                    const dataInAreaRange = formattedChartData.filter(
+                      (d) =>
+                        formatEpochToDateTime(d?.timestamp) >= x1 &&
+                        formatEpochToDateTime(d?.timestamp) <= x2
+                    );
+                    setFilteredPreppedData(dataInAreaRange);
+                    setTemporaryZoomArea({ x1, x2 });
+                    setIsZoomed(true);
+                  }
+                  setSelectingZoomArea(false);
+                }
+              }}
             >
               <CartesianGrid
                 verticalFill={[
@@ -93,6 +204,7 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 ]}
                 fillOpacity={0.5}
               />
+
               <XAxis
                 dataKey="timestamp"
                 tickFormatter={formatEpochToPrettyTime}
@@ -118,7 +230,13 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                 xAxisId={"x-axis-3"}
                 orientation="bottom"
                 domain={
-                  formattedChartData?.length
+                  filteredPreppedData?.length
+                    ? [
+                        filteredPreppedData[0]?.timestamp,
+                        filteredPreppedData[filteredPreppedData.length - 1]
+                          .timestamp,
+                      ]
+                    : formattedChartData?.length
                     ? [
                         formattedChartData[0]?.timestamp,
                         formattedChartData[formattedChartData.length - 1]
@@ -145,6 +263,16 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
                   dy: 0,
                 }}
               />
+              {zoomEnabled && selectingZoomArea && (
+                <ReferenceArea
+                  x1={temporaryZoomArea?.x1}
+                  x2={temporaryZoomArea?.x2}
+                  fill="#FFD053"
+                  fillOpacity={0.5}
+                  xAxisId={"x-axis-3"}
+                  yAxisId={"y-axis"}
+                />
+              )}
               <Tooltip
                 cursor={{ stroke: "#EEEEEE", strokeDasharray: 5 }}
                 filterNull={false}
