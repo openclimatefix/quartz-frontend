@@ -236,10 +236,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
     if (!globalIsZooming) {
       const { x1, x2 } = globalZoomArea;
 
+      if (!x1 || !x2) return;
+
       const dataInAreaRange = preppedData.filter(
         (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
       );
       setFilteredPreppedData(dataInAreaRange);
+      setGlobalZoomArea({ x1: "", x2: "" });
     }
   }, [globalZoomArea, globalIsZooming, preppedData, zoomEnabled]);
 
@@ -270,6 +273,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             left: 16
           }}
           onClick={(e?: { activeLabel?: string }) => {
+            if (globalIsZooming) return;
+
             if (setTimeOfInterest && e?.activeLabel) {
               view === VIEWS.SOLAR_SITES
                 ? setTimeOfInterest(
@@ -283,7 +288,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             setTemporaryZoomArea(globalZoomArea);
             setGlobalIsZooming(true);
             let xValue = e?.activeLabel;
-            if (xValue) {
+            if (typeof xValue === "string" && xValue.length > 0) {
               setGlobalZoomArea({ x1: xValue, x2: xValue });
             }
           }}
@@ -292,6 +297,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             if (globalIsZooming) {
               let xValue = e?.activeLabel;
+              if (!xValue) return;
               setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
             }
           }}
@@ -299,10 +305,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
             if (!zoomEnabled) return;
 
             if (globalIsZooming) {
-              if (globalZoomArea.x1 == globalZoomArea.x2 && e?.activeLabel && setTimeOfInterest) {
+              if (globalZoomArea.x1 === globalZoomArea.x2 && e?.activeLabel && setTimeOfInterest) {
                 setGlobalZoomArea(temporaryZoomArea);
                 setTimeOfInterest(e?.activeLabel);
-              } else {
+              } else if (globalZoomArea?.x1?.length && globalZoomArea?.x2?.length) {
                 let { x1 } = globalZoomArea;
                 let x2 = e?.activeLabel || "";
                 if (x1 > x2) {
