@@ -76,7 +76,7 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
     <div className="absolute -top-4 right-4 flex items-center h-9 z-40">
       <div
         className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-mapbox-black  ${
-          isLoadingData ? "pr-2 pl-1.5" : "bg-mapbox-black-600 px-1.5"
+          isLoadingData ? "pr-2 pl-1.5" : "bg-mapbox-black-600 px-1.5 fade-out"
         }`}
       >
         {!!isLoadingData && <SpinnerTextInline className="mr-2" />}
