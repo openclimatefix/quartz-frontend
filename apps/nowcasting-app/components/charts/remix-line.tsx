@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import {
   Area,
   Bar,
@@ -7,6 +7,7 @@ import {
   Line,
   Rectangle,
   ReferenceLine,
+  ReferenceArea,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -26,6 +27,10 @@ import {
 import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
+import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
+import SVGComponent, { CloseButtonIcon } from "../icons/icons";
+import { getZoomYMax } from "../helpers/chartUtils";
+import { ZoomOutIcon } from "@heroicons/react/solid";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -79,6 +84,7 @@ type RemixLineProps = {
   timeNow: string;
   resetTime?: () => void;
   visibleLines: string[];
+  zoomEnabled?: boolean;
   deltaView?: boolean;
   deltaYMaxOverride?: number;
 };
@@ -136,6 +142,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   timeNow,
   resetTime,
   visibleLines,
+  zoomEnabled = true,
   deltaView = false,
   deltaYMaxOverride
 }) => {
@@ -147,6 +154,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const fourHoursFromNow = new Date(currentTime);
+  const defaultZoom = { x1: "", x2: "" };
+  const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
+  const [globalZoomArea, setGlobalZoomArea] = useGlobalState("globalZoomArea");
+  const [globalIsZooming, setGlobalIsZooming] = useGlobalState("globalChartIsZooming");
+  const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
+  const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
+
   fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
 
   function prettyPrintYNumberWithCommas(
@@ -182,10 +196,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
     .map((d) => d.DELTA)
     .filter((n) => typeof n === "number")
     .sort((a, b) => Number(a) - Number(b))[0];
+
   // Take the max absolute value of the delta min and max as the y-axis max
   const deltaYMax =
     deltaYMaxOverride ||
     getRoundedTickBoundary(Math.max(Number(deltaMax), 0 - Number(deltaMin)) || 0, deltaMaxTicks);
+
   const roundTickMax = deltaYMax % 1000 === 0;
   const isGSP = !!deltaYMaxOverride && deltaYMaxOverride < 1000;
   const now = new Date();
@@ -198,13 +214,55 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
+  //get Y axis boundary
+
+  const yMaxZoom_Levels = [
+    10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 200, 300, 400, 500, 1000, 2000, 3000, 4000, 5000, 6000,
+    7000, 8000, 9000, 10000, 11000, 12000
+  ];
+
+  let zoomYMax = getZoomYMax(filteredPreppedData);
+  zoomYMax = getRoundedTickBoundary(zoomYMax || 0, yMaxZoom_Levels);
+
+  //reset zoom state
+  function handleZoomOut() {
+    setGlobalIsZoomed(false);
+    setFilteredPreppedData(preppedData);
+  }
+
+  useEffect(() => {
+    if (!zoomEnabled) return;
+
+    if (!globalIsZooming) {
+      const { x1, x2 } = globalZoomArea;
+
+      const dataInAreaRange = preppedData.filter(
+        (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
+      );
+      setFilteredPreppedData(dataInAreaRange);
+    }
+  }, [globalZoomArea, globalIsZooming, preppedData, zoomEnabled]);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      {zoomEnabled && globalIsZoomed && (
+        <div className={`absolute top-5 z-10 ${deltaView ? `right-16 mr-3` : `right-4`}`}>
+          <button
+            type="button"
+            onClick={handleZoomOut}
+            style={{ position: "relative", top: "0", left: "20" }}
+            className="flex font-bold items-center p-1.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+          >
+            <ZoomOutIcon className="w-8 h-8" />
+          </button>
+        </div>
+      )}
       <ResponsiveContainer>
         <ComposedChart
+          className="select-none"
           width={500}
           height={400}
-          data={preppedData}
+          data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
           margin={{
             top: 20,
             right: 16,
@@ -218,6 +276,42 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
                   )
                 : setTimeOfInterest(e.activeLabel);
+            }
+          }}
+          onMouseDown={(e?: { activeLabel?: string }) => {
+            if (!zoomEnabled) return;
+            setTemporaryZoomArea(globalZoomArea);
+            setGlobalIsZooming(true);
+            let xValue = e?.activeLabel;
+            if (xValue) {
+              setGlobalZoomArea({ x1: xValue, x2: xValue });
+            }
+          }}
+          onMouseMove={(e?: { activeLabel?: string }) => {
+            if (!zoomEnabled) return;
+
+            if (globalIsZooming) {
+              let xValue = e?.activeLabel;
+              setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
+            }
+          }}
+          onMouseUp={(e?: { activeLabel?: string }) => {
+            if (!zoomEnabled) return;
+
+            if (globalIsZooming) {
+              if (globalZoomArea.x1 == globalZoomArea.x2 && e?.activeLabel && setTimeOfInterest) {
+                setGlobalZoomArea(temporaryZoomArea);
+                setTimeOfInterest(e?.activeLabel);
+              } else {
+                let { x1 } = globalZoomArea;
+                let x2 = e?.activeLabel || "";
+                if (x1 > x2) {
+                  [x1, x2] = [x2, x1];
+                }
+                setGlobalZoomArea({ x1, x2 });
+                setGlobalIsZoomed(true);
+              }
+              setGlobalIsZooming(false);
             }
           }}
         >
@@ -235,6 +329,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
           />
           <XAxis
+            className="select-none"
             dataKey="formattedDate"
             xAxisId={"x-axis-2"}
             tickFormatter={prettyPrintChartAxisLabelDate}
@@ -277,7 +372,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             yAxisId={"y-axis"}
             tick={{ fill: "white", style: { fontSize: "12px" } }}
             tickLine={false}
-            domain={[0, yMax]}
+            domain={
+              globalIsZoomed && view !== VIEWS.SOLAR_SITES ? [0, Number(zoomYMax * 1.1)] : [0, yMax]
+            }
             label={{
               value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
               angle: 270,
@@ -289,6 +386,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dy: 0
             }}
           />
+
           {deltaView && (
             <>
               <YAxis
@@ -344,6 +442,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             }
           />
+
           <ReferenceLine
             x={
               view === VIEWS.SOLAR_SITES ? new Date(localeTimeOfInterest).getTime() : timeOfInterest
@@ -361,6 +460,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               ></CustomizedLabel>
             }
           />
+
           {deltaView && (
             <Bar
               type="monotone"
@@ -459,7 +559,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
             strokeWidth={largeScreenMode ? 4 : 2}
             hide={!visibleLines.includes("FORECAST")}
           />
-
+          {zoomEnabled && globalIsZooming && (
+            <ReferenceArea
+              x1={globalZoomArea?.x1}
+              x2={globalZoomArea?.x2}
+              fill="#FFD053"
+              fillOpacity={0.3}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+            />
+          )}
           <Tooltip
             content={({ payload, label }) => {
               const data = payload && payload[0]?.payload;
