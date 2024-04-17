@@ -15,7 +15,8 @@ const SideLayout: React.FC<SideLayoutProps> = ({
   bottomPadding = true
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const closedWidth = dashboardModeActive ? "50%" : "44%";
+  // const closedWidth = dashboardModeActive ? "50%" : "44%";
+  const closedWidth = "50%";
   return (
     <div
       className={`h-full pt-16 absolute top-0 left-0 z-20 ${className || ""}`}

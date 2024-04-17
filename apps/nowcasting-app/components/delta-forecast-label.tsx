@@ -16,7 +16,9 @@ const DeltaForecastLabel: React.FC<DeltaForecastLabelProps> = ({
     if (position === "middle") return "";
   };
   return (
-    <div className={`relative cursor-default flex group ${className || ""}`}>
+    <div
+      className={`relative cursor-default flex flex-1 whitespace-nowrap group ${className || ""}`}
+    >
       {children}
       <div className="absolute flex hidden mt-6 group-hover:flex flex-wrap">
         <span
