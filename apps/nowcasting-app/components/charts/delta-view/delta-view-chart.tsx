@@ -286,7 +286,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
   const hasGspPvInitialForSelectedTime = !!combinedData.pvRealDayInData?.find(
     (d) =>
-      d.datetimeUtc === `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}:00+00:00`
+      d.datetimeUtc.slice(0, 16) ===
+      `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}`
   );
 
   const {
