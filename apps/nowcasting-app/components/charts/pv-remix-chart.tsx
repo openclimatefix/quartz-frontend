@@ -27,6 +27,7 @@ const PvRemixChart: FC<{
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [loadingState] = useGlobalState("loadingState");
+  const [globalZoomArea] = useGlobalState("globalZoomArea");
 
   const {
     nationalForecastData,
