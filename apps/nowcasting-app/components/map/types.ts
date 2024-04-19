@@ -17,6 +17,5 @@ export interface IMap {
   controlOverlay: any;
   bearing?: number;
   updateData: { newData: boolean | string; updateMapData: (map: mapboxgl.Map) => void };
-  children: React.ReactNode;
   title: string;
 }
