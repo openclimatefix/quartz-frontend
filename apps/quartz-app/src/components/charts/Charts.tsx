@@ -74,6 +74,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, zoomEnabled = true }) => {
     zoomEnabled && isZoomed ? filteredChartData : chartData;
   const [zoomDomain, setZoomDomain] = useState(defaultZoom);
   const [temporaryZoomDomain, setTemporaryZoomDomain] = useState(defaultZoom);
+  const [zoomingInMore, setZoomingInMore] = useState(false);
 
   //get Y axis boundary
 
@@ -147,6 +148,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, zoomEnabled = true }) => {
               margin={{ top: 25, right: 30, left: 20, bottom: 20 }}
               onMouseDown={(e?: { activeLabel?: string }) => {
                 if (!zoomEnabled) return;
+
                 setTemporaryZoomDomain(zoomDomain);
                 setSelectingZoomArea(true);
                 let xValue = e?.activeLabel;
@@ -156,7 +158,6 @@ const Charts: FC<ChartsProps> = ({ combinedData, zoomEnabled = true }) => {
               }}
               onMouseMove={(e?: { activeLabel?: string }) => {
                 if (!zoomEnabled) return;
-                console.log("onMouseMove xValue", e?.activeLabel);
 
                 if (selectingZoomArea) {
                   let xValue = e?.activeLabel;
@@ -170,11 +171,13 @@ const Charts: FC<ChartsProps> = ({ combinedData, zoomEnabled = true }) => {
                 if (!zoomEnabled) return;
 
                 if (selectingZoomArea) {
-                  if (zoomDomain.x1 && zoomDomain.x2) {
+                  if (zoomDomain.x1 == zoomDomain.x2) {
+                    setZoomDomain(defaultZoom);
+                  } else if (zoomDomain.x1 != zoomDomain.x2) {
                     let { x1 } = zoomDomain;
                     let x2 = e?.activeLabel || "";
-                    // check that x1 is less than x2
 
+                    // check that x1 is less than x2
                     if (x1 > x2) {
                       [x1, x2] = [x2, x1];
                     }
@@ -185,13 +188,6 @@ const Charts: FC<ChartsProps> = ({ combinedData, zoomEnabled = true }) => {
                     );
 
                     setFilteredChartData(dataInZoomRange);
-
-                    console.log(
-                      "Filtered Data",
-                      dataInZoomRange,
-                      zoomDomain.x1,
-                      zoomDomain.x2
-                    );
 
                     setZoomDomain({ x1, x2 });
 
