@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3002",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "lint": "next lint",
