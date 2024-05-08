@@ -17,11 +17,15 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-    - name: install yarn app
+    - name: install yarn
       run: |
         cd apps/nowcasting-app
         yarn install
+    - name: build & start app
+      run: |
+        cd apps/nowcasting-app
+        yarn build
     - name: run tests
       run: |
         cd apps/nowcasting-app
-        yarn test --coverage --coverageDirectory=../..
+        yarn start & sleep 5 && yarn test --coverage --coverageDirectory=../..

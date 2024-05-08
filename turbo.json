@@ -5,7 +5,8 @@
         "^build"
       ],
       "outputs": [
-        ".next/**"
+        ".next/**",
+        "!.next/cache/**"
       ]
     },
     "@openclimatefix/nowcasting-app#build": {
@@ -26,7 +27,8 @@
       "dependsOn": [
         "build"
       ],
-      "outputs": []
+      "outputs": [],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
     },
     "lint": {
       "outputs": []

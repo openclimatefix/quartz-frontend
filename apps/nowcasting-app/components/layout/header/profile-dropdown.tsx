@@ -170,7 +170,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                   "block px-4 py-2 text-sm text-ocf-black-600"
                 )}
               >
-                <Link href="/api/auth/logout">
+                <Link href="/api/auth/logout" legacyBehavior>
                   <a id={"UserMenu-LogoutBtn"}>Sign out</a>
                 </Link>
               </div>
