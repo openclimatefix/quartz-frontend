@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ExpandButton from "./expand-button";
 import useGlobalState from "../helpers/globalState";
 
 type SideLayoutProps = {
+  children: React.ReactNode;
   className?: string;
   dashboardModeActive?: boolean;
   bottomPadding?: boolean;
@@ -15,7 +16,8 @@ const SideLayout: React.FC<SideLayoutProps> = ({
   bottomPadding = true
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const closedWidth = dashboardModeActive ? "50%" : "44%";
+  // const closedWidth = dashboardModeActive ? "50%" : "44%";
+  const closedWidth = "50%";
   return (
     <div
       className={`h-full pt-16 absolute top-0 left-0 z-20 ${className || ""}`}

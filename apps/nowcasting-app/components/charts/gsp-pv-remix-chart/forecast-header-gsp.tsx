@@ -1,7 +1,7 @@
-import React from "react";
 import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
 import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
+import React, { FC } from "react";
 
 type ForecastHeaderGSPProps = {
   title: string;
@@ -14,9 +14,10 @@ type ForecastHeaderGSPProps = {
   forecastPV?: string;
   forecastNextTimeOnly?: string;
   forecastNextPV?: string;
+  children?: React.ReactNode;
 };
 
-const ForecastHeaderGSP: React.FC<ForecastHeaderGSPProps> = ({
+const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   title,
   deltaView,
   deltaValue,

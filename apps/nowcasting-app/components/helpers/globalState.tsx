@@ -8,6 +8,7 @@ import {
   CookieStorageKeys
 } from "./cookieStorage";
 import { NationalEndpointStates, LoadingState, SitesEndpointStates } from "../types";
+import { ChartData } from "../charts/remix-line";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -55,6 +56,9 @@ export type GlobalStateType = {
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
+  globalChartIsZooming: boolean;
+  globalChartIsZoomed: boolean;
+  globalZoomArea: { x1: string; x2: string };
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
 };
@@ -80,6 +84,9 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lat: 54.70534432,
     zoom: 5,
     autoZoom: false,
+    globalChartIsZooming: false,
+    globalChartIsZoomed: false,
+    globalZoomArea: { x1: "", x2: "" },
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,

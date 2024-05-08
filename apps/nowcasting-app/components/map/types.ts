@@ -12,10 +12,10 @@ export enum SelectedData {
 }
 
 export interface IMap {
+  children: React.ReactNode;
   loadDataOverlay: any;
   controlOverlay: any;
   bearing?: number;
   updateData: { newData: boolean | string; updateMapData: (map: mapboxgl.Map) => void };
-  children: React.ReactNode;
   title: string;
 }
