@@ -8,8 +8,9 @@
     "prepare": "husky install"
   },
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "packages/nowcasting-tsconfig",
+    "apps/nowcasting-app",
+    "apps/quartz-app"
   ],
   "devDependencies": {
     "@babel/eslint-parser": "^7.18.9",
