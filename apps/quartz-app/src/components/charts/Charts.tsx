@@ -135,8 +135,8 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               />
               <YAxis
                 tick={{ fill: "white", style: { fontSize: "12px" } }}
-                domain={(dataMinMax) =>
-                  getDomainWithUpperBuffer(dataMinMax, 100)
+                domain={([, dataMax]) =>
+                  getDomainWithUpperBuffer(dataMax, 1000, 100)
                 }
                 label={{
                   value: "Generation ( MW )",
