@@ -12,14 +12,36 @@ export const safelyUpdateMapData = (
     !map.isStyleLoaded()
   ) {
     if (!map.isStyleLoaded()) {
-      setTimeout(() => {
-        // console.log("map is not style loaded, trying again");
+      console.warn("📍map style not loaded yet, skipping update");
+      // -- Check if we've already set a timeout for this map and therefore a check is already pending
+      const existingTimeout = localStorage.getItem(
+        `MapTimeoutId-${map.getContainer().dataset.title}`
+      );
+      // -- If we have, skip the update and return
+      if (existingTimeout) {
+        console.debug("existing timeout running, skipping");
+        return;
+      }
+      // -- Set a new timeout to check whether the map is ready and update the data
+      console.debug(`setting new map timeout for ${map.getContainer().dataset.title}`);
+      const newTimeout = setTimeout(() => {
         safelyUpdateMapData(map, updateMapData);
-      }, 400);
+        // console.log(`clearing new map timeout for ${map.getContainer().dataset.title}`);
+        localStorage.removeItem(`MapTimeoutId-${map.getContainer().dataset.title}`);
+      }, 500);
+      // -- Save the timeout id to local storage
+      console.debug(
+        `saving new map timeout id for ${map.getContainer().dataset.title}`,
+        newTimeout
+      );
+      localStorage.setItem(
+        `MapTimeoutId-${map.getContainer().dataset.title}`,
+        newTimeout.toString()
+      );
     }
     return;
   } else {
-    console.warn("🎉 map is ready, updating data");
+    console.debug("🎉 map is ready, updating data");
     updateMapData(map);
   }
 };

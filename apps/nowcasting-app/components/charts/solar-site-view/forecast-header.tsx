@@ -1,4 +1,3 @@
-import React from "react";
 import { CloseButtonIcon } from "../../icons/icons";
 
 type ForecastHeaderSiteProps = {

@@ -8,8 +8,9 @@
     "prepare": "husky install"
   },
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "packages/nowcasting-tsconfig",
+    "apps/nowcasting-app",
+    "apps/quartz-app"
   ],
   "devDependencies": {
     "@babel/eslint-parser": "^7.18.9",
@@ -20,45 +21,6 @@
     "husky": ">=6",
     "lint-staged": ">=10",
     "turbo": "^1.0.26"
-  },
-  "turbo": {
-    "baseBranch": "origin/main",
-    "pipeline": {
-      "build": {
-        "dependsOn": [
-          "^build"
-        ],
-        "outputs": [
-          ".next/**"
-        ]
-      },
-      "@openclimatefix/nowcasting-app#build": {
-        "dependsOn": [
-          "^build",
-          "$AUTH0_SECRET",
-          "$AUTH0_BASE_URL",
-          "$AUTH0_ISSUER_BASE_URL",
-          "$AUTH0_CLIENT_ID",
-          "$AUTH0_CLIENT_SECRET",
-          "$SENTRY_AUTH_TOKEN"
-        ],
-        "outputs": [
-          ".next/**"
-        ]
-      },
-      "test": {
-        "dependsOn": [
-          "^build"
-        ],
-        "outputs": []
-      },
-      "lint": {
-        "outputs": []
-      },
-      "dev": {
-        "cache": false
-      }
-    }
   },
   "lint-staged": {
     "**/*.(t|j)(s|sx)": "eslint --cache --fix"

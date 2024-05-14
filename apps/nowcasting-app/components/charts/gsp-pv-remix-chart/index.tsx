@@ -1,4 +1,3 @@
-import { FC } from "react";
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
 import {
@@ -12,6 +11,7 @@ import useGetGspData from "./use-get-gsp-data";
 import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import { ForecastValue } from "../../types";
+import React, { FC } from "react";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -63,7 +63,6 @@ const GspPvRemixChart: FC<{
     console.log(errors);
     return <div>failed to load</div>;
   }
-
   const now30min = formatISODateString(get30MinNow());
   const dataMissing = !gspForecastDataOneGSP || !pvRealDataIn || !pvRealDataAfter;
   const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =

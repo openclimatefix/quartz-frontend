@@ -130,6 +130,16 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [view, maps]);
 
   useEffect(() => {
+    // Clear any previous map timeouts on initial page load
+    for (const map of maps) {
+      localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`) &&
+        clearTimeout(
+          Number(localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`))
+        );
+    }
+  }, [maps]);
+
+  useEffect(() => {
     maps.forEach((map) => {
       console.log("-- -- -- resizing map");
       map.resize();
@@ -364,24 +374,33 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   //////////////////////////////////////
 
-  const currentYieldSet = allGspRealData?.find((datum) => {
-    return datum.datetimeUtc === `${selectedTime}:00+00:00`;
-  });
-  const currentYields = currentYieldSet
-    ? Object.entries(currentYieldSet.generationKwByGspId).map(([key, val]) => {
-        const gspLocationInfo = allGspSystemData?.find((gsp) => gsp.gspId === Number(key));
-        return {
-          gspId: key,
-          gspRegion: gspLocationInfo?.regionName || "No name",
-          gspCapacity: gspLocationInfo?.installedCapacityMw || 0,
-          yield: val
-        };
-      })
-    : [];
+  const currentYieldSet = useMemo(
+    () =>
+      allGspRealData?.find((datum) => {
+        return datum.datetimeUtc.slice(0, 16) === `${selectedTime}`;
+      }),
+    [allGspRealData, selectedTime]
+  );
+  const currentYields = useMemo(
+    () =>
+      currentYieldSet
+        ? Object.entries(currentYieldSet.generationKwByGspId).map(([key, val]) => {
+            const gspLocationInfo = allGspSystemData?.find((gsp) => gsp.gspId === Number(key));
+            return {
+              gspId: key,
+              gspRegion: gspLocationInfo?.regionName || "No name",
+              gspCapacity: gspLocationInfo?.installedCapacityMw || 0,
+              yield: val
+            };
+          })
+        : [],
+    [currentYieldSet, allGspSystemData]
+  );
   const gspDeltas = useMemo(() => {
+    console.log("about to calc deltas");
     let tempGspDeltas = new Map();
     const currentForecasts = allGspForecastData?.find((forecast) => {
-      return forecast.datetimeUtc === `${selectedTime}:00+00:00`;
+      return forecast.datetimeUtc.slice(0, 16) === `${selectedTime}`;
     });
     for (let i = 0; i < currentYields.length; i++) {
       const currentYield = currentYields[i];
@@ -419,7 +438,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     //     })
     // );
     return tempGspDeltas;
-  }, [allGspForecastData, allGspRealData, currentYields, selectedTime]);
+  }, [allGspForecastData, currentYields, selectedTime, timeNow]);
 
   const combinedData: CombinedData = {
     nationalForecastData,
@@ -604,7 +623,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     setSitesLoadingState
   ]);
 
-  const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
+  // const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
+  const closedWidth = "50%";
 
   return (
     <Layout>
