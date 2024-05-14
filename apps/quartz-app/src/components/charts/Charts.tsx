@@ -32,6 +32,7 @@ import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
 import { useGlobalState } from "../helpers/globalState";
 import { DateTime } from "luxon";
+import { getDomainWithUpperBuffer } from "@/src/helpers/chart";
 
 type ChartsProps = {
   combinedData: CombinedData;
@@ -134,6 +135,9 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
               />
               <YAxis
                 tick={{ fill: "white", style: { fontSize: "12px" } }}
+                domain={([, dataMax]) =>
+                  getDomainWithUpperBuffer(dataMax, 1000, 100)
+                }
                 label={{
                   value: "Generation ( MW )",
                   angle: 270,

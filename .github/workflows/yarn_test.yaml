@@ -21,11 +21,7 @@ jobs:
       run: |
         cd apps/nowcasting-app
         yarn install
-    - name: build & start app
+    - name: build & start app to run tests
       run: |
         cd apps/nowcasting-app
-        yarn build
-    - name: run tests
-      run: |
-        cd apps/nowcasting-app
-        yarn start & sleep 5 && yarn test --coverage --coverageDirectory=../..
+        yarn test:ci
