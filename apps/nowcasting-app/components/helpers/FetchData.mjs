@@ -1,5 +1,5 @@
-import loadMockData from '../loadMockData.mjs'; // Import the loadMockData function from loadMockData.mjs
-import fetchDataFromAPI from '../fetchDataFromAPI.mjs'; // Import the fetchDataFromAPI function from fetchDataFromAPI.mjs
+import loadMockData from './loadMockData.mjs'; // Import the loadMockData function from loadMockData.mjs
+import fetchDataFromAPI from './fetchDataFromAPI.mjs'; // Import the fetchDataFromAPI function from fetchDataFromAPI.mjs
 
 async function fetchData(filePath, useMockData) { // Accept filePath and useMockData as arguments
     if (!filePath) {
