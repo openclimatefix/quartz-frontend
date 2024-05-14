@@ -1,0 +1,418 @@
+[
+    {
+        "datetimeUtc": "2024-05-07T14:30:00Z",
+        "solarGenerationKw": 22748.9
+    },
+    {
+        "datetimeUtc": "2024-05-07T14:00:00Z",
+        "solarGenerationKw": 23930.3
+    },
+    {
+        "datetimeUtc": "2024-05-07T13:30:00Z",
+        "solarGenerationKw": 23619.9
+    },
+    {
+        "datetimeUtc": "2024-05-07T13:00:00Z",
+        "solarGenerationKw": 24627.7
+    },
+    {
+        "datetimeUtc": "2024-05-07T12:30:00Z",
+        "solarGenerationKw": 23452.8
+    },
+    {
+        "datetimeUtc": "2024-05-07T12:00:00Z",
+        "solarGenerationKw": 24090.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T11:30:00Z",
+        "solarGenerationKw": 21237.8
+    },
+    {
+        "datetimeUtc": "2024-05-07T11:00:00Z",
+        "solarGenerationKw": 17723.6
+    },
+    {
+        "datetimeUtc": "2024-05-07T10:30:00Z",
+        "solarGenerationKw": 11814.2
+    },
+    {
+        "datetimeUtc": "2024-05-07T10:00:00Z",
+        "solarGenerationKw": 10311.1
+    },
+    {
+        "datetimeUtc": "2024-05-07T09:30:00Z",
+        "solarGenerationKw": 10421.7
+    },
+    {
+        "datetimeUtc": "2024-05-07T09:00:00Z",
+        "solarGenerationKw": 8537.46
+    },
+    {
+        "datetimeUtc": "2024-05-07T08:30:00Z",
+        "solarGenerationKw": 5025.95
+    },
+    {
+        "datetimeUtc": "2024-05-07T08:00:00Z",
+        "solarGenerationKw": 3412.44
+    },
+    {
+        "datetimeUtc": "2024-05-07T07:30:00Z",
+        "solarGenerationKw": 2273.33
+    },
+    {
+        "datetimeUtc": "2024-05-07T07:00:00Z",
+        "solarGenerationKw": 1260.49
+    },
+    {
+        "datetimeUtc": "2024-05-07T06:30:00Z",
+        "solarGenerationKw": 1008.65
+    },
+    {
+        "datetimeUtc": "2024-05-07T06:00:00Z",
+        "solarGenerationKw": 403.34
+    },
+    {
+        "datetimeUtc": "2024-05-07T05:30:00Z",
+        "solarGenerationKw": 109.69
+    },
+    {
+        "datetimeUtc": "2024-05-07T05:00:00Z",
+        "solarGenerationKw": 23.53
+    },
+    {
+        "datetimeUtc": "2024-05-07T04:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T04:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T03:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T03:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T02:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T02:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T01:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T01:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T00:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-07T00:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T23:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T23:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T22:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T22:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T21:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T21:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T20:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T20:00:00Z",
+        "solarGenerationKw": 2.42
+    },
+    {
+        "datetimeUtc": "2024-05-06T19:30:00Z",
+        "solarGenerationKw": 46.42
+    },
+    {
+        "datetimeUtc": "2024-05-06T19:00:00Z",
+        "solarGenerationKw": 177.75
+    },
+    {
+        "datetimeUtc": "2024-05-06T18:30:00Z",
+        "solarGenerationKw": 493.52
+    },
+    {
+        "datetimeUtc": "2024-05-06T18:00:00Z",
+        "solarGenerationKw": 713.73
+    },
+    {
+        "datetimeUtc": "2024-05-06T17:30:00Z",
+        "solarGenerationKw": 1675.31
+    },
+    {
+        "datetimeUtc": "2024-05-06T17:00:00Z",
+        "solarGenerationKw": 3378.41
+    },
+    {
+        "datetimeUtc": "2024-05-06T16:30:00Z",
+        "solarGenerationKw": 5561.46
+    },
+    {
+        "datetimeUtc": "2024-05-06T16:00:00Z",
+        "solarGenerationKw": 6876.2
+    },
+    {
+        "datetimeUtc": "2024-05-06T15:30:00Z",
+        "solarGenerationKw": 8190.12
+    },
+    {
+        "datetimeUtc": "2024-05-06T15:00:00Z",
+        "solarGenerationKw": 7290.84
+    },
+    {
+        "datetimeUtc": "2024-05-06T14:30:00Z",
+        "solarGenerationKw": 9348.3
+    },
+    {
+        "datetimeUtc": "2024-05-06T14:00:00Z",
+        "solarGenerationKw": 12213.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T13:30:00Z",
+        "solarGenerationKw": 13760.2
+    },
+    {
+        "datetimeUtc": "2024-05-06T13:00:00Z",
+        "solarGenerationKw": 13708.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T12:30:00Z",
+        "solarGenerationKw": 16533.3
+    },
+    {
+        "datetimeUtc": "2024-05-06T12:00:00Z",
+        "solarGenerationKw": 17878.6
+    },
+    {
+        "datetimeUtc": "2024-05-06T11:30:00Z",
+        "solarGenerationKw": 19532.7
+    },
+    {
+        "datetimeUtc": "2024-05-06T11:00:00Z",
+        "solarGenerationKw": 21421.7
+    },
+    {
+        "datetimeUtc": "2024-05-06T10:30:00Z",
+        "solarGenerationKw": 18030.3
+    },
+    {
+        "datetimeUtc": "2024-05-06T10:00:00Z",
+        "solarGenerationKw": 16131.9
+    },
+    {
+        "datetimeUtc": "2024-05-06T09:30:00Z",
+        "solarGenerationKw": 15863.4
+    },
+    {
+        "datetimeUtc": "2024-05-06T09:00:00Z",
+        "solarGenerationKw": 11913.9
+    },
+    {
+        "datetimeUtc": "2024-05-06T08:30:00Z",
+        "solarGenerationKw": 8578.46
+    },
+    {
+        "datetimeUtc": "2024-05-06T08:00:00Z",
+        "solarGenerationKw": 6672.66
+    },
+    {
+        "datetimeUtc": "2024-05-06T07:30:00Z",
+        "solarGenerationKw": 3292.66
+    },
+    {
+        "datetimeUtc": "2024-05-06T07:00:00Z",
+        "solarGenerationKw": 2556.8
+    },
+    {
+        "datetimeUtc": "2024-05-06T06:30:00Z",
+        "solarGenerationKw": 1556.7
+    },
+    {
+        "datetimeUtc": "2024-05-06T06:00:00Z",
+        "solarGenerationKw": 483.26
+    },
+    {
+        "datetimeUtc": "2024-05-06T05:30:00Z",
+        "solarGenerationKw": 310.14
+    },
+    {
+        "datetimeUtc": "2024-05-06T05:00:00Z",
+        "solarGenerationKw": 8.74
+    },
+    {
+        "datetimeUtc": "2024-05-06T04:30:00Z",
+        "solarGenerationKw": 0.04
+    },
+    {
+        "datetimeUtc": "2024-05-06T04:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T03:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T03:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T02:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T02:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T01:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T01:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T00:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-06T00:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T23:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T23:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T22:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T22:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T21:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T21:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T20:30:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T20:00:00Z",
+        "solarGenerationKw": 0.0
+    },
+    {
+        "datetimeUtc": "2024-05-05T19:30:00Z",
+        "solarGenerationKw": 41.3
+    },
+    {
+        "datetimeUtc": "2024-05-05T19:00:00Z",
+        "solarGenerationKw": 737.32
+    },
+    {
+        "datetimeUtc": "2024-05-05T18:30:00Z",
+        "solarGenerationKw": 1718.29
+    },
+    {
+        "datetimeUtc": "2024-05-05T18:00:00Z",
+        "solarGenerationKw": 1903.43
+    },
+    {
+        "datetimeUtc": "2024-05-05T17:30:00Z",
+        "solarGenerationKw": 2370.7
+    },
+    {
+        "datetimeUtc": "2024-05-05T17:00:00Z",
+        "solarGenerationKw": 3869.78
+    },
+    {
+        "datetimeUtc": "2024-05-05T16:30:00Z",
+        "solarGenerationKw": 5250.41
+    },
+    {
+        "datetimeUtc": "2024-05-05T16:00:00Z",
+        "solarGenerationKw": 5825.51
+    },
+    {
+        "datetimeUtc": "2024-05-05T15:30:00Z",
+        "solarGenerationKw": 6273.59
+    },
+    {
+        "datetimeUtc": "2024-05-05T15:00:00Z",
+        "solarGenerationKw": 7440.41
+    },
+    {
+        "datetimeUtc": "2024-05-05T14:30:00Z",
+        "solarGenerationKw": 10828.7
+    },
+    {
+        "datetimeUtc": "2024-05-05T14:00:00Z",
+        "solarGenerationKw": 14079.4
+    },
+    {
+        "datetimeUtc": "2024-05-05T13:30:00Z",
+        "solarGenerationKw": 18554.3
+    },
+    {
+        "datetimeUtc": "2024-05-05T13:00:00Z",
+        "solarGenerationKw": 18367.8
+    },
+    {
+        "datetimeUtc": "2024-05-05T12:30:00Z",
+        "solarGenerationKw": 14345.2
+    },
+    {
+        "datetimeUtc": "2024-05-05T12:00:00Z",
+        "solarGenerationKw": 18032.7
+    },
+    {
+        "datetimeUtc": "2024-05-05T11:30:00Z",
+        "solarGenerationKw": 18757.9
+    },
+    {
+        "datetimeUtc": "2024-05-05T11:00:00Z",
+        "solarGenerationKw": 21166.7
+    }
+]
