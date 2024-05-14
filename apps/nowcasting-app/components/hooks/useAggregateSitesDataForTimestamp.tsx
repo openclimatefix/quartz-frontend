@@ -49,13 +49,15 @@ export const formatDNORegionName = (regionName: string) => {
   // if regionName is empty then return now
   if (!regionName) return regionName;
 
-  const regionNameParts = regionName.split(" ");
-  if (regionNameParts.length > 1) {
-    // Strip out the brackets
-    regionName = `${regionNameParts[1].replace("(", "").replace(")", "")}`;
+  // remove last ')'
+  const regionNameParts = regionName.replace(")", "");
 
+  // split by first ' ('
+  const regionAbbAndName = regionNameParts.split(" (");
+
+  if (regionAbbAndName.length > 1) {
     // join names back together
-    regionName = `${regionName} (${regionNameParts[0]})`;
+    regionName = `${regionAbbAndName[1]} (${regionAbbAndName[0]})`;
   }
 
   return regionName;
