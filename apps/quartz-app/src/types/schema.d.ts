@@ -143,6 +143,12 @@ export interface operations {
    * @description Health endpoint for the API.
    */
   get_health_route_health_get: {
+    parameters: {
+      query?: {
+        /** @description A common, optional "ui" query parameter for all endpoints. */
+        ui?: string;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -160,6 +166,8 @@ export interface operations {
     parameters: {
       query?: {
         resample_minutes?: number | null;
+        /** @description A common, optional "ui" query parameter for all endpoints. */
+        ui?: string;
       };
       path: {
         region: string;
@@ -187,6 +195,10 @@ export interface operations {
    */
   get_forecast_timeseries_route__source___region__forecast_get: {
     parameters: {
+      query?: {
+        /** @description A common, optional "ui" query parameter for all endpoints. */
+        ui?: string;
+      };
       path: {
         region: string;
         source: string;
@@ -212,6 +224,12 @@ export interface operations {
    * @description Function for the sources route.
    */
   get_sources_route_sources_get: {
+    parameters: {
+      query?: {
+        /** @description A common, optional "ui" query parameter for all endpoints. */
+        ui?: string;
+      };
+    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -227,6 +245,10 @@ export interface operations {
    */
   get_regions_route__source__regions_get: {
     parameters: {
+      query?: {
+        /** @description A common, optional "ui" query parameter for all endpoints. */
+        ui?: string;
+      };
       path: {
         source: string;
       };
