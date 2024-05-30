@@ -6,7 +6,6 @@ import mapboxgl, { Expression } from "mapbox-gl";
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
-import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
@@ -17,7 +16,10 @@ import { FeatureCollection } from "geojson";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { components } from "../../types/quartz-api";
 import { generateGeoJsonForecastData } from "../helpers/data";
+import dynamic from "next/dynamic";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+
+const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type PvLatestMapProps = {
   className?: string;
