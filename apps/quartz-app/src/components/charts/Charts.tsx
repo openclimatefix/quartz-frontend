@@ -12,7 +12,7 @@ import {
 } from "recharts";
 // @ts-ignore
 import { theme } from "@/tailwind.config";
-import { FC, ReactNode } from "react";
+import { ChangeEvent, FC, useEffect } from "react";
 import {
   ACTUAL_SOLAR_COLOR,
   ACTUAL_WIND_COLOR,
@@ -32,12 +32,15 @@ import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
 import { useGlobalState } from "../helpers/globalState";
 import { DateTime } from "luxon";
+import { components } from "@/src/types/schema";
+import Spinner, { SpinnerTextInline } from "@/src/components/icons/icons";
 
 type ChartsProps = {
   combinedData: CombinedData;
+  isLoading: boolean;
 };
 
-const Charts: FC<ChartsProps> = ({ combinedData }) => {
+const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
   const { data, error } = useGetRegionsQuery("solar");
   console.log("Charts data test", data);
   const formattedChartData = useChartData(combinedData);
@@ -67,9 +70,88 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
   const pastStrokeOpacity = 1;
 
   const [visibleLines] = useGlobalState("visibleLines");
+  const [forecastHorizon, setForecastHorizon] =
+    useGlobalState("forecastHorizon");
+  const [forecastHorizonMinutes, setForecastHorizonMinutes] = useGlobalState(
+    "forecastHorizonMinutes"
+  );
+  const forecastHorizonTypes: components["schemas"]["ForecastHorizon"][] = [
+    "latest",
+    "horizon",
+    "day_ahead",
+  ];
+  const forecastHorizonMinuteOptions = [90, 180];
 
+  const handleUpdateHorizon = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (
+      Object.values(forecastHorizonTypes).includes(
+        e.target.value as components["schemas"]["ForecastHorizon"]
+      )
+    ) {
+      setForecastHorizon(
+        e.target.value as components["schemas"]["ForecastHorizon"]
+      );
+    }
+  };
+  const handleUpdateHorizonMinutes = (e: ChangeEvent<HTMLSelectElement>) => {
+    if (forecastHorizonMinuteOptions.includes(parseInt(e.target.value))) {
+      setForecastHorizonMinutes(parseInt(e.target.value));
+    }
+  };
   return (
     <div className="flex-1 flex flex-col justify-center items-center bg-ocf-grey-800">
+      <div className="flex flex-1 w-full items-center justify-between -mb-6 py-3 px-4">
+        <div className="flex">
+          {isLoading ? (
+            <div className="pointer-events-none text-white px-2.5 py-0.5 rounded-md bg-ocf-black flex items-center gap-2">
+              Loading data <SpinnerTextInline />
+            </div>
+          ) : (
+            <div className="fade-out pointer-events-none text-white px-2.5 py-0.5 rounded-md bg-ocf-black flex items-center">
+              Data loaded
+            </div>
+          )}
+        </div>
+        <div className="flex gap-5">
+          <label className={forecastHorizon === "horizon" ? "" : "opacity-25"}>
+            <span className="text-white mr-2">Horizon Minutes</span>
+            <select
+              className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
+              onChange={handleUpdateHorizonMinutes}
+              value={forecastHorizonMinutes}
+              disabled={forecastHorizon !== "horizon"}
+            >
+              {forecastHorizonMinuteOptions.map(
+                (forecastHorizonMinuteOption) => (
+                  <option
+                    key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
+                    value={forecastHorizonMinuteOption}
+                  >
+                    {forecastHorizonMinuteOption}
+                  </option>
+                )
+              )}
+            </select>
+          </label>
+          <label>
+            <span className="text-white mr-2">Forecast</span>
+            <select
+              className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
+              onChange={handleUpdateHorizon}
+              value={forecastHorizon}
+            >
+              {forecastHorizonTypes.map((forecastHorizonType) => (
+                <option
+                  key={`horizonOption-${forecastHorizonType}`}
+                  value={forecastHorizonType}
+                >
+                  {forecastHorizonType.replace("_", " ")}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
         {/* Helps with the resizing of the chart in both axes */}
         <div
@@ -81,6 +163,13 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
             top: 0,
           }}
         >
+          {isLoading && (
+            <div
+              className={`absolute flex pb-7 items-center justify-center inset-0 z-30`}
+            >
+              <Spinner className="w-10 h-10 fill-ocf-yellow text-ocf-grey-700" />
+            </div>
+          )}
           <ResponsiveContainer>
             <ComposedChart
               data={formattedChartData}

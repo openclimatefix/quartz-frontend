@@ -22,6 +22,12 @@ export interface paths {
     /**
      * Get Forecast Timeseries Route
      * @description Function for the forecast generation route.
+     *
+     * Args:
+     *     source: The source of the forecast, this is current wind or solar.
+     *     region: The region to get the forecast for.
+     *     forecast_horizon: The time horizon to get the data for. Can be 'latest', 'horizon' or 'day ahead'
+     *     forecast_horizon_minutes: The number of minutes to get the forecast for. forecast_horizon must be 'horizon'
      */
     get: operations["get_forecast_timeseries_route__source___region__forecast_get"];
   };
@@ -58,6 +64,17 @@ export interface components {
        */
       Time: string;
     };
+    /**
+     * ForecastHorizon
+     * @description Defines the forecast horizon options.
+     *
+     * Can either be
+     * - latest: Gets the latest forecast values.
+     * - horizon: Gets the forecast values for a specific horizon.
+     * - day_ahead: Gets the day ahead forecast values.
+     * @enum {string}
+     */
+    ForecastHorizon: "latest" | "horizon" | "day_ahead";
     /**
      * GetForecastGenerationResponse
      * @description Model for the forecast generation endpoint response.
@@ -143,12 +160,6 @@ export interface operations {
    * @description Health endpoint for the API.
    */
   get_health_route_health_get: {
-    parameters: {
-      query?: {
-        /** @description A common, optional "ui" query parameter for all endpoints. */
-        ui?: string;
-      };
-    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -166,8 +177,6 @@ export interface operations {
     parameters: {
       query?: {
         resample_minutes?: number | null;
-        /** @description A common, optional "ui" query parameter for all endpoints. */
-        ui?: string;
       };
       path: {
         region: string;
@@ -192,12 +201,18 @@ export interface operations {
   /**
    * Get Forecast Timeseries Route
    * @description Function for the forecast generation route.
+   *
+   * Args:
+   *     source: The source of the forecast, this is current wind or solar.
+   *     region: The region to get the forecast for.
+   *     forecast_horizon: The time horizon to get the data for. Can be 'latest', 'horizon' or 'day ahead'
+   *     forecast_horizon_minutes: The number of minutes to get the forecast for. forecast_horizon must be 'horizon'
    */
   get_forecast_timeseries_route__source___region__forecast_get: {
     parameters: {
       query?: {
-        /** @description A common, optional "ui" query parameter for all endpoints. */
-        ui?: string;
+        forecast_horizon?: components["schemas"]["ForecastHorizon"];
+        forecast_horizon_minutes?: number | null;
       };
       path: {
         region: string;
@@ -224,12 +239,6 @@ export interface operations {
    * @description Function for the sources route.
    */
   get_sources_route_sources_get: {
-    parameters: {
-      query?: {
-        /** @description A common, optional "ui" query parameter for all endpoints. */
-        ui?: string;
-      };
-    };
     responses: {
       /** @description Successful Response */
       200: {
@@ -245,10 +254,6 @@ export interface operations {
    */
   get_regions_route__source__regions_get: {
     parameters: {
-      query?: {
-        /** @description A common, optional "ui" query parameter for all endpoints. */
-        ui?: string;
-      };
       path: {
         source: string;
       };

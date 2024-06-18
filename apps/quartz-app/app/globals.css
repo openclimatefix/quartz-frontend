@@ -25,3 +25,17 @@ body {
     text-wrap: balance;
   }
 }
+
+.fade-out {
+  opacity: 1;
+  animation: fade-out 2s ease-in-out forwards;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
