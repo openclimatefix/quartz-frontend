@@ -34,7 +34,7 @@ const HorizonSelect: FC = () => {
   return (
     <>
       <label className={forecastHorizon === "horizon" ? "" : "opacity-25"}>
-        <span className="text-white mr-2">Horizon Minutes</span>
+        <span className="text-white mr-2">Horizon Hours</span>
         <select
           className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
           onChange={handleUpdateHorizonMinutes}
@@ -46,7 +46,7 @@ const HorizonSelect: FC = () => {
               key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
               value={forecastHorizonMinuteOption}
             >
-              {forecastHorizonMinuteOption}
+              {Number(forecastHorizonMinuteOption) / 60}
             </option>
           ))}
         </select>
