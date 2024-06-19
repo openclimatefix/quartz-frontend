@@ -13,6 +13,8 @@ type HeaderProps = {};
 const Header: React.FC<HeaderProps> = () => {
   const { showUserMenu, setShowUserMenu } = useUserMenu();
   const [combinedData] = useGlobalState("combinedData");
+  const [forecastHorizon] = useGlobalState("forecastHorizon");
+  const [forecastHorizonMinutes] = useGlobalState("forecastHorizonMinutes");
   const { user } = useUser();
   const downloadCsv = async () => {
     console.log("Download CSV");
@@ -78,7 +80,14 @@ const Header: React.FC<HeaderProps> = () => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const now = DateTime.now().setZone("ist");
-    a.download = `Quartz-Data_${now
+    const forecastHorizonString = forecastHorizon
+      .split("_")
+      .map((type) => type.charAt(0).toUpperCase() + type.slice(1))
+      .join("-");
+    const forecastHorizonTimeString = forecastHorizon.includes("horizon")
+      ? `${String(forecastHorizonMinutes / 60).replace(".", "-")}h`
+      : "";
+    a.download = `Quartz-${forecastHorizonString}${forecastHorizonTimeString}_${now
       .toString()
       .slice(0, 16)
       .replaceAll("T", "_")}.csv`;
