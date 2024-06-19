@@ -22,6 +22,7 @@ export const getRegionsQuery = (
         path: {
           source,
         },
+        // @ts-ignore
         query: {
           ...sharedQueryParams,
         },
@@ -72,7 +73,9 @@ export const getGenerationQuery = (
 // Get forecast values for source and region
 export const getForecastQuery = (
   source: operations["get_forecast_timeseries_route__source___region__forecast_get"]["parameters"]["path"]["source"],
-  region: operations["get_forecast_timeseries_route__source___region__forecast_get"]["parameters"]["path"]["region"]
+  region: operations["get_forecast_timeseries_route__source___region__forecast_get"]["parameters"]["path"]["region"],
+  forecast_horizon?: components["schemas"]["ForecastHorizon"],
+  forecast_horizon_minutes?: number
 ): QueryFunction<components["schemas"]["GetForecastGenerationResponse"]> => {
   return async ({ meta, signal }) => {
     const { accessToken } = await fetch("/api/token").then((res) => res.json());
@@ -84,6 +87,9 @@ export const getForecastQuery = (
         },
         query: {
           ...sharedQueryParams,
+          forecast_horizon,
+          forecast_horizon_minutes:
+            forecast_horizon === "horizon" ? forecast_horizon_minutes : null,
         },
       },
       // Add bearer token to headers

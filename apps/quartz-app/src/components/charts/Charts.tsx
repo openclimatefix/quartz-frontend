@@ -12,14 +12,13 @@ import {
 } from "recharts";
 // @ts-ignore
 import { theme } from "@/tailwind.config";
-import { FC, ReactNode } from "react";
+import { ChangeEvent, FC, useEffect } from "react";
 import {
   ACTUAL_SOLAR_COLOR,
   ACTUAL_WIND_COLOR,
   SOLAR_COLOR,
   WIND_COLOR,
 } from "@/src/constants";
-import { LegendContainer } from "@/src/components/charts/legend/LegendContainer";
 import {
   formatEpochToHumanDayName,
   formatEpochToPrettyTime,
@@ -32,12 +31,15 @@ import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
 import { useGlobalState } from "../helpers/globalState";
 import { DateTime } from "luxon";
+import { Spinner, SpinnerTextInline } from "@/src/components/icons/icons";
+import HorizonSelect from "@/src/components/charts/HorizonSelect";
 
 type ChartsProps = {
   combinedData: CombinedData;
+  isLoading: boolean;
 };
 
-const Charts: FC<ChartsProps> = ({ combinedData }) => {
+const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
   const { data, error } = useGetRegionsQuery("solar");
   console.log("Charts data test", data);
   const formattedChartData = useChartData(combinedData);
@@ -70,6 +72,22 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
 
   return (
     <div className="flex-1 flex flex-col justify-center items-center bg-ocf-grey-800">
+      <div className="flex flex-1 w-full items-center justify-between -mb-6 py-3 px-4">
+        <div className="flex">
+          {isLoading ? (
+            <div className="pointer-events-none text-white px-2.5 py-0.5 rounded-md bg-ocf-black flex items-center gap-2">
+              Loading data <SpinnerTextInline />
+            </div>
+          ) : (
+            <div className="fade-out pointer-events-none text-white px-2.5 py-0.5 rounded-md bg-ocf-black flex items-center">
+              Data loaded
+            </div>
+          )}
+        </div>
+        <div className="flex gap-5">
+          <HorizonSelect />
+        </div>
+      </div>
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
         {/* Helps with the resizing of the chart in both axes */}
         <div
@@ -81,6 +99,13 @@ const Charts: FC<ChartsProps> = ({ combinedData }) => {
             top: 0,
           }}
         >
+          {isLoading && (
+            <div
+              className={`absolute flex pb-7 items-center justify-center inset-0 z-30`}
+            >
+              <Spinner className="w-10 h-10 fill-ocf-yellow text-ocf-grey-700" />
+            </div>
+          )}
           <ResponsiveContainer>
             <ComposedChart
               data={formattedChartData}

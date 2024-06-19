@@ -13,39 +13,63 @@ import { useEffect, useMemo } from "react";
 
 export const Main = () => {
   const [combinedData, setCombinedData] = useGlobalState("combinedData");
+  const [forecastHorizon] = useGlobalState("forecastHorizon");
+  const [forecastHorizonMinutes] = useGlobalState("forecastHorizonMinutes");
 
-  const { data: solarRegionsData, error: solarRegionsError } =
-    useGetRegionsQuery("solar");
+  const {
+    data: solarRegionsData,
+    isLoading: solarRegionsLoading,
+    error: solarRegionsError,
+  } = useGetRegionsQuery("solar");
 
-  const { data: windRegionsData, error: windRegionsError } =
-    useGetRegionsQuery("wind");
+  const {
+    data: windRegionsData,
+    isLoading: windRegionsLoading,
+    error: windRegionsError,
+  } = useGetRegionsQuery("wind");
 
-  const { data: solarGenerationData, error: solarGenerationError } =
-    useGetGenerationForRegionQuery(
-      "solar",
-      solarRegionsData?.regions[0] || "",
-      !!solarRegionsData?.regions[0]
-    );
-  const { data: windGenerationData, error: windGenerationError } =
-    useGetGenerationForRegionQuery(
-      "wind",
-      windRegionsData?.regions[0] || "",
-      !!windRegionsData?.regions[0]
-    );
+  const {
+    data: solarGenerationData,
+    isLoading: solarGenerationLoading,
+    error: solarGenerationError,
+  } = useGetGenerationForRegionQuery(
+    "solar",
+    solarRegionsData?.regions[0] || "",
+    !!solarRegionsData?.regions[0]
+  );
+  const {
+    data: windGenerationData,
+    isLoading: windGenerationLoading,
+    error: windGenerationError,
+  } = useGetGenerationForRegionQuery(
+    "wind",
+    windRegionsData?.regions[0] || "",
+    !!windRegionsData?.regions[0]
+  );
 
   // Get forecast data
-  const { data: solarForecastData, error: solarForecastError } =
-    useGetForecastedGenerationForRegionQuery(
-      "solar",
-      solarRegionsData?.regions[0] || "",
-      !!solarRegionsData?.regions[0]
-    );
-  const { data: windForecastData, error: windForecastError } =
-    useGetForecastedGenerationForRegionQuery(
-      "wind",
-      windRegionsData?.regions[0] || "",
-      !!windRegionsData?.regions[0]
-    );
+  const {
+    data: solarForecastData,
+    isLoading: solarForecastLoading,
+    error: solarForecastError,
+  } = useGetForecastedGenerationForRegionQuery(
+    "solar",
+    solarRegionsData?.regions[0] || "",
+    !!solarRegionsData?.regions[0],
+    forecastHorizon,
+    forecastHorizonMinutes
+  );
+  const {
+    data: windForecastData,
+    isLoading: windForecastLoading,
+    error: windForecastError,
+  } = useGetForecastedGenerationForRegionQuery(
+    "wind",
+    windRegionsData?.regions[0] || "",
+    !!windRegionsData?.regions[0],
+    forecastHorizon,
+    forecastHorizonMinutes
+  );
 
   const latestCombinedData: CombinedData = useMemo(() => {
     return {
@@ -66,6 +90,24 @@ export const Main = () => {
     setCombinedData(latestCombinedData);
   }, [latestCombinedData]);
 
+  const isLoading = useMemo(() => {
+    return (
+      solarForecastLoading ||
+      windForecastLoading ||
+      solarGenerationLoading ||
+      windGenerationLoading ||
+      solarRegionsLoading ||
+      windRegionsLoading
+    );
+  }, [
+    solarForecastLoading,
+    windForecastLoading,
+    solarGenerationLoading,
+    windGenerationLoading,
+    solarRegionsLoading,
+    windRegionsLoading,
+  ]);
+
   if (
     solarRegionsError ||
     windRegionsError ||
@@ -83,7 +125,11 @@ export const Main = () => {
       solarForecastError,
       windForecastError
     );
-    return <div>Error</div>;
+    return (
+      <div className="text-white flex items-center justify-center absolute inset-0">
+        An error has occurred. Please refresh, or try again shortly.
+      </div>
+    );
   }
 
   return (
@@ -95,7 +141,7 @@ export const Main = () => {
         solarGenerationData={solarGenerationData}
         windGenerationData={windGenerationData}
       />
-      <Charts combinedData={combinedData} />
+      <Charts combinedData={combinedData} isLoading={isLoading} />
     </>
   );
 };
