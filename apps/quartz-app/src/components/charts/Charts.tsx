@@ -34,6 +34,7 @@ import { useGlobalState } from "../helpers/globalState";
 import { DateTime } from "luxon";
 import { components } from "@/src/types/schema";
 import Spinner, { SpinnerTextInline } from "@/src/components/icons/icons";
+import HorizonSelect from "@/src/components/charts/HorizonSelect";
 
 type ChartsProps = {
   combinedData: CombinedData;
@@ -70,34 +71,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
   const pastStrokeOpacity = 1;
 
   const [visibleLines] = useGlobalState("visibleLines");
-  const [forecastHorizon, setForecastHorizon] =
-    useGlobalState("forecastHorizon");
-  const [forecastHorizonMinutes, setForecastHorizonMinutes] = useGlobalState(
-    "forecastHorizonMinutes"
-  );
-  const forecastHorizonTypes: components["schemas"]["ForecastHorizon"][] = [
-    "latest",
-    "horizon",
-    "day_ahead",
-  ];
-  const forecastHorizonMinuteOptions = [90, 180];
 
-  const handleUpdateHorizon = (e: ChangeEvent<HTMLSelectElement>) => {
-    if (
-      Object.values(forecastHorizonTypes).includes(
-        e.target.value as components["schemas"]["ForecastHorizon"]
-      )
-    ) {
-      setForecastHorizon(
-        e.target.value as components["schemas"]["ForecastHorizon"]
-      );
-    }
-  };
-  const handleUpdateHorizonMinutes = (e: ChangeEvent<HTMLSelectElement>) => {
-    if (forecastHorizonMinuteOptions.includes(parseInt(e.target.value))) {
-      setForecastHorizonMinutes(parseInt(e.target.value));
-    }
-  };
   return (
     <div className="flex-1 flex flex-col justify-center items-center bg-ocf-grey-800">
       <div className="flex flex-1 w-full items-center justify-between -mb-6 py-3 px-4">
@@ -113,43 +87,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
           )}
         </div>
         <div className="flex gap-5">
-          <label className={forecastHorizon === "horizon" ? "" : "opacity-25"}>
-            <span className="text-white mr-2">Horizon Minutes</span>
-            <select
-              className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
-              onChange={handleUpdateHorizonMinutes}
-              value={forecastHorizonMinutes}
-              disabled={forecastHorizon !== "horizon"}
-            >
-              {forecastHorizonMinuteOptions.map(
-                (forecastHorizonMinuteOption) => (
-                  <option
-                    key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
-                    value={forecastHorizonMinuteOption}
-                  >
-                    {forecastHorizonMinuteOption}
-                  </option>
-                )
-              )}
-            </select>
-          </label>
-          <label>
-            <span className="text-white mr-2">Forecast</span>
-            <select
-              className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
-              onChange={handleUpdateHorizon}
-              value={forecastHorizon}
-            >
-              {forecastHorizonTypes.map((forecastHorizonType) => (
-                <option
-                  key={`horizonOption-${forecastHorizonType}`}
-                  value={forecastHorizonType}
-                >
-                  {forecastHorizonType.replace("_", " ")}
-                </option>
-              ))}
-            </select>
-          </label>
+          <HorizonSelect />
         </div>
       </div>
       <div style={{ position: "relative", width: "100%", height: "100%" }}>
