@@ -4,7 +4,7 @@ import { useUser } from "@auth0/nextjs-auth0/client";
 import { FC, ReactNode } from "react";
 import Header from "@/src/components/layout/Header";
 import Providers from "@/app/providers";
-import Spinner from "@/src/components/icons/icons";
+import { Spinner } from "@/src/components/icons/icons";
 
 const LayoutWrapper: FC<{
   children: ReactNode;

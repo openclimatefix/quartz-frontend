@@ -205,7 +205,7 @@ type SpinnerProps = {
   children?: React.ReactNode;
 };
 
-const Spinner: React.FC<SpinnerProps> = ({ className = "" }) => {
+export const Spinner: React.FC<SpinnerProps> = ({ className = "" }) => {
   return (
     <svg
       role="status"
@@ -226,8 +226,6 @@ const Spinner: React.FC<SpinnerProps> = ({ className = "" }) => {
     </svg>
   );
 };
-
-export default Spinner;
 
 export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
   <svg

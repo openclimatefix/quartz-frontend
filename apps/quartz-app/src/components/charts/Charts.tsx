@@ -19,7 +19,6 @@ import {
   SOLAR_COLOR,
   WIND_COLOR,
 } from "@/src/constants";
-import { LegendContainer } from "@/src/components/charts/legend/LegendContainer";
 import {
   formatEpochToHumanDayName,
   formatEpochToPrettyTime,
@@ -32,8 +31,7 @@ import { useChartData } from "@/src/hooks/useChartData";
 import { CustomLabel } from "@/src/components/charts/labels/CustomLabel";
 import { useGlobalState } from "../helpers/globalState";
 import { DateTime } from "luxon";
-import { components } from "@/src/types/schema";
-import Spinner, { SpinnerTextInline } from "@/src/components/icons/icons";
+import { Spinner, SpinnerTextInline } from "@/src/components/icons/icons";
 import HorizonSelect from "@/src/components/charts/HorizonSelect";
 
 type ChartsProps = {
