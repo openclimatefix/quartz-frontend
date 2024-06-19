@@ -2,10 +2,13 @@
 
 import { CombinedData } from "@/src/types/data";
 import { createGlobalState } from "react-hooks-global-state";
+import { components } from "@/src/types/schema";
 
 export type GlobalStateType = {
   visibleLines: string[];
   combinedData: CombinedData;
+  forecastHorizon: components["schemas"]["ForecastHorizon"];
+  forecastHorizonMinutes: number;
 };
 
 export const {
@@ -39,6 +42,8 @@ export const {
 > = createGlobalState<GlobalStateType>({
   visibleLines: ["Solar", "Wind"],
   combinedData: {} as CombinedData,
+  forecastHorizon: "latest",
+  forecastHorizonMinutes: 90,
 });
 
 export default useGlobalState;

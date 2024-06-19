@@ -6,12 +6,14 @@ import useGlobalState from "../helpers/globalState";
 import { DownloadIcon } from "@/src/components/icons/icons";
 import { DateTime } from "luxon";
 import { KWtoMW } from "@/src/helpers/dataFormats";
+import { useUser } from "@auth0/nextjs-auth0/client";
 
 type HeaderProps = {};
 
 const Header: React.FC<HeaderProps> = () => {
   const { showUserMenu, setShowUserMenu } = useUserMenu();
   const [combinedData] = useGlobalState("combinedData");
+  const { user } = useUser();
   const downloadCsv = async () => {
     console.log("Download CSV");
     if (!combinedData) return;
@@ -122,43 +124,51 @@ const Header: React.FC<HeaderProps> = () => {
         </div>
         <div className="grow text-center inline-flex px-8 gap-5 items-center"></div>
         <div className="flex items-center relative gap-5 py-1">
-          <button
-            id="DownloadCsvButton"
-            className="text-sm p-2"
-            title={"Download CSV"}
-            tabIndex={0}
-            onClick={downloadCsv}
-          >
-            <DownloadIcon />
-          </button>
-          <button
-            onClick={() => {
-              setShowUserMenu(() => !showUserMenu);
-            }}
-            tabIndex={0}
-            className="w-8 h-8 flex items-center justify-center text-lg rounded-full cursor-pointer bg-gradient-to-br from-quartz-yellow to-quartz-blue"
-          >
-            E
-          </button>
-          <div
-            id="ProfileDropdown"
-            className={`flex absolute right-0 ${
-              showUserMenu ? "top-10" : "absolute -top-40"
-            }`}
-          >
-            <div className="absolute right-0 flex flex-col mt-2 w-48 py-1 bg-white text-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-              <span className="block px-4 py-2 text-xs ">
-                Signed in as example@email.com
-              </span>
-              <a
-                // href="/api/auth/logout"
-                className="cursor-not-allowed disabled block px-4 py-2 text-sm text-gray-400"
-                tabIndex={2}
+          {user && (
+            <>
+              <button
+                id="DownloadCsvButton"
+                className="text-sm p-2"
+                title={"Download CSV"}
+                tabIndex={0}
+                onClick={downloadCsv}
               >
-                Sign out
-              </a>
-            </div>
-          </div>
+                <DownloadIcon />
+              </button>
+              <button
+                onClick={() => {
+                  setShowUserMenu(() => !showUserMenu);
+                }}
+                tabIndex={0}
+                className="w-8 h-8 flex items-center justify-center text-md rounded-full cursor-pointer bg-gradient-to-br from-quartz-yellow to-quartz-blue"
+              >
+                <span className={"text-black"}>
+                  {user
+                    ? user.name?.split(" ").map((name) => name.slice(0, 1))
+                    : ""}
+                </span>
+              </button>
+              <div
+                id="ProfileDropdown"
+                className={`flex absolute right-0 ${
+                  showUserMenu ? "top-10" : "absolute -top-40"
+                }`}
+              >
+                <div className="absolute right-0 flex flex-col mt-2 w-48 py-1 bg-white text-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                  <span className="block px-4 py-2 text-xs ">
+                    Signed in as {user?.email}
+                  </span>
+                  <a
+                    href="/api/auth/logout"
+                    className="block px-4 py-2 text-sm"
+                    tabIndex={2}
+                  >
+                    Sign out
+                  </a>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </header>
     </>
