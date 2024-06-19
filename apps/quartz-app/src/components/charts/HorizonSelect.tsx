@@ -24,48 +24,61 @@ const HorizonSelect: FC = () => {
       setForecastHorizon(
         e.target.value as components["schemas"]["ForecastHorizon"]
       );
-    }
-  };
-  const handleUpdateHorizonMinutes = (e: ChangeEvent<HTMLSelectElement>) => {
-    if (forecastHorizonMinuteOptions.includes(parseInt(e.target.value))) {
-      setForecastHorizonMinutes(parseInt(e.target.value));
+    } else {
+      if (e.target.value.includes("horizon")) {
+        const horizonValue =
+          e.target.selectedOptions[0].getAttribute("data-horizon-value");
+        if (!horizonValue) return console.error("No horizon value found");
+
+        setForecastHorizon("horizon");
+        const horizonValueInt = parseInt(horizonValue);
+        setForecastHorizonMinutes(horizonValueInt);
+      }
     }
   };
   return (
     <>
-      <label className={forecastHorizon === "horizon" ? "" : "opacity-25"}>
-        <span className="text-white mr-2">Horizon Hours</span>
-        <select
-          className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
-          onChange={handleUpdateHorizonMinutes}
-          value={forecastHorizonMinutes}
-          disabled={forecastHorizon !== "horizon"}
-        >
-          {forecastHorizonMinuteOptions.map((forecastHorizonMinuteOption) => (
-            <option
-              key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
-              value={forecastHorizonMinuteOption}
-            >
-              {Number(forecastHorizonMinuteOption) / 60}
-            </option>
-          ))}
-        </select>
-      </label>
       <label>
         <span className="text-white mr-2">Forecast</span>
         <select
           className="capitalize rounded-md py-1 px-2 bg-ocf-grey-900 text-white"
           onChange={handleUpdateHorizon}
-          value={forecastHorizon}
+          value={
+            forecastHorizon.includes("horizon")
+              ? `horizon-${forecastHorizonMinutes}`
+              : forecastHorizon
+          }
         >
-          {forecastHorizonTypes.map((forecastHorizonType) => (
-            <option
-              key={`horizonOption-${forecastHorizonType}`}
-              value={forecastHorizonType}
-            >
-              {forecastHorizonType.replace("_", " ")}
-            </option>
-          ))}
+          {forecastHorizonTypes.map((forecastHorizonType) => {
+            switch (forecastHorizonType) {
+              case "latest":
+              case "day_ahead":
+                return (
+                  <option
+                    key={`horizonOption-${forecastHorizonType}`}
+                    value={forecastHorizonType}
+                  >
+                    {forecastHorizonType.replace("_", " ")}
+                  </option>
+                );
+              case "horizon":
+                return (
+                  <>
+                    {forecastHorizonMinuteOptions.map(
+                      (forecastHorizonMinuteOption) => (
+                        <option
+                          key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
+                          value={`${forecastHorizonType}-${forecastHorizonMinuteOption}`}
+                          data-horizon-value={forecastHorizonMinuteOption}
+                        >
+                          Horizon {Number(forecastHorizonMinuteOption) / 60}h
+                        </option>
+                      )
+                    )}
+                  </>
+                );
+            }
+          })}
         </select>
       </label>
     </>
