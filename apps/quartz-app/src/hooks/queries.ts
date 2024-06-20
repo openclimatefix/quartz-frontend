@@ -8,6 +8,7 @@ import {
   getGenerationQuery,
   getRegionsQuery,
 } from "@/src/data/queries";
+import { components } from "@/src/types/schema";
 
 // type UseQueryOptions<T> = ParamsOption<T> &
 //   RequestBodyOption<T> & {
@@ -44,11 +45,24 @@ export const useGetGenerationForRegionQuery = (
 export const useGetForecastedGenerationForRegionQuery = (
   source: operations["get_forecast_timeseries_route__source___region__forecast_get"]["parameters"]["path"]["source"],
   region: operations["get_forecast_timeseries_route__source___region__forecast_get"]["parameters"]["path"]["region"],
-  enabled: boolean = true
+  enabled: boolean = true,
+  forecastHorizon?: components["schemas"]["ForecastHorizon"],
+  forecastHorizonMinutes?: number
 ) => {
   return useQuery({
-    queryKey: [GET_FORECAST, source, region],
-    queryFn: getForecastQuery(source, region),
+    queryKey: [
+      GET_FORECAST,
+      source,
+      region,
+      forecastHorizon,
+      forecastHorizon === "horizon" ? forecastHorizonMinutes : "",
+    ],
+    queryFn: getForecastQuery(
+      source,
+      region,
+      forecastHorizon,
+      forecastHorizonMinutes
+    ),
     enabled,
   });
 };

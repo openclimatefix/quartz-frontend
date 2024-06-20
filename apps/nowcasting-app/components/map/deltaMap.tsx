@@ -6,7 +6,6 @@ import mapboxgl, { Expression } from "mapbox-gl";
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
-import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
@@ -28,7 +27,9 @@ import DeltaColorGuideBar from "./delta-color-guide-bar";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { generateGeoJsonForecastData } from "../helpers/data";
 import { components } from "../../types/quartz-api";
+import dynamic from "next/dynamic";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
   if (!round) return Math.round(pv);

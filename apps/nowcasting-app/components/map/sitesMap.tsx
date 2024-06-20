@@ -10,7 +10,6 @@ import {
   MAX_POWER_GENERATED,
   VIEWS
 } from "../../constant";
-import ButtonGroup from "../../components/button-group";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import useGlobalState from "../helpers/globalState";
@@ -26,8 +25,10 @@ import { Feature, FeatureCollection } from "geojson";
 import Slider from "./sitesMapFeatures/sitesZoomSlider";
 import SitesLegend from "./sitesMapFeatures/sitesLegend";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
+import dynamic from "next/dynamic";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 const getRoundedPv = (pv: number, round: boolean = true) => {
   if (!round) return Math.round(pv);
