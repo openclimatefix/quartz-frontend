@@ -9,7 +9,14 @@ The code is as open source as we can possibly make it (safely) and is powered by
 
 Head to [quartz.solar](https://quartz.solar) to find out more or to get in touch about using our Production services.
 
+### Running the apps in this project
 
+The following documentation explains how to get started with running each application:
+
+- [nowcasting-app](apps/nowcasting-app/README.md) - The main Quartz Solar UI, hosted at [app.quartz.solar](app.quartz.solar).
+- [nowcasting-website](apps/nowcasting-website/README.md) - The marketing website
+- [quartz-app](apps/quartz-app/README.md)
+- [ux-demos](apps/ux-demos/README.md)
 
 ## Solar Electricity Nowcasting UI
 
