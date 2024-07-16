@@ -85,7 +85,6 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 |----------------------------------------------------------------------------|------------------------|-------| 
 | [india-api](https://github.com/openclimatefix/india-api)                   | API India solar and wind data | [Sol Cotton](https://github.com/devsjc)
 | [india-forecast-app](https://github.com/openclimatefix/india-forecast-app) | Runs wind and PV forecasts for India and saves to database | [Peter Dudfield](https://github.com/peterdudfield)
-| [ruvnl-consumer-app](https://github.com/openclimatefix/ruvnl-consumer-app) | Data consumer that scrapes/saves data from the Rajasthan Urja Vikas Nigam Limited (RUVNL) website. | [Peter Dudfield](https://github.com/peterdudfield)
 
 
 ## Other repos
