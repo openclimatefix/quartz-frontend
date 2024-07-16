@@ -76,6 +76,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 | [pv-site-api](https://github.com/openclimatefix/pv-site-api)                      | Site specific API for SBRI project | [Peter Dudfield](https://github.com/peterdudfield)              |
 | [pv-site-production](https://github.com/openclimatefix/pv-site-production)        | Production service for PV site level forecasts | [Peter Dudfield](https://github.com/peterdudfield)
 | [quartz-frontend](https://github.com/openclimatefix/quartz-frontend)              | Front End repo for the Nowcasting project. | [Brad Fulford](https://github.com/braddf)
+| [uk-pv-forecast-blend](https://github.com/openclimatefix/uk-pv-forecast-blend) | Service to blend forecast together | [Peter Dudfield](https://github.com/peterdudfield)
 | [uk-pv-national-gsp-api](https://github.com/openclimatefix/uk-pv-national-gsp-api) | API for hosting nowcasting solar predictions | [Peter Dudfield](https://github.com/peterdudfield)
 
 ## India
