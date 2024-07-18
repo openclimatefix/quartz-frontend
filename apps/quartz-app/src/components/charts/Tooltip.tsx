@@ -235,7 +235,6 @@ export const TooltipContent: FC<{
       ),
     } as const,
   ].sort((a, b) => Number(b.value) - Number(a.value));
-  console.log("combinedRows", combinedRows);
 
   return (
     <div className="flex flex-col bg-ocf-grey-900/60 text-white p-3 w-64">

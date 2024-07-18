@@ -7,6 +7,7 @@ import { DownloadIcon } from "@/src/components/icons/icons";
 import { DateTime } from "luxon";
 import { KWtoMW } from "@/src/helpers/dataFormats";
 import { useUser } from "@auth0/nextjs-auth0/client";
+import * as Sentry from "@sentry/nextjs";
 
 type HeaderProps = {};
 
@@ -91,6 +92,18 @@ const Header: React.FC<HeaderProps> = () => {
       .toString()
       .slice(0, 16)
       .replaceAll("T", "_")}.csv`;
+    Sentry.captureEvent({
+      message: "Downloaded CSV",
+      level: "log",
+      tags: {
+        forecastHorizon: `${forecastHorizon}${forecastHorizonTimeString}`,
+      },
+      extra: {
+        csvFilename: a.download,
+        forecastHorizon: `${forecastHorizonString}${forecastHorizonTimeString}`,
+        csvStart: csv.slice(0, 300),
+      },
+    });
     document.body.appendChild(a);
     // console.log("csv", csv);
     a.click();
