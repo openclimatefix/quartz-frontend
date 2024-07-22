@@ -9,15 +9,15 @@ export const useUserMenu = () => {
       setShowUserMenu(false);
     }
   };
-  const handleProfileDropdownToggle = () => {
-    if (showUserMenu) {
-      window.onkeydown = handleEscape;
-    } else {
-      window.removeEventListener("keydown", handleEscape);
-    }
-  };
 
   useEffect(() => {
+    const handleProfileDropdownToggle = () => {
+      if (showUserMenu) {
+        window.onkeydown = handleEscape;
+      } else {
+        window.removeEventListener("keydown", handleEscape);
+      }
+    };
     console.log("showProfileDropdown", showUserMenu);
     handleProfileDropdownToggle();
   }, [showUserMenu]);
