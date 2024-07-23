@@ -6,6 +6,7 @@ import { SWRConfig } from "swr";
 import { apiErrorMSGS } from "../constant";
 import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 function MyApp({ Component, pageProps }: any) {
   return (
@@ -36,6 +37,7 @@ function MyApp({ Component, pageProps }: any) {
         <ToastContainer position="top-left" autoClose={10000} limit={5} hideProgressBar={true} />
 
         <Component {...pageProps} />
+        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
       </SWRConfig>
     </UserProvider>
   );
