@@ -25,6 +25,7 @@ import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
+import Link from "next/link";
 
 const LegendItem: FC<{
   iconClasses: string;
@@ -208,6 +209,56 @@ const SolarSiteChart: FC<{
         <Spinner></Spinner>
       </div>
     );
+
+  if (!combinedSitesData.allSitesData?.length) {
+    return (
+      <div className={`h-full flex ${className}`}>
+        <div className="flex-1 flex flex-col justify-center items-center p-32">
+          <div className={"flex-initial flex flex-col"}>
+            <h2 className="text-ocf-gray-300 text-4xl pb-6">Welcome to Site View.</h2>
+            <p className="text-ocf-gray-300 text-lg pb-3 font-semibold tracking-wide">
+              It looks like you don&apos;t currently have any sites.
+            </p>
+            {/* TODO: add func. to create sites from UI */}
+            {/*<p className="text-ocf-gray-300 text-base pb-6">*/}
+            {/*  To add a site, you can use the &quot;+&quot; button in the top left corner.*/}
+            {/*</p>*/}
+            <p className="text-ocf-gray-300 text-base pb-6">
+              To add a site, you can use our{" "}
+              <Link
+                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                target={"_blank"}
+                href={"https://api.quartz.solar/docs"}
+              >
+                API
+              </Link>{" "}
+              or our{" "}
+              <Link
+                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                target={"_blank"}
+                href={"https://api.quartz.solar/swagger"}
+              >
+                Swagger UI
+              </Link>
+              .
+            </p>
+            <blockquote className={"border-l-2 border-ocf-gray pl-3"}>
+              <p className="text-ocf-gray-300 text-base py-1">
+                If you think you should have sites here, have any questions or need some further
+                information, please get in touch at{" "}
+                <a
+                  className={"underline underline-offset-4 decoration-ocf-yellow"}
+                  href="mailto:quartz.support@openclimatefix.org"
+                >
+                  quartz.support@openclimatefix.org
+                </a>
+              </p>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const setSelectedTime = (time: string) => {
     stopTime();
