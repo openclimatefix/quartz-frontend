@@ -24,6 +24,7 @@ import { theme } from "../../tailwind.config";
 import { Feature, FeatureCollection } from "geojson";
 import Slider from "./sitesMapFeatures/sitesZoomSlider";
 import SitesLegend from "./sitesMapFeatures/sitesLegend";
+import { getRingMultiplier } from "./sitesMapFeatures/utils";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import dynamic from "next/dynamic";
 
@@ -100,20 +101,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
     isNormalized ? 1 : MAX_POWER_GENERATED,
     1
   ];
-
-  const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS) => {
-    // TODO: this will need to be dynamic depending on user's site capacities
-    switch (aggregationLevel) {
-      case AGGREGATION_LEVELS.SITE:
-        return 10;
-      case AGGREGATION_LEVELS.GSP:
-        return 5;
-      case AGGREGATION_LEVELS.REGION:
-        return 1.5;
-      case AGGREGATION_LEVELS.NATIONAL:
-        return 0.3;
-    }
-  };
 
   const generateGeoJsonForecastData: (
     forecastData?: FcAllResData,
@@ -283,6 +270,11 @@ const SitesMap: React.FC<SitesMapProps> = ({
       addGroupSource(map, groupName, groupFeatureArray);
     }
 
+    // get the maximum capacity in all the FeatureArrays, but feature.properties might be null, if so us 1
+    const maxCapacity = Math.max(
+      ...groupFeatureArray.map((feature) => feature.properties?.capacity || 1)
+    );
+
     if (groupName === "regions") {
       let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
         | mapboxgl.GeoJSONSource
@@ -347,7 +339,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       map.setPaintProperty(`Capacity-${groupName}`, "circle-radius", [
         "*",
         ["to-number", ["get", "capacity"]],
-        getRingMultiplier(groupAggregationLevel)
+        getRingMultiplier(groupAggregationLevel, maxCapacity)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
       const visibility = "visible";
@@ -367,7 +359,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
           "circle-radius": [
             "*",
             ["to-number", ["get", "capacity"]],
-            getRingMultiplier(groupAggregationLevel)
+            getRingMultiplier(groupAggregationLevel, maxCapacity)
           ],
           "circle-stroke-color": [
             "case",
@@ -413,7 +405,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       map.setPaintProperty(`Generation-${groupName}`, "circle-radius", [
         "*",
         ["to-number", ["get", "expectedPVRadius"]],
-        getRingMultiplier(groupAggregationLevel)
+        getRingMultiplier(groupAggregationLevel, maxCapacity)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
       const visibility = "visible";
@@ -433,7 +425,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
           "circle-radius": [
             "*",
             ["to-number", ["get", "expectedPVRadius"]],
-            getRingMultiplier(groupAggregationLevel)
+            getRingMultiplier(groupAggregationLevel, maxCapacity)
           ],
           "circle-color": [
             "case",
