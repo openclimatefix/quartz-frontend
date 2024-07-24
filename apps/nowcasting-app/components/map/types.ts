@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export enum ActiveUnit {
   MW = "MW",
   percentage = "%",
@@ -12,7 +14,7 @@ export enum SelectedData {
 }
 
 export interface IMap {
-  children: React.ReactNode;
+  children?: ReactNode;
   loadDataOverlay: any;
   controlOverlay: any;
   bearing?: number;

@@ -23,7 +23,6 @@ import {
 import { theme } from "../../tailwind.config";
 import { Feature, FeatureCollection } from "geojson";
 import Slider from "./sitesMapFeatures/sitesZoomSlider";
-import SitesLegend from "./sitesMapFeatures/sitesLegend";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import dynamic from "next/dynamic";
 
@@ -523,7 +522,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
           )}
           title={VIEWS.SOLAR_SITES}
         >
-          <SitesLegend color={"color"} />
+          {/*<SitesLegend color={"color"} />*/}
         </MapComponent>
       )}
     </div>
