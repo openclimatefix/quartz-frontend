@@ -42,6 +42,27 @@ const getPvActualGenerationForSite = (
   );
 };
 
+export const formatDNORegionName = (regionName: string) => {
+  /* The long name is like this "UKPN (East)" or just "SSE".
+  We want to change this to "East (UKPN)" or just "SSE" */
+
+  // if regionName is empty then return now
+  if (!regionName) return regionName;
+
+  // remove last ')'
+  const regionNameParts = regionName.replace(")", "");
+
+  // split by first ' ('
+  const regionAbbAndName = regionNameParts.split(" (");
+
+  if (regionAbbAndName.length > 1) {
+    // join names back together
+    regionName = `${regionAbbAndName[1]} (${regionAbbAndName[0]})`;
+  }
+
+  return regionName;
+};
+
 export const useAggregateSitesDataForTimestamp = (
   combinedSitesData: CombinedSitesData,
   selectedISOTime: string
@@ -108,9 +129,12 @@ export const useAggregateSitesDataForTimestamp = (
         const regionLatLong = dnoLatLongMap.get(region.dno_id);
         const regionLat = regionLatLong?.lat || 0;
         const regionLong = regionLatLong?.long || 0;
+
+        const regionNameFormatted = formatDNORegionName(regionName);
+
         let updatedRegionData = sitesTableData.regions.get(regionId) || {
           id: regionId,
-          label: regionName,
+          label: regionNameFormatted,
           capacity: 0,
           actualPV: 0,
           expectedPV: 0,
