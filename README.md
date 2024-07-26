@@ -35,7 +35,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 
 | Repo                                                                       | Description                                                                                                                                                                                                                                                                                                                              | Main Developer                                     |
 |----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
-| [ocf_datapipes](https://github.com/openclimatefix/ocf_datapipes)                   | OCF's DataPipe based dataloader for training and inference | [Jacob Bieker](https://github.com/jacobbieker)
+| [ocf_datapipes](https://github.com/openclimatefix/ocf_datapipes)                   | OCF's DataPipe based dataloader for training and inference | [James Fulton](https://github.com/dfulu)
 | [PVnet](https://github.com/openclimatefix/pvnet)                           | PV net main repo | [James Fulton](https://github.com/dfulu)
 | [PVNet-summation](https://github.com/openclimatefix/PVNet-summation)       | This project is used for training a model to sum the GSP predictions of PVNet into a national estimate     | [James Fulton](https://github.com/dfulu) |                                                   |
 | [pv-site-prediction](https://github.com/openclimatefix/pv-site-prediction) | ML experiments and models for SBRI project | [Zak Watts](https://github.com/zakwatts)
@@ -56,10 +56,10 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 
 | Repo                                                                               | Description  |    Main Developer      |
 |------------------------------------------------------------------------------------|------------------------|-------| 
-| [analysis-dashboard ](https://github.com/openclimatefix/uk-analysis-dashboard )    | This is a Streamlit app for the OCF team that reports database statistics | [Rachel Tipton](https://github.com/rachel-labri-tipton)
+| [analysis-dashboard ](https://github.com/openclimatefix/uk-analysis-dashboard )    | This is a Streamlit app for the OCF team that reports database statistics | [Peter Dudfield](https://github.com/peterdudfield)
 | [Nowcasting Alerts Cron](https://github.com/openclimatefix/nowcasting_alerts_cron) | Nowcasting Alerts cron Worker | [Brad Fulford](https://github.com/braddf)
 | [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc)
-| [ocf-infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments                                   | [Sol Cotton](https://github.com/devsjc)
+| [ocf-infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments  | [Sol Cotton](https://github.com/devsjc)
 | [pv-site-datamodel](https://github.com/openclimatefix/pv-site-datamodel)           | Datamodel for PV sites | [Peter Dudfield](https://github.com/peterdudfield)
 | [Satip](https://github.com/openclimatefix/satip)                                   | Satip contains the code necessary for retrieving, transforming and storing EUMETSAT data | [Sol Cotton](https://github.com/devsjc)
 
@@ -92,9 +92,7 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 | Repo                                                                     | Description                                                                                            | Main Developer                                 |
 |--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------| 
 | [GFS Downloader](https://github.com/openclimatefix/gfs-downloader)       | NCEP GFS 0.25 Degree Global Forecast Grids Historical Archive: https://rda.ucar.edu/datasets/ds084.1/ | [Zak Watts](https://github.com/zakwatts)
-| [NWP](https://github.com/openclimatefix/nwp)                             | Tools for downloading and processing numerical weather predictions          |[Jacob Bieker](https://github.com/jacobbieker)                           
-| [OCF ML Metrics](https://github.com/openclimatefix/ocf-ml-metrics)       | Collection of simple baseline models and metrics for standardized evaluation of OCF forecasting models  | [Jacob Bieker](https://github.com/jacobbieker) | 
-| [OCF Blocs2](https://github.com/openclimatefix/ocf_blosc2)               | Blosc2 codec used for OCF's Zarr compression | [Jacob Bieker](https://github.com/jacobbieker) | 
+| [OCF Blocs2](https://github.com/openclimatefix/ocf_blosc2)               | Blosc2 codec used for OCF's Zarr compression | [Peter Dudfield](https://github.com/peterdudfield) | 
 | [Open-Source-Quartz-Solar-Forecast](https://github.com/openclimatefix/Open-Source-Quartz-Solar-Forecast)                             | Open Source Solar Site Level Forecast          | [Zak Watts](https://github.com/zakwatts)
 | [Solar and Storage](https://github.com/openclimatefix/solar-and-storage) | Solar and Storage optimization code | [Peter Dudfield](https://github.com/peterdudfield)
 | [.github](https://github.com/openclimatefix/.github)                     | Various Community Health Files | [Peter Dudfield](https://github.com/peterdudfield)
