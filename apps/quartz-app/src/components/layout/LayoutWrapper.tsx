@@ -1,15 +1,31 @@
 "use client";
 
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import Header from "@/src/components/layout/Header";
 import Providers from "@/app/providers";
 import { Spinner } from "@/src/components/icons/icons";
+import * as Sentry from "@sentry/nextjs";
 
 const LayoutWrapper: FC<{
   children: ReactNode;
 }> = ({ children }) => {
-  const { isLoading } = useUser();
+  const { user, isLoading } = useUser();
+  const [sentryUserSet, setSentryUserSet] = useState(false);
+
+  useEffect(() => {
+    if (user && !sentryUserSet) {
+      Sentry.setUser({
+        id: user.sub || "",
+        email: user.email || "",
+        username: user.nickname || "",
+        name: user.name,
+        locale: user.locale,
+        avatar: user.picture,
+      });
+      setSentryUserSet(true);
+    }
+  }, [user, sentryUserSet]);
 
   if (isLoading) {
     return (
