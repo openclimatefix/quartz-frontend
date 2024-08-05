@@ -61,6 +61,7 @@ export type GlobalStateType = {
   globalZoomArea: { x1: string; x2: string };
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
+  nHourForecast: number;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -75,8 +76,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
       "GENERATION",
       "GENERATION_UPDATED",
-      "FORECAST",
-      "PAST_FORECAST"
+      "FORECAST"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
@@ -90,7 +90,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
-    show4hView: enable4hView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW),
+    show4hView:
+      (enable4hView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW)) || true,
     dashboardMode: getBooleanSettingFromLocalStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {
       initialLoadComplete: false,
@@ -101,7 +102,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       initialLoadComplete: false,
       showMessage: false,
       message: "Loading data"
-    }
+    },
+    nHourForecast: 4
   });
 
 export default useGlobalState;

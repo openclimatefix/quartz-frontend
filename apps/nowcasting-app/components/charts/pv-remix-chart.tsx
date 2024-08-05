@@ -108,8 +108,8 @@ const PvRemixChart: FC<{
             visibleLines={visibleLines}
           />
         </div>
-        <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
-          {clickedGspId && (
+        {clickedGspId && (
+          <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
             <GspPvRemixChart
               close={() => {
                 setClickedGspId(undefined);
@@ -121,8 +121,8 @@ const PvRemixChart: FC<{
               resetTime={resetTime}
               visibleLines={visibleLines}
             ></GspPvRemixChart>
-          )}
-        </div>
+          </div>
+        )}
       </div>
       <ChartLegend />
     </div>

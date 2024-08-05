@@ -1,16 +1,27 @@
 import Tooltip from "../tooltip";
 import { ChartInfo } from "../../ChartInfo";
 import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import useGlobalState from "../helpers/globalState";
 import { getRounded4HoursAgoString } from "../helpers/utils";
+
+const Toggle: FC<{
+  onClick: () => void;
+  visible: boolean;
+}> = ({ onClick, visible }) => {
+  return (
+    <label className="inline-flex items-center cursor-pointer px-1 ml-2">
+      <input type="checkbox" checked={visible} onClick={onClick} className={`toggle`}></input>
+    </label>
+  );
+};
 
 const LegendItem: FC<{
   iconClasses: string;
   label: string;
-  dashed?: boolean;
+  dashStyle?: "both" | "dashed" | "none";
   dataKey: string;
-}> = ({ iconClasses, label, dashed, dataKey }) => {
+}> = ({ iconClasses, label, dashStyle, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(dataKey);
 
@@ -23,20 +34,22 @@ const LegendItem: FC<{
   };
 
   return (
-    <div className="flex items-center flex-1">
-      <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
+    <div className="flex items-center flex-initial">
+      <LegendLineGraphIcon className={iconClasses} dashStyle={dashStyle} />
       <button
-        className="inline-flex flex-1 text-left pl-1 max-w-full w-44 dash:w-auto text-xs dash:text-base dash:tracking-wider dash:pb-1"
+        className="inline-flex flex-1 text-left pl-1 max-w-full w-auto dash:w-auto text-xs dash:text-base dash:tracking-wider dash:pb-1"
         onClick={toggleLineVisibility}
       >
         <span
-          className={`block w-auto uppercase pl-1${
-            isVisible ? " font-extrabold dash:font-semibold" : ""
+          className={`block sometimes-bold w-auto uppercase pl-1${
+            isVisible ? " font-extrabold dash:font-semibold" : " text-ocf-gray-700"
           }`}
+          title={label}
         >
           {label}
         </span>
       </button>
+      <Toggle onClick={toggleLineVisibility} visible={isVisible} />
     </div>
   );
 };
@@ -46,18 +59,21 @@ type ChartLegendProps = {
 };
 export const ChartLegend: React.FC<ChartLegendProps> = ({ className }) => {
   const [show4hView] = useGlobalState("show4hView");
+  const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
 
   const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = `flex flex-initial flex-col lg:flex-row 3xl:flex-col justify-between${
+  const legendItemContainerClasses = `flex flex-initial flex-row lg:flex-col 3xl:flex-row ${
     className ? ` ${className}` : ""
   }`;
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-      <div className={`flex flex-1 justify-around flex-col 3xl:flex-row pb-3 overflow-x-auto`}>
+    <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 bg-mapbox-black-500 overflow-y-visible">
+      <div
+        className={`flex flex-initial gap-4 xl:gap-8 2xl:gap-12 justify-between flex-col lg:flex-row 3xl:flex-col overflow-x-auto`}
+      >
         <div className={legendItemContainerClasses}>
           <LegendItem
             iconClasses={"text-ocf-black"}
-            dashed
+            dashStyle={"dashed"}
             label={"PV live initial estimate"}
             dataKey={`GENERATION`}
           />
@@ -70,34 +86,43 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({ className }) => {
         <div className={legendItemContainerClasses}>
           <LegendItem
             iconClasses={"text-ocf-yellow"}
-            dashed
+            dashStyle={"both"}
             label={"OCF Forecast"}
             dataKey={`FORECAST`}
           />
-          <LegendItem
-            iconClasses={"text-ocf-yellow"}
-            label={"OCF Final Forecast"}
-            dataKey={`PAST_FORECAST`}
-          />
-        </div>
-        {show4hView && (
-          <div className={legendItemContainerClasses}>
+          {/*<LegendItem*/}
+          {/*  iconClasses={"text-ocf-yellow"}*/}
+          {/*  label={"OCF Final Forecast"}*/}
+          {/*  dataKey={`PAST_FORECAST`}*/}
+          {/*/>*/}
+          {show4hView && (
             <LegendItem
               iconClasses={"text-ocf-orange"}
-              dashed
+              dashStyle={"both"}
               // label={`OCF ${fourHoursAgo} Forecast`}
-              label={`OCF 4hr+ Forecast`}
+              label={`OCF ${nHourForecast}hr Forecast`}
               dataKey={`4HR_FORECAST`}
             />
-            <LegendItem
-              iconClasses={"text-ocf-orange"}
-              label={"OCF 4hr Forecast"}
-              dataKey={`4HR_PAST_FORECAST`}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      <div className="flex-initial flex items-center pb-3">
+      <div className="flex flex-initial items-center self-center">
+        <div className="h-8 w-10 mr-2 custom-select bg-ocf-gray-800 ">
+          <select
+            value={nHourForecast}
+            onChange={(e) => setNHourForecast(Number(e.target.value))}
+            className="text-sm border-mapbox-black-400 px-2 py-0 text-white rounded-md"
+          >
+            <option>1</option>
+            <option>2</option>
+            <option>4</option>
+            <option>8</option>
+          </select>
+        </div>{" "}
+        hour <br />
+        forecast
+      </div>
+      <div className="flex-initial flex self-center items-start">
         <Tooltip
           tip={
             <div className="w-64 rounded-md">

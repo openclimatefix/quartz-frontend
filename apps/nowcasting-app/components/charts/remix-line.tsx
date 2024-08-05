@@ -501,7 +501,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 // strokeDasharray="10 10"
                 stroke={orange} // blue
                 strokeWidth={largeScreenMode ? 4 : 2}
-                hide={!visibleLines.includes("4HR_PAST_FORECAST")}
+                hide={!visibleLines.includes("4HR_FORECAST")}
               />
             </>
           )}
@@ -550,7 +550,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             fill="transparent"
             fillOpacity={100}
             strokeWidth={largeScreenMode ? 4 : 2}
-            hide={!visibleLines.includes("PAST_FORECAST")}
+            hide={!visibleLines.includes("FORECAST")}
           />
           <Line
             type="monotone"

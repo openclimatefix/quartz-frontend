@@ -70,6 +70,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [visibleLines] = useGlobalState("visibleLines");
   const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
   const [, setLoadingState] = useGlobalState("loadingState");
+  const [nHourForecast] = useGlobalState("nHourForecast");
 
   const [forecastLastFetch30MinISO, setForecastLastFetch30MinISO] = useState(get30MinNow(-30));
   const [forecastHistoricBackwardIntervalMinutes, setForecastHistoricBackwardIntervalMinutes] =
@@ -187,7 +188,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     error: national4HourError
   } = useLoadDataFromApi<National4HourData>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=${
+          nHourForecast * 60
+        }&historic=true&only_forecast_values=true`
       : null
   );
   const {
