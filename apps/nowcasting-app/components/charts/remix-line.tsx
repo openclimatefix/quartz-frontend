@@ -507,6 +507,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             fill={yellow}
             fillOpacity={0.4}
             strokeWidth={0}
+            hide={!visibleLines.includes("FORECAST")}
           />
 
           <Line
