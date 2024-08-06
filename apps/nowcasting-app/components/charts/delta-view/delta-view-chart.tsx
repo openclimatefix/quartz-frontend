@@ -22,40 +22,6 @@ import useTimeNow from "../../hooks/use-time-now";
 import { ChartLegend } from "../ChartLegend";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
 
-const LegendItem: FC<{
-  iconClasses: string;
-  label: string;
-  dashed?: boolean;
-  dataKey: string;
-  show4hrView: boolean | undefined;
-}> = ({ iconClasses, label, dashed, dataKey, show4hrView }) => {
-  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
-  const isVisible = visibleLines.includes(dataKey);
-
-  const toggleLineVisibility = () => {
-    if (isVisible) {
-      setVisibleLines(visibleLines.filter((line) => line !== dataKey));
-    } else {
-      setVisibleLines([...visibleLines, dataKey]);
-    }
-  };
-
-  return (
-    <div className="flex items-center">
-      <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button className="text-left pl-1 max-w-full" onClick={toggleLineVisibility}>
-        <span
-          className={`uppercase block whitespace-nowrap ${show4hrView ? "pr-3" : "pr-6"} pl-1${
-            isVisible ? " font-extrabold" : ""
-          }`}
-        >
-          {label}
-        </span>
-      </button>
-    </div>
-  );
-};
-
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
   setClickedGspId: Dispatch<SetStateAction<number | undefined>>;

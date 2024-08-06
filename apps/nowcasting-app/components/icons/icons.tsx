@@ -3,7 +3,7 @@ import logout from "../../pages/logout";
 
 type LegendLineGraphIconProps = {
   className?: string;
-  dashStyle?: "both" | "dashed" | "none";
+  dashStyle?: "both" | "dashed" | "solid";
 };
 
 type IconProps = {
@@ -16,7 +16,7 @@ type InfoIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashStyle = "none"
+  dashStyle = "solid"
 }) => {
   let dash = "0";
   switch (dashStyle) {
@@ -26,7 +26,7 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
     case "dashed":
       dash = "3 4";
       break;
-    case "none":
+    case "solid":
       break;
   }
   return (

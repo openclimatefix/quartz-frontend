@@ -26,34 +26,7 @@ import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
 import Link from "next/link";
-
-const LegendItem: FC<{
-  iconClasses: string;
-  label: string;
-  dashed?: boolean;
-  dataKey: string;
-}> = ({ iconClasses, label, dashed, dataKey }) => {
-  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
-  const isVisible = visibleLines.includes(dataKey);
-  const [show4hView] = useGlobalState("show4hView");
-
-  const toggleLineVisibility = () => {
-    if (isVisible) {
-      setVisibleLines(visibleLines.filter((line) => line !== dataKey));
-    } else {
-      setVisibleLines([...visibleLines, dataKey]);
-    }
-  };
-
-  return (
-    <div className="flex items-center">
-      <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
-        <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
-      </button>
-    </div>
-  );
-};
+import LegendItem from "../LegendItem";
 
 const SolarSiteChart: FC<{
   combinedSitesData: CombinedSitesData;
@@ -395,7 +368,7 @@ const SolarSiteChart: FC<{
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-yellow"}
-              dashed
+              dashStyle={"dashed"}
               label={"OCF Forecast"}
               dataKey={`FORECAST`}
             />
