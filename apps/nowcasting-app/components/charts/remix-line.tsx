@@ -42,8 +42,8 @@ export type ChartData = {
   GENERATION?: number;
   FORECAST?: number;
   PAST_FORECAST?: number;
-  "4HR_FORECAST"?: number;
-  "4HR_PAST_FORECAST"?: number;
+  NHR_FORECAST?: number;
+  NHR_PAST_FORECAST?: number;
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
   PROBABILISTIC_UPPER_BOUND?: number;
@@ -60,8 +60,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_FORECAST: "OCF Forecast",
   // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
   PROBABILISTIC_LOWER_BOUND: "OCF 10%",
-  "4HR_FORECAST": `OCF 4hr+ Forecast`,
-  "4HR_PAST_FORECAST": "OCF 4hr Forecast",
+  NHR_FORECAST: `OCF Nhr Forecast`,
+  NHR_PAST_FORECAST: "OCF Nhr Forecast",
   DELTA: "Delta"
 };
 
@@ -70,8 +70,8 @@ const toolTipColors: Record<string, string> = {
   GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
-  "4HR_FORECAST": orange,
-  "4HR_PAST_FORECAST": orange,
+  NHR_FORECAST: orange,
+  NHR_PAST_FORECAST: orange,
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
   PROBABILISTIC_LOWER_BOUND: yellow
@@ -148,20 +148,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
-  const [show4hView] = useGlobalState("show4hView");
+  const [showNhrView] = useGlobalState("show4hView");
   const [view] = useGlobalState("view");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
-  const fourHoursFromNow = new Date(currentTime);
   const defaultZoom = { x1: "", x2: "" };
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
   const [globalZoomArea, setGlobalZoomArea] = useGlobalState("globalZoomArea");
   const [globalIsZooming, setGlobalIsZooming] = useGlobalState("globalChartIsZooming");
   const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
-
-  fourHoursFromNow.setHours(fourHoursFromNow.getHours() + 4);
+  const [nHourForecast] = useGlobalState("nHourForecast");
 
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -174,13 +172,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
       showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-
-  const prettyPrintDate = (x: string | number) => {
-    if (typeof x === "number") {
-      return dateToLondonDateTimeOnlyString(new Date(x));
-    }
-    return dateToLondonDateTimeOnlyString(new Date(x));
-  };
 
   const CustomBar = (props: { DELTA: number }) => {
     const { DELTA } = props;
@@ -478,11 +469,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
               barSize={3}
             />
           )}
-          {show4hView && (
+          {showNhrView && (
             <>
               <Line
                 type="monotone"
-                dataKey="4HR_FORECAST"
+                dataKey="NHR_FORECAST"
                 dot={false}
                 yAxisId={"y-axis"}
                 xAxisId={"x-axis"}
@@ -490,18 +481,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 strokeDashoffset={3}
                 stroke={orange} // blue
                 strokeWidth={largeScreenMode ? 4 : 2}
-                hide={!visibleLines.includes("4HR_FORECAST")}
+                hide={!visibleLines.includes("NHR_FORECAST")}
               />
               <Line
                 type="monotone"
-                dataKey="4HR_PAST_FORECAST"
+                dataKey="NHR_PAST_FORECAST"
                 dot={false}
                 yAxisId={"y-axis"}
                 xAxisId={"x-axis"}
                 // strokeDasharray="10 10"
                 stroke={orange} // blue
                 strokeWidth={largeScreenMode ? 4 : 2}
-                hide={!visibleLines.includes("4HR_FORECAST")}
+                hide={!visibleLines.includes("NHR_FORECAST")}
               />
             </>
           )}
@@ -595,7 +586,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       if (typeof value !== "number") return null;
                       if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
                         return null;
-                      if (key.includes("4HR") && (!show4hView || !visibleLines.includes(key)))
+                      if (
+                        key.includes("NHR") &&
+                        (!showNhrView || !visibleLines.some((key) => key.includes("NHR")))
+                      )
                         return null;
                       if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0) return null;
                       let textClass = "font-normal";
@@ -616,17 +610,21 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         : toolTipColors[key];
                       const computedValue =
                         key === "DELTA" &&
-                        !show4hView &&
+                        !showNhrView &&
                         `${data["formattedDate"]}:00.000Z` >= currentTime
                           ? "-"
                           : prettyPrintYNumberWithCommas(String(value), 1);
+                      let title = toolTiplabels[key];
+                      if (key.includes("NHR")) {
+                        title = title.replace("Nhr", `${nHourForecast}hr`);
+                      }
 
                       return (
                         <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                           <div className={`flex justify-between ${textClass} ${pvLiveTextClass}`}>
-                            <div>{toolTiplabels[key]}: </div>
+                            <div>{title}: </div>
                             <div className={`font-sans ml-7`}>
-                              {(show4hView || key !== "DELTA") && sign}
+                              {(showNhrView || key !== "DELTA") && sign}
                               {computedValue}{" "}
                             </div>
                           </div>

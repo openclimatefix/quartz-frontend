@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { get30MinNow } from "../helpers/globalState";
+import { get30MinNow, useGlobalState } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
@@ -16,8 +16,8 @@ const getForecastChartData = (
 ) => {
   if (!fr) return {};
 
-  const futureKey = forecast_horizon === 240 ? "4HR_FORECAST" : "FORECAST";
-  const pastKey = forecast_horizon === 240 ? "4HR_PAST_FORECAST" : "PAST_FORECAST";
+  const futureKey = forecast_horizon ? "NHR_FORECAST" : "FORECAST";
+  const pastKey = forecast_horizon ? "NHR_PAST_FORECAST" : "PAST_FORECAST";
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
@@ -39,8 +39,8 @@ const getDelta: (datum: ChartData) => number = (datum) => {
     } else if (datum.GENERATION !== undefined) {
       return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
     }
-  } else if (datum.FORECAST !== undefined && datum["4HR_FORECAST"] !== undefined) {
-    return Number(datum.FORECAST) - Number(datum["4HR_FORECAST"]);
+  } else if (datum.FORECAST !== undefined && datum["NHR_FORECAST"] !== undefined) {
+    return Number(datum.FORECAST) - Number(datum["NHR_FORECAST"]);
   }
   return 0;
 };
@@ -62,6 +62,8 @@ const useFormatChartData = ({
   timeTrigger?: string;
   delta?: boolean;
 }) => {
+  const [nHourForecast] = useGlobalState("nHourForecast");
+
   const data = useMemo(() => {
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
@@ -148,7 +150,7 @@ const useFormatChartData = ({
           addDataToMap(
             fc,
             (db) => db.targetTime,
-            (db) => getForecastChartData(timeNow, db, 240)
+            (db) => getForecastChartData(timeNow, db, nHourForecast * 60)
           )
         );
       }

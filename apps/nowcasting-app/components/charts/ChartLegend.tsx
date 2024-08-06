@@ -10,7 +10,7 @@ type ChartLegendProps = {
   className?: string;
 };
 export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
-  const [show4hView] = useGlobalState("show4hView");
+  const [showNhrView] = useGlobalState("show4hView");
   const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
 
   const fourHoursAgo = getRounded4HoursAgoString();
@@ -47,13 +47,12 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           {/*  label={"OCF Final Forecast"}*/}
           {/*  dataKey={`PAST_FORECAST`}*/}
           {/*/>*/}
-          {show4hView && (
+          {showNhrView && (
             <LegendItem
               iconClasses={"text-ocf-orange"}
               dashStyle={"both"}
-              // label={`OCF ${fourHoursAgo} Forecast`}
               label={`OCF ${nHourForecast}hr Forecast`}
-              dataKey={`4HR_FORECAST`}
+              dataKey={`NHR_FORECAST`}
             />
           )}
         </div>

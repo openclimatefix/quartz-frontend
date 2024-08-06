@@ -76,7 +76,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
       "GENERATION",
       "GENERATION_UPDATED",
-      "FORECAST"
+      "FORECAST",
+      "NHR_FORECAST"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
