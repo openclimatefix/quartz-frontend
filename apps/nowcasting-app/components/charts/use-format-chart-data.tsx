@@ -168,7 +168,7 @@ const useFormatChartData = ({
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
-  }, [forecastData, fourHourData, pvRealDayInData, pvRealDayAfterData, timeTrigger]);
+  }, [forecastData, fourHourData, pvRealDayInData, pvRealDayAfterData, timeTrigger, nHourForecast]);
   return data;
 };
 

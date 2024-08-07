@@ -221,21 +221,28 @@ const RemixLine: React.FC<RemixLineProps> = ({
     setFilteredPreppedData(preppedData);
   }
 
+  const updateFilteredData = () => {
+    const { x1, x2 } = globalZoomArea;
+
+    if (!x1 || !x2) return;
+
+    const dataInAreaRange = preppedData.filter(
+      (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
+    );
+    setFilteredPreppedData(dataInAreaRange);
+  };
+
   useEffect(() => {
     if (!zoomEnabled) return;
 
     if (!globalIsZooming) {
-      const { x1, x2 } = globalZoomArea;
-
-      if (!x1 || !x2) return;
-
-      const dataInAreaRange = preppedData.filter(
-        (d) => d?.formattedDate >= x1 && d?.formattedDate <= x2
-      );
-      setFilteredPreppedData(dataInAreaRange);
-      setGlobalZoomArea({ x1: "", x2: "" });
+      updateFilteredData();
     }
   }, [globalZoomArea, globalIsZooming, preppedData, zoomEnabled]);
+
+  useEffect(() => {
+    updateFilteredData();
+  }, [nHourForecast]);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
