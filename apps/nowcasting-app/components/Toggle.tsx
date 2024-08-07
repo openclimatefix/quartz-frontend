@@ -6,7 +6,7 @@ const Toggle: FC<{
 }> = ({ onClick, visible }) => {
   return (
     <label className="inline-flex items-center cursor-pointer px-1 ml-2">
-      <input type="checkbox" checked={visible} onClick={onClick} className={`toggle`}></input>
+      <input type="checkbox" checked={visible} onChange={onClick} className={`toggle`}></input>
     </label>
   );
 };
