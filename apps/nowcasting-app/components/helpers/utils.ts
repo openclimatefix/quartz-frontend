@@ -51,7 +51,9 @@ export const getLoadingState = (
   combinedErrors: CombinedErrors,
   combinedData: CombinedData
 ): LoadingState<NationalEndpointStates> => {
-  let initialLoadComplete = Object.values(combinedLoading).every((loading) => !loading);
+  let initialLoadComplete = Object.entries(combinedLoading).every(
+    ([key, loading]) => key === "national4HourLoading" || !loading
+  );
   let showMessage = !initialLoadComplete;
   let message = "Loading initial data";
   if (initialLoadComplete) {
@@ -74,7 +76,7 @@ export const getLoadingState = (
     if (combinedValidating.national4HourValidating) {
       message = showMessage
         ? "Loading latest data"
-        : `Loading latest ${NationalEndpointLabel.national4Hour}`;
+        : `Loading latest ${NationalEndpointLabel.nationalNHour}`;
       showMessage = true;
     }
     if (combinedValidating.allGspForecastValidating) {
@@ -110,7 +112,7 @@ export const getLoadingState = (
       error: combinedErrors.pvRealDayAfterError,
       hasData: !!combinedData.pvRealDayAfterData
     },
-    national4Hour: {
+    nationalNHour: {
       loading: combinedLoading.national4HourLoading,
       validating: combinedValidating.national4HourValidating,
       error: combinedErrors.national4HourError,

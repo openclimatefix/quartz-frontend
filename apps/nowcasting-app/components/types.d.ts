@@ -11,7 +11,7 @@ export enum NationalEndpointLabel {
   nationalForecast = "National Forecast",
   pvRealDayIn = "PV Live Estimate",
   pvRealDayAfter = "PV Live Updated",
-  national4Hour = "4-hour forecast",
+  nationalNHour = "N-hour forecast",
   allGspForecast = "All GSP Forecast",
   allGspReal = "All GSP PV Live"
 }
