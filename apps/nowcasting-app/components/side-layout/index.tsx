@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { FC, ReactNode, useState } from "react";
 import ExpandButton from "./expand-button";
 import useGlobalState from "../helpers/globalState";
 
 type SideLayoutProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   dashboardModeActive?: boolean;
   bottomPadding?: boolean;
 };
 
-const SideLayout: React.FC<SideLayoutProps> = ({
+const SideLayout: FC<SideLayoutProps> = ({
   children,
   className,
   dashboardModeActive = false,
@@ -29,12 +29,14 @@ const SideLayout: React.FC<SideLayoutProps> = ({
         }
       >
         <div
-          className={`min-h-full flex flex-col overflow-y-scroll${bottomPadding ? " pb-32" : ""}`}
+          className={`min-h-full max-h-full flex flex-col overflow-y-scroll${
+            bottomPadding ? " pb-[4.5rem]" : ""
+          }`}
         >
           {children}
         </div>
       </div>
-      <div className="absolute bottom-16 -right-5 h-10 mb-[3px]">
+      <div className="absolute bottom-14 -right-5 h-10">
         <ExpandButton isOpen={isOpen} onClick={() => setIsOpen((o) => !o)} />
       </div>
     </div>

@@ -2,10 +2,10 @@ import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
-import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
+import useGlobalState, { get30MinSlot } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
-  convertISODateStringToLondonTime,
+  convertToLocaleDateString,
   formatISODateString,
   getRounded4HoursAgoString
 } from "../../helpers/utils";
@@ -273,10 +273,10 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const [loadingState] = useGlobalState("loadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const selectedTimeHalfHourSlot = getNext30MinSlot(new Date(selectedTime));
-  const halfHourAgoDate = new Date(timeNow).setMinutes(new Date(timeNow).getMinutes() - 30);
-  const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
-  const hasGspPvInitialForSelectedTime = !!combinedData.pvRealDayInData?.find(
+  const selectedTimeHalfHourSlot = get30MinSlot(new Date(convertToLocaleDateString(selectedTime)));
+  // const halfHourAgoDate = new Date(timeNow).setMinutes(new Date(timeNow).getMinutes() - 30);
+  // const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
+  const hasGspPvInitialForSelectedTime = combinedData.pvRealDayInData?.find(
     (d) =>
       d.datetimeUtc.slice(0, 16) ===
       `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}`
@@ -346,11 +346,10 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     setSelectedISOTime(time + ":00.000Z");
   };
   const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
 
   return (
-    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto flex flex-col mb-7">
+    <>
+      <div className={`flex flex-col flex-auto ${className || ""}`}>
         <ForecastHeader
           pvForecastData={nationalForecastData}
           pvLiveData={pvRealDayInData}
@@ -371,7 +370,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           />
         </div>
         {clickedGspId && (
-          <div className="flex-1 flex flex-col relative min-h-[30vh] h-auto">
+          <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
               close={() => {
                 setClickedGspId(undefined);
@@ -389,9 +388,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div>
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
         </div>
-        <div className="flex flex-initial justify-between mb-15">
+        <div className="flex flex-1 justify-between p-4">
           {!hasGspPvInitialForSelectedTime && (
-            <div className="flex flex-1 mb-16 px-4 justify-center items-center text-center text-ocf-gray-600 w-full">
+            <div className="flex flex-1 p-4 font-thin tracking-wide border border-dashed border-ocf-gray-600 rounded-md justify-center items-center text-center text-ocf-gray-600 w-full">
               [ Delta values not available until PV Live output available ]
             </div>
           )}
@@ -403,8 +402,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           )}
         </div>
       </div>
-      <ChartLegend />
-    </div>
+      {!className?.includes("hidden") && <ChartLegend />}
+    </>
   );
 };
 

@@ -141,7 +141,7 @@ const GspPvRemixChart: FC<{
           <span className="text-xs dash:text-2xl text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
-      <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto">
+      <div className="flex-1 relative">
         {dataMissing && (
           <div className="h-full absolute flex pb-7 items-center justify-center inset-0 z-30">
             <Spinner />

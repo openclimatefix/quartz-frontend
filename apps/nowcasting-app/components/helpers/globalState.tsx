@@ -22,6 +22,20 @@ export function get30MinNow(offsetMinutes = 0) {
   date = getNext30MinSlot(date);
   return date.toISOString();
 }
+export function get30MinSlot(isoTime: Date) {
+  if (isoTime.getMinutes() === 30) {
+    return isoTime;
+  } else if (isoTime.getMinutes() === 0) {
+    return isoTime;
+  } else if (isoTime.getMinutes() < 30) {
+    isoTime.setHours(isoTime.getHours());
+    isoTime.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
+  } else {
+    isoTime.setHours(isoTime.getHours() + 1);
+    isoTime.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
+  }
+  return isoTime;
+}
 export function getNext30MinSlot(isoTime: Date) {
   if (isoTime.getMinutes() === 30) {
     isoTime.setHours(isoTime.getHours() + 1);

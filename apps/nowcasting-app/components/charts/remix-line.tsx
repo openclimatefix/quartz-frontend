@@ -258,400 +258,419 @@ const RemixLine: React.FC<RemixLineProps> = ({
           </button>
         </div>
       )}
-      <ResponsiveContainer>
-        <ComposedChart
-          className="select-none"
-          width={500}
-          height={400}
-          data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
-          margin={{
-            top: 20,
-            right: 16,
-            bottom: 20,
-            left: 16
-          }}
-          onClick={(e?: { activeLabel?: string }) => {
-            if (globalIsZooming) return;
-
-            if (setTimeOfInterest && e?.activeLabel) {
-              view === VIEWS.SOLAR_SITES
-                ? setTimeOfInterest(
-                    new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
-                  )
-                : setTimeOfInterest(e.activeLabel);
-            }
-          }}
-          onMouseDown={(e?: { activeLabel?: string }) => {
-            if (!zoomEnabled) return;
-            setTemporaryZoomArea(globalZoomArea);
-            setGlobalIsZooming(true);
-            let xValue = e?.activeLabel;
-            if (typeof xValue === "string" && xValue.length > 0) {
-              setGlobalZoomArea({ x1: xValue, x2: xValue });
-            }
-          }}
-          onMouseMove={(e?: { activeLabel?: string }) => {
-            if (!zoomEnabled) return;
-
-            if (globalIsZooming) {
-              let xValue = e?.activeLabel;
-              if (!xValue) return;
-              setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
-            }
-          }}
-          onMouseUp={(e?: { activeLabel?: string }) => {
-            if (!zoomEnabled) return;
-
-            if (globalIsZooming) {
-              if (globalZoomArea.x1 === globalZoomArea.x2 && e?.activeLabel && setTimeOfInterest) {
-                setGlobalZoomArea(temporaryZoomArea);
-                setTimeOfInterest(e?.activeLabel);
-              } else if (globalZoomArea?.x1?.length && globalZoomArea?.x2?.length) {
-                let { x1 } = globalZoomArea;
-                let x2 = e?.activeLabel || "";
-                if (x1 > x2) {
-                  [x1, x2] = [x2, x1];
-                }
-                setGlobalZoomArea({ x1, x2 });
-                setGlobalIsZoomed(true);
-              }
-              setGlobalIsZooming(false);
-            }
-          }}
-        >
-          <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
-          <XAxis
-            dataKey="formattedDate"
-            xAxisId={"x-axis"}
-            tickFormatter={prettyPrintChartAxisLabelDate}
-            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-            tick={{ fill: "white", style: { fontSize: "12px" } }}
-            tickLine={true}
-            type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-            ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-            domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-            interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
-          />
-          <XAxis
+      <div className="absolute inset-0">
+        <ResponsiveContainer debounce={100}>
+          <ComposedChart
             className="select-none"
-            dataKey="formattedDate"
-            xAxisId={"x-axis-2"}
-            tickFormatter={prettyPrintChartAxisLabelDate}
-            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-            tick={{ fill: "white", style: { fontSize: "12px" } }}
-            tickLine={true}
-            type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-            ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-            domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-            interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
-            orientation="top"
-            padding="no-gap"
-            hide={true}
-          />
-          <XAxis
-            dataKey="formattedDate"
-            xAxisId={"x-axis-3"}
-            tickFormatter={prettyPrintDayLabelWithDate}
-            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-            tick={{ fill: "white", style: { fontSize: "12px" } }}
-            tickLine={false}
-            type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-            ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
-            domain={
-              view === VIEWS.SOLAR_SITES
-                ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
-                : undefined
-            }
-            interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
-            orientation="bottom"
-            axisLine={false}
-            tickMargin={-12}
-            hide={false}
-          />
-
-          <YAxis
-            tickFormatter={
-              view === VIEWS.SOLAR_SITES ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
-            }
-            yAxisId={"y-axis"}
-            tick={{ fill: "white", style: { fontSize: "12px" } }}
-            tickLine={false}
-            domain={
-              globalIsZoomed && view !== VIEWS.SOLAR_SITES ? [0, Number(zoomYMax * 1.1)] : [0, yMax]
-            }
-            label={{
-              value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
-              angle: 270,
-              position: "outsideLeft",
-              fill: "white",
-              style: { fontSize: "12px" },
-              offset: 0,
-              dx: -26,
-              dy: 0
+            width={500}
+            height={400}
+            data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
+            margin={{
+              top: 20,
+              right: 16,
+              bottom: -10,
+              left: 16
             }}
-          />
+            onClick={(e?: { activeLabel?: string }) => {
+              if (globalIsZooming) return;
 
-          {deltaView && (
-            <>
-              <YAxis
-                tickFormatter={(val, i) => prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2)}
-                tick={{
-                  fill: "white",
-                  style: { fontSize: "12px" },
-                  textAnchor: "end",
-                  dx: roundTickMax ? 36 : 24
-                }}
-                ticks={[deltaYMax, deltaYMax / 2, 0, -deltaYMax / 2, -deltaYMax]}
-                tickCount={5}
-                tickLine={false}
-                yAxisId={"delta"}
-                scale={"auto"}
-                orientation="right"
-                label={{
-                  value: `Delta (MW)`,
-                  angle: 90,
-                  position: "insideRight",
-                  fill: "white",
-                  style: { fontSize: "12px" },
-                  offset: 0,
-                  dx: roundTickMax ? 0 : -10,
-                  dy: 30
-                }}
-                domain={[-deltaYMax, deltaYMax]}
-              />
-              <ReferenceLine
-                yAxisId={"delta"}
-                xAxisId={"x-axis"}
-                y={0}
-                stroke="white"
-                strokeWidth={0.1}
-              />
-            </>
-          )}
+              if (setTimeOfInterest && e?.activeLabel) {
+                view === VIEWS.SOLAR_SITES
+                  ? setTimeOfInterest(
+                      new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
+                    )
+                  : setTimeOfInterest(e.activeLabel);
+              }
+            }}
+            onMouseDown={(e?: { activeLabel?: string }) => {
+              if (!zoomEnabled) return;
+              setTemporaryZoomArea(globalZoomArea);
+              setGlobalIsZooming(true);
+              let xValue = e?.activeLabel;
+              if (typeof xValue === "string" && xValue.length > 0) {
+                setGlobalZoomArea({ x1: xValue, x2: xValue });
+              }
+            }}
+            onMouseMove={(e?: { activeLabel?: string }) => {
+              if (!zoomEnabled) return;
 
-          <ReferenceLine
-            x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
-            stroke="white"
-            strokeWidth={currentTime === timeOfInterest ? 2 : 1}
-            yAxisId={"y-axis"}
-            xAxisId={"x-axis"}
-            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-            strokeDasharray="3 3"
-            className={currentTime !== timeOfInterest ? "" : "hidden"}
-            label={
-              <CustomizedLabel
-                className={`fill-amber-400 cursor-pointer text-sm`}
-                value={"LIVE"}
-                onClick={resetTime}
-              />
-            }
-          />
+              if (globalIsZooming) {
+                let xValue = e?.activeLabel;
+                if (!xValue) return;
+                setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
+              }
+            }}
+            onMouseUp={(e?: { activeLabel?: string }) => {
+              if (!zoomEnabled) return;
 
-          <ReferenceLine
-            x={
-              view === VIEWS.SOLAR_SITES ? new Date(localeTimeOfInterest).getTime() : timeOfInterest
-            }
-            stroke="white"
-            strokeWidth={2}
-            yAxisId={"y-axis"}
-            xAxisId={"x-axis"}
-            scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-            label={
-              <CustomizedLabel
-                className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
-                value={prettyPrintChartAxisLabelDate(timeOfInterest)}
-                solidLine={true}
-              ></CustomizedLabel>
-            }
-          />
-
-          {deltaView && (
-            <Bar
-              type="monotone"
-              dataKey="DELTA"
-              yAxisId={"delta"}
+              if (globalIsZooming) {
+                if (
+                  globalZoomArea.x1 === globalZoomArea.x2 &&
+                  e?.activeLabel &&
+                  setTimeOfInterest
+                ) {
+                  setGlobalZoomArea(temporaryZoomArea);
+                  setTimeOfInterest(e?.activeLabel);
+                } else if (globalZoomArea?.x1?.length && globalZoomArea?.x2?.length) {
+                  let { x1 } = globalZoomArea;
+                  let x2 = e?.activeLabel || "";
+                  if (x1 > x2) {
+                    [x1, x2] = [x2, x1];
+                  }
+                  setGlobalZoomArea({ x1, x2 });
+                  setGlobalIsZoomed(true);
+                }
+                setGlobalIsZooming(false);
+              }
+            }}
+          >
+            <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
+            <XAxis
+              dataKey="formattedDate"
               xAxisId={"x-axis"}
-              // @ts-ignore
-              shape={<CustomBar />}
-              barSize={3}
+              tickFormatter={prettyPrintChartAxisLabelDate}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tickLine={true}
+              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
+              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
             />
-          )}
-          {showNhrView && (
-            <>
-              <Line
-                type="monotone"
-                dataKey="NHR_FORECAST"
-                dot={false}
-                yAxisId={"y-axis"}
-                xAxisId={"x-axis"}
-                strokeDasharray="5 5"
-                strokeDashoffset={3}
-                stroke={orange} // blue
-                strokeWidth={largeScreenMode ? 4 : 2}
-                hide={!visibleLines.includes("NHR_FORECAST")}
-              />
-              <Line
-                type="monotone"
-                dataKey="NHR_PAST_FORECAST"
-                dot={false}
-                yAxisId={"y-axis"}
-                xAxisId={"x-axis"}
-                // strokeDasharray="10 10"
-                stroke={orange} // blue
-                strokeWidth={largeScreenMode ? 4 : 2}
-                hide={!visibleLines.includes("NHR_FORECAST")}
-              />
-            </>
-          )}
+            <XAxis
+              className="select-none"
+              dataKey="formattedDate"
+              xAxisId={"x-axis-2"}
+              tickFormatter={prettyPrintChartAxisLabelDate}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tickLine={true}
+              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
+              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+              orientation="top"
+              padding="no-gap"
+              hide={true}
+            />
+            <XAxis
+              dataKey="formattedDate"
+              xAxisId={"x-axis-3"}
+              tickFormatter={prettyPrintDayLabelWithDate}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tickLine={false}
+              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
+              ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
+              domain={
+                view === VIEWS.SOLAR_SITES
+                  ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
+                  : undefined
+              }
+              interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
+              orientation="bottom"
+              axisLine={false}
+              tickMargin={-12}
+              hide={false}
+            />
 
-          <Area
-            type="monotone"
-            dataKey="PROBABILISTIC_RANGE"
-            dot={false}
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            stroke={yellow}
-            fill={yellow}
-            fillOpacity={0.4}
-            strokeWidth={0}
-            hide={!visibleLines.includes("FORECAST")}
-          />
+            <YAxis
+              tickFormatter={
+                view === VIEWS.SOLAR_SITES
+                  ? undefined
+                  : (val, i) => prettyPrintYNumberWithCommas(val)
+              }
+              yAxisId={"y-axis"}
+              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tickLine={false}
+              domain={
+                globalIsZoomed && view !== VIEWS.SOLAR_SITES
+                  ? [0, Number(zoomYMax * 1.1)]
+                  : [0, yMax]
+              }
+              label={{
+                value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
+                angle: 270,
+                position: "outsideLeft",
+                fill: "white",
+                style: { fontSize: "12px" },
+                offset: 0,
+                dx: -26,
+                dy: 0
+              }}
+            />
 
-          <Line
-            type="monotone"
-            dataKey="GENERATION"
-            dot={false}
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            stroke="black"
-            strokeWidth={largeScreenMode ? 4 : 2}
-            strokeDasharray="5 5"
-            hide={!visibleLines.includes("GENERATION")}
-          />
-          <Line
-            type="monotone"
-            dataKey="GENERATION_UPDATED"
-            strokeWidth={largeScreenMode ? 4 : 2}
-            stroke="black"
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            dot={false}
-            hide={!visibleLines.includes("GENERATION_UPDATED")}
-          />
-          <Line
-            type="monotone"
-            dataKey="PAST_FORECAST"
-            dot={false}
-            connectNulls={true}
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            stroke={yellow} //yellow
-            fill="transparent"
-            fillOpacity={100}
-            strokeWidth={largeScreenMode ? 4 : 2}
-            hide={!visibleLines.includes("FORECAST")}
-          />
-          <Line
-            type="monotone"
-            dataKey="FORECAST"
-            dot={false}
-            xAxisId={"x-axis"}
-            yAxisId={"y-axis"}
-            strokeDasharray="5 5"
-            stroke={yellow} //yellow
-            fill="transparent"
-            fillOpacity={100}
-            strokeWidth={largeScreenMode ? 4 : 2}
-            hide={!visibleLines.includes("FORECAST")}
-          />
-          {zoomEnabled && globalIsZooming && (
-            <ReferenceArea
-              x1={globalZoomArea?.x1}
-              x2={globalZoomArea?.x2}
-              fill="#FFD053"
-              fillOpacity={0.3}
+            {deltaView && (
+              <>
+                <YAxis
+                  tickFormatter={(val, i) =>
+                    prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2)
+                  }
+                  tick={{
+                    fill: "white",
+                    style: { fontSize: "12px" },
+                    textAnchor: "end",
+                    dx: roundTickMax ? 36 : 24
+                  }}
+                  ticks={[deltaYMax, deltaYMax / 2, 0, -deltaYMax / 2, -deltaYMax]}
+                  tickCount={5}
+                  tickLine={false}
+                  yAxisId={"delta"}
+                  scale={"auto"}
+                  orientation="right"
+                  label={{
+                    value: `Delta (MW)`,
+                    angle: 90,
+                    position: "insideRight",
+                    fill: "white",
+                    style: { fontSize: "12px" },
+                    offset: 0,
+                    dx: roundTickMax ? 0 : -10,
+                    dy: 30
+                  }}
+                  domain={[-deltaYMax, deltaYMax]}
+                />
+                <ReferenceLine
+                  yAxisId={"delta"}
+                  xAxisId={"x-axis"}
+                  y={0}
+                  stroke="white"
+                  strokeWidth={0.1}
+                />
+              </>
+            )}
+
+            <ReferenceLine
+              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
+              stroke="white"
+              strokeWidth={currentTime === timeOfInterest ? 2 : 1}
+              yAxisId={"y-axis"}
+              xAxisId={"x-axis"}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              strokeDasharray="3 3"
+              className={currentTime !== timeOfInterest ? "" : "hidden"}
+              label={
+                <CustomizedLabel
+                  className={`fill-amber-400 cursor-pointer text-sm`}
+                  value={"LIVE"}
+                  onClick={resetTime}
+                />
+              }
+            />
+
+            <ReferenceLine
+              x={
+                view === VIEWS.SOLAR_SITES
+                  ? new Date(localeTimeOfInterest).getTime()
+                  : timeOfInterest
+              }
+              stroke="white"
+              strokeWidth={2}
+              yAxisId={"y-axis"}
+              xAxisId={"x-axis"}
+              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              label={
+                <CustomizedLabel
+                  className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
+                  value={prettyPrintChartAxisLabelDate(timeOfInterest)}
+                  solidLine={true}
+                ></CustomizedLabel>
+              }
+            />
+
+            {deltaView && (
+              <Bar
+                type="monotone"
+                dataKey="DELTA"
+                yAxisId={"delta"}
+                xAxisId={"x-axis"}
+                // @ts-ignore
+                shape={<CustomBar />}
+                barSize={3}
+              />
+            )}
+            {showNhrView && (
+              <>
+                <Line
+                  type="monotone"
+                  dataKey="NHR_FORECAST"
+                  dot={false}
+                  yAxisId={"y-axis"}
+                  xAxisId={"x-axis"}
+                  strokeDasharray="5 5"
+                  strokeDashoffset={3}
+                  stroke={orange} // blue
+                  strokeWidth={largeScreenMode ? 4 : 2}
+                  hide={!visibleLines.includes("NHR_FORECAST")}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="NHR_PAST_FORECAST"
+                  dot={false}
+                  yAxisId={"y-axis"}
+                  xAxisId={"x-axis"}
+                  // strokeDasharray="10 10"
+                  stroke={orange} // blue
+                  strokeWidth={largeScreenMode ? 4 : 2}
+                  hide={!visibleLines.includes("NHR_FORECAST")}
+                />
+              </>
+            )}
+
+            <Area
+              type="monotone"
+              dataKey="PROBABILISTIC_RANGE"
+              dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
+              stroke={yellow}
+              fill={yellow}
+              fillOpacity={0.4}
+              strokeWidth={0}
+              hide={!visibleLines.includes("FORECAST")}
             />
-          )}
-          <Tooltip
-            content={({ payload, label }) => {
-              const data = payload && payload[0]?.payload;
-              if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0)) return <div></div>;
 
-              let formattedDate = data?.formattedDate + ":00+00:00";
-              if (view === VIEWS.SOLAR_SITES) {
-                const date = new Date(Number(data?.formattedDate));
-                formattedDate = dateToLondonDateTimeString(date);
-              }
+            <Line
+              type="monotone"
+              dataKey="GENERATION"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke="black"
+              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeDasharray="5 5"
+              hide={!visibleLines.includes("GENERATION")}
+            />
+            <Line
+              type="monotone"
+              dataKey="GENERATION_UPDATED"
+              strokeWidth={largeScreenMode ? 4 : 2}
+              stroke="black"
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              dot={false}
+              hide={!visibleLines.includes("GENERATION_UPDATED")}
+            />
+            <Line
+              type="monotone"
+              dataKey="PAST_FORECAST"
+              dot={false}
+              connectNulls={true}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={yellow} //yellow
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 2}
+              hide={!visibleLines.includes("FORECAST")}
+            />
+            <Line
+              type="monotone"
+              dataKey="FORECAST"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={yellow} //yellow
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 2}
+              hide={!visibleLines.includes("FORECAST")}
+            />
+            {zoomEnabled && globalIsZooming && (
+              <ReferenceArea
+                x1={globalZoomArea?.x1}
+                x2={globalZoomArea?.x2}
+                fill="#FFD053"
+                fillOpacity={0.3}
+                xAxisId={"x-axis"}
+                yAxisId={"y-axis"}
+              />
+            )}
+            <Tooltip
+              content={({ payload, label }) => {
+                const data = payload && payload[0]?.payload;
+                if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
+                  return <div></div>;
 
-              return (
-                <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
-                  <ul className="">
-                    {Object.entries(toolTiplabels).map(([key, name]) => {
-                      const value = data[key];
-                      if (key === "DELTA" && !deltaView) return null;
-                      if (typeof value !== "number") return null;
-                      if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
-                        return null;
-                      if (
-                        key.includes("NHR") &&
-                        (!showNhrView || !visibleLines.some((key) => key.includes("NHR")))
-                      )
-                        return null;
-                      if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0) return null;
-                      let textClass = "font-normal";
-                      if (["FORECAST", "PAST_FORECAST"].includes(key)) textClass = "font-semibold";
-                      if (["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key))
-                        textClass = "text-xs";
-                      const pvLiveTextClass =
-                        data["GENERATION_UPDATED"] >= 0 &&
-                        data["GENERATION"] >= 0 &&
-                        key === "GENERATION"
-                          ? "text-xs"
-                          : "";
-                      const sign = ["DELTA"].includes(key) ? (Number(value) > 0 ? "+" : "") : "";
-                      const color = ["DELTA"].includes(key)
-                        ? Number(value) > 0
-                          ? deltaPos
-                          : deltaNeg
-                        : toolTipColors[key];
-                      const computedValue =
-                        key === "DELTA" &&
-                        !showNhrView &&
-                        `${data["formattedDate"]}:00.000Z` >= currentTime
-                          ? "-"
-                          : prettyPrintYNumberWithCommas(String(value), 1);
-                      let title = toolTiplabels[key];
-                      if (key.includes("NHR")) {
-                        title = title.replace("Nhr", `${nHourForecast}hr`);
-                      }
+                let formattedDate = data?.formattedDate + ":00+00:00";
+                if (view === VIEWS.SOLAR_SITES) {
+                  const date = new Date(Number(data?.formattedDate));
+                  formattedDate = dateToLondonDateTimeString(date);
+                }
 
-                      return (
-                        <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
-                          <div className={`flex justify-between ${textClass} ${pvLiveTextClass}`}>
-                            <div>{title}: </div>
-                            <div className={`font-sans ml-7`}>
-                              {(showNhrView || key !== "DELTA") && sign}
-                              {computedValue}{" "}
+                return (
+                  <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
+                    <ul className="">
+                      {Object.entries(toolTiplabels).map(([key, name]) => {
+                        const value = data[key];
+                        if (key === "DELTA" && !deltaView) return null;
+                        if (typeof value !== "number") return null;
+                        if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
+                          return null;
+                        if (
+                          key.includes("NHR") &&
+                          (!showNhrView || !visibleLines.some((key) => key.includes("NHR")))
+                        )
+                          return null;
+                        if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0)
+                          return null;
+                        let textClass = "font-normal";
+                        if (["FORECAST", "PAST_FORECAST"].includes(key))
+                          textClass = "font-semibold";
+                        if (
+                          ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
+                        )
+                          textClass = "text-xs";
+                        const pvLiveTextClass =
+                          data["GENERATION_UPDATED"] >= 0 &&
+                          data["GENERATION"] >= 0 &&
+                          key === "GENERATION"
+                            ? "text-xs"
+                            : "";
+                        const sign = ["DELTA"].includes(key) ? (Number(value) > 0 ? "+" : "") : "";
+                        const color = ["DELTA"].includes(key)
+                          ? Number(value) > 0
+                            ? deltaPos
+                            : deltaNeg
+                          : toolTipColors[key];
+                        const computedValue =
+                          key === "DELTA" &&
+                          !showNhrView &&
+                          `${data["formattedDate"]}:00.000Z` >= currentTime
+                            ? "-"
+                            : prettyPrintYNumberWithCommas(String(value), 1);
+                        let title = toolTiplabels[key];
+                        if (key.includes("NHR")) {
+                          title = title.replace("Nhr", `${nHourForecast}hr`);
+                        }
+
+                        return (
+                          <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
+                            <div className={`flex justify-between ${textClass} ${pvLiveTextClass}`}>
+                              <div>{title}:</div>
+                              <div className={`font-sans ml-7`}>
+                                {(showNhrView || key !== "DELTA") && sign}
+                                {computedValue}{" "}
+                              </div>
                             </div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                    <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
-                      <div className="pr-4">
-                        {formatISODateStringHumanNumbersOnly(formattedDate)}{" "}
-                      </div>
-                      <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
-                    </li>
-                  </ul>
-                </div>
-              );
-            }}
-          />
-        </ComposedChart>
-      </ResponsiveContainer>
+                          </li>
+                        );
+                      })}
+                      <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
+                        <div className="pr-4">
+                          {formatISODateStringHumanNumbersOnly(formattedDate)}{" "}
+                        </div>
+                        <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
+                      </li>
+                    </ul>
+                  </div>
+                );
+              }}
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
