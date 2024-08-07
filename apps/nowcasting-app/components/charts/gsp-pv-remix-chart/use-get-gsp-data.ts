@@ -5,6 +5,7 @@ import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 
 const useGetGspData = (gspId: number) => {
   const [show4hView] = useGlobalState("show4hView");
+  const [nHourForecast] = useGlobalState("nHourForecast");
 
   const { data: pvRealDataIn, error: pvRealInDat } = useLoadDataFromApi<PvRealData>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`
@@ -25,7 +26,9 @@ const useGetGspData = (gspId: number) => {
 
   const { data: gsp4HourData, error: pv4HourError } = useLoadDataFromApi<ForecastData>(
     show4hView
-      ? `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?forecast_horizon_minutes=${
+          nHourForecast * 60
+        }&historic=true&only_forecast_values=true`
       : null
   );
 
