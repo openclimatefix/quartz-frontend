@@ -242,7 +242,7 @@ const SolarSiteChart: FC<{
     <div className={`flex flex-col flex-1 ${className || ""}`}>
       <div className="flex-1 flex flex-col">
         <div className="flex flex-col flex-1 relative">
-          <div className="flex flex-1 content-between bg-ocf-gray-800 mb-4">
+          <div className="flex content-between bg-ocf-gray-800 mb-4">
             <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
               All Sites
             </div>
@@ -269,17 +269,19 @@ const SolarSiteChart: FC<{
               </div>
             </div>
           </div>
-          <DataLoadingChartStatus loadingState={sitesLoadingState} />
-          <RemixLine
-            resetTime={resetTime}
-            timeNow={formatISODateString(timeNow)}
-            timeOfInterest={selectedTime}
-            setTimeOfInterest={setSelectedTime}
-            data={chartData}
-            zoomEnabled={false}
-            yMax={yMax}
-            visibleLines={visibleLines}
-          />
+          <div className="flex-1 relative">
+            <DataLoadingChartStatus loadingState={sitesLoadingState} />
+            <RemixLine
+              resetTime={resetTime}
+              timeNow={formatISODateString(timeNow)}
+              timeOfInterest={selectedTime}
+              setTimeOfInterest={setSelectedTime}
+              data={chartData}
+              zoomEnabled={false}
+              yMax={yMax}
+              visibleLines={visibleLines}
+            />
+          </div>
         </div>
         {clickedSiteGroupId && aggregationLevel !== AGGREGATION_LEVELS.NATIONAL && (
           <div className="flex-1 flex flex-col relative">
