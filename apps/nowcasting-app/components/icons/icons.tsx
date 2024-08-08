@@ -21,7 +21,7 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   let dash = "0";
   switch (dashStyle) {
     case "both":
-      dash = "3 4 3 4 12";
+      dash = "11 4 3 4 3";
       break;
     case "dashed":
       dash = "3 4";
