@@ -529,6 +529,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   stroke={orange} // blue
                   strokeWidth={largeScreenMode ? 4 : 2}
                   hide={!visibleLines.includes("NHR_FORECAST")}
+                  isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
@@ -540,6 +541,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   stroke={orange} // blue
                   strokeWidth={largeScreenMode ? 4 : 2}
                   hide={!visibleLines.includes("NHR_FORECAST")}
+                  isAnimationActive={false}
                 />
               </>
             )}
@@ -555,6 +557,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fillOpacity={0.4}
               strokeWidth={0}
               hide={!visibleLines.includes("FORECAST")}
+              isAnimationActive={false}
             />
 
             <Line
@@ -567,6 +570,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               strokeWidth={largeScreenMode ? 4 : 2}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
+              isAnimationActive={false}
             />
             <Line
               type="monotone"
@@ -577,6 +581,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               yAxisId={"y-axis"}
               dot={false}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
+              isAnimationActive={false}
             />
             <Line
               type="monotone"
@@ -590,6 +595,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 2}
               hide={!visibleLines.includes("FORECAST")}
+              isAnimationActive={false}
             />
             <Line
               type="monotone"
@@ -603,6 +609,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 2}
               hide={!visibleLines.includes("FORECAST")}
+              isAnimationActive={false}
             />
             {zoomEnabled && globalIsZooming && (
               <ReferenceArea
