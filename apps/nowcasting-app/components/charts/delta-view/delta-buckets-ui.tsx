@@ -38,13 +38,13 @@ const BucketItem: React.FC<Bucket> = ({
             flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full h-16 items-center p-1 pt-2 rounded-md justify-center border-2 ${bucketColor} ${
+          className={`flex flex-col flex-1 w-full items-center p-1 rounded-md justify-center border-2 ${bucketColor} ${
             isSelected ? selectedClass : unselectedClass
           }`}
           onClick={toggleBucketSelection}
         >
-          <span className="text-2xl font-semibold">{quantity}</span>
-          <span className="flex text-xs pb-2">
+          <span className="text-xl font-semibold leading-tight">{quantity}</span>
+          <span className="flex text-xs">
             {text === DELTA_BUCKET.ZERO.toString() ? `-/+` : `${text} MW`}
           </span>
         </button>
@@ -86,7 +86,7 @@ const DeltaBuckets: React.FC<{
 
   return (
     <>
-      <div className="flex justify-center mx-3 pb-10 gap-1 lg:gap-3">
+      <div className="sticky top-0 bg-mapbox-black-500 z-10 mx-3 pb-1 flex justify-center gap-1 lg:gap-3">
         {buckets.map((bucket) => {
           return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
         })}

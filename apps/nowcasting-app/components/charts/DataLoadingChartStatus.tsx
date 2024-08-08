@@ -74,7 +74,7 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
   const endpointsArray = Array.from(Object.entries(endpointStates));
   return (
     <div
-      className={`absolute -top-4 right-4 flex items-center h-9 ${isLoadingData ? "z-40" : "z-0"}`}
+      className={`absolute -top-4 right-2 flex items-center h-9 ${isLoadingData ? "z-40" : "z-0"}`}
     >
       <div
         className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-mapbox-black  ${

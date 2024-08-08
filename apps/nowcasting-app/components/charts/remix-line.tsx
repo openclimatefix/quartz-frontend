@@ -160,6 +160,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [clickedGspId] = useGlobalState("clickedGspId");
 
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -244,6 +245,36 @@ const RemixLine: React.FC<RemixLineProps> = ({
     updateFilteredData();
   }, [nHourForecast]);
 
+  const DeltaTick: FC<{ x?: number; y?: number; stroke?: string; payload?: any }> = ({
+    x,
+    y,
+    stroke,
+    payload
+  }) => {
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text className="fill-white text-xs text-right" x={0} y={0} dy={3} textAnchor={"start"}>
+          {`${payload.value > 0 ? "+" : ""}${prettyPrintYNumberWithCommas(payload.value)}`}
+        </text>
+      </g>
+    );
+  };
+
+  let rightChartMargin = 16;
+  let deltaLabelOffset = roundTickMax ? -20 : -10;
+  if (deltaView) {
+    if (clickedGspId) {
+      rightChartMargin = 15;
+      if (roundTickMax) {
+        deltaLabelOffset = 0;
+      } else {
+        deltaLabelOffset = -5;
+      }
+    } else {
+      rightChartMargin = 0;
+    }
+  }
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
@@ -267,7 +298,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
             margin={{
               top: 20,
-              right: 16,
+              right: rightChartMargin,
               bottom: -10,
               left: 16
             }}
@@ -406,12 +437,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   tickFormatter={(val, i) =>
                     prettyPrintYNumberWithCommas(val, roundTickMax ? 0 : 2)
                   }
-                  tick={{
-                    fill: "white",
-                    style: { fontSize: "12px" },
-                    textAnchor: "end",
-                    dx: roundTickMax ? 36 : 24
-                  }}
+                  tick={<DeltaTick />}
                   ticks={[deltaYMax, deltaYMax / 2, 0, -deltaYMax / 2, -deltaYMax]}
                   tickCount={5}
                   tickLine={false}
@@ -423,12 +449,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     angle: 90,
                     position: "insideRight",
                     fill: "white",
-                    style: { fontSize: "12px" },
+                    style: { fontSize: "11px" },
                     offset: 0,
-                    dx: roundTickMax ? 0 : -10,
-                    dy: 30
+                    dx: deltaLabelOffset,
+                    dy: 29
                   }}
                   domain={[-deltaYMax, deltaYMax]}
+                  padding={{ top: 0, bottom: 0 }}
                 />
                 <ReferenceLine
                   yAxisId={"delta"}
