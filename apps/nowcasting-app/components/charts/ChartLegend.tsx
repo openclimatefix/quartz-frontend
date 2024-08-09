@@ -39,7 +39,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           <LegendItem
             iconClasses={"text-ocf-yellow"}
             dashStyle={"both"}
-            label={"OCF Forecast"}
+            label={"OCF Latest Forecast"}
             dataKey={`FORECAST`}
           />
           {/*<LegendItem*/}
@@ -58,7 +58,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
         </div>
       </div>
       <div className="flex flex-initial items-center self-center">
-        <div className="h-8 w-10 mr-2 custom-select bg-ocf-gray-800 ">
+        <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">
           <select
             value={nHourForecast}
             onChange={(e) => setNHourForecast(Number(e.target.value))}
