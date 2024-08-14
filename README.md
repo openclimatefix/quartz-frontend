@@ -33,69 +33,68 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 
 ### Main repositories for our ML experiments:
 
-| Repo                                                                       | Description                                                                                                                                                                                                                                                                                                                              | Main Developer                                     |
-|----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|
-| [ocf_datapipes](https://github.com/openclimatefix/ocf_datapipes)                   | OCF's DataPipe based dataloader for training and inference | [James Fulton](https://github.com/dfulu)
-| [PVnet](https://github.com/openclimatefix/pvnet)                           | PV net main repo | [James Fulton](https://github.com/dfulu)
-| [PVNet-summation](https://github.com/openclimatefix/PVNet-summation)       | This project is used for training a model to sum the GSP predictions of PVNet into a national estimate     | [James Fulton](https://github.com/dfulu) |                                                   |
-| [pv-site-prediction](https://github.com/openclimatefix/pv-site-prediction) | ML experiments and models for SBRI project | [Zak Watts](https://github.com/zakwatts)
-| [UK PV National XG](https://github.com/openclimatefix/uk-pv-national-xg)   | National GSP PV forecasting using Gradient Boosted Methods.     | [Peter Dudfield](https://github.com/peterdudfield) |                                                   |
+| Repo                                                                       | Description                                                                                                                                                                                                                                                                                                                              | Main Developer                                     | Easy to contribute? | 
+|----------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------|---------------------| 
+| [ocf_datapipes](https://github.com/openclimatefix/ocf_datapipes)                   | OCF's DataPipe based dataloader for training and inference | [James Fulton](https://github.com/dfulu) | 🟠              
+| [PVnet](https://github.com/openclimatefix/pvnet)                           | PV net main repo | [James Fulton](https://github.com/dfulu) | 🔴
+| [PVNet-summation](https://github.com/openclimatefix/PVNet-summation)       | This project is used for training a model to sum the GSP predictions of PVNet into a national estimate     | [James Fulton](https://github.com/dfulu) | 🔴                 |
+| [pv-site-prediction](https://github.com/openclimatefix/pv-site-prediction) | ML experiments and models for SBRI project | [Zak Watts](https://github.com/zakwatts) | 🔴                 
+| [UK PV National XG](https://github.com/openclimatefix/uk-pv-national-xg)   | National GSP PV forecasting using Gradient Boosted Methods.     | [Peter Dudfield](https://github.com/peterdudfield) | 🔴                 |
 
 ### PyTorch implementations of ML models from the literature
 
-| Repo                                                                         | Description  |    Main Developer      |
-|------------------------------------------------------------------------------|------------------------|-------| 
-| [Graph Weather](https://github.com/openclimatefix/perceiver-pytorch)         | PyTorch implementation of Ryan Keisler's 2022 "Forecasting Global Weather with Graph Neural Networks" paper (https://arxiv.org/abs/2202.07575) | [Jacob Bieker](https://github.com/jacobbieker)
-| [MetNet](https://github.com/openclimatefix/metnet)                           | PyTorch Implementation of Google Research's MetNet ([Sønderby et al. 2020](https://arxiv.org/abs/2003.12140)), inspired from Thomas Capelle's [metnet_pytorch](https://github.com/tcapelle/metnet_pytorch/tree/master/metnet_pytorch). | [Jacob Bieker](https://github.com/jacobbieker) 
-| [Perceiver Pytorch](https://github.com/openclimatefix/perceiver-pytorch)     | Implementation of DeepMind's Perceiver ([Jaegle et al. 2021](https://arxiv.org/abs/2103.03206)) and Perceiver IO ([Jaegle et al. 2021](https://arxiv.org/abs/2107.14795)) in Pytorch. Forked from [lucidrains/perceiver-pytorch](https://github.com/lucidrains/perceiver-pytorch) |[Jack Kelly](https://github.com/JackKelly)
-| [Skillful Nowcasting](https://github.com/openclimatefix/skillful_nowcasting) | Implementation of DeepMind's Skillful Nowcasting GAN ([Ravuri et al. 2021](https://arxiv.org/abs/2104.00954)) in PyTorch Lightning. | [Jacob Bieker](https://github.com/jacobbieker)
+| Repo                                                                         | Description  |    Main Developer      | Easy to contribute ? | 
+|------------------------------------------------------------------------------|------------------------|-------| --- |
+| [Graph Weather](https://github.com/openclimatefix/perceiver-pytorch)         | PyTorch implementation of Ryan Keisler's 2022 "Forecasting Global Weather with Graph Neural Networks" paper (https://arxiv.org/abs/2202.07575) | [Jacob Bieker](https://github.com/jacobbieker) | 🟢 
+| [MetNet](https://github.com/openclimatefix/metnet)                           | PyTorch Implementation of Google Research's MetNet ([Sønderby et al. 2020](https://arxiv.org/abs/2003.12140)), inspired from Thomas Capelle's [metnet_pytorch](https://github.com/tcapelle/metnet_pytorch/tree/master/metnet_pytorch). | [Jacob Bieker](https://github.com/jacobbieker) | 🟢 
+| [Perceiver Pytorch](https://github.com/openclimatefix/perceiver-pytorch)     | Implementation of DeepMind's Perceiver ([Jaegle et al. 2021](https://arxiv.org/abs/2103.03206)) and Perceiver IO ([Jaegle et al. 2021](https://arxiv.org/abs/2107.14795)) in Pytorch. Forked from [lucidrains/perceiver-pytorch](https://github.com/lucidrains/perceiver-pytorch) |[Jack Kelly](https://github.com/JackKelly) | 🔴
+| [Skillful Nowcasting](https://github.com/openclimatefix/skillful_nowcasting) | Implementation of DeepMind's Skillful Nowcasting GAN ([Ravuri et al. 2021](https://arxiv.org/abs/2104.00954)) in PyTorch Lightning. | [Jacob Bieker](https://github.com/jacobbieker) | 🟠
 
 ## Operational Solar Forecasting
 
 ### General 
 
-| Repo                                                                               | Description  |    Main Developer      |
-|------------------------------------------------------------------------------------|------------------------|-------| 
-| [analysis-dashboard ](https://github.com/openclimatefix/uk-analysis-dashboard )    | This is a Streamlit app for the OCF team that reports database statistics | [Peter Dudfield](https://github.com/peterdudfield)
-| [Nowcasting Alerts Cron](https://github.com/openclimatefix/nowcasting_alerts_cron) | Nowcasting Alerts cron Worker | [Brad Fulford](https://github.com/braddf)
-| [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc)
-| [ocf-infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments  | [Sol Cotton](https://github.com/devsjc)
-| [pv-site-datamodel](https://github.com/openclimatefix/pv-site-datamodel)           | Datamodel for PV sites | [Peter Dudfield](https://github.com/peterdudfield)
-| [Satip](https://github.com/openclimatefix/satip)                                   | Satip contains the code necessary for retrieving, transforming and storing EUMETSAT data | [Sol Cotton](https://github.com/devsjc)
+| Repo                                                                               | Description  |    Main Developer      | Easy to contribute ? | 
+|------------------------------------------------------------------------------------|------------------------|-------| --- |
+| [analysis-dashboard ](https://github.com/openclimatefix/uk-analysis-dashboard )    | This is a Streamlit app for the OCF team that reports database statistics | [Peter Dudfield](https://github.com/peterdudfield) | 🔴 
+| [Nowcasting Alerts Cron](https://github.com/openclimatefix/nowcasting_alerts_cron) | Nowcasting Alerts cron Worker | [Brad Fulford](https://github.com/braddf) | 🔴
+| [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc) | 🟢 
+| [ocf-infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments  | [Sol Cotton](https://github.com/devsjc) | 🟠
+| [pv-site-datamodel](https://github.com/openclimatefix/pv-site-datamodel)           | Datamodel for PV sites | [Peter Dudfield](https://github.com/peterdudfield) | 🟢 
+| [Satip](https://github.com/openclimatefix/satip)                                   | Satip contains the code necessary for retrieving, transforming and storing EUMETSAT data | [Sol Cotton](https://github.com/devsjc) | 🟠
 
 ## UK
 
-| Repo                                                                              | Description  |    Main Developer      |
-|-----------------------------------------------------------------------------------|------------------------|-------| 
-| [GSPConsumer](https://github.com/openclimatefix/gspconsumer)                      | Collect GSP solar generation data from PVLive | [Peter Dudfield](https://github.com/peterdudfield)
-| [nwp-consumer](https://github.com/openclimatefix/nwp-consumer)                    | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc)
-| [nowcasting_datamodel](https://github.com/openclimatefix/nowcasting_datamodel)    | Datamodel for the nowcasting project | [Peter Dudfield](https://github.com/peterdudfield)
-| [PVConsumer](https://github.com/openclimatefix/gspconsumer)                       | Consumer PV data from various sources | [Peter Dudfield](https://github.com/peterdudfield)
-| [pvnet_app](https://github.com/openclimatefix/pvnet_app)                          | Application for running PVNet in production | [Sukhil Patel](https://github.com/Sukh-P)
-| [PVoutput](https://github.com/openclimatefix/pvoutput)                            | Python code for downloading PV data from PVOutput.org | [Jack Kelly](https://github.com/JackKelly)
-| [pv-site-api](https://github.com/openclimatefix/pv-site-api)                      | Site specific API for SBRI project | [Peter Dudfield](https://github.com/peterdudfield)              |
-| [pv-site-production](https://github.com/openclimatefix/pv-site-production)        | Production service for PV site level forecasts | [Peter Dudfield](https://github.com/peterdudfield)
-| [quartz-frontend](https://github.com/openclimatefix/quartz-frontend)              | Front End repo for the Nowcasting project. | [Brad Fulford](https://github.com/braddf)
-| [uk-pv-forecast-blend](https://github.com/openclimatefix/uk-pv-forecast-blend) | Service to blend forecast together | [Peter Dudfield](https://github.com/peterdudfield)
-| [uk-pv-national-gsp-api](https://github.com/openclimatefix/uk-pv-national-gsp-api) | API for hosting nowcasting solar predictions | [Peter Dudfield](https://github.com/peterdudfield)
+| Repo                                                                              | Description  |    Main Developer      | Easy to contribute ? | 
+|-----------------------------------------------------------------------------------|------------------------|-------|  --- |
+| [GSPConsumer](https://github.com/openclimatefix/gspconsumer)                      | Collect GSP solar generation data from PVLive | [Peter Dudfield](https://github.com/peterdudfield) | 🟠
+| [nowcasting_datamodel](https://github.com/openclimatefix/nowcasting_datamodel)    | Datamodel for the nowcasting project | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
+| [PVConsumer](https://github.com/openclimatefix/gspconsumer)                       | Consumer PV data from various sources | [Peter Dudfield](https://github.com/peterdudfield) | 🟠
+| [pvnet_app](https://github.com/openclimatefix/pvnet_app)                          | Application for running PVNet in production | [Sukhil Patel](https://github.com/Sukh-P) | 🔴
+| [PVoutput](https://github.com/openclimatefix/pvoutput)                            | Python code for downloading PV data from PVOutput.org | [Jack Kelly](https://github.com/JackKelly) | 🟠
+| [pv-site-api](https://github.com/openclimatefix/pv-site-api)                      | Site specific API for SBRI project | [Peter Dudfield](https://github.com/peterdudfield)              | 🟠
+| [pv-site-production](https://github.com/openclimatefix/pv-site-production)        | Production service for PV site level forecasts | [Peter Dudfield](https://github.com/peterdudfield) | 🔴
+| [quartz-frontend](https://github.com/openclimatefix/quartz-frontend)              | Front End repo for the Nowcasting project. | [Brad Fulford](https://github.com/braddf) | 🟠
+| [uk-pv-forecast-blend](https://github.com/openclimatefix/uk-pv-forecast-blend) | Service to blend forecast together | [Peter Dudfield](https://github.com/peterdudfield) | 🔴 
+| [uk-pv-national-gsp-api](https://github.com/openclimatefix/uk-pv-national-gsp-api) | API for hosting nowcasting solar predictions | [Peter Dudfield](https://github.com/peterdudfield) | 🟠
 
 ## India
 
-| Repo                                                                       | Description  |    Main Developer      |
-|----------------------------------------------------------------------------|------------------------|-------| 
-| [india-api](https://github.com/openclimatefix/india-api)                   | API India solar and wind data | [Sol Cotton](https://github.com/devsjc)
-| [india-forecast-app](https://github.com/openclimatefix/india-forecast-app) | Runs wind and PV forecasts for India and saves to database | [Peter Dudfield](https://github.com/peterdudfield)
+| Repo                                                                       | Description  |    Main Developer      | Easy to contribute ? | 
+|----------------------------------------------------------------------------|------------------------|-------| --- |
+| [india-api](https://github.com/openclimatefix/india-api)                   | API India solar and wind data | [Sol Cotton](https://github.com/devsjc) | 🟢
+| [india-forecast-app](https://github.com/openclimatefix/india-forecast-app) | Runs wind and PV forecasts for India and saves to database | [Peter Dudfield](https://github.com/peterdudfield) | 🔴
 
 
 ## Other repos
 
-| Repo                                                                     | Description                                                                                            | Main Developer                                 |
-|--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------| 
-| [GFS Downloader](https://github.com/openclimatefix/gfs-downloader)       | NCEP GFS 0.25 Degree Global Forecast Grids Historical Archive: https://rda.ucar.edu/datasets/ds084.1/ | [Zak Watts](https://github.com/zakwatts)
-| [OCF Blocs2](https://github.com/openclimatefix/ocf_blosc2)               | Blosc2 codec used for OCF's Zarr compression | [Peter Dudfield](https://github.com/peterdudfield) | 
-| [Open-Source-Quartz-Solar-Forecast](https://github.com/openclimatefix/Open-Source-Quartz-Solar-Forecast)                             | Open Source Solar Site Level Forecast          | [Zak Watts](https://github.com/zakwatts)
-| [Solar and Storage](https://github.com/openclimatefix/solar-and-storage) | Solar and Storage optimization code | [Peter Dudfield](https://github.com/peterdudfield)
-| [.github](https://github.com/openclimatefix/.github)                     | Various Community Health Files | [Peter Dudfield](https://github.com/peterdudfield)
+| Repo                                                                     | Description                                                                                            | Main Developer                                 | Easy to contribute ? | 
+|--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------| --- |
+| [GFS Downloader](https://github.com/openclimatefix/gfs-downloader)       | NCEP GFS 0.25 Degree Global Forecast Grids Historical Archive: https://rda.ucar.edu/datasets/ds084.1/ | [Zak Watts](https://github.com/zakwatts) | 🟢
+| [OCF Blocs2](https://github.com/openclimatefix/ocf_blosc2)               | Blosc2 codec used for OCF's Zarr compression | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
+| [Open-Source-Quartz-Solar-Forecast](https://github.com/openclimatefix/Open-Source-Quartz-Solar-Forecast)                             | Open Source Solar Site Level Forecast          | [Zak Watts](https://github.com/zakwatts) | 🟢
+| [Solar and Storage](https://github.com/openclimatefix/solar-and-storage) | Solar and Storage optimization code | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
+| [.github](https://github.com/openclimatefix/.github)                     | Various Community Health Files | [Peter Dudfield](https://github.com/peterdudfield) | 🔴
 
 
 For a complete list of all of OCF's repositories tagged with "nowcasting", see [this link](https://github.com/search?l=&o=desc&q=topic%3Anowcasting+org%3Aopenclimatefix&s=updated&type=Repositories)
