@@ -31,21 +31,6 @@ import dynamic from "next/dynamic";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
-const getRoundedPv = (pv: number, round: boolean = true) => {
-  if (!round) return Math.round(pv);
-  // round To: 0, 100, 200, 300, 400, 500
-  return Math.round(pv / 100) * 100;
-};
-const getRoundedPvPercent = (per: number, round: boolean = true) => {
-  if (!round) return per;
-  // round to : 0, 0.2, 0.4, 0.6 0.8, 1
-  let rounded = Math.round(per * 10);
-  if (rounded % 2) {
-    if (per * 10 > rounded) return (rounded + 1) / 10;
-    else return (rounded - 1) / 10;
-  } else return rounded / 10;
-};
-
 type DeltaMapProps = {
   className?: string;
   combinedData: CombinedData;

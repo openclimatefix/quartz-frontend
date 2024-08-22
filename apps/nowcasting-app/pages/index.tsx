@@ -131,16 +131,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [view, maps]);
 
   useEffect(() => {
-    // Clear any previous map timeouts on initial page load
-    for (const map of maps) {
-      localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`) &&
-        clearTimeout(
-          Number(localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`))
-        );
-    }
-  }, [maps]);
-
-  useEffect(() => {
     maps.forEach((map) => {
       console.log("-- -- -- resizing map");
       map.resize();
@@ -219,6 +209,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
+      keepPreviousData: true,
       onSuccess: (data) => {
         const forecastHistoricStart = get30MinNow(forecastHistoricBackwardIntervalMinutes);
         const prev30MinFromNowISO = `${get30MinNow(-30)}:00+00:00`;
@@ -247,6 +238,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
+      keepPreviousData: true,
       refreshInterval: 0, // Only load this once at beginning
       onSuccess: (data) => {
         if (!data) return;
@@ -645,6 +637,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
             combinedData={combinedData}
+            combinedLoading={combinedLoading}
+            combinedValidating={combinedValidating}
             combinedErrors={combinedErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}

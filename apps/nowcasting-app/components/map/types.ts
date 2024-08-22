@@ -9,6 +9,9 @@ export enum ActiveUnit {
 export enum SelectedData {
   expectedPowerGenerationNormalized = "expectedPowerGenerationNormalized",
   expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts",
+  expectedPowerGenerationMegawattsRounded = "expectedPowerGenerationMegawattsRounded",
+  expectedPowerGenerationNormalizedRounded = "expectedPowerGenerationNormalizedRounded",
+  actualPowerGenerationMegawatts = "actualPowerGenerationMegawatts",
   installedCapacityMw = "installedCapacityMw",
   delta = "delta"
 }

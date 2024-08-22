@@ -45,6 +45,9 @@ export const generateGeoJsonForecastData: (
       );
       let selectedFC;
       let selectedFCValue;
+      let selectedActualValueMW: number | undefined;
+      const gspRealData =
+        combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
       if (gspForecastsDataByTimestamp && targetTime) {
         selectedFC = gspForecastsDataByTimestamp.find(
           (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
@@ -55,6 +58,11 @@ export const generateGeoJsonForecastData: (
         selectedFCValue = gspForecastsDataByTimestamp.find(
           (fc) => fc.datetimeUtc.slice(0, 16) === latestTimestamp
         )?.forecastValues[index];
+        selectedActualValueMW =
+          Number(
+            gspRealData?.find((realData) => realData.datetimeUtc.slice(0, 16) === latestTimestamp)
+              ?.generationKwByGspId?.[String(index + 1)]
+          ) / 1000;
       }
 
       const updatedFeatureObj: MapFeatureObject = {
@@ -62,13 +70,26 @@ export const generateGeoJsonForecastData: (
         properties: {
           ...featureObj.properties,
           [SelectedData.expectedPowerGenerationMegawatts]:
+            selectedFCValue && getRoundedPv(selectedFCValue, false),
+          [SelectedData.expectedPowerGenerationMegawattsRounded]:
             selectedFCValue && getRoundedPv(selectedFCValue),
           [SelectedData.expectedPowerGenerationNormalized]:
             selectedFCValue &&
             getOpacityValueFromPVNormalized(
+              (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0,
+              false
+            ),
+          [SelectedData.expectedPowerGenerationNormalizedRounded]:
+            selectedFCValue &&
+            getOpacityValueFromPVNormalized(
               (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0
             ),
-          [SelectedData.installedCapacityMw]: getRoundedPv(gspSystemInfo?.installedCapacityMw || 0),
+          [SelectedData.actualPowerGenerationMegawatts]:
+            selectedActualValueMW && getRoundedPv(Number(selectedActualValueMW), false),
+          [SelectedData.installedCapacityMw]: getRoundedPv(
+            gspSystemInfo?.installedCapacityMw || 0,
+            false
+          ),
           gspDisplayName: gspSystemInfo?.regionName || ""
         }
       };
@@ -77,7 +98,10 @@ export const generateGeoJsonForecastData: (
         updatedFeatureObj.properties = {
           ...updatedFeatureObj.properties,
           [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
+          [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
           [SelectedData.expectedPowerGenerationNormalized]:
+            Number(currentGspDelta?.deltaNormalized) || 0,
+          [SelectedData.expectedPowerGenerationNormalizedRounded]:
             Number(currentGspDelta?.deltaNormalized) || 0,
           [SelectedData.delta]: currentGspDelta?.delta || 0,
           deltaBucket: currentGspDelta?.deltaBucket || 0

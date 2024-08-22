@@ -1,22 +1,21 @@
-import { SWRResponse } from "swr";
-
-import React, { Dispatch, SetStateAction, useMemo } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import mapboxgl, { Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
-import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState from "../helpers/globalState";
-import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
-import { CombinedData, CombinedErrors, GspAllForecastData } from "../types";
+import { formatISODateStringHuman } from "../helpers/utils";
+import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
-import { FeatureCollection } from "geojson";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { components } from "../../types/quartz-api";
 import { generateGeoJsonForecastData } from "../helpers/data";
 import dynamic from "next/dynamic";
+import throttle from "lodash/throttle";
+import Spinner from "../icons/spinner";
+
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
@@ -24,6 +23,8 @@ const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr
 type PvLatestMapProps = {
   className?: string;
   combinedData: CombinedData;
+  combinedLoading: CombinedLoading;
+  combinedValidating: CombinedValidating;
   combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
@@ -32,23 +33,40 @@ type PvLatestMapProps = {
 const PvLatestMap: React.FC<PvLatestMapProps> = ({
   className,
   combinedData,
+  combinedLoading,
+  combinedValidating,
   combinedErrors,
   activeUnit,
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
+  const [mapDataLoading, setMapDataLoading] = useState(true);
 
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
+  let selectedDataName = SelectedData.expectedPowerGenerationMegawattsRounded;
   if (activeUnit === ActiveUnit.percentage)
-    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
+    selectedDataName = SelectedData.expectedPowerGenerationNormalizedRounded;
   if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
   const forecastLoading = false;
   const initForecastData =
     combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
   const forecastError = combinedErrors?.allGspForecastError;
+
+  useEffect(() => {
+    if (!combinedData?.allGspForecastData) return;
+    setMapDataLoading(true);
+  }, [selectedISOTime]);
+
+  useEffect(() => {
+    if (!combinedData?.allGspForecastData) return;
+
+    setShouldUpdateMap(true);
+  }, [combinedData, combinedLoading, combinedValidating, selectedISOTime]);
+
+  console.log("## shouldUpdateMap render", shouldUpdateMap);
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
@@ -64,22 +82,52 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData);
-  }, [initForecastData, selectedISOTime]);
+  }, [
+    combinedData.allGspForecastData,
+    combinedLoading.allGspForecastLoading,
+    combinedValidating.allGspForecastValidating,
+    selectedISOTime,
+    combinedData.allGspSystemData
+  ]);
+
+  // Create a popup, but don't add it to the map yet.
+  const popup = useMemo(
+    () =>
+      new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        anchor: "bottom-right",
+        maxWidth: "none"
+      }),
+    []
+  );
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
+    setMapDataLoading(true);
+
+    const geoJsonHasData =
+      generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
+      typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
+        ?.expectedPowerGenerationMegawatts === "number";
+    if (!geoJsonHasData) {
+      console.log("geoJsonForecastData empty, trying again...");
+      setShouldUpdateMap(true);
+      return;
+    }
+    setShouldUpdateMap(false);
+
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
 
     if (!source) {
-      const { forecastGeoJson } = generateGeoJsonForecastData(
-        initForecastData,
-        selectedISOTime,
-        combinedData
-      );
+      const { forecastGeoJson } = generatedGeoJsonForecastData;
       map.addSource("latestPV", {
         type: "geojson",
         data: forecastGeoJson
       });
+    } else {
+      source.setData(generatedGeoJsonForecastData.forecastGeoJson);
     }
+    console.log("latestPV source set");
 
     const pvForecastLayer = map.getLayer("latestPV-forecast");
     if (!pvForecastLayer) {
@@ -93,6 +141,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
         }
       });
+      console.log("pvForecastLayer added");
     } else {
       if (generatedGeoJsonForecastData && source) {
         source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
@@ -101,8 +150,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           "fill-opacity",
           getFillOpacity(selectedDataName, isNormalized)
         );
+        console.log("pvForecastLayer updated", generatedGeoJsonForecastData.forecastGeoJson);
+      } else {
+        console.log("pvForecastLayer not updated");
       }
     }
+    console.log("pvForecastLayer set");
 
     const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
     if (!pvForecastBordersLayer) {
@@ -131,39 +184,130 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     }
+
+    map.on(
+      "mousemove",
+      "latestPV-forecast",
+      throttle(
+        (e) => {
+          // Change the cursor style as a UI indicator.
+          map.getCanvas().style.cursor = "pointer";
+
+          const properties = e.features?.[0].properties;
+          if (!properties) return;
+          let actualValue = "";
+          let forecastValue = "";
+          // Map in MW mode
+          if (selectedDataName === SelectedData.expectedPowerGenerationMegawattsRounded) {
+            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
+              ? properties?.[SelectedData.actualPowerGenerationMegawatts].toFixed(0)
+              : "-";
+            forecastValue =
+              properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(0) || 0;
+          }
+          // Map in % mode
+          if (selectedDataName === SelectedData.expectedPowerGenerationNormalizedRounded) {
+            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
+              ? (
+                  Number(
+                    properties?.[SelectedData.actualPowerGenerationMegawatts] /
+                      properties?.[SelectedData.installedCapacityMw] || 0
+                  ) * 100
+                ).toFixed(0) + "%"
+              : "-";
+            forecastValue =
+              (
+                Number(properties?.[SelectedData.expectedPowerGenerationNormalized] || 0) * 100
+              ).toFixed(0) + "%" || "-";
+          }
+
+          const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          <div class="flex justify-between gap-3 items-center mb-1">
+            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs} • #${
+            properties?.gsp_id
+          }</div>
+          </div>
+          <div class="flex justify-between items-center">
+            
+            <div class="flex flex-col text-xs">
+              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
+              <div><span>${
+                properties?.[SelectedData.installedCapacityMw]
+              }</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
+            </div>
+            <div class="flex flex-col text-xs items-end">
+              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
+              <div>
+                <span class="">${actualValue}</span>  /  
+                <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">MW</span>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+          // Populate the popup and set its coordinates
+          // based on the feature found.
+          popup.setHTML(popupContent).trackPointer().addTo(map);
+        },
+        32,
+        {}
+      )
+    );
+
+    map.on("mouseleave", "latestPV-forecast", () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+
+    map.on("data", (e) => {
+      if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+        setMapDataLoading(false);
+      }
+    });
+
+    map.on("sourcedata", (e) => {
+      if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+        setMapDataLoading(false);
+      }
+    });
   };
 
   return (
-    <div className={`relative h-full w-full ${className}`}>
+    <div className={`pv-map relative h-full w-full ${className}`}>
       {forecastError ? (
         <FailedStateMap error="Failed to load" />
       ) : (
         // ) : !forecastError && !initForecastData ? (
-        //   <LoadStateMap>
-        //     <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-        //   </LoadStateMap>
-        <Map
-          loadDataOverlay={(map: { current: mapboxgl.Map }) =>
-            safelyUpdateMapData(map.current, addOrUpdateMapData)
-          }
-          updateData={{
-            newData: !!initForecastData,
-            updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateMapData)
-          }}
-          controlOverlay={(map: { current?: mapboxgl.Map }) => (
-            <>
-              <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-              <MeasuringUnit
-                activeUnit={activeUnit}
-                setActiveUnit={setActiveUnit}
-                isLoading={!initForecastData}
-              />
-            </>
+        <>
+          {(!combinedData.allGspForecastData || mapDataLoading) && (
+            <LoadStateMap>
+              <Spinner />
+            </LoadStateMap>
           )}
-          title={VIEWS.FORECAST}
-        >
-          <ColorGuideBar unit={activeUnit} />
-        </Map>
+          <Map
+            loadDataOverlay={(map: { current: mapboxgl.Map }) =>
+              safelyUpdateMapData(map.current, addOrUpdateMapData)
+            }
+            updateData={{
+              newData: shouldUpdateMap,
+              updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateMapData)
+            }}
+            controlOverlay={(map: { current?: mapboxgl.Map }) => (
+              <>
+                <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+                <MeasuringUnit
+                  activeUnit={activeUnit}
+                  setActiveUnit={setActiveUnit}
+                  isLoading={!initForecastData}
+                />
+              </>
+            )}
+            title={VIEWS.FORECAST}
+          >
+            <ColorGuideBar unit={activeUnit} />
+          </Map>
+        </>
       )}
     </div>
   );

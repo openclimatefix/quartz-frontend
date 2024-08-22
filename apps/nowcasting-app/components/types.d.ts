@@ -297,7 +297,10 @@ export type AggregatedSitesCombinedData = {
 export type MapFeatureObject = {
   properties: {
     expectedPowerGenerationMegawatts: number | undefined;
+    expectedPowerGenerationMegawattsRounded: number | undefined;
     expectedPowerGenerationNormalized: number | undefined;
+    expectedPowerGenerationNormalizedRounded: number | undefined;
+    actualPowerGenerationMegawatts: number | undefined;
     delta?: number;
     deltaBucket?: number;
     installedCapacityMw: number;
