@@ -53,6 +53,12 @@ export const generateGeoJsonForecastData: (
           (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
         );
         if (selectedFC) selectedFCValue = selectedFC.forecastValues[index + 1];
+        selectedActualValueMW =
+          Number(
+            gspRealData?.find(
+              (realData) => realData.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
+            )?.generationKwByGspId?.[String(index + 1)]
+          ) / 1000;
       } else if (gspForecastsDataByTimestamp) {
         let latestTimestamp = get30MinNow();
         selectedFCValue = gspForecastsDataByTimestamp.find(
