@@ -43,12 +43,31 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
 
+  const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
+    switch (activeUnit) {
+      case ActiveUnit.MW:
+        return SelectedData.expectedPowerGenerationMegawattsRounded;
+      case ActiveUnit.percentage:
+        return SelectedData.expectedPowerGenerationNormalizedRounded;
+      case ActiveUnit.capacity:
+        return SelectedData.installedCapacityMw;
+    }
+  };
+  const [selectedDataName, setSelectedDataName] = useState(
+    getSelectedDataFromActiveUnit(activeUnit)
+  );
+
+  useEffect(() => {
+    setSelectedDataName(getSelectedDataFromActiveUnit(activeUnit));
+    // Add unit to map container so that it can be accessed by popup in the map event listeners
+    const map: HTMLDivElement | null = document.querySelector(`#Map-${VIEWS.FORECAST}`);
+    if (map) {
+      map.dataset.unit = activeUnit;
+    }
+  }, [activeUnit]);
+
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawattsRounded;
-  if (activeUnit === ActiveUnit.percentage)
-    selectedDataName = SelectedData.expectedPowerGenerationNormalizedRounded;
-  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
 
   const forecastLoading = false;
   const initForecastData =
@@ -91,16 +110,23 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   ]);
 
   // Create a popup, but don't add it to the map yet.
-  const popup = useMemo(
-    () =>
-      new mapboxgl.Popup({
-        closeButton: false,
-        closeOnClick: false,
-        anchor: "bottom-right",
-        maxWidth: "none"
-      }),
-    []
-  );
+  const popup = useMemo(() => {
+    return new mapboxgl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+      anchor: "bottom-right",
+      maxWidth: "none"
+    });
+  }, []);
+
+  const nationalCapacityMW = useMemo(() => {
+    return (
+      (combinedData.allGspSystemData?.reduce(
+        (acc, gsp) => acc + (gsp.installedCapacityMw || 0),
+        0
+      ) || 0) / 1000
+    );
+  }, [combinedData.allGspSystemData]);
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
     setMapDataLoading(true);
@@ -142,6 +168,109 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
       console.log("pvForecastLayer added");
+
+      // Also add map event listeners but only the first time
+      const getActiveUnit = () => map.getContainer().dataset.unit as ActiveUnit;
+      const popupFunction = throttle(
+        (e) => {
+          // Change the cursor style as a UI indicator.
+          map.getCanvas().style.cursor = "pointer";
+          const currentActiveUnit = getActiveUnit();
+
+          const properties = e.features?.[0].properties;
+          if (!properties) return;
+          let actualValue = "";
+          let forecastValue = "";
+          let unit = "";
+          if (currentActiveUnit === ActiveUnit.MW) {
+            // Map in MW mode
+            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
+              ? properties?.[SelectedData.actualPowerGenerationMegawatts].toFixed(0)
+              : "-";
+            forecastValue =
+              properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(0) || 0;
+            unit = "MW";
+          } else if (currentActiveUnit === ActiveUnit.percentage) {
+            // Map in % mode
+            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
+              ? (
+                  Number(
+                    properties?.[SelectedData.actualPowerGenerationMegawatts] /
+                      properties?.[SelectedData.installedCapacityMw] || 0
+                  ) * 100
+                ).toFixed(0)
+              : "-";
+            forecastValue =
+              (
+                Number(properties?.[SelectedData.expectedPowerGenerationNormalized] || 0) * 100
+              ).toFixed(0) || "-";
+            unit = "%";
+          } else if (currentActiveUnit === ActiveUnit.capacity) {
+            // Map in Capacity mode
+            actualValue =
+              (
+                Number(properties?.[SelectedData.installedCapacityMw] || 0) / nationalCapacityMW
+              ).toFixed(1) || "-";
+            forecastValue = "-";
+            unit = "MW";
+          }
+
+          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
+              <div>
+                <span class="">${actualValue}</span>  /  
+                <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">${unit}</span>
+              </div>`;
+          if (currentActiveUnit === ActiveUnit.capacity) {
+            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">% of National</span>
+            <div><span>${actualValue}</span> <span class="text-2xs text-mapbox-black-300">%</span></div>`;
+          }
+
+          const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          <div class="flex justify-between gap-3 items-center mb-1">
+            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs} • #${
+            properties?.gsp_id
+          }</div>
+          </div>
+          <div class="flex justify-between items-center">
+            
+            <div class="flex flex-col text-xs">
+              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
+              <div><span>${
+                properties?.[SelectedData.installedCapacityMw]
+              }</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
+            </div>
+            <div class="flex flex-col text-xs items-end">
+              ${actualAndForecastSection}
+            </div>
+          </div>
+        </div>`;
+
+          // Populate the popup and set its coordinates
+          // based on the feature found.
+          popup.setHTML(popupContent).trackPointer().addTo(map);
+        },
+        32,
+        {}
+      );
+      map.on("mousemove", "latestPV-forecast", popupFunction);
+
+      map.on("mouseleave", "latestPV-forecast", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+
+      map.on("data", (e) => {
+        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+          setMapDataLoading(false);
+        }
+      });
+
+      map.on("sourcedata", (e) => {
+        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+          setMapDataLoading(false);
+        }
+      });
     } else {
       if (generatedGeoJsonForecastData && source) {
         source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
@@ -184,93 +313,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     }
-
-    map.on(
-      "mousemove",
-      "latestPV-forecast",
-      throttle(
-        (e) => {
-          // Change the cursor style as a UI indicator.
-          map.getCanvas().style.cursor = "pointer";
-
-          const properties = e.features?.[0].properties;
-          if (!properties) return;
-          let actualValue = "";
-          let forecastValue = "";
-          // Map in MW mode
-          if (selectedDataName === SelectedData.expectedPowerGenerationMegawattsRounded) {
-            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
-              ? properties?.[SelectedData.actualPowerGenerationMegawatts].toFixed(0)
-              : "-";
-            forecastValue =
-              properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(0) || 0;
-          }
-          // Map in % mode
-          if (selectedDataName === SelectedData.expectedPowerGenerationNormalizedRounded) {
-            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
-              ? (
-                  Number(
-                    properties?.[SelectedData.actualPowerGenerationMegawatts] /
-                      properties?.[SelectedData.installedCapacityMw] || 0
-                  ) * 100
-                ).toFixed(0) + "%"
-              : "-";
-            forecastValue =
-              (
-                Number(properties?.[SelectedData.expectedPowerGenerationNormalized] || 0) * 100
-              ).toFixed(0) + "%" || "-";
-          }
-
-          const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
-          <div class="flex justify-between gap-3 items-center mb-1">
-            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.GSPs} • #${
-            properties?.gsp_id
-          }</div>
-          </div>
-          <div class="flex justify-between items-center">
-            
-            <div class="flex flex-col text-xs">
-              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
-              <div><span>${
-                properties?.[SelectedData.installedCapacityMw]
-              }</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
-            </div>
-            <div class="flex flex-col text-xs items-end">
-              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
-              <div>
-                <span class="">${actualValue}</span>  /  
-                <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">MW</span>
-              </div>
-            </div>
-          </div>
-        </div>`;
-
-          // Populate the popup and set its coordinates
-          // based on the feature found.
-          popup.setHTML(popupContent).trackPointer().addTo(map);
-        },
-        32,
-        {}
-      )
-    );
-
-    map.on("mouseleave", "latestPV-forecast", () => {
-      map.getCanvas().style.cursor = "";
-      popup.remove();
-    });
-
-    map.on("data", (e) => {
-      if (e.sourceId === "latestPV" && e.isSourceLoaded) {
-        setMapDataLoading(false);
-      }
-    });
-
-    map.on("sourcedata", (e) => {
-      if (e.sourceId === "latestPV" && e.isSourceLoaded) {
-        setMapDataLoading(false);
-      }
-    });
   };
 
   return (
