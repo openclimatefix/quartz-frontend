@@ -17,7 +17,7 @@ const Layout = ({ children }: ILayout) => {
         <title>Solar PV Forecast</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="absolute inset-0 flex flex-col h-screen">
+      <main className="flex flex-col h-screen">
         {!solarStatus || solarStatus?.status === "ok" ? null : (
           <div className="blue text-white text-m px-4 py-2" style={{ backgroundColor: "#48B0DF" }}>
             <p>{solarStatus?.message}</p>

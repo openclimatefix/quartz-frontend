@@ -21,10 +21,10 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   let dash = "0";
   switch (dashStyle) {
     case "both":
-      dash = "11 4 3 4 3";
+      dash = "8 4 3 4 3";
       break;
     case "dashed":
-      dash = "3 4";
+      dash = "3 3";
       break;
     case "solid":
       break;
@@ -32,17 +32,17 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   return (
     <svg
       className={className}
-      width="24"
-      height="22"
-      viewBox="0 0 24 22"
+      width="20"
+      height="18"
+      viewBox="0 0 20 18"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M3 19C7 19 12 16 12.5 11C13 6 17 3 21 3"
+        d="M2.5 15.5C5.8 15.5 10 13 10.4 9.1C10.8 5.1 14.2 2.5 17.5 2.5"
         strokeWidth={2}
         stroke="currentColor"
-        strokeLinecap={"round"}
+        strokeLinecap="round"
         strokeDasharray={dash}
       />
     </svg>

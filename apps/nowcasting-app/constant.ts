@@ -102,3 +102,5 @@ export enum DELTA_BUCKET {
   POS4 = 100
 }
 export const getDeltaBucketKeys = () => Object.keys(DELTA_BUCKET).filter((k) => isNaN(Number(k)));
+
+export const NHR_FORECAST_OPTIONS = [1, 2, 4, 8];
