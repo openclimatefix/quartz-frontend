@@ -12,12 +12,13 @@ interface ILayout {
 const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status`);
   const [view] = useGlobalState("view");
-  const title = getViewTitle(view);
+  const viewTitle = getViewTitle(view);
+  const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
 
   return (
     <>
       <Head>
-        <title>Quartz Solar – {title}</title>
+        <title>{pageTitle}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-col h-screen">
