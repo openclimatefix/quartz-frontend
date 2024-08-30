@@ -3,7 +3,7 @@ import ProfileDropDown from "./profile-dropdown";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 import { Menu } from "@headlessui/react";
-import { VIEWS } from "../../../constant";
+import { getViewTitle, VIEWS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
 import useGlobalState from "../../helpers/globalState";
@@ -116,14 +116,14 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             view={VIEWS.FORECAST}
             currentView={view}
             setViewFunc={setView}
-            text="PV Forecast"
+            text={getViewTitle(VIEWS.FORECAST)}
           />
           <HeaderLink
             url="/"
             view={VIEWS.SOLAR_SITES}
             currentView={view}
             setViewFunc={setView}
-            text="Solar Sites"
+            text={getViewTitle(VIEWS.SOLAR_SITES)}
             disabled={isProduction}
           />
           <HeaderLink
@@ -131,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
             view={VIEWS.DELTA}
             currentView={view}
             setViewFunc={setView}
-            text="Delta"
+            text={getViewTitle(VIEWS.DELTA)}
           />
         </Menu>
       </div>

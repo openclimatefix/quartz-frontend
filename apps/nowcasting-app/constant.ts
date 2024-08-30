@@ -62,6 +62,16 @@ export enum VIEWS {
   DELTA = "DELTA",
   SOLAR_SITES = "SOLAR SITES"
 }
+export const getViewTitle = (view: VIEWS) => {
+  switch (view) {
+    case VIEWS.FORECAST:
+      return "PV Forecast";
+    case VIEWS.DELTA:
+      return "Delta";
+    case VIEWS.SOLAR_SITES:
+      return "Solar Sites";
+  }
+};
 
 export enum AGGREGATION_LEVELS {
   NATIONAL = "NATIONAL",
