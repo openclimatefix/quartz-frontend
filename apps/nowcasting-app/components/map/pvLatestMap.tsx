@@ -9,7 +9,7 @@ import { formatISODateStringHuman } from "../helpers/utils";
 import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
-import { safelyUpdateMapData } from "../helpers/mapUtils";
+import { getActiveUnitFromMap, safelyUpdateMapData, setActiveUnitOnMap } from "../helpers/mapUtils";
 import { components } from "../../types/quartz-api";
 import { generateGeoJsonForecastData } from "../helpers/data";
 import dynamic from "next/dynamic";
@@ -58,11 +58,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   );
 
   useEffect(() => {
+    setMapDataLoading(true);
     setSelectedDataName(getSelectedDataFromActiveUnit(activeUnit));
     // Add unit to map container so that it can be accessed by popup in the map event listeners
     const map: HTMLDivElement | null = document.querySelector(`#Map-${VIEWS.FORECAST}`);
     if (map) {
-      map.dataset.unit = activeUnit;
+      setActiveUnitOnMap(map, activeUnit);
     }
   }, [activeUnit]);
 
@@ -74,16 +75,26 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
   const forecastError = combinedErrors?.allGspForecastError;
 
+  // Show loading spinner when selectedISOTime changes
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
+
     setMapDataLoading(true);
   }, [selectedISOTime]);
 
+  // Update map data when forecast data is loaded
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
 
     setShouldUpdateMap(true);
   }, [combinedData, combinedLoading, combinedValidating, selectedISOTime]);
+
+  // Hide loading spinner if there is an error to prevent infinite loading
+  useEffect(() => {
+    if (combinedErrors.allGspForecastError) {
+      setMapDataLoading(false);
+    }
+  }, [combinedErrors.allGspForecastError]);
 
   console.log("## shouldUpdateMap render", shouldUpdateMap);
 
@@ -129,8 +140,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, [combinedData.allGspSystemData]);
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
-    setMapDataLoading(true);
-
     const geoJsonHasData =
       generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
       typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
@@ -170,12 +179,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       console.log("pvForecastLayer added");
 
       // Also add map event listeners but only the first time
-      const getActiveUnit = () => map.getContainer().dataset.unit as ActiveUnit;
       const popupFunction = throttle(
         (e) => {
           // Change the cursor style as a UI indicator.
           map.getCanvas().style.cursor = "pointer";
-          const currentActiveUnit = getActiveUnit();
+          const currentActiveUnit = getActiveUnitFromMap(map);
 
           const properties = e.features?.[0].properties;
           if (!properties) return;
@@ -273,6 +281,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       });
     } else {
       if (generatedGeoJsonForecastData && source) {
+        const currentActiveUnit = getActiveUnitFromMap(map);
+        const isNormalized = currentActiveUnit === ActiveUnit.percentage;
         source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
         map.setPaintProperty(
           "latestPV-forecast",
@@ -322,7 +332,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       ) : (
         // ) : !forecastError && !initForecastData ? (
         <>
-          {(!combinedData.allGspForecastData || mapDataLoading) && (
+          {(!combinedData.allGspForecastData ||
+            combinedLoading.allGspForecastLoading ||
+            mapDataLoading) && (
             <LoadStateMap>
               <Spinner />
             </LoadStateMap>

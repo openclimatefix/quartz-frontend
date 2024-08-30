@@ -1,4 +1,5 @@
 import mapboxgl from "mapbox-gl";
+import { ActiveUnit } from "../map/types";
 
 export const safelyUpdateMapData = (
   map: mapboxgl.Map,
@@ -36,3 +37,18 @@ export const safelyUpdateMapData = (
     updateMapData(map);
   }
 };
+
+export const setActiveUnitOnMap = (mapContainer: HTMLDivElement | null, unit: ActiveUnit) => {
+  if (!mapContainer) {
+    console.warn("Map container not found, skipping unit update");
+    return;
+  }
+  if (!Object.keys(ActiveUnit).includes(unit)) {
+    console.warn(`Invalid unit: ${unit}, skipping unit update`);
+    return;
+  }
+  mapContainer.dataset.unit = unit;
+};
+
+export const getActiveUnitFromMap = (map: mapboxgl.Map) =>
+  (map.getContainer().dataset.unit as ActiveUnit) || "MW";
