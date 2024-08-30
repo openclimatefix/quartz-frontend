@@ -43,7 +43,7 @@ export const setActiveUnitOnMap = (mapContainer: HTMLDivElement | null, unit: Ac
     console.warn("Map container not found, skipping unit update");
     return;
   }
-  if (!Object.keys(ActiveUnit).includes(unit)) {
+  if (!Object.values(ActiveUnit).includes(unit)) {
     console.warn(`Invalid unit: ${unit}, skipping unit update`);
     return;
   }
