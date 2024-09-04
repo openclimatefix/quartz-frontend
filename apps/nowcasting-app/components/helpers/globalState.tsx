@@ -1,7 +1,7 @@
 import { createGlobalState } from "react-hooks-global-state";
 import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS, SORT_BY } from "../../constant";
 import mapboxgl from "mapbox-gl";
-import { enable4hView } from "./utils";
+import { enableNHourView } from "./utils";
 import {
   getArraySettingFromCookieStorage,
   getBooleanSettingFromLocalStorage,
@@ -21,6 +21,20 @@ export function get30MinNow(offsetMinutes = 0) {
   }
   date = getNext30MinSlot(date);
   return date.toISOString();
+}
+export function get30MinSlot(isoTime: Date) {
+  if (isoTime.getMinutes() === 30) {
+    return isoTime;
+  } else if (isoTime.getMinutes() === 0) {
+    return isoTime;
+  } else if (isoTime.getMinutes() < 30) {
+    isoTime.setHours(isoTime.getHours());
+    isoTime.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
+  } else {
+    isoTime.setHours(isoTime.getHours() + 1);
+    isoTime.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
+  }
+  return isoTime;
 }
 export function getNext30MinSlot(isoTime: Date) {
   if (isoTime.getMinutes() === 30) {
@@ -52,7 +66,7 @@ export type GlobalStateType = {
   lat: number;
   zoom: number;
   showSiteCount?: boolean;
-  show4hView?: boolean;
+  showNHourView?: boolean;
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
@@ -61,6 +75,7 @@ export type GlobalStateType = {
   globalZoomArea: { x1: string; x2: string };
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
+  nHourForecast: number;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -76,7 +91,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       "GENERATION",
       "GENERATION_UPDATED",
       "FORECAST",
-      "PAST_FORECAST"
+      "N_HOUR_FORECAST"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
@@ -90,7 +105,9 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
-    show4hView: enable4hView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW),
+    showNHourView:
+      (enableNHourView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW)) ||
+      true,
     dashboardMode: getBooleanSettingFromLocalStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {
       initialLoadComplete: false,
@@ -101,7 +118,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       initialLoadComplete: false,
       showMessage: false,
       message: "Loading data"
-    }
+    },
+    nHourForecast: 4
   });
 
 export default useGlobalState;

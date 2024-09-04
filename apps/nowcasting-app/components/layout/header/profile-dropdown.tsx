@@ -15,7 +15,7 @@ interface IProfileDropDown {}
 
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
-  const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const [show4hView, setShow4hView] = useGlobalState("showNHourView");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const toggleDashboardMode = () => {
     setDashboardMode(!dashboardMode);
@@ -60,11 +60,11 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                     </span>
                   )}
                   <button
-                    id={"UserMenu-4hViewBtn"}
+                    id={"UserMenu-NhViewBtn"}
                     onClick={toggle4hView}
                     className="ml-1 text-sm  font-medium text-ocf-black-600"
                   >
-                    {`4-hour forecast`}
+                    {`N-hour forecast`}
                   </button>
                 </div>
               )}

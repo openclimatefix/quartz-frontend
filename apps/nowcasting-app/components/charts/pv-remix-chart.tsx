@@ -33,7 +33,7 @@ const PvRemixChart: FC<{
     nationalForecastData,
     pvRealDayInData,
     pvRealDayAfterData,
-    national4HourData,
+    nationalNHourData,
     allGspForecastData,
     allGspRealData,
     gspDeltas
@@ -42,7 +42,7 @@ const PvRemixChart: FC<{
     nationalForecastError,
     pvRealDayInError,
     pvRealDayAfterError,
-    national4HourError,
+    nationalNHourError,
     allGspForecastError
   } = combinedErrors;
 
@@ -60,7 +60,7 @@ const PvRemixChart: FC<{
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
     probabilisticRangeData: nationalForecastData,
-    fourHourData: national4HourData,
+    fourHourData: nationalNHourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
@@ -70,7 +70,7 @@ const PvRemixChart: FC<{
     nationalForecastError ||
     pvRealDayInError ||
     pvRealDayAfterError ||
-    national4HourError ||
+    nationalNHourError ||
     allGspForecastError
   )
     return <div className={`${className}`}>failed to load</div>;
@@ -81,15 +81,14 @@ const PvRemixChart: FC<{
   };
 
   return (
-    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex flex-col flex-auto">
-        <ForecastHeader
-          pvForecastData={nationalForecastData || []}
-          pvLiveData={pvRealDayInData || []}
-          deltaView={false}
-        ></ForecastHeader>
-
-        <div className="flex-1 relative h-60 dash:h-auto mt-4">
+    <>
+      <div className={`flex flex-col flex-auto ${className || ""}`}>
+        <div className="flex flex-col flex-1 dash:h-auto">
+          <ForecastHeader
+            pvForecastData={nationalForecastData || []}
+            pvLiveData={pvRealDayInData || []}
+            deltaView={false}
+          ></ForecastHeader>
           {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && (
             <div
               className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
@@ -97,19 +96,21 @@ const PvRemixChart: FC<{
               <Spinner></Spinner>
             </div>
           )}
-          <DataLoadingChartStatus loadingState={loadingState} />
-          <RemixLine
-            resetTime={resetTime}
-            timeNow={formatISODateString(timeNow)}
-            timeOfInterest={selectedTime}
-            setTimeOfInterest={setSelectedTime}
-            data={chartData}
-            yMax={MAX_NATIONAL_GENERATION_MW}
-            visibleLines={visibleLines}
-          />
+          <div className="flex-1 relative">
+            <DataLoadingChartStatus loadingState={loadingState} />
+            <RemixLine
+              resetTime={resetTime}
+              timeNow={formatISODateString(timeNow)}
+              timeOfInterest={selectedTime}
+              setTimeOfInterest={setSelectedTime}
+              data={chartData}
+              yMax={MAX_NATIONAL_GENERATION_MW}
+              visibleLines={visibleLines}
+            />
+          </div>
         </div>
-        <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
-          {clickedGspId && (
+        {clickedGspId && (
+          <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
               close={() => {
                 setClickedGspId(undefined);
@@ -121,11 +122,11 @@ const PvRemixChart: FC<{
               resetTime={resetTime}
               visibleLines={visibleLines}
             ></GspPvRemixChart>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-      <ChartLegend />
-    </div>
+      {!className?.includes("hidden") && <ChartLegend />}
+    </>
   );
 };
 

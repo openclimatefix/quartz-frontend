@@ -81,7 +81,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
 
   return (
     <>
-      <div className="flex-1 h-72 overflow-y-scroll">
+      <div className="flex-1 overflow-y-scroll">
         {rows?.sort(sortFn).map((site) => {
           const mostAccurateGeneration = site.actualPV || site.expectedPV;
           return (

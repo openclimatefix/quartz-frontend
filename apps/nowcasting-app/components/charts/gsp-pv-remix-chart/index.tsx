@@ -39,21 +39,20 @@ const GspPvRemixChart: FC<{
   visibleLines,
   deltaView = false
 }) => {
-  //when adding 4hour forecast data back in, add gsp4HourData to list in line 27
   const {
     errors,
     pvRealDataAfter,
     pvRealDataIn,
     gspLocationInfo,
     gspForecastDataOneGSP,
-    gsp4HourData
+    gspNHourData
   } = useGetGspData(gspId);
   // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspInstalledCapacity = gspLocationInfo?.[0]?.installedCapacityMw;
   const gspName = gspLocationInfo?.[0]?.regionName;
   const chartData = useFormatChartData({
     forecastData: gspForecastDataOneGSP,
-    fourHourData: gsp4HourData,
+    fourHourData: gspNHourData,
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,
@@ -71,7 +70,7 @@ const GspPvRemixChart: FC<{
   const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
   const fourHourForecastAtSelectedTime: ForecastValue =
-    gsp4HourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
+    gspNHourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
     ({} as ForecastValue);
 
   //
@@ -141,7 +140,7 @@ const GspPvRemixChart: FC<{
           <span className="text-xs dash:text-2xl text-ocf-gray-300"> MW</span>
         </ForecastHeaderGSP>
       </div>
-      <div className="flex-1 relative min-h-[30vh] max-h-[40vh] h-auto">
+      <div className="flex-1 relative">
         {dataMissing && (
           <div className="h-full absolute flex pb-7 items-center justify-center inset-0 z-30">
             <Spinner />

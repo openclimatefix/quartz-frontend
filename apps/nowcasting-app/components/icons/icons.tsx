@@ -3,7 +3,7 @@ import logout from "../../pages/logout";
 
 type LegendLineGraphIconProps = {
   className?: string;
-  dashed?: boolean;
+  dashStyle?: "both" | "dashed" | "solid";
 };
 
 type IconProps = {
@@ -16,24 +16,38 @@ type InfoIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashed = false
-}) => (
-  <svg
-    className={className}
-    width="24"
-    height="22"
-    viewBox="0 0 24 22"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M3 19C7 19 12 16 12.5 11C13 6 17 3 21 3"
-      strokeWidth={2}
-      stroke="currentColor"
-      strokeDasharray={dashed ? "3 3" : "0"}
-    />
-  </svg>
-);
+  dashStyle = "solid"
+}) => {
+  let dash = "0";
+  switch (dashStyle) {
+    case "both":
+      dash = "8 4 3 4 3";
+      break;
+    case "dashed":
+      dash = "3 3";
+      break;
+    case "solid":
+      break;
+  }
+  return (
+    <svg
+      className={className}
+      width="20"
+      height="18"
+      viewBox="0 0 20 18"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2.5 15.5C5.8 15.5 10 13 10.4 9.1C10.8 5.1 14.2 2.5 17.5 2.5"
+        strokeWidth={2}
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeDasharray={dash}
+      />
+    </svg>
+  );
+};
 
 export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
   <svg
