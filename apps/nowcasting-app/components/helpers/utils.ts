@@ -24,7 +24,7 @@ import { PathsWithMethod } from "openapi-typescript-helpers";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
-export const enable4hView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
+export const enableNHourView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
 const forecastAccessor0 = (d: any) => d.forecastValues[0].expectedPowerGenerationMegawatts;
@@ -52,7 +52,7 @@ export const getLoadingState = (
   combinedData: CombinedData
 ): LoadingState<NationalEndpointStates> => {
   let initialLoadComplete = Object.entries(combinedLoading).every(
-    ([key, loading]) => key === "national4HourLoading" || !loading
+    ([key, loading]) => key === "nationalNHourLoading" || !loading
   );
   let showMessage = !initialLoadComplete;
   let message = "Loading initial data";
@@ -73,7 +73,7 @@ export const getLoadingState = (
         : `Loading latest ${NationalEndpointLabel.pvRealDayAfter}`;
       showMessage = true;
     }
-    if (combinedValidating.national4HourValidating) {
+    if (combinedValidating.nationalNHourValidating) {
       message = showMessage
         ? "Loading latest data"
         : `Loading latest ${NationalEndpointLabel.nationalNHour}`;
@@ -113,10 +113,10 @@ export const getLoadingState = (
       hasData: !!combinedData.pvRealDayAfterData
     },
     nationalNHour: {
-      loading: combinedLoading.national4HourLoading,
-      validating: combinedValidating.national4HourValidating,
-      error: combinedErrors.national4HourError,
-      hasData: !!combinedData.national4HourData
+      loading: combinedLoading.nationalNHourLoading,
+      validating: combinedValidating.nationalNHourValidating,
+      error: combinedErrors.nationalNHourError,
+      hasData: !!combinedData.nationalNHourData
     },
     allGspForecast: {
       loading: combinedLoading.allGspForecastLoading,

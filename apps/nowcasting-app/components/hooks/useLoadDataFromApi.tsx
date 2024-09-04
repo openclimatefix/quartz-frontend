@@ -5,7 +5,7 @@ import {
   ForecastData,
   GspAllForecastData,
   GspEntities,
-  National4HourData,
+  NationalNHourData,
   PvRealData,
   SitesPvActual,
   SitesPvForecast,
@@ -24,7 +24,7 @@ const t2min = 1000 * 60 * 2;
 type APIResponseType =
   | ForecastData
   | PvRealData
-  | National4HourData
+  | NationalNHourData
   | GspAllForecastData
   | GspEntities
   | AllGspRealData

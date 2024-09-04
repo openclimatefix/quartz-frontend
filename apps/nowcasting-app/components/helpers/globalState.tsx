@@ -1,7 +1,7 @@
 import { createGlobalState } from "react-hooks-global-state";
 import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS, SORT_BY } from "../../constant";
 import mapboxgl from "mapbox-gl";
-import { enable4hView } from "./utils";
+import { enableNHourView } from "./utils";
 import {
   getArraySettingFromCookieStorage,
   getBooleanSettingFromLocalStorage,
@@ -66,7 +66,7 @@ export type GlobalStateType = {
   lat: number;
   zoom: number;
   showSiteCount?: boolean;
-  show4hView?: boolean;
+  showNHourView?: boolean;
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
@@ -91,7 +91,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       "GENERATION",
       "GENERATION_UPDATED",
       "FORECAST",
-      "NHR_FORECAST"
+      "N_HOUR_FORECAST"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
@@ -105,8 +105,9 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
-    show4hView:
-      (enable4hView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW)) || true,
+    showNHourView:
+      (enableNHourView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW)) ||
+      true,
     dashboardMode: getBooleanSettingFromLocalStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {
       initialLoadComplete: false,

@@ -16,8 +16,8 @@ const getForecastChartData = (
 ) => {
   if (!fr) return {};
 
-  const futureKey = forecast_horizon ? "NHR_FORECAST" : "FORECAST";
-  const pastKey = forecast_horizon ? "NHR_PAST_FORECAST" : "PAST_FORECAST";
+  const futureKey = forecast_horizon ? "N_HOUR_FORECAST" : "FORECAST";
+  const pastKey = forecast_horizon ? "N_HOUR_PAST_FORECAST" : "PAST_FORECAST";
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
@@ -39,8 +39,8 @@ const getDelta: (datum: ChartData) => number = (datum) => {
     } else if (datum.GENERATION !== undefined) {
       return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
     }
-  } else if (datum.FORECAST !== undefined && datum["NHR_FORECAST"] !== undefined) {
-    return Number(datum.FORECAST) - Number(datum["NHR_FORECAST"]);
+  } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
+    return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
   }
   return 0;
 };

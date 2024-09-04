@@ -18,7 +18,6 @@ import {
   convertToLocaleDateString,
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
-  getRounded4HoursAgoString,
   dateToLondonDateTimeOnlyString,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate,
@@ -42,8 +41,8 @@ export type ChartData = {
   GENERATION?: number;
   FORECAST?: number;
   PAST_FORECAST?: number;
-  NHR_FORECAST?: number;
-  NHR_PAST_FORECAST?: number;
+  N_HOUR_FORECAST?: number;
+  N_HOUR_PAST_FORECAST?: number;
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
   PROBABILISTIC_UPPER_BOUND?: number;
@@ -58,10 +57,9 @@ const toolTiplabels: Record<string, string> = {
   PROBABILISTIC_UPPER_BOUND: "OCF 90%",
   FORECAST: "OCF Forecast",
   PAST_FORECAST: "OCF Forecast",
-  // "4HR_FORECAST": `OCF ${getRounded4HoursAgoString()} Forecast`,
   PROBABILISTIC_LOWER_BOUND: "OCF 10%",
-  NHR_FORECAST: `OCF Nhr Forecast`,
-  NHR_PAST_FORECAST: "OCF Nhr Forecast",
+  N_HOUR_FORECAST: `OCF N-hour Forecast`,
+  N_HOUR_PAST_FORECAST: "OCF N-hour Forecast",
   DELTA: "Delta"
 };
 
@@ -70,8 +68,8 @@ const toolTipColors: Record<string, string> = {
   GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
-  NHR_FORECAST: orange,
-  NHR_PAST_FORECAST: orange,
+  N_HOUR_FORECAST: orange,
+  N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
   PROBABILISTIC_LOWER_BOUND: yellow
@@ -148,7 +146,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
-  const [showNhrView] = useGlobalState("show4hView");
+  const [showNHourView] = useGlobalState("showNHourView");
   const [view] = useGlobalState("view");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
@@ -516,11 +514,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 barSize={3}
               />
             )}
-            {showNhrView && (
+            {showNHourView && (
               <>
                 <Line
                   type="monotone"
-                  dataKey="NHR_FORECAST"
+                  dataKey="N_HOUR_FORECAST"
                   dot={false}
                   yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
@@ -528,19 +526,19 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   strokeDashoffset={3}
                   stroke={orange} // blue
                   strokeWidth={largeScreenMode ? 4 : 2}
-                  hide={!visibleLines.includes("NHR_FORECAST")}
+                  hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
-                  dataKey="NHR_PAST_FORECAST"
+                  dataKey="N_HOUR_PAST_FORECAST"
                   dot={false}
                   yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
                   strokeWidth={largeScreenMode ? 4 : 2}
-                  hide={!visibleLines.includes("NHR_FORECAST")}
+                  hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
               </>
@@ -643,8 +641,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
                           return null;
                         if (
-                          key.includes("NHR") &&
-                          (!showNhrView || !visibleLines.some((key) => key.includes("NHR")))
+                          key.includes("N_HOUR") &&
+                          (!showNHourView || !visibleLines.some((key) => key.includes("N_HOUR")))
                         )
                           return null;
                         if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0)
@@ -670,13 +668,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           : toolTipColors[key];
                         const computedValue =
                           key === "DELTA" &&
-                          !showNhrView &&
+                          !showNHourView &&
                           `${data["formattedDate"]}:00.000Z` >= currentTime
                             ? "-"
                             : prettyPrintYNumberWithCommas(String(value), 1);
                         let title = toolTiplabels[key];
-                        if (key.includes("NHR")) {
-                          title = title.replace("Nhr", `${nHourForecast}hr`);
+                        if (key.includes("N_HOUR")) {
+                          title = title.replace("N-hour", `${nHourForecast}-hour`);
                         }
 
                         return (
@@ -684,7 +682,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             <div className={`flex justify-between ${textClass} ${pvLiveTextClass}`}>
                               <div>{title}:</div>
                               <div className={`font-sans ml-7`}>
-                                {(showNhrView || key !== "DELTA") && sign}
+                                {(showNHourView || key !== "DELTA") && sign}
                                 {computedValue}{" "}
                               </div>
                             </div>

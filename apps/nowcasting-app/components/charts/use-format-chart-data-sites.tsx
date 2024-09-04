@@ -13,8 +13,8 @@ const getForecastChartData = (
 ) => {
   if (!fr) return {};
 
-  const futureKey = forecast_horizon === 240 ? "4HR_FORECAST" : "FORECAST";
-  const pastKey = forecast_horizon === 240 ? "4HR_PAST_FORECAST" : "PAST_FORECAST";
+  const futureKey = forecast_horizon === 240 ? "N_HOUR_FORECAST" : "FORECAST";
+  const pastKey = forecast_horizon === 240 ? "N_HOUR_PAST_FORECAST" : "PAST_FORECAST";
   const generation =
     fr.expected_generation_kw > 20 ? fr.expected_generation_kw / 7000 : fr.expected_generation_kw;
 
@@ -38,8 +38,8 @@ const getForecastChartData = (
 //     } else if (datum.GENERATION !== undefined) {
 //       return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
 //     }
-//   } else if (datum.FORECAST !== undefined && datum["4HR_FORECAST"] !== undefined) {
-//     return Number(datum.FORECAST) - Number(datum["4HR_FORECAST"]);
+//   } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
+//     return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
 //   }
 //   return 0;
 // };

@@ -81,13 +81,13 @@ type PvRealData = {
   datetimeUtc: string;
   solarGenerationKw: number;
 }[];
-type National4HourData = ForecastValue[];
+type NationalNHourData = ForecastValue[];
 type AllGspRealData = GspRealData[];
 type CombinedData = {
   nationalForecastData: ForecastData | undefined;
   pvRealDayInData: PvRealData | undefined;
   pvRealDayAfterData: PvRealData | undefined;
-  national4HourData: National4HourData | undefined;
+  nationalNHourData: NationalNHourData | undefined;
   allGspSystemData: components["schemas"]["Location"][] | undefined;
   // TODO: slight mashup of custom and generated types atm,
   //  ideally should be able to use just the generated for API typings
@@ -102,7 +102,7 @@ type CombinedLoading = {
   nationalForecastLoading: boolean;
   pvRealDayInLoading: boolean;
   pvRealDayAfterLoading: boolean;
-  national4HourLoading: boolean;
+  nationalNHourLoading: boolean;
   allGspSystemLoading: boolean;
   allGspForecastLoading: boolean;
   allGspRealLoading: boolean;
@@ -111,7 +111,7 @@ type CombinedValidating = {
   nationalForecastValidating: boolean;
   pvRealDayInValidating: boolean;
   pvRealDayAfterValidating: boolean;
-  national4HourValidating: boolean;
+  nationalNHourValidating: boolean;
   allGspSystemValidating: boolean;
   allGspForecastValidating: boolean;
   allGspRealValidating: boolean;
@@ -120,7 +120,7 @@ type CombinedErrors = {
   nationalForecastError: any;
   pvRealDayInError: any;
   pvRealDayAfterError: any;
-  national4HourError: any;
+  nationalNHourError: any;
   allGspSystemError: any;
   allGspForecastError: any;
   allGspRealError: any;

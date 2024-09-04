@@ -3,18 +3,16 @@ import { ChartInfo } from "../../ChartInfo";
 import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
 import { FC, useEffect } from "react";
 import useGlobalState from "../helpers/globalState";
-import { getRounded4HoursAgoString } from "../helpers/utils";
 import LegendItem from "./LegendItem";
-import { NHR_FORECAST_OPTIONS } from "../../constant";
+import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 
 type ChartLegendProps = {
   className?: string;
 };
 export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
-  const [showNhrView] = useGlobalState("show4hView");
+  const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
 
-  const fourHoursAgo = getRounded4HoursAgoString();
   const legendItemContainerClasses = `flex flex-initial flex-col @sm:gap-1 @6xl:gap-6 @6xl:flex-row ${
     className ? ` ${className}` : ""
   }`;
@@ -49,12 +47,12 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             {/*  label={"OCF Final Forecast"}*/}
             {/*  dataKey={`PAST_FORECAST`}*/}
             {/*/>*/}
-            {showNhrView && (
+            {showNHourView && (
               <LegendItem
                 iconClasses={"text-ocf-orange"}
                 dashStyle={"both"}
                 label={`OCF ${nHourForecast}hr Forecast`}
-                dataKey={`NHR_FORECAST`}
+                dataKey={`N_HOUR_FORECAST`}
               />
             )}
           </div>
@@ -67,9 +65,9 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 onChange={(e) => setNHourForecast(Number(e.target.value))}
                 className="text-sm px-2 py-0 rounded-md"
               >
-                {NHR_FORECAST_OPTIONS.map((option) => (
+                {N_HOUR_FORECAST_OPTIONS.map((option) => (
                   <option
-                    key={`NHr-select-option-${option}`}
+                    key={`N-hour-select-option-${option}`}
                     className="text-black bg-white"
                     value={option}
                   >

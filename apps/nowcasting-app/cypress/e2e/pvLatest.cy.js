@@ -41,9 +41,9 @@ describe("Load the page", () => {
     cy.get("header #UserMenu-4hViewBtn").should("not.exist");
     cy.get("header button").contains("Open user menu").should("exist");
     cy.get("header button").contains("Open user menu").parent().click();
-    cy.get("header #UserMenu-4hViewBtn").should("exist");
-    cy.get("header #UserMenu-4hViewBtn").should("be.visible");
-    cy.get("header #UserMenu-4hViewBtn").should("contain", "4-hour forecast");
+    cy.get("header #UserMenu-NhViewBtn").should("exist");
+    cy.get("header #UserMenu-NhViewBtn").should("be.visible");
+    cy.get("header #UserMenu-NhViewBtn").should("contain", "N-hour forecast");
     cy.get("header #UserMenu-DashboardModeBtn").should("contain", "Dashboard mode");
     cy.get("header #UserMenu-DocumentationBtn").should("contain", "Documentation");
     cy.get("header #UserMenu-ContactBtn").should("contain", "Contact");

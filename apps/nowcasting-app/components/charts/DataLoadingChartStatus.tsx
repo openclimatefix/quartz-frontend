@@ -31,7 +31,7 @@ const DataLoadingChartStatus = <
   const isLoadingData =
     !loadingState.initialLoadComplete ||
     (loadingState.showMessage && !!loadingState.message.length);
-  const [show4hView] = useGlobalState("show4hView");
+  const [showNHourView] = useGlobalState("showNHourView");
 
   if (!loadingState || !loadingState.endpointStates || !loadingState.endpointStates.type)
     return null;
@@ -42,7 +42,7 @@ const DataLoadingChartStatus = <
         isLoadingData={isLoadingData}
         message={loadingState.message}
         endpointStates={loadingState.endpointStates}
-        show4hView={show4hView}
+        showNHourView={showNHourView}
       />
     );
   } else if (isEndpointStateType<SitesEndpointStates>(loadingState.endpointStates, "sites")) {
@@ -51,7 +51,7 @@ const DataLoadingChartStatus = <
         message={loadingState.message}
         endpointStates={loadingState.endpointStates}
         isLoadingData={isLoadingData}
-        show4hView={show4hView}
+        showNHourView={showNHourView}
       />
     );
   }
@@ -63,13 +63,13 @@ type EndpointStatusListProps<K> = {
   isLoadingData: boolean;
   message: string;
   endpointStates: K;
-  show4hView: boolean | undefined;
+  showNHourView: boolean | undefined;
 };
 const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStates>({
   isLoadingData,
   message,
   endpointStates,
-  show4hView = false
+  showNHourView = false
 }: EndpointStatusListProps<K>) => {
   const endpointsArray = Array.from(Object.entries(endpointStates));
   return (
@@ -92,7 +92,7 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
             {!!endpointsArray.length &&
               endpointsArray.map(([key, val]) => {
                 if (!endpointStates) return null;
-                if (key === "national4Hour" && !show4hView) return null;
+                if (key === "nationalNHour" && !showNHourView) return null;
                 // Filter out "type" key with string state value
                 if (typeof val === "string") return null;
                 const state = endpointStates[key as keyof typeof endpointStates];

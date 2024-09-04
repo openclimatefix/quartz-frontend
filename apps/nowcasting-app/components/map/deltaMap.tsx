@@ -17,7 +17,7 @@ import {
   ForecastValue,
   GspAllForecastData,
   GspDeltaValue,
-  National4HourData,
+  NationalNHourData,
   PvRealData
 } from "../types";
 import { theme } from "../../tailwind.config";

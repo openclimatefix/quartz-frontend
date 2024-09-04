@@ -4,11 +4,7 @@ import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, { get30MinSlot } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
-import {
-  convertToLocaleDateString,
-  formatISODateString,
-  getRounded4HoursAgoString
-} from "../../helpers/utils";
+import { convertToLocaleDateString, formatISODateString } from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
@@ -254,7 +250,7 @@ type DeltaChartProps = {
 };
 const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
   // const [view] = useGlobalState("view");
-  const [show4hView] = useGlobalState("show4hView");
+  const [show4hView] = useGlobalState("showNHourView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [globalZoomArea] = useGlobalState("globalZoomArea");
@@ -278,7 +274,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     nationalForecastData,
     pvRealDayInData,
     pvRealDayAfterData,
-    national4HourData,
+    nationalNHourData,
     allGspForecastData,
     allGspRealData,
     gspDeltas
@@ -287,7 +283,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     nationalForecastError,
     pvRealDayInError,
     pvRealDayAfterError,
-    national4HourError,
+    nationalNHourError,
     allGspForecastError
   } = combinedErrors;
 
@@ -303,14 +299,14 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
-    fourHourData: national4HourData,
+    fourHourData: nationalNHourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime,
     delta: true
   });
 
-  // While 4-hour is not available, we default to the latest interval with an Initial Estimate
+  // While N-hour is not available, we default to the latest interval with an Initial Estimate
   // useEffect(() => {
   //   if (selectedISOTime === get30MinNow() && view === VIEWS.DELTA) {
   //     setSelectedISOTime(get30MinNow(-60));
@@ -321,7 +317,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     nationalForecastError ||
     pvRealDayInError ||
     pvRealDayAfterError ||
-    national4HourError ||
+    nationalNHourError ||
     allGspForecastError
   )
     return <div className={`h-full flex ${className}`}>Failed to load data.</div>;
@@ -337,7 +333,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     stopTime();
     setSelectedISOTime(time + ":00.000Z");
   };
-  const fourHoursAgo = getRounded4HoursAgoString();
 
   return (
     <>

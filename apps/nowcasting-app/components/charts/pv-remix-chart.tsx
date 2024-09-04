@@ -33,7 +33,7 @@ const PvRemixChart: FC<{
     nationalForecastData,
     pvRealDayInData,
     pvRealDayAfterData,
-    national4HourData,
+    nationalNHourData,
     allGspForecastData,
     allGspRealData,
     gspDeltas
@@ -42,7 +42,7 @@ const PvRemixChart: FC<{
     nationalForecastError,
     pvRealDayInError,
     pvRealDayAfterError,
-    national4HourError,
+    nationalNHourError,
     allGspForecastError
   } = combinedErrors;
 
@@ -60,7 +60,7 @@ const PvRemixChart: FC<{
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
     probabilisticRangeData: nationalForecastData,
-    fourHourData: national4HourData,
+    fourHourData: nationalNHourData,
     pvRealDayInData,
     pvRealDayAfterData,
     timeTrigger: selectedTime
@@ -70,7 +70,7 @@ const PvRemixChart: FC<{
     nationalForecastError ||
     pvRealDayInError ||
     pvRealDayAfterError ||
-    national4HourError ||
+    nationalNHourError ||
     allGspForecastError
   )
     return <div className={`${className}`}>failed to load</div>;

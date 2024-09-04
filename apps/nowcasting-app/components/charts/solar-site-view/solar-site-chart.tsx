@@ -5,7 +5,6 @@ import useGlobalState from "../../helpers/globalState";
 import {
   convertISODateStringToLondonTime,
   formatISODateString,
-  getRounded4HoursAgoString,
   getRoundedTickBoundary
 } from "../../helpers/utils";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
@@ -34,7 +33,6 @@ const SolarSiteChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedSitesData, aggregatedSitesData, className }) => {
-  const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -237,7 +235,6 @@ const SolarSiteChart: FC<{
     stopTime();
     setSelectedISOTime(time);
   };
-  const fourHoursAgo = getRounded4HoursAgoString();
   return (
     <div className={`flex flex-col flex-1 ${className || ""}`}>
       <div className="flex-1 flex flex-col">
@@ -366,21 +363,6 @@ const SolarSiteChart: FC<{
             dataKey={`FORECAST`}
           />
         </div>
-        {/* {show4hView && (
-            <div className={legendItemContainerClasses}>
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                dashed
-                label={`OCF ${fourHoursAgo} Forecast`}
-                dataKey={`4HR_FORECAST`}
-              />
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                label={"OCF 4hr Forecast"}
-                dataKey={`4HR_PAST_FORECAST`}
-              />
-            </div>
-          )} */}
 
         <div className="flex-initial flex self-center items-start">
           <Tooltip
