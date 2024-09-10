@@ -4,7 +4,7 @@ import mapboxgl from "mapbox-gl";
 import { enableNHourView } from "./utils";
 import {
   getArraySettingFromCookieStorage,
-  getBooleanSettingFromLocalStorage,
+  getBooleanSettingFromCookieStorage,
   CookieStorageKeys
 } from "./cookieStorage";
 import { NationalEndpointStates, LoadingState, SitesEndpointStates } from "../types";
@@ -105,10 +105,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
-    showNHourView:
-      (enableNHourView && getBooleanSettingFromLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW)) ||
-      true,
-    dashboardMode: getBooleanSettingFromLocalStorage(CookieStorageKeys.DASHBOARD_MODE),
+    showNHourView: false,
+    dashboardMode: getBooleanSettingFromCookieStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {
       initialLoadComplete: false,
       showMessage: false,

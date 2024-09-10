@@ -131,12 +131,16 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, []);
 
   const nationalCapacityMW = useMemo(() => {
-    return (
-      (combinedData.allGspSystemData?.reduce(
-        (acc, gsp) => acc + (gsp.installedCapacityMw || 0),
-        0
-      ) || 0) / 1000
-    );
+    if (!combinedData.allGspSystemData) return 0;
+
+    let totalCapacityMW = 0;
+    combinedData.allGspSystemData.forEach((gsp) => {
+      // Skip the national capacity
+      if (gsp.gspId === 0) return;
+
+      totalCapacityMW += gsp.installedCapacityMw || 0;
+    });
+    return totalCapacityMW;
   }, [combinedData.allGspSystemData]);
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
@@ -217,7 +221,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             // Map in Capacity mode
             actualValue =
               (
-                Number(properties?.[SelectedData.installedCapacityMw] || 0) / nationalCapacityMW
+                (Number(properties?.[SelectedData.installedCapacityMw] || 0) / nationalCapacityMW) *
+                100
               ).toFixed(1) || "-";
             forecastValue = "-";
             unit = "MW";

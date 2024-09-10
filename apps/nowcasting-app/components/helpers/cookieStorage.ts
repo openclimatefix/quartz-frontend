@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 export enum CookieStorageKeys {
   "DASHBOARD_MODE" = "dashboardMode",
-  "FOUR_HOUR_VIEW" = "fourHourView",
+  "N_HOUR_VIEW" = "NHourView",
   "VISIBLE_LINES" = "visibleLines"
 }
 
@@ -18,9 +18,12 @@ export const setSettingInCookieStorage = <T>(key: string, value: T) => {
   Cookies.set(key, JSON.stringify(value));
 };
 
-export const getBooleanSettingFromLocalStorage = (key: string): boolean => {
+export const getBooleanSettingFromCookieStorage = (
+  key: string,
+  defaultBool: boolean = false
+): boolean => {
   const item = getSettingFromCookieStorage<boolean>(key);
-  if (item === null) return false;
+  if (item === null) return defaultBool;
 
   return item;
 };
