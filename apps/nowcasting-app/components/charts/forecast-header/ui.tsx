@@ -164,7 +164,10 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextTimeOnly
 }) => {
   return (
-    <div data-test="national-chart-header" className="flex content-between bg-ocf-gray-800 h-auto">
+    <div
+      data-test="national-chart-header"
+      className="flex flex-initial content-between bg-ocf-gray-800 h-auto mb-4"
+    >
       <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
         National
       </div>

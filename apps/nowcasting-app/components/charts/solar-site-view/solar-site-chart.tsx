@@ -5,7 +5,6 @@ import useGlobalState from "../../helpers/globalState";
 import {
   convertISODateStringToLondonTime,
   formatISODateString,
-  getRounded4HoursAgoString,
   getRoundedTickBoundary
 } from "../../helpers/utils";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
@@ -25,34 +24,8 @@ import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { AggregatedDataTable } from "./solar-site-tables";
 import ForecastHeaderSite from "./forecast-header";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
-
-const LegendItem: FC<{
-  iconClasses: string;
-  label: string;
-  dashed?: boolean;
-  dataKey: string;
-}> = ({ iconClasses, label, dashed, dataKey }) => {
-  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
-  const isVisible = visibleLines.includes(dataKey);
-  const [show4hView] = useGlobalState("show4hView");
-
-  const toggleLineVisibility = () => {
-    if (isVisible) {
-      setVisibleLines(visibleLines.filter((line) => line !== dataKey));
-    } else {
-      setVisibleLines([...visibleLines, dataKey]);
-    }
-  };
-
-  return (
-    <div className="flex items-center">
-      <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button className="text-left pl-1 max-w-full w-44" onClick={toggleLineVisibility}>
-        <span className={`uppercase pl-1${isVisible ? " font-extrabold" : ""}`}>{label}</span>
-      </button>
-    </div>
-  );
-};
+import Link from "next/link";
+import LegendItem from "../LegendItem";
 
 const SolarSiteChart: FC<{
   combinedSitesData: CombinedSitesData;
@@ -60,7 +33,6 @@ const SolarSiteChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedSitesData, aggregatedSitesData, className }) => {
-  const [show4hView] = useGlobalState("show4hView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -190,7 +162,7 @@ const SolarSiteChart: FC<{
         return gsp.name || "";
       case AGGREGATION_LEVELS.SITE:
         const site = filteredSites.find((s) => s.site_uuid === clickedGroupId);
-        return site?.client_site_id || "";
+        return site?.client_site_name || "";
     }
   };
 
@@ -209,172 +181,200 @@ const SolarSiteChart: FC<{
       </div>
     );
 
+  if (!combinedSitesData.allSitesData?.length) {
+    return (
+      <div className={`h-full flex ${className}`}>
+        <div className="flex-1 flex flex-col justify-center items-center p-32">
+          <div className={"flex-initial flex flex-col"}>
+            <h2 className="text-ocf-gray-300 text-4xl pb-6">Welcome to Site View.</h2>
+            <p className="text-ocf-gray-300 text-lg pb-3 font-semibold tracking-wide">
+              It looks like you don&apos;t currently have any sites.
+            </p>
+            {/* TODO: add func. to create sites from UI */}
+            {/*<p className="text-ocf-gray-300 text-base pb-6">*/}
+            {/*  To add a site, you can use the &quot;+&quot; button in the top left corner.*/}
+            {/*</p>*/}
+            <p className="text-ocf-gray-300 text-base pb-6">
+              To add a site, you can use our{" "}
+              <Link
+                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                target={"_blank"}
+                href={"https://api.quartz.solar/docs"}
+              >
+                API
+              </Link>{" "}
+              or our{" "}
+              <Link
+                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                target={"_blank"}
+                href={"https://api.quartz.solar/swagger"}
+              >
+                Swagger UI
+              </Link>
+              .
+            </p>
+            <blockquote className={"border-l-2 border-ocf-gray pl-3"}>
+              <p className="text-ocf-gray-300 text-base py-1">
+                If you think you should have sites here, have any questions or need some further
+                information, please get in touch at{" "}
+                <a
+                  className={"underline underline-offset-4 decoration-ocf-yellow"}
+                  href="mailto:quartz.support@openclimatefix.org"
+                >
+                  quartz.support@openclimatefix.org
+                </a>
+              </p>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const setSelectedTime = (time: string) => {
     stopTime();
     setSelectedISOTime(time);
   };
-  const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = "flex flex-initial flex-col xl:flex-col justify-between";
   return (
-    <div className={`flex flex-col flex-1 mb-1 ${className || ""}`}>
-      <div className="flex-auto flex flex-col mb-2">
-        <div className="flex content-between bg-ocf-gray-800 h-auto">
-          <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
-            All Sites
-          </div>
-          <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
-            <div className="">
-              <ForecastHeadlineFigure
-                tip={`PV Actual / OCF Forecast`}
-                time={allSitesChartDateTime}
-                color="ocf-yellow"
-                unit={"KW"}
-              >
-                <span className="text-black">{nationalPVActual?.toFixed(1)}</span>
-                <span className="text-ocf-gray-300 mx-1"> / </span>
-                {nationalPVExpected?.toFixed(1)}
-              </ForecastHeadlineFigure>
+    <div className={`flex flex-col flex-1 ${className || ""}`}>
+      <div className="flex-1 flex flex-col">
+        <div className="flex flex-col flex-1 relative">
+          <div className="flex content-between bg-ocf-gray-800 mb-4">
+            <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
+              All Sites
             </div>
-            <div>
-              {/*<NextForecast*/}
-              {/*  pv={forecastNextPV}*/}
-              {/*  time={`${forecastNextTimeOnly}`}*/}
-              {/*  tip={`Next OCF Forecast`}*/}
-              {/*  color="ocf-yellow"*/}
-              {/*/>*/}
-            </div>
-          </div>
-          <div className="inline-flex h-full"></div>
-          {/*<div className="inline-flex h-full">{children}</div>*/}
-        </div>
-        <div className="flex-1 relative h-60 mt-4 mb-3">
-          <DataLoadingChartStatus loadingState={sitesLoadingState} />
-          <RemixLine
-            resetTime={resetTime}
-            timeNow={formatISODateString(timeNow)}
-            timeOfInterest={selectedTime}
-            setTimeOfInterest={setSelectedTime}
-            data={chartData}
-            zoomEnabled={false}
-            yMax={yMax}
-            visibleLines={visibleLines}
-          />
-        </div>
-        {clickedSiteGroupId && aggregationLevel !== AGGREGATION_LEVELS.NATIONAL && (
-          <div className="flex-1 flex flex-col relative h-60 dash:h-auto">
-            <>
-              <ForecastHeaderSite
-                onClose={() => {
-                  setClickedSiteGroupId(undefined);
-                }}
-                title={
-                  getSiteName(selectedSiteData, aggregationLevel, clickedSiteGroupId) ||
-                  "No name found for selected group"
-                }
-              >
+            <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
+              <div className="">
                 <ForecastHeadlineFigure
                   tip={`PV Actual / OCF Forecast`}
                   time={allSitesChartDateTime}
                   color="ocf-yellow"
                   unit={"KW"}
                 >
-                  <span className="text-black">
-                    {getTotalPvActualGenerationForGroup(
-                      selectedSiteData.map((site) => site.site_uuid),
-                      selectedTime
-                    ).toFixed(1) || "0"}
-                  </span>
+                  <span className="text-black">{nationalPVActual?.toFixed(1)}</span>
                   <span className="text-ocf-gray-300 mx-1"> / </span>
-                  {getTotalPvForecastGenerationForGroup(
-                    selectedSiteData.map((site) => site.site_uuid),
-                    selectedTime
-                  ).toFixed(1) || "0"}
+                  {nationalPVExpected?.toFixed(1)}
                 </ForecastHeadlineFigure>
-              </ForecastHeaderSite>
-              <div className="h-60 mt-4 mb-2">
-                <RemixLine
-                  resetTime={resetTime}
-                  timeNow={formatISODateString(timeNow)}
-                  timeOfInterest={selectedTime}
-                  setTimeOfInterest={setSelectedTime}
-                  data={filteredChartData}
-                  yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
-                  visibleLines={visibleLines}
-                />
               </div>
-            </>
+              <div>
+                {/*<NextForecast*/}
+                {/*  pv={forecastNextPV}*/}
+                {/*  time={`${forecastNextTimeOnly}`}*/}
+                {/*  tip={`Next OCF Forecast`}*/}
+                {/*  color="ocf-yellow"*/}
+                {/*/>*/}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-
-      <AggregatedDataTable
-        className={currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "" : "hidden"}
-        title={"National"}
-        tableData={Array.from(aggregatedSitesData.national.values())}
-      />
-      <AggregatedDataTable
-        className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
-        title={"Region"}
-        tableData={Array.from(aggregatedSitesData.regions.values())}
-      />
-      <AggregatedDataTable
-        className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
-        title={"GSP"}
-        tableData={Array.from(aggregatedSitesData.gsps.values())}
-      />
-      <AggregatedDataTable
-        className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
-        title={"Sites"}
-        tableData={Array.from(aggregatedSitesData.sites.values())}
-      />
-
-      <div className="flex flex-none justify-end align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 mb-1 bg-mapbox-black-500 overflow-y-visible">
-        <div
-          className={`flex flex-1 justify-around max-w-2xl flex-row pb-3 overflow-x-auto ${
-            show4hView ? " pl-32" : ""
-          }`}
-        >
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              label={"PV Actual"}
-              dataKey={`GENERATION_UPDATED`}
-            />
-          </div>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              dashed
-              label={"OCF Forecast"}
-              dataKey={`FORECAST`}
-            />
-          </div>
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              label={"OCF Final Forecast"}
-              dataKey={`PAST_FORECAST`}
+          <div className="flex-1 relative">
+            <DataLoadingChartStatus loadingState={sitesLoadingState} />
+            <RemixLine
+              resetTime={resetTime}
+              timeNow={formatISODateString(timeNow)}
+              timeOfInterest={selectedTime}
+              setTimeOfInterest={setSelectedTime}
+              data={chartData}
+              zoomEnabled={false}
+              yMax={yMax}
+              visibleLines={visibleLines}
             />
           </div>
         </div>
-        {/* {show4hView && (
-            <div className={legendItemContainerClasses}>
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                dashed
-                label={`OCF ${fourHoursAgo} Forecast`}
-                dataKey={`4HR_FORECAST`}
-              />
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                label={"OCF 4hr Forecast"}
-                dataKey={`4HR_PAST_FORECAST`}
+        {clickedSiteGroupId && aggregationLevel !== AGGREGATION_LEVELS.NATIONAL && (
+          <div className="flex-1 flex flex-col relative">
+            <ForecastHeaderSite
+              onClose={() => {
+                setClickedSiteGroupId(undefined);
+              }}
+              title={
+                getSiteName(selectedSiteData, aggregationLevel, clickedSiteGroupId) ||
+                "No name found for selected group"
+              }
+            >
+              <ForecastHeadlineFigure
+                tip={`PV Actual / OCF Forecast`}
+                time={allSitesChartDateTime}
+                color="ocf-yellow"
+                unit={"KW"}
+              >
+                <span className="text-black">
+                  {getTotalPvActualGenerationForGroup(
+                    selectedSiteData.map((site) => site.site_uuid),
+                    selectedTime
+                  ).toFixed(1) || "0"}
+                </span>
+                <span className="text-ocf-gray-300 mx-1"> / </span>
+                {getTotalPvForecastGenerationForGroup(
+                  selectedSiteData.map((site) => site.site_uuid),
+                  selectedTime
+                ).toFixed(1) || "0"}
+              </ForecastHeadlineFigure>
+            </ForecastHeaderSite>
+            <div className="flex-1 mt-4">
+              <RemixLine
+                resetTime={resetTime}
+                timeNow={formatISODateString(timeNow)}
+                timeOfInterest={selectedTime}
+                setTimeOfInterest={setSelectedTime}
+                data={filteredChartData}
+                yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
+                visibleLines={visibleLines}
               />
             </div>
-          )} */}
+          </div>
+        )}
 
-        <div className="flex-initial flex items-center pb-6 pl-6">
-          <Tooltip tip={<ChartInfo />} position="top" className={"text-right"} fullWidth>
+        <div className="flex-1 flex flex-col">
+          <AggregatedDataTable
+            className={currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "" : "hidden"}
+            title={"National"}
+            tableData={Array.from(aggregatedSitesData.national.values())}
+          />
+          <AggregatedDataTable
+            className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
+            title={"Region"}
+            tableData={Array.from(aggregatedSitesData.regions.values())}
+          />
+          <AggregatedDataTable
+            className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
+            title={"GSP"}
+            tableData={Array.from(aggregatedSitesData.gsps.values())}
+          />
+          <AggregatedDataTable
+            className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
+            title={"Sites"}
+            tableData={Array.from(aggregatedSitesData.sites.values())}
+          />
+        </div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 bg-mapbox-black-500 overflow-y-visible">
+        <div
+          className={`flex flex-col lg:flex-row flex-initial gap-x-6 justify-around max-w-2xl overflow-x-auto`}
+        >
+          <LegendItem
+            iconClasses={"text-ocf-black"}
+            label={"PV Actual"}
+            dataKey={`GENERATION_UPDATED`}
+          />
+          <LegendItem
+            iconClasses={"text-ocf-yellow"}
+            dashStyle={"both"}
+            label={"OCF Forecast"}
+            dataKey={`FORECAST`}
+          />
+        </div>
+
+        <div className="flex-initial flex self-center items-start">
+          <Tooltip
+            tip={
+              <div className="w-64 rounded-md">
+                <ChartInfo />
+              </div>
+            }
+            position="top"
+            className={"text-right"}
+            fullWidth
+          >
             <InfoIcon />
           </Tooltip>
         </div>

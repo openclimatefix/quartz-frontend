@@ -20,7 +20,7 @@ import {
   CombinedValidating,
   ForecastData,
   GspAllForecastData,
-  National4HourData,
+  NationalNHourData,
   PvRealData,
   SitePvActual,
   SitePvForecast,
@@ -57,7 +57,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
-  const [show4hView] = useGlobalState("show4hView");
+  const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [timeNow] = useGlobalState("timeNow");
@@ -70,6 +70,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [visibleLines] = useGlobalState("visibleLines");
   const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
   const [, setLoadingState] = useGlobalState("loadingState");
+  const [nHourForecast] = useGlobalState("nHourForecast");
 
   const [forecastLastFetch30MinISO, setForecastLastFetch30MinISO] = useState(get30MinNow(-30));
   const [forecastHistoricBackwardIntervalMinutes, setForecastHistoricBackwardIntervalMinutes] =
@@ -130,16 +131,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [view, maps]);
 
   useEffect(() => {
-    // Clear any previous map timeouts on initial page load
-    for (const map of maps) {
-      localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`) &&
-        clearTimeout(
-          Number(localStorage.getItem(`MapTimeoutId-${map.getContainer().dataset.title}`))
-        );
-    }
-  }, [maps]);
-
-  useEffect(() => {
     maps.forEach((map) => {
       console.log("-- -- -- resizing map");
       map.resize();
@@ -180,14 +171,15 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: pvRealDayAfterValidating,
     error: pvRealDayAfterError
   } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`);
+  const nMinuteForecast = nHourForecast * 60;
   const {
-    data: national4HourData,
-    isLoading: national4HourLoading,
-    isValidating: national4HourValidating,
-    error: national4HourError
-  } = useLoadDataFromApi<National4HourData>(
-    show4hView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true`
+    data: nationalNHourData,
+    isLoading: nationalNHourLoading,
+    isValidating: nationalNHourValidating,
+    error: nationalNHourError
+  } = useLoadDataFromApi<NationalNHourData>(
+    showNHourView
+      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
       : null
   );
   const {
@@ -216,6 +208,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
+      keepPreviousData: true,
       onSuccess: (data) => {
         const forecastHistoricStart = get30MinNow(forecastHistoricBackwardIntervalMinutes);
         const prev30MinFromNowISO = `${get30MinNow(-30)}:00+00:00`;
@@ -244,6 +237,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
+      keepPreviousData: true,
       refreshInterval: 0, // Only load this once at beginning
       onSuccess: (data) => {
         if (!data) return;
@@ -326,7 +320,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: allGspActualHistoricValidating,
     error: allGspActualHistoricError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true&end_datetime_utc=${encodeURIComponent(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?compact=true&end_datetime_utc=${encodeURIComponent(
       `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
@@ -444,7 +438,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     nationalForecastData,
     pvRealDayInData,
     pvRealDayAfterData,
-    national4HourData,
+    nationalNHourData,
     allGspSystemData,
     allGspForecastData,
     allGspRealData,
@@ -455,7 +449,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       nationalForecastLoading,
       pvRealDayInLoading,
       pvRealDayAfterLoading,
-      national4HourLoading,
+      nationalNHourLoading: nationalNHourLoading,
       allGspSystemLoading,
       allGspForecastLoading,
       allGspRealLoading
@@ -464,7 +458,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       nationalForecastLoading,
       pvRealDayInLoading,
       pvRealDayAfterLoading,
-      national4HourLoading,
+      nationalNHourLoading,
       allGspSystemLoading,
       allGspForecastLoading,
       allGspRealLoading
@@ -475,7 +469,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       nationalForecastValidating,
       pvRealDayInValidating,
       pvRealDayAfterValidating,
-      national4HourValidating,
+      nationalNHourValidating,
       allGspSystemValidating,
       allGspForecastValidating,
       allGspRealValidating: allGspActualValidating
@@ -484,7 +478,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       nationalForecastValidating,
       pvRealDayInValidating,
       pvRealDayAfterValidating,
-      national4HourValidating,
+      nationalNHourValidating,
       allGspSystemValidating,
       allGspForecastValidating,
       allGspActualValidating
@@ -494,7 +488,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     nationalForecastError,
     pvRealDayInError,
     pvRealDayAfterError,
-    national4HourError,
+    nationalNHourError,
     allGspSystemError,
     allGspForecastError,
     allGspRealError: allGspActualError
@@ -642,6 +636,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
             combinedData={combinedData}
+            combinedLoading={combinedLoading}
+            combinedValidating={combinedValidating}
             combinedErrors={combinedErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}

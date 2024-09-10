@@ -5,15 +5,15 @@ type ExpandButtonProps = { isOpen: boolean; onClick: () => void };
 const ExpandButton: React.FC<ExpandButtonProps> = ({ onClick, isOpen }) => {
   return (
     <button
-      className="items-center w-10 h-10  text-lg m text-black bg-amber-400  hover:bg-amber-400 focus:bg-amber-400 "
+      className="items-center w-8 h-8 text-lg m text-black bg-amber-400  hover:bg-amber-400 focus:bg-amber-400 "
       onClick={() => {
         onClick();
       }}
     >
       {!isOpen ? (
-        <MdKeyboardArrowRight size={40} className="m-auto" />
+        <MdKeyboardArrowRight size={32} className="m-auto" />
       ) : (
-        <MdKeyboardArrowLeft size={40} className="m-auto" />
+        <MdKeyboardArrowLeft size={32} className="m-auto" />
       )}
     </button>
   );

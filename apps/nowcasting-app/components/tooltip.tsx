@@ -1,7 +1,8 @@
+export type TooltipPosition = "left" | "right" | "middle" | "top" | "top-middle" | "top-left";
 type TooltipProps = {
   children: React.ReactNode;
   tip: string | React.ReactNode;
-  position?: "left" | "right" | "middle" | "top";
+  position?: TooltipPosition;
   className?: string;
   fullWidth?: boolean;
 };
@@ -32,6 +33,15 @@ const Tooltip: React.FC<TooltipProps> = ({
     case "top":
       containerPositionClass = "bottom-5 right-2";
       tipPositionClass = "-right-2 bottom-0";
+      break;
+    case "top-middle":
+      containerPositionClass = "bottom-6 -left-32 transform translate-x-2";
+      tipPositionClass = "-left-1 bottom-0";
+      break;
+    case "top-left":
+      containerPositionClass = "bottom-8 right-64 transform -translate-x-2";
+      tipPositionClass = "-left-1 bottom-0";
+      break;
   }
   return (
     <div

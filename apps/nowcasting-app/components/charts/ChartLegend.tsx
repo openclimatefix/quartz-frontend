@@ -1,115 +1,93 @@
 import Tooltip from "../tooltip";
 import { ChartInfo } from "../../ChartInfo";
 import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import useGlobalState from "../helpers/globalState";
-import { getRounded4HoursAgoString } from "../helpers/utils";
-
-const LegendItem: FC<{
-  iconClasses: string;
-  label: string;
-  dashed?: boolean;
-  dataKey: string;
-}> = ({ iconClasses, label, dashed, dataKey }) => {
-  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
-  const isVisible = visibleLines.includes(dataKey);
-
-  const toggleLineVisibility = () => {
-    if (isVisible) {
-      setVisibleLines(visibleLines.filter((line) => line !== dataKey));
-    } else {
-      setVisibleLines([...visibleLines, dataKey]);
-    }
-  };
-
-  return (
-    <div className="flex items-center flex-1">
-      <LegendLineGraphIcon className={iconClasses} dashed={dashed} />
-      <button
-        className="inline-flex flex-1 text-left pl-1 max-w-full w-44 dash:w-auto text-xs dash:text-base dash:tracking-wider dash:pb-1"
-        onClick={toggleLineVisibility}
-      >
-        <span
-          className={`block w-auto uppercase pl-1${
-            isVisible ? " font-extrabold dash:font-semibold" : ""
-          }`}
-        >
-          {label}
-        </span>
-      </button>
-    </div>
-  );
-};
+import LegendItem from "./LegendItem";
+import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 
 type ChartLegendProps = {
   className?: string;
 };
-export const ChartLegend: React.FC<ChartLegendProps> = ({ className }) => {
-  const [show4hView] = useGlobalState("show4hView");
+export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
+  const [showNHourView] = useGlobalState("showNHourView");
+  const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
 
-  const fourHoursAgo = getRounded4HoursAgoString();
-  const legendItemContainerClasses = `flex flex-initial flex-col lg:flex-row 3xl:flex-col justify-between${
-    className ? ` ${className}` : ""
-  }`;
+  const legendItemContainerClasses = `flex flex-initial  ${
+    showNHourView
+      ? "flex-col @sm:gap-1 @6xl:gap-6 @6xl:flex-row"
+      : "flex-col @md:gap-1 @3xl:gap-12 @3xl:flex-row"
+  }${className ? ` ${className}` : ""}`;
   return (
-    <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 pt-3 bg-mapbox-black-500 overflow-y-visible">
-      <div className={`flex flex-1 justify-around flex-col 3xl:flex-row pb-3 overflow-x-auto`}>
-        <div className={legendItemContainerClasses}>
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            dashed
-            label={"PV live initial estimate"}
-            dataKey={`GENERATION`}
-          />
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            label={"PV live updated"}
-            dataKey={`GENERATION_UPDATED`}
-          />
-        </div>
-        <div className={legendItemContainerClasses}>
-          <LegendItem
-            iconClasses={"text-ocf-yellow"}
-            dashed
-            label={"OCF Forecast"}
-            dataKey={`FORECAST`}
-          />
-          <LegendItem
-            iconClasses={"text-ocf-yellow"}
-            label={"OCF Final Forecast"}
-            dataKey={`PAST_FORECAST`}
-          />
-        </div>
-        {show4hView && (
+    <div className="@container flex flex-initial">
+      <div className="flex flex-1 flex-col justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 gap-3 bg-mapbox-black-500 overflow-y-visible @sm:flex-row @xl:gap-6">
+        <div
+          className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto ${
+            showNHourView ? "@sm:gap-1" : ""
+          } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-8`}
+        >
           <div className={legendItemContainerClasses}>
             <LegendItem
-              iconClasses={"text-ocf-orange"}
-              dashed
-              // label={`OCF ${fourHoursAgo} Forecast`}
-              label={`OCF 4hr+ Forecast`}
-              dataKey={`4HR_FORECAST`}
+              iconClasses={"text-ocf-black"}
+              dashStyle={"dashed"}
+              label={"PV live initial estimate"}
+              dataKey={`GENERATION`}
             />
             <LegendItem
-              iconClasses={"text-ocf-orange"}
-              label={"OCF 4hr Forecast"}
-              dataKey={`4HR_PAST_FORECAST`}
+              iconClasses={"text-ocf-black"}
+              label={"PV live updated"}
+              dataKey={`GENERATION_UPDATED`}
             />
           </div>
-        )}
-      </div>
-      <div className="flex-initial flex items-center pb-3">
-        <Tooltip
-          tip={
-            <div className="w-64 rounded-md">
-              <ChartInfo />
+          <div className={legendItemContainerClasses}>
+            <LegendItem
+              iconClasses={"text-ocf-yellow"}
+              dashStyle={"both"}
+              label={"OCF Latest Forecast"}
+              dataKey={`FORECAST`}
+            />
+            {/*<LegendItem*/}
+            {/*  iconClasses={"text-ocf-yellow"}*/}
+            {/*  label={"OCF Final Forecast"}*/}
+            {/*  dataKey={`PAST_FORECAST`}*/}
+            {/*/>*/}
+            {showNHourView && (
+              <LegendItem
+                iconClasses={"text-ocf-orange"}
+                dashStyle={"both"}
+                label={`OCF ${nHourForecast}hr Forecast`}
+                dataKey={`N_HOUR_FORECAST`}
+              />
+            )}
+          </div>
+        </div>
+        {showNHourView && (
+          <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
+            <div className="flex">
+              <>
+                <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">
+                  <select
+                    value={nHourForecast}
+                    onChange={(e) => setNHourForecast(Number(e.target.value))}
+                    className="text-sm px-2 py-0 rounded-md"
+                  >
+                    {N_HOUR_FORECAST_OPTIONS.map((option) => (
+                      <option
+                        key={`N-hour-select-option-${option}`}
+                        className="text-black bg-white"
+                        value={option}
+                      >
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </div>{" "}
+                hour <br />
+                forecast
+              </>
             </div>
-          }
-          position="top"
-          className={"text-right"}
-          fullWidth
-        >
-          <InfoIcon />
-        </Tooltip>
+          </div>
+        )}
       </div>
     </div>
   );

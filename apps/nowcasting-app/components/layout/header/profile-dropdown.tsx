@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useEffect } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0";
 import pkg from "../../../package.json";
@@ -8,24 +8,40 @@ import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
 import { ChartInfo } from "../../../ChartInfo";
 import { Checkmark, ExternalLinkIcon } from "../../icons/icons";
-import { CookieStorageKeys, setBooleanSettingInLocalStorage } from "../../helpers/cookieStorage";
+import {
+  CookieStorageKeys,
+  getBooleanSettingFromCookieStorage,
+  setBooleanSettingInLocalStorage
+} from "../../helpers/cookieStorage";
 const { version } = pkg;
 
 interface IProfileDropDown {}
 
 const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
-  const [show4hView, setShow4hView] = useGlobalState("show4hView");
+  const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const toggleDashboardMode = () => {
     setDashboardMode(!dashboardMode);
     setBooleanSettingInLocalStorage(CookieStorageKeys.DASHBOARD_MODE, !dashboardMode);
   };
   const toggle4hView = () => {
-    setShow4hView(!show4hView);
-    setBooleanSettingInLocalStorage(CookieStorageKeys.FOUR_HOUR_VIEW, !show4hView);
+    setShowNHourView(!showNHourView);
+    setBooleanSettingInLocalStorage(CookieStorageKeys.N_HOUR_VIEW, !showNHourView);
   };
-  console.log("dashboardMode", dashboardMode);
+  // Check cookies for the N-hour view setting and update the state if it's different
+  // Doing this here on client-side because the user's cookies are not available on the server,
+  // and React doesn't like it when the state is updated during hydration between server and client.
+  useEffect(() => {
+    // Also default to true if no cookie is set
+    const showNHourViewLocal = getBooleanSettingFromCookieStorage(
+      CookieStorageKeys.N_HOUR_VIEW,
+      true
+    );
+    if (showNHourViewLocal !== showNHourView) {
+      setShowNHourView(showNHourViewLocal);
+    }
+  }, []);
 
   return (
     <Menu as="div" className="relative z-20 ml-3">
@@ -54,17 +70,17 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
                     "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
                   )}
                 >
-                  {show4hView && (
+                  {showNHourView && (
                     <span className="flex items-center">
                       <Checkmark />
                     </span>
                   )}
                   <button
-                    id={"UserMenu-4hViewBtn"}
+                    id={"UserMenu-NhViewBtn"}
                     onClick={toggle4hView}
                     className="ml-1 text-sm  font-medium text-ocf-black-600"
                   >
-                    {`4-hour forecast`}
+                    {`N-hour forecast`}
                   </button>
                 </div>
               )}

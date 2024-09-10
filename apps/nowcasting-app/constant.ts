@@ -62,6 +62,16 @@ export enum VIEWS {
   DELTA = "DELTA",
   SOLAR_SITES = "SOLAR SITES"
 }
+export const getViewTitle = (view: VIEWS) => {
+  switch (view) {
+    case VIEWS.FORECAST:
+      return "PV Forecast";
+    case VIEWS.DELTA:
+      return "Delta";
+    case VIEWS.SOLAR_SITES:
+      return "Solar Sites";
+  }
+};
 
 export enum AGGREGATION_LEVELS {
   NATIONAL = "NATIONAL",
@@ -102,3 +112,5 @@ export enum DELTA_BUCKET {
   POS4 = 100
 }
 export const getDeltaBucketKeys = () => Object.keys(DELTA_BUCKET).filter((k) => isNaN(Number(k)));
+
+export const N_HOUR_FORECAST_OPTIONS = [1, 2, 4, 8];
