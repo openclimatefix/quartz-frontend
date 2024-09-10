@@ -320,7 +320,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: allGspActualHistoricValidating,
     error: allGspActualHistoricError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true&end_datetime_utc=${encodeURIComponent(
+    `${API_PREFIX}/solar/GB/gsp/pvlive/all?compact=true&end_datetime_utc=${encodeURIComponent(
       `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
