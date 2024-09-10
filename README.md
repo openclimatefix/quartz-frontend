@@ -1,6 +1,6 @@
 # Solar Electricity Nowcasting
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-) 
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 This is a "meta-repository" for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project. See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to solar electricity nowcasting.
@@ -35,6 +35,12 @@ We've set up this traffic light legend, so you can see how easy it is to get inv
 | 🟢 | Easy to contribute | These project are easy to run, standalone and have easily reable code. There should be issue for everyone at different skills levels.                         |
 | 🟠 | Medium difficulty to contribute | These projects are accessible to contributers but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
 | 🔴 | Hard to contribute | We would not recommend going to these project. They havent been made "nice" and it might take a lot of digging in the code to understand whats going on.      |
+
+You will usually see one of the corresponding badges on the repo's README:
+
+[![ease of contribution: easy](https://img.shields.io/badge/ease%20of%20contribution:%20easy-32bd50)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#overview-of-ocfs-nowcasting-repositories) 
+[![ease of contribution: medium](https://img.shields.io/badge/ease%20of%20contribution:%20medium-f4900c)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#overview-of-ocfs-nowcasting-repositories) 
+[![ease of contribution: hard](https://img.shields.io/badge/ease%20of%20contribution:%20hard-dd2e44)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#overview-of-ocfs-nowcasting-repositories)
 
 # Overview of OCF's nowcasting repositories
 
