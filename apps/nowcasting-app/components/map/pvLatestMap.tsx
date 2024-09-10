@@ -241,9 +241,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between gap-3 items-center mb-1">
             <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.GSPs} • #${
-            properties?.gsp_id
-          }</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs}</div>
           </div>
           <div class="flex justify-between items-center">
             
