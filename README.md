@@ -32,9 +32,9 @@ We've set up this traffic light legend, so you can see how easy it is to get inv
 
 | Colour | Description | Details                                                                                                                                                       |
 |--------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 🟢 | Easy to contribute | These project are easy to run, standalone and have easily reable code. There should be issue for everyone at different skills levels.                         |
-| 🟠 | Medium difficulty to contribute | These projects are accessible to contributers but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
-| 🔴 | Hard to contribute | We would not recommend going to these project. They havent been made "nice" and it might take a lot of digging in the code to understand whats going on.      |
+| 🟢 | Ease of contribution: easy | These project are easy to run, standalone and have easily reable code. There should be issue for everyone at different skills levels.                         |
+| 🟠 | Ease of contribution: medium | These projects are accessible to contributers but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
+| 🔴 | Ease of contribution: hard | We would not recommend going to these project. They havent been made "nice" and it might take a lot of digging in the code to understand whats going on.      |
 
 You will usually see one of the corresponding badges on the repo's README:
 
