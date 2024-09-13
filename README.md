@@ -27,11 +27,18 @@ It's really, really, _really_ hard to estimate climate impact of forecasting! Bu
 ## How easy is it to get involved
 We've set up this traffic light legend, so you can see how easy it is to get involved in each of our repositories.
 
+
 | Colour | Description | Details                                                                                                                                                       |
 |--------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 🟢 | Easy to contribute | These project are easy to run, standalone and have easily reable code. There should be issue for everyone at different skills levels.                         |
-| 🟠 | Medium difficulty to contribute | These projects are accessible to contributers but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
-| 🔴 | Hard to contribute | We would not recommend going to these project. They havent been made "nice" and it might take a lot of digging in the code to understand whats going on.      |
+| 🟢 | Ease of contribution: easy | These projects are easy to run, standalone, and have easily readable code. There should be issues for everyone at different skill levels.                         |
+| 🟠 | Ease of contribution: medium | These projects are accessible to contributors but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
+| 🔴 | Ease of contribution: hard | We would not recommend going into these projects. They haven't been made "nice" and it might take a lot of digging in the code to understand what's going on.      |
+
+You will usually see one of the corresponding badges on the repo's README:
+
+[![ease of contribution: easy](https://img.shields.io/badge/ease%20of%20contribution:%20easy-32bd50)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#overview-of-ocfs-nowcasting-repositories) 
+[![ease of contribution: medium](https://img.shields.io/badge/ease%20of%20contribution:%20medium-f4900c)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#overview-of-ocfs-nowcasting-repositories) 
+[![ease of contribution: hard](https://img.shields.io/badge/ease%20of%20contribution:%20hard-bb2629)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#overview-of-ocfs-nowcasting-repositories)
 
 # Overview of OCF's nowcasting repositories
 
