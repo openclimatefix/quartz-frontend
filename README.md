@@ -58,7 +58,7 @@ You will usually see one of the corresponding badges on the repo's README:
 
 | Repo                                                                         | Description  |    Main Developer      | Easy to contribute ? | 
 |------------------------------------------------------------------------------|------------------------|-------| --- |
-| [Graph Weather](https://github.com/openclimatefix/perceiver-pytorch)         | PyTorch implementation of Ryan Keisler's 2022 "Forecasting Global Weather with Graph Neural Networks" paper (https://arxiv.org/abs/2202.07575) | [Jacob Bieker](https://github.com/jacobbieker) | 🟢 
+| [Graph Weather](https://github.com/openclimatefix/graph_weather)         | PyTorch implementation of Ryan Keisler's 2022 "Forecasting Global Weather with Graph Neural Networks" paper (https://arxiv.org/abs/2202.07575) | [Jacob Bieker](https://github.com/jacobbieker) | 🟢 
 | [MetNet](https://github.com/openclimatefix/metnet)                           | PyTorch Implementation of Google Research's MetNet ([Sønderby et al. 2020](https://arxiv.org/abs/2003.12140)), inspired from Thomas Capelle's [metnet_pytorch](https://github.com/tcapelle/metnet_pytorch/tree/master/metnet_pytorch). | [Jacob Bieker](https://github.com/jacobbieker) | 🟢 
 | [Skillful Nowcasting](https://github.com/openclimatefix/skillful_nowcasting) | Implementation of DeepMind's Skillful Nowcasting GAN ([Ravuri et al. 2021](https://arxiv.org/abs/2104.00954)) in PyTorch Lightning. | [Jacob Bieker](https://github.com/jacobbieker) | 🟠
 | [Perceiver Pytorch](https://github.com/openclimatefix/perceiver-pytorch)     | Implementation of DeepMind's Perceiver ([Jaegle et al. 2021](https://arxiv.org/abs/2103.03206)) and Perceiver IO ([Jaegle et al. 2021](https://arxiv.org/abs/2107.14795)) in Pytorch. Forked from [lucidrains/perceiver-pytorch](https://github.com/lucidrains/perceiver-pytorch) |[Jack Kelly](https://github.com/JackKelly) | 🔴
@@ -71,7 +71,7 @@ You will usually see one of the corresponding badges on the repo's README:
 |------------------------------------------------------------------------------------|------------------------|-------| --- |
 | [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc) | 🟢
 | [pv-site-datamodel](https://github.com/openclimatefix/pv-site-datamodel)           | Datamodel for PV sites | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
-| [ocf-infrastructure](https://github.com/openclimatefix/pv-site-api)                | Infrastructure code for OCF's cloud environments  | [Sol Cotton](https://github.com/devsjc) | 🟠
+| [ocf-infrastructure](https://github.com/openclimatefix/ocf-infrastructure)                | Infrastructure code for OCF's cloud environments  | [Sol Cotton](https://github.com/devsjc) | 🟠
 | [Satip](https://github.com/openclimatefix/satip)                                   | Satip contains the code necessary for retrieving, transforming and storing EUMETSAT data | [Sol Cotton](https://github.com/devsjc) | 🟠
 | [analysis-dashboard ](https://github.com/openclimatefix/uk-analysis-dashboard )    | This is a Streamlit app for the OCF team that reports database statistics | [Peter Dudfield](https://github.com/peterdudfield) | 🔴 
 | [Nowcasting Alerts Cron](https://github.com/openclimatefix/nowcasting_alerts_cron) | Nowcasting Alerts cron Worker | [Brad Fulford](https://github.com/braddf) | 🔴
@@ -82,7 +82,7 @@ You will usually see one of the corresponding badges on the repo's README:
 |-----------------------------------------------------------------------------------|------------------------|-------|  --- |
 | [nowcasting_datamodel](https://github.com/openclimatefix/nowcasting_datamodel)    | Datamodel for the nowcasting project | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
 | [GSPConsumer](https://github.com/openclimatefix/gspconsumer)                      | Collect GSP solar generation data from PVLive | [Peter Dudfield](https://github.com/peterdudfield) | 🟠
-| [PVConsumer](https://github.com/openclimatefix/gspconsumer)                       | Consumer PV data from various sources | [Peter Dudfield](https://github.com/peterdudfield) | 🟠
+| [PVConsumer](https://github.com/openclimatefix/PVConsumer)                       | Consumer PV data from various sources | [Peter Dudfield](https://github.com/peterdudfield) | 🟠
 | [PVoutput](https://github.com/openclimatefix/pvoutput)                            | Python code for downloading PV data from PVOutput.org | [Jack Kelly](https://github.com/JackKelly) | 🟠
 | [pv-site-api](https://github.com/openclimatefix/pv-site-api)                      | Site specific API for SBRI project | [Peter Dudfield](https://github.com/peterdudfield)              | 🟠
 | [quartz-frontend](https://github.com/openclimatefix/quartz-frontend)              | Front End repo for the Nowcasting project. | [Brad Fulford](https://github.com/braddf) | 🟠
