@@ -29,3 +29,5 @@ jobs:
       run: |
         cd apps/nowcasting-app
         yarn start & sleep 5 && yarn test:ci --coverage --coverageDirectory=../..
+      env:
+        AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
