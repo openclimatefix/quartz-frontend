@@ -11,7 +11,7 @@
     "lint": "next lint",
     "pre-commit": "pre-commit run",
     "test": "yarn dev & cypress run --browser chrome && jest && lsof -t -i :3002 | xargs kill",
-    "test:ci": "yarn dev & cypress run --browser chrome && jest"
+    "test:ci": "cypress run --browser chrome && jest"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^1.8.0",

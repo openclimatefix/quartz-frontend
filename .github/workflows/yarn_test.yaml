@@ -28,4 +28,4 @@ jobs:
     - name: run tests
       run: |
         cd apps/nowcasting-app
-        yarn start & sleep 5 && yarn test --coverage --coverageDirectory=../..
+        yarn start & sleep 5 && yarn test:ci --coverage --coverageDirectory=../..
