@@ -324,30 +324,38 @@ const SolarSiteChart: FC<{
           </div>
         )}
 
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-y-scroll relative">
           <AggregatedDataTable
-            className={currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "" : "hidden"}
+            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+              currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "z-10" : "z-0 opacity-0"
+            }`}
             title={"National"}
             tableData={Array.from(aggregatedSitesData.national.values())}
           />
           <AggregatedDataTable
-            className={currentAggregation(AGGREGATION_LEVELS.REGION) ? "" : "hidden"}
+            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+              currentAggregation(AGGREGATION_LEVELS.REGION) ? "z-10" : "z-0 opacity-0"
+            }`}
             title={"Region"}
             tableData={Array.from(aggregatedSitesData.regions.values())}
           />
           <AggregatedDataTable
-            className={currentAggregation(AGGREGATION_LEVELS.GSP) ? "" : "hidden"}
+            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+              currentAggregation(AGGREGATION_LEVELS.GSP) ? "z-10" : "z-0 opacity-0"
+            }`}
             title={"GSP"}
             tableData={Array.from(aggregatedSitesData.gsps.values())}
           />
           <AggregatedDataTable
-            className={currentAggregation(AGGREGATION_LEVELS.SITE) ? "" : "hidden"}
+            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+              currentAggregation(AGGREGATION_LEVELS.SITE) ? "z-10" : "z-0 opacity-0"
+            }`}
             title={"Sites"}
             tableData={Array.from(aggregatedSitesData.sites.values())}
           />
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 bg-mapbox-black-500 overflow-y-visible">
+      <div className="absolute bottom-0 left-0 right-0 z-10 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 bg-mapbox-black-500 overflow-y-visible">
         <div
           className={`flex flex-col lg:flex-row flex-initial gap-x-6 justify-around max-w-2xl overflow-x-auto`}
         >

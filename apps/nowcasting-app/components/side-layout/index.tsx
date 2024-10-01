@@ -46,7 +46,7 @@ const SideLayout: FC<SideLayoutProps> = ({
       >
         <div className={`min-h-full max-h-full flex flex-col overflow-y-scroll`}>{children}</div>
       </div>
-      <div className="absolute bottom-12 -right-4 h-10">
+      <div className="absolute bottom-12 -right-4 h-10 z-20">
         <ExpandButton isOpen={isOpen} onClick={() => setIsOpen((o) => !o)} />
       </div>
 
