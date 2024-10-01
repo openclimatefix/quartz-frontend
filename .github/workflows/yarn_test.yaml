@@ -28,7 +28,7 @@ jobs:
     - name: run tests
       run: |
         cd apps/nowcasting-app
-        yarn start & sleep 5 && yarn test:ci --coverage --coverageDirectory=../..
+        yarn start & sleep 5 && yarn test --coverage --coverageDirectory=../..
       env:
         AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
         AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
@@ -38,6 +38,7 @@ jobs:
         AUTH0_ISSUER_BASE_URL: ${{ secrets.AUTH0_ISSUER_BASE_URL }}
         AUTH0_SCOPE: ${{ secrets.AUTH0_SCOPE }}
         AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
+        NEXT_PUBLIC_API_PREFIX: ${{ secrets.NEXT_PUBLIC_API_PREFIX }}
         NEXT_PUBLIC_AUTH0_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_AUDIENCE }}
         NEXT_PUBLIC_AUTH0_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_AUTH0_CLIENT_ID }}
         NEXT_PUBLIC_AUTH0_DOMAIN: ${{ secrets.NEXT_PUBLIC_AUTH0_DOMAIN }}

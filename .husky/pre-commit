@@ -1,6 +1,15 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-cd apps/nowcasting-app
+cd apps/nowcasting-app || exit
 yarn lint
-yarn test
+
+# check if the server is already running and save the boolean result
+serverRunning=$(lsof -t -i :3002)
+# if the server is running, just run the tests and don't start the server
+if [ -z "$serverRunning" ]; then
+  yarn test
+else
+  # if the server isn't running, start it, run the tests, and then kill the server after the tests are done
+  yarn dev & yarn test && lsof -t -i :3002 | xargs kill
+fi
