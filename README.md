@@ -42,7 +42,7 @@ You will usually see one of the corresponding badges on the repo's README:
 
 # Overview of OCF's nowcasting repositories
 
-## Machine Learning
+<details><summary><a>Machine Learning</a></summary>
 
 ### Main repositories for our ML experiments
 
@@ -63,7 +63,9 @@ You will usually see one of the corresponding badges on the repo's README:
 | [Skillful Nowcasting](https://github.com/openclimatefix/skillful_nowcasting) | Implementation of DeepMind's Skillful Nowcasting GAN ([Ravuri et al. 2021](https://arxiv.org/abs/2104.00954)) in PyTorch Lightning. | [Jacob Bieker](https://github.com/jacobbieker) | 🟠
 | [Perceiver Pytorch](https://github.com/openclimatefix/perceiver-pytorch)     | Implementation of DeepMind's Perceiver ([Jaegle et al. 2021](https://arxiv.org/abs/2103.03206)) and Perceiver IO ([Jaegle et al. 2021](https://arxiv.org/abs/2107.14795)) in Pytorch. Forked from [lucidrains/perceiver-pytorch](https://github.com/lucidrains/perceiver-pytorch) |[Jack Kelly](https://github.com/JackKelly) | 🔴
 
-## Operational Solar Forecasting
+</details>
+
+<details><summary><a>Operational Solar Forecasting</a></summary>
 
 ### General 
 
@@ -98,8 +100,9 @@ You will usually see one of the corresponding badges on the repo's README:
 | [india-api](https://github.com/openclimatefix/india-api)                   | API India solar and wind data | [Sol Cotton](https://github.com/devsjc) | 🟢
 | [india-forecast-app](https://github.com/openclimatefix/india-forecast-app) | Runs wind and PV forecasts for India and saves to database | [Peter Dudfield](https://github.com/peterdudfield) | 🔴
 
+</details>
 
-## Other repos
+<details><summary><a>Other repos</a></summary>
 
 | Repo                                                                     | Description                                                                                            | Main Developer                                 | Easy to contribute ? | 
 |--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------| --- |
@@ -111,4 +114,6 @@ You will usually see one of the corresponding badges on the repo's README:
 
 
 For a complete list of all of OCF's repositories tagged with "nowcasting", see [this link](https://github.com/search?l=&o=desc&q=topic%3Anowcasting+org%3Aopenclimatefix&s=updated&type=Repositories)
+
+</details>
 
