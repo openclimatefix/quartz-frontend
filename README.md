@@ -1,46 +1,48 @@
-# Solar Electricity Nowcasting
+![](https://cdn.prod.website-files.com/62d92550f6774db58d441cca/6324a2038936ecda71599a8b_OCF_Logo_black_trans.png)
 
-This is a "meta-repository" for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project. See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to solar electricity nowcasting.
+Open Climate Fix (OCF) is a non-profit company, focused on Building AI tools for a greener grid
+Every path to net zero has the electricity grid at its heart. At Open Climate Fix, we're delivering cutting-edge technology for industry to accelerate the energy transition.
 
-The plan is to enable the community to build the world's best near-term forecasting system for solar electricity generation, and then let anyone use it! :) We'll do this by using state-of-the-art machine learning and 5-minutely satellite imagery to predict the movement of clouds over the next few hours, and then use this to predict solar electricity generation.
+## How to get involved?
+At OCF we are passionate that all the knowledge we produce remains open, to break down intellectual property barriers and subsequently reduce the “time to impact”. We therefore encourage external users to use our base code.
 
-The term "nowcasting" just means "forecasting for the next few hours using statistical techniques".
+<details><summary><a>Click here to see a number of ways for you to get involved: </a></summary>
 
-# Why is all this stuff open-source?
+* Submit pull requests.
+* Have a look at our [List of "good first issues"](https://github.com/search?l=&p=1&q=user%3Aopenclimatefix+label%3A%22good+first+issue%22&ref=advsearch&type=Issues&utf8=%E2%9C%93&state=open): GitHub "issues" which describe changes we'd like to make to the code. Our coding style is [here](https://github.com/openclimatefix/.github/blob/main/coding_style.md)
+* Check out which [Github repository](https://github.com/openclimatefix/ocf-meta-repo) are easy to contribute to. 
+* Sign up to our [newsletter](https://ocfnews.substack.com/?utm_source=substack&utm_medium=web&utm_campaign=substack_profile) and follow us on [Twitter](https://twitter.com/OpenClimateFix) and [LinkedIn](https://www.linkedin.com/company/19123036/admin/) to learn the latest about our work
+* Use our datasets on [Hugging Face](https://huggingface.co/openclimatefix) or [EUMETSAT satellite data](https://console.cloud.google.com/marketplace/product/bigquery-public-data/eumetsat-seviri-rss?hl=en-GB&project=solar-pv-nowcasting) and let us know if it was useful. 
+* Spread the word with your networks
+* Use our code(!) by following the guidelines below.
 
-In OCF, we're curious to see if it's possible to rapidly mitigate climate change by:
+</details>
 
-1. Enabling thousands of people to help solve ML problems which, if solved, might help reduce CO2 emissions
-2. Running small(ish) pilot projects to implement the best solution in industry
-3. Enabling thousands of practitioners to use the code in their products.
+## What if you use our code?
+<details><summary><a>Click here to see more </a></summary>
 
-# What's the likely climate impact?
+In order for us to understand the use of our models, and to demonstrate impact to future funders, it is invaluable for us to know who is using the code and if possible, how. We licence the code in this repository under a permissive MIT licence and if you are using the code or deriving from it, we request that you attribute the use of Open Climate Fix’s work in your product by adding the text below:
 
-It's really, really, _really_ hard to estimate climate impact of forecasting! But, as a super-rough back-of-the-envelope calculation, we estimate that better solar forecasts, if rolled out globally, could reduce CO2 emissions by about a billion tonnes between now and 2035.
+#### 'original code by [Open Climate Fix](https://github.com/openclimatefix)'
 
-# Getting involved
+If you're a contributor, we'd love for you to share your work! We ask our community to refer to themselves as an Open Climate Fix Community Contributor, specifically across social media channels and on personal CVs or portfolios. 
 
-- [List of "good first issues"](https://github.com/search?l=&p=1&q=user%3Aopenclimatefix+label%3A%22good+first+issue%22&ref=advsearch&type=Issues&utf8=%E2%9C%93&state=open): GitHub "issues" which describe changes we'd like to make to the code.
-- [OCF's coding style](https://github.com/openclimatefix/.github/blob/main/coding_style.md)
-- The main tools we use include: PyTorch, PyTorch Lighting, xarray, pandas, pvlib
+</details>
 
 ## How easy is it to get involved
 We've set up this traffic light legend, so you can see how easy it is to get involved in each of our repositories.
 
 
-| Colour | Description | Details                                                                                                                                                       |
-|--------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 🟢 | Ease of contribution: easy | These projects are easy to run, standalone, and have easily readable code. There should be issues for everyone at different skill levels.                         |
-| 🟠 | Ease of contribution: medium | These projects are accessible to contributors but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
-| 🔴 | Ease of contribution: hard | We would not recommend going into these projects. They haven't been made "nice" and it might take a lot of digging in the code to understand what's going on.      |
+| Level | Details|        
+|--- | ---- |
+|[![ease of contribution: easy](https://img.shields.io/badge/ease%20of%20contribution:%20easy-32bd50)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#how-easy-is-it-to-get-involved) | These projects are easy to run, standalone, and have easily readable code. There should be issues for everyone at different skill levels.                         |
+| [![ease of contribution: medium](https://img.shields.io/badge/ease%20of%20contribution:%20medium-f4900c)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#how-easy-is-it-to-get-involved)  | These projects are accessible to contributors but might depend on your skill level. They might depend on another bit of code or need you to investigate a little bit. 
+| [![ease of contribution: hard](https://img.shields.io/badge/ease%20of%20contribution:%20hard-bb2629)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#how-easy-is-it-to-get-involved) | We would not recommend going into these projects. They haven't been made "nice" and it might take a lot of digging in the code to understand what's going on.      |
 
-You will usually see one of the corresponding badges on the repo's README:
+You will usually see one of the corresponding badges on the repo's README.
 
-[![ease of contribution: easy](https://img.shields.io/badge/ease%20of%20contribution:%20easy-32bd50)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#how-easy-is-it-to-get-involved) 
-[![ease of contribution: medium](https://img.shields.io/badge/ease%20of%20contribution:%20medium-f4900c)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#how-easy-is-it-to-get-involved) 
-[![ease of contribution: hard](https://img.shields.io/badge/ease%20of%20contribution:%20hard-bb2629)](https://github.com/openclimatefix/ocf-meta-repo?tab=readme-ov-file#how-easy-is-it-to-get-involved)
 
-# Overview of OCF's nowcasting repositories
+## Overview of OCF's nowcasting repositories
 
 <details><summary><a>Machine Learning</a></summary>
 
