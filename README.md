@@ -1,7 +1,8 @@
 ![](https://cdn.prod.website-files.com/62d92550f6774db58d441cca/6324a2038936ecda71599a8b_OCF_Logo_black_trans.png)
 
-Open Climate Fix (OCF) is a non-profit company, focused on Building AI tools for a greener grid
-Every path to net zero has the electricity grid at its heart. At Open Climate Fix, we're delivering cutting-edge technology for industry to accelerate the energy transition.
+Open Climate Fix (OCF) is a non-profit company, focused on Building AI tools for a greener grid. 
+Every path to net zero has the electricity grid at its heart. 
+At Open Climate Fix, we're delivering cutting-edge technology for industry to accelerate the energy transition.
 
 ## How to get involved?
 At OCF we are passionate that all the knowledge we produce remains open, to break down intellectual property barriers and subsequently reduce the “time to impact”. We therefore encourage external users to use our base code.
