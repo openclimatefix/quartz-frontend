@@ -7,17 +7,16 @@ At Open Climate Fix, we're delivering cutting-edge technology for industry to ac
 ## How to get involved?
 At OCF we are passionate that all the knowledge we produce remains open, to break down intellectual property barriers and subsequently reduce the “time to impact”. We therefore encourage external users to use our base code.
 
-<details><summary><a>Click here to see a number of ways for you to get involved: </a></summary>
+Here how you can get involved:
 
 * Submit pull requests.
 * Have a look at our [List of "good first issues"](https://github.com/search?l=&p=1&q=user%3Aopenclimatefix+label%3A%22good+first+issue%22&ref=advsearch&type=Issues&utf8=%E2%9C%93&state=open): GitHub "issues" which describe changes we'd like to make to the code. Our coding style is [here](https://github.com/openclimatefix/.github/blob/main/coding_style.md)
 * Check out which [Github repository](https://github.com/openclimatefix/ocf-meta-repo) are easy to contribute to. 
 * Sign up to our [newsletter](https://ocfnews.substack.com/?utm_source=substack&utm_medium=web&utm_campaign=substack_profile) and follow us on [Twitter](https://twitter.com/OpenClimateFix) and [LinkedIn](https://www.linkedin.com/company/19123036/admin/) to learn the latest about our work
 * Use our datasets on [Hugging Face](https://huggingface.co/openclimatefix) or [EUMETSAT satellite data](https://console.cloud.google.com/marketplace/product/bigquery-public-data/eumetsat-seviri-rss?hl=en-GB&project=solar-pv-nowcasting) and let us know if it was useful. 
+* Use our ML models on [Huggin Face](https://huggingface.co/openclimatefix) and let us know if it was useful.
 * Spread the word with your networks
 * Use our code(!) by following the guidelines below.
-
-</details>
 
 ## What if you use our code?
 <details><summary><a>Click here to see more </a></summary>
@@ -43,7 +42,20 @@ We've set up this traffic light legend, so you can see how easy it is to get inv
 You will usually see one of the corresponding badges on the repo's README.
 
 
-## Overview of OCF's nowcasting repositories
+## Overview of OCF's repositories
+
+Click on the sections below to see the repo's. 
+
+<details><summary><a>Open Source Tools</a></summary>
+
+| Repo                                                                                                     | Description                           | Main Developer                                     | Easy to contribute ? | 
+|----------------------------------------------------------------------------------------------------------|---------------------------------------|----------------------------------------------------| --- |
+| [Open-Source-Quartz-Solar-Forecast](https://github.com/openclimatefix/Open-Source-Quartz-Solar-Forecast) | Open Source Solar Site Level Forecast | [Zak Watts](https://github.com/zakwatts)           | 🟢
+| [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                                           | Microservice for consuming NWP data.  | [Sol Cotton](https://github.com/devsjc)            | 🟢
+| [Elexonpy](https://github.com/openclimatefix/elexonpy)                                                   | Python wrapper for UK Elexon data     | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
+
+
+</details>
 
 <details><summary><a>Machine Learning</a></summary>
 
@@ -74,7 +86,6 @@ You will usually see one of the corresponding badges on the repo's README.
 
 | Repo                                                                               | Description  |    Main Developer      | Easy to contribute ? | 
 |------------------------------------------------------------------------------------|------------------------|-------| --- |
-| [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                     | Microservice for consuming NWP data. | [Sol Cotton](https://github.com/devsjc) | 🟢
 | [pv-site-datamodel](https://github.com/openclimatefix/pv-site-datamodel)           | Datamodel for PV sites | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
 | [ocf-infrastructure](https://github.com/openclimatefix/ocf-infrastructure)                | Infrastructure code for OCF's cloud environments  | [Sol Cotton](https://github.com/devsjc) | 🟠
 | [Satip](https://github.com/openclimatefix/satip)                                   | Satip contains the code necessary for retrieving, transforming and storing EUMETSAT data | [Sol Cotton](https://github.com/devsjc) | 🟠
@@ -111,7 +122,6 @@ You will usually see one of the corresponding badges on the repo's README.
 |--------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|------------------------------------------------| --- |
 | [GFS Downloader](https://github.com/openclimatefix/gfs-downloader)       | NCEP GFS 0.25 Degree Global Forecast Grids Historical Archive: https://rda.ucar.edu/datasets/ds084.1/ | [Zak Watts](https://github.com/zakwatts) | 🟢
 | [OCF Blocs2](https://github.com/openclimatefix/ocf_blosc2)               | Blosc2 codec used for OCF's Zarr compression | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
-| [Open-Source-Quartz-Solar-Forecast](https://github.com/openclimatefix/Open-Source-Quartz-Solar-Forecast)                             | Open Source Solar Site Level Forecast          | [Zak Watts](https://github.com/zakwatts) | 🟢
 | [Solar and Storage](https://github.com/openclimatefix/solar-and-storage) | Solar and Storage optimization code | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
 | [.github](https://github.com/openclimatefix/.github)                     | Various Community Health Files | [Peter Dudfield](https://github.com/peterdudfield) | 🔴
 
