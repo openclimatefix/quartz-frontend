@@ -53,6 +53,7 @@ Click on the sections below to see the repo's.
 | [Open-Source-Quartz-Solar-Forecast](https://github.com/openclimatefix/Open-Source-Quartz-Solar-Forecast) | Open Source Solar Site Level Forecast | [Zak Watts](https://github.com/zakwatts)           | 🟢
 | [NWP consumer](https://github.com/openclimatefix/nwp-consumer)                                           | Microservice for consuming NWP data.  | [Sol Cotton](https://github.com/devsjc)            | 🟢
 | [Elexonpy](https://github.com/openclimatefix/elexonpy)                                                   | Python wrapper for UK Elexon data     | [Peter Dudfield](https://github.com/peterdudfield) | 🟢
+| [OCF VRM API](https://github.com/openclimatefix/vrm-api-python-client)                                    | Python wrapper for Victron API        | [Matthew Duffin](https://github.com/mduffin95) | 🟢
 
 
 </details>
