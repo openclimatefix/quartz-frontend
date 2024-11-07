@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction } from "react";
-import { ActiveUnit } from "./types";
+import { Dispatch, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
+import { ActiveUnit, NationalAggregation } from "./types";
 
 const MeasuringUnit = ({
   activeUnit,
@@ -10,59 +10,99 @@ const MeasuringUnit = ({
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
   isLoading: boolean;
 }) => {
-  const onToggle = async (
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  const onToggleUnit = async (
+    event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit
   ) => {
     event.preventDefault();
     setActiveUnit(unit);
   };
+  const onToggleAggregation = async (
+    event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
+    aggregation: NationalAggregation
+  ) => {
+    event.preventDefault();
+    // setAggregation(aggregation);
+    console.log("aggregation", aggregation);
+  };
   const buttonClasses =
     "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";
 
+  type ButtonProps<T> = {
+    id: string;
+    active: boolean;
+    isLoading: boolean;
+    onToggle: (event: ReactMouseEvent<HTMLButtonElement>, unit: T) => Promise<void>;
+    text: string;
+    value: T;
+  };
+  const MapUIButton = <T,>({ id, active, isLoading, onToggle, text, value }: ButtonProps<T>) => {
+    return (
+      <button
+        onClick={(event) => onToggle(event, value)}
+        disabled={isLoading}
+        id={id}
+        type="button"
+        className={`${buttonClasses}  ${
+          active ? "text-black bg-ocf-yellow" : "text-white bg-black border-r"
+        } ${isLoading ? "cursor-wait" : ""}`}
+      >
+        {text}
+      </button>
+    );
+  };
+
   return (
-    <div className="flex justify-end mr-0">
-      <div className="inline-block">
-        <button
-          onClick={(event) => onToggle(event, ActiveUnit.MW)}
-          disabled={isLoading}
-          id="MapButtonMW"
-          type="button"
-          className={`${buttonClasses}  ${
-            activeUnit === ActiveUnit.MW
-              ? "text-black bg-ocf-yellow"
-              : "text-white bg-black border-r"
-          } ${isLoading ? "cursor-wait" : ""}`}
-        >
-          MW
-        </button>
-        <button
-          onClick={(event) => onToggle(event, ActiveUnit.percentage)}
-          disabled={isLoading}
-          id="MapButtonPercentage"
-          type="button"
-          className={`${buttonClasses} px-5 ${
-            activeUnit === ActiveUnit.percentage
-              ? "text-black bg-ocf-yellow"
-              : "text-white bg-black"
-            // : "text-white bg-black border-r"
-          }  ${isLoading ? "cursor-wait" : ""}`}
-        >
-          %
-        </button>
-        <button
-          onClick={(event) => onToggle(event, ActiveUnit.capacity)}
-          disabled={isLoading}
-          id="MapButtonCapacity"
-          type="button"
-          className={`${buttonClasses}  ${
-            activeUnit === ActiveUnit.capacity ? "text-black bg-ocf-yellow" : "text-white bg-black"
-          } ${isLoading ? "cursor-wait" : ""}`}
-        >
-          Capacity
-        </button>
+    <>
+      <div className="flex justify-end mr-0">
+        <div className="inline-block">
+          <MapUIButton<ActiveUnit>
+            id={"UnitButtonMW"}
+            active={activeUnit === ActiveUnit.MW}
+            isLoading={isLoading}
+            onToggle={onToggleUnit}
+            text={"MW"}
+            value={ActiveUnit.MW}
+          />
+          <MapUIButton<ActiveUnit>
+            id={"UnitButtonPercentage"}
+            active={activeUnit === ActiveUnit.percentage}
+            isLoading={isLoading}
+            onToggle={onToggleUnit}
+            text={"%"}
+            value={ActiveUnit.percentage}
+          />
+          <MapUIButton<ActiveUnit>
+            id={"UnitButtonCapacity"}
+            active={activeUnit === ActiveUnit.capacity}
+            isLoading={isLoading}
+            onToggle={onToggleUnit}
+            text={"Capacity"}
+            value={ActiveUnit.capacity}
+          />
+        </div>
       </div>
-    </div>
+      <div className="flex justify-end mr-0 mt-3">
+        <div className="inline-block">
+          <MapUIButton<NationalAggregation>
+            id={"GroupButtonGSP"}
+            active={false}
+            isLoading={isLoading}
+            onToggle={onToggleAggregation}
+            text={"GSP"}
+            value={NationalAggregation.GSP}
+          />
+          <MapUIButton<NationalAggregation>
+            id={"GroupButtonZones"}
+            active={true}
+            isLoading={isLoading}
+            onToggle={onToggleAggregation}
+            text={"NG Zones"}
+            value={NationalAggregation.zone}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

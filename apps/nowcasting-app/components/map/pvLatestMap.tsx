@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import mapboxgl, { Expression } from "mapbox-gl";
+import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
@@ -15,6 +15,8 @@ import { generateGeoJsonForecastData } from "../helpers/data";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
+import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
+import { FeatureCollection } from "geojson";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
@@ -323,6 +325,34 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           "line-color": "#ffffff",
           "line-width": 4,
           "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+        }
+      });
+    }
+
+    // Test DNO boundaries
+    let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
+      | mapboxgl.GeoJSONSource
+      | undefined;
+    if (!dnoBoundariesSource) {
+      map.addSource("dnoBoundaries", {
+        type: "geojson",
+        data: dnoShapeData as FeatureCollection
+      });
+    }
+
+    let dnoBoundariesLayer = (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
+    if (!dnoBoundariesLayer) {
+      map.addLayer({
+        id: "dnoBoundaries",
+        type: "line",
+        source: "dnoBoundaries",
+        // Test showing DNO region boundaries at all zoom levels
+        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+        // maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+        paint: {
+          "line-color": "#ffcc2d",
+          "line-width": 0.6,
+          "line-opacity": 0.5
         }
       });
     }

@@ -6,6 +6,11 @@ export enum ActiveUnit {
   capacity = "Capacity"
 }
 
+export enum NationalAggregation {
+  GSP = "GSP",
+  zone = "Zone"
+}
+
 export enum SelectedData {
   expectedPowerGenerationNormalized = "expectedPowerGenerationNormalized",
   expectedPowerGenerationMegawatts = "expectedPowerGenerationMegawatts",
