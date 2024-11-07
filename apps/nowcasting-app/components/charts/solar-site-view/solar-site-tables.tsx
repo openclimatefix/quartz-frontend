@@ -29,7 +29,7 @@ import { formatISODateString } from "../../helpers/utils";
 const TableHeader: React.FC<{ text: string }> = ({ text }) => {
   return (
     <div
-      className="sticky flex flex-row bg-ocf-sites-100
+      className="sticky top-0 z-10 flex flex-row bg-ocf-sites-100
             justify-between"
     >
       <div className="ml-10 w-80">
@@ -81,7 +81,7 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
 
   return (
     <>
-      <div className="flex-1 overflow-y-scroll">
+      <div className="flex-1">
         {rows?.sort(sortFn).map((site) => {
           const mostAccurateGeneration = site.actualPV || site.expectedPV;
           return (
