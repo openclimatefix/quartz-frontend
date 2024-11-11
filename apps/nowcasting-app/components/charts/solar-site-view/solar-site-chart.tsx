@@ -324,30 +324,30 @@ const SolarSiteChart: FC<{
           </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-y-scroll relative">
+        <div className="flex-1 flex flex-col relative">
           <AggregatedDataTable
-            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+            className={`absolute inset-0 overflow-y-scroll mb-12 ${
               currentAggregation(AGGREGATION_LEVELS.NATIONAL) ? "z-10" : "z-0 opacity-0"
             }`}
             title={"National"}
             tableData={Array.from(aggregatedSitesData.national.values())}
           />
           <AggregatedDataTable
-            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+            className={`absolute inset-0 overflow-y-scroll mb-12 ${
               currentAggregation(AGGREGATION_LEVELS.REGION) ? "z-10" : "z-0 opacity-0"
             }`}
             title={"Region"}
             tableData={Array.from(aggregatedSitesData.regions.values())}
           />
           <AggregatedDataTable
-            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+            className={`absolute inset-0 overflow-y-scroll mb-12 ${
               currentAggregation(AGGREGATION_LEVELS.GSP) ? "z-10" : "z-0 opacity-0"
             }`}
             title={"GSP"}
             tableData={Array.from(aggregatedSitesData.gsps.values())}
           />
           <AggregatedDataTable
-            className={`absolute inset-0 overflow-y-scroll pb-16 ${
+            className={`absolute inset-0 overflow-y-scroll mb-12 ${
               currentAggregation(AGGREGATION_LEVELS.SITE) ? "z-10" : "z-0 opacity-0"
             }`}
             title={"Sites"}

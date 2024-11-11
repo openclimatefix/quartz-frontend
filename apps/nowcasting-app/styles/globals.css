@@ -114,3 +114,28 @@
   overflow: hidden;
   visibility: hidden;
 }
+
+/**************/
+/* SCROLLBARS */
+/**************/
+
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.mapbox-black.700) theme(colors.mapbox-black.600);
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: theme(colors.mapbox-black.600);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: theme(colors.mapbox-black.700);
+  border-radius: 20px;
+  border: 3px solid theme(colors.mapbox-black.600);
+}

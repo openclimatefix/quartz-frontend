@@ -44,7 +44,7 @@ const SideLayout: FC<SideLayoutProps> = ({
           "focus:outline-none h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20 "
         }
       >
-        <div className={`min-h-full max-h-full flex flex-col overflow-y-scroll`}>{children}</div>
+        <div className={`min-h-full max-h-full flex flex-col`}>{children}</div>
       </div>
       <div className="absolute bottom-12 -right-4 h-10 z-20">
         <ExpandButton isOpen={isOpen} onClick={() => setIsOpen((o) => !o)} />

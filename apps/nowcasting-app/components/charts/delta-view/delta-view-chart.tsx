@@ -374,9 +374,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           </div>
         )}
         <div
-          className={`flex flex-col flex-grow-0 flex-shrink overflow-y-scroll ${
-            clickedGspId ? "h-[30%]" : "h-[40%]"
-          }`}
+          className={`flex flex-col flex-grow-0 flex-shrink${
+            hasGspPvInitialForSelectedTime ? " overflow-y-scroll" : ""
+          } ${clickedGspId ? "h-[30%]" : "h-[40%]"}`}
         >
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
           {!hasGspPvInitialForSelectedTime && (
