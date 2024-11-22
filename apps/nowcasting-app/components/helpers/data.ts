@@ -152,10 +152,13 @@ const mapZoneFeatures: (
     let zoneInstalledCapacity = 0;
     // Loop through all the GSP IDs in the zone and aggregate the forecast and actuals
     gsps.forEach((gsp) => {
-      gspCoords = [
-        ...gspCoords,
-        ...(gspShapeData.features[gsp - 1].geometry.coordinates as Position[][][])
-      ];
+      const gspShape = gspShapeData.features[gsp - 1];
+      if (gspShape.geometry.type === "Polygon") {
+        gspCoords = [...gspCoords, gspShape.geometry.coordinates as Position[][]];
+      }
+      if (gspShape.geometry.type === "MultiPolygon") {
+        gspCoords = [...gspCoords, ...(gspShape.geometry.coordinates as Position[][][])];
+      }
       zoneForecastTotal +=
         gspForecastsDataByTimestamp.find(
           (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
