@@ -1,14 +1,13 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { getDeltaBucketKeys, AGGREGATION_LEVELS, VIEWS, SORT_BY } from "../../constant";
+import { AGGREGATION_LEVELS, getDeltaBucketKeys, SORT_BY, VIEWS } from "../../constant";
 import mapboxgl from "mapbox-gl";
-import { enableNHourView } from "./utils";
 import {
+  CookieStorageKeys,
   getArraySettingFromCookieStorage,
-  getBooleanSettingFromCookieStorage,
-  CookieStorageKeys
+  getBooleanSettingFromCookieStorage
 } from "./cookieStorage";
-import { NationalEndpointStates, LoadingState, SitesEndpointStates } from "../types";
-import { ChartData } from "../charts/remix-line";
+import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
+import { NationalAggregation } from "../map/types";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -76,6 +75,7 @@ export type GlobalStateType = {
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
+  nationalAggregationLevel: NationalAggregation;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -117,7 +117,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       showMessage: false,
       message: "Loading data"
     },
-    nHourForecast: 4
+    nHourForecast: 4,
+    nationalAggregationLevel: NationalAggregation.GSP
   });
 
 export default useGlobalState;

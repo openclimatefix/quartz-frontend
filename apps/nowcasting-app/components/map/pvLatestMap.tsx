@@ -42,6 +42,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
 
@@ -89,7 +90,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     if (!combinedData?.allGspForecastData) return;
 
     setShouldUpdateMap(true);
-  }, [combinedData, combinedLoading, combinedValidating, selectedISOTime]);
+  }, [
+    combinedData,
+    combinedLoading,
+    combinedValidating,
+    selectedISOTime,
+    nationalAggregationLevel
+  ]);
 
   // Hide loading spinner if there is an error to prevent infinite loading
   useEffect(() => {
@@ -113,14 +120,51 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   ];
 
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData);
+    return generateGeoJsonForecastData(
+      initForecastData,
+      selectedISOTime,
+      combinedData,
+      undefined,
+      nationalAggregationLevel
+    );
   }, [
     combinedData.allGspForecastData,
     combinedLoading.allGspForecastLoading,
     combinedValidating.allGspForecastValidating,
     selectedISOTime,
-    combinedData.allGspSystemData
+    combinedData.allGspSystemData,
+    nationalAggregationLevel
   ]);
+
+  console.log("## generatedGeoJsonForecastData", generatedGeoJsonForecastData);
+
+  // generatedGeoJsonForecastData.forecastGeoJson.features.forEach((feature) => {
+  //   if (feature.geometry.type === "MultiPolygon") {
+  //     console.log("## MultiPolygon feature", feature);
+  //     turfFeatures.push(turf.multiPolygon(feature.geometry.coordinates));
+  //   } else {
+  //     console.log("NOT MultiPolygon");
+  //   }
+  // });
+  // console.log("## turfFeatures", turfFeatures);
+  // const featColl = turf.featureCollection(turfFeatures);
+  // console.log("## featColl", featColl);
+  // const union = featColl.features.slice(1).reduce((acc, feature) => {
+  //   console.log("## acc", acc);
+  //   console.log("## feature", feature);
+  //   return turf.union(turf.featureCollection([turf.truncate(acc), turf.truncate(feature)]));
+  // }, featColl.features[0]);
+
+  // if (generatedGeoJsonForecastData.forecastGeoJson.features[0].type === "Feature") {
+  //   const union = turf.union(
+  //     turf.featureCollection(generatedGeoJsonForecastData.forecastGeoJson.features)
+  //   );
+  // }
+
+  // const aggregatedGeoJsonForecastData = useMemo(() => {
+  //   console.log("## aggregatedGeoJsonForecastData", generatedGeoJsonForecastData);
+  //   return generatedGeoJsonForecastData.forecastGeoJson;
+  // }, [generatedGeoJsonForecastData.forecastGeoJson]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -242,8 +286,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
           const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between gap-3 items-center mb-1">
-            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.GSPs}</div>
+          <!-- TODO – remove gsp_id when done testing zones -->
+            <div class="text-sm font-semibold">${properties?.gspDisplayName || ""}</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.gsp_id || ""} ${
+            properties?.GSPs || ""
+          }</div>
           </div>
           <div class="flex justify-between items-center">
             
@@ -329,34 +376,36 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       });
     }
 
-    // Test DNO boundaries
-    let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
-      | mapboxgl.GeoJSONSource
-      | undefined;
-    if (!dnoBoundariesSource) {
-      map.addSource("dnoBoundaries", {
-        type: "geojson",
-        data: dnoShapeData as FeatureCollection
-      });
-    }
-
-    let dnoBoundariesLayer = (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
-    if (!dnoBoundariesLayer) {
-      map.addLayer({
-        id: "dnoBoundaries",
-        type: "line",
-        source: "dnoBoundaries",
-        // Test showing DNO region boundaries at all zoom levels
-        // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-        // maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
-        paint: {
-          "line-color": "#ffcc2d",
-          "line-width": 0.6,
-          "line-opacity": 0.5
-        }
-      });
-    }
+    // // Test DNO boundaries
+    // let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
+    //   | mapboxgl.GeoJSONSource
+    //   | undefined;
+    // if (!dnoBoundariesSource) {
+    //   map.addSource("dnoBoundaries", {
+    //     type: "geojson",
+    //     data: dnoShapeData as FeatureCollection
+    //   });
+    // }
+    //
+    // let dnoBoundariesLayer = (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
+    // if (!dnoBoundariesLayer) {
+    //   map.addLayer({
+    //     id: "dnoBoundaries",
+    //     type: "line",
+    //     source: "dnoBoundaries",
+    //     // Test showing DNO region boundaries at all zoom levels
+    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+    //     // maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+    //     paint: {
+    //       "line-color": "#ffcc2d",
+    //       "line-width": 0.6,
+    //       "line-opacity": 0.5
+    //     }
+    //   });
+    // }
   };
+
+  // return <div>Hello</div>;
 
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>

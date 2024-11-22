@@ -1,5 +1,6 @@
 import { Dispatch, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
 import { ActiveUnit, NationalAggregation } from "./types";
+import useGlobalState from "../helpers/globalState";
 
 const MeasuringUnit = ({
   activeUnit,
@@ -10,6 +11,7 @@ const MeasuringUnit = ({
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
   isLoading: boolean;
 }) => {
+  const [nationalAggregation, setNationalAggregation] = useGlobalState("nationalAggregationLevel");
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit
@@ -22,7 +24,7 @@ const MeasuringUnit = ({
     aggregation: NationalAggregation
   ) => {
     event.preventDefault();
-    // setAggregation(aggregation);
+    setNationalAggregation(aggregation);
     console.log("aggregation", aggregation);
   };
   const buttonClasses =
@@ -86,7 +88,7 @@ const MeasuringUnit = ({
         <div className="inline-block">
           <MapUIButton<NationalAggregation>
             id={"GroupButtonGSP"}
-            active={false}
+            active={nationalAggregation === NationalAggregation.GSP}
             isLoading={isLoading}
             onToggle={onToggleAggregation}
             text={"GSP"}
@@ -94,7 +96,7 @@ const MeasuringUnit = ({
           />
           <MapUIButton<NationalAggregation>
             id={"GroupButtonZones"}
-            active={true}
+            active={nationalAggregation === NationalAggregation.zone}
             isLoading={isLoading}
             onToggle={onToggleAggregation}
             text={"NG Zones"}

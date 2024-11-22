@@ -1,11 +1,195 @@
 import { components } from "../../types/quartz-api";
 import { Map } from "../map";
 import { CombinedData, GspDeltaValue, MapFeatureObject } from "../types";
-import { FeatureCollection } from "geojson";
+import { Feature, FeatureCollection, Position } from "geojson";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
-import { formatISODateString, getRoundedPv, getOpacityValueFromPVNormalized } from "./utils";
+import gspZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
+import { formatISODateString, getOpacityValueFromPVNormalized, getRoundedPv } from "./utils";
 import { get30MinNow } from "./globalState";
-import { SelectedData } from "../map/types";
+import { NationalAggregation, SelectedData } from "../map/types";
+
+const getGspActualValueMwForTime = (
+  gspRealData: components["schemas"]["GSPYieldGroupByDatetime"][],
+  targetTime: string,
+  gspId: number
+) => {
+  return (
+    Number(
+      gspRealData?.find((realData) => realData.datetimeUtc.slice(0, 16) === targetTime)
+        ?.generationKwByGspId?.[String(gspId)]
+    ) / 1000
+  );
+};
+const getGspForecastForTime = (
+  gspForecastsDataByTimestamp: components["schemas"]["OneDatetimeManyForecastValues"][],
+  targetTime: string
+) => {
+  return gspForecastsDataByTimestamp.find((fc) => fc.datetimeUtc.slice(0, 16) === targetTime);
+};
+const setFeatureObjectProps = (
+  existingProperties: any,
+  gspSystemInfo: any,
+  selectedFCValue: number | undefined,
+  selectedActualValueMW: number | undefined
+) => {
+  return {
+    ...existingProperties,
+    [SelectedData.expectedPowerGenerationMegawatts]:
+      selectedFCValue && getRoundedPv(selectedFCValue, false),
+    [SelectedData.expectedPowerGenerationMegawattsRounded]:
+      selectedFCValue && getRoundedPv(selectedFCValue),
+    [SelectedData.expectedPowerGenerationNormalized]:
+      selectedFCValue &&
+      getOpacityValueFromPVNormalized(
+        (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0,
+        false
+      ),
+    [SelectedData.expectedPowerGenerationNormalizedRounded]:
+      selectedFCValue &&
+      getOpacityValueFromPVNormalized(
+        (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0
+      ),
+    [SelectedData.actualPowerGenerationMegawatts]:
+      selectedActualValueMW && getRoundedPv(Number(selectedActualValueMW), false),
+    [SelectedData.installedCapacityMw]: getRoundedPv(
+      gspSystemInfo?.installedCapacityMw || 0,
+      false
+    ),
+    gspDisplayName: gspSystemInfo?.regionName || ""
+  };
+};
+
+const mapGspFeatures: (
+  features: Feature[],
+  combinedData?: CombinedData,
+  gspForecastsDataByTimestamp?: components["schemas"]["OneDatetimeManyForecastValues"][],
+  targetTime?: string,
+  gspDeltas?: Map<string, GspDeltaValue>
+) => Feature[] = (
+  features,
+  combinedData,
+  gspForecastsDataByTimestamp = [],
+  targetTime,
+  gspDeltas
+) => {
+  return features.map((featureObj, index) => {
+    const gspSystemInfo = combinedData?.allGspSystemData?.find(
+      (system) => system.gspId === index + 1
+    );
+    let selectedFC;
+    let selectedFCValue;
+    let selectedActualValueMW: number | undefined;
+    const gspRealData =
+      combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
+    // If targetTime selected on chart, find the forecast/actuals data for that time
+    if (gspForecastsDataByTimestamp && targetTime) {
+      selectedFC = getGspForecastForTime(
+        gspForecastsDataByTimestamp,
+        formatISODateString(targetTime)
+      );
+      if (selectedFC) selectedFCValue = selectedFC.forecastValues[index + 1];
+      selectedActualValueMW = getGspActualValueMwForTime(
+        gspRealData,
+        formatISODateString(targetTime),
+        index + 1
+      );
+    } else if (gspForecastsDataByTimestamp) {
+      // If no targetTime selected, find the latest forecast/actuals data
+      let latestTimestamp = get30MinNow();
+      selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
+        ?.forecastValues[index];
+      selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, index + 1);
+    }
+
+    // Update the feature object with the calculated forecast/actuals data
+    const updatedFeatureObj: MapFeatureObject = {
+      ...featureObj,
+      properties: setFeatureObjectProps(
+        featureObj.properties,
+        gspSystemInfo,
+        selectedFCValue,
+        selectedActualValueMW
+      )
+    };
+    if (gspDeltas) {
+      const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(index + 1));
+      updatedFeatureObj.properties = {
+        ...updatedFeatureObj.properties,
+        [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
+        [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
+        [SelectedData.expectedPowerGenerationNormalized]:
+          Number(currentGspDelta?.deltaNormalized) || 0,
+        [SelectedData.expectedPowerGenerationNormalizedRounded]:
+          Number(currentGspDelta?.deltaNormalized) || 0,
+        [SelectedData.delta]: currentGspDelta?.delta || 0,
+        deltaBucket: currentGspDelta?.deltaBucket || 0
+      };
+    }
+
+    return updatedFeatureObj;
+  });
+};
+
+// TODO BRAD: map/aggregate all the GSP data to the zone level
+const mapZoneFeatures: (
+  features: Feature[],
+  combinedData?: CombinedData,
+  gspForecastsDataByTimestamp?: components["schemas"]["OneDatetimeManyForecastValues"][],
+  targetTime?: string,
+  gspDeltas?: Map<string, GspDeltaValue>
+) => Feature[] = (
+  features,
+  combinedData,
+  gspForecastsDataByTimestamp = [],
+  targetTime,
+  gspDeltas
+) => {
+  if (!targetTime) return [];
+  const newFeatures: Feature[] = Object.entries(gspZoneGroupings).map(([name, gsps]) => {
+    let gspCoords: Position[][][] = [];
+    let zoneForecastTotal = 0;
+    let zoneActualTotal = 0;
+    let zoneInstalledCapacity = 0;
+    // Loop through all the GSP IDs in the zone and aggregate the forecast and actuals
+    gsps.forEach((gsp) => {
+      gspCoords = [
+        ...gspCoords,
+        ...(gspShapeData.features[gsp - 1].geometry.coordinates as Position[][][])
+      ];
+      zoneForecastTotal +=
+        gspForecastsDataByTimestamp.find(
+          (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
+        )?.forecastValues[gsp] || 0;
+      zoneActualTotal += getGspActualValueMwForTime(
+        combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][],
+        formatISODateString(targetTime),
+        gsp
+      );
+      zoneInstalledCapacity += Number(
+        combinedData?.allGspSystemData?.find((system) => system.gspId === gsp)?.installedCapacityMw
+      );
+    });
+    return {
+      id: name,
+      type: "Feature" as "Feature",
+      properties: setFeatureObjectProps(
+        {},
+        { regionName: name, installedCapacityMw: zoneInstalledCapacity },
+        zoneForecastTotal,
+        zoneActualTotal
+      ),
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: gspCoords
+      }
+    };
+  });
+  // console.log("newFeatures", newFeatures);
+
+  // TODO Deltas
+
+  return newFeatures;
+};
 
 /**
  * `generateGeoJsonForecastData` is a function that generates the GeoJson feature collection for forecast data.
@@ -27,95 +211,38 @@ export const generateGeoJsonForecastData: (
   forecastData?: components["schemas"]["OneDatetimeManyForecastValues"][],
   targetTime?: string,
   combinedData?: CombinedData,
-  gspDeltas?: Map<string, GspDeltaValue>
+  gspDeltas?: Map<string, GspDeltaValue>,
+  aggregation?: NationalAggregation
 ) => { forecastGeoJson: FeatureCollection } = (
   forecastData,
   targetTime,
   combinedData,
-  gspDeltas
+  gspDeltas,
+  aggregation = NationalAggregation.GSP
 ) => {
   const gspForecastsDataByTimestamp = forecastData || [];
   const gspShapeJson = gspShapeData as FeatureCollection;
+  let features = gspShapeJson.features;
+  if (aggregation === NationalAggregation.GSP) {
+    features = mapGspFeatures(
+      gspShapeJson.features,
+      combinedData,
+      gspForecastsDataByTimestamp,
+      targetTime
+    );
+  } else if (aggregation === NationalAggregation.zone) {
+    console.log("aggregating to zone");
+    features = mapZoneFeatures(
+      gspShapeJson.features,
+      combinedData,
+      gspForecastsDataByTimestamp,
+      targetTime
+    );
+  }
   const forecastGeoJson = {
     ...gspShapeData,
     type: "FeatureCollection" as "FeatureCollection",
-    features: gspShapeJson.features.map((featureObj, index) => {
-      const gspSystemInfo = combinedData?.allGspSystemData?.find(
-        (system) => system.gspId === index + 1
-      );
-      let selectedFC;
-      let selectedFCValue;
-      let selectedActualValueMW: number | undefined;
-      const gspRealData =
-        combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
-      if (gspForecastsDataByTimestamp && targetTime) {
-        selectedFC = gspForecastsDataByTimestamp.find(
-          (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
-        );
-        if (selectedFC) selectedFCValue = selectedFC.forecastValues[index + 1];
-        selectedActualValueMW =
-          Number(
-            gspRealData?.find(
-              (realData) => realData.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
-            )?.generationKwByGspId?.[String(index + 1)]
-          ) / 1000;
-      } else if (gspForecastsDataByTimestamp) {
-        let latestTimestamp = get30MinNow();
-        selectedFCValue = gspForecastsDataByTimestamp.find(
-          (fc) => fc.datetimeUtc.slice(0, 16) === latestTimestamp
-        )?.forecastValues[index];
-        selectedActualValueMW =
-          Number(
-            gspRealData?.find((realData) => realData.datetimeUtc.slice(0, 16) === latestTimestamp)
-              ?.generationKwByGspId?.[String(index + 1)]
-          ) / 1000;
-      }
-
-      const updatedFeatureObj: MapFeatureObject = {
-        ...featureObj,
-        properties: {
-          ...featureObj.properties,
-          [SelectedData.expectedPowerGenerationMegawatts]:
-            selectedFCValue && getRoundedPv(selectedFCValue, false),
-          [SelectedData.expectedPowerGenerationMegawattsRounded]:
-            selectedFCValue && getRoundedPv(selectedFCValue),
-          [SelectedData.expectedPowerGenerationNormalized]:
-            selectedFCValue &&
-            getOpacityValueFromPVNormalized(
-              (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0,
-              false
-            ),
-          [SelectedData.expectedPowerGenerationNormalizedRounded]:
-            selectedFCValue &&
-            getOpacityValueFromPVNormalized(
-              (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0
-            ),
-          [SelectedData.actualPowerGenerationMegawatts]:
-            selectedActualValueMW && getRoundedPv(Number(selectedActualValueMW), false),
-          [SelectedData.installedCapacityMw]: getRoundedPv(
-            gspSystemInfo?.installedCapacityMw || 0,
-            false
-          ),
-          gspDisplayName: gspSystemInfo?.regionName || ""
-        }
-      };
-      if (gspDeltas) {
-        const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(index + 1));
-        updatedFeatureObj.properties = {
-          ...updatedFeatureObj.properties,
-          [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
-          [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
-          [SelectedData.expectedPowerGenerationNormalized]:
-            Number(currentGspDelta?.deltaNormalized) || 0,
-          [SelectedData.expectedPowerGenerationNormalizedRounded]:
-            Number(currentGspDelta?.deltaNormalized) || 0,
-          [SelectedData.delta]: currentGspDelta?.delta || 0,
-          deltaBucket: currentGspDelta?.deltaBucket || 0
-        };
-      }
-
-      return updatedFeatureObj;
-    })
+    features
   };
 
   return { forecastGeoJson };
