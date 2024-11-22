@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "r
 import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
-import { ActiveUnit, SelectedData } from "./types";
+import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
@@ -107,6 +107,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   console.log("## shouldUpdateMap render", shouldUpdateMap);
 
+  const maxPower =
+    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 2500;
+
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
     ["linear"],
@@ -115,7 +118,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     0,
     0,
     // on value maximum the opacity will be 1
-    isNormalized ? 1 : MAX_POWER_GENERATED,
+    isNormalized ? 1 : maxPower,
     1
   ];
 
