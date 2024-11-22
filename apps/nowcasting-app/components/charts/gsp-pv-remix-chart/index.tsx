@@ -12,6 +12,7 @@ import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/glo
 import Spinner from "../../icons/spinner";
 import { ForecastValue } from "../../types";
 import React, { FC } from "react";
+import { NationalAggregation } from "../../map/types";
 
 // We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
@@ -39,7 +40,8 @@ const GspPvRemixChart: FC<{
   visibleLines,
   deltaView = false
 }) => {
-  const {
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  let {
     errors,
     pvRealDataAfter,
     pvRealDataIn,
@@ -47,6 +49,15 @@ const GspPvRemixChart: FC<{
     gspForecastDataOneGSP,
     gspNHourData
   } = useGetGspData(gspId);
+  // TODO – if aggregation is zone, we need to get the data for all GSPs in the zone
+  if (nationalAggregationLevel === NationalAggregation.zone) {
+    errors = [];
+    pvRealDataAfter = [];
+    pvRealDataIn = [];
+    gspLocationInfo = [];
+    gspForecastDataOneGSP = [];
+    gspNHourData = [];
+  }
   // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspInstalledCapacity = gspLocationInfo?.[0]?.installedCapacityMw;
   const gspName = gspLocationInfo?.[0]?.regionName;
@@ -112,12 +123,15 @@ const GspPvRemixChart: FC<{
   let yMax = gspInstalledCapacity || 100;
   yMax = getRoundedTickBoundary(yMax, yMax_levels);
 
+  const title =
+    nationalAggregationLevel === NationalAggregation.GSP ? gspName || "" : String(gspId);
+
   return (
     <>
       <div className="flex-initial">
         <ForecastHeaderGSP
           onClose={close}
-          title={gspName || ""}
+          title={title}
           mwpercent={Math.round(pvPercentage)}
           pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime)}
           pvValue={Number(latestPvActualInMW)?.toFixed(1)}

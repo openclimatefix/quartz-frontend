@@ -105,7 +105,7 @@ const mapGspFeatures: (
     const updatedFeatureObj: MapFeatureObject = {
       ...featureObj,
       properties: setFeatureObjectProps(
-        featureObj.properties,
+        { ...featureObj.properties, id: featureObj.properties?.gsp_id },
         gspSystemInfo,
         selectedFCValue,
         selectedActualValueMW
@@ -171,6 +171,7 @@ const mapZoneFeatures: (
     });
     return {
       ...feature,
+      id: feature.properties.id,
       type: "Feature" as "Feature",
       properties: setFeatureObjectProps(
         feature.properties,
@@ -215,6 +216,7 @@ export const generateGeoJsonForecastData: (
   gspDeltas,
   aggregation = NationalAggregation.GSP
 ) => {
+  console.log("aggregation", aggregation);
   const gspForecastsDataByTimestamp = forecastData || [];
   const gspShapeJson = gspShapeData as FeatureCollection;
   let features = gspShapeJson.features;
@@ -236,7 +238,6 @@ export const generateGeoJsonForecastData: (
     );
   }
   const forecastGeoJson = {
-    ...gspShapeData,
     type: "FeatureCollection" as "FeatureCollection",
     features
   };

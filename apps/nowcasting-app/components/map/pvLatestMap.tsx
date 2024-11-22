@@ -210,7 +210,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       const { forecastGeoJson } = generatedGeoJsonForecastData;
       map.addSource("latestPV", {
         type: "geojson",
-        data: forecastGeoJson
+        data: forecastGeoJson,
+        promoteId: "id"
       });
     } else {
       source.setData(generatedGeoJsonForecastData.forecastGeoJson);
