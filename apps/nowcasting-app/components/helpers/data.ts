@@ -1,8 +1,10 @@
 import { components } from "../../types/quartz-api";
-import { CombinedData, GspDeltaValue, MapFeatureObject } from "../types";
+import { CombinedData, GspDeltaValue, GspZoneGroupings, MapFeatureObject } from "../types";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
+import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
+import dnoGspGroupings from "../../data/dno_gsp_groupings.json";
 import ngZones from "../../data/ng_zones.json";
 import { formatISODateString, getOpacityValueFromPVNormalized, getRoundedPv } from "./utils";
 import { get30MinNow } from "./globalState";
@@ -133,29 +135,32 @@ const mapGspFeatures: (
 // TODO BRAD: map/aggregate all the GSP data to the zone level
 const mapZoneFeatures: (
   features: Feature[],
+  gspZoneGroupings: GspZoneGroupings,
   combinedData?: CombinedData,
   gspForecastsDataByTimestamp?: components["schemas"]["OneDatetimeManyForecastValues"][],
   targetTime?: string,
-  gspDeltas?: Map<string, GspDeltaValue>
+  gspDeltas?: Map<string, GspDeltaValue>,
+  idKey?: string
 ) => Feature[] = (
   features,
+  gspZoneGroupings,
   combinedData,
   gspForecastsDataByTimestamp = [],
   targetTime,
-  gspDeltas
+  gspDeltas,
+  idKey = "id"
 ) => {
   if (!targetTime) return [];
   // Loop through ng_zones data and aggregate the forecast and actuals
   const newFeatures: Feature[] = features.map((feature) => {
-    if (!feature.properties?.id) return feature;
-    if (!ngGSPZoneGroupings[feature.properties.id as keyof typeof ngGSPZoneGroupings])
-      return feature;
+    const zoneId = feature.properties?.[idKey as keyof typeof gspZoneGroupings];
+    if (!zoneId) return feature;
+    const zoneGspIds: number[] = gspZoneGroupings[zoneId as keyof typeof gspZoneGroupings];
+    if (!zoneGspIds) return feature;
     let zoneForecastTotal = 0;
     let zoneActualTotal = 0;
     let zoneInstalledCapacity = 0;
-    const gspIds: number[] =
-      ngGSPZoneGroupings[feature.properties.id as keyof typeof ngGSPZoneGroupings];
-    gspIds.forEach((gsp: number) => {
+    zoneGspIds.forEach((gsp: number) => {
       zoneForecastTotal +=
         gspForecastsDataByTimestamp.find(
           (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
@@ -171,11 +176,11 @@ const mapZoneFeatures: (
     });
     return {
       ...feature,
-      id: feature.properties.id,
+      id: zoneId,
       type: "Feature" as "Feature",
       properties: setFeatureObjectProps(
         feature.properties,
-        { regionName: feature.properties.id, installedCapacityMw: zoneInstalledCapacity },
+        { regionName: zoneId, installedCapacityMw: zoneInstalledCapacity },
         zoneForecastTotal,
         zoneActualTotal
       )
@@ -232,9 +237,21 @@ export const generateGeoJsonForecastData: (
     console.log("aggregating to zone");
     features = mapZoneFeatures(
       ngZones.features as Feature<Geometry, GeoJsonProperties>[],
+      ngGSPZoneGroupings,
       combinedData,
       gspForecastsDataByTimestamp,
       targetTime
+    );
+  } else if (aggregation === NationalAggregation.DNO) {
+    console.log("aggregating to DNO");
+    features = mapZoneFeatures(
+      dnoShapeData.features as Feature<Geometry, GeoJsonProperties>[],
+      dnoGspGroupings,
+      combinedData,
+      gspForecastsDataByTimestamp,
+      targetTime,
+      undefined,
+      "LongName"
     );
   }
   const forecastGeoJson = {

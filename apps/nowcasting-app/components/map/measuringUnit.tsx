@@ -102,6 +102,14 @@ const MeasuringUnit = ({
             text={"NG Zones"}
             value={NationalAggregation.zone}
           />
+          <MapUIButton<NationalAggregation>
+            id={"GroupButtonZones"}
+            active={nationalAggregation === NationalAggregation.DNO}
+            isLoading={isLoading}
+            onToggle={onToggleAggregation}
+            text={"DNO"}
+            value={NationalAggregation.DNO}
+          />
         </div>
       </div>
     </>
