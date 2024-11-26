@@ -49,13 +49,9 @@ const GspPvRemixChart: FC<{
     gspForecastDataOneGSP,
     gspNHourData
   } = useGetGspData(gspId);
-  // TODO – if aggregation is zone, we need to get the data for all GSPs in the zone
-  if (nationalAggregationLevel === NationalAggregation.zone) {
-    errors = [];
-    pvRealDataAfter = [];
-    pvRealDataIn = [];
+  // TODO – temp reset; if aggregation is zones, make sure data is all set
+  if ([NationalAggregation.DNO, NationalAggregation.zone].includes(nationalAggregationLevel)) {
     gspLocationInfo = [];
-    gspForecastDataOneGSP = [];
     gspNHourData = [];
   }
   // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
