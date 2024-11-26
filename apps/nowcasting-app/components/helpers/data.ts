@@ -179,7 +179,7 @@ const mapZoneFeatures: (
       id: zoneId,
       type: "Feature" as "Feature",
       properties: setFeatureObjectProps(
-        feature.properties,
+        { ...feature.properties, id: zoneId },
         { regionName: zoneId, installedCapacityMw: zoneInstalledCapacity },
         zoneForecastTotal,
         zoneActualTotal
