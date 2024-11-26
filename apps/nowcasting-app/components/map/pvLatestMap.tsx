@@ -325,7 +325,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       });
 
       map.on("data", (e) => {
-        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+        if (e.dataType === "source" && e.sourceId === "latestPV" && e.isSourceLoaded) {
           setMapDataLoading(false);
         }
       });
