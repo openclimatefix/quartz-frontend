@@ -85,6 +85,7 @@ type RemixLineProps = {
   zoomEnabled?: boolean;
   deltaView?: boolean;
   deltaYMaxOverride?: number;
+  yTicks?: number[];
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -142,7 +143,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   visibleLines,
   zoomEnabled = true,
   deltaView = false,
-  deltaYMaxOverride
+  deltaYMaxOverride,
+  yTicks
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
@@ -412,6 +414,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               yAxisId={"y-axis"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
+              ticks={yTicks}
               domain={
                 globalIsZoomed && view !== VIEWS.SOLAR_SITES
                   ? [0, Number(zoomYMax * 1.1)]

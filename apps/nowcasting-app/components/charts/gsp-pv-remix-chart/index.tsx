@@ -13,12 +13,20 @@ import Spinner from "../../icons/spinner";
 import { ForecastValue } from "../../types";
 import React, { FC } from "react";
 import { NationalAggregation } from "../../map/types";
+import { getTicks } from "../../helpers/chartUtils";
 
-// We want to have the ymax of the graph to be related to the capacity of the GspPvRemixChart
+// Static constant below of this function so we don't call dynamically unnecessarily.
+// import { generateYMaxTickArray } from "../../helpers/chartUtils";
+// console.log("Y_MAX_TICKS", generateYMaxTickArray());
+//
+// We want to have the yMax of the graph to be related to the capacity of the GspPvRemixChart.
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
-// So, we round these up to the following numbers
-const yMax_levels = [
-  3, 9, 20, 28, 36, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450, 600
+// So, we round these up to the following numbers, which hopefully split nicely into the y-axis.
+// Uncomment the above function to get updated values should we need to change these
+const Y_MAX_TICKS = [
+  1, 2, 3, 4, 5, 6, 9, 10, 12, 15, 18, 20, 25, 30, 40, 45, 50, 60, 75, 80, 90, 100, 150, 200, 250,
+  300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000,
+  6000, 7000, 8000, 9000, 10000
 ];
 
 const GspPvRemixChart: FC<{
@@ -51,7 +59,6 @@ const GspPvRemixChart: FC<{
   } = useGetGspData(gspId);
   // TODO – temp reset; if aggregation is zones, make sure data is all set
   if ([NationalAggregation.DNO, NationalAggregation.zone].includes(nationalAggregationLevel)) {
-    gspLocationInfo = [];
     gspNHourData = [];
   }
   // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
@@ -117,7 +124,7 @@ const GspPvRemixChart: FC<{
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInstalledCapacity || 100;
-  yMax = getRoundedTickBoundary(yMax, yMax_levels);
+  yMax = getRoundedTickBoundary(yMax, Y_MAX_TICKS);
 
   const title =
     nationalAggregationLevel === NationalAggregation.GSP ? gspName || "" : String(gspId);
@@ -166,6 +173,7 @@ const GspPvRemixChart: FC<{
           visibleLines={visibleLines}
           deltaView={deltaView}
           deltaYMaxOverride={Math.ceil(Number(gspInstalledCapacity) / 200) * 100 || 500}
+          yTicks={getTicks(yMax, Y_MAX_TICKS)}
         />
       </div>
     </>

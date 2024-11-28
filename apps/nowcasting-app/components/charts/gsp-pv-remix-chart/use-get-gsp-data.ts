@@ -52,6 +52,9 @@ const useGetGspData = (gspId: number | string) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   let errors: Error[] = [];
+  let isZoneAggregation = [NationalAggregation.DNO, NationalAggregation.zone].includes(
+    nationalAggregationLevel
+  );
 
   let gspIds: number[] = typeof gspId === "number" ? [gspId] : [];
   if (nationalAggregationLevel === NationalAggregation.DNO) {
@@ -98,9 +101,26 @@ const useGetGspData = (gspId: number | string) => {
   const gspForecastDataOneGSP = aggregateForecastData(gspForecastDataOneGSPRaw, gspIds);
 
   //add new useSWR for gspLocationInfo since this is not
-  const { data: gspLocationInfo, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
-    `${API_PREFIX}/system/GB/gsp/?gsp_id=${gspId}`
+  const { data: gspLocationInfoRaw, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
+    isZoneAggregation
+      ? `${API_PREFIX}/system/GB/gsp/?zones=true` // TODO: API seems to struggle with UI flag if no other query params
+      : `${API_PREFIX}/system/GB/gsp/?gsp_id=${gspId}`
   );
+  let gspLocationInfo = gspLocationInfoRaw?.filter((gsp) => gspIds.includes(gsp.gspId));
+  if (isZoneAggregation && gspLocationInfo) {
+    const zoneCapacity = gspLocationInfo.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0);
+    gspLocationInfo = [
+      {
+        gspId: gspId as number,
+        gspName: gspId as string,
+        regionName: gspId as string,
+        installedCapacityMw: zoneCapacity,
+        rmMode: true,
+        label: "Zone",
+        gspGroup: "Zone"
+      }
+    ];
+  }
 
   // TODO: nHour with aggregation
   const nMinuteForecast = nHourForecast * 60;
