@@ -20,7 +20,7 @@ import DataLoadingChartStatus from "../DataLoadingChartStatus";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
-  setClickedGspId: Dispatch<SetStateAction<number | undefined>>;
+  setClickedGspId: Dispatch<SetStateAction<number | string | undefined>>;
   negative?: boolean;
 }> = ({ gspDeltas, setClickedGspId, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
