@@ -3,8 +3,10 @@ import { CombinedData, GspDeltaValue, GspZoneGroupings, MapFeatureObject } from 
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
+import nationalShapeData from "../../data/national_gsp_shape.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
 import dnoGspGroupings from "../../data/dno_gsp_groupings.json";
+import nationalGspZone from "../../data/national_gsp_zone.json";
 import ngZones from "../../data/ng_zones.json";
 import { formatISODateString, getOpacityValueFromPVNormalized, getRoundedPv } from "./utils";
 import { get30MinNow } from "./globalState";
@@ -244,14 +246,25 @@ export const generateGeoJsonForecastData: (
     );
   } else if (aggregation === NationalAggregation.DNO) {
     console.log("aggregating to DNO");
+    const dnoShapeJson = dnoShapeData as FeatureCollection;
     features = mapZoneFeatures(
-      dnoShapeData.features as Feature<Geometry, GeoJsonProperties>[],
+      dnoShapeJson.features as Feature<Geometry, GeoJsonProperties>[],
       dnoGspGroupings,
       combinedData,
       gspForecastsDataByTimestamp,
       targetTime,
       undefined,
       "LongName"
+    );
+  } else if (aggregation === NationalAggregation.national) {
+    console.log("aggregating to national");
+    const nationalShapeJson = nationalShapeData as FeatureCollection;
+    features = mapZoneFeatures(
+      nationalShapeJson.features as Feature<Geometry, GeoJsonProperties>[],
+      nationalGspZone,
+      combinedData,
+      gspForecastsDataByTimestamp,
+      targetTime
     );
   }
   const forecastGeoJson = {

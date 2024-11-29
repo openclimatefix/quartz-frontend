@@ -53,7 +53,7 @@ export type GlobalStateType = {
   selectedISOTime: string;
   timeNow: string;
   intervals: any[];
-  clickedGspId?: number;
+  clickedGspId?: number | string;
   clickedSiteGroupId?: string;
   forecastCreationTime?: string;
   view: VIEWS;

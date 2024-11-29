@@ -9,7 +9,8 @@ export enum ActiveUnit {
 export enum NationalAggregation {
   GSP = "GSP",
   zone = "Zone",
-  DNO = "DNO"
+  DNO = "DNO",
+  national = "National"
 }
 
 export enum SelectedData {

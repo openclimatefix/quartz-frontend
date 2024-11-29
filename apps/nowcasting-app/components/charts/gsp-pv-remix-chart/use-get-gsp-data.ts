@@ -2,6 +2,7 @@ import { API_PREFIX, getAllForecastUrl } from "../../../constant";
 import { FcAllResData, ForecastData, GspEntities, PvRealData } from "../../types";
 import dnoGspGroupings from "../../../data/dno_gsp_groupings.json";
 import ngGspZoneGroupings from "../../../data/ng_gsp_zone_groupings.json";
+import nationalGspZone from "../../../data/national_gsp_zone.json";
 import useGlobalState from "../../helpers/globalState";
 import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 import { NationalAggregation } from "../../map/types";
@@ -52,9 +53,11 @@ const useGetGspData = (gspId: number | string) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   let errors: Error[] = [];
-  let isZoneAggregation = [NationalAggregation.DNO, NationalAggregation.zone].includes(
-    nationalAggregationLevel
-  );
+  let isZoneAggregation = [
+    NationalAggregation.DNO,
+    NationalAggregation.zone,
+    NationalAggregation.national
+  ].includes(nationalAggregationLevel);
 
   let gspIds: number[] = typeof gspId === "number" ? [gspId] : [];
   if (nationalAggregationLevel === NationalAggregation.DNO) {
@@ -63,6 +66,9 @@ const useGetGspData = (gspId: number | string) => {
   }
   if (nationalAggregationLevel === NationalAggregation.zone) {
     gspIds = ngGspZoneGroupings[gspId as keyof typeof ngGspZoneGroupings] || [];
+  }
+  if (nationalAggregationLevel === NationalAggregation.national) {
+    gspIds = nationalGspZone[gspId as keyof typeof nationalGspZone] || [];
   }
 
   // TODO add check for gspIds before making the api call

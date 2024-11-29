@@ -36,6 +36,7 @@ const PvRemixChart: FC<{
     nationalNHourData,
     allGspForecastData,
     allGspRealData,
+    allGspSystemData,
     gspDeltas
   } = combinedData;
   const {
@@ -104,6 +105,7 @@ const PvRemixChart: FC<{
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
+              // yMax={allGspSystemData?.[0].installedCapacityMw || MAX_NATIONAL_GENERATION_MW}
               yMax={MAX_NATIONAL_GENERATION_MW}
               visibleLines={visibleLines}
             />

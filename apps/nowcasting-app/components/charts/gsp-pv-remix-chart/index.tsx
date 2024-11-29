@@ -26,11 +26,11 @@ import { getTicks } from "../../helpers/chartUtils";
 const Y_MAX_TICKS = [
   1, 2, 3, 4, 5, 6, 9, 10, 12, 15, 18, 20, 25, 30, 40, 45, 50, 60, 75, 80, 90, 100, 150, 200, 250,
   300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000,
-  6000, 7000, 8000, 9000, 10000
+  6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 16000, 18000, 20000
 ];
 
 const GspPvRemixChart: FC<{
-  gspId: number;
+  gspId: number | string;
   selectedTime: string;
   close: () => void;
   setTimeOfInterest: (t: string) => void;
@@ -126,8 +126,11 @@ const GspPvRemixChart: FC<{
   let yMax = gspInstalledCapacity || 100;
   yMax = getRoundedTickBoundary(yMax, Y_MAX_TICKS);
 
-  const title =
-    nationalAggregationLevel === NationalAggregation.GSP ? gspName || "" : String(gspId);
+  let title = nationalAggregationLevel === NationalAggregation.GSP ? gspName || "" : String(gspId);
+
+  if (nationalAggregationLevel === NationalAggregation.national) {
+    title = "National GSP Sum";
+  }
 
   return (
     <>
