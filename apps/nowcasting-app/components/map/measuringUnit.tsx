@@ -94,14 +94,14 @@ const MeasuringUnit = ({
             text={"GSP"}
             value={NationalAggregation.GSP}
           />
-          <MapUIButton<NationalAggregation>
-            id={"GroupButtonZones"}
-            active={nationalAggregation === NationalAggregation.zone}
-            isLoading={isLoading}
-            onToggle={onToggleAggregation}
-            text={"NG Zones"}
-            value={NationalAggregation.zone}
-          />
+          {/*<MapUIButton<NationalAggregation>*/}
+          {/*  id={"GroupButtonZones"}*/}
+          {/*  active={nationalAggregation === NationalAggregation.zone}*/}
+          {/*  isLoading={isLoading}*/}
+          {/*  onToggle={onToggleAggregation}*/}
+          {/*  text={"NG Zones"}*/}
+          {/*  value={NationalAggregation.zone}*/}
+          {/*/>*/}
           <MapUIButton<NationalAggregation>
             id={"GroupButtonZones"}
             active={nationalAggregation === NationalAggregation.DNO}
@@ -110,14 +110,14 @@ const MeasuringUnit = ({
             text={"DNO"}
             value={NationalAggregation.DNO}
           />
-          <MapUIButton<NationalAggregation>
-            id={"GroupButtonZones"}
-            active={nationalAggregation === NationalAggregation.national}
-            isLoading={isLoading}
-            onToggle={onToggleAggregation}
-            text={"National"}
-            value={NationalAggregation.national}
-          />
+          {/*<MapUIButton<NationalAggregation>*/}
+          {/*  id={"GroupButtonZones"}*/}
+          {/*  active={nationalAggregation === NationalAggregation.national}*/}
+          {/*  isLoading={isLoading}*/}
+          {/*  onToggle={onToggleAggregation}*/}
+          {/*  text={"National"}*/}
+          {/*  value={NationalAggregation.national}*/}
+          {/*/>*/}
         </div>
       </div>
     </>
