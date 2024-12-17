@@ -106,7 +106,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, [combinedErrors.allGspForecastError]);
 
   const maxPower =
-    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 2500;
+    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",

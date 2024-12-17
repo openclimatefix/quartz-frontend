@@ -34,14 +34,15 @@ const setFeatureObjectProps = (
   existingProperties: any,
   gspSystemInfo: any,
   selectedFCValue: number | undefined,
-  selectedActualValueMW: number | undefined
+  selectedActualValueMW: number | undefined,
+  roundingFactor: number = 100
 ) => {
   return {
     ...existingProperties,
     [SelectedData.expectedPowerGenerationMegawatts]:
-      selectedFCValue && getRoundedPv(selectedFCValue, false),
+      selectedFCValue && getRoundedPv(selectedFCValue, false, roundingFactor),
     [SelectedData.expectedPowerGenerationMegawattsRounded]:
-      selectedFCValue && getRoundedPv(selectedFCValue),
+      selectedFCValue && getRoundedPv(selectedFCValue, true, roundingFactor),
     [SelectedData.expectedPowerGenerationNormalized]:
       selectedFCValue &&
       getOpacityValueFromPVNormalized(
@@ -54,10 +55,11 @@ const setFeatureObjectProps = (
         (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0
       ),
     [SelectedData.actualPowerGenerationMegawatts]:
-      selectedActualValueMW && getRoundedPv(Number(selectedActualValueMW), false),
+      selectedActualValueMW && getRoundedPv(Number(selectedActualValueMW), false, roundingFactor),
     [SelectedData.installedCapacityMw]: getRoundedPv(
       gspSystemInfo?.installedCapacityMw || 0,
-      false
+      false,
+      roundingFactor
     ),
     gspDisplayName: gspSystemInfo?.regionName || ""
   };
@@ -184,7 +186,8 @@ const mapZoneFeatures: (
         { ...feature.properties, id: zoneId },
         { regionName: zoneId, installedCapacityMw: zoneInstalledCapacity },
         zoneForecastTotal,
-        zoneActualTotal
+        zoneActualTotal,
+        1000
       )
     } as Feature<Geometry, GeoJsonProperties>;
   });
@@ -201,6 +204,7 @@ const mapZoneFeatures: (
  * @param targetTime - An optional String parameter that represents the time for which to generate the forecast data.
  * @param combinedData - An optional object that holds the combined data from different sources, the structure is defined by the `CombinedData` type.
  * @param gspDeltas - An optional Map where the keys are the GSP IDs and the values are `GspDeltaValue` objects.
+ * @param aggregation - An optional NationalAggregation value to aggregate the data to a specific level.
  *
  * @returns An object containing the generated feature collection under the `forecastGeoJson` property.
  *

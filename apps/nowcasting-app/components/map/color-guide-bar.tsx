@@ -43,20 +43,20 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
       if (unit === ActiveUnit.MW) {
         return [
           { value: "0-500", opacity: 3, textColor: "ocf-gray-300" },
-          { value: "500-1k", opacity: 20, textColor: "ocf-gray-300" },
-          { value: "1k-1.5k", opacity: 40, textColor: "ocf-gray-300" },
-          { value: "1.5k-2k", opacity: 60, textColor: "black" },
-          { value: "2k-2.5k", opacity: 80, textColor: "black" },
-          { value: "2.5k+", opacity: 100, textColor: "black" }
+          { value: "500-1.5k", opacity: 20, textColor: "ocf-gray-300" },
+          { value: "1.5k-2.5k", opacity: 40, textColor: "ocf-gray-300" },
+          { value: "2.5k-3.5k", opacity: 60, textColor: "black" },
+          { value: "3.5k-4.5k", opacity: 80, textColor: "black" },
+          { value: "4.5k+", opacity: 100, textColor: "black" }
         ];
       } else if (unit === ActiveUnit.capacity) {
         return [
           { value: "0-500", opacity: 3, textColor: "ocf-gray-300" },
-          { value: "500-1000", opacity: 20, textColor: "ocf-gray-300" },
-          { value: "1000-1500", opacity: 40, textColor: "ocf-gray-300" },
-          { value: "1500-2000", opacity: 60, textColor: "black" },
-          { value: "2000-2500", opacity: 80, textColor: "black" },
-          { value: "2500+", opacity: 100, textColor: "black" }
+          { value: "500-1.5k", opacity: 20, textColor: "ocf-gray-300" },
+          { value: "1.5k-2.5k", opacity: 40, textColor: "ocf-gray-300" },
+          { value: "2.5k-3.5k", opacity: 60, textColor: "black" },
+          { value: "3.5k-4.5k", opacity: 80, textColor: "black" },
+          { value: "4.5k+", opacity: 100, textColor: "black" }
         ];
       }
     }
