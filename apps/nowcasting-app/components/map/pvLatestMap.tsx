@@ -105,8 +105,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
   }, [combinedErrors.allGspForecastError]);
 
-  console.log("## shouldUpdateMap render", shouldUpdateMap);
-
   const maxPower =
     nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 2500;
 
@@ -138,8 +136,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     combinedData.allGspSystemData,
     nationalAggregationLevel
   ]);
-
-  console.log("## generatedGeoJsonForecastData", generatedGeoJsonForecastData);
 
   // generatedGeoJsonForecastData.forecastGeoJson.features.forEach((feature) => {
   //   if (feature.geometry.type === "MultiPolygon") {

@@ -27,7 +27,6 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     }
 
     if (clickedGspId) {
-      console.log("map", map?.getFeatureState({ source: "latestPV", id: clickedGspId }));
       clickedGspIdRef.current = clickedGspId;
       map?.setFeatureState(
         {
