@@ -128,13 +128,16 @@ const useGetGspData = (gspId: number | string) => {
     ];
   }
 
-  // TODO: nHour with aggregation
+  // TODO: nHour with aggregation when /forecast/all API endpoint has new forecast_horizon_minutes param
   const nMinuteForecast = nHourForecast * 60;
-  const { data: gspNHourData, error: pvNHourError } = useLoadDataFromApi<ForecastData>(
-    show4hView
+  const { data: gspNHourDataRaw, error: pvNHourError } = useLoadDataFromApi<
+    components["schemas"]["ForecastValue"][]
+  >(
+    show4hView && !isZoneAggregation
       ? `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
       : null
   );
+  let gspNHourData = gspNHourDataRaw || [];
 
   return {
     errors: [
@@ -144,7 +147,7 @@ const useGetGspData = (gspId: number | string) => {
       gspLocationError,
       pvNHourError
     ].filter((e) => !!e),
-    gspNHourData: gspNHourData,
+    gspNHourData,
     pvRealDataIn,
     pvRealDataAfter,
     gspForecastDataOneGSP,

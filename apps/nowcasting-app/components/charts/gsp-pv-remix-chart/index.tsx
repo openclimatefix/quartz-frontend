@@ -57,10 +57,6 @@ const GspPvRemixChart: FC<{
     gspForecastDataOneGSP,
     gspNHourData
   } = useGetGspData(gspId);
-  // TODO – temp reset; if aggregation is zones, make sure data is all set
-  if ([NationalAggregation.DNO, NationalAggregation.zone].includes(nationalAggregationLevel)) {
-    gspNHourData = [];
-  }
   // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
   const gspInstalledCapacity = gspLocationInfo?.[0]?.installedCapacityMw;
   const gspName = gspLocationInfo?.[0]?.regionName;
