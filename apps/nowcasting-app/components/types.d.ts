@@ -311,3 +311,7 @@ export type MapFeatureObject = {
   id?: string | number | undefined;
   bbox?: BBox | undefined;
 };
+
+export type GspZoneGroupings = {
+  [key]: number[];
+};
