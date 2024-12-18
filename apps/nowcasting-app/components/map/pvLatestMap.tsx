@@ -137,34 +137,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     nationalAggregationLevel
   ]);
 
-  // generatedGeoJsonForecastData.forecastGeoJson.features.forEach((feature) => {
-  //   if (feature.geometry.type === "MultiPolygon") {
-  //     console.log("## MultiPolygon feature", feature);
-  //     turfFeatures.push(turf.multiPolygon(feature.geometry.coordinates));
-  //   } else {
-  //     console.log("NOT MultiPolygon");
-  //   }
-  // });
-  // console.log("## turfFeatures", turfFeatures);
-  // const featColl = turf.featureCollection(turfFeatures);
-  // console.log("## featColl", featColl);
-  // const union = featColl.features.slice(1).reduce((acc, feature) => {
-  //   console.log("## acc", acc);
-  //   console.log("## feature", feature);
-  //   return turf.union(turf.featureCollection([turf.truncate(acc), turf.truncate(feature)]));
-  // }, featColl.features[0]);
-
-  // if (generatedGeoJsonForecastData.forecastGeoJson.features[0].type === "Feature") {
-  //   const union = turf.union(
-  //     turf.featureCollection(generatedGeoJsonForecastData.forecastGeoJson.features)
-  //   );
-  // }
-
-  // const aggregatedGeoJsonForecastData = useMemo(() => {
-  //   console.log("## aggregatedGeoJsonForecastData", generatedGeoJsonForecastData);
-  //   return generatedGeoJsonForecastData.forecastGeoJson;
-  // }, [generatedGeoJsonForecastData.forecastGeoJson]);
-
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
     return new mapboxgl.Popup({
@@ -288,9 +260,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           <div class="flex justify-between gap-3 items-center mb-1">
           <!-- TODO – remove gsp_id when done testing zones -->
             <div class="text-sm font-semibold">${properties?.gspDisplayName || ""}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.gsp_id || ""} ${
-            properties?.GSPs || ""
-          }</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs || ""}</div>
           </div>
           <div class="flex justify-between items-center">
             
@@ -404,8 +374,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     //   });
     // }
   };
-
-  // return <div>Hello</div>;
 
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>

@@ -136,7 +136,6 @@ const mapGspFeatures: (
   });
 };
 
-// TODO BRAD: map/aggregate all the GSP data to the zone level
 const mapZoneFeatures: (
   features: Feature[],
   gspZoneGroupings: GspZoneGroupings,

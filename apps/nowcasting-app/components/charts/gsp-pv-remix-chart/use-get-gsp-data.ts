@@ -71,11 +71,9 @@ const useGetGspData = (gspId: number | string) => {
     gspIds = nationalGspZone[gspId as keyof typeof nationalGspZone] || [];
   }
 
-  // TODO add check for gspIds before making the api call
   const { data: pvRealDataInRaw, error: pvRealInDayError } = useLoadDataFromApi<
     components["schemas"]["GSPYieldGroupByDatetime"][]
   >(
-    // `${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=in-day`
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&gsp_ids=${encodeURIComponent(
       gspIds.join(",")
     )}&compact=true`
@@ -85,18 +83,15 @@ const useGetGspData = (gspId: number | string) => {
   const { data: pvRealDataAfterRaw, error: pvRealDayAfterError } = useLoadDataFromApi<
     components["schemas"]["GSPYieldGroupByDatetime"][]
   >(
-    // `${API_PREFIX}/solar/GB/gsp/pvlive/${gspId}?regime=day-after`
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=day-after&gsp_ids=${encodeURIComponent(
       gspIds.join(",")
     )}&compact=true`
   );
   const pvRealDataAfter = aggregateTruthData(pvRealDataAfterRaw, gspIds, "solarGenerationKw");
 
-  //add new useSWR for gspChartData
   const { data: gspForecastDataOneGSPRaw, error: gspForecastDataOneGSPError } = useLoadDataFromApi<
     components["schemas"]["OneDatetimeManyForecastValues"][]
   >(
-    // `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast`,
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
       gspIds.join(",")
     )}&compact=true&historic=true`,
