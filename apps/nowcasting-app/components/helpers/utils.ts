@@ -347,10 +347,10 @@ export const getRounded4HoursAgoString = () => {
   return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
 };
 
-export const getRoundedPv = (pv: number, round: boolean = true) => {
+export const getRoundedPv = (pv: number, round: boolean = true, roundingFactor: number = 100) => {
   if (!round) return Math.round(pv);
-  // round To: 0, 100, 200, 300, 400, 500
-  return Math.round(pv / 100) * 100;
+  // rounding factor determines step, e.g. for 100, round to: 0, 100, 200, 300, 400, 500
+  return Math.round(pv / roundingFactor) * roundingFactor;
 };
 
 export const getRoundedPvPercent = (per: number, round: boolean = true) => {

@@ -36,6 +36,7 @@ const PvRemixChart: FC<{
     nationalNHourData,
     allGspForecastData,
     allGspRealData,
+    allGspSystemData,
     gspDeltas
   } = combinedData;
   const {
