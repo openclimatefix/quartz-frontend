@@ -240,8 +240,9 @@ export const generateGeoJsonForecastData: (
     );
   } else if (aggregation === NationalAggregation.zone) {
     console.log("aggregating to zone");
+    const ngZonesJson = ngZones as FeatureCollection;
     features = mapZoneFeatures(
-      ngZones.features as Feature<Geometry, GeoJsonProperties>[],
+      ngZonesJson.features as Feature<Geometry, GeoJsonProperties>[],
       ngGSPZoneGroupings,
       combinedData,
       gspForecastsDataByTimestamp,
