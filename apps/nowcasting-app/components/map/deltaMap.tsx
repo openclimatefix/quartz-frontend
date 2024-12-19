@@ -152,7 +152,8 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       );
       map.addSource("latestPV", {
         type: "geojson",
-        data: forecastGeoJson
+        data: forecastGeoJson,
+        promoteId: "id"
       });
     } else {
       if (generatedGeoJsonForecastData && source) {

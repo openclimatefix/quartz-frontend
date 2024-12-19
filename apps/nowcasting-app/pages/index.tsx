@@ -35,7 +35,7 @@ import {
   getSitesLoadingState,
   isProduction
 } from "../components/helpers/utils";
-import { ActiveUnit } from "../components/map/types";
+import { ActiveUnit, NationalAggregation } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
@@ -71,6 +71,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
   const [, setLoadingState] = useGlobalState("loadingState");
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [, setClickedGspId] = useGlobalState("clickedGspId");
 
   const [forecastLastFetch30MinISO, setForecastLastFetch30MinISO] = useState(get30MinNow(-30));
   const [forecastHistoricBackwardIntervalMinutes, setForecastHistoricBackwardIntervalMinutes] =
@@ -105,6 +107,13 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   useEffect(() => {
     setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
   }, [visibleLines]);
+
+  // On view change, unset the clicked "GSP" if the aggregation is not GSP
+  useEffect(() => {
+    if (nationalAggregationLevel !== NationalAggregation.GSP) {
+      setClickedGspId(undefined);
+    }
+  }, [view]);
 
   const currentView = (v: VIEWS) => v === view;
 
