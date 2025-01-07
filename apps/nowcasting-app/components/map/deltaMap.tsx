@@ -46,6 +46,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   activeUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
 
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
@@ -67,7 +68,8 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         initForecastData,
         selectedISOTime,
         combinedData,
-        gspDeltas
+        gspDeltas,
+        nationalAggregationLevel
       );
 
       map.addSource("latestPV", {
@@ -145,11 +147,13 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         initForecastData,
         selectedISOTime,
         combinedData,
-        gspDeltas
+        gspDeltas,
+        nationalAggregationLevel
       );
       map.addSource("latestPV", {
         type: "geojson",
-        data: forecastGeoJson
+        data: forecastGeoJson,
+        promoteId: "id"
       });
     } else {
       if (generatedGeoJsonForecastData && source) {

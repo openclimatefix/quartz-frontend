@@ -1,8 +1,8 @@
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import mapboxgl, { Expression } from "mapbox-gl";
+import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
-import { ActiveUnit, SelectedData } from "./types";
+import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
@@ -15,6 +15,8 @@ import { generateGeoJsonForecastData } from "../helpers/data";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
+import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
+import { FeatureCollection } from "geojson";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
@@ -40,6 +42,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
 
@@ -87,7 +90,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     if (!combinedData?.allGspForecastData) return;
 
     setShouldUpdateMap(true);
-  }, [combinedData, combinedLoading, combinedValidating, selectedISOTime]);
+  }, [
+    combinedData,
+    combinedLoading,
+    combinedValidating,
+    selectedISOTime,
+    nationalAggregationLevel
+  ]);
 
   // Hide loading spinner if there is an error to prevent infinite loading
   useEffect(() => {
@@ -96,7 +105,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
   }, [combinedErrors.allGspForecastError]);
 
-  console.log("## shouldUpdateMap render", shouldUpdateMap);
+  const maxPower =
+    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
@@ -106,18 +116,25 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     0,
     0,
     // on value maximum the opacity will be 1
-    isNormalized ? 1 : MAX_POWER_GENERATED,
+    isNormalized ? 1 : maxPower,
     1
   ];
 
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData);
+    return generateGeoJsonForecastData(
+      initForecastData,
+      selectedISOTime,
+      combinedData,
+      undefined,
+      nationalAggregationLevel
+    );
   }, [
     combinedData.allGspForecastData,
     combinedLoading.allGspForecastLoading,
     combinedValidating.allGspForecastValidating,
     selectedISOTime,
-    combinedData.allGspSystemData
+    combinedData.allGspSystemData,
+    nationalAggregationLevel
   ]);
 
   // Create a popup, but don't add it to the map yet.
@@ -161,7 +178,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       const { forecastGeoJson } = generatedGeoJsonForecastData;
       map.addSource("latestPV", {
         type: "geojson",
-        data: forecastGeoJson
+        data: forecastGeoJson,
+        promoteId: "id"
       });
     } else {
       source.setData(generatedGeoJsonForecastData.forecastGeoJson);
@@ -240,8 +258,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
           const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between gap-3 items-center mb-1">
-            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.GSPs}</div>
+          <!-- TODO – remove gsp_id when done testing zones -->
+            <div class="text-sm font-semibold">${properties?.gspDisplayName || ""}</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs || ""}</div>
           </div>
           <div class="flex justify-between items-center">
             
@@ -272,7 +291,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       });
 
       map.on("data", (e) => {
-        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+        if (e.dataType === "source" && e.sourceId === "latestPV" && e.isSourceLoaded) {
           setMapDataLoading(false);
         }
       });
@@ -326,6 +345,34 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     }
+
+    // // Test DNO boundaries
+    // let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
+    //   | mapboxgl.GeoJSONSource
+    //   | undefined;
+    // if (!dnoBoundariesSource) {
+    //   map.addSource("dnoBoundaries", {
+    //     type: "geojson",
+    //     data: dnoShapeData as FeatureCollection
+    //   });
+    // }
+    //
+    // let dnoBoundariesLayer = (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
+    // if (!dnoBoundariesLayer) {
+    //   map.addLayer({
+    //     id: "dnoBoundaries",
+    //     type: "line",
+    //     source: "dnoBoundaries",
+    //     // Test showing DNO region boundaries at all zoom levels
+    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
+    //     // maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+    //     paint: {
+    //       "line-color": "#ffcc2d",
+    //       "line-width": 0.6,
+    //       "line-opacity": 0.5
+    //     }
+    //   });
+    // }
   };
 
   return (

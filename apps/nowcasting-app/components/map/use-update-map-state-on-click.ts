@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import useGlobalState from "../helpers/globalState";
+import { NationalAggregation } from "./types";
 
 type UseUpdateMapStateOnClickProps = {
   map?: mapboxgl.Map;
@@ -7,20 +8,36 @@ type UseUpdateMapStateOnClickProps = {
 };
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
 
   const clickedGspIdRef = useRef(clickedGspId);
   const isEventRegistertedRef = useRef(false);
   useEffect(() => {
     if (clickedGspIdRef.current) {
       map?.setFeatureState(
-        { source: "latestPV", id: clickedGspIdRef.current - 1 },
+        {
+          source: "latestPV",
+          id:
+            clickedGspId && nationalAggregationLevel === NationalAggregation.GSP
+              ? clickedGspIdRef.current
+              : clickedGspIdRef.current
+        },
         { click: false }
       );
     }
 
     if (clickedGspId) {
       clickedGspIdRef.current = clickedGspId;
-      map?.setFeatureState({ source: "latestPV", id: clickedGspId - 1 }, { click: true });
+      map?.setFeatureState(
+        {
+          source: "latestPV",
+          id:
+            nationalAggregationLevel === NationalAggregation.GSP
+              ? Number(clickedGspId)
+              : clickedGspId
+        },
+        { click: true }
+      );
     } else {
       clickedGspIdRef.current = undefined;
     }
@@ -32,8 +49,11 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
       map.on("click", "latestPV-forecast", (e) => {
         const clickedFeature = e.features && e.features[0];
         if (clickedFeature) {
-          const gspId = clickedFeature.properties?.gsp_id;
-          if (gspId !== clickedGspIdRef.current) setClickedGspId(gspId);
+          const id =
+            nationalAggregationLevel === NationalAggregation.GSP
+              ? clickedFeature.properties?.id
+              : clickedFeature.properties?.id;
+          if (id !== clickedGspIdRef.current) setClickedGspId(id);
           else setClickedGspId(undefined);
         }
       });

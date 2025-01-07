@@ -3,6 +3,7 @@ import { API_PREFIX, getViewTitle } from "../../constant";
 import { useLoadDataFromApi } from "../hooks/useLoadDataFromApi";
 import { SolarStatus } from "../types";
 import useGlobalState from "../helpers/globalState";
+import { useEffect } from "react";
 
 interface ILayout {
   children: React.ReactNode;
@@ -12,8 +13,14 @@ interface ILayout {
 const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status`);
   const [view] = useGlobalState("view");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [, setClickedGspId] = useGlobalState("clickedGspId");
   const viewTitle = getViewTitle(view);
   const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
+
+  useEffect(() => {
+    setClickedGspId(undefined);
+  }, [nationalAggregationLevel]);
 
   return (
     <>
