@@ -31,7 +31,7 @@ export default withSentry(
         await handleLogin(req, res, {
           authorizationParams: {
             redirect_uri: redirectUri,
-            audience: process.env.NEXT_PUBLIC_AUTH0_API_AUDIENCE || "https://api.quartz.solar/", // Production fallback
+            audience: process.env.NEXT_PUBLIC_AUTH0_API_AUDIENCE || "https://api.nowcasting.io/", // Production fallback
             scope: "openid profile email offline_access",
             useRefreshTokens: true
           },
