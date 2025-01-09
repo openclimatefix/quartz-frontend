@@ -1,3 +1,5 @@
+import "cypress-real-events/support";
+
 describe("Load the page", () => {
   beforeEach(function () {
     // cy.visit("http://localhost:3002/");
@@ -40,7 +42,7 @@ describe("Load the page", () => {
     // Profile dropdown menu
     cy.get("header #UserMenu-4hViewBtn").should("not.exist");
     cy.get("header button").contains("Open user menu").should("exist");
-    cy.get("header button").contains("Open user menu").parent().click();
+    cy.get("header button").contains("Open user menu").parent().realClick();
     cy.get("header #UserMenu-NhViewBtn").should("exist");
     cy.get("header #UserMenu-NhViewBtn").should("be.visible");
     cy.get("header #UserMenu-NhViewBtn").should("contain", "N-hour forecast");
