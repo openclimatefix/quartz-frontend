@@ -39,13 +39,16 @@ Sentry.init({
   // sessions when an error occurs.
   replaysOnErrorSampleRate: 1.0,
 
-  integrations: [
-    Sentry.replayIntegration({
-      // Additional SDK configuration goes in here, for example:
-      maskAllText: true,
-      blockAllMedia: true
-    })
-  ],
+  integrations: (integrations) => {
+    return [
+      ...integrations,
+      Sentry.replayIntegration({
+        // Additional SDK configuration goes in here, for example:
+        maskAllText: true,
+        blockAllMedia: true
+      })
+    ].filter((integration) => integration.name !== "Dedupe");
+  },
   environment: process.env.NEXT_PUBLIC_SENTRY_ENV_LABEL || process.env.NODE_ENV
   // ...
   // Note: if you want to override the automatic release value, do not set a
