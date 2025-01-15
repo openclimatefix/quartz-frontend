@@ -8,27 +8,46 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         node-version: [20.x]
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
+        cache: "yarn"
     - name: install yarn
       run: |
         cd apps/nowcasting-app
         yarn install
-    - name: build & start app
+    - name: build app
       run: |
         cd apps/nowcasting-app
         yarn build
-    - name: run tests
+      env:
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        NODE_OPTIONS: --max_old_space_size=6144
+    - name: run unit tests
       run: |
         cd apps/nowcasting-app
-        yarn start & sleep 5 && yarn test --coverage --coverageDirectory=../..
+        yarn test --clear-cache --coverage --coverageDirectory=../..
+    - name: Run cypress tests
+      # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
+      uses: cypress-io/github-action@v6
+      with:
+        # Starts web server for E2E tests - replace with your own server invocation
+        # https://docs.cypress.io/guides/continuous-integration/introduction#Boot-your-server
+        working-directory: ./apps/nowcasting-app
+        start: yarn start
+        wait-on: 'http://localhost:3002' # Waits for above
+        # Records to Cypress Cloud
+        # https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record
+        record: true
+#        parallel: true # Runs test in parallel using settings above
       env:
         AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
         AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
@@ -38,6 +57,9 @@ jobs:
         AUTH0_ISSUER_BASE_URL: ${{ secrets.AUTH0_ISSUER_BASE_URL }}
         AUTH0_SCOPE: ${{ secrets.AUTH0_SCOPE }}
         AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
+        GITHUB_TOKEN: ${{ secrets.CYPRESS_GITHUB_TOKEN }}
         NEXT_PUBLIC_API_PREFIX: ${{ secrets.NEXT_PUBLIC_API_PREFIX }}
         NEXT_PUBLIC_AUTH0_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_AUDIENCE }}
         NEXT_PUBLIC_AUTH0_API_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_API_AUDIENCE }}

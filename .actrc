@@ -1,0 +1,4 @@
+--container-architecture linux/arm64
+--container-daemon-socket -
+--platform ubuntu-latest=cypress/included:13.17.0
+--secret-file ./apps/nowcasting-app/.env.production
