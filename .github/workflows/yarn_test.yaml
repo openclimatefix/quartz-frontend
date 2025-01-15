@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: [20.x]
-        containers: [1, 2]
+#        containers: [1, 2]
 
     steps:
     - name: Checkout
@@ -47,7 +47,9 @@ jobs:
         # Records to Cypress Cloud
         # https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record
         record: true
-        parallel: true # Runs test in parallel using settings above
+#        parallel: true # Runs test in parallel using settings above
+        config: chromeWebSecurity=false
+        browser: chrome
 env:
   AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
   AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
