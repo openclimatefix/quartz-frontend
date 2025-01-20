@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { withSentry } from "@sentry/nextjs";
+import { wrapApiHandlerWithSentry } from "@sentry/nextjs";
 
 import gbPvGSPJson from "../../../data/dummy-res/fc-gsp.json";
 import gspRegions from "../../../data/dummy-res/gsp-regions.json";
@@ -28,4 +28,4 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withSentry(handler);
+export default wrapApiHandlerWithSentry(handler, "/api/forecasts/*");

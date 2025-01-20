@@ -23,7 +23,6 @@ import { SORT_BY } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
 import { convertISODateStringToLondonTime } from "../../helpers/utils";
 import { ChartData } from "../remix-line";
-import { consoleSandbox } from "@sentry/utils";
 import { formatISODateString } from "../../helpers/utils";
 
 const TableHeader: React.FC<{ text: string }> = ({ text }) => {

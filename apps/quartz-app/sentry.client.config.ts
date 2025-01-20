@@ -3,8 +3,7 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
-import { ErrorEvent } from "@sentry/types";
-import { EventHint } from "@sentry/nextjs";
+import { EventHint, ErrorEvent } from "@sentry/nextjs";
 
 Sentry.init({
   dsn: "https://3b5237320bf70088737fe3aae018292d@o400768.ingest.us.sentry.io/4507622592151552",
