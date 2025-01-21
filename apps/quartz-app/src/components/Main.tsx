@@ -88,7 +88,7 @@ export const Main = () => {
   useEffect(() => {
     console.log("combinedData updated", latestCombinedData);
     setCombinedData(latestCombinedData);
-  }, [latestCombinedData]);
+  }, [setCombinedData, latestCombinedData]);
 
   const isLoading = useMemo(() => {
     return (

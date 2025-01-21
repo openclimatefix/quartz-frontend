@@ -19,7 +19,7 @@
     "@heroicons/react": "^1.0.6",
     "@next/third-parties": "^14.2.5",
     "@react-icons/all-files": "^4.1.0",
-    "@sentry/nextjs": "^7.102.1",
+    "@sentry/nextjs": "8",
     "@tailwindcss/container-queries": "^0.1.1",
     "@turf/turf": "^7.1.0",
     "@types/cookies": "^0.7.7",
