@@ -1,4 +1,5 @@
-import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0";
+import { useUser } from "@auth0/nextjs-auth0/client";
+import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import Layout from "../components/layout/layout";
 import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
