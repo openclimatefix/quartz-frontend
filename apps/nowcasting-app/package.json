@@ -14,7 +14,7 @@
     "test:cypress": "cypress run --browser chrome"
   },
   "dependencies": {
-    "@auth0/nextjs-auth0": "^2.7.0",
+    "@auth0/nextjs-auth0": "^3.5.0",
     "@headlessui/react": "^1.6.1",
     "@heroicons/react": "^1.0.6",
     "@next/third-parties": "^14.2.5",

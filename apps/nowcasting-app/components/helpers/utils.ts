@@ -394,7 +394,7 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
       return res.data;
     })
     .catch((err) => {
-      if ([401, 403].includes(err.response.status)) {
+      if (process.env.NEXT_PUBLIC_DEV_MODE !== "true" && [401, 403].includes(err.response.status)) {
         Sentry.captureException(err, {
           tags: {
             error: "401/403 auth error"

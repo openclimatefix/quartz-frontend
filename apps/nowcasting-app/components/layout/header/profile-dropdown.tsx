@@ -18,7 +18,8 @@ const { version } = pkg;
 interface IProfileDropDown {}
 
 const ProfileDropDown = ({}: IProfileDropDown) => {
-  const { user } = useUser();
+  // const { user } = useUser();
+  const { user } = { user: { email: "fake@user.com", picture: "" } };
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const toggleDashboardMode = () => {

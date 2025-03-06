@@ -62,7 +62,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [timeNow] = useGlobalState("timeNow");
-  const { user, isLoading, error } = useUser();
+  // const { user, isLoading, error } = useUser();
+  const { user, isLoading, error } = {
+    user: { email: "fake@user.com", picture: "" },
+    isLoading: false,
+    error: null
+  };
   const [maps] = useGlobalState("maps");
   const [lat] = useGlobalState("lat");
   const [lng] = useGlobalState("lng");
@@ -720,13 +725,23 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
 }
 
-export const getServerSideProps = withPageAuthRequired({
-  async getServerSideProps(context) {
-    const cookies = new Cookies(context.req, context.res);
-    return {
-      props: {
-        dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
+export const getServerSideProps =
+  process.env.NEXT_PUBLIC_DEV_MODE === "true"
+    ? (context: any) => {
+        const cookies = new Cookies(context.req, context.res);
+        return {
+          props: {
+            dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
+          }
+        };
       }
-    };
-  }
-});
+    : withPageAuthRequired({
+        async getServerSideProps(context) {
+          const cookies = new Cookies(context.req, context.res);
+          return {
+            props: {
+              dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
+            }
+          };
+        }
+      });
