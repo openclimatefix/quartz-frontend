@@ -62,12 +62,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [timeNow] = useGlobalState("timeNow");
-  // const { user, isLoading, error } = useUser();
-  const { user, isLoading, error } = {
-    user: { email: "fake@user.com", picture: "" },
-    isLoading: false,
-    error: null
-  };
+  const { user, isLoading, error } = useUser();
   const [maps] = useGlobalState("maps");
   const [lat] = useGlobalState("lat");
   const [lng] = useGlobalState("lng");

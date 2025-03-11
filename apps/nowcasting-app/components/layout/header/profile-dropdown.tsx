@@ -6,7 +6,6 @@ import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from ".
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
-import { ChartInfo } from "../../../ChartInfo";
 import { Checkmark, ExternalLinkIcon } from "../../icons/icons";
 import {
   CookieStorageKeys,
@@ -18,8 +17,7 @@ const { version } = pkg;
 interface IProfileDropDown {}
 
 const ProfileDropDown = ({}: IProfileDropDown) => {
-  // const { user } = useUser();
-  const { user } = { user: { email: "fake@user.com", picture: "" } };
+  const { user } = useUser();
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const toggleDashboardMode = () => {
