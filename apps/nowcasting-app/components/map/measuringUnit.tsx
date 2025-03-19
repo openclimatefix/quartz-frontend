@@ -1,6 +1,7 @@
 import { Dispatch, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
 import { ActiveUnit, NationalAggregation } from "./types";
 import useGlobalState from "../helpers/globalState";
+import * as Sentry from "@sentry/nextjs";
 
 const MeasuringUnit = ({
   activeUnit,
@@ -24,8 +25,15 @@ const MeasuringUnit = ({
     aggregation: NationalAggregation
   ) => {
     event.preventDefault();
+    Sentry.captureMessage("Event: Aggregation level changed", {
+      extra: {
+        eventType: "UserAction",
+        aggregation,
+        timestamp: new Date().getTime() // Just to make the event unique
+      }
+    });
     setNationalAggregation(aggregation);
-    console.log("aggregation", aggregation);
+    console.log("sent event to Sentry: aggregation", aggregation);
   };
   const buttonClasses =
     "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";

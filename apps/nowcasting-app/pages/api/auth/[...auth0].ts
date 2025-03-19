@@ -1,5 +1,5 @@
 import { handleAuth, handleCallback, handleLogin, handleLogout } from "@auth0/nextjs-auth0";
-import { withSentry, setUser } from "@sentry/nextjs";
+import { wrapApiHandlerWithSentry, setUser } from "@sentry/nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 function getUrls(req: NextApiRequest) {
@@ -13,7 +13,7 @@ function getUrls(req: NextApiRequest) {
   };
 }
 
-export default withSentry(
+export default wrapApiHandlerWithSentry(
   handleAuth({
     async callback(req: NextApiRequest, res: NextApiResponse) {
       try {
@@ -31,7 +31,7 @@ export default withSentry(
         await handleLogin(req, res, {
           authorizationParams: {
             redirect_uri: redirectUri,
-            audience: process.env.NEXT_PUBLIC_AUTH0_API_AUDIENCE || "https://api.quartz.solar/", // Production fallback
+            audience: process.env.NEXT_PUBLIC_AUTH0_API_AUDIENCE || "https://api.nowcasting.io/", // Production fallback
             scope: "openid profile email offline_access",
             useRefreshTokens: true
           },
@@ -49,5 +49,6 @@ export default withSentry(
         returnTo
       });
     }
-  })
+  }),
+  "/api/*"
 );
