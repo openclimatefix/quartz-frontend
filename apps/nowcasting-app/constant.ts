@@ -3,7 +3,7 @@ export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev
 export const SITES_API_PREFIX =
   process.env.NEXT_PUBLIC_SITES_API_PREFIX || "https://api-site-dev.quartz.solar";
 export const MAX_POWER_GENERATED = 500;
-export const MAX_NATIONAL_GENERATION_MW = 12000;
+export const MAX_NATIONAL_GENERATION_MW = 18000;
 
 export const getAllForecastUrl = (isNormalized: boolean, isHistoric: boolean) =>
   `${API_PREFIX}/solar/GB/gsp/forecast/all/?UI&${isHistoric ? "historic=true" : ""}${

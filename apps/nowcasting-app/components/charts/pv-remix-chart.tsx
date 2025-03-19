@@ -67,6 +67,29 @@ const PvRemixChart: FC<{
     timeTrigger: selectedTime
   });
 
+  const yMax = useMemo(() => {
+    if (!chartData || chartData.length === 0) {
+      return MAX_NATIONAL_GENERATION_MW; // Default max value
+    }
+
+    const maxDataValue = Math.max(
+      0,
+      ...chartData.flatMap((dataPoint) =>
+        Object.entries(dataPoint)
+          .filter(
+            ([key, value]) =>
+              typeof value === "number" && key !== "formattedDate" && !key.includes("TIME")
+          )
+          .map(([_, value]) => value as number)
+      )
+    );
+
+    const buffer = 1000; // This buffer is added to the max value to ensure the chart is not too close to the top
+    const roundedMax = Math.ceil((maxDataValue + buffer) / 1000) * 1000;
+
+    return Math.max(MAX_NATIONAL_GENERATION_MW, roundedMax);
+  }, [chartData]);
+
   if (
     nationalForecastError ||
     pvRealDayInError ||
@@ -105,7 +128,7 @@ const PvRemixChart: FC<{
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
-              yMax={MAX_NATIONAL_GENERATION_MW}
+              yMax={yMax}
               visibleLines={visibleLines}
             />
           </div>
