@@ -14,11 +14,9 @@ import {
   YAxis
 } from "recharts";
 import {
-  convertISODateStringToLondonTime,
   convertToLocaleDateString,
   dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
-  dateToLondonDateTimeOnlyString,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate,
   prettyPrintDayLabelWithDate
@@ -26,8 +24,6 @@ import {
 import { theme } from "../../tailwind.config";
 import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
-import get from "@auth0/nextjs-auth0/dist/auth0-session/client";
-import SVGComponent, { CloseButtonIcon } from "../icons/icons";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 

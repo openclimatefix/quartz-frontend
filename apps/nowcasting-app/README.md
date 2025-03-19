@@ -1,7 +1,7 @@
 # Quartz Solar UI
 
 This is the main Quartz Solar UI, hosted at [app.quartz.solar](app.quartz.solar).
-It is used by customers to login and view their forecasts.
+It is used by customers to log in and view their forecasts.
 
 ## Getting Started
 
@@ -18,26 +18,15 @@ yarn install
 
 ### Setting Environment Variables
 
-The following environment variables need to be populated to make sure Auth0 is working properly.
-Place them in the file `.env.local` in the root of this app folder.
+The environment variables in `.env.example` need to be populated to make sure Auth0 is working properly.
+Place them in a `.env.local` file in the root of this app folder (`nowcasting-app`).
 
-```bash
-# ./apps/nowcasting-app/.env.local
 
-# A long, secret value used to encrypt the session cookie
-AUTH0_SECRET='<secret>'
-# The base url of your application
-AUTH0_BASE_URL='http://localhost:3002'
-# The url of your Auth0 tenant domain
-AUTH0_ISSUER_BASE_URL='https://nowcasting-dev.eu.auth0.com'
-# Your Auth0 application's Client ID
-AUTH0_CLIENT_ID='<client id>'
-# Your Auth0 application's Client Secret
-AUTH0_CLIENT_SECRET='<client secret>'
-# Disable Sentry on local to avoid noise 
-# (should default to off in development env anyway but just to make sure)
-NEXT_PUBLIC_SENTRY_DISABLED='true'
-```
+### Running the API locally
+
+The app needs to communicate with the API to fetch the forecasts, even if they are fake data in the local environment.
+To run the API locally, follow the instructions in the 
+[nowcasting-api README](https://github.com/openclimatefix/uk-pv-national-gsp-api) to set up and run the API.
 
 ### Running the App
 
@@ -52,9 +41,12 @@ Open [http://localhost:3002](http://localhost:3002) with your browser to see the
 
 ## Deployment
 
-The app gets automatically deployed to Vercel, on each push to the `main` branch.
+The app gets automatically deployed to Vercel, on each merge to the `development`, `staging`, and `main` branches.
+Any Pull Requests are deployed on their own respective Preview branches when granted an OCF Team member.
 
 ## Storybook
+
+This part of the app is slightly unloved, but it is still possible to run Storybook to see the components in isolation.
 
 ```bash
 yarn run storybook
