@@ -6,7 +6,7 @@ import * as Sentry from "@sentry/nextjs";
 import { EventHint, ErrorEvent } from "@sentry/nextjs";
 
 Sentry.init({
-  dsn: "https://3b5237320bf70088737fe3aae018292d@o400768.ingest.us.sentry.io/4507622592151552",
+  dsn: process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   // Adjust this value in production, or use tracesSampler for greater control
   tracesSampler: ({ name, attributes, parentSampled }) => {
