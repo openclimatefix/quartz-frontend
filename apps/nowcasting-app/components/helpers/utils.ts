@@ -573,3 +573,30 @@ export const createBucketObject: (
     increment
   };
 };
+
+export function calculateChartYMax<T extends Record<string, any>>(
+  chartData: T[] | null | undefined
+): number {
+  if (!chartData || chartData.length === 0) {
+    // If there is no data, return 0
+    return 0;
+  }
+
+  const maxDataValue = Math.max(
+    0,
+    ...chartData.flatMap((dataPoint) =>
+      Object.entries(dataPoint)
+        .filter(
+          ([key, value]) =>
+            typeof value === "number" && key !== "formattedDate" && !key.includes("TIME")
+        )
+        .map(([_, value]) => value as number)
+    )
+  );
+
+  const valueWithBuffer = maxDataValue + 1000;
+  const roundingFactor = 2000;
+
+  // below the 0.01 is the epsilon value to handle the edge case where the value is exactly on the rounding factor
+  return Math.ceil((valueWithBuffer + 0.01) / roundingFactor) * roundingFactor;
+}

@@ -5,6 +5,7 @@ import {
   prettyPrintChartAxisLabelDate
 } from "./utils";
 import * as utils from "./utils";
+import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
 
 describe("check getOpacityValueFromPVNormalized with valid values", () => {
   test("check rounding to [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1.0] and then selecting the correct opacity from [0.03, 0.2, 0.4, 0.6, 0.8, 1, 1]", () => {
@@ -179,5 +180,76 @@ describe("prettyPrintDayLabelWithDate", () => {
   it("should print 'Today' for today's date", () => {
     const result = utils.prettyPrintDayLabelWithDate(new Date().toISOString());
     expect(result).toBe("Today");
+  });
+});
+
+describe("check y-axis max value calculation", () => {
+  test("should return 0 when chart data is null", () => {
+    const result = utils.calculateChartYMax(null);
+    expect(result).toBe(0);
+  });
+
+  test("should return 0 when chart data is undefined", () => {
+    const result = utils.calculateChartYMax(undefined);
+    expect(result).toBe(0);
+  });
+
+  test("should return 0 when chart data is empty array", () => {
+    const result = utils.calculateChartYMax([]);
+    expect(result).toBe(0);
+  });
+
+  test("should round up to nearest 2000 with buffer of 1000", () => {
+    const chartData = [{ value: 12500 }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(14000); // 12500 + 1000 = 13500 rounded up to nearest 2000, ie 14000
+  });
+
+  test("should handle multiple numeric values", () => {
+    const chartData = [
+      { value1: 5000, value2: 8000 },
+      { value1: 3000, value2: 7000 }
+    ];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(10000); // (8000 + 1000) rounded up to nearest 2000
+  });
+
+  test("should ignore formattedDate fields", () => {
+    const chartData = [{ value: 6000, formattedDate: 15000 }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(8000); // (6000 + 1000) rounded up to nearest 2000
+  });
+
+  test("should ignore fields containing TIME", () => {
+    const chartData = [{ value: 4500, TIME_VALUE: 9000 }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(6000); // (4500 + 1000) rounded up to nearest 2000
+  });
+
+  test("should handle edge case where values exactly match rounding threshold", () => {
+    const chartData = [{ value: 5000 }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(8000); // (5000 + 1000) rounded up to nearest 2000
+  });
+
+  test("should consider yMax if value is greater", () => {
+    const chartData = [{ value: 15000 }];
+    const result = Math.max(utils.calculateChartYMax(chartData), MAX_NATIONAL_GENERATION_MW);
+    expect(result).toBe(utils.calculateChartYMax(chartData));
+  });
+
+  test("should consider MAX_NATIONAL_GENERATION_MW if value is less", () => {
+    const chartData = [{ value: 10000 }];
+    const result = Math.max(utils.calculateChartYMax(chartData), MAX_NATIONAL_GENERATION_MW);
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW);
+  });
+
+  test("should handle non-numeric values", () => {
+    const chartData = [
+      { value: "not-a-number", numericValue: 3000 },
+      { stringValue: "string", numericValue: 2500 }
+    ];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(6000); // (3000 + 1000) rounded up to nearest 2000
   });
 });
