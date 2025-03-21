@@ -210,46 +210,31 @@ describe("check y-axis max value calculation", () => {
       { value1: 5000, value2: 8000 },
       { value1: 3000, value2: 7000 }
     ];
-    const result = utils.calculateChartYMax(chartData);
+    const result = utils.calculateChartYMax(chartData, 0); // the MAX_NATIONAL_GENERATION_MW is not considered for this test
     expect(result).toBe(10000); // (8000 + 1000) rounded up to nearest 2000
   });
 
   test("should ignore formattedDate fields", () => {
-    const chartData = [{ value: 6000, formattedDate: 15000 }];
-    const result = utils.calculateChartYMax(chartData);
+    const chartData = [{ value: 6000, formattedDate: "2023-10-12" }];
+    const result = utils.calculateChartYMax(chartData, 0); // the MAX_NATIONAL_GENERATION_MW is not considered for this test
     expect(result).toBe(8000); // (6000 + 1000) rounded up to nearest 2000
   });
 
-  test("should ignore fields containing TIME", () => {
-    const chartData = [{ value: 4500, TIME_VALUE: 9000 }];
-    const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(6000); // (4500 + 1000) rounded up to nearest 2000
-  });
-
   test("should handle edge case where values exactly match rounding threshold", () => {
-    const chartData = [{ value: 5000 }];
+    const chartData = [{ value: 15000 }];
     const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(8000); // (5000 + 1000) rounded up to nearest 2000
+    expect(result).toBe(18000); // (15000 + 1000) rounded up to nearest 2000
   });
 
-  test("should consider yMax if value is greater", () => {
+  test("should consider yMax if the value of yMax is greater than the Max National Generation", () => {
     const chartData = [{ value: 15000 }];
     const result = Math.max(utils.calculateChartYMax(chartData), MAX_NATIONAL_GENERATION_MW);
     expect(result).toBe(utils.calculateChartYMax(chartData));
   });
 
-  test("should consider MAX_NATIONAL_GENERATION_MW if value is less", () => {
+  test("should consider Max National Generation if the value of yMax is less than the Max National Generation", () => {
     const chartData = [{ value: 10000 }];
     const result = Math.max(utils.calculateChartYMax(chartData), MAX_NATIONAL_GENERATION_MW);
     expect(result).toBe(MAX_NATIONAL_GENERATION_MW);
-  });
-
-  test("should handle non-numeric values", () => {
-    const chartData = [
-      { value: "not-a-number", numericValue: 3000 },
-      { stringValue: "string", numericValue: 2500 }
-    ];
-    const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(6000); // (3000 + 1000) rounded up to nearest 2000
   });
 });

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
+import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import {
   Bucket,
   CombinedData,
@@ -573,9 +573,9 @@ export const createBucketObject: (
     increment
   };
 };
-
-export function calculateChartYMax<T extends Record<string, any>>(
-  chartData: T[] | null | undefined
+export function calculateChartYMax(
+  chartData: Array<{ [key: string]: number | string | number[] }> | null | undefined,
+  maxY: number = MAX_NATIONAL_GENERATION_MW
 ): number {
   if (!chartData || chartData.length === 0) {
     // If there is no data, return 0
@@ -588,7 +588,7 @@ export function calculateChartYMax<T extends Record<string, any>>(
       Object.entries(dataPoint)
         .filter(
           ([key, value]) =>
-            typeof value === "number" && key !== "formattedDate" && !key.includes("TIME")
+            typeof value === "number" && key !== "formattedDate" && !key.includes("GENERATION")
         )
         .map(([_, value]) => value as number)
     )
@@ -598,5 +598,5 @@ export function calculateChartYMax<T extends Record<string, any>>(
   const roundingFactor = 2000;
 
   // below the 0.01 is the epsilon value to handle the edge case where the value is exactly on the rounding factor
-  return Math.ceil((valueWithBuffer + 0.01) / roundingFactor) * roundingFactor;
+  return Math.max(Math.ceil((valueWithBuffer + 0.01) / roundingFactor) * roundingFactor, maxY);
 }

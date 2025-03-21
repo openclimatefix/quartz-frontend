@@ -69,7 +69,7 @@ const PvRemixChart: FC<{
   });
 
   const yMax = useMemo(() => {
-    return calculateChartYMax(chartData);
+    return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
 
   if (
@@ -110,7 +110,7 @@ const PvRemixChart: FC<{
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
-              yMax={Math.max(yMax, MAX_NATIONAL_GENERATION_MW)}
+              yMax={yMax}
               visibleLines={visibleLines}
             />
           </div>
