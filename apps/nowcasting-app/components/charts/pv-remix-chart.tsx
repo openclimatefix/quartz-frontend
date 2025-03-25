@@ -13,6 +13,7 @@ import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
+import { getTicks } from "../helpers/chartUtils";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;
@@ -112,6 +113,7 @@ const PvRemixChart: FC<{
               data={chartData}
               yMax={yMax}
               visibleLines={visibleLines}
+              yTicks={getTicks(yMax, [])}
             />
           </div>
         </div>

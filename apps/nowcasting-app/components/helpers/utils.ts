@@ -595,7 +595,7 @@ export function calculateChartYMax(
   );
 
   const valueWithBuffer = maxDataValue + 1000;
-  const roundingFactor = 2000;
+  const roundingFactor = 1000;
 
   // below the 0.01 is the epsilon value to handle the edge case where the value is exactly on the rounding factor
   return Math.max(Math.ceil((valueWithBuffer + 0.01) / roundingFactor) * roundingFactor, maxY);

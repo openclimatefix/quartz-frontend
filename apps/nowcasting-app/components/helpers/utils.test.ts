@@ -223,7 +223,7 @@ describe("check y-axis max value calculation", () => {
   test("should handle edge case where values exactly match rounding threshold", () => {
     const chartData = [{ value: 15000 }];
     const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(18000); // (15000 + 1000) rounded up to nearest 2000
+    expect(result).toBe(17000); // (15000 + 1000) rounded up to nearest 1000
   });
 
   test("should consider yMax if the value of yMax is greater than the Max National Generation", () => {

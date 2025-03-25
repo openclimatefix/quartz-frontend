@@ -62,6 +62,8 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
   const fifth = yMax / 5;
   const seventh = yMax / 7;
   const testTicksToAdd = (fractionN: number) => {
+    if (!Number.isFinite(fractionN) || fractionN <= 0) return;
+    fractionN = Math.round(fractionN);
     let canSplit = true;
     let tempTicks = [];
     for (let i = fractionN; i <= yMax; i += fractionN) {
