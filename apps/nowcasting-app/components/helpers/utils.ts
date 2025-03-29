@@ -21,6 +21,7 @@ import * as Sentry from "@sentry/nextjs";
 import createClient from "openapi-fetch";
 import { paths } from "../../types/quartz-api";
 import { PathsWithMethod } from "openapi-typescript-helpers";
+import { ChartData } from "../charts/remix-line";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
@@ -574,7 +575,7 @@ export const createBucketObject: (
   };
 };
 export function calculateChartYMax(
-  chartData: Array<{ [key: string]: number | string | number[] }> | null | undefined,
+  chartData: ChartData[],
   maxY: number = MAX_NATIONAL_GENERATION_MW
 ): number {
   if (!chartData || chartData.length === 0) {
@@ -586,10 +587,7 @@ export function calculateChartYMax(
     0,
     ...chartData.flatMap((dataPoint) =>
       Object.entries(dataPoint)
-        .filter(
-          ([key, value]) =>
-            typeof value === "number" && key !== "formattedDate" && !key.includes("GENERATION")
-        )
+        .filter(([key, value]) => typeof value === "number" && key !== "formattedDate")
         .map(([_, value]) => value as number)
     )
   );
@@ -597,6 +595,5 @@ export function calculateChartYMax(
   const valueWithBuffer = maxDataValue + 1000;
   const roundingFactor = 1000;
 
-  // below the 0.01 is the epsilon value to handle the edge case where the value is exactly on the rounding factor
-  return Math.max(Math.ceil((valueWithBuffer + 0.01) / roundingFactor) * roundingFactor, maxY);
+  return Math.max(Math.ceil(valueWithBuffer / roundingFactor) * roundingFactor, maxY);
 }
