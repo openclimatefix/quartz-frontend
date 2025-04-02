@@ -723,7 +723,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 export const getServerSideProps =
   process.env.NEXT_PUBLIC_DEV_MODE === "true"
     ? (context: any) => {
-        const cookies = new Cookies(context.req, context.res);
+        const cookies = new Cookies(context.req, context.res, {
+          secure: process.env.NODE_ENV === "production"
+        });
         const bearer = context.query.bearer;
         cookies.set("bearer", bearer, {
           sameSite: "none",
