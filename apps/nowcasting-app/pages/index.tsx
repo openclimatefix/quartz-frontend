@@ -726,7 +726,7 @@ export const getServerSideProps =
         const cookies = new Cookies(context.req, context.res);
         const bearer = context.query.bearer;
         cookies.set("bearer", bearer, {
-          sameSite: "strict"
+          sameSite: "none"
         });
         return {
           props: {
