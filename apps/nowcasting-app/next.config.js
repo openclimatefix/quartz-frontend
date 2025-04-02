@@ -6,7 +6,20 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 const moduleExports = {
-  // Your existing module.exports
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "default-src * https://api-dev.nowcasting.io https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com http://localhost:* blob: https://api-dev.nowcasting.io https://www.googletagmanager.com/gtm.js; style-src 'self' https://unpkg.com/leaflet@1.7.1/dist/leaflet.css 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com;"
+          }
+        ]
+      }
+    ];
+  }
 };
 
 const sentryWebpackPluginOptions = {

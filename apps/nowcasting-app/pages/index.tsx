@@ -724,6 +724,10 @@ export const getServerSideProps =
   process.env.NEXT_PUBLIC_DEV_MODE === "true"
     ? (context: any) => {
         const cookies = new Cookies(context.req, context.res);
+        const bearer = context.query.bearer;
+        cookies.set("bearer", bearer, {
+          sameSite: "strict"
+        });
         return {
           props: {
             dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
