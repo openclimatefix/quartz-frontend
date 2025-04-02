@@ -726,7 +726,8 @@ export const getServerSideProps =
         const cookies = new Cookies(context.req, context.res);
         const bearer = context.query.bearer;
         cookies.set("bearer", bearer, {
-          sameSite: "none"
+          sameSite: "none",
+          secure: process.env.NODE_ENV === "production"
         });
         return {
           props: {

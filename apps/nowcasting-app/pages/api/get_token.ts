@@ -5,6 +5,8 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
   ? async function token(req: NextApiRequest, res: NextApiResponse) {
       if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
         const { bearer } = req.cookies;
+        console.log("req.cookies", req.cookies);
+        console.log("Cookie bearer", bearer);
         return res.status(200).json({ accessToken: bearer || "FAKE_TOKEN" });
       }
     }
