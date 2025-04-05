@@ -5,7 +5,7 @@ import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
-import { formatISODateStringHuman } from "../helpers/utils";
+import { formatISODateStringHuman, formatISODateString } from "../helpers/utils";
 import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
@@ -45,6 +45,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
+  const [noDataForSelectedTime, setNoDataForSelectedTime] = useState(false);
 
   const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
     switch (activeUnit) {
@@ -82,14 +83,45 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
 
+    // Check if we have data for the selected time
+    const forecastData = combinedData.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
+    const hasDataForSelectedTime = forecastData.some(
+      (item: components["schemas"]["OneDatetimeManyForecastValues"]) => 
+        item.datetimeUtc.slice(0, 16) === formatISODateString(selectedISOTime || "")
+    );
+
     setMapDataLoading(true);
-  }, [selectedISOTime]);
+    setNoDataForSelectedTime(!hasDataForSelectedTime);
+
+    // If data isn't available for this time, stop showing loading after a short delay
+    if (!hasDataForSelectedTime) {
+      const timer = setTimeout(() => {
+        setMapDataLoading(false);
+        console.log("No data available for selected time:", selectedISOTime);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedISOTime, combinedData?.allGspForecastData]);
 
   // Update map data when forecast data is loaded
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
 
-    setShouldUpdateMap(true);
+    // Check if we have data for the selected time
+    const forecastData = combinedData.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
+    const hasDataForSelectedTime = forecastData.some(
+      (item: components["schemas"]["OneDatetimeManyForecastValues"]) => 
+        item.datetimeUtc.slice(0, 16) === formatISODateString(selectedISOTime || "")
+    );
+
+    setNoDataForSelectedTime(!hasDataForSelectedTime);
+
+    if (hasDataForSelectedTime) {
+      setShouldUpdateMap(true);
+    } else {
+      console.log("Not updating map - no data for selected time:", selectedISOTime);
+      setMapDataLoading(false);
+    }
   }, [
     combinedData,
     combinedLoading,
@@ -386,7 +418,14 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             combinedLoading.allGspForecastLoading ||
             mapDataLoading) && (
             <LoadStateMap>
-              <Spinner />
+              {noDataForSelectedTime ? (
+                <div className="text-center">
+                  <p className="text-white mb-2">No data available for selected time</p>
+                  <p className="text-white text-sm">Try selecting a different time</p>
+                </div>
+              ) : (
+                <Spinner />
+              )}
             </LoadStateMap>
           )}
           <Map

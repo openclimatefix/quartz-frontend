@@ -228,6 +228,25 @@ export const generateGeoJsonForecastData: (
 ) => {
   console.log("aggregation", aggregation);
   const gspForecastsDataByTimestamp = forecastData || [];
+  
+  // Check if the target time exists in the forecast data
+  if (targetTime && gspForecastsDataByTimestamp.length > 0) {
+    const targetTimeFormatted = formatISODateString(targetTime);
+    const hasDataForTargetTime = gspForecastsDataByTimestamp.some(
+      (item) => item.datetimeUtc.slice(0, 16) === targetTimeFormatted
+    );
+    
+    if (!hasDataForTargetTime) {
+      console.log("No forecast data available for selected time:", targetTime);
+      return { 
+        forecastGeoJson: {
+          type: "FeatureCollection" as "FeatureCollection",
+          features: []
+        } 
+      };
+    }
+  }
+  
   const gspShapeJson = gspShapeData as FeatureCollection;
   let features = gspShapeJson.features;
   if (aggregation === NationalAggregation.GSP) {
