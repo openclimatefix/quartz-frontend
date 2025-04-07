@@ -62,18 +62,21 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
   const fifth = yMax / 5;
   const seventh = yMax / 7;
   const testTicksToAdd = (fractionN: number) => {
-    let canSplit = true;
-    let tempTicks = [];
-    for (let i = fractionN; i <= yMax; i += fractionN) {
-      if (isRoundNumber(i) || i === yMax) {
-        tempTicks.push(i);
-      } else {
-        canSplit = false;
-        break;
+    if (!Number.isFinite(fractionN)) return;
+    if (fractionN > 0) {
+      let canSplit = true;
+      let tempTicks = [];
+      for (let i = fractionN; i <= yMax; i += fractionN) {
+        if (isRoundNumber(i) || i === yMax) {
+          tempTicks.push(i);
+        } else {
+          canSplit = false;
+          break;
+        }
       }
-    }
-    if (canSplit) {
-      ticks.push(...tempTicks);
+      if (canSplit) {
+        ticks.push(...tempTicks);
+      }
     }
   };
   const isRoundNumber = (n: number) => {
@@ -107,7 +110,7 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
     testTicksToAdd(seventh);
   }
   if (ticks.length === 0) {
-    testTicksToAdd(yMax > 500 ? 100 : 50);
+    testTicksToAdd(yMax > 500 ? 100 : yMax > 10 ? 50 : 0.5);
   }
   return ticks;
 };

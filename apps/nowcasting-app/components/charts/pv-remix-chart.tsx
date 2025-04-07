@@ -12,6 +12,8 @@ import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
+import { calculateChartYMax } from "../helpers/utils";
+import { getTicks } from "../helpers/chartUtils";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;
@@ -67,6 +69,10 @@ const PvRemixChart: FC<{
     timeTrigger: selectedTime
   });
 
+  const yMax = useMemo(() => {
+    return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
+  }, [chartData]);
+
   if (
     nationalForecastError ||
     pvRealDayInError ||
@@ -105,8 +111,9 @@ const PvRemixChart: FC<{
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
-              yMax={MAX_NATIONAL_GENERATION_MW}
+              yMax={yMax}
               visibleLines={visibleLines}
+              yTicks={getTicks(yMax, [])}
             />
           </div>
         </div>
