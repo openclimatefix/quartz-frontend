@@ -407,7 +407,7 @@ export const getOldestTimestampFromCompactForecastValues = <
 };
 
 export const getOldestTimestampFromForecastValues = (forecastValues: ForecastData): string => {
-  const sortedForecast = forecastValues.sort((a, b) => {
+  const sortedForecast = [...forecastValues].sort((a, b) => {
     return a.targetTime > b.targetTime ? 1 : -1;
   });
   return sortedForecast?.[0]?.targetTime || "";
