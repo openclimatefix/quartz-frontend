@@ -106,7 +106,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
     showNHourView: false,
-    dashboardMode: getBooleanSettingFromCookieStorage(CookieStorageKeys.DASHBOARD_MODE),
+    dashboardMode: getBooleanSettingFromCookieStorage(CookieStorageKeys.DASHBOARD_MODE, true),
     loadingState: {
       initialLoadComplete: false,
       showMessage: false,

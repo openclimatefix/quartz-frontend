@@ -382,13 +382,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       ) : (
         // ) : !forecastError && !initForecastData ? (
         <>
-          {(!combinedData.allGspForecastData ||
-            combinedLoading.allGspForecastLoading ||
-            mapDataLoading) && (
-            <LoadStateMap>
-              <Spinner />
-            </LoadStateMap>
-          )}
+          {/*{(!combinedData.allGspForecastData ||*/}
+          {/*  combinedLoading.allGspForecastLoading ||*/}
+          {/*  mapDataLoading) && (*/}
+          {/*  <LoadStateMap>*/}
+          {/*    <Spinner />*/}
+          {/*  </LoadStateMap>*/}
+          {/*)}*/}
           <Map
             loadDataOverlay={(map: { current: mapboxgl.Map }) =>
               safelyUpdateMapData(map.current, addOrUpdateMapData)
