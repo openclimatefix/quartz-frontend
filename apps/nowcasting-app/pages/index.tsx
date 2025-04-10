@@ -57,7 +57,7 @@ import {
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
-  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
+  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.percentage);
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());

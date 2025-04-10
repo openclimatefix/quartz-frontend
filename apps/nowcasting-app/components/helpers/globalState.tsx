@@ -87,11 +87,12 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
     view: VIEWS.FORECAST,
-    visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
+    // visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
+    visibleLines: [
       "GENERATION",
       "GENERATION_UPDATED",
-      "FORECAST",
-      "N_HOUR_FORECAST"
+      "FORECAST"
+      // "N_HOUR_FORECAST"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
