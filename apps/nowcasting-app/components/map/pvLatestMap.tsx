@@ -186,6 +186,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
     console.log("latestPV source set");
 
+    // add timeout to force resize the map after loading the data
+    setTimeout(() => {
+      map.resize();
+      console.log("map force resized");
+    }, 2000);
+
     const pvForecastLayer = map.getLayer("latestPV-forecast");
     if (!pvForecastLayer) {
       map.addLayer({
