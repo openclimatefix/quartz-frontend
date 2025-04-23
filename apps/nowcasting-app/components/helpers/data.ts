@@ -406,6 +406,25 @@ export const getOldestTimestampFromCompactForecastValues = <
   );
 };
 
+/**
+ * Retrieves the oldest timestamp from a given `ForecastData` array.
+ *
+ * This function sorts the provided forecast data by the `targetTime` property in ascending order
+ * and returns the earliest (oldest) timestamp. If the array is empty or no valid `targetTime` is found,
+ * it defaults to returning an empty string.
+ *
+ * @param {ForecastData} forecastValues - An array of forecast data objects, each containing a `targetTime` property.
+ * @returns {string} The oldest timestamp as a string, or an empty string if no valid timestamp is found.
+ *
+ * @example
+ * const forecastValues = [
+ *   { targetTime: "2023-12-25T12:00:00Z", ... },
+ *   { targetTime: "2023-12-24T12:00:00Z", ... },
+ *   { targetTime: "2023-12-26T12:00:00Z", ... }
+ * ];
+ * console.log(getOldestTimestampFromForecastValues(forecastValues));
+ * // Output: "2023-12-24T12:00:00Z"
+ */
 export const getOldestTimestampFromForecastValues = (forecastValues: ForecastData): string => {
   const sortedForecast = [...forecastValues].sort((a, b) => {
     return a.targetTime > b.targetTime ? 1 : -1;
@@ -413,6 +432,19 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
   return sortedForecast?.[0]?.targetTime || "";
 };
 
+/**
+ * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
+ *
+ * This function determines the timestamp two days prior to the current time, rounded down to the nearest
+ * 6-hour boundary (e.g., 00:00, 06:00, 12:00, 18:00). The result is returned as an ISO 8601 string in UTC.
+ *
+ * @returns {string} The earliest forecast timestamp as an ISO 8601 string in UTC.
+ *
+ * @example
+ * // Assuming the current time is "2023-12-07T14:45:00Z":
+ * console.log(getEarliestForecastTimestamp());
+ * // Output: "2023-12-05T12:00:00.000Z"
+ */
 export const getEarliestForecastTimestamp = () => {
   const now = new Date();
   // Two days ago
