@@ -1,5 +1,11 @@
 import { components } from "../../types/quartz-api";
-import { CombinedData, GspDeltaValue, GspZoneGroupings, MapFeatureObject } from "../types";
+import {
+  CombinedData,
+  ForecastData,
+  GspDeltaValue,
+  GspZoneGroupings,
+  MapFeatureObject
+} from "../types";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
@@ -400,6 +406,60 @@ export const getOldestTimestampFromCompactForecastValues = <
   );
 };
 
+/**
+ * Retrieves the oldest timestamp from a given `ForecastData` array.
+ *
+ * This function sorts the provided forecast data by the `targetTime` property in ascending order
+ * and returns the earliest (oldest) timestamp. If the array is empty or no valid `targetTime` is found,
+ * it defaults to returning an empty string.
+ *
+ * @param {ForecastData} forecastValues - An array of forecast data objects, each containing a `targetTime` property.
+ * @returns {string} The oldest timestamp as a string, or an empty string if no valid timestamp is found.
+ *
+ * @example
+ * const forecastValues = [
+ *   { targetTime: "2023-12-25T12:00:00Z", ... },
+ *   { targetTime: "2023-12-24T12:00:00Z", ... },
+ *   { targetTime: "2023-12-26T12:00:00Z", ... }
+ * ];
+ * console.log(getOldestTimestampFromForecastValues(forecastValues));
+ * // Output: "2023-12-24T12:00:00Z"
+ */
+export const getOldestTimestampFromForecastValues = (forecastValues: ForecastData): string => {
+  const sortedForecast = [...forecastValues].sort((a, b) => {
+    return a.targetTime > b.targetTime ? 1 : -1;
+  });
+  return sortedForecast?.[0]?.targetTime || "";
+};
+
+/**
+ * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
+ *
+ * This function determines the timestamp two days prior to the current time, rounded down to the nearest
+ * 6-hour boundary (e.g., 00:00, 06:00, 12:00, 18:00). The result is returned as an ISO 8601 string in UTC.
+ *
+ * @returns {string} The earliest forecast timestamp as an ISO 8601 string in UTC.
+ *
+ * @example
+ * // Assuming the current time is "2023-12-07T14:45:00Z":
+ * console.log(getEarliestForecastTimestamp());
+ * // Output: "2023-12-05T12:00:00.000Z"
+ */
+export const getEarliestForecastTimestamp = () => {
+  const now = new Date();
+  // Two days ago
+  const start = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+  // floor to the nearest rounded 6 hours, e.g. 06:00, 12:00, 18:00, 00:00
+  const roundedDate = new Date(
+    Math.floor(start.getTime() / (6 * 60 * 60 * 1000)) * 6 * 60 * 60 * 1000
+  );
+  // Convert from local time to UTC
+  const utcOffset = roundedDate.getTimezoneOffset() * 60 * 1000;
+  roundedDate.setTime(roundedDate.getTime() + utcOffset);
+
+  return roundedDate.toISOString();
+};
+
 const MILLISECONDS_PER_MINUTE = 1000 * 60;
 
 /**
@@ -411,7 +471,7 @@ const MILLISECONDS_PER_MINUTE = 1000 * 60;
  * the number of milliseconds since the Unix Epoch (1970-01-01 00:00:00 UTC).
  * This is used to ensure an accurate and standardised measurement of time between the two dates provided.
  *
- * This function is used in conjunction with other datetime processing functions such as `calculateHistoricDataStartIntervalInMinutes`,
+ * This function is used in conjunction with other datetime processing functions such as `calculateHistoricDataStartFromCompactValuesIntervalInMinutes`,
  * `getOldestTimestampFromCompactForecastValues`, `get30MinNow`, and `getNext30MinSlot` to process and analyze interval data.
  *
  * @example
@@ -454,14 +514,14 @@ const calculateIntervalDuration = (dateOne: Date, dateTwo: Date): number => {
  *   { datetimeUtc: "2023-12-24T23:00:00" },
  *   { datetimeUtc: "2023-12-25T00:00:00" }
  * ];
- * console.log(calculateHistoricDataStartIntervalInMinutes(data));
+ * console.log(calculateHistoricDataStartFromCompactValuesIntervalInMinutes(data));
  * // Output: 30 (assuming current time is 2023-12-25T00:30:00)
  *
  * @param {T[]} data An array of objects `T` that includes a `datetimeUtc` field.
  *
  * @returns {number} The calculated interval duration in minutes, or `0` if no oldest timestamp is found.
  */
-export const calculateHistoricDataStartIntervalInMinutes = <
+export const calculateHistoricDataStartFromCompactValuesIntervalInMinutes = <
   T extends {
     datetimeUtc: string;
     generationKwByGspId?: any;
@@ -471,6 +531,17 @@ export const calculateHistoricDataStartIntervalInMinutes = <
   data: T[]
 ): number => {
   const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
+  if (!oldestTimestamp) return 0;
+
+  const oldestDate = new Date(oldestTimestamp);
+  const comparisonDate = new Date(get30MinNow(-30));
+  return calculateIntervalDuration(oldestDate, comparisonDate);
+};
+
+export const calculateHistoricDataStartFromForecastValuesIntervalInMinutes = (
+  forecastValues: ForecastData
+): number => {
+  const oldestTimestamp = getOldestTimestampFromForecastValues(forecastValues);
   if (!oldestTimestamp) return 0;
 
   const oldestDate = new Date(oldestTimestamp);
