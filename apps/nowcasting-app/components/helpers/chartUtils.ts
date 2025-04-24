@@ -47,7 +47,9 @@ export const generateYMaxTickArray = () => {
   // Multiples of 500
   yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 500)];
   // Multiples of 1000
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 1000)];
+  yMax_levels = [...yMax_levels, ...Array.from({ length: 15 }, (_, i) => (i + 1) * 1000)];
+  // Multiples of 2500
+  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 2500)];
   // Remove duplicates
   yMax_levels = [...new Set(yMax_levels)];
   // Sort
@@ -56,10 +58,14 @@ export const generateYMaxTickArray = () => {
 };
 
 export const getTicks = (yMax: number, yMax_levels: number[]) => {
+  if (yMax === 13000) {
+    return [3000, 6000, 9000, 12000];
+  }
   const ticks: number[] = [];
   const third = yMax / 3;
   const quarter = yMax / 4;
   const fifth = yMax / 5;
+  const sixth = yMax / 6;
   const seventh = yMax / 7;
   const testTicksToAdd = (fractionN: number) => {
     if (!Number.isFinite(fractionN)) return;
@@ -102,14 +108,17 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
     }
     return n % 0.5 === 0;
   };
-  if (isRoundNumber(third)) {
-    testTicksToAdd(third);
+  if (ticks.length === 0 && isRoundNumber(fifth)) {
+    testTicksToAdd(fifth);
+  }
+  if (ticks.length === 0 && isRoundNumber(sixth)) {
+    testTicksToAdd(sixth);
   }
   if (ticks.length === 0 && isRoundNumber(quarter)) {
     testTicksToAdd(quarter);
   }
-  if (ticks.length === 0 && isRoundNumber(fifth)) {
-    testTicksToAdd(fifth);
+  if (ticks.length === 0 && isRoundNumber(third)) {
+    testTicksToAdd(third);
   }
   if (ticks.length === 0 && isRoundNumber(seventh)) {
     testTicksToAdd(seventh);

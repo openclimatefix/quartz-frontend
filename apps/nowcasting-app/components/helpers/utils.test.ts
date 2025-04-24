@@ -190,10 +190,16 @@ describe("check y-axis max value calculation", () => {
     expect(result).toBe(0);
   });
 
-  test("should round up to nearest 1000 with buffer of 1000", () => {
+  test("should round up to nearest 1000 with buffer of 1000, and return MAX_NATIONAL if lower", () => {
     const chartData: ChartData[] = [{ GENERATION: 12500, formattedDate: "2022-05-16T15:00" }];
     const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(14000); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000, which is less than MAX_NATIONAL_GENERATION_MW
+  });
+
+  test("should round up to nearest 1000 with buffer of 1000", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14500, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(16000); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000, which is less than MAX_NATIONAL_GENERATION_MW
   });
 
   test("should handle multiple numeric values", () => {
