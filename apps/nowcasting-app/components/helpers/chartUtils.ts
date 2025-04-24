@@ -67,6 +67,11 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
       let canSplit = true;
       let tempTicks = [];
       for (let i = fractionN; i <= yMax; i += fractionN) {
+        /*
+         TODO: this could check against the yMax_levels array / constant for strictly sticking
+         to the levels we want to show; but we need to be careful not to inhibit the default
+          behaviour of the chart library doing its job.
+        */
         if (isRoundNumber(i) || i === yMax) {
           tempTicks.push(i);
         } else {
@@ -81,7 +86,7 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
   };
   const isRoundNumber = (n: number) => {
     if (n > 2000) {
-      return n % 500 === 0;
+      return n % 2500 === 0 || n % 1000 === 0;
     }
     if (n > 1000) {
       return n % 250 === 0 || n % 100 === 0;
