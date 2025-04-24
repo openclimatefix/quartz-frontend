@@ -58,7 +58,7 @@ export const generateYMaxTickArray = () => {
 };
 
 export const getTicks = (yMax: number, yMax_levels: number[]) => {
-  if (yMax === 13000) {
+  if (yMax === 13000 || yMax === 14000) {
     return [3000, 6000, 9000, 12000];
   }
   const ticks: number[] = [];

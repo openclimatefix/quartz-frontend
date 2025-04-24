@@ -34,7 +34,7 @@ describe("getTicks", () => {
 
   it("should return the correct ticks for a yMax of 14000", () => {
     const ticks = getTicks(14000, []);
-    expect(ticks).toEqual([2000, 4000, 6000, 8000, 10000, 12000, 14000]);
+    expect(ticks).toEqual([3000, 6000, 9000, 12000]);
   });
 
   it("should return the correct ticks for a yMax of 15000", () => {
