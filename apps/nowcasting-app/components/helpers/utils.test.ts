@@ -191,9 +191,9 @@ describe("check y-axis max value calculation", () => {
   });
 
   test("should round up to nearest 1000 with buffer of 1000, and return MAX_NATIONAL if lower", () => {
-    const chartData: ChartData[] = [{ GENERATION: 12500, formattedDate: "2022-05-16T15:00" }];
+    const chartData: ChartData[] = [{ GENERATION: 10500, formattedDate: "2022-05-16T15:00" }];
     const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(MAX_NATIONAL_GENERATION_MW); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000, which is less than MAX_NATIONAL_GENERATION_MW
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW); // 10500 + 1000 = 11500 rounded to nearest 1000 is 12000, which is less than MAX_NATIONAL_GENERATION_MW
   });
 
   test("should round up to nearest 1000 with buffer of 1000", () => {

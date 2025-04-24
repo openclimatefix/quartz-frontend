@@ -3,7 +3,7 @@ export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev
 export const SITES_API_PREFIX =
   process.env.NEXT_PUBLIC_SITES_API_PREFIX || "https://api-site-dev.quartz.solar";
 export const MAX_POWER_GENERATED = 500;
-export const MAX_NATIONAL_GENERATION_MW = 15000;
+export const MAX_NATIONAL_GENERATION_MW = 13000;
 
 // Static constant below of this function so we don't call dynamically unnecessarily.
 // import { generateYMaxTickArray } from "./components/helpers/chartUtils";
