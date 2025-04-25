@@ -1,10 +1,14 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
-import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW } from "../../../constant";
+import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, { get30MinSlot } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
-import { convertToLocaleDateString, formatISODateString } from "../../helpers/utils";
+import {
+  calculateChartYMax,
+  convertToLocaleDateString,
+  formatISODateString
+} from "../../helpers/utils";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
@@ -17,6 +21,7 @@ import DeltaBuckets from "./delta-buckets-ui";
 import useTimeNow from "../../hooks/use-time-now";
 import { ChartLegend } from "../ChartLegend";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
+import { getTicks } from "../../helpers/chartUtils";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
@@ -306,6 +311,10 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     delta: true
   });
 
+  const yMax = useMemo(() => {
+    return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
+  }, [chartData]);
+
   // While N-hour is not available, we default to the latest interval with an Initial Estimate
   // useEffect(() => {
   //   if (selectedISOTime === get30MinNow() && view === VIEWS.DELTA) {
@@ -351,7 +360,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
-              yMax={MAX_NATIONAL_GENERATION_MW}
+              yMax={yMax}
+              yTicks={getTicks(yMax, Y_MAX_TICKS)}
               visibleLines={visibleLines}
               deltaView={true}
             />

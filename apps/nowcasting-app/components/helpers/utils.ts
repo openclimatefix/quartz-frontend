@@ -592,8 +592,8 @@ export function calculateChartYMax(
     )
   );
 
-  const valueWithBuffer = maxDataValue + 1000;
-  const roundingFactor = 1000;
+  const valueWithBuffer = maxDataValue + 100;
+  const roundingFactor = 500;
 
   return Math.max(Math.ceil(valueWithBuffer / roundingFactor) * roundingFactor, maxY);
 }

@@ -190,10 +190,22 @@ describe("check y-axis max value calculation", () => {
     expect(result).toBe(0);
   });
 
-  test("should round up to nearest 1000 with buffer of 1000", () => {
-    const chartData: ChartData[] = [{ GENERATION: 12500, formattedDate: "2022-05-16T15:00" }];
+  test("should round up to nearest 500 with buffer of 100, and return MAX_NATIONAL if lower", () => {
+    const chartData: ChartData[] = [{ GENERATION: 10500, formattedDate: "2022-05-16T15:00" }];
     const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(14000); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW); // 10500 + 100 = 10600 rounded to nearest 500 is 11000, which is less than MAX_NATIONAL_GENERATION_MW
+  });
+
+  test("should round up to next nearest 500 with buffer of 100", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14450, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(15000); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000, which is more than MAX_NATIONAL_GENERATION_MW
+  });
+
+  test("should round up to nearest 500 with buffer of 100", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14350, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(14500); // 14350 + 100 = 14450 rounded to nearest 500 is 14500, which is more than MAX_NATIONAL_GENERATION_MW
   });
 
   test("should handle multiple numeric values", () => {
@@ -202,19 +214,25 @@ describe("check y-axis max value calculation", () => {
       { GENERATION: 3000, FORECAST: 7000, formattedDate: "2022-05-16T16:00" }
     ];
     const result = utils.calculateChartYMax(chartData, 0); // the MAX_NATIONAL_GENERATION_MW is not considered for this test
-    expect(result).toBe(9000); // (8000 + 1000) rounded up to nearest 1000 is 9000
+    expect(result).toBe(8500); // (8000 + 100) rounded up to nearest 500 is 8500
   });
 
   test("should ignore formattedDate fields", () => {
     const chartData: ChartData[] = [{ GENERATION: 15500, formattedDate: "2023-10-12" }];
     const result = utils.calculateChartYMax(chartData, 0); // the MAX_NATIONAL_GENERATION_MW is not considered for this test
-    expect(result).toBe(17000); // (15500 + 1000) rounded up to nearest 1000 is 17000
+    expect(result).toBe(16000); // (15500 + 100) rounded up to nearest 500 is 16000
+  });
+
+  test("should handle edge case where value is just under rounding threshold", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14990, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(15500); // (14990 + 100) rounded up to next 500
   });
 
   test("should handle edge case where values exactly match rounding threshold", () => {
     const chartData: ChartData[] = [{ GENERATION: 15000, formattedDate: "2022-05-16T15:00" }];
     const result = utils.calculateChartYMax(chartData);
-    expect(result).toBe(16000); // (15000 + 1000) rounded up to next 1000
+    expect(result).toBe(15500); // (15000 + 100) rounded up to next 500
   });
 
   test("should consider yMax if the value of yMax is greater than the Max National Generation", () => {

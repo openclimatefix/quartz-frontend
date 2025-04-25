@@ -7,7 +7,7 @@ import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
@@ -113,7 +113,7 @@ const PvRemixChart: FC<{
               data={chartData}
               yMax={yMax}
               visibleLines={visibleLines}
-              yTicks={getTicks(yMax, [])}
+              yTicks={getTicks(yMax, Y_MAX_TICKS)}
             />
           </div>
         </div>
