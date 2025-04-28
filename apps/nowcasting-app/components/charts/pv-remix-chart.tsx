@@ -7,11 +7,13 @@ import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
+import { calculateChartYMax } from "../helpers/utils";
+import { getTicks } from "../helpers/chartUtils";
 
 const PvRemixChart: FC<{
   combinedData: CombinedData;
@@ -67,6 +69,10 @@ const PvRemixChart: FC<{
     timeTrigger: selectedTime
   });
 
+  const yMax = useMemo(() => {
+    return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
+  }, [chartData]);
+
   if (
     nationalForecastError ||
     pvRealDayInError ||
@@ -105,8 +111,9 @@ const PvRemixChart: FC<{
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
-              yMax={MAX_NATIONAL_GENERATION_MW}
+              yMax={yMax}
               visibleLines={visibleLines}
+              yTicks={getTicks(yMax, Y_MAX_TICKS)}
             />
           </div>
         </div>

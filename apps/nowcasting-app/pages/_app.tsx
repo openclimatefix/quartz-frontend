@@ -1,5 +1,3 @@
-import type { AppProps } from "next/app";
-import { UserProvider } from "@auth0/nextjs-auth0";
 import { ToastContainer, toast } from "react-toastify";
 import "../styles/globals.css";
 import { SWRConfig } from "swr";
@@ -7,10 +5,11 @@ import { apiErrorMSGS } from "../constant";
 import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import { GoogleTagManager } from "@next/third-parties/google";
+import CustomUserProvider from "../components/auth/CustomUserProvider";
 
 function MyApp({ Component, pageProps }: any) {
   return (
-    <UserProvider>
+    <CustomUserProvider>
       <SWRConfig
         value={{
           provider: () => new Map(),
@@ -39,7 +38,7 @@ function MyApp({ Component, pageProps }: any) {
         <Component {...pageProps} />
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
       </SWRConfig>
-    </UserProvider>
+    </CustomUserProvider>
   );
 }
 

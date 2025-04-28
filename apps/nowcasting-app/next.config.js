@@ -18,6 +18,7 @@ const sentryWebpackPluginOptions = {
 
   org: "openclimatefix",
   project: "quartz-solar-app",
+  enabled: process.env.NEXT_PUBLIC_DEV_MODE !== "true",
 
   silent: true // Suppresses all logs
   // For all available options, see:

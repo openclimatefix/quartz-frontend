@@ -1,12 +1,11 @@
 import React, { Fragment, useEffect } from "react";
 import { Menu, Transition } from "@headlessui/react";
-import { useUser } from "@auth0/nextjs-auth0";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import pkg from "../../../package.json";
 import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from "../../helpers/utils";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
-import { ChartInfo } from "../../../ChartInfo";
 import { Checkmark, ExternalLinkIcon } from "../../icons/icons";
 import {
   CookieStorageKeys,

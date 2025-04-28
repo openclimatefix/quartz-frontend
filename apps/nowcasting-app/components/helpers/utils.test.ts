@@ -5,6 +5,8 @@ import {
   prettyPrintChartAxisLabelDate
 } from "./utils";
 import * as utils from "./utils";
+import { MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import { ChartData } from "../charts/remix-line";
 
 describe("check getOpacityValueFromPVNormalized with valid values", () => {
   test("check rounding to [0, 0.1, 0.2, 0.35, 0.5, 0.7, 1.0] and then selecting the correct opacity from [0.03, 0.2, 0.4, 0.6, 0.8, 1, 1]", () => {
@@ -179,5 +181,69 @@ describe("prettyPrintDayLabelWithDate", () => {
   it("should print 'Today' for today's date", () => {
     const result = utils.prettyPrintDayLabelWithDate(new Date().toISOString());
     expect(result).toBe("Today");
+  });
+});
+
+describe("check y-axis max value calculation", () => {
+  test("should return 0 when chart data is empty array", () => {
+    const result = utils.calculateChartYMax([]);
+    expect(result).toBe(0);
+  });
+
+  test("should round up to nearest 500 with buffer of 100, and return MAX_NATIONAL if lower", () => {
+    const chartData: ChartData[] = [{ GENERATION: 10500, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW); // 10500 + 100 = 10600 rounded to nearest 500 is 11000, which is less than MAX_NATIONAL_GENERATION_MW
+  });
+
+  test("should round up to next nearest 500 with buffer of 100", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14450, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(15000); // 12500 + 1000 = 13500 rounded to nearest 1000 is 14000, which is more than MAX_NATIONAL_GENERATION_MW
+  });
+
+  test("should round up to nearest 500 with buffer of 100", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14350, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(14500); // 14350 + 100 = 14450 rounded to nearest 500 is 14500, which is more than MAX_NATIONAL_GENERATION_MW
+  });
+
+  test("should handle multiple numeric values", () => {
+    const chartData: ChartData[] = [
+      { GENERATION: 5000, FORECAST: 8000, formattedDate: "2022-05-16T15:00" },
+      { GENERATION: 3000, FORECAST: 7000, formattedDate: "2022-05-16T16:00" }
+    ];
+    const result = utils.calculateChartYMax(chartData, 0); // the MAX_NATIONAL_GENERATION_MW is not considered for this test
+    expect(result).toBe(8500); // (8000 + 100) rounded up to nearest 500 is 8500
+  });
+
+  test("should ignore formattedDate fields", () => {
+    const chartData: ChartData[] = [{ GENERATION: 15500, formattedDate: "2023-10-12" }];
+    const result = utils.calculateChartYMax(chartData, 0); // the MAX_NATIONAL_GENERATION_MW is not considered for this test
+    expect(result).toBe(16000); // (15500 + 100) rounded up to nearest 500 is 16000
+  });
+
+  test("should handle edge case where value is just under rounding threshold", () => {
+    const chartData: ChartData[] = [{ GENERATION: 14990, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(15500); // (14990 + 100) rounded up to next 500
+  });
+
+  test("should handle edge case where values exactly match rounding threshold", () => {
+    const chartData: ChartData[] = [{ GENERATION: 15000, formattedDate: "2022-05-16T15:00" }];
+    const result = utils.calculateChartYMax(chartData);
+    expect(result).toBe(15500); // (15000 + 100) rounded up to next 500
+  });
+
+  test("should consider yMax if the value of yMax is greater than the Max National Generation", () => {
+    const chartData: ChartData[] = [{ GENERATION: 15000, formattedDate: "2022-05-16T15:00" }];
+    const result = Math.max(utils.calculateChartYMax(chartData), MAX_NATIONAL_GENERATION_MW);
+    expect(result).toBe(utils.calculateChartYMax(chartData));
+  });
+
+  test("should consider Max National Generation if the value of yMax is less than the Max National Generation", () => {
+    const chartData: ChartData[] = [{ GENERATION: 10000, formattedDate: "2022-05-16T15:00" }];
+    const result = Math.max(utils.calculateChartYMax(chartData), MAX_NATIONAL_GENERATION_MW);
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW);
   });
 });
