@@ -477,3 +477,75 @@ describe("check func returns correct timestamp", () => {
     expect(evenOlderTimestamp).toBe("2023-12-04T12:00:00+00:00");
   });
 });
+
+//////////////////////////////////
+// getEarliestForecastTimestamp //
+//////////////////////////////////
+import { getOldestTimestampFromForecastValues } from "./data";
+
+describe("getOldestTimestampFromForecastValues", () => {
+  test("should return the oldest timestamp from a valid forecast data array", () => {
+    const forecastValues: ForecastData = [
+      { targetTime: "2023-12-25T12:00:00Z", expectedPowerGenerationMegawatts: 1 },
+      { targetTime: "2023-12-24T12:00:00Z", expectedPowerGenerationMegawatts: 2 },
+      { targetTime: "2023-12-24T13:00:00Z", expectedPowerGenerationMegawatts: 2 },
+      { targetTime: "2023-12-26T12:00:00Z", expectedPowerGenerationMegawatts: 3 }
+    ];
+    const result = getOldestTimestampFromForecastValues(forecastValues);
+    expect(result).toBe("2023-12-24T12:00:00Z");
+  });
+
+  test("should return an empty string if the forecast data array is empty", () => {
+    const forecastValues: ForecastData = [];
+    const result = getOldestTimestampFromForecastValues(forecastValues);
+    expect(result).toBe("");
+  });
+
+  test("should still return the oldest timestamp even if incomplete string", () => {
+    const forecastValues = [
+      { targetTime: "2023-12-25T12:00", expectedPowerGenerationMegawatts: 1 }
+    ];
+    const result = getOldestTimestampFromForecastValues(forecastValues);
+    expect(result).toBe("2023-12-25T12:00");
+  });
+});
+
+//////////////////////////////////
+// getEarliestForecastTimestamp //
+//////////////////////////////////
+import { getEarliestForecastTimestamp } from "./data";
+import { ForecastData } from "../types";
+
+describe("getEarliestForecastTimestamp", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test("should return the correct timestamp when the current time is exactly on a 6-hour boundary", () => {
+    // Freeze time to a 6-hour boundary (e.g., 2023-12-07T12:00:00Z)
+    jest.setSystemTime(new Date("2023-12-07T12:00:00Z"));
+
+    const result = getEarliestForecastTimestamp();
+    expect(result).toBe("2023-12-05T12:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
+  });
+
+  test("should return the correct timestamp when the current time is not on a 6-hour boundary", () => {
+    // Freeze time to a non-6-hour boundary (e.g., 2023-12-07T14:45:00Z)
+    jest.setSystemTime(new Date("2023-12-07T14:45:00Z"));
+
+    const result = getEarliestForecastTimestamp();
+    expect(result).toBe("2023-12-05T12:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
+  });
+
+  test("should handle edge cases near midnight correctly", () => {
+    // Freeze time to just before midnight (e.g., 2023-12-07T23:59:59Z)
+    jest.setSystemTime(new Date("2023-12-07T23:59:59Z"));
+
+    const result = getEarliestForecastTimestamp();
+    expect(result).toBe("2023-12-05T18:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
+  });
+});

@@ -1,12 +1,11 @@
 import React, { Fragment, useEffect } from "react";
 import { Menu, Transition } from "@headlessui/react";
-import { useUser } from "@auth0/nextjs-auth0";
+import { useUser } from "@auth0/nextjs-auth0/client";
 import pkg from "../../../package.json";
 import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from "../../helpers/utils";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
-import { ChartInfo } from "../../../ChartInfo";
 import { Checkmark, ExternalLinkIcon } from "../../icons/icons";
 import {
   CookieStorageKeys,
@@ -61,31 +60,29 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
         leaveTo="transform opacity-0 scale-95"
       >
         <Menu.Items className="absolute right-0 top-12 w-48 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          {process.env.NEXT_PUBLIC_4H_VIEW === "true" && (
-            <Menu.Item>
-              {({ active }) => (
-                <div
-                  className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                  )}
+          <Menu.Item>
+            {({ active }) => (
+              <div
+                className={classNames(
+                  active ? "bg-gray-100" : "",
+                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                )}
+              >
+                {showNHourView && (
+                  <span className="flex items-center">
+                    <Checkmark />
+                  </span>
+                )}
+                <button
+                  id={"UserMenu-NhViewBtn"}
+                  onClick={toggle4hView}
+                  className="ml-1 text-sm  font-medium text-ocf-black-600"
                 >
-                  {showNHourView && (
-                    <span className="flex items-center">
-                      <Checkmark />
-                    </span>
-                  )}
-                  <button
-                    id={"UserMenu-NhViewBtn"}
-                    onClick={toggle4hView}
-                    className="ml-1 text-sm  font-medium text-ocf-black-600"
-                  >
-                    {`N-hour forecast`}
-                  </button>
-                </div>
-              )}
-            </Menu.Item>
-          )}
+                  {`N-hour forecast`}
+                </button>
+              </div>
+            )}
+          </Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <div

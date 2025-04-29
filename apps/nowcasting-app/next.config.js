@@ -16,6 +16,10 @@ const sentryWebpackPluginOptions = {
   //   release, url, org, project, authToken, configFile, stripPrefix,
   //   urlPrefix, include, ignore
 
+  org: "openclimatefix",
+  project: "quartz-solar-app",
+  enabled: process.env.NEXT_PUBLIC_DEV_MODE !== "true",
+
   silent: true // Suppresses all logs
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options.

@@ -14,20 +14,7 @@ import { ForecastValue } from "../../types";
 import React, { FC } from "react";
 import { NationalAggregation } from "../../map/types";
 import { getTicks } from "../../helpers/chartUtils";
-
-// Static constant below of this function so we don't call dynamically unnecessarily.
-// import { generateYMaxTickArray } from "../../helpers/chartUtils";
-// console.log("Y_MAX_TICKS", generateYMaxTickArray());
-//
-// We want to have the yMax of the graph to be related to the capacity of the GspPvRemixChart.
-// If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
-// So, we round these up to the following numbers, which hopefully split nicely into the y-axis.
-// Uncomment the above function to get updated values should we need to change these
-const Y_MAX_TICKS = [
-  1, 2, 3, 4, 5, 6, 9, 10, 12, 15, 18, 20, 25, 30, 40, 45, 50, 60, 75, 80, 90, 100, 150, 200, 250,
-  300, 350, 400, 450, 500, 600, 700, 800, 900, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000,
-  6000, 7000, 8000, 9000, 10000, 12000, 14000, 15000, 16000, 18000, 20000
-];
+import { Y_MAX_TICKS } from "../../../constant";
 
 const GspPvRemixChart: FC<{
   gspId: number | string;
