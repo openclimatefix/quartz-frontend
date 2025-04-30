@@ -17,7 +17,7 @@ import { getTicks } from "../../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../../constant";
 
 const GspPvRemixChart: FC<{
-  selectedRegions: number[];
+  selectedRegions: string[];
   selectedTime: string;
   close: () => void;
   setTimeOfInterest: (t: string) => void;
