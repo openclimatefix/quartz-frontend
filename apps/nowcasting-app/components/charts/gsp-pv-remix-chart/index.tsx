@@ -17,7 +17,7 @@ import { getTicks } from "../../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../../constant";
 
 const GspPvRemixChart: FC<{
-  gspId: number | string;
+  selectedRegions: number[];
   selectedTime: string;
   close: () => void;
   setTimeOfInterest: (t: string) => void;
@@ -26,7 +26,7 @@ const GspPvRemixChart: FC<{
   visibleLines: string[];
   deltaView?: boolean;
 }> = ({
-  gspId,
+  selectedRegions,
   selectedTime,
   close,
   setTimeOfInterest,
@@ -44,9 +44,10 @@ const GspPvRemixChart: FC<{
     gspLocationInfo,
     gspForecastDataOneGSP,
     gspNHourData
-  } = useGetGspData(gspId);
+  } = useGetGspData(selectedRegions);
   // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
-  const gspInstalledCapacity = gspLocationInfo?.[0]?.installedCapacityMw;
+  const gspInstalledCapacity =
+    gspLocationInfo?.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0) || 0;
   const gspName = gspLocationInfo?.[0]?.regionName;
   const chartData = useFormatChartData({
     forecastData: gspForecastDataOneGSP,
@@ -116,7 +117,16 @@ const GspPvRemixChart: FC<{
   let yMax = gspInstalledCapacity || 100;
   yMax = getRoundedTickBoundary(yMax, Y_MAX_TICKS);
 
-  let title = nationalAggregationLevel === NationalAggregation.GSP ? gspName || "" : String(gspId);
+  let title =
+    nationalAggregationLevel === NationalAggregation.GSP
+      ? gspName || ""
+      : String(String(selectedRegions[0]));
+  let selectedGSPNames =
+    selectedRegions.length > 1 ? gspLocationInfo?.map((gsp) => gsp.regionName) || [] : [];
+
+  if (selectedRegions.length > 1) {
+    title = `${selectedRegions.length} GSPs selected`;
+  }
 
   if (nationalAggregationLevel === NationalAggregation.national) {
     title = "National GSP Sum";
@@ -138,6 +148,7 @@ const GspPvRemixChart: FC<{
           forecastNextPV={followingPvForecastInMW?.toFixed(1)}
           deltaValue={deltaValue.toString()}
           deltaView={deltaView}
+          titleTooltipText={selectedGSPNames}
         >
           <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-ocf-yellow-500">
             {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}

@@ -12,10 +12,10 @@ const ForecastLabel: React.FC<ForecastLabelProps> = ({
   className
 }) => {
   const getPositionClass = (position: "left" | "right" | "middle") => {
-    if (position === "left") return "-left-5";
+    if (position === "left") return "left-0";
     if (position === "right") return "-right-3";
     if (position === "middle")
-      return "-bottom-full left-1/2 transform -translate-x-1/2 -translate-y-2";
+      return "bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full";
   };
   return (
     <div className={`relative z-50 overflow-visible cursor-default flex group ${className || ""}`}>

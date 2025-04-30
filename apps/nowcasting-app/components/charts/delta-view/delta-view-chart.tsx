@@ -257,6 +257,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   // const [view] = useGlobalState("view");
   const [show4hView] = useGlobalState("showNHourView");
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [globalZoomArea] = useGlobalState("globalZoomArea");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
@@ -343,6 +344,17 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     setSelectedISOTime(time + ":00.000Z");
   };
 
+  let selectedRegions: number[] = [];
+  if (clickedGspId) {
+    selectedRegions = [clickedGspId as number];
+  }
+  console.log("PV REMIX selectedMapRegionIds", selectedMapRegionIds);
+  console.log("PV REMIX selectedRegions", selectedRegions);
+  if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
+    selectedRegions = selectedMapRegionIds;
+  }
+  console.log("should render", selectedRegions && selectedRegions.length > 0);
+
   return (
     <>
       <div className={`flex flex-col flex-1 ${className || ""}`}>
@@ -375,7 +387,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               }}
               setTimeOfInterest={setSelectedTime}
               selectedTime={selectedTime}
-              gspId={clickedGspId}
+              selectedRegions={selectedRegions}
               timeNow={formatISODateString(timeNow)}
               resetTime={resetTime}
               visibleLines={visibleLines}
