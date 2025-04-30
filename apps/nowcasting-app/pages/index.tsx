@@ -230,7 +230,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     components["schemas"]["OneDatetimeManyForecastValues"][]
   >(
     // `/v0/solar/GB/gsp/forecast/all/`,
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&compact=true&start_datetime_utc=${encodeURIComponent(
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?compact=true&start_datetime_utc=${encodeURIComponent(
       `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
     )}`,
     {
@@ -283,11 +283,11 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       : [];
   }, [allGspForecastHistory, allGspForecastFuture]);
   const allGspForecastLoading = useMemo(() => {
-    return allGspForecastHistoricLoading || allGspForecastFutureLoading;
-  }, [allGspForecastHistoricLoading, allGspForecastFutureLoading]);
+    return allGspForecastFutureLoading;
+  }, [allGspForecastFutureLoading]);
   const allGspForecastValidating = useMemo(() => {
-    return allGspForecastHistoricValidating || allGspForecastFutureValidating;
-  }, [allGspForecastHistoricValidating, allGspForecastFutureValidating]);
+    return allGspForecastFutureValidating;
+  }, [allGspForecastFutureValidating]);
   const allGspForecastError = useMemo(() => {
     return allGspForecastHistoricError || allGspForecastFutureError;
   }, [allGspForecastHistoricError, allGspForecastFutureError]);

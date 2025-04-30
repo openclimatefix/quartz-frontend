@@ -49,6 +49,7 @@ const Map: FC<IMap> = ({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/dark-v10",
         center: [lng, lat],
+        boxZoom: false,
         zoom,
         bearing,
         keyboard: false
