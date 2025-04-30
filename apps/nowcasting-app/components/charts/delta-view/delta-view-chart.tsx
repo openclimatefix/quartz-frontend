@@ -344,9 +344,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     setSelectedISOTime(time + ":00.000Z");
   };
 
-  let selectedRegions: number[] = [];
+  let selectedRegions: string[] = [];
   if (clickedGspId) {
-    selectedRegions = [clickedGspId as number];
+    selectedRegions = [clickedGspId as string];
   }
   console.log("PV REMIX selectedMapRegionIds", selectedMapRegionIds);
   console.log("PV REMIX selectedRegions", selectedRegions);
