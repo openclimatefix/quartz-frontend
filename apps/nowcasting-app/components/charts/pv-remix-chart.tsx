@@ -90,10 +90,10 @@ const PvRemixChart: FC<{
 
   let selectedRegions: string[] = [];
   if (clickedGspId) {
-    selectedRegions = [clickedGspId as string];
+    selectedRegions = [String(clickedGspId)];
   }
   if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
-    selectedRegions = selectedMapRegionIds;
+    selectedRegions = selectedMapRegionIds.map((id) => String(id));
   }
 
   return (

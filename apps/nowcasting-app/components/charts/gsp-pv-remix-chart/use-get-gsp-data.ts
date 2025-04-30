@@ -11,7 +11,7 @@ import { getEarliestForecastTimestamp } from "../../helpers/data";
 
 const aggregateTruthData = (
   pvDataRaw: components["schemas"]["GSPYieldGroupByDatetime"][] | undefined,
-  gspIds: number[],
+  gspIds: string[],
   key: string
 ) => {
   if (!pvDataRaw?.length) return [];
@@ -31,7 +31,7 @@ const aggregateTruthData = (
 };
 const aggregateForecastData = (
   pvDataRaw: components["schemas"]["OneDatetimeManyForecastValues"][] | undefined,
-  gspIds: number[]
+  gspIds: string[]
 ) => {
   if (!pvDataRaw?.length) return [];
   return pvDataRaw?.map((d) => {
@@ -49,7 +49,7 @@ const aggregateForecastData = (
   }) as ForecastData;
 };
 
-const useGetGspData = (selectedRegions: number[]) => {
+const useGetGspData = (selectedRegions: string[]) => {
   const [show4hView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
@@ -123,12 +123,18 @@ const useGetGspData = (selectedRegions: number[]) => {
       ? `${API_PREFIX}/system/GB/gsp/?zones=true` // TODO: API seems to struggle with UI flag if no other query params
       : `${API_PREFIX}/system/GB/gsp/?gsp_id=${selectedRegions[0]}`
   );
-  let gspLocationInfo = gspLocationInfoRaw?.filter((gsp) => selectedRegions.includes(gsp.gspId));
+  console.log("gspLocationInfoRaw", gspLocationInfoRaw);
+  console.log("selectedRegions", selectedRegions);
+  let gspLocationInfo =
+    gspLocationInfoRaw && gspLocationInfoRaw?.length > 1
+      ? gspLocationInfoRaw?.filter((gsp) => selectedRegions.includes(String(gsp.gspId)))
+      : gspLocationInfoRaw;
+  console.log("gspLocationInfo", gspLocationInfo);
   if (isZoneAggregation && gspLocationInfo) {
     const zoneCapacity = gspLocationInfo.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0);
     gspLocationInfo = [
       {
-        gspId: selectedRegions[0] as number,
+        gspId: Number(selectedRegions[0]),
         gspName: String(selectedRegions[0]) as string,
         regionName: String(selectedRegions[0]) as string,
         installedCapacityMw: zoneCapacity,
