@@ -88,16 +88,13 @@ const PvRemixChart: FC<{
     setSelectedISOTime(time + ":00.000Z");
   };
 
-  let selectedRegions: number[] = [];
+  let selectedRegions: string[] = [];
   if (clickedGspId) {
-    selectedRegions = [clickedGspId as number];
+    selectedRegions = [clickedGspId as string];
   }
-  console.log("PV REMIX selectedMapRegionIds", selectedMapRegionIds);
-  console.log("PV REMIX selectedRegions", selectedRegions);
   if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
     selectedRegions = selectedMapRegionIds;
   }
-  console.log("should render", selectedRegions && selectedRegions.length > 0);
 
   return (
     <>
