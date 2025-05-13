@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
+import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import {
   Bucket,
   CombinedData,
@@ -21,6 +21,7 @@ import * as Sentry from "@sentry/nextjs";
 import createClient from "openapi-fetch";
 import { paths } from "../../types/quartz-api";
 import { PathsWithMethod } from "openapi-typescript-helpers";
+import { ChartData } from "../charts/remix-line";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
@@ -573,3 +574,26 @@ export const createBucketObject: (
     increment
   };
 };
+export function calculateChartYMax(
+  chartData: ChartData[],
+  maxY: number = MAX_NATIONAL_GENERATION_MW
+): number {
+  if (!chartData || chartData.length === 0) {
+    // If there is no data, return 0
+    return 0;
+  }
+
+  const maxDataValue = Math.max(
+    0,
+    ...chartData.flatMap((dataPoint) =>
+      Object.entries(dataPoint)
+        .filter(([key, value]) => typeof value === "number" && key !== "formattedDate")
+        .map(([_, value]) => value as number)
+    )
+  );
+
+  const valueWithBuffer = maxDataValue + 100;
+  const roundingFactor = 500;
+
+  return Math.max(Math.ceil(valueWithBuffer / roundingFactor) * roundingFactor, maxY);
+}

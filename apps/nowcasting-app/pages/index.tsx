@@ -50,8 +50,11 @@ import { useLoadDataFromApi } from "../components/hooks/useLoadDataFromApi";
 import {
   filterCompactFutureData,
   filterCompactHistoricData,
-  calculateHistoricDataStartIntervalInMinutes,
-  getOldestTimestampFromCompactForecastValues
+  calculateHistoricDataStartFromCompactValuesIntervalInMinutes,
+  getOldestTimestampFromCompactForecastValues,
+  getOldestTimestampFromForecastValues,
+  calculateHistoricDataStartFromForecastValuesIntervalInMinutes,
+  getEarliestForecastTimestamp
 } from "../components/helpers/data";
 
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
@@ -166,7 +169,20 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: nationalForecastValidating,
     error: nationalForecastError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0, // Only load this once at beginning
+      onSuccess: (data) => {
+        if (!data) return;
+
+        const historicBackwardIntervalMinutes =
+          calculateHistoricDataStartFromForecastValuesIntervalInMinutes(data);
+        const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
+        setForecastLastFetch30MinISO(prev30MinNowISO);
+        setForecastHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
+      }
+    }
   );
 
   const {
@@ -237,15 +253,16 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   // Load historic all GSP forecast data (once, at page load)
+  const forecastFrom = getEarliestForecastTimestamp();
   const {
     data: allGspForecastHistoricData,
     isLoading: allGspForecastHistoricLoading,
     isValidating: allGspForecastHistoricValidating,
     error: allGspForecastHistoricError
   } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&compact=true&end_datetime_utc=${encodeURIComponent(
-      `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
-    )}`,
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&compact=true&start_datetime_utc=${encodeURIComponent(
+      `${forecastFrom.slice(0, 19)}+00:00`
+    )}&end_datetime_utc=${encodeURIComponent(`${forecastLastFetch30MinISO.slice(0, 19)}+00:00`)}`,
     {
       keepPreviousData: true,
       refreshInterval: 0, // Only load this once at beginning
@@ -253,10 +270,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         if (!data) return;
 
         const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
-        const historicBackwardIntervalMinutes = calculateHistoricDataStartIntervalInMinutes(data);
         const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
-        setForecastLastFetch30MinISO(prev30MinNowISO);
-        setForecastHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
         setAllGspForecastHistory(filterCompactHistoricData(data, oldestTimestamp, prev30MinNowISO));
       }
     }
@@ -343,7 +357,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             components["schemas"]["GSPYieldGroupByDatetime"]
           >(data);
         const historicBackwardIntervalMinutes =
-          calculateHistoricDataStartIntervalInMinutes<
+          calculateHistoricDataStartFromCompactValuesIntervalInMinutes<
             components["schemas"]["GSPYieldGroupByDatetime"]
           >(data);
         const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
