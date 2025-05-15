@@ -38,6 +38,7 @@ const GspPvRemixChart: FC<{
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   let {
     errors,
+    loading,
     pvRealDataAfter,
     pvRealDataIn,
     gspLocationInfo,
@@ -60,7 +61,13 @@ const GspPvRemixChart: FC<{
     return <div>failed to load</div>;
   }
   const now30min = formatISODateString(get30MinNow());
-  const dataMissing = !gspForecastDataOneGSP || !pvRealDataIn || !pvRealDataAfter;
+  const dataMissing =
+    !gspForecastDataOneGSP ||
+    !pvRealDataIn ||
+    !pvRealDataAfter ||
+    loading.gspForecastSelectedGSPsLoading ||
+    loading.pvRealInDayLoading ||
+    loading.pvRealDayAfterLoading;
   const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =
     gspForecastDataOneGSP?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
     ({} as any);
