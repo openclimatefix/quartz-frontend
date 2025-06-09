@@ -44,8 +44,8 @@ Sentry.init({
       ...integrations,
       Sentry.replayIntegration({
         // Additional SDK configuration goes in here, for example:
-        maskAllText: true,
-        blockAllMedia: true
+        maskAllText: false,
+        blockAllMedia: false
       })
     ].filter((integration) => integration.name !== "Dedupe");
   },
