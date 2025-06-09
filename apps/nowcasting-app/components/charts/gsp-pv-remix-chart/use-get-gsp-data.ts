@@ -70,28 +70,37 @@ const useGetGspData = (gspId: number | string) => {
   if (nationalAggregationLevel === NationalAggregation.national) {
     gspIds = nationalGspZone[gspId as keyof typeof nationalGspZone] || [];
   }
+  if (Number(gspId) !== 0) {
+    gspIds = [Number(gspId)];
+  }
 
-  const { data: pvRealDataInRaw, error: pvRealInDayError } = useLoadDataFromApi<
-    components["schemas"]["GSPYieldGroupByDatetime"][]
-  >(
+  const {
+    data: pvRealDataInRaw,
+    isLoading: pvRealInDayLoading,
+    error: pvRealInDayError
+  } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&gsp_ids=${encodeURIComponent(
       gspIds.join(",")
     )}&compact=true`
   );
   const pvRealDataIn = aggregateTruthData(pvRealDataInRaw, gspIds, "solarGenerationKw");
 
-  const { data: pvRealDataAfterRaw, error: pvRealDayAfterError } = useLoadDataFromApi<
-    components["schemas"]["GSPYieldGroupByDatetime"][]
-  >(
+  const {
+    data: pvRealDataAfterRaw,
+    isLoading: pvRealDayAfterLoading,
+    error: pvRealDayAfterError
+  } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=day-after&gsp_ids=${encodeURIComponent(
       gspIds.join(",")
     )}&compact=true`
   );
   const pvRealDataAfter = aggregateTruthData(pvRealDataAfterRaw, gspIds, "solarGenerationKw");
 
-  const { data: gspForecastDataOneGSPRaw, error: gspForecastDataOneGSPError } = useLoadDataFromApi<
-    components["schemas"]["OneDatetimeManyForecastValues"][]
-  >(
+  const {
+    data: gspForecastDataOneGSPRaw,
+    isLoading: gspForecastSelectedGSPsLoading,
+    error: gspForecastDataOneGSPError
+  } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
       gspIds.join(",")
     )}&compact=true&historic=true`,
@@ -101,7 +110,6 @@ const useGetGspData = (gspId: number | string) => {
   );
   const gspForecastDataOneGSP = aggregateForecastData(gspForecastDataOneGSPRaw, gspIds);
 
-  //add new useSWR for gspLocationInfo since this is not
   const { data: gspLocationInfoRaw, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
     isZoneAggregation
       ? `${API_PREFIX}/system/GB/gsp/?zones=true` // TODO: API seems to struggle with UI flag if no other query params
@@ -142,6 +150,11 @@ const useGetGspData = (gspId: number | string) => {
       gspLocationError,
       pvNHourError
     ].filter((e) => !!e),
+    loading: {
+      pvRealInDayLoading,
+      pvRealDayAfterLoading,
+      gspForecastSelectedGSPsLoading
+    },
     gspNHourData,
     pvRealDataIn,
     pvRealDataAfter,
