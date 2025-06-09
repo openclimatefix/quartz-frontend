@@ -222,7 +222,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between mb-1">
             <div class="text-xs">${properties?.GSPs}</div>
-            <div class="text-xs">#${properties?.gsp_id}</div>
+            <div class="text-xs">#${properties?.id}</div>
           </div>
           <div class="flex justify-between text-base">
             <div class="text-ocf-yellow">${properties?.gspDisplayName}</div>

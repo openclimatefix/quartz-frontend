@@ -7,7 +7,7 @@ import {
   MapFeatureObject
 } from "../types";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
-import gspShapeData from "../../data/gsp_regions_20220314.json";
+import gspShapeData from "../../data/GSP_regions_4326_20250109.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import nationalShapeData from "../../data/national_gsp_shape.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
@@ -86,8 +86,10 @@ const mapGspFeatures: (
 ) => {
   return features.map((featureObj, index) => {
     const gspSystemInfo = combinedData?.allGspSystemData?.find(
-      (system) => system.gspId === index + 1
+      (system) => system.gspName === featureObj?.properties?.GSPs
     );
+    // TODO better handling for if gsp not found
+    const gspId = gspSystemInfo?.gspId || 1000;
     let selectedFC;
     let selectedFCValue;
     let selectedActualValueMW: number | undefined;
@@ -99,32 +101,32 @@ const mapGspFeatures: (
         gspForecastsDataByTimestamp,
         formatISODateString(targetTime)
       );
-      if (selectedFC) selectedFCValue = selectedFC.forecastValues[index + 1];
+      if (selectedFC && gspSystemInfo) selectedFCValue = selectedFC.forecastValues[gspId];
       selectedActualValueMW = getGspActualValueMwForTime(
         gspRealData,
         formatISODateString(targetTime),
-        index + 1
+        gspId
       );
     } else if (gspForecastsDataByTimestamp) {
       // If no targetTime selected, find the latest forecast/actuals data
       let latestTimestamp = get30MinNow();
       selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
-        ?.forecastValues[index];
-      selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, index + 1);
+        ?.forecastValues[gspId];
+      selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, gspId);
     }
 
     // Update the feature object with the calculated forecast/actuals data
     const updatedFeatureObj: MapFeatureObject = {
       ...featureObj,
       properties: setFeatureObjectProps(
-        { ...featureObj.properties, id: featureObj.properties?.gsp_id },
+        { ...featureObj.properties, id: gspId },
         gspSystemInfo,
         selectedFCValue,
         selectedActualValueMW
       )
     };
     if (gspDeltas) {
-      const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(index + 1));
+      const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(gspId));
       updatedFeatureObj.properties = {
         ...updatedFeatureObj.properties,
         [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
