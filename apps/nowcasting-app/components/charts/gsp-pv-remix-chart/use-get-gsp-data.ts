@@ -7,6 +7,7 @@ import useGlobalState from "../../helpers/globalState";
 import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 import { NationalAggregation } from "../../map/types";
 import { components } from "../../../types/quartz-api";
+import { getEarliestForecastTimestamp } from "../../helpers/data";
 
 const aggregateTruthData = (
   pvDataRaw: components["schemas"]["GSPYieldGroupByDatetime"][] | undefined,
@@ -70,7 +71,7 @@ const useGetGspData = (gspId: number | string) => {
   if (nationalAggregationLevel === NationalAggregation.national) {
     gspIds = nationalGspZone[gspId as keyof typeof nationalGspZone] || [];
   }
-  if (Number(gspId) !== 0) {
+  if (nationalAggregationLevel === NationalAggregation.GSP && Number(gspId) !== 0) {
     gspIds = [Number(gspId)];
   }
 
@@ -96,6 +97,7 @@ const useGetGspData = (gspId: number | string) => {
   );
   const pvRealDataAfter = aggregateTruthData(pvRealDataAfterRaw, gspIds, "solarGenerationKw");
 
+  const startDatetime = getEarliestForecastTimestamp();
   const {
     data: gspForecastDataOneGSPRaw,
     isLoading: gspForecastSelectedGSPsLoading,
@@ -103,7 +105,7 @@ const useGetGspData = (gspId: number | string) => {
   } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
       gspIds.join(",")
-    )}&compact=true&historic=true`,
+    )}&compact=true&historic=true&start_datetime_utc=${encodeURIComponent(startDatetime)}`,
     {
       dedupingInterval: 1000 * 30
     }
