@@ -454,7 +454,7 @@ export const getEarliestForecastTimestamp = () => {
   const utcOffset = now.getTimezoneOffset() * 60 * 1000;
 
   // Two days ago, in local time, as we want to do the rounding in local time
-  const start = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 - utcOffset)
+  const start = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 - utcOffset);
   // floor to the nearest rounded 6 hours, e.g. 06:00, 12:00, 18:00, 00:00
   const roundedDate = new Date(
     Math.floor(start.getTime() / (6 * 60 * 60 * 1000)) * 6 * 60 * 60 * 1000

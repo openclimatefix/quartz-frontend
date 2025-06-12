@@ -564,6 +564,4 @@ describe("getEarliestForecastTimestamp", () => {
     // which then gets rounded down to 18:00
     expect(result).toBe("2025-06-10T17:00:00.000Z");
   });
-
 });
-
