@@ -548,4 +548,22 @@ describe("getEarliestForecastTimestamp", () => {
     const result = getEarliestForecastTimestamp();
     expect(result).toBe("2023-12-05T18:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
   });
+
+  test("Should handle British Summer time, away from 6h floor", () => {
+    jest.setSystemTime(new Date("2025-06-12T20:11:00Z"));
+
+    const result = getEarliestForecastTimestamp();
+    expect(result).toBe("2025-06-10T17:00:00.000Z");
+  });
+
+  test("Should handle British Summer time, near 6 hour florr", () => {
+    jest.setSystemTime(new Date("2025-06-12T17:11:00Z"));
+
+    const result = getEarliestForecastTimestamp();
+    // The API works with BST, so 17:11 is actually 18:11 BST,
+    // which then gets rounded down to 18:00
+    expect(result).toBe("2025-06-10T17:00:00.000Z");
+  });
+
 });
+
