@@ -556,7 +556,7 @@ describe("getEarliestForecastTimestamp", () => {
     expect(result).toBe("2025-06-10T17:00:00.000Z");
   });
 
-  test("Should handle British Summer time, near 6 hour florr", () => {
+  test("Should handle British Summer time, near 6 hour floor", () => {
     jest.setSystemTime(new Date("2025-06-12T17:11:00Z"));
 
     const result = getEarliestForecastTimestamp();
