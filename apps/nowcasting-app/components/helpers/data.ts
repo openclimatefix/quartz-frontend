@@ -449,14 +449,17 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
  */
 export const getEarliestForecastTimestamp = () => {
   const now = new Date();
-  // Two days ago
-  const start = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+
+  // get utc offset, e.g in London, BST this is -1 hour
+  const utcOffset = now.getTimezoneOffset() * 60 * 1000;
+
+  // Two days ago, in local time, as we want to do the rounding in local time
+  const start = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 - utcOffset)
   // floor to the nearest rounded 6 hours, e.g. 06:00, 12:00, 18:00, 00:00
   const roundedDate = new Date(
     Math.floor(start.getTime() / (6 * 60 * 60 * 1000)) * 6 * 60 * 60 * 1000
   );
   // Convert from local time to UTC
-  const utcOffset = roundedDate.getTimezoneOffset() * 60 * 1000;
   roundedDate.setTime(roundedDate.getTime() + utcOffset);
 
   return roundedDate.toISOString();
