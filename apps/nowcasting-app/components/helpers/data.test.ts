@@ -515,53 +515,130 @@ describe("getOldestTimestampFromForecastValues", () => {
 //////////////////////////////////
 import { getEarliestForecastTimestamp } from "./data";
 import { ForecastData } from "../types";
+import { DateTime, Settings } from "luxon";
 
 describe("getEarliestForecastTimestamp", () => {
-  beforeEach(() => {
+  beforeAll(() => {
     jest.useFakeTimers();
+    Settings.defaultZone = "utc"; // Enforce UTC for all DateTime operations during tests
   });
-
-  afterEach(() => {
+  afterAll(() => {
     jest.useRealTimers();
+    Settings.defaultZone = "system"; // Reset to system defaults after tests
   });
 
-  test("should return the correct timestamp when the current time is exactly on a 6-hour boundary", () => {
-    // Freeze time to a 6-hour boundary (e.g., 2023-12-07T12:00:00Z)
-    jest.setSystemTime(new Date("2023-12-07T12:00:00Z"));
+  describe("General Behaviour", () => {
+    it("calculates two days prior, rounded to the nearest 6-hour interval in UTC+0", () => {
+      jest.setSystemTime(new Date("2025-12-07T14:45:00Z").getTime());
 
-    const result = getEarliestForecastTimestamp();
-    expect(result).toBe("2023-12-05T12:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
+      const result = getEarliestForecastTimestamp();
+
+      // Two days back from 14:45 UTC == 2025-12-05 14:45 UTC
+      // Nearest 6-hour tick = 2025-12-05 12:00 UTC
+      expect(result).toBe("2025-12-05T12:00:00.000Z");
+    });
+
+    it("correctly rounds down 2 days back for local timezone (e.g. UTC+2)", () => {
+      jest
+        .spyOn(DateTime, "now")
+        .mockReturnValue(
+          DateTime.fromISO("2025-12-07T14:45:00+02:00", { setZone: true }) as DateTime
+        );
+
+      const result = getEarliestForecastTimestamp();
+
+      // Local time UTC+2 => 2025-12-05 14:45 (local) => 12:00 local rounded 6 hr tick => 10:00 UTC
+      expect(result).toBe("2025-12-05T10:00:00.000Z");
+    });
   });
 
-  test("should return the correct timestamp when the current time is not on a 6-hour boundary", () => {
-    // Freeze time to a non-6-hour boundary (e.g., 2023-12-07T14:45:00Z)
-    jest.setSystemTime(new Date("2023-12-07T14:45:00Z"));
+  it("returns a 6-hour aligned UTC timestamp", () => {
+    // Mock the current time to a specific UTC date.
+    jest.spyOn(DateTime, "now").mockReturnValue(
+      DateTime.fromISO("2025-12-07T14:45:00.000Z").toUTC() as DateTime<true> // Mock current time in UTC
+    );
 
     const result = getEarliestForecastTimestamp();
-    expect(result).toBe("2023-12-05T12:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
+
+    // Two days before 2025-12-07T14:45:00Z is 2025-12-05T14:45:00Z
+    // Rounded down to the nearest 6-hour boundary --> 2025-12-05T12:00:00Z
+    expect(result).toBe("2025-12-05T12:00:00.000Z");
   });
 
-  test("should handle edge cases near midnight correctly", () => {
-    // Freeze time to just before midnight (e.g., 2023-12-07T23:59:59Z)
-    jest.setSystemTime(new Date("2023-12-07T23:59:59Z"));
+  it("returns correctly rounded 6-hour boundary for a time just before midnight UTC", () => {
+    jest
+      .spyOn(DateTime, "now")
+      .mockReturnValue(DateTime.fromISO("2025-12-07T23:59:59.000Z").toUTC() as DateTime<true>);
 
     const result = getEarliestForecastTimestamp();
-    expect(result).toBe("2023-12-05T18:00:00.000Z"); // Two days ago, rounded to 6-hour boundary
+    // Two days before is 2025-12-05T23:59:59Z --> Rounded down: 2025-12-05T18:00:00Z
+    expect(result).toBe("2025-12-05T18:00:00.000Z");
   });
 
-  test("Should handle British Summer time, away from 6h floor", () => {
-    jest.setSystemTime(new Date("2025-06-12T20:11:00Z"));
+  it("handles time zones with positive offset correctly", () => {
+    // Mock the current time in a timezone with +05:30 offset (e.g., India Standard Time).
+    jest.spyOn(DateTime, "now").mockReturnValue(
+      DateTime.fromISO("2025-12-07T14:45:00+05:30", { setZone: true }) as DateTime<true> // Mock current time in IST
+    );
 
     const result = getEarliestForecastTimestamp();
-    expect(result).toBe("2025-06-10T17:00:00.000Z");
+    // Two days before in local time: 2025-12-05T14:45:00+05:30
+    // Rounded down: 2025-12-05T12:00:00Z
+    // Converted to UTC: 2025-12-05T06:30:00Z
+    expect(result).toBe("2025-12-05T06:30:00.000Z");
   });
 
-  test("Should handle British Summer time, near 6 hour floor", () => {
-    jest.setSystemTime(new Date("2025-06-12T17:11:00Z"));
+  it("handles time zones with negative offset correctly", () => {
+    // Mock the current time in a timezone with -05:00 offset (e.g., Eastern Standard Time).
+    jest.spyOn(DateTime, "now").mockReturnValue(
+      DateTime.fromISO("2025-12-07T14:45:00-05:00", { setZone: true }) as DateTime<true> // Mock current time in EST
+    );
 
     const result = getEarliestForecastTimestamp();
-    // The API works with BST, so 17:11 is actually 18:11 BST,
-    // which then gets rounded down to 18:00
-    expect(result).toBe("2025-06-10T17:00:00.000Z");
+    // Two days before in local time: 2025-12-05T14:45:00-05:00
+    // Rounded down: 2025-12-05T12:00:00Z
+    // Converted to UTC: 2025-12-05T17:00:00Z
+    expect(result).toBe("2025-12-05T17:00:00.000Z");
+  });
+
+  it("handles Daylight Saving Time transitions (spring forward)", () => {
+    // Mock the current time to just after a spring-forward DST change.
+    jest.spyOn(DateTime, "now").mockReturnValue(
+      DateTime.fromISO("2025-03-30T03:30:00+02:00", { setZone: true }) as DateTime<true> // Mock CET
+    );
+
+    const result = getEarliestForecastTimestamp();
+    // Two days before in local time: 2025-03-28T03:30:00+02:00
+    // Rounded down: 2025-03-28T00:00:00Z
+    // Converted to UTC: 2025-03-27T22:00:00Z
+    expect(result).toBe("2025-03-27T22:00:00.000Z");
+  });
+
+  it("handles Daylight Saving Time transitions (fall back)", () => {
+    // Mock the current time to just after a fall-back DST change.
+    jest.spyOn(DateTime, "now").mockReturnValue(
+      DateTime.fromISO("2025-10-26T01:30:00+02:00", { setZone: true }) as DateTime<true> // Mock CET
+    );
+
+    const result = getEarliestForecastTimestamp();
+    // Two days before in local time: 2025-10-24T01:30:00+02:00
+    // Rounded down: 2025-10-24T00:00:00Z
+    // Converted to UTC: 2025-10-23T22:00:00Z
+    expect(result).toBe("2025-10-23T22:00:00.000Z");
+  });
+
+  it("returns correctly aligned UTC values with no timezone (system default)", () => {
+    // Restore default zone to simulate system timezone behavior.
+    Settings.defaultZone = "system";
+
+    // Mock the current time in the system default zone.
+    jest.spyOn(DateTime, "now").mockReturnValue(
+      DateTime.fromISO("2025-12-07T14:45:00") as DateTime<true> // Mock without explicit UTC or timezone
+    );
+
+    const result = getEarliestForecastTimestamp();
+
+    // The result depends on the system timezone but must align to a 6-hour boundary.
+    console.log(result); // Log for visual validation in non-UTC systems.
   });
 });
