@@ -456,6 +456,8 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
 
 export const getEarliestForecastTimestamp = (): string => {
   // Get the current time in the user's local timezone
+  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
+  // so they might see slightly different data around the rounding times.
   const now = DateTime.now(); // Defaults to the user's system timezone
 
   // Two days ago in local time
