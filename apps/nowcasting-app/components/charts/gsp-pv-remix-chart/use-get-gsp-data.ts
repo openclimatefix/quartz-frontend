@@ -146,17 +146,24 @@ const useGetGspData = (selectedRegions: string[]) => {
   }
 
   // TODO: nHour with aggregation when /forecast/all API endpoint has new forecast_horizon_minutes param
+  // For now, let's disable the N hour forecast when multiple GSPs are selected
   const nMinuteForecast = nHourForecast * 60;
-  const { data: gspNHourDataRaw, error: pvNHourError } = useLoadDataFromApi<
-    components["schemas"]["ForecastValue"][]
-  >(
-    show4hView && !isZoneAggregation
+  const {
+    data: gspNHourDataRaw,
+    isLoading: gspNHourLoading,
+    isValidating: gspNHourValidating,
+    error: pvNHourError
+  } = useLoadDataFromApi<components["schemas"]["ForecastValue"][]>(
+    show4hView && !isZoneAggregation && selectedRegions.length === 1
       ? `${API_PREFIX}/solar/GB/gsp/${String(
           selectedRegions[0]
         )}/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
       : null
   );
-  let gspNHourData = gspNHourDataRaw || [];
+  let gspNHourData =
+    selectedRegions.length === 1 && !gspNHourValidating && !gspNHourLoading
+      ? gspNHourDataRaw || []
+      : [];
 
   return {
     errors: [

@@ -12,6 +12,7 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
 
   const clickedGspIdRef = useRef(clickedGspId);
   const clickedMapRegionIdsRef = useRef(clickedMapRegionIds);
@@ -79,6 +80,11 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     selectedIds = selectedIds.filter((i) => i !== "");
     map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...selectedIds]);
     setSelectedMapRegionIds(selectedIds);
+
+    // // If multiple GSPs are selected, disable the N hour forecast
+    // if (selectedIds.length > 1) {
+    //   setVisibleLines((prev) => prev.filter((line) => line !== "N_HOUR_FORECAST"));
+    // }
   }, [clickedMapRegionIds, selectedMapRegionIds]);
 
   useEffect(() => {
