@@ -125,9 +125,11 @@ const useGetGspData = (selectedRegions: string[]) => {
   );
   console.log("gspLocationInfoRaw", gspLocationInfoRaw);
   console.log("selectedRegions", selectedRegions);
+  // TODO: Need to sort out the string/number mismatch in the GSP IDs
+  const selectedRegionsNumbers = selectedRegions.map((r) => Number(r));
   let gspLocationInfo =
     gspLocationInfoRaw && gspLocationInfoRaw?.length > 1
-      ? gspLocationInfoRaw?.filter((gsp) => selectedRegions.includes(String(gsp.gspId)))
+      ? gspLocationInfoRaw?.filter((gsp) => selectedRegionsNumbers.includes(gsp.gspId))
       : gspLocationInfoRaw;
   console.log("gspLocationInfo", gspLocationInfo);
   if (isZoneAggregation && gspLocationInfo) {

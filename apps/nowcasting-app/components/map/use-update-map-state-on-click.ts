@@ -46,7 +46,10 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   }, [clickedGspId]);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || !clickedMapRegionIds) return;
+
+    const selectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+    if (!selectBordersLayer) return;
 
     let currentlySelectedIds = map.getFilter("latestPV-forecast-select-borders");
     if (!currentlySelectedIds) return;
@@ -78,17 +81,28 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
       setClickedMapRegionIds(undefined);
     }
     selectedIds = selectedIds.filter((i) => i !== "");
-    map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...selectedIds]);
     setSelectedMapRegionIds(selectedIds);
 
     // // If multiple GSPs are selected, disable the N hour forecast
     // if (selectedIds.length > 1) {
     //   setVisibleLines((prev) => prev.filter((line) => line !== "N_HOUR_FORECAST"));
     // }
-  }, [clickedMapRegionIds, selectedMapRegionIds]);
+  }, [clickedMapRegionIds]);
 
   useEffect(() => {
-    if (map && !isEventRegistertedRef.current) {
+    if (!map) return;
+    if (!selectedMapRegionIds) return;
+
+    if (selectedMapRegionIds.length === 0) {
+      map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
+      return;
+    }
+
+    map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...selectedMapRegionIds]);
+  }, [selectedMapRegionIds]);
+
+  useEffect(() => {
+    if (map && isMapReady && !isEventRegistertedRef.current) {
       isEventRegistertedRef.current = true;
       map.on("click", "latestPV-forecast", (e) => {
         const clickedFeature = e.features && e.features[0];
