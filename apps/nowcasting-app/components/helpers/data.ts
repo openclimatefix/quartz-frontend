@@ -17,6 +17,7 @@ import ngZones from "../../data/ng_zones.json";
 import { formatISODateString, getOpacityValueFromPVNormalized, getRoundedPv } from "./utils";
 import { get30MinNow } from "./globalState";
 import { NationalAggregation, SelectedData } from "../map/types";
+import { DateTime } from "luxon";
 
 const getGspActualValueMwForTime = (
   gspRealData: components["schemas"]["GSPYieldGroupByDatetime"][],
@@ -437,29 +438,40 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
 /**
  * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
  *
- * This function determines the timestamp two days prior to the current time, rounded down to the nearest
- * 6-hour boundary (e.g., 00:00, 06:00, 12:00, 18:00). The result is returned as an ISO 8601 string in UTC.
+ * This function determines the timestamp two days prior to the current time, rounds it down
+ * to the nearest 6-hour interval (e.g., 00:00, 06:00, 12:00, 18:00) in local time, and finally
+ * converts the result back to UTC as an ISO-8601 string.
  *
- * @returns {string} The earliest forecast timestamp as an ISO 8601 string in UTC.
+ * Key Features:
+ * - Handles time zones correctly by rounding in the user's local timezone first.
+ * - Ensures accurate rounding during Daylight Saving Time (DST) changes.
+ *
+ * @returns {string} The earliest forecast timestamp in UTC as an ISO-8601 string.
  *
  * @example
- * // Assuming the current time is "2023-12-07T14:45:00Z":
- * console.log(getEarliestForecastTimestamp());
- * // Output: "2023-12-05T12:00:00.000Z"
+ * // Assuming the current time is 2025-12-07T14:45:00Z:
+ * const result = getEarliestForecastTimestamp();
+ * console.log(result); // Output: "2025-12-05T12:00:00.000Z"
  */
-export const getEarliestForecastTimestamp = () => {
-  const now = new Date();
-  // Two days ago
-  const start = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
-  // floor to the nearest rounded 6 hours, e.g. 06:00, 12:00, 18:00, 00:00
-  const roundedDate = new Date(
-    Math.floor(start.getTime() / (6 * 60 * 60 * 1000)) * 6 * 60 * 60 * 1000
-  );
-  // Convert from local time to UTC
-  const utcOffset = roundedDate.getTimezoneOffset() * 60 * 1000;
-  roundedDate.setTime(roundedDate.getTime() + utcOffset);
 
-  return roundedDate.toISOString();
+export const getEarliestForecastTimestamp = (): string => {
+  // Get the current time in the user's local timezone
+  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
+  // so they might see slightly different data around the rounding times.
+  const now = DateTime.now(); // Defaults to the user's system timezone
+
+  // Two days ago in local time
+  const twoDaysAgoLocal = now.minus({ days: 2 });
+
+  // Round down to the nearest 6-hour interval in the user's local timezone
+  const roundedDownLocal = twoDaysAgoLocal.startOf("hour").minus({
+    hours: twoDaysAgoLocal.hour % 6 // Rounds down to the last multiple of 6
+  });
+
+  // Convert the rounded timestamp back to UTC
+  const roundedDownUtc = roundedDownLocal.toUTC();
+
+  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
 };
 
 const MILLISECONDS_PER_MINUTE = 1000 * 60;
