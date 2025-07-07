@@ -45,6 +45,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
+  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [showMap, setShowMap] = useState(true);
 
   const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
@@ -89,6 +90,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   // Update map data when forecast data is loaded
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
+
+    console.info("Updating map data with new forecast data");
 
     setShouldUpdateMap(true);
   }, [
@@ -380,7 +383,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     // }
   };
 
-  // if mapDataLoading has been true for 30 seconds, set it to false
+  // if mapDataLoading has been true for 3 seconds, set it to false
   const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (mapDataLoadingTimeout) {
@@ -399,17 +402,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       }
     };
   }, [mapDataLoading]);
-
-  // return <div>Hello</div>;
-  useEffect(() => {
-    if (!showMap) {
-      setShowMap(true);
-    }
-  }, [showMap]);
-
-  if (!showMap) {
-    return <div>Reset</div>;
-  }
 
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>

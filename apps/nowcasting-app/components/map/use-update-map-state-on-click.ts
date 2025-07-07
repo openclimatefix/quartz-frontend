@@ -7,6 +7,20 @@ type UseUpdateMapStateOnClickProps = {
   map?: mapboxgl.Map;
   isMapReady: boolean;
 };
+
+const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) => {
+  if (!map) return;
+
+  const selectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+  if (!selectBordersLayer) return;
+
+  if (ids.length === 0) {
+    map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
+    return;
+  }
+  map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...ids]);
+};
+
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
   const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
@@ -59,8 +73,8 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     )
       return;
 
-    if (selectedMapRegionIds?.length === 0 && !clickedMapRegionIds) {
-      map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
+    if (selectedMapRegionIds?.length === 0 && !clickedMapRegionIds.length) {
+      setMapFilterSelectedIds(map, []);
       return;
     }
 
@@ -84,22 +98,35 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     setSelectedMapRegionIds(selectedIds);
 
     // // If multiple GSPs are selected, disable the N hour forecast
-    // if (selectedIds.length > 1) {
-    //   setVisibleLines((prev) => prev.filter((line) => line !== "N_HOUR_FORECAST"));
-    // }
+    if (selectedIds.length > 1) {
+      setVisibleLines((prev) => prev.filter((line) => line !== "N_HOUR_FORECAST"));
+    }
   }, [clickedMapRegionIds]);
 
   useEffect(() => {
     if (!map) return;
     if (!selectedMapRegionIds) return;
 
-    if (selectedMapRegionIds.length === 0) {
-      map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
-      return;
+    // Force ids to be numbers if national aggregation level is GSP for the map filter
+    if (nationalAggregationLevel === NationalAggregation.GSP) {
+      setMapFilterSelectedIds(
+        map,
+        selectedMapRegionIds.map((id) => Number(id))
+      );
+    } else {
+      setMapFilterSelectedIds(map, selectedMapRegionIds);
     }
-
-    map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...selectedMapRegionIds]);
   }, [selectedMapRegionIds]);
+
+  useEffect(() => {
+    if (!map) return;
+
+    console.log(
+      "### resetting map filter on national aggregation level change",
+      nationalAggregationLevel
+    );
+    setSelectedMapRegionIds([]);
+  }, [nationalAggregationLevel]);
 
   useEffect(() => {
     if (map && isMapReady && !isEventRegistertedRef.current) {
@@ -139,15 +166,15 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
               console.log("no features clicked");
             }
           } else {
-            const id =
+            const ids =
               nationalAggregationLevel === NationalAggregation.GSP
-                ? clickedFeature.properties?.id
-                : clickedFeature.properties?.id;
-            if (id !== clickedGspIdRef.current) {
-              map.setFilter("latestPV-forecast-select-borders", ["in", "id", id]);
-              setSelectedMapRegionIds([id]);
+                ? ([Number(clickedFeature.properties?.id)] as number[])
+                : ([String(clickedFeature.properties?.id)] as string[]);
+            if (ids[0] !== clickedGspIdRef.current) {
+              setMapFilterSelectedIds(map, ids);
+              setSelectedMapRegionIds([String(clickedFeature.properties?.id)]);
             } else {
-              map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
+              setMapFilterSelectedIds(map, []);
               setSelectedMapRegionIds([]);
             }
           }

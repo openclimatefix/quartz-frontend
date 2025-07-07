@@ -25,11 +25,12 @@ import { getTicks } from "../../helpers/chartUtils";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
-  setClickedGspId: Dispatch<SetStateAction<number | string | undefined>>;
   negative?: boolean;
-}> = ({ gspDeltas, setClickedGspId, negative = false }) => {
+}> = ({ gspDeltas, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
-  const [clickedGspId] = useGlobalState("clickedGspId");
+  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
+  const [, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;
 
@@ -108,7 +109,9 @@ const GspDeltaColumn: FC<{
             hasRows = true;
           }
 
-          const isSelectedGsp = Number(clickedGspId) === Number(gspDelta.gspId);
+          const isSelectedGsp =
+            gspDelta.gspId &&
+            selectedMapRegionIds?.map((id) => Number(id)).includes(gspDelta.gspId);
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
@@ -136,7 +139,7 @@ const GspDeltaColumn: FC<{
               } box-content cursor-pointer relative flex w-full transition duration-200 ease-out 
               hover:bg-ocf-gray-900 hover:ease-in`}
               key={`gspCol${gspDelta.gspId}`}
-              onClick={() => setClickedGspId(gspDelta.gspId)}
+              onClick={() => setSelectedMapRegionIds([String(gspDelta.gspId)])}
             >
               <div
                 className={`items-start xl:items-center text-xs grid grid-cols-12 flex-1 py-1.5 justify-between px-2 
@@ -397,8 +400,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           )}
           {hasGspPvInitialForSelectedTime && gspDeltas && (
             <div className="flex pt-2 mx-3 max-h-96">
-              <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
-              <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+              <GspDeltaColumn gspDeltas={gspDeltas} negative />
+              <GspDeltaColumn gspDeltas={gspDeltas} />
             </div>
           )}
         </div>

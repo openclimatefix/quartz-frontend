@@ -120,7 +120,7 @@ const GspPvRemixChart: FC<{
   let title =
     nationalAggregationLevel === NationalAggregation.GSP
       ? gspName || ""
-      : String(String(selectedRegions[0]));
+      : String(selectedRegions[0]);
   let selectedGSPNames =
     selectedRegions.length > 1 ? gspLocationInfo?.map((gsp) => gsp.regionName) || [] : [];
 

@@ -61,20 +61,39 @@ const useGetGspData = (selectedRegions: string[]) => {
     NationalAggregation.national
   ].includes(nationalAggregationLevel);
 
+  let selectedGspIds = selectedRegions;
+
+  const flattenSelectedGroupsToGspIds = (
+    grouping: Record<string, number[]>,
+    selectedRegionIds: string[]
+  ) => {
+    let selectedGspIds: string[] = [];
+    for (const regionId of selectedRegionIds) {
+      if (grouping[regionId]) {
+        selectedGspIds = selectedGspIds.concat(grouping[regionId].map((gsp) => String(gsp)));
+      }
+    }
+    return selectedGspIds;
+  };
+
   // TODO: Reimplement aggregation as is now
   // let gspIds: number[] = typeof gspId === "number" ? [gspId] : [];
-  // if (nationalAggregationLevel === NationalAggregation.DNO) {
-  //   // Get the GSP ids for the DNO
-  //   gspIds = dnoGspGroupings[gspId as keyof typeof dnoGspGroupings] || [];
-  // }
+  if (nationalAggregationLevel === NationalAggregation.DNO) {
+    // Get the GSP ids for the DNO
+    selectedGspIds = flattenSelectedGroupsToGspIds(dnoGspGroupings, selectedRegions);
+  }
+  // (zone and national not fully reimplemented; not needed for now)
   // if (nationalAggregationLevel === NationalAggregation.zone) {
-  //   gspIds = ngGspZoneGroupings[gspId as keyof typeof ngGspZoneGroupings] || [];
+  //   selectedGspIds =
+  //     ngGspZoneGroupings[selectedRegions[0] as keyof typeof ngGspZoneGroupings]?.map((gsp) =>
+  //       String(gsp)
+  //     ) || [];
   // }
   // if (nationalAggregationLevel === NationalAggregation.national) {
-  //   gspIds = nationalGspZone[gspId as keyof typeof nationalGspZone] || [];
-  // }
-  // if (nationalAggregationLevel === NationalAggregation.GSP && Number(gspId) !== 0) {
-  //   gspIds = [Number(gspId)];
+  //   selectedGspIds =
+  //     nationalGspZone[selectedRegions[0] as keyof typeof nationalGspZone]?.map((gsp) =>
+  //       String(gsp)
+  //     ) || [];
   // }
 
   const {
@@ -83,10 +102,10 @@ const useGetGspData = (selectedRegions: string[]) => {
     error: pvRealInDayError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&gsp_ids=${encodeURIComponent(
-      selectedRegions.join(",")
+      selectedGspIds.join(",")
     )}&compact=true`
   );
-  const pvRealDataIn = aggregateTruthData(pvRealDataInRaw, selectedRegions, "solarGenerationKw");
+  const pvRealDataIn = aggregateTruthData(pvRealDataInRaw, selectedGspIds, "solarGenerationKw");
 
   const {
     data: pvRealDataAfterRaw,
@@ -94,12 +113,12 @@ const useGetGspData = (selectedRegions: string[]) => {
     error: pvRealDayAfterError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=day-after&gsp_ids=${encodeURIComponent(
-      selectedRegions.join(",")
+      selectedGspIds.join(",")
     )}&compact=true`
   );
   const pvRealDataAfter = aggregateTruthData(
     pvRealDataAfterRaw,
-    selectedRegions,
+    selectedGspIds,
     "solarGenerationKw"
   );
 
@@ -110,35 +129,31 @@ const useGetGspData = (selectedRegions: string[]) => {
     error: gspForecastDataOneGSPError
   } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
-      selectedRegions.join(",")
-    )}&compact=true&historic=true`,
+      selectedGspIds.join(",")
+    )}&compact=true&historic=true&start_datetime_utc=${encodeURIComponent(startDatetime)}`,
     {
       dedupingInterval: 1000 * 30
     }
   );
-  const gspForecastDataOneGSP = aggregateForecastData(gspForecastDataOneGSPRaw, selectedRegions);
+  const gspForecastDataOneGSP = aggregateForecastData(gspForecastDataOneGSPRaw, selectedGspIds);
 
   const { data: gspLocationInfoRaw, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
     isZoneAggregation || (selectedMapRegionIds?.length && selectedMapRegionIds.length > 1)
       ? `${API_PREFIX}/system/GB/gsp/?zones=true` // TODO: API seems to struggle with UI flag if no other query params
-      : `${API_PREFIX}/system/GB/gsp/?gsp_id=${selectedRegions[0]}`
+      : `${API_PREFIX}/system/GB/gsp/?gsp_id=${selectedGspIds[0]}`
   );
-  console.log("gspLocationInfoRaw", gspLocationInfoRaw);
-  console.log("selectedRegions", selectedRegions);
   // TODO: Need to sort out the string/number mismatch in the GSP IDs
-  const selectedRegionsNumbers = selectedRegions.map((r) => Number(r));
   let gspLocationInfo =
     gspLocationInfoRaw && gspLocationInfoRaw?.length > 1
-      ? gspLocationInfoRaw?.filter((gsp) => selectedRegionsNumbers.includes(gsp.gspId))
+      ? gspLocationInfoRaw?.filter((gsp) => selectedGspIds.includes(String(gsp.gspId)))
       : gspLocationInfoRaw;
-  console.log("gspLocationInfo", gspLocationInfo);
   if (isZoneAggregation && gspLocationInfo) {
     const zoneCapacity = gspLocationInfo.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0);
     gspLocationInfo = [
       {
-        gspId: Number(selectedRegions[0]),
-        gspName: String(selectedRegions[0]) as string,
-        regionName: String(selectedRegions[0]) as string,
+        gspId: Number(selectedGspIds[0]),
+        gspName: String(selectedGspIds[0]) as string,
+        regionName: String(selectedGspIds[0]) as string,
         installedCapacityMw: zoneCapacity,
         rmMode: true,
         label: "Zone",
@@ -156,14 +171,14 @@ const useGetGspData = (selectedRegions: string[]) => {
     isValidating: gspNHourValidating,
     error: pvNHourError
   } = useLoadDataFromApi<components["schemas"]["ForecastValue"][]>(
-    show4hView && !isZoneAggregation && selectedRegions.length === 1
+    show4hView && !isZoneAggregation && selectedGspIds.length === 1
       ? `${API_PREFIX}/solar/GB/gsp/${String(
-          selectedRegions[0]
+          selectedGspIds[0]
         )}/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
       : null
   );
   let gspNHourData =
-    selectedRegions.length === 1 && !gspNHourValidating && !gspNHourLoading
+    selectedGspIds.length === 1 && !gspNHourValidating && !gspNHourLoading
       ? gspNHourDataRaw || []
       : [];
 
