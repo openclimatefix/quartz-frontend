@@ -110,8 +110,7 @@ const GspDeltaColumn: FC<{
           }
 
           const isSelectedGsp =
-            gspDelta.gspId &&
-            selectedMapRegionIds?.map((id) => Number(id)).includes(gspDelta.gspId);
+            gspDelta.gspId && selectedMapRegionIds?.includes(String(gspDelta.gspId));
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
@@ -390,7 +389,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div
           className={`flex flex-col flex-grow-0 flex-shrink${
             hasGspPvInitialForSelectedTime ? " overflow-y-scroll" : ""
-          } ${clickedGspId ? "h-[30%]" : "h-[40%]"}`}
+          } ${selectedMapRegionIds?.length ? "h-[30%]" : "h-[40%]"}`}
         >
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
           {!hasGspPvInitialForSelectedTime && (
