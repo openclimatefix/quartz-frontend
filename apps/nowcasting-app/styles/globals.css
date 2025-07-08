@@ -26,6 +26,10 @@
   border-top-color: rgba(0,0,0,0.5);
 }
 
+.mapboxgl-canvas {
+  outline: none;
+}
+
 .up-arrow, .down-arrow {
   content: "";
   display: inline-block;
