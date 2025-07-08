@@ -256,22 +256,15 @@ type DeltaChartProps = {
   combinedErrors: CombinedErrors;
 };
 const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
-  // const [view] = useGlobalState("view");
-  const [show4hView] = useGlobalState("showNHourView");
-  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [globalZoomArea] = useGlobalState("globalZoomArea");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const [loadingState] = useGlobalState("loadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const selectedTimeHalfHourSlot = get30MinSlot(new Date(convertToLocaleDateString(selectedTime)));
-  // const halfHourAgoDate = new Date(timeNow).setMinutes(new Date(timeNow).getMinutes() - 30);
-  // const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
   const hasGspPvInitialForSelectedTime = combinedData.pvRealDayInData?.find(
     (d) =>
       d.datetimeUtc.slice(0, 16) ===
@@ -346,6 +339,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     setSelectedISOTime(time + ":00.000Z");
   };
 
+  let selectedRegions: string[] = [];
+  if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
+    selectedRegions = selectedMapRegionIds.map((id) => String(id));
+  }
+
   return (
     <>
       <div className={`flex flex-col flex-1 ${className || ""}`}>
@@ -378,7 +376,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               }}
               setTimeOfInterest={setSelectedTime}
               selectedTime={selectedTime}
-              selectedRegions={selectedMapRegionIds || []}
+              selectedRegions={selectedRegions}
               timeNow={formatISODateString(timeNow)}
               resetTime={resetTime}
               visibleLines={visibleLines}

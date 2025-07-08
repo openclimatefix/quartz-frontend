@@ -125,7 +125,7 @@ const GspPvRemixChart: FC<{
     selectedRegions.length > 1 ? gspLocationInfo?.map((gsp) => gsp.regionName) || [] : [];
 
   if (selectedRegions.length > 1) {
-    title = `${selectedRegions.length} GSPs selected`;
+    title = `${selectedRegions.length} ${String(nationalAggregationLevel)}s selected`;
   }
 
   if (nationalAggregationLevel === NationalAggregation.national) {
