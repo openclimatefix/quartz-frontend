@@ -80,10 +80,12 @@ const GspPvRemixChart: FC<{
   //
 
   // get the latest Actual pv value in GW
-  const latestPvActualInMW = KWtoMW(pvRealDataIn?.[0]?.solarGenerationKw || 0);
+  const latestPvActualInMW = KWtoMW(
+    pvRealDataIn?.[pvRealDataIn.length - 1]?.solarGenerationKw || 0
+  );
 
   // get pv time
-  const latestPvActualDatetime = pvRealDataIn?.[0]?.datetimeUtc || timeNow;
+  const latestPvActualDatetime = pvRealDataIn?.[pvRealDataIn.length - 1]?.datetimeUtc || timeNow;
 
   // Use the same time for the Forecast historic
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime);
