@@ -106,6 +106,7 @@ type CombinedData = {
     | undefined;
   allGspRealData: AllGspRealData | components["schemas"]["GSPYieldGroupByDatetime"][] | undefined;
   gspDeltas: Map<string, GspDeltaValue> | undefined;
+  nlForecastData?: SitePvForecast;
 };
 type CombinedLoading = {
   nationalForecastLoading: boolean;

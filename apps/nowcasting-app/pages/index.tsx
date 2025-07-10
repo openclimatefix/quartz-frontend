@@ -512,6 +512,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     timeNow
   ]);
 
+  const nlForecastData = useMemo(() => {
+    return sitePvForecastData?.find((d) => d.site_uuid === "22c63590-8065-4237-b665-42c6a4fc22cc");
+  }, [sitePvForecastData]);
+
   const combinedData: CombinedData = {
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
@@ -525,7 +529,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     allGspSystemData,
     allGspForecastData,
     allGspRealData,
-    gspDeltas
+    gspDeltas,
+    nlForecastData
   };
   const combinedLoading: CombinedLoading = useMemo(
     () => ({
