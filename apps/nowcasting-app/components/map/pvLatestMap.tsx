@@ -6,12 +6,21 @@ import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
-import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
+import {
+  CombinedData,
+  CombinedErrors,
+  CombinedLoading,
+  CombinedValidating,
+  SitePvForecast
+} from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import { getActiveUnitFromMap, safelyUpdateMapData, setActiveUnitOnMap } from "../helpers/mapUtils";
 import { components } from "../../types/quartz-api";
-import { generateGeoJsonForecastData } from "../helpers/data";
+import {
+  generateGeoJsonForecastData,
+  generateNetherlandsGeoJsonForecastData
+} from "../helpers/data";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
@@ -78,6 +87,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
   const forecastError = combinedErrors?.allGspForecastError;
 
+  const nlForecastData = useMemo(() => {
+    return combinedData?.nlForecastData as SitePvForecast;
+  }, [combinedData?.nlForecastData]);
+
   // Show loading spinner when selectedISOTime changes
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
@@ -120,6 +133,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     1
   ];
 
+  const getNLFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
+    "interpolate",
+    ["linear"],
+    ["to-number", ["get", selectedData]],
+    // on value 0 the opacity will be 0
+    0,
+    0,
+    // on value maximum the opacity will be 1
+    isNormalized ? 1 : 16000000,
+    1
+  ];
+
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(
       initForecastData,
@@ -136,6 +161,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     combinedData.allGspSystemData,
     nationalAggregationLevel
   ]);
+
+  const generatedNetherlandsGeoJsonForecastData = useMemo(() => {
+    return generateNetherlandsGeoJsonForecastData(nlForecastData, selectedISOTime);
+  }, [nlForecastData, selectedISOTime]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -185,6 +214,17 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       source.setData(generatedGeoJsonForecastData.forecastGeoJson);
     }
     console.log("latestPV source set");
+
+    const nlSource = map.getSource("nlSource") as unknown as mapboxgl.GeoJSONSource;
+    if (!nlSource) {
+      const { forecastGeoJson: nlForecastGeoJson } = generatedNetherlandsGeoJsonForecastData;
+
+      map.addSource("nlSource", {
+        type: "geojson",
+        data: nlForecastGeoJson,
+        promoteId: "id"
+      });
+    }
 
     const pvForecastLayer = map.getLayer("latestPV-forecast");
     if (!pvForecastLayer) {
@@ -332,6 +372,51 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           "line-opacity": 0.2
         }
       });
+    }
+
+    const nlBordersLayer = map.getLayer("nl-borders");
+    if (!nlBordersLayer) {
+      map.addLayer({
+        id: "nl-borders",
+        type: "line",
+        source: "nlSource",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 0.6,
+          "line-opacity": 0.2
+        }
+      });
+    }
+
+    const nlForecastLayer = map.getLayer("nl-forecast");
+    if (!nlForecastLayer) {
+      map.addLayer({
+        id: "nl-forecast",
+        type: "fill",
+        source: "nlSource",
+        layout: { visibility: "visible" },
+        paint: {
+          "fill-color": "#ffcc2d",
+          "fill-opacity": getNLFillOpacity(selectedDataName, isNormalized)
+        }
+      });
+    } else {
+      if (generatedNetherlandsGeoJsonForecastData && nlSource) {
+        const currentActiveUnit = getActiveUnitFromMap(map);
+        const isNormalized = currentActiveUnit === ActiveUnit.percentage;
+        nlSource.setData(generatedNetherlandsGeoJsonForecastData.forecastGeoJson);
+        map.setPaintProperty(
+          "nl-forecast",
+          "fill-opacity",
+          getNLFillOpacity(selectedDataName, isNormalized)
+        );
+        console.log(
+          "nlForecastLayer updated",
+          generatedNetherlandsGeoJsonForecastData.forecastGeoJson
+        );
+      } else {
+        console.log("nlForecastLayer not updated");
+      }
     }
 
     const pvForecastSelectBordersLayer = map.getLayer("latestPV-forecast-select-borders");

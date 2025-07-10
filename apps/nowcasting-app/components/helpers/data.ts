@@ -4,11 +4,13 @@ import {
   ForecastData,
   GspDeltaValue,
   GspZoneGroupings,
-  MapFeatureObject
+  MapFeatureObject,
+  SitePvForecast
 } from "../types";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import gspShapeData from "../../data/GSP_regions_4326_20250109.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
+import netherlandsShapeData from "../../data/netherlands.json";
 import nationalShapeData from "../../data/national_gsp_shape.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
 import dnoGspGroupings from "../../data/dno_gsp_groupings.json";
@@ -286,6 +288,51 @@ export const generateGeoJsonForecastData: (
   };
 
   return { forecastGeoJson };
+};
+
+export const generateNetherlandsGeoJsonForecastData: (
+  forecastData?: SitePvForecast,
+  targetTime?: string
+) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
+  const gspForecastsDataByTimestamp = forecastData || [];
+  const gspShapeJson = netherlandsShapeData as FeatureCollection;
+  let features = gspShapeJson.features;
+
+  const forecastGeoJson = {
+    type: "FeatureCollection" as "FeatureCollection",
+    features: features.map((f) => {
+      const gspId = "NL";
+      let selectedFCValue;
+      if (gspForecastsDataByTimestamp && targetTime) {
+        selectedFCValue = forecastData?.forecast_values?.find((fv) => {
+          return (
+            fv.target_datetime_utc.slice(0, 16) === formatISODateString(targetTime)?.slice(0, 16)
+          );
+        });
+      } else if (gspForecastsDataByTimestamp) {
+        let latestTimestamp = get30MinNow();
+        selectedFCValue = forecastData?.forecast_values?.find((fv) => {
+          return (
+            fv.target_datetime_utc.slice(0, 16) ===
+            formatISODateString(latestTimestamp)?.slice(0, 16)
+          );
+        });
+      }
+
+      console.log("=== selectedFCValue", selectedFCValue);
+      return {
+        ...f,
+        properties: setFeatureObjectProps(
+          { ...f.properties, id: gspId },
+          { regionName: gspId, installedCapacityMw: 23900000 }, // 23.9 GW installed capacity in Netherlands
+          selectedFCValue?.expected_generation_kw || 0,
+          undefined
+        )
+      };
+    })
+  };
+
+  return { forecastGeoJson } as { forecastGeoJson: FeatureCollection };
 };
 
 /**

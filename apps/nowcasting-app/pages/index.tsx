@@ -457,67 +457,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     // );
     return tempGspDeltas;
   }, [allGspForecastData, currentYields, selectedTime, timeNow]);
-
-  const combinedData: CombinedData = {
-    nationalForecastData,
-    pvRealDayInData,
-    pvRealDayAfterData,
-    nationalNHourData,
-    allGspSystemData,
-    allGspForecastData,
-    allGspRealData,
-    gspDeltas
-  };
-  const combinedLoading: CombinedLoading = useMemo(
-    () => ({
-      nationalForecastLoading,
-      pvRealDayInLoading,
-      pvRealDayAfterLoading,
-      nationalNHourLoading: nationalNHourLoading,
-      allGspSystemLoading,
-      allGspForecastLoading,
-      allGspRealLoading
-    }),
-    [
-      nationalForecastLoading,
-      pvRealDayInLoading,
-      pvRealDayAfterLoading,
-      nationalNHourLoading,
-      allGspSystemLoading,
-      allGspForecastLoading,
-      allGspRealLoading
-    ]
-  );
-  const combinedValidating: CombinedValidating = useMemo(
-    () => ({
-      nationalForecastValidating,
-      pvRealDayInValidating,
-      pvRealDayAfterValidating,
-      nationalNHourValidating,
-      allGspSystemValidating,
-      allGspForecastValidating,
-      allGspRealValidating: allGspActualValidating
-    }),
-    [
-      nationalForecastValidating,
-      pvRealDayInValidating,
-      pvRealDayAfterValidating,
-      nationalNHourValidating,
-      allGspSystemValidating,
-      allGspForecastValidating,
-      allGspActualValidating
-    ]
-  );
-  const combinedErrors: CombinedErrors = {
-    nationalForecastError,
-    pvRealDayInError,
-    pvRealDayAfterError,
-    nationalNHourError,
-    allGspSystemError,
-    allGspForecastError,
-    allGspRealError: allGspActualError
-  };
-
   const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
 
   // Sites API data
@@ -610,6 +549,71 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     allSitesError,
     sitesPvForecastError: sitePvForecastError,
     sitesPvActualError: sitePvActualError
+  };
+
+  const nlForecastData = useMemo(() => {
+    return sitePvForecastData?.find((d) => d.site_uuid === "22c63590-8065-4237-b665-42c6a4fc22cc");
+  }, [sitePvForecastData]);
+
+  const combinedData: CombinedData = {
+    nationalForecastData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    nationalNHourData,
+    allGspSystemData,
+    allGspForecastData,
+    allGspRealData,
+    gspDeltas,
+    nlForecastData
+  };
+  const combinedLoading: CombinedLoading = useMemo(
+    () => ({
+      nationalForecastLoading,
+      pvRealDayInLoading,
+      pvRealDayAfterLoading,
+      nationalNHourLoading: nationalNHourLoading,
+      allGspSystemLoading,
+      allGspForecastLoading,
+      allGspRealLoading
+    }),
+    [
+      nationalForecastLoading,
+      pvRealDayInLoading,
+      pvRealDayAfterLoading,
+      nationalNHourLoading,
+      allGspSystemLoading,
+      allGspForecastLoading,
+      allGspRealLoading
+    ]
+  );
+  const combinedValidating: CombinedValidating = useMemo(
+    () => ({
+      nationalForecastValidating,
+      pvRealDayInValidating,
+      pvRealDayAfterValidating,
+      nationalNHourValidating,
+      allGspSystemValidating,
+      allGspForecastValidating,
+      allGspRealValidating: allGspActualValidating
+    }),
+    [
+      nationalForecastValidating,
+      pvRealDayInValidating,
+      pvRealDayAfterValidating,
+      nationalNHourValidating,
+      allGspSystemValidating,
+      allGspForecastValidating,
+      allGspActualValidating
+    ]
+  );
+  const combinedErrors: CombinedErrors = {
+    nationalForecastError,
+    pvRealDayInError,
+    pvRealDayAfterError,
+    nationalNHourError,
+    allGspSystemError,
+    allGspForecastError,
+    allGspRealError: allGspActualError
   };
 
   const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
