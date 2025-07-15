@@ -114,7 +114,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
   }, [visibleLines]);
 
-  // On view change, unset the clicked GSP if the aggregation is not GSP,
+  // On view change, unset the clicked region if the aggregation is not GSP,
   // and set the national aggregation level to GSP if we're now on Delta view
   useEffect(() => {
     if (nationalAggregationLevel !== NationalAggregation.GSP) {
