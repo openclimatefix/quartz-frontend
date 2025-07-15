@@ -1,6 +1,6 @@
 {
   "name": "@openclimatefix/nowcasting-app",
-  "version": "0.5.7",
+  "version": "0.5.9",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",

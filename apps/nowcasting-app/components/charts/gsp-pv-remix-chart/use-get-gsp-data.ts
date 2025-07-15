@@ -8,6 +8,7 @@ import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 import { NationalAggregation } from "../../map/types";
 import { components } from "../../../types/quartz-api";
 import { getEarliestForecastTimestamp } from "../../helpers/data";
+import * as Sentry from "@sentry/react";
 
 const aggregateTruthData = (
   pvDataRaw: components["schemas"]["GSPYieldGroupByDatetime"][] | undefined,
@@ -15,6 +16,12 @@ const aggregateTruthData = (
   key: string
 ) => {
   if (!pvDataRaw?.length) return [];
+
+  if (pvDataRaw[0].datetimeUtc > pvDataRaw[pvDataRaw.length - 1].datetimeUtc) {
+    // If the data is not in chronological order, i.e. oldest first, reverse it
+    Sentry.captureMessage("Reversing pvDataRaw order in aggregateTruthData", "info");
+    pvDataRaw = pvDataRaw.reverse();
+  }
   return pvDataRaw?.map((d) => {
     return {
       datetimeUtc: d.datetimeUtc,

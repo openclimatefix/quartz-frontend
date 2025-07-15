@@ -3578,7 +3578,7 @@
     },
     {
       "type": "Feature",
-      "properties": { "ID": 11, "Name": "_B", "LongName": "WPD (East Midlands)" },
+      "properties": { "ID": 11, "Name": "_B", "LongName": "NGED (East Midlands)" },
       "geometry": {
         "type": "MultiPolygon",
         "coordinates": [
@@ -14505,7 +14505,7 @@
     },
     {
       "type": "Feature",
-      "properties": { "ID": 14, "Name": "_E", "LongName": "WPD (Midlands)" },
+      "properties": { "ID": 14, "Name": "_E", "LongName": "NGED (Midlands)" },
       "geometry": {
         "type": "MultiPolygon",
         "coordinates": [
@@ -43401,7 +43401,7 @@
     },
     {
       "type": "Feature",
-      "properties": { "ID": 21, "Name": "_K", "LongName": "WPD (South Wales)" },
+      "properties": { "ID": 21, "Name": "_K", "LongName": "NGED (South Wales)" },
       "geometry": {
         "type": "MultiPolygon",
         "coordinates": [
@@ -46208,7 +46208,7 @@
     },
     {
       "type": "Feature",
-      "properties": { "ID": 22, "Name": "_L", "LongName": "WPD (South West)" },
+      "properties": { "ID": 22, "Name": "_L", "LongName": "NGED (South West)" },
       "geometry": {
         "type": "MultiPolygon",
         "coordinates": [
