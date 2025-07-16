@@ -75,6 +75,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
   const [, setLoadingState] = useGlobalState("loadingState");
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [nationalAggregationLevel, setNationalAggregationLevel] = useGlobalState(
+    "nationalAggregationLevel"
+  );
+  const [, setClickedGspId] = useGlobalState("clickedGspId");
 
   const [forecastLastFetch30MinISO, setForecastLastFetch30MinISO] = useState(get30MinNow(-30));
   const [forecastHistoricBackwardIntervalMinutes, setForecastHistoricBackwardIntervalMinutes] =
@@ -109,6 +113,17 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   useEffect(() => {
     setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
   }, [visibleLines]);
+
+  // On view change, unset the clicked region if the aggregation is not GSP,
+  // and set the national aggregation level to GSP if we're now on Delta view
+  useEffect(() => {
+    if (nationalAggregationLevel !== NationalAggregation.GSP) {
+      setClickedGspId(undefined);
+    }
+    if (view === VIEWS.DELTA) {
+      setNationalAggregationLevel(NationalAggregation.GSP);
+    }
+  }, [view]);
 
   const currentView = (v: VIEWS) => v === view;
 
