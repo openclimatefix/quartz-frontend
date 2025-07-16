@@ -83,13 +83,13 @@ const useGetGspData = (selectedRegions: string[]) => {
     return selectedGspIds;
   };
 
-  // TODO: Reimplement aggregation as is now
-  // let gspIds: number[] = typeof gspId === "number" ? [gspId] : [];
   if (nationalAggregationLevel === NationalAggregation.DNO) {
     // Get the GSP ids for the DNO
     selectedGspIds = flattenSelectedGroupsToGspIds(dnoGspGroupings, selectedRegions);
   }
+
   // (zone and national not fully reimplemented; not needed for now)
+  //
   // if (nationalAggregationLevel === NationalAggregation.zone) {
   //   selectedGspIds =
   //     ngGspZoneGroupings[selectedRegions[0] as keyof typeof ngGspZoneGroupings]?.map((gsp) =>
