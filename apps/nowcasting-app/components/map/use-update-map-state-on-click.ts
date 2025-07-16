@@ -22,42 +22,13 @@ const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) =>
 };
 
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
-  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
-  const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
+  const [, setVisibleLines] = useGlobalState("visibleLines");
 
-  const clickedGspIdRef = useRef(clickedGspId);
   const clickedMapRegionIdsRef = useRef(clickedMapRegionIds);
   const isEventRegistertedRef = useRef(false);
-  useEffect(() => {
-    if (clickedGspIdRef.current) {
-      map?.setFeatureState(
-        {
-          source: "latestPV",
-          id: clickedGspIdRef.current
-        },
-        { click: false }
-      );
-    }
-
-    if (clickedGspId) {
-      clickedGspIdRef.current = clickedGspId;
-      map?.setFeatureState(
-        {
-          source: "latestPV",
-          id:
-            nationalAggregationLevel === NationalAggregation.GSP
-              ? Number(clickedGspId)
-              : clickedGspId
-        },
-        { click: true }
-      );
-    } else {
-      clickedGspIdRef.current = undefined;
-    }
-  }, [clickedGspId]);
 
   useEffect(() => {
     if (!map || !clickedMapRegionIds) return;
@@ -162,13 +133,8 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
               nationalAggregationLevel === NationalAggregation.GSP
                 ? ([Number(clickedFeature.properties?.id)] as number[])
                 : ([String(clickedFeature.properties?.id)] as string[]);
-            if (ids[0] !== clickedGspIdRef.current) {
-              setMapFilterSelectedIds(map, ids);
-              setSelectedMapRegionIds([String(clickedFeature.properties?.id)]);
-            } else {
-              setMapFilterSelectedIds(map, []);
-              setSelectedMapRegionIds([]);
-            }
+            setMapFilterSelectedIds(map, ids);
+            setSelectedMapRegionIds([String(clickedFeature.properties?.id)]);
           }
         }
       });

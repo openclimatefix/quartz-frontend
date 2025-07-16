@@ -21,7 +21,6 @@ const PvRemixChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedData, combinedErrors, className }) => {
-  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -89,9 +88,6 @@ const PvRemixChart: FC<{
   };
 
   let selectedRegions: string[] = [];
-  if (clickedGspId) {
-    selectedRegions = [String(clickedGspId)];
-  }
   if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
     selectedRegions = selectedMapRegionIds.map((id) => String(id));
   }
@@ -130,7 +126,6 @@ const PvRemixChart: FC<{
           <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
               close={() => {
-                setClickedGspId(undefined);
                 setSelectedMapRegionIds([]);
               }}
               setTimeOfInterest={setSelectedTime}
