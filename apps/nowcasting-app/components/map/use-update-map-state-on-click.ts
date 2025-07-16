@@ -63,11 +63,6 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     }
     selectedIds = selectedIds.filter((i) => i !== "");
     setSelectedMapRegionIds(selectedIds);
-
-    // // If multiple GSPs are selected, disable the N hour forecast
-    if (selectedIds.length > 1) {
-      setVisibleLines((prev) => prev.filter((line) => line !== "N_HOUR_FORECAST"));
-    }
   }, [clickedMapRegionIds]);
 
   useEffect(() => {
@@ -98,13 +93,6 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
         const clickedFeature = e.features && e.features[0];
         if (clickedFeature) {
           if (e.originalEvent.shiftKey) {
-            /*
-             TODO: BRAD - multi select working, but remove clicked GSP stuff altogether and
-              replace with clickedMapRegionIds everywhere properly; also additional API changes
-              to get what we need from the frontend for multiple GSP forecasts with their history.
-              This may include a new API endpoint for the GSPs that are selected, as per comments
-              on Github issue about GSP forecast history from this week.
-            */
             const bbox: [PointLike, PointLike] = [
               [e.point.x - 5, e.point.y - 5],
               [e.point.x + 5, e.point.y + 5]

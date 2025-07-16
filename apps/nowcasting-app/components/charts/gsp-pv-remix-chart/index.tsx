@@ -134,6 +134,12 @@ const GspPvRemixChart: FC<{
     title = "National GSP Sum";
   }
 
+  // If multiple GSPs are selected, hide the N-hour data, if any
+  let filteredLines = visibleLines;
+  if (selectedRegions.length > 1) {
+    filteredLines = visibleLines.filter((line) => !line.includes("N_HOUR_FORECAST"));
+  }
+
   return (
     <>
       <div className="flex-initial">
@@ -176,7 +182,7 @@ const GspPvRemixChart: FC<{
           yMax={yMax!}
           timeNow={timeNow}
           resetTime={resetTime}
-          visibleLines={visibleLines}
+          visibleLines={filteredLines}
           deltaView={deltaView}
           deltaYMaxOverride={Math.ceil(Number(gspInstalledCapacity) / 200) * 100 || 500}
           yTicks={getTicks(yMax, Y_MAX_TICKS)}

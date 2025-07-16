@@ -1,8 +1,20 @@
+type TipPosition = "left" | "right" | "middle" | "top";
+
 type ForecastLabelProps = {
   children: React.ReactNode;
   tip: string | React.ReactNode;
-  position?: "left" | "right" | "middle";
+  position?: TipPosition;
   className?: string;
+};
+
+const getPositionClass = (position: TipPosition) => {
+  if (position === "left") return "left-0";
+  if (position === "right") return "-right-3";
+  if (position === "middle") return "bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full";
+  if (position === "top")
+    return "-top-[calc(100%+0.5rem)] left-1/2 transform -translate-x-1/2 -translate-y-full";
+
+  return "top-0 left-0"; // Default case for top-left
 };
 
 const ForecastLabel: React.FC<ForecastLabelProps> = ({
@@ -11,12 +23,6 @@ const ForecastLabel: React.FC<ForecastLabelProps> = ({
   position = "left",
   className
 }) => {
-  const getPositionClass = (position: "left" | "right" | "middle") => {
-    if (position === "left") return "left-0";
-    if (position === "right") return "-right-3";
-    if (position === "middle")
-      return "bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full";
-  };
   return (
     <div className={`relative z-50 overflow-visible cursor-default flex group ${className || ""}`}>
       {children}
