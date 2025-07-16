@@ -28,9 +28,7 @@ const GspDeltaColumn: FC<{
   negative?: boolean;
 }> = ({ gspDeltas, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
-  const [, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
-  const [, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;
 
@@ -110,7 +108,8 @@ const GspDeltaColumn: FC<{
           }
 
           const isSelectedGsp =
-            gspDelta.gspId && selectedMapRegionIds?.includes(String(gspDelta.gspId));
+            gspDelta.gspId &&
+            selectedMapRegionIds?.map((gspId) => Number(gspId)).includes(Number(gspDelta.gspId));
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
