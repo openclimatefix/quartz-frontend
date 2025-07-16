@@ -91,8 +91,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
 
-    console.info("Updating map data with new forecast data");
-
     setShouldUpdateMap(true);
   }, [
     combinedData,

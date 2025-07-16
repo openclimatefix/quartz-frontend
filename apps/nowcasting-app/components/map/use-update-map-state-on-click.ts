@@ -121,10 +121,6 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   useEffect(() => {
     if (!map) return;
 
-    console.log(
-      "### resetting map filter on national aggregation level change",
-      nationalAggregationLevel
-    );
     setSelectedMapRegionIds([]);
   }, [nationalAggregationLevel]);
 
