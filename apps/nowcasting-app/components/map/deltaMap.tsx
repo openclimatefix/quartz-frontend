@@ -198,9 +198,10 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         source: "latestPV",
         paint: {
           "line-color": "#ffffff",
-          "line-width": 4,
-          "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
-        }
+          "line-width": 2,
+          "line-opacity": 1
+        },
+        filter: ["in", "id", ""]
       });
     }
     // Create a popup, but don't add it to the map yet.

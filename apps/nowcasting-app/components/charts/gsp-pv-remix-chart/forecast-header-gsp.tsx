@@ -2,6 +2,7 @@ import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
 import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 import React, { FC } from "react";
+import ForecastLabel from "../../national_forecast_labels";
 
 type ForecastHeaderGSPProps = {
   title: string;
@@ -15,6 +16,7 @@ type ForecastHeaderGSPProps = {
   forecastNextTimeOnly?: string;
   forecastNextPV?: string;
   children?: React.ReactNode;
+  titleTooltipText?: string[];
 };
 
 const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
@@ -26,13 +28,29 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   pvValue,
   forecastNextPV,
   forecastNextTimeOnly,
-  onClose
+  onClose,
+  titleTooltipText = []
 }) => {
   const height = title.length < 12 ? "dash:h-[4.25rem]" : "dash:h-[5.5rem]";
+  const titleTooltipContent = (
+    <ul className="text-left">
+      {titleTooltipText.map((gspName) => (
+        <li key={gspName} className="text-ocf-gray-300 text-xs font-normal">
+          {gspName}
+        </li>
+      ))}
+    </ul>
+  );
   return (
     <div className={`flex content-between bg-ocf-gray-800 h-12 mb-4 ${height}`}>
       <div className="dash:xl:text-2xl dash:2xl:text-3xl dash:3xl:text-4xl text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
-        {title}
+        {titleTooltipText.length ? (
+          <ForecastLabel className="" position={"left"} tip={titleTooltipContent}>
+            {title}
+          </ForecastLabel>
+        ) : (
+          title
+        )}
       </div>
       <div className="flex justify-between items-center flex-2 my-2 dash:3xl:my-3 px-2 2xl:px-4 3xl:px-6">
         {forecastPV && (

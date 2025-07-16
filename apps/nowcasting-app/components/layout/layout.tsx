@@ -13,14 +13,8 @@ interface ILayout {
 const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status`);
   const [view] = useGlobalState("view");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
-  const [, setClickedGspId] = useGlobalState("clickedGspId");
   const viewTitle = getViewTitle(view);
   const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
-
-  useEffect(() => {
-    setClickedGspId(undefined);
-  }, [nationalAggregationLevel]);
 
   return (
     <>
