@@ -78,10 +78,6 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
       return;
     }
 
-    // let currentlySelectedIds = map.getFilter("latestPV-forecast-select-borders")?.[2];
-    // if (!Array.isArray(currentlySelectedIds)) {
-    //   currentlySelectedIds = [currentlySelectedIds];
-    // }
     let selectedIds = (currentlySelectedIds?.slice(2) as string[]) || [];
 
     if (clickedMapRegionIds) {
