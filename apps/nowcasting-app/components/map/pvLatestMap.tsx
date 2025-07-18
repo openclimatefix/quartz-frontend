@@ -45,6 +45,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
+  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [showMap, setShowMap] = useState(true);
 
   const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
     switch (activeUnit) {
@@ -342,9 +344,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         source: "latestPV",
         paint: {
           "line-color": "#ffffff",
-          "line-width": 4,
-          "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
-        }
+          "line-width": 2,
+          // "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
+          "line-opacity": 1
+        },
+        filter: ["in", "id", ""]
       });
     }
 
@@ -376,6 +380,26 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     //   });
     // }
   };
+
+  // if mapDataLoading has been true for 3 seconds, set it to false
+  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (mapDataLoadingTimeout) {
+      clearTimeout(mapDataLoadingTimeout);
+    }
+    if (mapDataLoading) {
+      setMapDataLoadingTimeout(
+        setTimeout(() => {
+          setMapDataLoading(false);
+        }, 3000)
+      );
+    }
+    return () => {
+      if (mapDataLoadingTimeout) {
+        clearTimeout(mapDataLoadingTimeout);
+      }
+    };
+  }, [mapDataLoading]);
 
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>

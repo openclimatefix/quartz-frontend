@@ -156,7 +156,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
   const [nHourForecast] = useGlobalState("nHourForecast");
-  const [clickedGspId] = useGlobalState("clickedGspId");
+  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
 
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -259,7 +259,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   let rightChartMargin = 16;
   let deltaLabelOffset = roundTickMax ? -20 : -10;
   if (deltaView) {
-    if (clickedGspId) {
+    if (selectedMapRegionIds?.length) {
       rightChartMargin = 15;
       if (roundTickMax) {
         deltaLabelOffset = 0;

@@ -54,6 +54,8 @@ export type GlobalStateType = {
   timeNow: string;
   intervals: any[];
   clickedGspId?: number | string;
+  clickedMapRegionIds?: string[];
+  selectedMapRegionIds?: string[];
   clickedSiteGroupId?: string;
   forecastCreationTime?: string;
   view: VIEWS;
@@ -84,6 +86,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     timeNow: get30MinNow(),
     intervals: [],
     clickedGspId: undefined,
+    clickedMapRegionIds: undefined,
+    selectedMapRegionIds: undefined,
     clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
     view: VIEWS.FORECAST,
