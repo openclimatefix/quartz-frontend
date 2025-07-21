@@ -32,6 +32,8 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   const selectedMapRegionIdsRef = useRef(selectedMapRegionIds);
   selectedMapRegionIdsRef.current = selectedMapRegionIds;
   const isEventRegistertedRef = useRef(false);
+  const nationalAggregationLevelRef = useRef(nationalAggregationLevel);
+  nationalAggregationLevelRef.current = nationalAggregationLevel;
 
   useEffect(() => {
     if (!map || !clickedMapRegionIds) return;
@@ -120,8 +122,8 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
               console.log("no features clicked");
             }
           } else {
-            let ids: string[] | number[] = [];
-            if (nationalAggregationLevel === NationalAggregation.GSP) {
+            let ids: string[] | number[];
+            if (nationalAggregationLevelRef.current === NationalAggregation.GSP) {
               ids = [Number(clickedFeature.properties?.id)];
             } else {
               ids = [String(clickedFeature.properties?.id)];
