@@ -28,6 +28,9 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   const [, setVisibleLines] = useGlobalState("visibleLines");
 
   const clickedMapRegionIdsRef = useRef(clickedMapRegionIds);
+  clickedMapRegionIdsRef.current = clickedMapRegionIds;
+  const selectedMapRegionIdsRef = useRef(selectedMapRegionIds);
+  selectedMapRegionIdsRef.current = selectedMapRegionIds;
   const isEventRegistertedRef = useRef(false);
 
   useEffect(() => {
@@ -117,12 +120,22 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
               console.log("no features clicked");
             }
           } else {
-            const ids =
-              nationalAggregationLevel === NationalAggregation.GSP
-                ? ([Number(clickedFeature.properties?.id)] as number[])
-                : ([String(clickedFeature.properties?.id)] as string[]);
+            let ids: string[] | number[] = [];
+            if (nationalAggregationLevel === NationalAggregation.GSP) {
+              ids = [Number(clickedFeature.properties?.id)];
+            } else {
+              ids = [String(clickedFeature.properties?.id)];
+            }
+            //  if there is one selected region, and it is the same as the clicked region, then deselect it
+            if (
+              selectedMapRegionIdsRef.current &&
+              selectedMapRegionIdsRef.current.length === 1 &&
+              selectedMapRegionIdsRef.current[0] === String(clickedFeature.properties?.id)
+            ) {
+              ids = [];
+            }
             setMapFilterSelectedIds(map, ids);
-            setSelectedMapRegionIds([String(clickedFeature.properties?.id)]);
+            setSelectedMapRegionIds([...ids.map((id) => String(id))]);
           }
         }
       });
