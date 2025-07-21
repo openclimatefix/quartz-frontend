@@ -1,60 +1,144 @@
 import { useEffect, useRef } from "react";
 import useGlobalState from "../helpers/globalState";
 import { NationalAggregation } from "./types";
+import { PointLike } from "mapbox-gl";
 
 type UseUpdateMapStateOnClickProps = {
   map?: mapboxgl.Map;
   isMapReady: boolean;
 };
-const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
-  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
 
-  const clickedGspIdRef = useRef(clickedGspId);
+const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) => {
+  if (!map) return;
+
+  const selectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+  if (!selectBordersLayer) return;
+
+  if (ids.length === 0) {
+    map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
+    return;
+  }
+  map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...ids]);
+};
+
+const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
+  const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [, setVisibleLines] = useGlobalState("visibleLines");
+
+  const clickedMapRegionIdsRef = useRef(clickedMapRegionIds);
+  clickedMapRegionIdsRef.current = clickedMapRegionIds;
+  const selectedMapRegionIdsRef = useRef(selectedMapRegionIds);
+  selectedMapRegionIdsRef.current = selectedMapRegionIds;
   const isEventRegistertedRef = useRef(false);
+  const nationalAggregationLevelRef = useRef(nationalAggregationLevel);
+  nationalAggregationLevelRef.current = nationalAggregationLevel;
+
   useEffect(() => {
-    if (clickedGspIdRef.current) {
-      map?.setFeatureState(
-        {
-          source: "latestPV",
-          id:
-            clickedGspId && nationalAggregationLevel === NationalAggregation.GSP
-              ? clickedGspIdRef.current
-              : clickedGspIdRef.current
-        },
-        { click: false }
-      );
+    if (!map || !clickedMapRegionIds) return;
+
+    const selectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+    if (!selectBordersLayer) return;
+
+    let currentlySelectedIds = map.getFilter("latestPV-forecast-select-borders");
+    if (!currentlySelectedIds) return;
+    if (
+      selectedMapRegionIds?.join() == currentlySelectedIds?.slice(2).join() &&
+      !clickedMapRegionIds
+    )
+      return;
+
+    if (selectedMapRegionIds?.length === 0 && !clickedMapRegionIds.length) {
+      setMapFilterSelectedIds(map, []);
+      return;
     }
 
-    if (clickedGspId) {
-      clickedGspIdRef.current = clickedGspId;
-      map?.setFeatureState(
-        {
-          source: "latestPV",
-          id:
-            nationalAggregationLevel === NationalAggregation.GSP
-              ? Number(clickedGspId)
-              : clickedGspId
-        },
-        { click: true }
+    let selectedIds = (currentlySelectedIds?.slice(2) as string[]) || [];
+
+    if (clickedMapRegionIds) {
+      for (const id of clickedMapRegionIds) {
+        if (!selectedIds.includes(id)) {
+          selectedIds.push(id);
+        } else {
+          selectedIds = selectedIds.filter((i) => i !== id);
+        }
+      }
+      setClickedMapRegionIds(undefined);
+    }
+    selectedIds = selectedIds.filter((i) => i !== "");
+    setSelectedMapRegionIds(selectedIds);
+  }, [clickedMapRegionIds]);
+
+  useEffect(() => {
+    if (!map) return;
+    if (!selectedMapRegionIds) return;
+
+    // Force ids to be numbers if national aggregation level is GSP for the map filter
+    if (nationalAggregationLevel === NationalAggregation.GSP) {
+      setMapFilterSelectedIds(
+        map,
+        selectedMapRegionIds.map((id) => Number(id))
       );
     } else {
-      clickedGspIdRef.current = undefined;
+      setMapFilterSelectedIds(map, selectedMapRegionIds);
     }
-  }, [clickedGspId]);
+  }, [selectedMapRegionIds]);
 
   useEffect(() => {
-    if (map && !isEventRegistertedRef.current) {
+    if (!map) return;
+
+    setSelectedMapRegionIds([]);
+  }, [nationalAggregationLevel]);
+
+  useEffect(() => {
+    if (map && isMapReady && !isEventRegistertedRef.current) {
       isEventRegistertedRef.current = true;
       map.on("click", "latestPV-forecast", (e) => {
         const clickedFeature = e.features && e.features[0];
         if (clickedFeature) {
-          const id =
-            nationalAggregationLevel === NationalAggregation.GSP
-              ? clickedFeature.properties?.id
-              : clickedFeature.properties?.id;
-          if (id !== clickedGspIdRef.current) setClickedGspId(id);
-          else setClickedGspId(undefined);
+          if (e.originalEvent.shiftKey) {
+            const bbox: [PointLike, PointLike] = [
+              [e.point.x - 5, e.point.y - 5],
+              [e.point.x + 5, e.point.y + 5]
+            ];
+            const clickedFeatures = map.queryRenderedFeatures([e.point.x, e.point.y], {
+              layers: ["latestPV-forecast"]
+            });
+            const clickedIds = clickedFeatures.map((feature) => feature.properties?.id);
+            if (clickedIds.length > 0) {
+              const newSelectedMapRegionIds = clickedMapRegionIdsRef?.current
+                ? [...clickedMapRegionIdsRef.current]
+                : [];
+              clickedIds.forEach((id) => {
+                if (newSelectedMapRegionIds.includes(id)) {
+                  newSelectedMapRegionIds.splice(newSelectedMapRegionIds.indexOf(id), 1);
+                } else {
+                  newSelectedMapRegionIds.push(id);
+                }
+              });
+              setClickedMapRegionIds(newSelectedMapRegionIds);
+            } else {
+              console.log("no features clicked");
+            }
+          } else {
+            let ids: string[] | number[];
+            if (nationalAggregationLevelRef.current === NationalAggregation.GSP) {
+              ids = [Number(clickedFeature.properties?.id)];
+            } else {
+              ids = [String(clickedFeature.properties?.id)];
+            }
+            //  if there is one selected region, and it is the same as the clicked region, then deselect it
+            if (
+              selectedMapRegionIdsRef.current &&
+              selectedMapRegionIdsRef.current.length === 1 &&
+              selectedMapRegionIdsRef.current[0] === String(clickedFeature.properties?.id)
+            ) {
+              ids = [];
+            }
+            setMapFilterSelectedIds(map, ids);
+            setSelectedMapRegionIds([...ids.map((id) => String(id))]);
+          }
         }
       });
     }

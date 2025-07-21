@@ -25,11 +25,10 @@ import { getTicks } from "../../helpers/chartUtils";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
-  setClickedGspId: Dispatch<SetStateAction<number | string | undefined>>;
   negative?: boolean;
-}> = ({ gspDeltas, setClickedGspId, negative = false }) => {
+}> = ({ gspDeltas, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
-  const [clickedGspId] = useGlobalState("clickedGspId");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;
 
@@ -108,7 +107,9 @@ const GspDeltaColumn: FC<{
             hasRows = true;
           }
 
-          const isSelectedGsp = Number(clickedGspId) === Number(gspDelta.gspId);
+          const isSelectedGsp =
+            gspDelta.gspId &&
+            selectedMapRegionIds?.map((gspId) => Number(gspId)).includes(Number(gspDelta.gspId));
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
@@ -136,7 +137,7 @@ const GspDeltaColumn: FC<{
               } box-content cursor-pointer relative flex w-full transition duration-200 ease-out 
               hover:bg-ocf-gray-900 hover:ease-in`}
               key={`gspCol${gspDelta.gspId}`}
-              onClick={() => setClickedGspId(gspDelta.gspId)}
+              onClick={() => setSelectedMapRegionIds([String(gspDelta.gspId)])}
             >
               <div
                 className={`items-start xl:items-center text-xs grid grid-cols-12 flex-1 py-1.5 justify-between px-2 
@@ -254,21 +255,15 @@ type DeltaChartProps = {
   combinedErrors: CombinedErrors;
 };
 const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
-  // const [view] = useGlobalState("view");
-  const [show4hView] = useGlobalState("showNHourView");
-  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [globalZoomArea] = useGlobalState("globalZoomArea");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const [loadingState] = useGlobalState("loadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const selectedTimeHalfHourSlot = get30MinSlot(new Date(convertToLocaleDateString(selectedTime)));
-  // const halfHourAgoDate = new Date(timeNow).setMinutes(new Date(timeNow).getMinutes() - 30);
-  // const halfHourAgo = `${formatISODateString(new Date(halfHourAgoDate).toISOString())}:00Z`;
   const hasGspPvInitialForSelectedTime = combinedData.pvRealDayInData?.find(
     (d) =>
       d.datetimeUtc.slice(0, 16) ===
@@ -343,6 +338,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     setSelectedISOTime(time + ":00.000Z");
   };
 
+  let selectedRegions: string[] = [];
+  if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
+    selectedRegions = selectedMapRegionIds.map((id) => String(id));
+  }
+
   return (
     <>
       <div className={`flex flex-col flex-1 ${className || ""}`}>
@@ -367,15 +367,15 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
             />
           </div>
         </div>
-        {clickedGspId && (
+        {selectedMapRegionIds?.length && (
           <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
               close={() => {
-                setClickedGspId(undefined);
+                setSelectedMapRegionIds([]);
               }}
               setTimeOfInterest={setSelectedTime}
               selectedTime={selectedTime}
-              gspId={clickedGspId}
+              selectedRegions={selectedRegions}
               timeNow={formatISODateString(timeNow)}
               resetTime={resetTime}
               visibleLines={visibleLines}
@@ -386,7 +386,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
         <div
           className={`flex flex-col flex-grow-0 flex-shrink${
             hasGspPvInitialForSelectedTime ? " overflow-y-scroll" : ""
-          } ${clickedGspId ? "h-[30%]" : "h-[40%]"}`}
+          } ${selectedMapRegionIds?.length ? "h-[30%]" : "h-[40%]"}`}
         >
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
           {!hasGspPvInitialForSelectedTime && (
@@ -396,8 +396,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
           )}
           {hasGspPvInitialForSelectedTime && gspDeltas && (
             <div className="flex pt-2 mx-3 max-h-96">
-              <GspDeltaColumn gspDeltas={gspDeltas} negative setClickedGspId={setClickedGspId} />
-              <GspDeltaColumn gspDeltas={gspDeltas} setClickedGspId={setClickedGspId} />
+              <GspDeltaColumn gspDeltas={gspDeltas} negative />
+              <GspDeltaColumn gspDeltas={gspDeltas} />
             </div>
           )}
         </div>

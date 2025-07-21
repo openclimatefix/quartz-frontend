@@ -12,7 +12,7 @@ import * as Sentry from "@sentry/react";
 
 const aggregateTruthData = (
   pvDataRaw: components["schemas"]["GSPYieldGroupByDatetime"][] | undefined,
-  gspIds: number[],
+  gspIds: string[],
   key: string
 ) => {
   if (!pvDataRaw?.length) return [];
@@ -38,7 +38,7 @@ const aggregateTruthData = (
 };
 const aggregateForecastData = (
   pvDataRaw: components["schemas"]["OneDatetimeManyForecastValues"][] | undefined,
-  gspIds: number[]
+  gspIds: string[]
 ) => {
   if (!pvDataRaw?.length) return [];
   return pvDataRaw?.map((d) => {
@@ -56,9 +56,10 @@ const aggregateForecastData = (
   }) as ForecastData;
 };
 
-const useGetGspData = (gspId: number | string) => {
+const useGetGspData = (selectedRegions: string[]) => {
   const [show4hView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   let errors: Error[] = [];
   let isZoneAggregation = [
@@ -67,20 +68,40 @@ const useGetGspData = (gspId: number | string) => {
     NationalAggregation.national
   ].includes(nationalAggregationLevel);
 
-  let gspIds: number[] = typeof gspId === "number" ? [gspId] : [];
+  let selectedGspIds = selectedRegions;
+
+  const flattenSelectedGroupsToGspIds = (
+    grouping: Record<string, number[]>,
+    selectedRegionIds: string[]
+  ) => {
+    let selectedGspIds: string[] = [];
+    for (const regionId of selectedRegionIds) {
+      if (grouping[regionId]) {
+        selectedGspIds = selectedGspIds.concat(grouping[regionId].map((gsp) => String(gsp)));
+      }
+    }
+    return selectedGspIds;
+  };
+
   if (nationalAggregationLevel === NationalAggregation.DNO) {
     // Get the GSP ids for the DNO
-    gspIds = dnoGspGroupings[gspId as keyof typeof dnoGspGroupings] || [];
+    selectedGspIds = flattenSelectedGroupsToGspIds(dnoGspGroupings, selectedRegions);
   }
-  if (nationalAggregationLevel === NationalAggregation.zone) {
-    gspIds = ngGspZoneGroupings[gspId as keyof typeof ngGspZoneGroupings] || [];
-  }
-  if (nationalAggregationLevel === NationalAggregation.national) {
-    gspIds = nationalGspZone[gspId as keyof typeof nationalGspZone] || [];
-  }
-  if (nationalAggregationLevel === NationalAggregation.GSP && Number(gspId) !== 0) {
-    gspIds = [Number(gspId)];
-  }
+
+  // (zone and national not fully reimplemented; not needed for now)
+  //
+  // if (nationalAggregationLevel === NationalAggregation.zone) {
+  //   selectedGspIds =
+  //     ngGspZoneGroupings[selectedRegions[0] as keyof typeof ngGspZoneGroupings]?.map((gsp) =>
+  //       String(gsp)
+  //     ) || [];
+  // }
+  // if (nationalAggregationLevel === NationalAggregation.national) {
+  //   selectedGspIds =
+  //     nationalGspZone[selectedRegions[0] as keyof typeof nationalGspZone]?.map((gsp) =>
+  //       String(gsp)
+  //     ) || [];
+  // }
 
   const {
     data: pvRealDataInRaw,
@@ -88,10 +109,10 @@ const useGetGspData = (gspId: number | string) => {
     error: pvRealInDayError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&gsp_ids=${encodeURIComponent(
-      gspIds.join(",")
+      selectedGspIds.join(",")
     )}&compact=true`
   );
-  const pvRealDataIn = aggregateTruthData(pvRealDataInRaw, gspIds, "solarGenerationKw");
+  const pvRealDataIn = aggregateTruthData(pvRealDataInRaw, selectedGspIds, "solarGenerationKw");
 
   const {
     data: pvRealDataAfterRaw,
@@ -99,10 +120,14 @@ const useGetGspData = (gspId: number | string) => {
     error: pvRealDayAfterError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
     `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=day-after&gsp_ids=${encodeURIComponent(
-      gspIds.join(",")
+      selectedGspIds.join(",")
     )}&compact=true`
   );
-  const pvRealDataAfter = aggregateTruthData(pvRealDataAfterRaw, gspIds, "solarGenerationKw");
+  const pvRealDataAfter = aggregateTruthData(
+    pvRealDataAfterRaw,
+    selectedGspIds,
+    "solarGenerationKw"
+  );
 
   const startDatetime = getEarliestForecastTimestamp();
   const {
@@ -111,27 +136,31 @@ const useGetGspData = (gspId: number | string) => {
     error: gspForecastDataOneGSPError
   } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
     `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
-      gspIds.join(",")
+      selectedGspIds.join(",")
     )}&compact=true&historic=true&start_datetime_utc=${encodeURIComponent(startDatetime)}`,
     {
       dedupingInterval: 1000 * 30
     }
   );
-  const gspForecastDataOneGSP = aggregateForecastData(gspForecastDataOneGSPRaw, gspIds);
+  const gspForecastDataOneGSP = aggregateForecastData(gspForecastDataOneGSPRaw, selectedGspIds);
 
   const { data: gspLocationInfoRaw, error: gspLocationError } = useLoadDataFromApi<GspEntities>(
-    isZoneAggregation
+    isZoneAggregation || (selectedMapRegionIds?.length && selectedMapRegionIds.length > 1)
       ? `${API_PREFIX}/system/GB/gsp/?zones=true` // TODO: API seems to struggle with UI flag if no other query params
-      : `${API_PREFIX}/system/GB/gsp/?gsp_id=${gspId}`
+      : `${API_PREFIX}/system/GB/gsp/?gsp_id=${selectedGspIds[0]}`
   );
-  let gspLocationInfo = gspLocationInfoRaw?.filter((gsp) => gspIds.includes(gsp.gspId));
+  // TODO: Need to sort out the string/number mismatch in the GSP IDs
+  let gspLocationInfo =
+    gspLocationInfoRaw && gspLocationInfoRaw?.length > 1
+      ? gspLocationInfoRaw?.filter((gsp) => selectedGspIds.includes(String(gsp.gspId)))
+      : gspLocationInfoRaw;
   if (isZoneAggregation && gspLocationInfo) {
     const zoneCapacity = gspLocationInfo.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0);
     gspLocationInfo = [
       {
-        gspId: gspId as number,
-        gspName: gspId as string,
-        regionName: gspId as string,
+        gspId: Number(selectedGspIds[0]),
+        gspName: String(selectedGspIds[0]) as string,
+        regionName: String(selectedGspIds[0]) as string,
         installedCapacityMw: zoneCapacity,
         rmMode: true,
         label: "Zone",
@@ -141,15 +170,24 @@ const useGetGspData = (gspId: number | string) => {
   }
 
   // TODO: nHour with aggregation when /forecast/all API endpoint has new forecast_horizon_minutes param
+  // For now, let's disable the N hour forecast when multiple GSPs are selected
   const nMinuteForecast = nHourForecast * 60;
-  const { data: gspNHourDataRaw, error: pvNHourError } = useLoadDataFromApi<
-    components["schemas"]["ForecastValue"][]
-  >(
-    show4hView && !isZoneAggregation
-      ? `${API_PREFIX}/solar/GB/gsp/${gspId}/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
+  const {
+    data: gspNHourDataRaw,
+    isLoading: gspNHourLoading,
+    isValidating: gspNHourValidating,
+    error: pvNHourError
+  } = useLoadDataFromApi<components["schemas"]["ForecastValue"][]>(
+    show4hView && !isZoneAggregation && selectedGspIds.length === 1
+      ? `${API_PREFIX}/solar/GB/gsp/${String(
+          selectedGspIds[0]
+        )}/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
       : null
   );
-  let gspNHourData = gspNHourDataRaw || [];
+  let gspNHourData =
+    selectedGspIds.length === 1 && !gspNHourValidating && !gspNHourLoading
+      ? gspNHourDataRaw || []
+      : [];
 
   return {
     errors: [

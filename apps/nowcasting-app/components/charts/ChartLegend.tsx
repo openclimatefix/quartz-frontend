@@ -5,6 +5,8 @@ import { FC, useEffect } from "react";
 import useGlobalState from "../helpers/globalState";
 import LegendItem from "./LegendItem";
 import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
+import LegendTooltip from "../LegendTooltop";
+import { NationalAggregation } from "../map/types";
 
 type ChartLegendProps = {
   className?: string;
@@ -12,12 +14,34 @@ type ChartLegendProps = {
 export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
+  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [visibleLines] = useGlobalState("visibleLines");
+  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
 
-  const legendItemContainerClasses = `flex flex-initial  ${
+  const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
     showNHourView
       ? "flex-col @sm:gap-1 @6xl:gap-6 @6xl:flex-row"
       : "flex-col @md:gap-1 @3xl:gap-12 @3xl:flex-row"
   }${className ? ` ${className}` : ""}`;
+
+  let nHrTipText;
+  if (showNHourView && visibleLines.includes("N_HOUR_FORECAST")) {
+    if (selectedMapRegionIds && selectedMapRegionIds.length > 1) {
+      nHrTipText =
+        "As you have multiple regions selected, N-hour view is (currently) unavailable with multi-select. " +
+        "\nSelect a single region to see the \nN-hour forecast.";
+    }
+    if (
+      nationalAggregationLevel === NationalAggregation.DNO &&
+      selectedMapRegionIds &&
+      selectedMapRegionIds.length > 0
+    ) {
+      nHrTipText =
+        "N-hour view is not (currently) available for DNO-level data. " +
+        "\nSelect GSP-level aggregation to see the N-hour forecast.";
+    }
+  }
+
   return (
     <div className="@container flex flex-initial">
       <div className="flex flex-1 flex-col justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 gap-3 bg-mapbox-black-500 overflow-y-visible @sm:flex-row @xl:gap-6">
@@ -25,6 +49,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto ${
             showNHourView ? "@sm:gap-1" : ""
           } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-8`}
+          style={{ overflow: "visible" }}
         >
           <div className={legendItemContainerClasses}>
             <LegendItem
@@ -52,12 +77,18 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             {/*  dataKey={`PAST_FORECAST`}*/}
             {/*/>*/}
             {showNHourView && (
-              <LegendItem
-                iconClasses={"text-ocf-orange"}
-                dashStyle={"both"}
-                label={`OCF ${nHourForecast}hr Forecast`}
-                dataKey={`N_HOUR_FORECAST`}
-              />
+              <LegendTooltip
+                tip={nHrTipText}
+                position={"top"}
+                className="relative w-full whitespace-pre-wrap"
+              >
+                <LegendItem
+                  iconClasses={"text-ocf-orange"}
+                  dashStyle={"both"}
+                  label={`OCF ${nHourForecast}hr Forecast`}
+                  dataKey={`N_HOUR_FORECAST`}
+                />
+              </LegendTooltip>
             )}
           </div>
         </div>

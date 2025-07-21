@@ -33,7 +33,6 @@ const SolarSiteChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedSitesData, aggregatedSitesData, className }) => {
-  const [clickedGspId, setClickedGspId] = useGlobalState("clickedGspId");
   const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
