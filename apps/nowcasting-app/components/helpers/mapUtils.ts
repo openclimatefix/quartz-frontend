@@ -53,7 +53,7 @@ export const setActiveUnitOnMap = (mapContainer: HTMLDivElement | null, unit: Ac
 export const getActiveUnitFromMap = (map: mapboxgl.Map) =>
   (map.getContainer().dataset.unit as ActiveUnit) || "MW";
 
-export const getBoundingBoxFromPoint = (point: mapboxgl.Point, hitTolerance = 5) => {
+export const getBoundingBoxFromPoint = (point: mapboxgl.Point, hitTolerance = 10) => {
   const bbox: [mapboxgl.PointLike, mapboxgl.PointLike] = [
     [point.x - hitTolerance, point.y - hitTolerance],
     [point.x + hitTolerance, point.y + hitTolerance]
