@@ -125,7 +125,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   // Toggle constraints visibility on map
   useEffect(() => {
     if (mapRef.current) {
-      console.log("Updating constraints visibility");
       safelyUpdateMapData(mapRef.current, (m) => {
         if (m.getLayer("boundary-data")) {
           m.setLayoutProperty("boundary-data", "visibility", showConstraints ? "visible" : "none");
@@ -138,8 +137,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           );
         }
       });
-    } else {
-      console.log("Map not ready yet");
     }
   }, [showConstraints, mapRef]);
 
@@ -453,10 +450,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         throttle((e) => {
           const bbox = getBoundingBoxFromPoint(e.point);
           const features = map.queryRenderedFeatures(bbox, {
-            layers: ["boundary-data"] // add others like "boundary-data", "gspMetaLayer" if desired
+            layers: ["boundary-data"]
           });
-          console.log("## features", features);
-          // const features = e.features;
           if (features && features.length > 0) {
             const feature = features[0];
             const coordinates = (
