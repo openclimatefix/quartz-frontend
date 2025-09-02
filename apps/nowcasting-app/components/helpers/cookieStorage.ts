@@ -2,7 +2,8 @@ import Cookies from "js-cookie";
 export enum CookieStorageKeys {
   "DASHBOARD_MODE" = "dashboardMode",
   "N_HOUR_VIEW" = "NHourView",
-  "VISIBLE_LINES" = "visibleLines"
+  "VISIBLE_LINES" = "visibleLines",
+  "CONSTRAINTS" = "constraints"
 }
 
 export const getSettingFromCookieStorage = <T>(key: string): null | T => {
