@@ -1,5 +1,5 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import mapboxgl, { Expression, LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
@@ -9,16 +9,23 @@ import { formatISODateStringHuman } from "../helpers/utils";
 import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
-import { getActiveUnitFromMap, safelyUpdateMapData, setActiveUnitOnMap } from "../helpers/mapUtils";
+import {
+  getActiveUnitFromMap,
+  getBoundingBoxFromPoint,
+  safelyUpdateMapData,
+  setActiveUnitOnMap
+} from "../helpers/mapUtils";
 import { components } from "../../types/quartz-api";
 import { generateGeoJsonForecastData } from "../helpers/data";
+import boundariesData from "../../data/ng_constraint_boundaries.json";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
-import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import { FeatureCollection } from "geojson";
+import * as turf from "@turf/turf";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
@@ -46,7 +53,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [showConstraints] = useGlobalState("showConstraints");
   const [showMap, setShowMap] = useState(true);
+
+  const showConstraintsRef = useRef(showConstraints);
+  useEffect(() => {
+    showConstraintsRef.current = showConstraints;
+  }, [showConstraints]);
+
+  const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
     switch (activeUnit) {
@@ -106,6 +121,24 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       setMapDataLoading(false);
     }
   }, [combinedErrors.allGspForecastError]);
+
+  // Toggle constraints visibility on map
+  useEffect(() => {
+    if (mapRef.current) {
+      safelyUpdateMapData(mapRef.current, (m) => {
+        if (m.getLayer("boundary-data")) {
+          m.setLayoutProperty("boundary-data", "visibility", showConstraints ? "visible" : "none");
+        }
+        if (m.getLayer("boundary-data-labels")) {
+          m.setLayoutProperty(
+            "boundary-data-labels",
+            "visibility",
+            showConstraints ? "visible" : "none"
+          );
+        }
+      });
+    }
+  }, [showConstraints, mapRef]);
 
   const maxPower =
     nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
@@ -174,9 +207,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
     setShouldUpdateMap(false);
 
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    //////////////////////////
+    // FORECAST DATA LAYERS //
+    //////////////////////////
+    const forecastSource = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
 
-    if (!source) {
+    if (!forecastSource) {
       const { forecastGeoJson } = generatedGeoJsonForecastData;
       map.addSource("latestPV", {
         type: "geojson",
@@ -184,7 +220,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         promoteId: "id"
       });
     } else {
-      source.setData(generatedGeoJsonForecastData.forecastGeoJson);
+      forecastSource.setData(generatedGeoJsonForecastData.forecastGeoJson);
     }
     console.log("latestPV source set");
 
@@ -205,6 +241,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       // Also add map event listeners but only the first time
       const popupFunction = throttle(
         (e) => {
+          const bbox = getBoundingBoxFromPoint(e.point);
+          const overBoundary = map.queryRenderedFeatures(bbox, { layers: ["boundary-data"] });
+          if (overBoundary.length) return; // let the boundary handler handle the popup
+
           // Change the cursor style as a UI indicator.
           map.getCanvas().style.cursor = "pointer";
           const currentActiveUnit = getActiveUnitFromMap(map);
@@ -306,10 +346,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     } else {
-      if (generatedGeoJsonForecastData && source) {
+      if (generatedGeoJsonForecastData && forecastSource) {
         const currentActiveUnit = getActiveUnitFromMap(map);
         const isNormalized = currentActiveUnit === ActiveUnit.percentage;
-        source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
+        forecastSource?.setData(generatedGeoJsonForecastData.forecastGeoJson);
         map.setPaintProperty(
           "latestPV-forecast",
           "fill-opacity",
@@ -352,33 +392,88 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       });
     }
 
-    // // Test DNO boundaries
-    // let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
-    //   | mapboxgl.GeoJSONSource
-    //   | undefined;
-    // if (!dnoBoundariesSource) {
-    //   map.addSource("dnoBoundaries", {
-    //     type: "geojson",
-    //     data: dnoShapeData as FeatureCollection
-    //   });
-    // }
-    //
-    // let dnoBoundariesLayer = (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
-    // if (!dnoBoundariesLayer) {
-    //   map.addLayer({
-    //     id: "dnoBoundaries",
-    //     type: "line",
-    //     source: "dnoBoundaries",
-    //     // Test showing DNO region boundaries at all zoom levels
-    //     // minzoom: AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-    //     // maxzoom: AGGREGATION_LEVEL_MAX_ZOOM.REGION,
-    //     paint: {
-    //       "line-color": "#ffcc2d",
-    //       "line-width": 0.6,
-    //       "line-opacity": 0.5
-    //     }
-    //   });
-    // }
+    //////////////////////////////////////
+    // CONSTRAINT BOUNDARIES DATA LAYER //
+    //////////////////////////////////////
+    if (boundariesData) {
+      let boundarySource = map.getSource("boundary-data") as mapboxgl.GeoJSONSource;
+      if (!boundarySource) {
+        map.addSource("boundary-data", {
+          type: "geojson",
+          data: boundariesData as FeatureCollection,
+          promoteId: "id"
+        });
+      }
+
+      if (!map.getLayer("boundary-data")) {
+        map.addLayer({
+          id: "boundary-data",
+          type: "line",
+          source: "boundary-data",
+          filter: ["==", ["get", "Constraint"], "TBC"],
+          layout: { visibility: showConstraintsRef ? "visible" : "none" },
+          paint: {
+            "line-color": ["case", ["==", ["get", "Constraint"], "TBC"], orange, orange],
+            "line-width": ["case", ["==", ["get", "Constraint"], "TBC"], 2, 1],
+            "line-opacity": ["case", ["==", ["get", "Constraint"], "TBC"], 1, 0.5]
+          }
+        });
+      }
+      if (!map.getLayer("boundary-data-labels")) {
+        map.addLayer({
+          id: "boundary-data-labels",
+          type: "symbol",
+          source: "boundary-data",
+          layout: {
+            "text-field": "{id}",
+            "text-size": 12,
+            "symbol-placement": "line",
+            visibility: showConstraintsRef ? "visible" : "none"
+          },
+          paint: {
+            "text-color": ["case", ["==", ["get", "Constraint"], "TBC"], "#fff", "transparent"]
+          }
+        });
+      }
+
+      // set initial visibility from global state
+      map.setLayoutProperty("boundary-data", "visibility", showConstraints ? "visible" : "none");
+      map.setLayoutProperty(
+        "boundary-data-labels",
+        "visibility",
+        showConstraints ? "visible" : "none"
+      );
+
+      map.on(
+        "mousemove",
+        "boundary-data",
+        throttle((e) => {
+          const bbox = getBoundingBoxFromPoint(e.point);
+          const features = map.queryRenderedFeatures(bbox, {
+            layers: ["boundary-data"]
+          });
+          if (features && features.length > 0) {
+            const feature = features[0];
+            const coordinates = (
+              "coordinates" in feature.geometry ? feature.geometry.coordinates[0] : [0, 0]
+            ) as LngLatLike;
+            const nearestPoint =
+              coordinates && feature.geometry.type === "LineString"
+                ? turf.nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
+                : null;
+            popup
+              .setLngLat((nearestPoint?.geometry.coordinates as LngLatLike) || [0, 50])
+              .setHTML(feature.properties?.id)
+              .addTo(map);
+          } else {
+            popup.remove();
+          }
+        }, 32)
+      );
+      map.on("mouseleave", "boundary-data", () => {
+        popup.remove();
+      });
+    }
   };
 
   // if mapDataLoading has been true for 3 seconds, set it to false
@@ -416,12 +511,16 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             </LoadStateMap>
           )}
           <Map
-            loadDataOverlay={(map: { current: mapboxgl.Map }) =>
-              safelyUpdateMapData(map.current, addOrUpdateMapData)
-            }
+            loadDataOverlay={(map: { current: mapboxgl.Map }) => {
+              mapRef.current = map.current;
+              safelyUpdateMapData(map.current, addOrUpdateMapData);
+            }}
             updateData={{
               newData: shouldUpdateMap,
-              updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateMapData)
+              updateMapData: (map) => {
+                mapRef.current = map;
+                safelyUpdateMapData(map, addOrUpdateMapData);
+              }
             }}
             controlOverlay={(map: { current?: mapboxgl.Map }) => (
               <>

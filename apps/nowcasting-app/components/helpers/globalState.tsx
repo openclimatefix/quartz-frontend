@@ -1,6 +1,5 @@
 import { createGlobalState } from "react-hooks-global-state";
 import { AGGREGATION_LEVELS, getDeltaBucketKeys, SORT_BY, VIEWS } from "../../constant";
-import mapboxgl from "mapbox-gl";
 import {
   CookieStorageKeys,
   getArraySettingFromCookieStorage,
@@ -68,6 +67,7 @@ export type GlobalStateType = {
   zoom: number;
   showSiteCount?: boolean;
   showNHourView?: boolean;
+  showConstraints: boolean;
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
@@ -110,6 +110,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     aggregationLevel: AGGREGATION_LEVELS.REGION,
     sortBy: SORT_BY.CAPACITY,
     showNHourView: false,
+    showConstraints: getBooleanSettingFromCookieStorage(CookieStorageKeys.CONSTRAINTS),
     dashboardMode: getBooleanSettingFromCookieStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {
       initialLoadComplete: false,

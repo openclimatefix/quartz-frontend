@@ -20,6 +20,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
   const { user } = useUser();
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
+  const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
   const toggleDashboardMode = () => {
     setDashboardMode(!dashboardMode);
     setBooleanSettingInLocalStorage(CookieStorageKeys.DASHBOARD_MODE, !dashboardMode);
@@ -27,6 +28,10 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
   const toggle4hView = () => {
     setShowNHourView(!showNHourView);
     setBooleanSettingInLocalStorage(CookieStorageKeys.N_HOUR_VIEW, !showNHourView);
+  };
+  const toggleConstraints = () => {
+    setShowConstraints(!showConstraints);
+    setBooleanSettingInLocalStorage(CookieStorageKeys.CONSTRAINTS, !showConstraints);
   };
   // Check cookies for the N-hour view setting and update the state if it's different
   // Doing this here on client-side because the user's cookies are not available on the server,
@@ -59,7 +64,7 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 top-12 w-48 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute right-0 top-12 w-52 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <Menu.Item>
             {({ active }) => (
               <div
@@ -109,6 +114,32 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
               </div>
             )}
           </Menu.Item>
+          <Menu.Item>
+            {({ active }) => (
+              <div
+                className={classNames(
+                  active ? "bg-gray-100" : "",
+                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                )}
+              >
+                {showConstraints && (
+                  <span className="flex items-center">
+                    <Checkmark />
+                  </span>
+                )}
+                <button
+                  id={"UserMenu-ConstraintsBtn"}
+                  onClick={toggleConstraints}
+                  className="ml-1 text-sm  font-medium text-ocf-black-600"
+                >
+                  {`Constraint Boundaries`}
+                </button>
+              </div>
+            )}
+          </Menu.Item>
+
+          <div className="w-full border-t border-gray-300" />
+
           <Menu.Item>
             <div className="px-4 pt-3 text-ocf-black-600 text-right">
               <a
