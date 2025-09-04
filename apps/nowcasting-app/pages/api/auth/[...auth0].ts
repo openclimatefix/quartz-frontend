@@ -18,6 +18,12 @@ export default wrapApiHandlerWithSentry(
     async callback(req: NextApiRequest, res: NextApiResponse) {
       try {
         const { redirectUri } = getUrls(req);
+        const { query } = req;
+        if (query.error?.includes("access_denied")) {
+          res.redirect(
+            `/auth/denied?${new URLSearchParams(query as Record<string, string>).toString()}`
+          );
+        }
         await handleCallback(req, res, { redirectUri: redirectUri });
       } catch (error: any) {
         res.status(error.status || 500).end(error.message);
