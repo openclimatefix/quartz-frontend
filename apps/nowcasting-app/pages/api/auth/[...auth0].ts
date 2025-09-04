@@ -20,11 +20,6 @@ export default wrapApiHandlerWithSentry(
         const { redirectUri } = getUrls(req);
         const { query } = req;
         if (query.error?.includes("access_denied")) {
-          // If the user has just come from the auth/denied page, we can assume they have not
-          // verified their email, so we amend the message
-          query.error_description =
-            "Email not verified. Please check your inbox and verify your email address before continuing.";
-          // If the user denied access, redirect to a holding page
           res.redirect(
             `/auth/denied?${new URLSearchParams(query as Record<string, string>).toString()}`
           );
