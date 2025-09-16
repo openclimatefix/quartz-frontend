@@ -46,7 +46,7 @@ export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(" ");
 };
 
-export const getLoadingState = (
+export const computeLoadingState = (
   combinedLoading: CombinedLoading,
   combinedValidating: CombinedValidating,
   combinedErrors: CombinedErrors,
@@ -90,6 +90,18 @@ export const getLoadingState = (
       message = showMessage
         ? "Loading latest data"
         : `Loading latest ${NationalEndpointLabel.allGspReal}`;
+      showMessage = true;
+    }
+
+    //   Check for any errors
+    if (Object.values(combinedErrors).some((error) => !!error)) {
+      message = "Error loading initial data. Waiting to retry...";
+      showMessage = true;
+    }
+  } else {
+    //   Check for any errors
+    if (Object.values(combinedErrors).some((error) => !!error)) {
+      message = "Error loading data. Waiting to retry...";
       showMessage = true;
     }
   }
@@ -386,24 +398,35 @@ export const getOpacityValueFromPVNormalized = (val: number, round: boolean = tr
 //header or the request to the API.
 
 export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
-  const response = await fetch("/api/get_token");
-  const { accessToken } = await response.json();
-  const router = Router;
+  try {
+    const response = await fetch("/api/get_token");
+    if (!response.ok) {
+      // Ensure SWR sees an error if token retrieval fails
+      const text = await response.text().catch(() => "");
+      throw new Error(
+        `Failed to get access token (${response.status}): ${text || response.statusText}`
+      );
+    }
+    const { accessToken } = await response.json();
 
-  return axios(url as string, { headers: { Authorization: `Bearer ${accessToken}` } })
-    .then(async (res) => {
-      return res.data;
-    })
-    .catch((err) => {
-      if (process.env.NEXT_PUBLIC_DEV_MODE !== "true" && [401, 403].includes(err.response.status)) {
-        Sentry.captureException(err, {
-          tags: {
-            error: "401/403 auth error"
-          }
-        });
-        router.push("/api/auth/logout?redirectToLogin=true");
-      }
+    const res = await axios(url as string, {
+      headers: { Authorization: `Bearer ${accessToken}` }
     });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (process.env.NEXT_PUBLIC_DEV_MODE !== "true" && [401, 403].includes(status)) {
+      Sentry.captureException(err, {
+        tags: { error: "401/403 auth error" }
+      });
+      // Redirect but still propagate the error to SWR
+      const router = Router;
+      router.push("/api/auth/logout?redirectToLogin=true");
+    }
+
+    // IMPORTANT: rethrow so SWR receives the error and onError/onErrorRetry can run
+    throw err;
+  }
 };
 
 // @ts-ignore
@@ -579,8 +602,8 @@ export function calculateChartYMax(
   maxY: number = MAX_NATIONAL_GENERATION_MW
 ): number {
   if (!chartData || chartData.length === 0) {
-    // If there is no data, return 0
-    return 0;
+    // If there is no data, return the default maxY value
+    return maxY;
   }
 
   const maxDataValue = Math.max(
