@@ -95,13 +95,13 @@ export const computeLoadingState = (
 
     //   Check for any errors
     if (Object.values(combinedErrors).some((error) => !!error)) {
-      message = "Error loading initial data. Waiting to retry...";
+      message = "Error loading data. Waiting to retry...";
       showMessage = true;
     }
   } else {
     //   Check for any errors
     if (Object.values(combinedErrors).some((error) => !!error)) {
-      message = "Error loading data. Waiting to retry...";
+      message = "Error loading initial data. Waiting to retry...";
       showMessage = true;
     }
   }
@@ -111,37 +111,41 @@ export const computeLoadingState = (
       loading: combinedLoading.nationalForecastLoading,
       validating: combinedValidating.nationalForecastValidating,
       error: combinedErrors.nationalForecastError,
-      hasData: !!combinedData.nationalForecastData
+      hasData: !!combinedData.nationalForecastData?.length
     },
     pvRealDayIn: {
       loading: combinedLoading.pvRealDayInLoading,
       validating: combinedValidating.pvRealDayInValidating,
       error: combinedErrors.pvRealDayInError,
-      hasData: !!combinedData.pvRealDayInData
+      hasData: !!combinedData.pvRealDayInData?.length
     },
     pvRealDayAfter: {
       loading: combinedLoading.pvRealDayAfterLoading,
       validating: combinedValidating.pvRealDayAfterValidating,
       error: combinedErrors.pvRealDayAfterError,
-      hasData: !!combinedData.pvRealDayAfterData
+      hasData: !!combinedData.pvRealDayAfterData?.length
     },
     nationalNHour: {
       loading: combinedLoading.nationalNHourLoading,
       validating: combinedValidating.nationalNHourValidating,
       error: combinedErrors.nationalNHourError,
-      hasData: !!combinedData.nationalNHourData
+      hasData: !!combinedData.nationalNHourData?.length
     },
     allGspForecast: {
       loading: combinedLoading.allGspForecastLoading,
       validating: combinedValidating.allGspForecastValidating,
       error: combinedErrors.allGspForecastError,
-      hasData: !!combinedData.allGspForecastData
+      hasData: (() => {
+        const d = combinedData.allGspForecastData;
+        if (!d) return false;
+        return Array.isArray(d) ? d.length > 0 : "forecasts" in d ? !!d.forecasts?.length : false;
+      })()
     },
     allGspReal: {
       loading: combinedLoading.allGspRealLoading,
       validating: combinedValidating.allGspRealValidating,
       error: combinedErrors.allGspRealError,
-      hasData: !!combinedData.allGspRealData
+      hasData: !!combinedData.allGspRealData?.length
     }
   };
   return {

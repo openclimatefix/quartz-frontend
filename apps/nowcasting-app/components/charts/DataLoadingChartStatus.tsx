@@ -116,6 +116,18 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
   );
 };
 
+const StateIcon = ({ state }: { state: EndpointState }) => {
+  if (state.loading || state.validating) {
+    return <SpinnerTextInlineSmall title="Loading data" />;
+  } else if (state.error) {
+    return <CrossInlineSmall title="Failed to load data" />;
+  } else if (state.hasData) {
+    return <CheckInlineSmall title={"Latest data loaded"} />;
+  } else {
+    return <CrossInlineSmall title="No data" />;
+  }
+};
+
 const EndpointStatus: React.FC<{ endpointKey: string; state: EndpointState }> = ({
   endpointKey,
   state
@@ -133,22 +145,7 @@ const EndpointStatus: React.FC<{ endpointKey: string; state: EndpointState }> = 
         </span>
       )}
       <div className="flex gap-2 items-center">
-        {state.loading && !state.hasData && <SpinnerTextInlineSmall title="Loading initial data" />}
-        {state.hasData && <CheckInlineSmall title={"Initial data loaded"} />}
-        {!state.loading && !state.hasData ? (
-          <>
-            <CrossInlineSmall title="Failed to load data" />
-            <CrossInlineSmall title="Failed to load data" />
-          </>
-        ) : state.validating ? (
-          state.loading ? (
-            <ClockInlineSmall title="Waiting for initial data" />
-          ) : (
-            <SpinnerTextInlineSmall title="Fetching updated data" />
-          )
-        ) : (
-          <CheckInlineSmall title="Data up-to-date" />
-        )}
+        <StateIcon state={state} />
       </div>
     </div>
   );
