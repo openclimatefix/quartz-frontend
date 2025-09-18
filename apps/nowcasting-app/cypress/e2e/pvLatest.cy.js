@@ -11,6 +11,14 @@ describe("Load the page", () => {
     // Ensure Auth0 has redirected us back to the local app.
     cy.location("href").should("equal", "http://localhost:3002/");
   });
+  it("matches the snapshot", () => {
+    cy.visit("http://localhost:3002/");
+    cy.location("href").should("equal", "http://localhost:3002/");
+    // wait for loading message to disappear
+    // allow up to 10 seconds for the loading message to disappear
+    cy.get("div.chart-data-loading-message", { timeout: 30000 }).should("not.be.visible");
+    cy.percySnapshot("Home - default");
+  });
 
   ////////////////////////////////
   //  GENERAL
