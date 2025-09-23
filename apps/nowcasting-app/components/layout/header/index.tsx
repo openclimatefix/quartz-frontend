@@ -1,6 +1,6 @@
 import { classNames, isProduction } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
-import { OCFlogo } from "../../icons/logo";
+import { OcfLogo } from "../../icons/logo";
 import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { getViewTitle, VIEWS } from "../../../constant";
@@ -84,22 +84,30 @@ const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true }) => 
     <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
         <a
+          id="QuartzSolarIconLink"
           className="flex h-8 self-center w-auto"
           target="_blank"
           href="https://quartz.solar/"
           rel="noreferrer"
         >
-          <img src="/QUARTZSOLAR_LOGO_ICON.svg" alt="quartz_logo" className="h-8 w-auto" />
+          <img
+            id="QuartzSolarIconImg"
+            src="/QUARTZSOLAR_LOGO_ICON.svg"
+            alt="Quartz Solar Logo"
+            className="h-8 w-auto"
+          />
         </a>
       </div>
       <div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">
         <a
+          id="QuartzSolarTextLogoLink"
           className="flex h-6 w-auto"
           target="_blank"
           href="https://quartz.solar/"
           rel="noreferrer"
         >
           <img
+            id="QuartzSolarTextLogoImg"
             src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"
             alt="quartz_logo"
             className="h-8 w-auto"
@@ -107,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true }) => 
         </a>
         <div className="mr-[6px] flex items-center">
           <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>
-          <OCFlogo />
+          <OcfLogo idPrefix={"OCFLogo"} />
         </div>
       </div>
       <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">

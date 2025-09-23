@@ -4,7 +4,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState from "../helpers/globalState";
-import { AGGREGATION_LEVEL_MIN_ZOOM, AGGREGATION_LEVELS } from "../../constant";
+import { AGGREGATION_LEVEL_MIN_ZOOM, AGGREGATION_LEVELS, VIEWS } from "../../constant";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
@@ -96,6 +96,19 @@ const Map: FC<IMap> = ({
           setAggregation(AGGREGATION_LEVELS.SITE);
         }
       });
+
+      if (typeof window !== "undefined" && (window as any).Cypress) {
+        switch (title) {
+          case VIEWS.FORECAST:
+            (window as any).__pvForecastMap = map;
+            break;
+          case VIEWS.DELTA:
+            (window as any).__pvDeltaMap = map;
+            break;
+          case VIEWS.SOLAR_SITES:
+            (window as any).__sitesMap = map;
+        }
+      }
     }
     // TODO: unsure as to whether react cleans up/ends up with multiple maps when re-rendering
     // or whether removing will cause more issues elsewhere in the app.

@@ -5,6 +5,7 @@ type ForecastLabelProps = {
   tip: string | React.ReactNode;
   position?: TipPosition;
   className?: string;
+  id: string;
 };
 
 const getPositionClass = (position: TipPosition) => {
@@ -21,10 +22,14 @@ const ForecastLabel: React.FC<ForecastLabelProps> = ({
   children,
   tip,
   position = "left",
-  className
+  className,
+  id
 }) => {
   return (
-    <div className={`relative z-50 overflow-visible cursor-default flex group ${className || ""}`}>
+    <div
+      id={id}
+      className={`relative z-50 overflow-visible cursor-default flex group ${className || ""}`}
+    >
       {children}
       <div
         className={`absolute flex ${getPositionClass(

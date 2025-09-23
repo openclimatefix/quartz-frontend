@@ -302,7 +302,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           <div class="flex justify-between gap-3 items-center mb-1">
           <!-- TODO – remove gsp_id when done testing zones -->
             <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.id} ${
+            <div class="text-xs text-mapbox-black-300">${properties?.idPrefix} ${
             properties?.GSPs || ""
           }</div>
           </div>

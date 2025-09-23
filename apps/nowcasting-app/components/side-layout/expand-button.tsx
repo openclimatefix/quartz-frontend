@@ -5,6 +5,7 @@ type ExpandButtonProps = { isOpen: boolean; onClick: () => void };
 const ExpandButton: React.FC<ExpandButtonProps> = ({ onClick, isOpen }) => {
   return (
     <button
+      id="ExpandSideBarButton"
       className="items-center w-8 h-8 text-lg m text-black bg-amber-400  hover:bg-amber-400 focus:bg-amber-400 "
       onClick={() => {
         onClick();

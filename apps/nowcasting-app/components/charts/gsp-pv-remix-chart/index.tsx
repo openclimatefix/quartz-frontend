@@ -142,7 +142,7 @@ const GspPvRemixChart: FC<{
 
   return (
     <>
-      <div className="flex-initial">
+      <div id="SelectedRegionHeader" className="flex-initial">
         <ForecastHeaderGSP
           onClose={close}
           title={title}

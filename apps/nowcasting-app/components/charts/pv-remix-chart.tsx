@@ -101,7 +101,7 @@ const PvRemixChart: FC<{
               <Spinner></Spinner>
             </div>
           )}
-          <div className="flex-1 relative">
+          <div id="PVRemiwChart" className="flex-1 relative">
             <DataLoadingChartStatus loadingState={loadingState} />
             <RemixLine
               resetTime={resetTime}

@@ -24,6 +24,7 @@ export const ForecastHeadlineFigure: React.FC<{
       <div className="flex flex-1 self-center items-center justify-center">
         <div className={`flex items-center ${textSizeClasses}`}>
           <ForecastLabel
+            id="NationalForecastHeaderTitle"
             position={"middle"}
             tip={
               <div className="min-w-36 whitespace-nowrap z-[100]">
@@ -70,6 +71,7 @@ export const ForecastWithActualPV: React.FC<{
     <div className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between">
       <div className="dash:order-2">
         <ForecastLabel
+          id="ForecastWithActualPVLabel"
           tip={
             <div className="w-36">
               <p>{tip}</p>
@@ -112,6 +114,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
       className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
     >
       <ForecastLabel
+        id="NextForecastLabel"
         className="dash:order-2"
         tip={
           <div className="w-28">
