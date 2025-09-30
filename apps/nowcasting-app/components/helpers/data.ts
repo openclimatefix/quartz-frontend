@@ -474,6 +474,26 @@ export const getEarliestForecastTimestamp = (): string => {
   return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
 };
 
+export const getFurthestForecastTimestamp = (): string => {
+  // Get the current time in the user's local timezone
+  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
+  // so they might see slightly different data around the rounding times.
+  const now = DateTime.now(); // Defaults to the user's system timezone
+
+  // One day from now in local time
+  const twoDaysFromNowLocal = now.plus({ days: 1 });
+
+  // Round up to the nearest 6-hour interval in the user's local timezone
+  const roundedDownLocal = twoDaysFromNowLocal.startOf("hour").plus({
+    hours: twoDaysFromNowLocal.hour % 6 // Rounds up to the last multiple of 6
+  });
+
+  // Convert the rounded timestamp back to UTC
+  const roundedDownUtc = roundedDownLocal.toUTC();
+
+  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
+};
+
 const MILLISECONDS_PER_MINUTE = 1000 * 60;
 
 /**

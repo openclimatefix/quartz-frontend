@@ -12,12 +12,13 @@ const getForecastChartData = (
     targetTime: string;
     expectedPowerGenerationMegawatts: number;
   },
-  forecast_horizon?: number
+  forecast_horizon?: number,
+  forecast_key: string = "FORECAST"
 ) => {
   if (!fr) return {};
 
-  const futureKey = forecast_horizon ? "N_HOUR_FORECAST" : "FORECAST";
-  const pastKey = forecast_horizon ? "N_HOUR_PAST_FORECAST" : "PAST_FORECAST";
+  const futureKey = forecast_horizon ? `N_HOUR_${forecast_key}` : forecast_key;
+  const pastKey = forecast_horizon ? `N_HOUR_PAST_${forecast_key}` : `PAST_${forecast_key}`;
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
@@ -47,6 +48,10 @@ const getDelta: (datum: ChartData) => number = (datum) => {
 
 const useFormatChartData = ({
   forecastData,
+  nationalIntradayECMWFOnlyData,
+  nationalPvnetDayAhead,
+  nationalPvnetIntraday,
+  elexonIntraday,
   fourHourData,
   probabilisticRangeData,
   pvRealDayAfterData,
@@ -55,6 +60,10 @@ const useFormatChartData = ({
   delta = false
 }: {
   forecastData?: ForecastData;
+  nationalIntradayECMWFOnlyData?: ForecastData;
+  nationalPvnetDayAhead?: ForecastData;
+  nationalPvnetIntraday?: ForecastData;
+  elexonIntraday?: ForecastData;
   fourHourData?: ForecastData;
   probabilisticRangeData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
@@ -145,6 +154,23 @@ const useFormatChartData = ({
         }
       });
 
+      const models: [ForecastData | undefined, string][] = [
+        [nationalIntradayECMWFOnlyData, "INTRADAY_ECMWF_ONLY"],
+        [nationalPvnetDayAhead, "PVNET_DAY_AHEAD"],
+        [nationalPvnetIntraday, "PVNET_INTRADAY"],
+        [elexonIntraday, "ELEXON_INTRADAY"]
+      ];
+      for (const [model, key] of models) {
+        if (model) {
+          model.forEach((fc) => {
+            addDataToMap(
+              fc,
+              (db) => db.targetTime,
+              (db) => getForecastChartData(timeNow, db, undefined, key)
+            );
+          });
+        }
+      }
       if (fourHourData) {
         fourHourData.forEach((fc) =>
           addDataToMap(
@@ -168,7 +194,20 @@ const useFormatChartData = ({
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
-  }, [forecastData, fourHourData, pvRealDayInData, pvRealDayAfterData, timeTrigger, nHourForecast]);
+  }, [
+    forecastData,
+    fourHourData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    timeTrigger,
+    nHourForecast,
+    elexonIntraday,
+    nationalIntradayECMWFOnlyData,
+    nationalPvnetDayAhead,
+    nationalPvnetIntraday,
+    probabilisticRangeData
+  ]);
+  console.log("returning chartData", data);
   return data;
 };
 

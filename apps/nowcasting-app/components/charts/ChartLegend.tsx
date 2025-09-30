@@ -48,7 +48,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
         <div
           className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto ${
             showNHourView ? "@sm:gap-1" : ""
-          } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-8`}
+          } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-5`}
           style={{ overflow: "visible" }}
         >
           <div className={legendItemContainerClasses}>
@@ -68,7 +68,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             <LegendItem
               iconClasses={"text-ocf-yellow"}
               dashStyle={"both"}
-              label={"OCF Latest Forecast"}
+              label={"OCF Latest"}
               dataKey={`FORECAST`}
             />
             {/*<LegendItem*/}
@@ -85,11 +85,37 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 <LegendItem
                   iconClasses={"text-ocf-orange"}
                   dashStyle={"both"}
-                  label={`OCF ${nHourForecast}hr Forecast`}
+                  label={`OCF ${nHourForecast}hr`}
                   dataKey={`N_HOUR_FORECAST`}
                 />
               </LegendTooltip>
             )}
+            <LegendItem
+              iconClasses={`text-elexon`}
+              dashStyle={"solid"}
+              label={`Elexon Day Ahead`}
+              dataKey={`ELEXON_INTRADAY`}
+            />
+          </div>
+          <div className={legendItemContainerClasses}>
+            <LegendItem
+              iconClasses={"text-ocf-delta-700"}
+              dashStyle={"solid"}
+              label={`OCF ECMWF-only`}
+              dataKey={`INTRADAY_ECMWF_ONLY`}
+            />
+            <LegendItem
+              iconClasses={"text-ocf-teal-500"}
+              dashStyle={"solid"}
+              label={`OCF Intraday`}
+              dataKey={`PVNET_INTRADAY`}
+            />
+            <LegendItem
+              iconClasses={"text-ocf-delta-100"}
+              dashStyle={"solid"}
+              label={`OCF Day Ahead`}
+              dataKey={`PVNET_DAY_AHEAD`}
+            />
           </div>
         </div>
         {showNHourView && (

@@ -19,6 +19,7 @@ import {
   CombinedLoading,
   CombinedSitesData,
   CombinedValidating,
+  ElexonForecastValue,
   ForecastData,
   GspAllForecastData,
   NationalNHourData,
@@ -54,7 +55,8 @@ import {
   getOldestTimestampFromCompactForecastValues,
   getOldestTimestampFromForecastValues,
   calculateHistoricDataStartFromForecastValuesIntervalInMinutes,
-  getEarliestForecastTimestamp
+  getEarliestForecastTimestamp,
+  getFurthestForecastTimestamp
 } from "../components/helpers/data";
 
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
@@ -169,13 +171,16 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     });
   }, [lat, lng, zoom]);
 
+  const forecastFrom = getEarliestForecastTimestamp();
+  const forecastTo = getFurthestForecastTimestamp();
+
   const {
     data: nationalForecastData,
     isLoading: nationalForecastLoading,
     isValidating: nationalForecastValidating,
     error: nationalForecastError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true&model_name=blend&trend_adjuster_on=true`,
     {
       keepPreviousData: true,
       refreshInterval: 0, // Only load this once at beginning
@@ -190,6 +195,76 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       }
     }
   );
+  const {
+    data: nationalIntradayECMWFOnlyData,
+    isLoading: nationalIntradayECMWFOnlyLoading,
+    isValidating: nationalIntradayECMWFOnlyValidating,
+    error: nationalIntradayECMWFOnlyError
+  } = useLoadDataFromApi<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_ecmwf_only&trend_adjuster_on=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0 // Only load this once at beginning
+    }
+  );
+  if (nationalIntradayECMWFOnlyError) {
+    Sentry.captureMessage(
+      `ECMWF forecast data load error: ${JSON.stringify(nationalIntradayECMWFOnlyError)}`
+    );
+  }
+  const {
+    data: nationalPvnetDayAhead,
+    isLoading: nationalPvnetDayAheadLoading,
+    isValidating: nationalPvnetDayAheadValidating,
+    error: nationalPvnetDayAheadError
+  } = useLoadDataFromApi<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_day_ahead&trend_adjuster_on=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0 // Only load this once at beginning
+    }
+  );
+  if (nationalPvnetDayAheadError) {
+    Sentry.captureMessage(
+      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetDayAheadError)}`
+    );
+  }
+  const {
+    data: nationalPvnetIntraday,
+    isLoading: nationalPvnetIntradayLoading,
+    isValidating: nationalPvnetIntradayValidating,
+    error: nationalPvnetIntradayError
+  } = useLoadDataFromApi<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday&trend_adjuster_on=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0 // Only load this once at beginning
+    }
+  );
+  if (nationalPvnetIntradayError) {
+    Sentry.captureMessage(
+      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
+    );
+  }
+  const {
+    data: elexonIntraday,
+    isLoading: elexonIntradayLoading,
+    isValidating: elexonIntradayValidating,
+    error: elexonIntradayError
+  } = useLoadDataFromApi<{ data: ElexonForecastValue[] }>(
+    `${API_PREFIX}/solar/GB/national/elexon?process_type=Day%20Ahead&start_datetime_utc=${encodeURIComponent(
+      `${forecastFrom.slice(0, 19)}`
+    )}&end_datetime_utc=${encodeURIComponent(`${forecastTo.slice(0, 19)}`)}`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0 // Only load this once at beginning
+    }
+  );
+  if (nationalPvnetIntradayError) {
+    Sentry.captureMessage(
+      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
+    );
+  }
 
   const {
     data: pvRealDayInData,
@@ -259,7 +334,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   // Load historic all GSP forecast data (once, at page load)
-  const forecastFrom = getEarliestForecastTimestamp();
   const {
     data: allGspForecastHistoricData,
     isLoading: allGspForecastHistoricLoading,
@@ -466,6 +540,13 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   const combinedData: CombinedData = {
     nationalForecastData,
+    nationalIntradayECMWFOnlyData,
+    nationalPvnetDayAhead,
+    nationalPvnetIntraday,
+    elexonIntraday: elexonIntraday?.data.map((fc) => ({
+      targetTime: fc.timestamp,
+      expectedPowerGenerationMegawatts: fc.expected_power_generation_megawatts
+    })),
     pvRealDayInData,
     pvRealDayAfterData,
     nationalNHourData,

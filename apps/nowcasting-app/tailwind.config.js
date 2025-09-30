@@ -197,6 +197,11 @@ module.exports = {
         "ocf-sites": {
           DEFAULT: "#6C6C6C",
           100: "#444444"
+        },
+        elexon: {
+          DEFAULT: "#B6CFF3",
+          100: "#B6CFF3",
+          900: "#000081"
         }
       }
     }
