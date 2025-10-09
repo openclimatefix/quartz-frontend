@@ -57,6 +57,7 @@ export type ChartData = {
   PROBABILISTIC_LOWER_BOUND?: number;
   PROBABILISTIC_RANGE?: Array<number>;
   formattedDate: string; // "2022-05-16T15:00",
+  SETTLEMENT_PERIOD?: number | undefined;
 };
 
 const toolTiplabels: Record<string, string> = {
@@ -768,6 +769,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
                     <ul className="">
+                      <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
+                        <div className="pr-3">
+                          {formatISODateStringHumanNumbersOnly(formattedDate)}
+                          {" • "}
+                          <span className="w-6">{data.SETTLEMENT_PERIOD}</span>
+                        </div>
+                        <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
+                      </li>
                       {Object.entries(toolTiplabels)
                         .filter(([key]) => data[key] !== undefined)
                         .sort((a, b) => {

@@ -3,7 +3,7 @@ import { get30MinNow, useGlobalState } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
-import { DELTA_BUCKET } from "../../constant";
+import { DateTime } from "luxon";
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -171,6 +171,18 @@ const useFormatChartData = ({
           });
         }
       }
+
+      // Add settlement period
+      for (const key of Object.keys(chartMap)) {
+        const date = DateTime.fromISO(key);
+        const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+        // Compute settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
+        const interval = date.diff(midnightBefore, "minutes").minutes;
+        // console.log("date", date);
+        // console.log("interval", interval);
+        chartMap[key].SETTLEMENT_PERIOD = Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed
+      }
+
       if (fourHourData) {
         fourHourData.forEach((fc) =>
           addDataToMap(
