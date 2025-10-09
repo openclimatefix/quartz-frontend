@@ -58,6 +58,7 @@ import {
   getEarliestForecastTimestamp,
   getFurthestForecastTimestamp
 } from "../components/helpers/data";
+import { DateTime } from "luxon";
 
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
@@ -246,6 +247,41 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
     );
   }
+  const {
+    data: nationalMetOfficeOnly,
+    isLoading: nationalMetOfficeOnlyLoading,
+    isValidating: nationalMetOfficeOnlyValidating,
+    error: nationalMetOfficeOnlyError
+  } = useLoadDataFromApi<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_met_office_only&trend_adjuster_on=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0
+    }
+  );
+  if (nationalMetOfficeOnlyError) {
+    Sentry.captureMessage(
+      `Met Office forecast data load error: ${JSON.stringify(nationalMetOfficeOnlyError)}`
+    );
+  }
+  const {
+    data: nationalSatOnly,
+    isLoading: nationalSatOnlyLoading,
+    isValidating: nationalSatOnlyValidating,
+    error: nationalSatOnlyError
+  } = useLoadDataFromApi<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_sat_only&trend_adjuster_on=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0
+    }
+  );
+  if (nationalSatOnlyError) {
+    Sentry.captureMessage(
+      `Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`
+    );
+  }
+
   const {
     data: elexonIntraday,
     isLoading: elexonIntradayLoading,
@@ -538,15 +574,31 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     return tempGspDeltas;
   }, [allGspForecastData, currentYields, selectedTime, timeNow]);
 
+  const elexonDayAheadReformatted = elexonIntraday?.data.map((fc) => {
+    // Currently showing with no alteration to Elexon's times;
+    // we may want to double check this for clarity.
+    const timestamp = `${DateTime.fromISO(fc.timestamp)
+      .toUTC()
+      // .plus({ hours: 1 })
+      // .plus({ minutes: 30 })
+      .toISO()
+      ?.slice(0, 19)}Z`;
+    return {
+      // add one hour to the timestamp
+      // targetTime: timestamp,
+      targetTime: fc.timestamp,
+      expectedPowerGenerationMegawatts: fc.expected_power_generation_megawatts
+    };
+  });
+
   const combinedData: CombinedData = {
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
+    nationalMetOfficeOnly,
+    nationalSatOnly,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
-    elexonIntraday: elexonIntraday?.data.map((fc) => ({
-      targetTime: fc.timestamp,
-      expectedPowerGenerationMegawatts: fc.expected_power_generation_megawatts
-    })),
+    elexonDayAhead: elexonDayAheadReformatted,
     pvRealDayInData,
     pvRealDayAfterData,
     nationalNHourData,

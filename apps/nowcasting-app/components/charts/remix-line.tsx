@@ -29,7 +29,9 @@ import { ZoomOutIcon } from "@heroicons/react/solid";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
-const ecmwfOnly = theme.extend.colors["ocf-delta"]["700"];
+const ecmwfOnly = theme.extend.colors["ocf-teal"]["500"];
+const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
+const satOnly = theme.extend.colors["ocf-yellow"]["200"];
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const elexon = theme.extend.colors["elexon"].DEFAULT;
@@ -42,10 +44,9 @@ export type ChartData = {
   FORECAST?: number;
   INTRADAY_ECMWF_ONLY?: number;
   PAST_INTRADAY_ECMWF_ONLY?: number;
-  PVNET_DAY_AHEAD?: number;
-  PAST_PVNET_DAY_AHEAD?: number;
-  PVNET_INTRADAY?: number;
-  PAST_PVNET_INTRADAY?: number;
+  MET_OFFICE_ONLY?: number;
+  PAST_MET_OFFICE_ONLY?: number;
+  SAT_ONLY?: number;
   ELEXON_INTRADAY?: number;
   PAST_ELEXON_INTRADAY?: number;
   PAST_FORECAST?: number;
@@ -64,19 +65,19 @@ const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Actual",
   PROBABILISTIC_UPPER_BOUND: "OCF 90%",
-  FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast",
-  INTRADAY_ECMWF_ONLY: "Intraday ECMWF-only Forecast",
-  PAST_INTRADAY_ECMWF_ONLY: "Intraday ECMWF-only Forecast",
-  PVNET_DAY_AHEAD: "PVNET Day Ahead Forecast",
-  PAST_PVNET_DAY_AHEAD: "PVNET Day Ahead Forecast",
-  PVNET_INTRADAY: "PVNET Intraday Forecast",
-  PAST_PVNET_INTRADAY: "PVNET Intraday Forecast",
-  ELEXON_INTRADAY: "Elexon Day Ahead Forecast",
-  PAST_ELEXON_INTRADAY: "Elexon Day Ahead Forecast",
+  FORECAST: "OCF Latest",
+  PAST_FORECAST: "OCF Latest",
+  INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
+  PAST_INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
+  MET_OFFICE_ONLY: "OCF Met Office-only",
+  PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
+  SAT_ONLY: "OCF Satellite-only",
+  PAST_SAT_ONLY: "OCF Satellite-only",
+  ELEXON_DAY_AHEAD: "Elexon Day Ahead",
+  PAST_ELEXON_DAY_AHEAD: "Elexon Day Ahead",
   PROBABILISTIC_LOWER_BOUND: "OCF 10%",
-  N_HOUR_FORECAST: `OCF N-hour Forecast`,
-  N_HOUR_PAST_FORECAST: "OCF N-hour Forecast",
+  N_HOUR_FORECAST: `OCF N-hour`,
+  N_HOUR_PAST_FORECAST: "OCF N-hour",
   DELTA: "Delta"
 };
 
@@ -87,12 +88,12 @@ const toolTipColors: Record<string, string> = {
   PAST_FORECAST: yellow,
   INTRADAY_ECMWF_ONLY: ecmwfOnly,
   PAST_INTRADAY_ECMWF_ONLY: ecmwfOnly,
-  PVNET_DAY_AHEAD: pvnetDayAhead,
-  PAST_PVNET_DAY_AHEAD: pvnetDayAhead,
-  PVNET_INTRADAY: pvnetIntraday,
-  PAST_PVNET_INTRADAY: pvnetIntraday,
-  ELEXON_INTRADAY: elexon,
-  PAST_ELEXON_INTRADAY: elexon,
+  MET_OFFICE_ONLY: metOfficeOnly,
+  PAST_MET_OFFICE_ONLY: metOfficeOnly,
+  SAT_ONLY: satOnly,
+  PAST_SAT_ONLY: satOnly,
+  ELEXON_DAY_AHEAD: elexon,
+  PAST_ELEXON_DAY_AHEAD: elexon,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -601,7 +602,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             />
             <Line
               type="monotone"
-              dataKey="ELEXON_INTRADAY"
+              dataKey="ELEXON_DAY_AHEAD"
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
@@ -609,12 +610,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("ELEXON_INTRADAY")}
+              hide={!visibleLines.includes("ELEXON_DAY_AHEAD")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
-              dataKey="PAST_ELEXON_INTRADAY"
+              dataKey="PAST_ELEXON_DAY_AHEAD"
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
@@ -622,7 +623,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("ELEXON_INTRADAY")}
+              hide={!visibleLines.includes("ELEXON_DAY_AHEAD")}
               isAnimationActive={false}
             />
             <Line
@@ -641,56 +642,56 @@ const RemixLine: React.FC<RemixLineProps> = ({
             />
             <Line
               type="monotone"
-              dataKey="PAST_PVNET_DAY_AHEAD"
+              dataKey="PAST_SAT_ONLY"
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
-              stroke={pvnetDayAhead}
+              stroke={satOnly}
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("PVNET_DAY_AHEAD")}
+              hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
-              dataKey="PVNET_DAY_AHEAD"
+              dataKey="SAT_ONLY"
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
-              stroke={pvnetDayAhead}
+              stroke={satOnly}
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("PVNET_DAY_AHEAD")}
+              hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
-              dataKey="PAST_PVNET_INTRADAY"
+              dataKey="PAST_MET_OFFICE_ONLY"
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
-              stroke={pvnetIntraday}
+              stroke={metOfficeOnly}
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("PVNET_INTRADAY")}
+              hide={!visibleLines.includes("MET_OFFICE_ONLY")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
-              dataKey="PVNET_INTRADAY"
+              dataKey="MET_OFFICE_ONLY"
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
-              stroke={pvnetIntraday}
+              stroke={metOfficeOnly}
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("PVNET_INTRADAY")}
+              hide={!visibleLines.includes("MET_OFFICE_ONLY")}
               isAnimationActive={false}
             />
             <Line
@@ -778,10 +779,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
                       {Object.entries(toolTiplabels)
-                        .filter(([key]) => data[key] !== undefined)
+                        .filter(
+                          ([key]) =>
+                            data[key] !== undefined &&
+                            (visibleLines.includes(key.replace("PAST_", "")) ||
+                              key.includes("PROBABILISTIC"))
+                        )
                         .sort((a, b) => {
-                          if (!data[b[0]]) return 1;
-                          if (!data[a[0]]) return -1;
+                          if (typeof data[b[0]] !== "number") return 1;
+                          if (typeof data[a[0]] !== "number") return -1;
                           if (data[b[0]] === data[a[0]]) return 0;
                           return data[b[0]] - data[a[0]];
                         })
@@ -846,12 +852,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             </li>
                           );
                         })}
-                      <li className={`flex justify-between pt-2 text-xs text-white font-sans`}>
-                        <div className="pr-4">
-                          {formatISODateStringHumanNumbersOnly(formattedDate)}{" "}
-                        </div>
-                        <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
-                      </li>
                     </ul>
                   </div>
                 );

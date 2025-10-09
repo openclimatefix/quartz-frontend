@@ -202,6 +202,9 @@ module.exports = {
           DEFAULT: "#B6CFF3",
           100: "#B6CFF3",
           900: "#000081"
+        },
+        metOffice: {
+          DEFAULT: "#B9D532"
         }
       }
     }

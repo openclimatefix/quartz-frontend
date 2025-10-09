@@ -63,6 +63,12 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               label={"PV live updated"}
               dataKey={`GENERATION_UPDATED`}
             />
+            <LegendItem
+              iconClasses={`text-elexon`}
+              dashStyle={"solid"}
+              label={`Elexon Day Ahead`}
+              dataKey={`ELEXON_DAY_AHEAD`}
+            />
           </div>
           <div className={legendItemContainerClasses}>
             <LegendItem
@@ -90,31 +96,25 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 />
               </LegendTooltip>
             )}
-            <LegendItem
-              iconClasses={`text-elexon`}
-              dashStyle={"solid"}
-              label={`Elexon Day Ahead`}
-              dataKey={`ELEXON_INTRADAY`}
-            />
           </div>
           <div className={legendItemContainerClasses}>
             <LegendItem
-              iconClasses={"text-ocf-delta-700"}
-              dashStyle={"solid"}
+              iconClasses={"text-ocf-teal-500"}
+              dashStyle={"both"}
               label={`OCF ECMWF-only`}
               dataKey={`INTRADAY_ECMWF_ONLY`}
             />
             <LegendItem
-              iconClasses={"text-ocf-teal-500"}
-              dashStyle={"solid"}
-              label={`OCF Intraday`}
-              dataKey={`PVNET_INTRADAY`}
+              iconClasses={"text-metOffice"}
+              dashStyle={"both"}
+              label={`OCF Met Office-only`}
+              dataKey={`MET_OFFICE_ONLY`}
             />
             <LegendItem
-              iconClasses={"text-ocf-delta-100"}
-              dashStyle={"solid"}
-              label={`OCF Day Ahead`}
-              dataKey={`PVNET_DAY_AHEAD`}
+              iconClasses={"text-ocf-yellow-200"}
+              dashStyle={"both"}
+              label={`OCF Satellite-only`}
+              dataKey={`SAT_ONLY`}
             />
           </div>
         </div>

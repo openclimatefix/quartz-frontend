@@ -92,7 +92,9 @@ type CombinedData = {
   nationalIntradayECMWFOnlyData?: ForecastData | undefined;
   nationalPvnetDayAhead?: ForecastData | undefined;
   nationalPvnetIntraday?: ForecastData | undefined;
-  elexonIntraday?: ForecastData | undefined;
+  nationalMetOfficeOnly?: ForecastData | undefined;
+  nationalSatOnly?: ForecastData | undefined;
+  elexonDayAhead?: ForecastData | undefined;
   pvRealDayInData: PvRealData | undefined;
   pvRealDayAfterData: PvRealData | undefined;
   nationalNHourData: NationalNHourData | undefined;

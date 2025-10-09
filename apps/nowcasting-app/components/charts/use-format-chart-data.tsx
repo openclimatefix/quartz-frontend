@@ -49,9 +49,11 @@ const getDelta: (datum: ChartData) => number = (datum) => {
 const useFormatChartData = ({
   forecastData,
   nationalIntradayECMWFOnlyData,
+  nationalMetOfficeOnly,
+  nationalSatOnly,
   nationalPvnetDayAhead,
   nationalPvnetIntraday,
-  elexonIntraday,
+  elexonDayAhead,
   fourHourData,
   probabilisticRangeData,
   pvRealDayAfterData,
@@ -61,9 +63,11 @@ const useFormatChartData = ({
 }: {
   forecastData?: ForecastData;
   nationalIntradayECMWFOnlyData?: ForecastData;
+  nationalMetOfficeOnly?: ForecastData;
+  nationalSatOnly?: ForecastData;
   nationalPvnetDayAhead?: ForecastData;
   nationalPvnetIntraday?: ForecastData;
-  elexonIntraday?: ForecastData;
+  elexonDayAhead?: ForecastData;
   fourHourData?: ForecastData;
   probabilisticRangeData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
@@ -158,7 +162,9 @@ const useFormatChartData = ({
         [nationalIntradayECMWFOnlyData, "INTRADAY_ECMWF_ONLY"],
         [nationalPvnetDayAhead, "PVNET_DAY_AHEAD"],
         [nationalPvnetIntraday, "PVNET_INTRADAY"],
-        [elexonIntraday, "ELEXON_INTRADAY"]
+        [elexonDayAhead, "ELEXON_DAY_AHEAD"],
+        [nationalMetOfficeOnly, "MET_OFFICE_ONLY"],
+        [nationalSatOnly, "SAT_ONLY"]
       ];
       for (const [model, key] of models) {
         if (model) {
@@ -213,7 +219,7 @@ const useFormatChartData = ({
     pvRealDayAfterData,
     timeTrigger,
     nHourForecast,
-    elexonIntraday,
+    elexonDayAhead,
     nationalIntradayECMWFOnlyData,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
