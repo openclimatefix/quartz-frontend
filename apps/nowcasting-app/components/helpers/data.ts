@@ -85,64 +85,74 @@ const mapGspFeatures: (
   targetTime,
   gspDeltas
 ) => {
-  return features.map((featureObj, index) => {
-    const gspSystemInfo = combinedData?.allGspSystemData?.find(
-      (system) => system.gspName === featureObj?.properties?.GSPs
-    );
-    // TODO better handling for if gsp not found
-    const gspId = gspSystemInfo?.gspId || 1000;
-    let selectedFC;
-    let selectedFCValue;
-    let selectedActualValueMW: number | undefined;
-    const gspRealData =
-      combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
-    // If targetTime selected on chart, find the forecast/actuals data for that time
-    if (gspForecastsDataByTimestamp && targetTime) {
-      selectedFC = getGspForecastForTime(
-        gspForecastsDataByTimestamp,
-        formatISODateString(targetTime)
+  const UKPNRegionGspIds = [
+    dnoGspGroupings["UKPN (East)"],
+    dnoGspGroupings["UKPN (London)"],
+    dnoGspGroupings["UKPN (South)"]
+  ].flat();
+  return features
+    .map((featureObj, index) => {
+      const gspSystemInfo = combinedData?.allGspSystemData?.find(
+        (system) => system.gspName === featureObj?.properties?.GSPs
       );
-      if (selectedFC && gspSystemInfo) selectedFCValue = selectedFC.forecastValues[gspId];
-      selectedActualValueMW = getGspActualValueMwForTime(
-        gspRealData,
-        formatISODateString(targetTime),
-        gspId
-      );
-    } else if (gspForecastsDataByTimestamp) {
-      // If no targetTime selected, find the latest forecast/actuals data
-      let latestTimestamp = get30MinNow();
-      selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
-        ?.forecastValues[gspId];
-      selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, gspId);
-    }
+      // TODO better handling for if gsp not found
+      const gspId = gspSystemInfo?.gspId || 1000;
+      // Exclude feature if GSP id is not in one of UKPN's DNO areas
+      if (!gspSystemInfo) return;
+      if (!UKPNRegionGspIds.includes(gspId)) return;
+      let selectedFC;
+      let selectedFCValue;
+      let selectedActualValueMW: number | undefined;
+      const gspRealData =
+        combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
+      // If targetTime selected on chart, find the forecast/actuals data for that time
+      if (gspForecastsDataByTimestamp && targetTime) {
+        selectedFC = getGspForecastForTime(
+          gspForecastsDataByTimestamp,
+          formatISODateString(targetTime)
+        );
+        if (selectedFC && gspSystemInfo) selectedFCValue = selectedFC.forecastValues[gspId];
+        selectedActualValueMW = getGspActualValueMwForTime(
+          gspRealData,
+          formatISODateString(targetTime),
+          gspId
+        );
+      } else if (gspForecastsDataByTimestamp) {
+        // If no targetTime selected, find the latest forecast/actuals data
+        let latestTimestamp = get30MinNow();
+        selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
+          ?.forecastValues[gspId];
+        selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, gspId);
+      }
 
-    // Update the feature object with the calculated forecast/actuals data
-    const updatedFeatureObj: MapFeatureObject = {
-      ...featureObj,
-      properties: setFeatureObjectProps(
-        { ...featureObj.properties, id: gspId },
-        gspSystemInfo,
-        selectedFCValue,
-        selectedActualValueMW
-      )
-    };
-    if (gspDeltas) {
-      const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(gspId));
-      updatedFeatureObj.properties = {
-        ...updatedFeatureObj.properties,
-        [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
-        [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
-        [SelectedData.expectedPowerGenerationNormalized]:
-          Number(currentGspDelta?.deltaNormalized) || 0,
-        [SelectedData.expectedPowerGenerationNormalizedRounded]:
-          Number(currentGspDelta?.deltaNormalized) || 0,
-        [SelectedData.delta]: currentGspDelta?.delta || 0,
-        deltaBucket: currentGspDelta?.deltaBucket || 0
+      // Update the feature object with the calculated forecast/actuals data
+      const updatedFeatureObj: MapFeatureObject = {
+        ...featureObj,
+        properties: setFeatureObjectProps(
+          { ...featureObj.properties, id: gspId },
+          gspSystemInfo,
+          selectedFCValue,
+          selectedActualValueMW
+        )
       };
-    }
+      if (gspDeltas) {
+        const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(gspId));
+        updatedFeatureObj.properties = {
+          ...updatedFeatureObj.properties,
+          [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
+          [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
+          [SelectedData.expectedPowerGenerationNormalized]:
+            Number(currentGspDelta?.deltaNormalized) || 0,
+          [SelectedData.expectedPowerGenerationNormalizedRounded]:
+            Number(currentGspDelta?.deltaNormalized) || 0,
+          [SelectedData.delta]: currentGspDelta?.delta || 0,
+          deltaBucket: currentGspDelta?.deltaBucket || 0
+        };
+      }
 
-    return updatedFeatureObj;
-  });
+      return updatedFeatureObj;
+    })
+    .filter((feature) => !!feature) as Feature[];
 };
 
 const mapZoneFeatures: (

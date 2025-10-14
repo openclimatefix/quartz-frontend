@@ -524,7 +524,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             }}
             controlOverlay={(map: { current?: mapboxgl.Map }) => (
               <>
-                <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+                {/*<ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />*/}
                 <MeasuringUnit
                   activeUnit={activeUnit}
                   setActiveUnit={setActiveUnit}
