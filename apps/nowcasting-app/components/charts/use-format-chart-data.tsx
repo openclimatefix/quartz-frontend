@@ -53,7 +53,6 @@ const useFormatChartData = ({
   nationalSatOnly,
   nationalPvnetDayAhead,
   nationalPvnetIntraday,
-  elexonDayAhead,
   fourHourData,
   probabilisticRangeData,
   pvRealDayAfterData,
@@ -67,7 +66,6 @@ const useFormatChartData = ({
   nationalSatOnly?: ForecastData;
   nationalPvnetDayAhead?: ForecastData;
   nationalPvnetIntraday?: ForecastData;
-  elexonDayAhead?: ForecastData;
   fourHourData?: ForecastData;
   probabilisticRangeData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
@@ -162,7 +160,6 @@ const useFormatChartData = ({
         [nationalIntradayECMWFOnlyData, "INTRADAY_ECMWF_ONLY"],
         [nationalPvnetDayAhead, "PVNET_DAY_AHEAD"],
         [nationalPvnetIntraday, "PVNET_INTRADAY"],
-        [elexonDayAhead, "ELEXON_DAY_AHEAD"],
         [nationalMetOfficeOnly, "MET_OFFICE_ONLY"],
         [nationalSatOnly, "SAT_ONLY"]
       ];
@@ -219,7 +216,6 @@ const useFormatChartData = ({
     pvRealDayAfterData,
     timeTrigger,
     nHourForecast,
-    elexonDayAhead,
     nationalIntradayECMWFOnlyData,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,

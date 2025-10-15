@@ -283,26 +283,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }
 
   const {
-    data: elexonIntraday,
-    isLoading: elexonIntradayLoading,
-    isValidating: elexonIntradayValidating,
-    error: elexonIntradayError
-  } = useLoadDataFromApi<{ data: ElexonForecastValue[] }>(
-    `${API_PREFIX}/solar/GB/national/elexon?process_type=Day%20Ahead&start_datetime_utc=${encodeURIComponent(
-      `${forecastFrom.slice(0, 19)}`
-    )}&end_datetime_utc=${encodeURIComponent(`${forecastTo.slice(0, 19)}`)}`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  if (nationalPvnetIntradayError) {
-    Sentry.captureMessage(
-      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
-    );
-  }
-
-  const {
     data: pvRealDayInData,
     isLoading: pvRealDayInLoading,
     isValidating: pvRealDayInValidating,
@@ -574,23 +554,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     return tempGspDeltas;
   }, [allGspForecastData, currentYields, selectedTime, timeNow]);
 
-  const elexonDayAheadReformatted = elexonIntraday?.data.map((fc) => {
-    // Currently showing with no alteration to Elexon's times;
-    // we may want to double check this for clarity.
-    const timestamp = `${DateTime.fromISO(fc.timestamp)
-      .toUTC()
-      // .plus({ hours: 1 })
-      // .plus({ minutes: 30 })
-      .toISO()
-      ?.slice(0, 19)}Z`;
-    return {
-      // add one hour to the timestamp
-      // targetTime: timestamp,
-      targetTime: fc.timestamp,
-      expectedPowerGenerationMegawatts: fc.expected_power_generation_megawatts
-    };
-  });
-
   const combinedData: CombinedData = {
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
@@ -598,7 +561,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     nationalSatOnly,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
-    elexonDayAhead: elexonDayAheadReformatted,
     pvRealDayInData,
     pvRealDayAfterData,
     nationalNHourData,

@@ -34,7 +34,6 @@ const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
 const satOnly = theme.extend.colors["ocf-yellow"]["200"];
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
-const elexon = theme.extend.colors["elexon"].DEFAULT;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
@@ -47,8 +46,6 @@ export type ChartData = {
   MET_OFFICE_ONLY?: number;
   PAST_MET_OFFICE_ONLY?: number;
   SAT_ONLY?: number;
-  ELEXON_INTRADAY?: number;
-  PAST_ELEXON_INTRADAY?: number;
   PAST_FORECAST?: number;
   N_HOUR_FORECAST?: number;
   N_HOUR_PAST_FORECAST?: number;
@@ -73,8 +70,6 @@ const toolTiplabels: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
   SAT_ONLY: "OCF Satellite-only",
   PAST_SAT_ONLY: "OCF Satellite-only",
-  ELEXON_DAY_AHEAD: "Elexon Day Ahead",
-  PAST_ELEXON_DAY_AHEAD: "Elexon Day Ahead",
   PROBABILISTIC_LOWER_BOUND: "OCF 10%",
   N_HOUR_FORECAST: `OCF N-hour`,
   N_HOUR_PAST_FORECAST: "OCF N-hour",
@@ -92,8 +87,6 @@ const toolTipColors: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: metOfficeOnly,
   SAT_ONLY: satOnly,
   PAST_SAT_ONLY: satOnly,
-  ELEXON_DAY_AHEAD: elexon,
-  PAST_ELEXON_DAY_AHEAD: elexon,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -602,32 +595,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             />
             <Line
               type="monotone"
-              dataKey="ELEXON_DAY_AHEAD"
-              dot={false}
-              xAxisId={"x-axis"}
-              yAxisId={"y-axis"}
-              stroke={elexon}
-              fill="transparent"
-              fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("ELEXON_DAY_AHEAD")}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="PAST_ELEXON_DAY_AHEAD"
-              dot={false}
-              xAxisId={"x-axis"}
-              yAxisId={"y-axis"}
-              stroke={elexon}
-              fill="transparent"
-              fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("ELEXON_DAY_AHEAD")}
-              isAnimationActive={false}
-            />
-            <Line
-              type="monotone"
               dataKey="INTRADAY_ECMWF_ONLY"
               dot={false}
               xAxisId={"x-axis"}
@@ -650,7 +617,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("SAT_ONLY")}
+              // hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
             <Line
@@ -664,7 +631,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fill="transparent"
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
-              hide={!visibleLines.includes("SAT_ONLY")}
+              // hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
             <Line

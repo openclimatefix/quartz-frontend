@@ -63,12 +63,6 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               label={"PV live updated"}
               dataKey={`GENERATION_UPDATED`}
             />
-            <LegendItem
-              iconClasses={`text-elexon`}
-              dashStyle={"solid"}
-              label={`Elexon Day Ahead`}
-              dataKey={`ELEXON_DAY_AHEAD`}
-            />
           </div>
           <div className={legendItemContainerClasses}>
             <LegendItem
@@ -77,11 +71,6 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               label={"OCF Latest"}
               dataKey={`FORECAST`}
             />
-            {/*<LegendItem*/}
-            {/*  iconClasses={"text-ocf-yellow"}*/}
-            {/*  label={"OCF Final Forecast"}*/}
-            {/*  dataKey={`PAST_FORECAST`}*/}
-            {/*/>*/}
             {showNHourView && (
               <LegendTooltip
                 tip={nHrTipText}
