@@ -99,12 +99,6 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               label={`OCF Met Office-only`}
               dataKey={`MET_OFFICE_ONLY`}
             />
-            <LegendItem
-              iconClasses={"text-ocf-yellow-200"}
-              dashStyle={"both"}
-              label={`OCF Satellite-only`}
-              dataKey={`SAT_ONLY`}
-            />
           </div>
         </div>
         {showNHourView && (
