@@ -62,11 +62,11 @@ const toolTiplabels: Record<string, string> = {
   PROBABILISTIC_UPPER_BOUND: "OCF 90%",
   FORECAST: "OCF Latest",
   PAST_FORECAST: "OCF Latest",
+  PROBABILISTIC_LOWER_BOUND: "OCF 10%",
   INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
   PAST_INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
   MET_OFFICE_ONLY: "OCF Met Office-only",
   PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
-  PROBABILISTIC_LOWER_BOUND: "OCF 10%",
   N_HOUR_FORECAST: `OCF N-hour`,
   N_HOUR_PAST_FORECAST: "OCF N-hour",
   DELTA: "Delta"
@@ -707,8 +707,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
                         <div className="pr-3">
                           {formatISODateStringHumanNumbersOnly(formattedDate)}
-                          {" • "}
-                          <span className="w-6">{data.SETTLEMENT_PERIOD}</span>
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
@@ -719,12 +717,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             (visibleLines.includes(key.replace("PAST_", "")) ||
                               key.includes("PROBABILISTIC"))
                         )
-                        .sort((a, b) => {
-                          if (typeof data[b[0]] !== "number") return 1;
-                          if (typeof data[a[0]] !== "number") return -1;
-                          if (data[b[0]] === data[a[0]]) return 0;
-                          return data[b[0]] - data[a[0]];
-                        })
                         .map(([key, name]) => {
                           const value = data[key];
                           if (key === "DELTA" && !deltaView) return null;
