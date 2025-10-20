@@ -31,7 +31,6 @@ const LegendItem: FC<{
           className={`block sometimes-bold w-auto uppercase pl-1${
             isVisible ? " font-extrabold dash:font-semibold" : " text-ocf-gray-700"
           }`}
-          title={label}
         >
           {label}
         </span>
