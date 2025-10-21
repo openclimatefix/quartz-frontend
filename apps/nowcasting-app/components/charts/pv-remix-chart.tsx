@@ -73,14 +73,7 @@ const PvRemixChart: FC<{
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
 
-  if (
-    nationalForecastError ||
-    pvRealDayInError ||
-    pvRealDayAfterError ||
-    nationalNHourError ||
-    allGspForecastError
-  )
-    return <div className={`${className}`}>failed to load</div>;
+  const hasError = Object.entries(combinedErrors).some(([, value]) => value !== null);
 
   const setSelectedTime = (time: string) => {
     stopTime();
@@ -101,7 +94,7 @@ const PvRemixChart: FC<{
             pvLiveData={pvRealDayInData || []}
             deltaView={false}
           ></ForecastHeader>
-          {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && (
+          {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
             <div
               className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
             >

@@ -1,7 +1,5 @@
-import { ToastContainer, toast } from "react-toastify";
 import "../styles/globals.css";
 import { SWRConfig } from "swr";
-import { apiErrorMSGS } from "../constant";
 import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -22,19 +20,10 @@ function MyApp({ Component, pageProps }: any) {
             ) {
               Sentry.captureException(error);
             }
-            const defaultMsg = "Error fetching data. Retrying now…";
             console.log("error", key, error);
-            const errorMsg = apiErrorMSGS.find((e) => key.match(e.key))?.getMsg(key);
-            toast(errorMsg || defaultMsg, {
-              type: "error",
-              theme: "colored",
-              icon: false
-            });
           }
         }}
       >
-        <ToastContainer position="top-left" autoClose={10000} limit={5} hideProgressBar={true} />
-
         <Component {...pageProps} />
         <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
       </SWRConfig>

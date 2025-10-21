@@ -46,7 +46,7 @@ export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(" ");
 };
 
-export const getLoadingState = (
+export const computeLoadingState = (
   combinedLoading: CombinedLoading,
   combinedValidating: CombinedValidating,
   combinedErrors: CombinedErrors,
@@ -92,44 +92,61 @@ export const getLoadingState = (
         : `Loading latest ${NationalEndpointLabel.allGspReal}`;
       showMessage = true;
     }
+
+    //   Check for any errors
+    if (Object.values(combinedErrors).some((error) => !!error)) {
+      message = "Error loading data. Waiting to retry...";
+      showMessage = true;
+    }
+  } else {
+    //   Check for any errors
+    if (Object.values(combinedErrors).some((error) => !!error)) {
+      message = "Error loading initial data. Waiting to retry...";
+      showMessage = true;
+    }
   }
+  const checkAllGspForecastHasData = () => {
+    const d = combinedData.allGspForecastData;
+    if (!d) return false;
+    return Array.isArray(d) ? d.length > 0 : "forecasts" in d ? !!d.forecasts?.length : false;
+  };
   const endpointStates: NationalEndpointStates = {
     type: "national",
     nationalForecast: {
       loading: combinedLoading.nationalForecastLoading,
       validating: combinedValidating.nationalForecastValidating,
       error: combinedErrors.nationalForecastError,
-      hasData: !!combinedData.nationalForecastData
+      hasData: !!combinedData.nationalForecastData?.length
     },
     pvRealDayIn: {
       loading: combinedLoading.pvRealDayInLoading,
       validating: combinedValidating.pvRealDayInValidating,
       error: combinedErrors.pvRealDayInError,
-      hasData: !!combinedData.pvRealDayInData
+      hasData: !!combinedData.pvRealDayInData?.length
     },
     pvRealDayAfter: {
       loading: combinedLoading.pvRealDayAfterLoading,
       validating: combinedValidating.pvRealDayAfterValidating,
       error: combinedErrors.pvRealDayAfterError,
-      hasData: !!combinedData.pvRealDayAfterData
+      hasData: !!combinedData.pvRealDayAfterData?.length
     },
     nationalNHour: {
       loading: combinedLoading.nationalNHourLoading,
       validating: combinedValidating.nationalNHourValidating,
       error: combinedErrors.nationalNHourError,
-      hasData: !!combinedData.nationalNHourData
+      hasData: !!combinedData.nationalNHourData?.length
     },
     allGspForecast: {
       loading: combinedLoading.allGspForecastLoading,
       validating: combinedValidating.allGspForecastValidating,
       error: combinedErrors.allGspForecastError,
-      hasData: !!combinedData.allGspForecastData
+      hasData: checkAllGspForecastHasData()
     },
     allGspReal: {
       loading: combinedLoading.allGspRealLoading,
       validating: combinedValidating.allGspRealValidating,
       error: combinedErrors.allGspRealError,
-      hasData: !!combinedData.allGspRealData
+      hasData: !!combinedData.allGspRealData?.length
     }
   };
   return {
@@ -386,24 +403,35 @@ export const getOpacityValueFromPVNormalized = (val: number, round: boolean = tr
 //header or the request to the API.
 
 export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
-  const response = await fetch("/api/get_token");
-  const { accessToken } = await response.json();
-  const router = Router;
+  try {
+    const response = await fetch("/api/get_token");
+    if (!response.ok) {
+      // Ensure SWR sees an error if token retrieval fails
+      const text = await response.text().catch(() => "");
+      throw new Error(
+        `Failed to get access token (${response.status}): ${text || response.statusText}`
+      );
+    }
+    const { accessToken } = await response.json();
 
-  return axios(url as string, { headers: { Authorization: `Bearer ${accessToken}` } })
-    .then(async (res) => {
-      return res.data;
-    })
-    .catch((err) => {
-      if (process.env.NEXT_PUBLIC_DEV_MODE !== "true" && [401, 403].includes(err.response.status)) {
-        Sentry.captureException(err, {
-          tags: {
-            error: "401/403 auth error"
-          }
-        });
-        router.push("/api/auth/logout?redirectToLogin=true");
-      }
+    const res = await axios(url as string, {
+      headers: { Authorization: `Bearer ${accessToken}` }
     });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (process.env.NEXT_PUBLIC_DEV_MODE !== "true" && [401, 403].includes(status)) {
+      Sentry.captureException(err, {
+        tags: { error: "401/403 auth error" }
+      });
+      // Redirect but still propagate the error to SWR
+      const router = Router;
+      router.push("/api/auth/logout?redirectToLogin=true");
+    }
+
+    // IMPORTANT: rethrow so SWR receives the error and onError/onErrorRetry can run
+    throw err;
+  }
 };
 
 // @ts-ignore
@@ -579,8 +607,8 @@ export function calculateChartYMax(
   maxY: number = MAX_NATIONAL_GENERATION_MW
 ): number {
   if (!chartData || chartData.length === 0) {
-    // If there is no data, return 0
-    return 0;
+    // If there is no data, return the default maxY value
+    return maxY;
   }
 
   const maxDataValue = Math.max(

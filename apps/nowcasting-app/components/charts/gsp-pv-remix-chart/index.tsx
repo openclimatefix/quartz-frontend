@@ -57,10 +57,6 @@ const GspPvRemixChart: FC<{
     timeTrigger: selectedTime,
     delta: deltaView
   });
-  if (errors.length) {
-    console.log(errors);
-    return <div>failed to load</div>;
-  }
   const now30min = formatISODateString(get30MinNow());
   const dataMissing =
     !gspForecastDataOneGSP ||
@@ -68,7 +64,8 @@ const GspPvRemixChart: FC<{
     !pvRealDataAfter ||
     loading.gspForecastSelectedGSPsLoading ||
     loading.pvRealInDayLoading ||
-    loading.pvRealDayAfterLoading;
+    loading.pvRealDayAfterLoading ||
+    errors.length;
   const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =
     gspForecastDataOneGSP?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
     ({} as any);
@@ -170,7 +167,7 @@ const GspPvRemixChart: FC<{
         </ForecastHeaderGSP>
       </div>
       <div className="flex-1 relative">
-        {dataMissing && (
+        {!!dataMissing && (
           <div className="h-full absolute flex pb-7 items-center justify-center inset-0 z-30">
             <Spinner />
           </div>
