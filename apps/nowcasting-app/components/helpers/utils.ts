@@ -105,6 +105,11 @@ export const computeLoadingState = (
       showMessage = true;
     }
   }
+  const checkAllGspForecastHasData = () => {
+    const d = combinedData.allGspForecastData;
+    if (!d) return false;
+    return Array.isArray(d) ? d.length > 0 : "forecasts" in d ? !!d.forecasts?.length : false;
+  };
   const endpointStates: NationalEndpointStates = {
     type: "national",
     nationalForecast: {
@@ -135,11 +140,7 @@ export const computeLoadingState = (
       loading: combinedLoading.allGspForecastLoading,
       validating: combinedValidating.allGspForecastValidating,
       error: combinedErrors.allGspForecastError,
-      hasData: (() => {
-        const d = combinedData.allGspForecastData;
-        if (!d) return false;
-        return Array.isArray(d) ? d.length > 0 : "forecasts" in d ? !!d.forecasts?.length : false;
-      })()
+      hasData: checkAllGspForecastHasData()
     },
     allGspReal: {
       loading: combinedLoading.allGspRealLoading,

@@ -26,10 +26,12 @@ export default wrapApiHandlerWithSentry(
             res.redirect(
               `/expired?email=${query.error_description?.toString().split("user_email:")[1]}`
             );
+            return;
           }
           res.redirect(
             `/auth/denied?${new URLSearchParams(query as Record<string, string>).toString()}`
           );
+          return;
         }
         await handleCallback(req, res, { redirectUri: redirectUri });
       } catch (error: any) {

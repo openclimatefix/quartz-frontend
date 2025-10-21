@@ -16,9 +16,8 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
     //   If the user has a cookie saying they have visited before, set hasVisited to true
     if (document.cookie.includes("visited_access_denied=true")) {
       setHasVisited(true);
-    }
-    //   If first time visiting the page, set a cookie to remember they have been here
-    if (!document.cookie.includes("visited_access_denied=true")) {
+    } else {
+      //   If first time visiting the page, set a cookie to remember they have been here
       document.cookie = "visited_access_denied=true; path=/; max-age=3600"; // 1 hour
     }
   }, []);

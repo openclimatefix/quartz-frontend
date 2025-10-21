@@ -12,7 +12,7 @@ const TrialExpiredPage = () => {
   return (
     <>
       <Head>
-        <title>Email Verification | Quartz Solar UI</title>
+        <title>Trial Expired | Quartz Solar UI</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
