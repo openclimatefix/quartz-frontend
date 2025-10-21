@@ -32,7 +32,7 @@ import { components } from "../types/quartz-api";
 import {
   formatISODateString,
   getDeltaBucket,
-  getLoadingState,
+  computeLoadingState,
   getSitesLoadingState,
   isProduction
 } from "../components/helpers/utils";
@@ -624,7 +624,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   // Watch and update loading state
   useEffect(() => {
     setLoadingState(
-      getLoadingState(combinedLoading, combinedValidating, combinedErrors, combinedData)
+      computeLoadingState(combinedLoading, combinedValidating, combinedErrors, combinedData)
     );
   }, [combinedLoading, combinedValidating, combinedErrorsLength, setLoadingState]);
 

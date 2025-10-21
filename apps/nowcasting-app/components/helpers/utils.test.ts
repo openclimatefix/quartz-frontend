@@ -185,9 +185,9 @@ describe("prettyPrintDayLabelWithDate", () => {
 });
 
 describe("check y-axis max value calculation", () => {
-  test("should return 0 when chart data is empty array", () => {
+  test("should return MAX_NATIONAL_GENERATION_MW when chart data is empty array", () => {
     const result = utils.calculateChartYMax([]);
-    expect(result).toBe(0);
+    expect(result).toBe(MAX_NATIONAL_GENERATION_MW);
   });
 
   test("should round up to nearest 500 with buffer of 100, and return MAX_NATIONAL if lower", () => {

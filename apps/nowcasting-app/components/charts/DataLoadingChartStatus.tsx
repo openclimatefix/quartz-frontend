@@ -72,20 +72,30 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
   showNHourView = false
 }: EndpointStatusListProps<K>) => {
   const endpointsArray = Array.from(Object.entries(endpointStates));
+  const hasErrors = endpointsArray.some(([key, val]) => {
+    if (typeof val === "string") return false;
+
+    return !!val?.error;
+  });
   return (
     <div
-      className={`absolute -top-4 right-2 flex items-center h-9 ${isLoadingData ? "z-40" : "z-0"}`}
+      className={`absolute -top-4 right-2 flex items-center h-9 ${
+        isLoadingData || hasErrors ? "z-40" : "z-0"
+      }`}
     >
       <div
         className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-mapbox-black  ${
-          isLoadingData
+          isLoadingData || hasErrors
             ? "pr-2 pl-1.5"
             : "bg-mapbox-black-600 px-1.5 fade-out pointer-events-none select-none"
         }`}
       >
-        {!!isLoadingData && <SpinnerTextInline className="mr-2" />}
+        {isLoadingData && <SpinnerTextInline className="mr-2" />}
+        {hasErrors && !isLoadingData && (
+          <CrossInlineSmall title={"Error"} className="mr-2 text-red-500" />
+        )}
         <div className="text-sm text-ocf-gray-500">
-          {isLoadingData ? message : "Data up-to-date"}
+          {isLoadingData || hasErrors ? message : "Data up-to-date"}
         </div>
         <div className="chart-data-loading-endpoints hidden absolute top-full min-w-fit right-0 items-center text-2xs pt-1">
           <div className="py-1.5 px-2 bg-mapbox-black rounded-sm">
@@ -106,6 +116,18 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
   );
 };
 
+const StateIcon = ({ state }: { state: EndpointState }) => {
+  if (state.loading || state.validating) {
+    return <SpinnerTextInlineSmall title="Loading data" />;
+  } else if (state.error) {
+    return <CrossInlineSmall title="Failed to load data" />;
+  } else if (state.hasData) {
+    return <CheckInlineSmall title={"Latest data loaded"} />;
+  } else {
+    return <CrossInlineSmall title="No data" />;
+  }
+};
+
 const EndpointStatus: React.FC<{ endpointKey: string; state: EndpointState }> = ({
   endpointKey,
   state
@@ -123,22 +145,7 @@ const EndpointStatus: React.FC<{ endpointKey: string; state: EndpointState }> = 
         </span>
       )}
       <div className="flex gap-2 items-center">
-        {state.loading && !state.hasData && <SpinnerTextInlineSmall title="Loading initial data" />}
-        {state.hasData && <CheckInlineSmall title={"Initial data loaded"} />}
-        {!state.loading && !state.hasData ? (
-          <>
-            <CrossInlineSmall title="Failed to load data" />
-            <CrossInlineSmall title="Failed to load data" />
-          </>
-        ) : state.validating ? (
-          state.loading ? (
-            <ClockInlineSmall title="Waiting for initial data" />
-          ) : (
-            <SpinnerTextInlineSmall title="Fetching updated data" />
-          )
-        ) : (
-          <CheckInlineSmall title="Data up-to-date" />
-        )}
+        <StateIcon state={state} />
       </div>
     </div>
   );

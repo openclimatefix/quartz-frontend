@@ -498,10 +498,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>
-      {forecastError ? (
-        <FailedStateMap error="Failed to load" />
-      ) : (
-        // ) : !forecastError && !initForecastData ? (
+      {
         <>
           {(!combinedData.allGspForecastData ||
             combinedLoading.allGspForecastLoading ||
@@ -537,7 +534,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             <ColorGuideBar unit={activeUnit} />
           </Map>
         </>
-      )}
+      }
     </div>
   );
 };

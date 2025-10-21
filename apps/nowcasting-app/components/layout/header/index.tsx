@@ -16,6 +16,7 @@ type HeaderLinkProps = {
   currentView?: VIEWS;
   view?: VIEWS;
   setViewFunc?: Dispatch<SetStateAction<VIEWS>>;
+  isLoggedIn?: boolean;
 };
 const HeaderLink: React.FC<HeaderLinkProps> = ({
   url,
@@ -76,9 +77,9 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   );
 };
 
-type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>> };
+type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>>; isLoggedIn?: boolean };
 
-const Header: React.FC<HeaderProps> = ({ view, setView }) => {
+const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true }) => {
   return (
     <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
@@ -110,34 +111,34 @@ const Header: React.FC<HeaderProps> = ({ view, setView }) => {
         </div>
       </div>
       <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">
-        <Menu>
-          <HeaderLink
-            url="/"
-            view={VIEWS.FORECAST}
-            currentView={view}
-            setViewFunc={setView}
-            text={getViewTitle(VIEWS.FORECAST)}
-          />
-          <HeaderLink
-            url="/"
-            view={VIEWS.SOLAR_SITES}
-            currentView={view}
-            setViewFunc={setView}
-            text={getViewTitle(VIEWS.SOLAR_SITES)}
-            disabled={isProduction}
-          />
-          <HeaderLink
-            url="/"
-            view={VIEWS.DELTA}
-            currentView={view}
-            setViewFunc={setView}
-            text={getViewTitle(VIEWS.DELTA)}
-          />
-        </Menu>
+        {isLoggedIn && (
+          <Menu>
+            <HeaderLink
+              url="/"
+              view={VIEWS.FORECAST}
+              currentView={view}
+              setViewFunc={setView}
+              text={getViewTitle(VIEWS.FORECAST)}
+            />
+            <HeaderLink
+              url="/"
+              view={VIEWS.SOLAR_SITES}
+              currentView={view}
+              setViewFunc={setView}
+              text={getViewTitle(VIEWS.SOLAR_SITES)}
+              disabled={isProduction}
+            />
+            <HeaderLink
+              url="/"
+              view={VIEWS.DELTA}
+              currentView={view}
+              setViewFunc={setView}
+              text={getViewTitle(VIEWS.DELTA)}
+            />
+          </Menu>
+        )}
       </div>
-      <div className="py-1">
-        <ProfileDropDown />
-      </div>
+      <div className="py-1">{isLoggedIn && <ProfileDropDown />}</div>
     </header>
   );
 };

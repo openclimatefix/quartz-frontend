@@ -1,7 +1,8 @@
 import { NextPage } from "next";
 import Head from "next/head";
-import Footer from "../components/layout/footer";
 import Link from "next/link";
+import Header from "../components/layout/header";
+import { VIEWS } from "../constant";
 
 const NotFoundPage: NextPage = () => {
   return (
@@ -9,45 +10,31 @@ const NotFoundPage: NextPage = () => {
       <Head>
         <title>Not found | Quartz Solar UI</title>
       </Head>
-      <div className="flex flex-col min-h-screen pt-16">
-        <main className="flex flex-col justify-center flex-grow w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="flex justify-center flex-shrink-0">
-            <Link href="/" className="inline-flex">
-              <div>
-                <span className="sr-only">Workflow</span>
-                <img
-                  className="w-auto h-12"
-                  src="/QUARTZSOLAR_LOGO_SECONDARY_WHITE.svg"
-                  alt="Quartz Solar Logo"
-                />
-              </div>
-            </Link>
-          </div>
+      <div className="bg-mapbox-black flex flex-col min-h-screen pt-16">
+        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false} />
+        <main className="flex flex-col justify-center flex-grow w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 text-white">
           <div className="py-16">
             <div className="text-center">
               <p className="text-sm font-semibold tracking-wide uppercase text-danube-600">
                 404 error
               </p>
-              <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl">
+              <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ocf-gray-500 sm:text-5xl">
                 Page not found.
               </h1>
-              <p className="mt-2 text-base text-gray-500">
+              <p className="mt-2 py-3 text-base text-ocf-gray-700">
                 Sorry, we couldn&apos;t find the page you&apos;re looking for.
               </p>
               <div className="mt-6">
                 <Link
                   href="/"
-                  className="text-base font-medium text-danube-600 hover:text-danube-500"
+                  className="text-sm self-center my-3 p-3 font-medium hover:cursor-pointer bg-ocf-gray-500 hover:bg-ocf-yellow-600 active:bg-ocf-yellow-600 text-black transition-all duration-200 py-2 px-4 rounded-full"
                 >
-                  <div>
-                    Go back home<span aria-hidden="true"> &rarr;</span>
-                  </div>
+                  Go back home<span aria-hidden="true"> &rarr;</span>
                 </Link>
               </div>
             </div>
           </div>
         </main>
-        <Footer />
       </div>
     </>
   );
