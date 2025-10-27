@@ -114,6 +114,23 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
     </div>
   );
 
+  const ocfSatForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF NWPs</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office NWPs</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="@container flex flex-initial">
       <div className="flex flex-1 flex-col justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 gap-3 bg-mapbox-black-500 overflow-y-visible @sm:flex-row @xl:gap-6">
@@ -187,6 +204,18 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 dashStyle={"both"}
                 label={`OCF Met Office-only`}
                 dataKey={`MET_OFFICE_ONLY`}
+              />
+            </LegendTooltip>
+            <LegendTooltip
+              tip={ocfSatForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow-200"}
+                dashStyle={"both"}
+                label={`OCF Satellite-only`}
+                dataKey={`SAT_ONLY`}
               />
             </LegendTooltip>
           </div>

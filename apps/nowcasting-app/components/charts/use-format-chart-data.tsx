@@ -50,6 +50,7 @@ const useFormatChartData = ({
   forecastData,
   nationalIntradayECMWFOnlyData,
   nationalMetOfficeOnly,
+  nationalSatOnly,
   nationalPvnetDayAhead,
   nationalPvnetIntraday,
   fourHourData,
@@ -62,6 +63,7 @@ const useFormatChartData = ({
   forecastData?: ForecastData;
   nationalIntradayECMWFOnlyData?: ForecastData;
   nationalMetOfficeOnly?: ForecastData;
+  nationalSatOnly?: ForecastData;
   nationalPvnetDayAhead?: ForecastData;
   nationalPvnetIntraday?: ForecastData;
   fourHourData?: ForecastData;
@@ -158,7 +160,8 @@ const useFormatChartData = ({
         [nationalIntradayECMWFOnlyData, "INTRADAY_ECMWF_ONLY"],
         [nationalPvnetDayAhead, "PVNET_DAY_AHEAD"],
         [nationalPvnetIntraday, "PVNET_INTRADAY"],
-        [nationalMetOfficeOnly, "MET_OFFICE_ONLY"]
+        [nationalMetOfficeOnly, "MET_OFFICE_ONLY"],
+        [nationalSatOnly, "SAT_ONLY"]
       ];
       for (const [model, key] of models) {
         if (model) {
