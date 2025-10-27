@@ -31,6 +31,7 @@ const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 const ecmwfOnly = theme.extend.colors["ocf-teal"]["500"];
 const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
+const satOnly = theme.extend.colors["ocf-yellow"]["200"];
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
@@ -44,6 +45,7 @@ export type ChartData = {
   PAST_INTRADAY_ECMWF_ONLY?: number;
   MET_OFFICE_ONLY?: number;
   PAST_MET_OFFICE_ONLY?: number;
+  SAT_ONLY?: number;
   PAST_FORECAST?: number;
   N_HOUR_FORECAST?: number;
   N_HOUR_PAST_FORECAST?: number;
@@ -67,6 +69,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
   MET_OFFICE_ONLY: "OCF Met Office-only",
   PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
+  SAT_ONLY: "OCF Satellite-only",
+  PAST_SAT_ONLY: "OCF Satellite-only",
   N_HOUR_FORECAST: `OCF N-hour`,
   N_HOUR_PAST_FORECAST: "OCF N-hour",
   DELTA: "Delta"
@@ -81,6 +85,8 @@ const toolTipColors: Record<string, string> = {
   PAST_INTRADAY_ECMWF_ONLY: ecmwfOnly,
   MET_OFFICE_ONLY: metOfficeOnly,
   PAST_MET_OFFICE_ONLY: metOfficeOnly,
+  SAT_ONLY: satOnly,
+  PAST_SAT_ONLY: satOnly,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -599,6 +605,33 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="PAST_SAT_ONLY"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={satOnly}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("SAT_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="SAT_ONLY"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={satOnly}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
             <Line

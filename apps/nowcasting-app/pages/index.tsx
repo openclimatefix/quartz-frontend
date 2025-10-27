@@ -264,6 +264,23 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `Met Office forecast data load error: ${JSON.stringify(nationalMetOfficeOnlyError)}`
     );
   }
+  const {
+    data: nationalSatOnly,
+    isLoading: nationalSatOnlyLoading,
+    isValidating: nationalSatOnlyValidating,
+    error: nationalSatOnlyError
+  } = useLoadDataFromApi<ForecastData>(
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_sat_only&trend_adjuster_on=true`,
+    {
+      keepPreviousData: true,
+      refreshInterval: 0
+    }
+  );
+  if (nationalSatOnlyError) {
+    Sentry.captureMessage(
+      `Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`
+    );
+  }
 
   const {
     data: pvRealDayInData,
@@ -541,6 +558,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
     nationalMetOfficeOnly,
+    nationalSatOnly,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
     pvRealDayInData,

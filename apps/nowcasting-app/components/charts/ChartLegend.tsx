@@ -20,7 +20,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
   const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
     showNHourView
-      ? "flex-col @sm:gap-1 @6xl:gap-6 @6xl:flex-row"
+      ? "flex-col @sm:gap-0 @6xl:gap-6 @6xl:flex-row"
       : "flex-col @md:gap-1 @3xl:gap-12 @3xl:flex-row"
   }${className ? ` ${className}` : ""}`;
 
@@ -223,6 +223,18 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 dashStyle={"both"}
                 label={`OCF Met Office-only`}
                 dataKey={`MET_OFFICE_ONLY`}
+              />
+            </LegendTooltip>
+            <LegendTooltip
+              tip={ocfSatForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow-200"}
+                dashStyle={"both"}
+                label={`OCF Satellite-only`}
+                dataKey={`SAT_ONLY`}
               />
             </LegendTooltip>
           </div>
