@@ -461,7 +461,7 @@ export const getEarliestForecastTimestamp = (): string => {
   const now = DateTime.now(); // Defaults to the user's system timezone
 
   // Two days ago in local time
-  const twoDaysAgoLocal = now.minus({ days: 2 });
+  const twoDaysAgoLocal = now.minus({ days: 3 });
 
   // Round down to the nearest 6-hour interval in the user's local timezone
   const roundedDownLocal = twoDaysAgoLocal.startOf("hour").minus({

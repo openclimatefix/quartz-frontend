@@ -535,7 +535,7 @@ describe("getEarliestForecastTimestamp", () => {
 
       // Two days back from 14:45 UTC == 2025-12-05 14:45 UTC
       // Nearest 6-hour tick = 2025-12-05 12:00 UTC
-      expect(result).toBe("2025-12-05T12:00:00.000Z");
+      expect(result).toBe("2025-12-04T12:00:00.000Z");
     });
 
     it("correctly rounds down 2 days back for local timezone (e.g. UTC+2)", () => {
@@ -548,7 +548,7 @@ describe("getEarliestForecastTimestamp", () => {
       const result = getEarliestForecastTimestamp();
 
       // Local time UTC+2 => 2025-12-05 14:45 (local) => 12:00 local rounded 6 hr tick => 10:00 UTC
-      expect(result).toBe("2025-12-05T10:00:00.000Z");
+      expect(result).toBe("2025-12-04T10:00:00.000Z");
     });
   });
 
@@ -562,7 +562,7 @@ describe("getEarliestForecastTimestamp", () => {
 
     // Two days before 2025-12-07T14:45:00Z is 2025-12-05T14:45:00Z
     // Rounded down to the nearest 6-hour boundary --> 2025-12-05T12:00:00Z
-    expect(result).toBe("2025-12-05T12:00:00.000Z");
+    expect(result).toBe("2025-12-04T12:00:00.000Z");
   });
 
   it("returns correctly rounded 6-hour boundary for a time just before midnight UTC", () => {
@@ -572,7 +572,7 @@ describe("getEarliestForecastTimestamp", () => {
 
     const result = getEarliestForecastTimestamp();
     // Two days before is 2025-12-05T23:59:59Z --> Rounded down: 2025-12-05T18:00:00Z
-    expect(result).toBe("2025-12-05T18:00:00.000Z");
+    expect(result).toBe("2025-12-04T18:00:00.000Z");
   });
 
   it("handles time zones with positive offset correctly", () => {
@@ -585,7 +585,7 @@ describe("getEarliestForecastTimestamp", () => {
     // Two days before in local time: 2025-12-05T14:45:00+05:30
     // Rounded down: 2025-12-05T12:00:00Z
     // Converted to UTC: 2025-12-05T06:30:00Z
-    expect(result).toBe("2025-12-05T06:30:00.000Z");
+    expect(result).toBe("2025-12-04T06:30:00.000Z");
   });
 
   it("handles time zones with negative offset correctly", () => {
@@ -598,7 +598,7 @@ describe("getEarliestForecastTimestamp", () => {
     // Two days before in local time: 2025-12-05T14:45:00-05:00
     // Rounded down: 2025-12-05T12:00:00Z
     // Converted to UTC: 2025-12-05T17:00:00Z
-    expect(result).toBe("2025-12-05T17:00:00.000Z");
+    expect(result).toBe("2025-12-04T17:00:00.000Z");
   });
 
   it("handles Daylight Saving Time transitions (spring forward)", () => {
@@ -613,7 +613,7 @@ describe("getEarliestForecastTimestamp", () => {
     // Two days before in local time: 2025-03-28T03:30:00+02:00
     // Rounded down: 2025-03-28T00:00:00Z
     // Converted to UTC: 2025-03-27T22:00:00Z
-    expect(result).toBe("2025-03-27T23:00:00.000Z");
+    expect(result).toBe("2025-03-26T23:00:00.000Z");
   });
 
   it("handles Daylight Saving Time transitions (fall back)", () => {
@@ -628,7 +628,7 @@ describe("getEarliestForecastTimestamp", () => {
     // Two days before in local time: 2025-10-24T01:30:00+02:00
     // Rounded down: 2025-10-24T00:00:00Z
     // Converted to UTC: 2025-10-23T22:00:00Z
-    expect(result).toBe("2025-10-24T00:00:00.000Z");
+    expect(result).toBe("2025-10-23T00:00:00.000Z");
   });
 
   describe("Handle before and after noon in BST", () => {
@@ -641,7 +641,7 @@ describe("getEarliestForecastTimestamp", () => {
       const result = getEarliestForecastTimestamp();
       // Two days before in local time: 2025-05-30T11:30:00+01:00
       // Rounded down: 2025-05-30T06:00:00Z
-      expect(result).toBe("2025-05-30T05:00:00.000Z");
+      expect(result).toBe("2025-05-29T05:00:00.000Z");
     });
 
     it("handles after noon in BST", () => {
@@ -653,7 +653,7 @@ describe("getEarliestForecastTimestamp", () => {
       const result = getEarliestForecastTimestamp();
       // Two days before in local time: 2025-05-30T12:30:00+01:00
       // Rounded down: 2025-05-30T06:00:00Z
-      expect(result).toBe("2025-05-30T11:00:00.000Z");
+      expect(result).toBe("2025-05-29T11:00:00.000Z");
     });
   });
 

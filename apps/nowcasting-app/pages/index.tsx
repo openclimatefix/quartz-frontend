@@ -181,7 +181,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: nationalForecastValidating,
     error: nationalForecastError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true&model_name=blend&trend_adjuster_on=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?historic=false&start_datetime_utc=${encodeURIComponent(
+      `${forecastFrom.slice(0, 19)}+00:00`
+    )}&only_forecast_values=true&model_name=blend&trend_adjuster_on=true`,
     {
       keepPreviousData: true,
       refreshInterval: 0, // Only load this once at beginning
@@ -202,7 +204,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: nationalIntradayECMWFOnlyValidating,
     error: nationalIntradayECMWFOnlyError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_ecmwf_only&trend_adjuster_on=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&start_datetime_utc=${encodeURIComponent(
+      `${forecastFrom.slice(0, 19)}+00:00`
+    )}&model_name=pvnet_intraday_ecmwf_only&trend_adjuster_on=true`,
     {
       keepPreviousData: true,
       refreshInterval: 0 // Only load this once at beginning
@@ -213,47 +217,49 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       `ECMWF forecast data load error: ${JSON.stringify(nationalIntradayECMWFOnlyError)}`
     );
   }
-  const {
-    data: nationalPvnetDayAhead,
-    isLoading: nationalPvnetDayAheadLoading,
-    isValidating: nationalPvnetDayAheadValidating,
-    error: nationalPvnetDayAheadError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_day_ahead&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  if (nationalPvnetDayAheadError) {
-    Sentry.captureMessage(
-      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetDayAheadError)}`
-    );
-  }
-  const {
-    data: nationalPvnetIntraday,
-    isLoading: nationalPvnetIntradayLoading,
-    isValidating: nationalPvnetIntradayValidating,
-    error: nationalPvnetIntradayError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  if (nationalPvnetIntradayError) {
-    Sentry.captureMessage(
-      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
-    );
-  }
+  // const {
+  //   data: nationalPvnetDayAhead,
+  //   isLoading: nationalPvnetDayAheadLoading,
+  //   isValidating: nationalPvnetDayAheadValidating,
+  //   error: nationalPvnetDayAheadError
+  // } = useLoadDataFromApi<ForecastData>(
+  //   `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_day_ahead&trend_adjuster_on=true`,
+  //   {
+  //     keepPreviousData: true,
+  //     refreshInterval: 0 // Only load this once at beginning
+  //   }
+  // );
+  // if (nationalPvnetDayAheadError) {
+  //   Sentry.captureMessage(
+  //     `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetDayAheadError)}`
+  //   );
+  // }
+  // const {
+  //   data: nationalPvnetIntraday,
+  //   isLoading: nationalPvnetIntradayLoading,
+  //   isValidating: nationalPvnetIntradayValidating,
+  //   error: nationalPvnetIntradayError
+  // } = useLoadDataFromApi<ForecastData>(
+  //   `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday&trend_adjuster_on=true`,
+  //   {
+  //     keepPreviousData: true,
+  //     refreshInterval: 0 // Only load this once at beginning
+  //   }
+  // );
+  // if (nationalPvnetIntradayError) {
+  //   Sentry.captureMessage(
+  //     `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
+  //   );
+  // }
   const {
     data: nationalMetOfficeOnly,
     isLoading: nationalMetOfficeOnlyLoading,
     isValidating: nationalMetOfficeOnlyValidating,
     error: nationalMetOfficeOnlyError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_met_office_only&trend_adjuster_on=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&start_datetime_utc=${encodeURIComponent(
+      `${forecastFrom.slice(0, 19)}+00:00`
+    )}&model_name=pvnet_intraday_met_office_only&trend_adjuster_on=true`,
     {
       keepPreviousData: true,
       refreshInterval: 0
@@ -270,7 +276,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: nationalSatOnlyValidating,
     error: nationalSatOnlyError
   } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_sat_only&trend_adjuster_on=true`,
+    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&start_datetime_utc=${encodeURIComponent(
+      `${forecastFrom.slice(0, 19)}+00:00`
+    )}&model_name=pvnet_intraday_sat_only&trend_adjuster_on=true`,
     {
       keepPreviousData: true,
       refreshInterval: 0
@@ -302,7 +310,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     error: nationalNHourError
   } = useLoadDataFromApi<NationalNHourData>(
     showNHourView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
+      ? `${API_PREFIX}/solar/GB/national/forecast?start_datetime_utc=${encodeURIComponent(
+          `${forecastFrom.slice(0, 19)}+00:00`
+        )}&forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
       : null
   );
   const {
@@ -559,8 +569,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     nationalIntradayECMWFOnlyData,
     nationalMetOfficeOnly,
     nationalSatOnly,
-    nationalPvnetDayAhead,
-    nationalPvnetIntraday,
+    // nationalPvnetDayAhead,
+    // nationalPvnetIntraday,
     pvRealDayInData,
     pvRealDayAfterData,
     nationalNHourData,
