@@ -1,7 +1,7 @@
 import Tooltip from "../tooltip";
 import { ChartInfo } from "../../ChartInfo";
-import { InfoIcon, LegendLineGraphIcon } from "../icons/icons";
-import { FC, useEffect } from "react";
+import { CheckInlineSmall, CrossInlineSmall, InfoIcon, LegendLineGraphIcon } from "../icons/icons";
+import React, { FC, useEffect } from "react";
 import useGlobalState from "../helpers/globalState";
 import LegendItem from "./LegendItem";
 import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
@@ -42,13 +42,121 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
     }
   }
 
+  const ocfForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF IFS</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office UKV</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+    </div>
+  );
+
+  const ocfNHrForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      {!!nHrTipText && (
+        <>
+          <div className="flex self-stretch text-left justify-between items-center gap-2 text-xs text-ocf-gray-300">
+            {nHrTipText}
+          </div>
+          <hr />
+        </>
+      )}
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF IFS</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office UKV</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+    </div>
+  );
+
+  const ocfMetOfficeForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF IFS</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office UKV</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+    </div>
+  );
+
+  const ocfEcmwfForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF IFS</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office UKV</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+    </div>
+  );
+
+  const ocfSatForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF IFS</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office UKV</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CheckInlineSmall title={"Included in forecast"} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="@container flex flex-initial">
       <div className="flex flex-1 flex-col justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 gap-3 bg-mapbox-black-500 overflow-y-visible @sm:flex-row @xl:gap-6">
         <div
           className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto ${
             showNHourView ? "@sm:gap-1" : ""
-          } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-8`}
+          } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-5`}
           style={{ overflow: "visible" }}
         >
           <div className={legendItemContainerClasses}>
@@ -65,31 +173,58 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             />
           </div>
           <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-yellow"}
-              dashStyle={"both"}
-              label={"OCF Latest Forecast"}
-              dataKey={`FORECAST`}
-            />
-            {/*<LegendItem*/}
-            {/*  iconClasses={"text-ocf-yellow"}*/}
-            {/*  label={"OCF Final Forecast"}*/}
-            {/*  dataKey={`PAST_FORECAST`}*/}
-            {/*/>*/}
+            <LegendTooltip
+              tip={ocfForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow"}
+                dashStyle={"both"}
+                label={"OCF Latest"}
+                dataKey={`FORECAST`}
+              />
+            </LegendTooltip>
             {showNHourView && (
               <LegendTooltip
-                tip={nHrTipText}
+                tip={ocfNHrForecastTooltipContent}
                 position={"top"}
                 className="relative w-full whitespace-pre-wrap"
               >
                 <LegendItem
                   iconClasses={"text-ocf-orange"}
                   dashStyle={"both"}
-                  label={`OCF ${nHourForecast}hr Forecast`}
+                  label={`OCF ${nHourForecast}hr`}
                   dataKey={`N_HOUR_FORECAST`}
                 />
               </LegendTooltip>
             )}
+          </div>
+          <div className={legendItemContainerClasses}>
+            <LegendTooltip
+              tip={ocfEcmwfForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-teal-500"}
+                dashStyle={"both"}
+                label={`OCF ECMWF-only`}
+                dataKey={`INTRADAY_ECMWF_ONLY`}
+              />
+            </LegendTooltip>
+            <LegendTooltip
+              tip={ocfMetOfficeForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-metOffice"}
+                dashStyle={"both"}
+                label={`OCF Met Office-only`}
+                dataKey={`MET_OFFICE_ONLY`}
+              />
+            </LegendTooltip>
           </div>
         </div>
         {showNHourView && (

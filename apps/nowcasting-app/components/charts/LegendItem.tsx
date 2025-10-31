@@ -24,14 +24,13 @@ const LegendItem: FC<{
     <div className="flex items-center flex-initial">
       <LegendLineGraphIcon className={iconClasses} dashStyle={dashStyle} />
       <button
-        className="inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-2xs @lg:pr-1 @xl:pr-0 @2xl:text-xs dash:text-base dash:tracking-wider dash:pb-1"
+        className="inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-3xs @lg:pr-1 @xl:pr-0 @2xl:text-2xs dash:text-base dash:tracking-wider dash:pb-1"
         onClick={toggleLineVisibility}
       >
         <span
           className={`block sometimes-bold w-auto uppercase pl-1${
             isVisible ? " font-extrabold dash:font-semibold" : " text-ocf-gray-700"
           }`}
-          title={label}
         >
           {label}
         </span>

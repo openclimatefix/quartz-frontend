@@ -29,6 +29,10 @@ import { ZoomOutIcon } from "@heroicons/react/solid";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
+const ecmwfOnly = theme.extend.colors["ocf-teal"]["500"];
+const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
+const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
+const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
@@ -36,6 +40,10 @@ export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
   FORECAST?: number;
+  INTRADAY_ECMWF_ONLY?: number;
+  PAST_INTRADAY_ECMWF_ONLY?: number;
+  MET_OFFICE_ONLY?: number;
+  PAST_MET_OFFICE_ONLY?: number;
   PAST_FORECAST?: number;
   N_HOUR_FORECAST?: number;
   N_HOUR_PAST_FORECAST?: number;
@@ -45,17 +53,22 @@ export type ChartData = {
   PROBABILISTIC_LOWER_BOUND?: number;
   PROBABILISTIC_RANGE?: Array<number>;
   formattedDate: string; // "2022-05-16T15:00",
+  SETTLEMENT_PERIOD?: number | undefined;
 };
 
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Actual",
   PROBABILISTIC_UPPER_BOUND: "OCF 90%",
-  FORECAST: "OCF Forecast",
-  PAST_FORECAST: "OCF Forecast",
+  FORECAST: "OCF Latest",
+  PAST_FORECAST: "OCF Latest",
   PROBABILISTIC_LOWER_BOUND: "OCF 10%",
-  N_HOUR_FORECAST: `OCF N-hour Forecast`,
-  N_HOUR_PAST_FORECAST: "OCF N-hour Forecast",
+  INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
+  PAST_INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
+  MET_OFFICE_ONLY: "OCF Met Office-only",
+  PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
+  N_HOUR_FORECAST: `OCF N-hour`,
+  N_HOUR_PAST_FORECAST: "OCF N-hour",
   DELTA: "Delta"
 };
 
@@ -64,6 +77,10 @@ const toolTipColors: Record<string, string> = {
   GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
+  INTRADAY_ECMWF_ONLY: ecmwfOnly,
+  PAST_INTRADAY_ECMWF_ONLY: ecmwfOnly,
+  MET_OFFICE_ONLY: metOfficeOnly,
+  PAST_MET_OFFICE_ONLY: metOfficeOnly,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -559,6 +576,60 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <Line
               type="monotone"
+              dataKey="PAST_INTRADAY_ECMWF_ONLY"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={ecmwfOnly} //yellow
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 2}
+              hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="INTRADAY_ECMWF_ONLY"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={ecmwfOnly} //yellow
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="PAST_MET_OFFICE_ONLY"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={metOfficeOnly}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("MET_OFFICE_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="MET_OFFICE_ONLY"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={metOfficeOnly}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("MET_OFFICE_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
               dataKey="GENERATION"
               dot={false}
               xAxisId={"x-axis"}
@@ -631,69 +702,82 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 }
 
                 return (
-                  <div className="px-3 py-2 bg-mapbox-black bg-opacity-70 shadow">
+                  <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
                     <ul className="">
-                      {Object.entries(toolTiplabels).map(([key, name]) => {
-                        const value = data[key];
-                        if (key === "DELTA" && !deltaView) return null;
-                        if (typeof value !== "number") return null;
-                        if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
-                          return null;
-                        if (
-                          key.includes("N_HOUR") &&
-                          (!showNHourView || !visibleLines.some((key) => key.includes("N_HOUR")))
-                        )
-                          return null;
-                        if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0)
-                          return null;
-                        let textClass = "font-normal";
-                        if (["FORECAST", "PAST_FORECAST"].includes(key))
-                          textClass = "font-semibold";
-                        if (
-                          ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
-                        )
-                          textClass = "text-xs";
-                        const pvLiveTextClass =
-                          data["GENERATION_UPDATED"] >= 0 &&
-                          data["GENERATION"] >= 0 &&
-                          key === "GENERATION"
-                            ? "text-xs"
-                            : "";
-                        const sign = ["DELTA"].includes(key) ? (Number(value) > 0 ? "+" : "") : "";
-                        const color = ["DELTA"].includes(key)
-                          ? Number(value) > 0
-                            ? deltaPos
-                            : deltaNeg
-                          : toolTipColors[key];
-                        const computedValue =
-                          key === "DELTA" &&
-                          !showNHourView &&
-                          `${data["formattedDate"]}:00.000Z` >= currentTime
-                            ? "-"
-                            : prettyPrintYNumberWithCommas(String(value), 1);
-                        let title = toolTiplabels[key];
-                        if (key.includes("N_HOUR")) {
-                          title = title.replace("N-hour", `${nHourForecast}-hour`);
-                        }
-
-                        return (
-                          <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
-                            <div className={`flex justify-between ${textClass} ${pvLiveTextClass}`}>
-                              <div>{title}:</div>
-                              <div className={`font-sans ml-7`}>
-                                {(showNHourView || key !== "DELTA") && sign}
-                                {computedValue}{" "}
-                              </div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                      <li className={`flex justify-between pt-4 text-sm text-white font-sans`}>
-                        <div className="pr-4">
-                          {formatISODateStringHumanNumbersOnly(formattedDate)}{" "}
+                      <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
+                        <div className="pr-3">
+                          {formatISODateStringHumanNumbersOnly(formattedDate)}
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
+                      {Object.entries(toolTiplabels)
+                        .filter(
+                          ([key]) =>
+                            data[key] !== undefined &&
+                            (visibleLines.includes(key.replace("PAST_", "")) ||
+                              key.includes("PROBABILISTIC"))
+                        )
+                        .map(([key, name]) => {
+                          const value = data[key];
+                          if (key === "DELTA" && !deltaView) return null;
+                          if (typeof value !== "number") return null;
+                          if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
+                            return null;
+                          if (
+                            key.includes("N_HOUR") &&
+                            (!showNHourView || !visibleLines.some((key) => key.includes("N_HOUR")))
+                          )
+                            return null;
+                          if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0)
+                            return null;
+                          let textClass = "font-normal text-xs";
+                          if (["FORECAST", "PAST_FORECAST"].includes(key))
+                            textClass = "font-semibold";
+                          if (
+                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
+                          )
+                            textClass = "text-2xs";
+                          const pvLiveTextClass =
+                            data["GENERATION_UPDATED"] >= 0 &&
+                            data["GENERATION"] >= 0 &&
+                            key === "GENERATION"
+                              ? "text-xs"
+                              : "";
+                          const sign = ["DELTA"].includes(key)
+                            ? Number(value) > 0
+                              ? "+"
+                              : ""
+                            : "";
+                          const color = ["DELTA"].includes(key)
+                            ? Number(value) > 0
+                              ? deltaPos
+                              : deltaNeg
+                            : toolTipColors[key];
+                          const computedValue =
+                            key === "DELTA" &&
+                            !showNHourView &&
+                            `${data["formattedDate"]}:00.000Z` >= currentTime
+                              ? "-"
+                              : prettyPrintYNumberWithCommas(String(value), 1);
+                          let title = name;
+                          if (key.includes("N_HOUR")) {
+                            title = title.replace("N-hour", `${nHourForecast}-hour`);
+                          }
+
+                          return (
+                            <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
+                              <div
+                                className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
+                              >
+                                <div>{title}:</div>
+                                <div className={`font-sans ml-4`}>
+                                  {(showNHourView || key !== "DELTA") && sign}
+                                  {computedValue}{" "}
+                                </div>
+                              </div>
+                            </li>
+                          );
+                        })}
                     </ul>
                   </div>
                 );

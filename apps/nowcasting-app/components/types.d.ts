@@ -74,6 +74,10 @@ type ForecastValue = {
     plevel_90: number;
   };
 };
+type ElexonForecastValue = {
+  timestamp: string;
+  expected_power_generation_megawatts: number;
+};
 
 type ForecastData = ForecastValue[];
 
@@ -85,6 +89,10 @@ type NationalNHourData = ForecastValue[];
 type AllGspRealData = GspRealData[];
 type CombinedData = {
   nationalForecastData: ForecastData | undefined;
+  nationalIntradayECMWFOnlyData?: ForecastData | undefined;
+  nationalPvnetDayAhead?: ForecastData | undefined;
+  nationalPvnetIntraday?: ForecastData | undefined;
+  nationalMetOfficeOnly?: ForecastData | undefined;
   pvRealDayInData: PvRealData | undefined;
   pvRealDayAfterData: PvRealData | undefined;
   nationalNHourData: NationalNHourData | undefined;

@@ -68,13 +68,13 @@
 }
 
 .toggle {
-  @apply inline-flex items-center relative w-6 h-2 rounded-full bg-ocf-yellow
+  @apply inline-flex items-center relative w-4 h-2 rounded-full bg-ocf-yellow
   border border-ocf-yellow/0 transition-all duration-100 ease-in-out delay-0 cursor-pointer
-  bg-opacity-25 checked:bg-opacity-100 after:-ml-0.5 checked:after:ml-0 checked:after:-mr-0.5
+  bg-opacity-25 checked:bg-opacity-100 after:-ml-0.5 checked:after:ml-0 checked:after:-mr-1
   checked:bg-none checked:text-ocf-yellow
   focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus:ring-transparent
   after:will-change-transform after:transition-all after:duration-200 after:ease-in-out after:inline-flex
-  after:content-[''] after:bg-white after:border-ocf-gray-300 after:border after:rounded-full after:h-3 after:w-3
+  after:content-[''] after:bg-white after:border-ocf-gray-300 after:border after:rounded-full after:h-2 after:w-2
   checked:after:translate-x-full checked:after:border-white;
 }
 
