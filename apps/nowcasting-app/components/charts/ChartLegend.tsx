@@ -44,12 +44,15 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
   const ocfForecastTooltipContent = (
     <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF NWPs</span>
+        <span>ECMWF IFS</span>
         <CheckInlineSmall title={"Included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office NWPs</span>
+        <span>Met Office UKV</span>
         <CheckInlineSmall title={"Included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
@@ -61,16 +64,23 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
   const ocfNHrForecastTooltipContent = (
     <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
-      <div className="flex self-stretch text-left justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        {nHrTipText}
+      {!!nHrTipText && (
+        <>
+          <div className="flex self-stretch text-left justify-between items-center gap-2 text-xs text-ocf-gray-300">
+            {nHrTipText}
+          </div>
+          <hr />
+        </>
+      )}
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
       </div>
-      <hr />
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF NWPs</span>
+        <span>ECMWF IFS</span>
         <CheckInlineSmall title={"Included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office NWPs</span>
+        <span>Met Office UKV</span>
         <CheckInlineSmall title={"Included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
@@ -82,12 +92,15 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
   const ocfMetOfficeForecastTooltipContent = (
     <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF NWPs</span>
+        <span>ECMWF IFS</span>
         <CrossInlineSmall title={"Not included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office NWPs</span>
+        <span>Met Office UKV</span>
         <CheckInlineSmall title={"Included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
@@ -99,17 +112,40 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
   const ocfEcmwfForecastTooltipContent = (
     <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF NWPs</span>
+        <span>ECMWF IFS</span>
         <CheckInlineSmall title={"Included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office NWPs</span>
+        <span>Met Office UKV</span>
         <CrossInlineSmall title={"Not included in forecast"} />
       </div>
       <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
         <span>Satellite Imagery</span>
         <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+    </div>
+  );
+
+  const ocfSatForecastTooltipContent = (
+    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+        <span>Data Inputs:</span>
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>ECMWF IFS</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Met Office UKV</span>
+        <CrossInlineSmall title={"Not included in forecast"} />
+      </div>
+      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
+        <span>Satellite Imagery</span>
+        <CheckInlineSmall title={"Included in forecast"} />
       </div>
     </div>
   );
