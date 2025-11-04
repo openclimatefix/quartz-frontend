@@ -48,6 +48,8 @@ export function getNext30MinSlot(isoTime: Date) {
   return isoTime;
 }
 
+export type HistoryStartType = "fixed" | "rolling";
+
 export type GlobalStateType = {
   selectedISOTime: string;
   timeNow: string;
