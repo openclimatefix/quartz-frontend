@@ -197,6 +197,9 @@ module.exports = {
         "ocf-sites": {
           DEFAULT: "#6C6C6C",
           100: "#444444"
+        },
+        metOffice: {
+          DEFAULT: "#B9D532"
         }
       }
     }

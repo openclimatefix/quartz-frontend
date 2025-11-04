@@ -33,6 +33,11 @@ const PvRemixChart: FC<{
 
   const {
     nationalForecastData,
+    nationalIntradayECMWFOnlyData,
+    nationalMetOfficeOnly,
+    nationalSatOnly,
+    nationalPvnetDayAhead,
+    nationalPvnetIntraday,
     pvRealDayInData,
     pvRealDayAfterData,
     nationalNHourData,
@@ -62,6 +67,11 @@ const PvRemixChart: FC<{
 
   const chartData = useFormatChartData({
     forecastData: nationalForecastData,
+    nationalIntradayECMWFOnlyData,
+    nationalMetOfficeOnly,
+    nationalSatOnly,
+    nationalPvnetDayAhead,
+    nationalPvnetIntraday,
     probabilisticRangeData: nationalForecastData,
     fourHourData: nationalNHourData,
     pvRealDayInData,

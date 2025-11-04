@@ -5,7 +5,7 @@ const Toggle: FC<{
   visible: boolean;
 }> = ({ onClick, visible }) => {
   return (
-    <label className="inline-flex items-center cursor-pointer px-1 ml-2">
+    <label className="inline-flex items-center cursor-pointer px-1 ml-2 py-2 -my-2">
       <input type="checkbox" checked={visible} onChange={onClick} className={`toggle`}></input>
     </label>
   );

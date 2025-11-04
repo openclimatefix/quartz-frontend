@@ -3,7 +3,7 @@ import { get30MinNow, useGlobalState } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
-import { DELTA_BUCKET } from "../../constant";
+import { DateTime } from "luxon";
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -12,12 +12,13 @@ const getForecastChartData = (
     targetTime: string;
     expectedPowerGenerationMegawatts: number;
   },
-  forecast_horizon?: number
+  forecast_horizon?: number,
+  forecast_key: string = "FORECAST"
 ) => {
   if (!fr) return {};
 
-  const futureKey = forecast_horizon ? "N_HOUR_FORECAST" : "FORECAST";
-  const pastKey = forecast_horizon ? "N_HOUR_PAST_FORECAST" : "PAST_FORECAST";
+  const futureKey = forecast_horizon ? `N_HOUR_${forecast_key}` : forecast_key;
+  const pastKey = forecast_horizon ? `N_HOUR_PAST_${forecast_key}` : `PAST_${forecast_key}`;
 
   if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
@@ -47,6 +48,11 @@ const getDelta: (datum: ChartData) => number = (datum) => {
 
 const useFormatChartData = ({
   forecastData,
+  nationalIntradayECMWFOnlyData,
+  nationalMetOfficeOnly,
+  nationalSatOnly,
+  nationalPvnetDayAhead,
+  nationalPvnetIntraday,
   fourHourData,
   probabilisticRangeData,
   pvRealDayAfterData,
@@ -55,6 +61,11 @@ const useFormatChartData = ({
   delta = false
 }: {
   forecastData?: ForecastData;
+  nationalIntradayECMWFOnlyData?: ForecastData;
+  nationalMetOfficeOnly?: ForecastData;
+  nationalSatOnly?: ForecastData;
+  nationalPvnetDayAhead?: ForecastData;
+  nationalPvnetIntraday?: ForecastData;
   fourHourData?: ForecastData;
   probabilisticRangeData?: ForecastData;
   pvRealDayAfterData?: PvRealData;
@@ -145,6 +156,36 @@ const useFormatChartData = ({
         }
       });
 
+      const models: [ForecastData | undefined, string][] = [
+        [nationalIntradayECMWFOnlyData, "INTRADAY_ECMWF_ONLY"],
+        [nationalPvnetDayAhead, "PVNET_DAY_AHEAD"],
+        [nationalPvnetIntraday, "PVNET_INTRADAY"],
+        [nationalMetOfficeOnly, "MET_OFFICE_ONLY"],
+        [nationalSatOnly, "SAT_ONLY"]
+      ];
+      for (const [model, key] of models) {
+        if (model) {
+          model.forEach((fc) => {
+            addDataToMap(
+              fc,
+              (db) => db.targetTime,
+              (db) => getForecastChartData(timeNow, db, undefined, key)
+            );
+          });
+        }
+      }
+
+      // Add settlement period
+      for (const key of Object.keys(chartMap)) {
+        const date = DateTime.fromISO(key);
+        const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+        // Compute settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
+        const interval = date.diff(midnightBefore, "minutes").minutes;
+        // console.log("date", date);
+        // console.log("interval", interval);
+        chartMap[key].SETTLEMENT_PERIOD = Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed
+      }
+
       if (fourHourData) {
         fourHourData.forEach((fc) =>
           addDataToMap(
@@ -168,7 +209,19 @@ const useFormatChartData = ({
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
-  }, [forecastData, fourHourData, pvRealDayInData, pvRealDayAfterData, timeTrigger, nHourForecast]);
+  }, [
+    forecastData,
+    fourHourData,
+    pvRealDayInData,
+    pvRealDayAfterData,
+    timeTrigger,
+    nHourForecast,
+    nationalIntradayECMWFOnlyData,
+    nationalPvnetDayAhead,
+    nationalPvnetIntraday,
+    probabilisticRangeData
+  ]);
+  console.log("returning chartData", data);
   return data;
 };
 
