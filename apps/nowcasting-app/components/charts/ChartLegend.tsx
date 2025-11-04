@@ -7,6 +7,7 @@ import LegendItem from "./LegendItem";
 import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 import LegendTooltip from "../LegendTooltop";
 import { NationalAggregation } from "../map/types";
+import LegendTooltipContent from "./LegendTooltipContent";
 
 type ChartLegendProps = {
   className?: string;
@@ -43,112 +44,18 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   }
 
   const ocfForecastTooltipContent = (
-    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
-      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
-        <span>Data Inputs:</span>
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF IFS</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office UKV</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Satellite Imagery</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-    </div>
+    <LegendTooltipContent inputs={["ECMWF", "MET_OFFICE", "SAT"]} />
   );
 
   const ocfNHrForecastTooltipContent = (
-    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
-      {!!nHrTipText && (
-        <>
-          <div className="flex self-stretch text-left justify-between items-center gap-2 text-xs text-ocf-gray-300">
-            {nHrTipText}
-          </div>
-          <hr />
-        </>
-      )}
-      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
-        <span>Data Inputs:</span>
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF IFS</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office UKV</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Satellite Imagery</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-    </div>
+    <LegendTooltipContent inputs={["ECMWF", "MET_OFFICE", "SAT"]} extraText={nHrTipText} />
   );
 
-  const ocfMetOfficeForecastTooltipContent = (
-    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
-      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
-        <span>Data Inputs:</span>
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF IFS</span>
-        <CrossInlineSmall title={"Not included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office UKV</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Satellite Imagery</span>
-        <CrossInlineSmall title={"Not included in forecast"} />
-      </div>
-    </div>
-  );
+  const ocfMetOfficeForecastTooltipContent = <LegendTooltipContent inputs={["MET_OFFICE"]} />;
 
-  const ocfEcmwfForecastTooltipContent = (
-    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
-      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
-        <span>Data Inputs:</span>
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF IFS</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office UKV</span>
-        <CrossInlineSmall title={"Not included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Satellite Imagery</span>
-        <CrossInlineSmall title={"Not included in forecast"} />
-      </div>
-    </div>
-  );
+  const ocfEcmwfForecastTooltipContent = <LegendTooltipContent inputs={["ECMWF"]} />;
 
-  const ocfSatForecastTooltipContent = (
-    <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
-      <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
-        <span>Data Inputs:</span>
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>ECMWF IFS</span>
-        <CrossInlineSmall title={"Not included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Met Office UKV</span>
-        <CrossInlineSmall title={"Not included in forecast"} />
-      </div>
-      <div className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300">
-        <span>Satellite Imagery</span>
-        <CheckInlineSmall title={"Included in forecast"} />
-      </div>
-    </div>
-  );
+  const ocfSatForecastTooltipContent = <LegendTooltipContent inputs={["SAT"]} />;
 
   return (
     <div className="@container flex flex-initial">
