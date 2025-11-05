@@ -437,21 +437,28 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
 
 /**
  * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
+ * Gets the history start time based on environment variables
  *
- * This function determines the timestamp two days prior to the current time, rounds it down
- * to the nearest 6-hour interval (e.g., 00:00, 06:00, 12:00, 18:00) in local time, and finally
- * converts the result back to UTC as an ISO-8601 string.
+ * NEXT_PUBLIC_HISTORY_START_TYPE: 'fixed' | 'rolling'
+ * NEXT_PUBLIC_HISTORY_START_OFFSET_HOURS: number (e.g. 48, 72)
  *
+ * This function determines start time,based on:
+ *
+ * 1. Type: 'fixed' (start from midnight) or 'rolling' (offset from now)
+ * 2. Offset: Number of hours to look back (default: 48)
+ *
+ * For both modes, the result is rounded down to the nearest 6-hour interval
+ * to match the API's data granularity
  * Key Features:
  * - Handles time zones correctly by rounding in the user's local timezone first.
  * - Ensures accurate rounding during Daylight Saving Time (DST) changes.
  *
- * @returns {string} The earliest forecast timestamp in UTC as an ISO-8601 string.
+ * @returns {string} The history start timestamp in UTC as an ISO-8601 string
  *
  * @example
- * // Assuming the current time is 2025-12-07T14:45:00Z:
- * const result = getEarliestForecastTimestamp();
- * console.log(result); // Output: "2025-12-05T12:00:00.000Z"
+ * // With NEXT_PUBLIC_HISTORY_START_TYPE='fixed' and NEXT_PUBLIC_HISTORY_START_OFFSET_HOURS='48'
+ * // If current time is 2025-12-07T14:45:00Z
+ * console.log(result); // Output: "2025-12-05T00:00:00.000Z"
  */
 
 export const getEarliestForecastTimestamp = (): string => {
@@ -460,18 +467,26 @@ export const getEarliestForecastTimestamp = (): string => {
   // so they might see slightly different data around the rounding times.
   const now = DateTime.now(); // Defaults to the user's system timezone
 
-  // Two days ago in local time
-  const twoDaysAgoLocal = now.minus({ days: 2 });
+  const startType = process.env.NEXT_PUBLIC_HISTORY_START_TYPE || "rolling";
+  const offsetHours = parseInt(process.env.NEXT_PUBLIC_HISTORY_START_OFFSET_HOURS || "48", 10);
 
-  // Round down to the nearest 6-hour interval in the user's local timezone
-  const roundedDownLocal = twoDaysAgoLocal.startOf("hour").minus({
-    hours: twoDaysAgoLocal.hour % 6 // Rounds down to the last multiple of 6
-  });
-
-  // Convert the rounded timestamp back to UTC
-  const roundedDownUtc = roundedDownLocal.toUTC();
-
-  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
+  if (startType === "fixed") {
+    // For fixed mode, start from previous midnight
+    const startTime = now.minus({ days: Math.ceil(offsetHours / 24) }).startOf("day");
+    // Round down to nearest 6-hour interval
+    const roundedTime = startTime.minus({
+      hours: startTime.hour % 6
+    });
+    return roundedTime.toUTC().toISO();
+  } else {
+    // For rolling mode, go back by offset hours
+    const startTime = now.minus({ hours: offsetHours });
+    // Round down to nearest 6-hour interval
+    const roundedTime = startTime.startOf("hour").minus({
+      hours: startTime.hour % 6
+    });
+    return roundedTime.toUTC().toISO();
+  }
 };
 
 const MILLISECONDS_PER_MINUTE = 1000 * 60;
