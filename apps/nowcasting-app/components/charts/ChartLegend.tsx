@@ -59,11 +59,9 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
   return (
     <div className="@container flex flex-initial">
-      <div className="flex flex-1 flex-col justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 gap-3 bg-mapbox-black-500 overflow-y-visible @sm:flex-row @xl:gap-6">
+      <div className="flex flex-1 flex-col justify-between align-items:baseline px-3 text-xs tracking-wider text-ocf-gray-300 py-2 gap-3 bg-mapbox-black-500 overflow-y-visible @sm:flex-row @xl:gap-6">
         <div
-          className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto ${
-            showNHourView ? "@sm:gap-1" : ""
-          } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-5`}
+          className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto @md:pr-0 @md:flex-col @md:gap-0 @lg:flex-row @lg:gap-5`}
           style={{ overflow: "visible" }}
         >
           <div className={legendItemContainerClasses}>
@@ -78,8 +76,34 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               label={"PV live updated"}
               dataKey={`GENERATION_UPDATED`}
             />
+            <LegendTooltip
+              tip={ocfForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap @2xl:hidden"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow"}
+                dashStyle={"both"}
+                label={"OCF Latest"}
+                dataKey={`FORECAST`}
+              />
+            </LegendTooltip>
+            {showNHourView && (
+              <LegendTooltip
+                tip={ocfNHrForecastTooltipContent}
+                position={"top"}
+                className="relative w-full whitespace-pre-wrap @2xl:hidden"
+              >
+                <LegendItem
+                  iconClasses={"text-ocf-orange"}
+                  dashStyle={"both"}
+                  label={`OCF ${nHourForecast}hr`}
+                  dataKey={`N_HOUR_FORECAST`}
+                />
+              </LegendTooltip>
+            )}
           </div>
-          <div className={legendItemContainerClasses}>
+          <div className={`${legendItemContainerClasses} hidden @2xl:flex`}>
             <LegendTooltip
               tip={ocfForecastTooltipContent}
               position={"top"}
@@ -147,7 +171,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           </div>
         </div>
         {showNHourView && (
-          <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
+          <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 pb-1 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
             <div className="flex">
               <>
                 <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">
