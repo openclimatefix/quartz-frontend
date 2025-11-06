@@ -20,9 +20,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
 
   const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
-    showNHourView
-      ? "flex-col @sm:gap-0 @6xl:gap-6 @6xl:flex-row"
-      : "flex-col @md:gap-1 @3xl:gap-12 @3xl:flex-row"
+    showNHourView ? "flex-col @sm:gap-0" : "flex-col @md:gap-1"
   }${className ? ` ${className}` : ""}`;
 
   let nHrTipText;
@@ -79,7 +77,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             <LegendTooltip
               tip={ocfForecastTooltipContent}
               position={"top"}
-              className="relative w-full whitespace-pre-wrap @2xl:hidden"
+              className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"
             >
               <LegendItem
                 iconClasses={"text-ocf-yellow"}
@@ -92,7 +90,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               <LegendTooltip
                 tip={ocfNHrForecastTooltipContent}
                 position={"top"}
-                className="relative w-full whitespace-pre-wrap @2xl:hidden"
+                className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"
               >
                 <LegendItem
                   iconClasses={"text-ocf-orange"}
@@ -103,7 +101,9 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               </LegendTooltip>
             )}
           </div>
-          <div className={`${legendItemContainerClasses} hidden @2xl:flex`}>
+          <div
+            className={`${legendItemContainerClasses} hidden @2xl:flex dash:hidden @4xl:dash:flex`}
+          >
             <LegendTooltip
               tip={ocfForecastTooltipContent}
               position={"top"}
