@@ -16,6 +16,11 @@ export default defineConfig({
     auth0_client_secret: process.env.AUTH0_CLIENT_SECRET,
     baseUrl: process.env.AUTH0_BASE_URL
   },
+  viewportWidth: 1280,
+  viewportHeight: 720,
+  defaultCommandTimeout: 10000,
+  requestTimeout: 15000,
+  responseTimeout: 15000,
   chromeWebSecurity: false,
   // ...rest of the Cypress project config
   projectId: process.env.CYPRESS_PROJECT_ID,

@@ -42,7 +42,10 @@ export const ForecastHeadlineFigure: React.FC<{
               {time && (
                 <>
                   <ClockIcon />
-                  <p className="text-xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
+                  <p
+                    className="text-xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none"
+                    suppressHydrationWarning
+                  >
                     {time}
                   </p>
                 </>

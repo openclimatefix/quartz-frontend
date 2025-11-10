@@ -44,6 +44,7 @@ const Map: FC<IMap> = ({
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
+    const isCypressEnv = window.Cypress !== undefined;
     if (mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
@@ -52,7 +53,8 @@ const Map: FC<IMap> = ({
         boxZoom: false,
         zoom,
         bearing,
-        keyboard: false
+        keyboard: false,
+        preserveDrawingBuffer: isCypressEnv // Only set this in E2E tests to allow canvas rendering
       });
       // Updater function to prevent state updates overriding each other in race condition on load
       setMaps((m) => [...m, map.current!]);

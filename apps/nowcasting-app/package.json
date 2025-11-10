@@ -11,7 +11,8 @@
     "lint": "next lint",
     "pre-commit": "pre-commit run",
     "test": "jest",
-    "test:cypress": "cypress run --browser chrome"
+    "test:cypress": "cypress run --browser chrome",
+    "test:cypress-headed": "cypress run --browser chrome headed"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
@@ -46,6 +47,8 @@
     "@babel/eslint-parser": "^7.19.1",
     "@jest/globals": "^29.7.0",
     "@openclimatefix/nowcasting-tsconfig": "*",
+    "@percy/cli": "^1.31.2",
+    "@percy/cypress": "^3.1.6",
     "@storybook/addon-actions": "^8.0.8",
     "@storybook/addon-essentials": "^8.0.8",
     "@storybook/addon-links": "^8.0.8",
