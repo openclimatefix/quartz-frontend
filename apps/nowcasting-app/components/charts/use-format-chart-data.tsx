@@ -4,6 +4,10 @@ import { ForecastData, PvRealData } from "../types";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 import { DateTime } from "luxon";
+import { Invalid, Valid } from "luxon/src/_util";
+import seasonalMeans from "../../data/monthly_averages.json";
+import seasonalMaxes from "../../data/monthly_maxes.json";
+import seasonalMins from "../../data/monthly_mins.json";
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -46,6 +50,37 @@ const getDelta: (datum: ChartData) => number = (datum) => {
   return 0;
 };
 
+const getSeasonalMean = (date: DateTime<Valid> | DateTime<Invalid>) => {
+  if (date.isValid === false) return 0;
+
+  const month = date.month;
+  const time = date.toFormat("HH:mm:ss");
+  //   load json file with seasonal means
+  const seasonalMeansForMonth = seasonalMeans[month];
+  if (seasonalMeansForMonth[time as keyof typeof seasonalMeansForMonth]) {
+    return seasonalMeansForMonth[time as keyof typeof seasonalMeansForMonth] * 21504.629;
+  }
+  return 0;
+};
+
+const getSeasonalMinMax = (date: DateTime<Valid> | DateTime<Invalid>) => {
+  if (date.isValid === false) return [0, 0];
+
+  const month = date.month;
+  const time = date.toFormat("HH:mm:ss");
+  const seasonalMaxesForMonth = seasonalMaxes[month];
+  const seasonalMinsForMonth = seasonalMins[month];
+  let max = 0;
+  let min = 0;
+
+  if (seasonalMaxesForMonth[time as keyof typeof seasonalMaxesForMonth]) {
+    max = seasonalMaxesForMonth[time as keyof typeof seasonalMaxesForMonth] * 21504.629;
+  }
+  if (seasonalMinsForMonth[time as keyof typeof seasonalMinsForMonth]) {
+    min = seasonalMinsForMonth[time as keyof typeof seasonalMinsForMonth] * 21504.629;
+  }
+  return [min, max];
+};
 const useFormatChartData = ({
   forecastData,
   nationalIntradayECMWFOnlyData,
@@ -175,7 +210,7 @@ const useFormatChartData = ({
         }
       }
 
-      // Add settlement period
+      // Add settlement period and seasonal norm data
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key);
         const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
@@ -184,6 +219,9 @@ const useFormatChartData = ({
         // console.log("date", date);
         // console.log("interval", interval);
         chartMap[key].SETTLEMENT_PERIOD = Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed
+
+        chartMap[key].SEASONAL_MEAN = getSeasonalMean(date);
+        chartMap[key].SEASONAL_BOUNDS = getSeasonalMinMax(date);
       }
 
       if (fourHourData) {

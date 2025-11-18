@@ -34,6 +34,7 @@ const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
 const satOnly = theme.extend.colors["ocf-yellow"]["200"];
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
+const seasonal = "#ffdfd1";
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
@@ -56,6 +57,8 @@ export type ChartData = {
   PROBABILISTIC_RANGE?: Array<number>;
   formattedDate: string; // "2022-05-16T15:00",
   SETTLEMENT_PERIOD?: number | undefined;
+  SEASONAL_MEAN?: number | undefined;
+  SEASONAL_BOUNDS?: Array<number> | undefined;
 };
 
 const toolTiplabels: Record<string, string> = {
@@ -73,7 +76,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_SAT_ONLY: "OCF Satellite-only",
   N_HOUR_FORECAST: `OCF N-hour`,
   N_HOUR_PAST_FORECAST: "OCF N-hour",
-  DELTA: "Delta"
+  DELTA: "Delta",
+  SEASONAL_MEAN: "Seasonal Mean"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -91,7 +95,8 @@ const toolTipColors: Record<string, string> = {
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
-  PROBABILISTIC_LOWER_BOUND: yellow
+  PROBABILISTIC_LOWER_BOUND: yellow,
+  SEASONAL_MEAN: seasonal
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -582,6 +587,33 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <Line
               type="monotone"
+              dataKey="SEASONAL_MEAN"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={seasonal}
+              fill="transparent"
+              fillOpacity={50}
+              strokeWidth={largeScreenMode ? 2 : 1}
+              hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
+              isAnimationActive={false}
+            />
+            {/*<Area*/}
+            {/*  dataKey="SEASONAL_BOUNDS"*/}
+            {/*  type="monotone"*/}
+            {/*  dot={false}*/}
+            {/*  xAxisId={"x-axis"}*/}
+            {/*  yAxisId={"y-axis"}*/}
+            {/*  stroke={"#ffdfd1"}*/}
+            {/*  fill={"#ffdfd1"}*/}
+            {/*  fillOpacity={0.4}*/}
+            {/*  strokeWidth={0}*/}
+            {/*  hide={!visibleLines.includes("FORECAST")}*/}
+            {/*  isAnimationActive={false}*/}
+            {/*/>*/}
+
+            <Line
+              type="monotone"
               dataKey="PAST_INTRADAY_ECMWF_ONLY"
               dot={false}
               xAxisId={"x-axis"}
@@ -746,9 +778,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       {Object.entries(toolTiplabels)
                         .filter(
                           ([key]) =>
-                            data[key] !== undefined &&
-                            (visibleLines.includes(key.replace("PAST_", "")) ||
-                              key.includes("PROBABILISTIC"))
+                            (data[key] !== undefined &&
+                              (visibleLines.includes(key.replace("PAST_", "")) ||
+                                key.includes("PROBABILISTIC"))) ||
+                            key.includes("SEASONAL")
                         )
                         .map(([key, name]) => {
                           const value = data[key];
