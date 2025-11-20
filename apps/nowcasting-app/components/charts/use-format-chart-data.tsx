@@ -5,9 +5,9 @@ import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
-import seasonalMeans from "../../data/monthly_averages.json";
-import seasonalMaxes from "../../data/monthly_maxes.json";
-import seasonalMins from "../../data/monthly_mins.json";
+import seasonalRollingMeans from "../../data/monthly_rolling_averages.json";
+import seasonalP10s from "../../data/monthly_p10_rolling.json";
+import seasonalP90s from "../../data/monthly_p90_rolling.json";
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -56,10 +56,11 @@ const getSeasonalMean = (date: DateTime<Valid> | DateTime<Invalid>) => {
   const month = date.month;
   const time = date.toFormat("HH:mm:ss");
   //   load json file with seasonal means
-  const seasonalMeansForMonth = seasonalMeans[month];
-  if (seasonalMeansForMonth[time as keyof typeof seasonalMeansForMonth]) {
-    return seasonalMeansForMonth[time as keyof typeof seasonalMeansForMonth] * 21504.629;
-  }
+  const seasonalMeanForDay =
+    seasonalRollingMeans[`(${month}, ${date.day})` as keyof typeof seasonalRollingMeans];
+  if (seasonalMeanForDay?.[time as keyof typeof seasonalMeanForDay])
+    return seasonalMeanForDay[time as keyof typeof seasonalMeanForDay] * 21504.629;
+
   return 0;
 };
 
@@ -68,16 +69,16 @@ const getSeasonalMinMax = (date: DateTime<Valid> | DateTime<Invalid>) => {
 
   const month = date.month;
   const time = date.toFormat("HH:mm:ss");
-  const seasonalMaxesForMonth = seasonalMaxes[month];
-  const seasonalMinsForMonth = seasonalMins[month];
+  const seasonalP10ForDate = seasonalP10s[`(${month}, ${date.day})` as keyof typeof seasonalP10s];
+  const seasonalP90ForDate = seasonalP90s[`(${month}, ${date.day})` as keyof typeof seasonalP90s];
   let max = 0;
   let min = 0;
 
-  if (seasonalMaxesForMonth[time as keyof typeof seasonalMaxesForMonth]) {
-    max = seasonalMaxesForMonth[time as keyof typeof seasonalMaxesForMonth] * 21504.629;
+  if (seasonalP10ForDate?.[time as keyof typeof seasonalP10ForDate]) {
+    max = seasonalP10ForDate[time as keyof typeof seasonalP10ForDate] * 21504.629;
   }
-  if (seasonalMinsForMonth[time as keyof typeof seasonalMinsForMonth]) {
-    min = seasonalMinsForMonth[time as keyof typeof seasonalMinsForMonth] * 21504.629;
+  if (seasonalP90ForDate?.[time as keyof typeof seasonalP90ForDate]) {
+    min = seasonalP90ForDate[time as keyof typeof seasonalP90ForDate] * 21504.629;
   }
   return [min, max];
 };
@@ -220,8 +221,11 @@ const useFormatChartData = ({
         // console.log("interval", interval);
         chartMap[key].SETTLEMENT_PERIOD = Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed
 
+        const seasonalBounds = getSeasonalMinMax(date);
         chartMap[key].SEASONAL_MEAN = getSeasonalMean(date);
-        chartMap[key].SEASONAL_BOUNDS = getSeasonalMinMax(date);
+        chartMap[key].SEASONAL_BOUNDS = seasonalBounds;
+        chartMap[key].SEASONAL_P10 = seasonalBounds[1];
+        chartMap[key].SEASONAL_P90 = seasonalBounds[0];
       }
 
       if (fourHourData) {

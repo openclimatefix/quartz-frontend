@@ -58,26 +58,30 @@ export type ChartData = {
   formattedDate: string; // "2022-05-16T15:00",
   SETTLEMENT_PERIOD?: number | undefined;
   SEASONAL_MEAN?: number | undefined;
+  SEASONAL_P90?: number | undefined;
   SEASONAL_BOUNDS?: Array<number> | undefined;
+  SEASONAL_P10?: number | undefined;
 };
 
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
-  GENERATION_UPDATED: "PV Actual",
-  PROBABILISTIC_UPPER_BOUND: "OCF 90%",
-  FORECAST: "OCF Latest",
-  PAST_FORECAST: "OCF Latest",
-  PROBABILISTIC_LOWER_BOUND: "OCF 10%",
-  INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
-  PAST_INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
-  MET_OFFICE_ONLY: "OCF Met Office-only",
-  PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
-  SAT_ONLY: "OCF Satellite-only",
-  PAST_SAT_ONLY: "OCF Satellite-only",
-  N_HOUR_FORECAST: `OCF N-hour`,
-  N_HOUR_PAST_FORECAST: "OCF N-hour",
+  GENERATION_UPDATED: "PV Live Actual",
+  PROBABILISTIC_UPPER_BOUND: "OCF P90",
+  FORECAST: "Current",
+  PAST_FORECAST: "Current",
+  PROBABILISTIC_LOWER_BOUND: "OCF P10",
+  INTRADAY_ECMWF_ONLY: "ECMWF-only",
+  PAST_INTRADAY_ECMWF_ONLY: "ECMWF-only",
+  MET_OFFICE_ONLY: "Met Office-only",
+  PAST_MET_OFFICE_ONLY: "Met Office-only",
+  SAT_ONLY: "Satellite-only",
+  PAST_SAT_ONLY: "Satellite-only",
+  N_HOUR_FORECAST: `N-hour`,
+  N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
-  SEASONAL_MEAN: "Seasonal Mean"
+  SEASONAL_P90: "Seasonal P90",
+  SEASONAL_MEAN: "Seasonal Norm",
+  SEASONAL_P10: "Seasonal P10"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -96,7 +100,9 @@ const toolTipColors: Record<string, string> = {
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
   PROBABILISTIC_LOWER_BOUND: yellow,
-  SEASONAL_MEAN: seasonal
+  SEASONAL_P90: seasonal,
+  SEASONAL_MEAN: seasonal,
+  SEASONAL_P10: seasonal
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -594,21 +600,40 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={seasonal}
               fill="transparent"
               fillOpacity={50}
-              strokeWidth={largeScreenMode ? 2 : 1}
-              hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
+              strokeWidth={largeScreenMode ? 3 : 2}
+              hide={!visibleLines.includes("SEASONAL_MEAN")}
+              isAnimationActive={false}
+            />
+            <Area
+              dataKey={"SEASONAL_BOUNDS"}
+              // dataKey={(d) => {
+              //   return [d.SEASONAL_BOUNDS[0] * 6, d.SEASONAL_BOUNDS[1] / 1.3];
+              // }}
+              type="monotone"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={"#ffdfd1"}
+              fill={"#ffdfd1"}
+              fillOpacity={0.3}
+              strokeWidth={0}
+              hide={!visibleLines.includes("SEASONAL_BOUNDS")}
               isAnimationActive={false}
             />
             {/*<Area*/}
-            {/*  dataKey="SEASONAL_BOUNDS"*/}
+            {/*  // dataKey={"SEASONAL_BOUNDS"}*/}
+            {/*  // dataKey={(d) => {*/}
+            {/*  //   return [d.SEASONAL_BOUNDS[0] * 3, d.SEASONAL_BOUNDS[1] / 1.4];*/}
+            {/*  // }}*/}
             {/*  type="monotone"*/}
             {/*  dot={false}*/}
             {/*  xAxisId={"x-axis"}*/}
             {/*  yAxisId={"y-axis"}*/}
             {/*  stroke={"#ffdfd1"}*/}
             {/*  fill={"#ffdfd1"}*/}
-            {/*  fillOpacity={0.4}*/}
+            {/*  fillOpacity={0.3}*/}
             {/*  strokeWidth={0}*/}
-            {/*  hide={!visibleLines.includes("FORECAST")}*/}
+            {/*  hide={!visibleLines.includes("SEASONAL_BOUNDS")}*/}
             {/*  isAnimationActive={false}*/}
             {/*/>*/}
 
@@ -800,7 +825,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           if (["FORECAST", "PAST_FORECAST"].includes(key))
                             textClass = "font-semibold";
                           if (
-                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
+                            [
+                              "PROBABILISTIC_UPPER_BOUND",
+                              "PROBABILISTIC_LOWER_BOUND",
+                              "SEASONAL_P10",
+                              "SEASONAL_P90"
+                            ].includes(key)
                           )
                             textClass = "text-2xs";
                           const pvLiveTextClass =

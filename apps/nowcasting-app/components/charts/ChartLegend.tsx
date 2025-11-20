@@ -62,11 +62,85 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           className={`flex flex-initial pr-2 justify-between flex-col overflow-x-auto @md:pr-0 @md:flex-col @md:gap-0 @lg:flex-row @lg:gap-5`}
           style={{ overflow: "visible" }}
         >
+          <div
+            className={`${legendItemContainerClasses} hidden @2xl:flex dash:hidden @4xl:dash:flex`}
+          >
+            <LegendTooltip
+              tip={ocfForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow"}
+                symbolStyle={"both"}
+                label={"Current"}
+                dataKey={`FORECAST`}
+              />
+            </LegendTooltip>
+            {showNHourView && (
+              <LegendTooltip
+                tip={ocfNHrForecastTooltipContent}
+                position={"top"}
+                className="relative w-full whitespace-pre-wrap"
+              >
+                <LegendItem
+                  iconClasses={"text-ocf-orange"}
+                  symbolStyle={"both"}
+                  label={`${nHourForecast} hour`}
+                  dataKey={`N_HOUR_FORECAST`}
+                />
+              </LegendTooltip>
+            )}
+
+            <LegendItem
+              iconClasses={"text-[#ffdfd1]"}
+              label={"Seasonal norm"}
+              dataKey={`SEASONAL_MEAN`}
+            />
+          </div>
+          <div className={legendItemContainerClasses}>
+            <LegendTooltip
+              tip={ocfEcmwfForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-teal-500"}
+                symbolStyle={"both"}
+                label={`ECMWF-only`}
+                dataKey={`INTRADAY_ECMWF_ONLY`}
+              />
+            </LegendTooltip>
+            <LegendTooltip
+              tip={ocfMetOfficeForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-metOffice"}
+                symbolStyle={"both"}
+                label={`Met Office-only`}
+                dataKey={`MET_OFFICE_ONLY`}
+              />
+            </LegendTooltip>
+            <LegendTooltip
+              tip={ocfSatForecastTooltipContent}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow-200"}
+                symbolStyle={"both"}
+                label={`Satellite-only`}
+                dataKey={`SAT_ONLY`}
+              />
+            </LegendTooltip>
+          </div>
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-black"}
-              dashStyle={"dashed"}
-              label={"PV live initial estimate"}
+              symbolStyle={"dashed"}
+              label={"PV live initial"}
               dataKey={`GENERATION`}
             />
             <LegendItem
@@ -74,6 +148,18 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               label={"PV live updated"}
               dataKey={`GENERATION_UPDATED`}
             />
+            {/*<LegendTooltip*/}
+            {/*  tip={ocfForecastTooltipContent}*/}
+            {/*  position={"top"}*/}
+            {/*  className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"*/}
+            {/*>*/}
+            <LegendItem
+              iconClasses={"text-[#ffdfd1]"}
+              symbolStyle={"area"}
+              label={"Seasonal quantiles"}
+              dataKey={`SEASONAL_BOUNDS`}
+            />
+            {/*</LegendTooltip>*/}
             <LegendTooltip
               tip={ocfForecastTooltipContent}
               position={"top"}
@@ -81,7 +167,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             >
               <LegendItem
                 iconClasses={"text-ocf-yellow"}
-                dashStyle={"both"}
+                symbolStyle={"both"}
                 label={"OCF Latest"}
                 dataKey={`FORECAST`}
               />
@@ -94,80 +180,12 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               >
                 <LegendItem
                   iconClasses={"text-ocf-orange"}
-                  dashStyle={"both"}
+                  symbolStyle={"both"}
                   label={`OCF ${nHourForecast}hr`}
                   dataKey={`N_HOUR_FORECAST`}
                 />
               </LegendTooltip>
             )}
-          </div>
-          <div
-            className={`${legendItemContainerClasses} hidden @2xl:flex dash:hidden @4xl:dash:flex`}
-          >
-            <LegendTooltip
-              tip={ocfForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-yellow"}
-                dashStyle={"both"}
-                label={"OCF Latest"}
-                dataKey={`FORECAST`}
-              />
-            </LegendTooltip>
-            {showNHourView && (
-              <LegendTooltip
-                tip={ocfNHrForecastTooltipContent}
-                position={"top"}
-                className="relative w-full whitespace-pre-wrap"
-              >
-                <LegendItem
-                  iconClasses={"text-ocf-orange"}
-                  dashStyle={"both"}
-                  label={`OCF ${nHourForecast}hr`}
-                  dataKey={`N_HOUR_FORECAST`}
-                />
-              </LegendTooltip>
-            )}
-          </div>
-          <div className={legendItemContainerClasses}>
-            <LegendTooltip
-              tip={ocfEcmwfForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-teal-500"}
-                dashStyle={"both"}
-                label={`OCF ECMWF-only`}
-                dataKey={`INTRADAY_ECMWF_ONLY`}
-              />
-            </LegendTooltip>
-            <LegendTooltip
-              tip={ocfMetOfficeForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-metOffice"}
-                dashStyle={"both"}
-                label={`OCF Met Office-only`}
-                dataKey={`MET_OFFICE_ONLY`}
-              />
-            </LegendTooltip>
-            <LegendTooltip
-              tip={ocfSatForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-yellow-200"}
-                dashStyle={"both"}
-                label={`OCF Satellite-only`}
-                dataKey={`SAT_ONLY`}
-              />
-            </LegendTooltip>
           </div>
         </div>
         {showNHourView && (
