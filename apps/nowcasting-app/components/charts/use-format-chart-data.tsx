@@ -2,12 +2,16 @@ import { useMemo } from "react";
 import { get30MinNow, useGlobalState } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
-import { ChartData } from "./remix-line";
+import { ChartData, SeasonalPValue } from "./remix-line";
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import seasonalRollingMeans from "../../data/monthly_rolling_averages.json";
 import seasonalP10s from "../../data/monthly_p10_rolling.json";
 import seasonalP90s from "../../data/monthly_p90_rolling.json";
+import nationalMetrics from "../../data/national_metrics.json";
+import { getSettlementPeriodForDate } from "../helpers/chartUtils";
+
+const NATIONAL_CAPACITY = 21504.629;
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -82,6 +86,58 @@ const getSeasonalMinMax = (date: DateTime<Valid> | DateTime<Invalid>) => {
   }
   return [min, max];
 };
+
+const getSeasonalMinMax2 = (date: DateTime<Valid> | DateTime<Invalid>) => {
+  if (date.isValid === false) return [0, 0];
+
+  const month = date.month;
+  const time = date.toFormat("HH:mm:ss");
+  // @ts-ignore
+  const seasonalP5ForDate = nationalMetrics["data"][month][date.day]["pLevels"][0];
+  // @ts-ignore
+  const seasonalP95ForDate = nationalMetrics["data"][month][date.day]["pLevels"][3];
+  let max = 0;
+  let min = 0;
+
+  if (seasonalP5ForDate?.[time as keyof typeof seasonalP5ForDate]) {
+    max = seasonalP5ForDate[time as keyof typeof seasonalP5ForDate] * NATIONAL_CAPACITY;
+  }
+  if (seasonalP95ForDate?.[time as keyof typeof seasonalP95ForDate]) {
+    min = seasonalP95ForDate[time as keyof typeof seasonalP95ForDate] * NATIONAL_CAPACITY;
+  }
+  return [min, max];
+};
+
+const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) => {
+  if (date.isValid === false) return { seasonalMean: 0, seasonalBounds: [] };
+
+  const month = date.month;
+  const day = date.day;
+  const seasonalQuantiles = nationalMetrics["keys"]["pLevels"];
+  // @ts-ignore
+  const seasonalMetricData = nationalMetrics["data"][month][day];
+  const seasonalMetrics = {
+    seasonalMean: seasonalMetricData.mean,
+    seasonalBounds: [] as SeasonalPValue[]
+  };
+  // Split quantiles into pairs from beginning and end of array
+  const quantilePairs = [];
+  for (let i = 0; i < seasonalQuantiles.length / 2; i += 1) {
+    quantilePairs.push([seasonalQuantiles[i], seasonalQuantiles[seasonalQuantiles.length - i - 1]]);
+  }
+  for (const [lowerQuantile, upperQuantile] of quantilePairs) {
+    seasonalMetrics["seasonalBounds"].push({
+      [lowerQuantile.toUpperCase()]:
+        seasonalMetricData.pLevels[seasonalQuantiles.indexOf(lowerQuantile)],
+      [upperQuantile.toUpperCase()]:
+        seasonalMetricData.pLevels[seasonalQuantiles.indexOf(upperQuantile)]
+    } as SeasonalPValue);
+  }
+
+  console.log("seasonalMetrics", seasonalMetrics);
+  return seasonalMetrics;
+};
+
 const useFormatChartData = ({
   forecastData,
   nationalIntradayECMWFOnlyData,
@@ -214,18 +270,26 @@ const useFormatChartData = ({
       // Add settlement period and seasonal norm data
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key);
-        const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-        // Compute settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
-        const interval = date.diff(midnightBefore, "minutes").minutes;
-        // console.log("date", date);
-        // console.log("interval", interval);
-        chartMap[key].SETTLEMENT_PERIOD = Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed
+        const settlementPeriod = getSettlementPeriodForDate(date);
+        chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
+        const { seasonalMean, seasonalBounds: seasBounds } = getSeasonalMetricsForDate(date);
 
-        const seasonalBounds = getSeasonalMinMax(date);
+        // const seasonalBounds = getSeasonalMinMax(date);
+        const seasonalBounds2 = getSeasonalMinMax2(date);
         chartMap[key].SEASONAL_MEAN = getSeasonalMean(date);
-        chartMap[key].SEASONAL_BOUNDS = seasonalBounds;
-        chartMap[key].SEASONAL_P10 = seasonalBounds[1];
-        chartMap[key].SEASONAL_P90 = seasonalBounds[0];
+        chartMap[key].SEASONAL_BOUNDS = seasBounds.map((boundPair) => Object.keys(boundPair));
+        // chartMap[key].SEASONAL_BOUNDS = seasonalBounds;
+        // chartMap[key].SEASONAL_BOUNDS2 = seasonalBounds2;
+        for (const boundPair of seasBounds) {
+          for (const [index, bound] of Object.entries(boundPair)) {
+            // @ts-ignore
+            chartMap[key][`SEASONAL_${index}`] = bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+          }
+          // @ts-ignore
+          chartMap[key][`SEASONAL_${Object.keys(boundPair).join("")}`] = Object.values(
+            boundPair
+          ).map((bound) => bound[settlementPeriod - 1] * NATIONAL_CAPACITY);
+        }
       }
 
       if (fourHourData) {

@@ -38,6 +38,8 @@ const seasonal = "#ffdfd1";
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
+export type SeasonalPValue = Record<string, number[]>;
+export type SeasonalBoundPair = [SeasonalPValue, SeasonalPValue];
 export type ChartData = {
   GENERATION_UPDATED?: number;
   GENERATION?: number;
@@ -58,9 +60,12 @@ export type ChartData = {
   formattedDate: string; // "2022-05-16T15:00",
   SETTLEMENT_PERIOD?: number | undefined;
   SEASONAL_MEAN?: number | undefined;
+  SEASONAL_P95?: number | undefined;
   SEASONAL_P90?: number | undefined;
-  SEASONAL_BOUNDS?: Array<number> | undefined;
+  SEASONAL_BOUNDS?: string[][] | undefined;
+  SEASONAL_BOUNDS2?: Array<number> | undefined;
   SEASONAL_P10?: number | undefined;
+  SEASONAL_P5?: number | undefined;
 };
 
 const toolTiplabels: Record<string, string> = {
@@ -79,9 +84,13 @@ const toolTiplabels: Record<string, string> = {
   N_HOUR_FORECAST: `N-hour`,
   N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
+  SEASONAL_P95: "Seasonal P95",
   SEASONAL_P90: "Seasonal P90",
+  SEASONAL_P75: "Seasonal P75",
   SEASONAL_MEAN: "Seasonal Norm",
-  SEASONAL_P10: "Seasonal P10"
+  SEASONAL_P25: "Seasonal P25",
+  SEASONAL_P10: "Seasonal P10",
+  SEASONAL_P5: "Seasonal P5"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -100,9 +109,13 @@ const toolTipColors: Record<string, string> = {
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
   PROBABILISTIC_LOWER_BOUND: yellow,
+  SEASONAL_P95: seasonal,
   SEASONAL_P90: seasonal,
+  SEASONAL_P75: seasonal,
   SEASONAL_MEAN: seasonal,
-  SEASONAL_P10: seasonal
+  SEASONAL_P25: seasonal,
+  SEASONAL_P10: seasonal,
+  SEASONAL_P5: seasonal
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -604,10 +617,41 @@ const RemixLine: React.FC<RemixLineProps> = ({
               hide={!visibleLines.includes("SEASONAL_MEAN")}
               isAnimationActive={false}
             />
+
+            {data.length > 0 &&
+              data[0].SEASONAL_BOUNDS?.map((boundPair) => {
+                return (
+                  <Area
+                    key={`SEASONAL_${boundPair.join("")}`}
+                    dataKey={`SEASONAL_${boundPair.join("")}`}
+                    // dataKey={(d) => {
+                    //   return [d.SEASONAL_BOUNDS[0] * 3, d.SEASONAL_BOUNDS[1] / 1.4];
+                    // }}
+                    type="monotone"
+                    dot={false}
+                    xAxisId={"x-axis"}
+                    yAxisId={"y-axis"}
+                    stroke={"#ffdfd1"}
+                    fill={"#ffdfd1"}
+                    // fillOpacity={(50 - Number(boundPair[0].replace("p", ""))) / 200}
+                    fillOpacity={
+                      (1 /
+                        (Number(boundPair[1].replace("P", "")) -
+                          Number(boundPair[0].replace("P", "")))) *
+                      15
+                    }
+                    // fillOpacity={0.1}
+                    strokeWidth={0}
+                    hide={!visibleLines.includes("SEASONAL_BOUNDS")}
+                    isAnimationActive={false}
+                  />
+                );
+              })}
+
             <Area
               dataKey={"SEASONAL_BOUNDS"}
               // dataKey={(d) => {
-              //   return [d.SEASONAL_BOUNDS[0] * 6, d.SEASONAL_BOUNDS[1] / 1.3];
+              //   return [d.SEASONAL_BOUNDS[0] * 3, d.SEASONAL_BOUNDS[1] / 1.4];
               // }}
               type="monotone"
               dot={false}
@@ -620,22 +664,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               hide={!visibleLines.includes("SEASONAL_BOUNDS")}
               isAnimationActive={false}
             />
-            {/*<Area*/}
-            {/*  // dataKey={"SEASONAL_BOUNDS"}*/}
-            {/*  // dataKey={(d) => {*/}
-            {/*  //   return [d.SEASONAL_BOUNDS[0] * 3, d.SEASONAL_BOUNDS[1] / 1.4];*/}
-            {/*  // }}*/}
-            {/*  type="monotone"*/}
-            {/*  dot={false}*/}
-            {/*  xAxisId={"x-axis"}*/}
-            {/*  yAxisId={"y-axis"}*/}
-            {/*  stroke={"#ffdfd1"}*/}
-            {/*  fill={"#ffdfd1"}*/}
-            {/*  fillOpacity={0.3}*/}
-            {/*  strokeWidth={0}*/}
-            {/*  hide={!visibleLines.includes("SEASONAL_BOUNDS")}*/}
-            {/*  isAnimationActive={false}*/}
-            {/*/>*/}
 
             <Line
               type="monotone"
@@ -825,12 +853,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           if (["FORECAST", "PAST_FORECAST"].includes(key))
                             textClass = "font-semibold";
                           if (
-                            [
-                              "PROBABILISTIC_UPPER_BOUND",
-                              "PROBABILISTIC_LOWER_BOUND",
-                              "SEASONAL_P10",
-                              "SEASONAL_P90"
-                            ].includes(key)
+                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(
+                              key
+                            ) ||
+                            key.includes("SEASONAL_P")
                           )
                             textClass = "text-2xs";
                           const pvLiveTextClass =

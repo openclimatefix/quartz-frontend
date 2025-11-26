@@ -1,5 +1,6 @@
 // tools for the chart
 import { ChartData } from "../charts/remix-line";
+import { DateTime } from "luxon";
 
 // get the zoomYMax for either sites or national view
 export const getZoomYMax = (filteredPreppedData: ChartData[]) => {
@@ -127,4 +128,13 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
     testTicksToAdd(yMax > 500 ? 100 : yMax > 10 ? 50 : 0.5);
   }
   return ticks;
+};
+
+export const getSettlementPeriodForDate = (date: DateTime) => {
+  /**
+   * Compute the settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
+   */
+  const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
+  const interval = date.diff(midnightBefore, "minutes").minutes;
+  return Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed;
 };
