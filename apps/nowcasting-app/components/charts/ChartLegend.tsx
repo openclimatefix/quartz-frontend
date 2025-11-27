@@ -94,7 +94,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
 
             <LegendItem
               iconClasses={"text-[#ffdfd1]"}
-              label={"Seasonal norm"}
+              label={"Seasonal Mean"}
               dataKey={`SEASONAL_MEAN`}
             />
           </div>
