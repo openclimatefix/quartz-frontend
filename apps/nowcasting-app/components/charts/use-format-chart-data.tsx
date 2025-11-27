@@ -102,7 +102,8 @@ const useFormatChartData = ({
   pvRealDayAfterData,
   pvRealDayInData,
   timeTrigger,
-  delta = false
+  delta = false,
+  gsp = false
 }: {
   forecastData?: ForecastData;
   nationalIntradayECMWFOnlyData?: ForecastData;
@@ -116,6 +117,7 @@ const useFormatChartData = ({
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
   delta?: boolean;
+  gsp?: boolean;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
 
@@ -224,27 +226,29 @@ const useFormatChartData = ({
         const date = DateTime.fromISO(key);
         const settlementPeriod = getSettlementPeriodForDate(date);
         chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
-        const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
+        if (!gsp) {
+          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
 
-        chartMap[key].SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
-        chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
-        for (const boundPair of seasonalBounds) {
-          for (const [index, bound] of Object.entries(boundPair)) {
-            if (bound) {
-              chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
-                bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+          chartMap[key].SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
+          chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
+          for (const boundPair of seasonalBounds) {
+            for (const [index, bound] of Object.entries(boundPair)) {
+              if (bound) {
+                chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
+                  bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+              }
             }
+            chartMap[key][
+              `SEASONAL_BOUND_${Object.keys(boundPair).join(
+                "_"
+              )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
+            ] = Object.values(boundPair).map((bound) => {
+              if (bound) {
+                return bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+              }
+              return 0;
+            });
           }
-          chartMap[key][
-            `SEASONAL_BOUND_${Object.keys(boundPair).join(
-              "_"
-            )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
-          ] = Object.values(boundPair).map((bound) => {
-            if (bound) {
-              return bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
-            }
-            return 0;
-          });
         }
       }
 
