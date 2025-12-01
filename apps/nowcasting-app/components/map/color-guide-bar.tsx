@@ -61,9 +61,9 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
       }
     }
   }, [unit, nationalAggregationLevel]);
-  let unitText = unit === ActiveUnit.MW ? "MW" : "%";
+  let unitText = unit === ActiveUnit.MW ? "kW" : "%";
   if (unit === ActiveUnit.capacity) {
-    unitText = "MW";
+    unitText = "kW";
   }
   return (
     <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">

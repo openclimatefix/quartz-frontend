@@ -21,8 +21,7 @@ const SideLayout: FC<SideLayoutProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [view] = useGlobalState("view");
-  // const closedWidth = dashboardModeActive ? "50%" : "44%";
-  const closedWidth = "20%";
+  const closedWidth = dashboardModeActive ? "50%" : "44%";
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     if (window.innerWidth < 1024) {
@@ -36,7 +35,7 @@ const SideLayout: FC<SideLayoutProps> = ({
   }
   return (
     <div
-      className={`h-full pt-16 absolute overflow-clip top-0 left-0 z-20 ${className || ""}`}
+      className={`h-full pt-16 absolute overflow-visible top-0 left-0 z-20 ${className || ""}`}
       style={{ width: isOpen ? "90%" : closedWidth }}
     >
       <div

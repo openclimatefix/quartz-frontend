@@ -168,30 +168,30 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       data-test="national-chart-header"
       className="flex flex-initial content-between bg-ocf-gray-800 h-auto mb-4"
     >
-      <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
-        National
+      <div className="text-white py-2 dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
+        Broxbourne Primary 33/11kV
       </div>
       <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 3xl:px-6">
-        <div className="pr-4 lg:pr-4 3xl:pr-6">
-          <ForecastHeadlineFigure
-            tip={`PV Live / OCF Forecast`}
-            time={pvTimeOnly}
-            color="ocf-yellow"
-          >
-            <span className="text-black">{actualPV}</span>
-            <span className="text-ocf-gray-300 mx-1"> / </span>
-            {forecastPV}
-          </ForecastHeadlineFigure>
-        </div>
-        <div>
-          <ForecastHeadlineFigure
-            tip={`Next OCF Forecast`}
-            time={forecastNextTimeOnly}
-            color="ocf-yellow"
-          >
-            {forecastNextPV}
-          </ForecastHeadlineFigure>
-        </div>
+        {/*<div className="pr-4 lg:pr-4 3xl:pr-6">*/}
+        {/*  <ForecastHeadlineFigure*/}
+        {/*    tip={`PV Live / OCF Forecast`}*/}
+        {/*    time={pvTimeOnly}*/}
+        {/*    color="ocf-yellow"*/}
+        {/*  >*/}
+        {/*    <span className="text-black">{actualPV}</span>*/}
+        {/*    <span className="text-ocf-gray-300 mx-1"> / </span>*/}
+        {/*    {forecastPV}*/}
+        {/*  </ForecastHeadlineFigure>*/}
+        {/*</div>*/}
+        {/*<div>*/}
+        {/*  <ForecastHeadlineFigure*/}
+        {/*    tip={`Next OCF Forecast`}*/}
+        {/*    time={forecastNextTimeOnly}*/}
+        {/*    color="ocf-yellow"*/}
+        {/*  >*/}
+        {/*    {forecastNextPV}*/}
+        {/*  </ForecastHeadlineFigure>*/}
+        {/*</div>*/}
       </div>
       <div className="inline-flex h-full">{children}</div>
     </div>

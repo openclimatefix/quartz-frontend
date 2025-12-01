@@ -18,6 +18,7 @@ import {
 import { components } from "../../types/quartz-api";
 import { generateGeoJsonForecastData } from "../helpers/data";
 import boundariesData from "../../data/ng_constraint_boundaries.json";
+import ukpnData from "../../data/ukpn_primary_postcode_area.json";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
@@ -434,6 +435,53 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             "text-color": ["case", ["==", ["get", "Constraint"], "TBC"], "#fff", "transparent"]
           }
         });
+      }
+
+      //////////////////////////
+      // UKPN PRIMARIES LAYER //
+      //////////////////////////
+      if (ukpnData) {
+        let boundarySource = map.getSource("ukpn-data") as mapboxgl.GeoJSONSource;
+        if (!boundarySource) {
+          map.addSource("ukpn-data", {
+            type: "geojson",
+            data: ukpnData as FeatureCollection,
+            promoteId: "id"
+          });
+        }
+        console.log("ukpnData added", boundarySource);
+
+        if (!map.getLayer("ukpn-data")) {
+          map.addLayer({
+            id: "ukpn-data",
+            type: "line",
+            source: "ukpn-data",
+            // filter: ["==", ["get", "Constraint"], "TBC"],
+            // layout: { visibility: showConstraintsRef ? "visible" : "none" },
+            paint: {
+              "line-color": "#ffffff",
+              "line-width": 0.6,
+              "line-opacity": 0.2
+            }
+          });
+        }
+        if (!map.getLayer("ukpn-data-labels")) {
+          map.addLayer({
+            id: "ukpn-data-labels",
+            type: "symbol",
+            source: "ukpn-data",
+            // layout: {
+            //   "text-field": "{id}",
+            //   "text-size": 12,
+            //   "symbol-placement": "line"
+            // visibility: showConstraintsRef ? "visible" : "none"
+            // },
+            paint: {
+              "text-color": "#fff"
+              // "text-color": ["case", ["==", ["get", "Constraint"], "TBC"], "#fff", "transparent"]
+            }
+          });
+        }
       }
 
       // set initial visibility from global state

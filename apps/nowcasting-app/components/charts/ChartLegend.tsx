@@ -51,24 +51,24 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           } @md:pr-0 @md:flex-col @md:gap-1 @lg:flex-row @lg:gap-8`}
           style={{ overflow: "visible" }}
         >
-          <div className={legendItemContainerClasses}>
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              dashStyle={"dashed"}
-              label={"PV live initial estimate"}
-              dataKey={`GENERATION`}
-            />
-            <LegendItem
-              iconClasses={"text-ocf-black"}
-              label={"PV live updated"}
-              dataKey={`GENERATION_UPDATED`}
-            />
-          </div>
+          {/*<div className={legendItemContainerClasses}>*/}
+          {/*  <LegendItem*/}
+          {/*    iconClasses={"text-ocf-black"}*/}
+          {/*    dashStyle={"dashed"}*/}
+          {/*    label={"PV live initial estimate"}*/}
+          {/*    dataKey={`GENERATION`}*/}
+          {/*  />*/}
+          {/*  <LegendItem*/}
+          {/*    iconClasses={"text-ocf-black"}*/}
+          {/*    label={"PV live updated"}*/}
+          {/*    dataKey={`GENERATION_UPDATED`}*/}
+          {/*  />*/}
+          {/*</div>*/}
           <div className={legendItemContainerClasses}>
             <LegendItem
               iconClasses={"text-ocf-yellow"}
               dashStyle={"both"}
-              label={"OCF Latest Forecast"}
+              label={"Current Forecast"}
               dataKey={`FORECAST`}
             />
             {/*<LegendItem*/}
@@ -76,49 +76,49 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             {/*  label={"OCF Final Forecast"}*/}
             {/*  dataKey={`PAST_FORECAST`}*/}
             {/*/>*/}
-            {showNHourView && (
-              <LegendTooltip
-                tip={nHrTipText}
-                position={"top"}
-                className="relative w-full whitespace-pre-wrap"
-              >
-                <LegendItem
-                  iconClasses={"text-ocf-orange"}
-                  dashStyle={"both"}
-                  label={`OCF ${nHourForecast}hr Forecast`}
-                  dataKey={`N_HOUR_FORECAST`}
-                />
-              </LegendTooltip>
-            )}
+            {/*{showNHourView && (*/}
+            {/*  <LegendTooltip*/}
+            {/*    tip={nHrTipText}*/}
+            {/*    position={"top"}*/}
+            {/*    className="relative w-full whitespace-pre-wrap"*/}
+            {/*  >*/}
+            {/*    <LegendItem*/}
+            {/*      iconClasses={"text-ocf-orange"}*/}
+            {/*      dashStyle={"both"}*/}
+            {/*      label={`${nHourForecast}hr Forecast`}*/}
+            {/*      dataKey={`N_HOUR_FORECAST`}*/}
+            {/*    />*/}
+            {/*  </LegendTooltip>*/}
+            {/*)}*/}
           </div>
         </div>
-        {showNHourView && (
-          <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
-            <div className="flex">
-              <>
-                <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">
-                  <select
-                    value={nHourForecast}
-                    onChange={(e) => setNHourForecast(Number(e.target.value))}
-                    className="text-sm px-2 py-0 rounded-md"
-                  >
-                    {N_HOUR_FORECAST_OPTIONS.map((option) => (
-                      <option
-                        key={`N-hour-select-option-${option}`}
-                        className="text-black bg-white"
-                        value={option}
-                      >
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>{" "}
-                hour <br />
-                forecast
-              </>
-            </div>
-          </div>
-        )}
+        {/*{showNHourView && (*/}
+        {/*  <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">*/}
+        {/*    <div className="flex">*/}
+        {/*      <>*/}
+        {/*        <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">*/}
+        {/*          <select*/}
+        {/*            value={nHourForecast}*/}
+        {/*            onChange={(e) => setNHourForecast(Number(e.target.value))}*/}
+        {/*            className="text-sm px-2 py-0 rounded-md"*/}
+        {/*          >*/}
+        {/*            {N_HOUR_FORECAST_OPTIONS.map((option) => (*/}
+        {/*              <option*/}
+        {/*                key={`N-hour-select-option-${option}`}*/}
+        {/*                className="text-black bg-white"*/}
+        {/*                value={option}*/}
+        {/*              >*/}
+        {/*                {option}*/}
+        {/*              </option>*/}
+        {/*            ))}*/}
+        {/*          </select>*/}
+        {/*        </div>{" "}*/}
+        {/*        hour <br />*/}
+        {/*        forecast*/}
+        {/*      </>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
     </div>
   );

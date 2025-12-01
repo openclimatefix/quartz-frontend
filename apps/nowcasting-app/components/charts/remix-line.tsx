@@ -417,7 +417,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   : [0, yMax]
               }
               label={{
-                value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
+                value: view === VIEWS.SOLAR_SITES ? "Generation (kW)" : "Generation (kW)",
                 angle: 270,
                 position: "outsideLeft",
                 fill: "white",

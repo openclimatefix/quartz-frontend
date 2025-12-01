@@ -36,7 +36,7 @@ const LegendItem: FC<{
           {label}
         </span>
       </button>
-      <Toggle onClick={toggleLineVisibility} visible={isVisible} />
+      {/*<Toggle onClick={toggleLineVisibility} visible={isVisible} />*/}
     </div>
   );
 };

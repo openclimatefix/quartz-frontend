@@ -647,8 +647,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     setSitesLoadingState
   ]);
 
-  // const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
-  const closedWidth = "80%";
+  const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
 
   return (
     <Layout>
