@@ -94,13 +94,15 @@ const toolTiplabels: Record<string, string> = {
   N_HOUR_FORECAST: `N-hour`,
   N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
+  SEASONAL_P99: "Seasonal P99",
   SEASONAL_P95: "Seasonal P95",
   SEASONAL_P90: "Seasonal P90",
   SEASONAL_P75: "Seasonal P75",
   SEASONAL_MEAN: "Seasonal Mean",
   SEASONAL_P25: "Seasonal P25",
   SEASONAL_P10: "Seasonal P10",
-  SEASONAL_P5: "Seasonal P5"
+  SEASONAL_P5: "Seasonal P5",
+  SEASONAL_P1: "Seasonal P1"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -119,13 +121,15 @@ const toolTipColors: Record<string, string> = {
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
   PROBABILISTIC_LOWER_BOUND: yellow,
+  SEASONAL_P99: seasonal,
   SEASONAL_P95: seasonal,
   SEASONAL_P90: seasonal,
   SEASONAL_P75: seasonal,
   SEASONAL_MEAN: seasonal,
   SEASONAL_P25: seasonal,
   SEASONAL_P10: seasonal,
-  SEASONAL_P5: seasonal
+  SEASONAL_P5: seasonal,
+  SEASONAL_P1: seasonal
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -630,6 +634,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             {data.length > 0 &&
               data[0].SEASONAL_BOUNDS?.map((boundPair) => {
+                console.log("BOUND PAIR: ", boundPair);
                 return (
                   <Area
                     key={`SEASONAL_BOUND_${boundPair.join("_")}`}
