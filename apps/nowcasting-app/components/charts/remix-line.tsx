@@ -644,7 +644,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       (1 /
                         (Number(boundPair[1].replace("P", "")) -
                           Number(boundPair[0].replace("P", "")))) *
-                      10
+                      15
                     }
                     strokeWidth={0}
                     hide={!visibleLines.includes("SEASONAL_BOUNDS")}
