@@ -1,0 +1,2987 @@
+[
+    {
+        "location": "abbots_central_primary",
+        "mean_embedded_capacity_mw": 0.3595900654134171,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "acrows_primary",
+        "mean_embedded_capacity_mw": 0.4478225962672225,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "addington_grid",
+        "mean_embedded_capacity_mw": 0.7046911040283259,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "addington_local",
+        "mean_embedded_capacity_mw": 0.0740622508152633,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "adelaide_st_primary",
+        "mean_embedded_capacity_mw": 0.8660514897623992,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "aldreth_primary",
+        "mean_embedded_capacity_mw": 0.9090449662278808,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "alpington_primary",
+        "mean_embedded_capacity_mw": 1.4248871934567586,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "alresford_primary",
+        "mean_embedded_capacity_mw": 1.1802670694626938,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "amersham_primary",
+        "mean_embedded_capacity_mw": 1.1449623023607456,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "ampthill_primary",
+        "mean_embedded_capacity_mw": 1.4346836088112047,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "angmering",
+        "mean_embedded_capacity_mw": 0.5777960942704814,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "arbury_grid",
+        "mean_embedded_capacity_mw": 0.6207963911648394,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "ashford_east",
+        "mean_embedded_capacity_mw": 0.5080559051717404,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "ashington",
+        "mean_embedded_capacity_mw": 1.0452013207403994,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "ashtead",
+        "mean_embedded_capacity_mw": 0.9780415424325848,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "attleborough_primary",
+        "mean_embedded_capacity_mw": 0.7861741432168866,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "austin_canons_primary",
+        "mean_embedded_capacity_mw": 1.6582567840649938,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "austin_street_primary",
+        "mean_embedded_capacity_mw": 0.5105991640143631,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "aylsham_primary",
+        "mean_embedded_capacity_mw": 0.4095640474481038,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "baldslow",
+        "mean_embedded_capacity_mw": 1.828216390276043,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "banstead",
+        "mean_embedded_capacity_mw": 0.6939821361836808,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "barming",
+        "mean_embedded_capacity_mw": 0.123865061262914,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "barnwell_primary",
+        "mean_embedded_capacity_mw": 0.923251258536597,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "barrack_st_primary",
+        "mean_embedded_capacity_mw": 0.3164956762042054,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "barrow_primary",
+        "mean_embedded_capacity_mw": 0.9188229943287746,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "barsham_primary",
+        "mean_embedded_capacity_mw": 1.5406593544707117,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "barton_primary",
+        "mean_embedded_capacity_mw": 0.5603143907164123,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "basildon_local_primary",
+        "mean_embedded_capacity_mw": 0.0892889085834636,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "bassingbourn_primary",
+        "mean_embedded_capacity_mw": 0.0,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "bata_primary",
+        "mean_embedded_capacity_mw": 0.2781914564786036,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "beccles_primary",
+        "mean_embedded_capacity_mw": 0.7522583633496617,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "becontree_primary",
+        "mean_embedded_capacity_mw": 0.4673758218301594,
+        "gsp_numeric_id": 322.0
+    },
+    {
+        "location": "beighton_primary",
+        "mean_embedded_capacity_mw": 1.6970475874772608,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "belchamp_grid",
+        "mean_embedded_capacity_mw": 1.7340180907240668,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "bellevue_primary",
+        "mean_embedded_capacity_mw": 1.2716670378795645,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "bellhouse_ln_primary",
+        "mean_embedded_capacity_mw": 0.8545035931725967,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "benhall_primary",
+        "mean_embedded_capacity_mw": 1.2214792745987135,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "bentwaters_primary",
+        "mean_embedded_capacity_mw": 1.1609743105717565,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "berechurch_primary",
+        "mean_embedded_capacity_mw": 0.7434054175793137,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "berkhamsted_primary",
+        "mean_embedded_capacity_mw": 1.2437073793639577,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "berrylands",
+        "mean_embedded_capacity_mw": 0.9959382115148048,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "betchworth",
+        "mean_embedded_capacity_mw": 1.3326345988619617,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "betteshanger_local",
+        "mean_embedded_capacity_mw": 0.994551614942252,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "bexhill_town",
+        "mean_embedded_capacity_mw": 1.0669915498290932,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "biggin_hill",
+        "mean_embedded_capacity_mw": 0.8550610914634297,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "biggleswade_primary",
+        "mean_embedded_capacity_mw": 0.7500530148079382,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "billericay_east_primary",
+        "mean_embedded_capacity_mw": 0.7988314952420047,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "bois_ln_primary",
+        "mean_embedded_capacity_mw": 0.905003936251224,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "boundary_park_primary",
+        "mean_embedded_capacity_mw": 0.9086592907405032,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "bourn_primary",
+        "mean_embedded_capacity_mw": 0.9509301182095296,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "boxted_primary",
+        "mean_embedded_capacity_mw": 0.3401848416576508,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "bradwell_primary",
+        "mean_embedded_capacity_mw": 1.108231804691406,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "braintree_depot_primary",
+        "mean_embedded_capacity_mw": 1.5719754305114184,
+        "gsp_numeric_id": 34.0
+    },
+    {
+        "location": "braiswick_primary",
+        "mean_embedded_capacity_mw": 0.7037818260614385,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "brandon_primary",
+        "mean_embedded_capacity_mw": 0.9448882682986464,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "brentwood_primary",
+        "mean_embedded_capacity_mw": 1.0312318104187208,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "brighton_town",
+        "mean_embedded_capacity_mw": 0.1794058995901111,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "brington_primary",
+        "mean_embedded_capacity_mw": 0.3922694944160858,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "brockenhurst_primary",
+        "mean_embedded_capacity_mw": 0.5057211505115361,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "brogborough_primary",
+        "mean_embedded_capacity_mw": 0.4443328661593723,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "brookwood",
+        "mean_embedded_capacity_mw": 0.9159850196065604,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "broxbourne_primary",
+        "mean_embedded_capacity_mw": 0.0534365163982243,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "bruce_gv_primary",
+        "mean_embedded_capacity_mw": 0.2731816457780027,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "buckingham_rd_primary",
+        "mean_embedded_capacity_mw": 1.2030188023934267,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "bungay_primary",
+        "mean_embedded_capacity_mw": 1.0254187383045807,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "burgess_hill",
+        "mean_embedded_capacity_mw": 1.4131411027293617,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "burnham_primary",
+        "mean_embedded_capacity_mw": 0.7994423293496583,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "burnham_thorpe_primary",
+        "mean_embedded_capacity_mw": 0.2532091303918902,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "burwell_primary",
+        "mean_embedded_capacity_mw": 0.7518831476431964,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "bury_grid",
+        "mean_embedded_capacity_mw": 0.853994017806501,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "bury_primary",
+        "mean_embedded_capacity_mw": 0.4518542735396608,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "bury_st_primary",
+        "mean_embedded_capacity_mw": 0.880327033733136,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "buxted",
+        "mean_embedded_capacity_mw": 0.8925608381162471,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "caddington_primary",
+        "mean_embedded_capacity_mw": 0.7000334640453754,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "caister_primary",
+        "mean_embedded_capacity_mw": 1.0737542205313513,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "canterbury_local",
+        "mean_embedded_capacity_mw": 0.8563795585219591,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "canterbury_town",
+        "mean_embedded_capacity_mw": 0.8970677400601283,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "canvey_primary",
+        "mean_embedded_capacity_mw": 1.0516142581707866,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "capability_green_primary",
+        "mean_embedded_capacity_mw": 0.5318374522922228,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "capel",
+        "mean_embedded_capacity_mw": 0.7184064944146087,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "caterham",
+        "mean_embedded_capacity_mw": 0.1228363382772407,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "cell_barnes_primary",
+        "mean_embedded_capacity_mw": 0.7591085873036534,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "central_edmonton_primary",
+        "mean_embedded_capacity_mw": 0.695930339409721,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "central_harpenden_primary",
+        "mean_embedded_capacity_mw": 0.951965500131716,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "central_potters_bar_primary",
+        "mean_embedded_capacity_mw": 0.7213504103665852,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "central_tottenham_primary",
+        "mean_embedded_capacity_mw": 1.552859991185134,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "central_welwyn_primary",
+        "mean_embedded_capacity_mw": 0.8803604060334614,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "central_wembley_primary",
+        "mean_embedded_capacity_mw": 0.4512846548912933,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "chalvedon_primary",
+        "mean_embedded_capacity_mw": 0.3610292731288608,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "chantry_ln_primary",
+        "mean_embedded_capacity_mw": 0.4357762178663391,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "chartham",
+        "mean_embedded_capacity_mw": 0.9337970878976924,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "chase_cross_primary",
+        "mean_embedded_capacity_mw": 0.8911242083291322,
+        "gsp_numeric_id": 320.0
+    },
+    {
+        "location": "chatham_hill",
+        "mean_embedded_capacity_mw": 1.594267742475752,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "chatham_west",
+        "mean_embedded_capacity_mw": 1.0633426157809094,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "chatteris_primary",
+        "mean_embedded_capacity_mw": 1.3495302829953189,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "chaul_end_primary",
+        "mean_embedded_capacity_mw": 1.5387018951921831,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "cheddington_primary",
+        "mean_embedded_capacity_mw": 0.1212535437683593,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "chelmsford_east_local",
+        "mean_embedded_capacity_mw": 0.8666895936426756,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "chelmsford_north_grid",
+        "mean_embedded_capacity_mw": 1.3613781327042132,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "chequers_primary",
+        "mean_embedded_capacity_mw": 0.0772327136378701,
+        "gsp_numeric_id": 322.0
+    },
+    {
+        "location": "cherry_grn_primary",
+        "mean_embedded_capacity_mw": 0.7041136313977602,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "cherry_tree_primary",
+        "mean_embedded_capacity_mw": 1.0102816284690774,
+        "gsp_numeric_id": 322.0
+    },
+    {
+        "location": "chertsey",
+        "mean_embedded_capacity_mw": 0.7110609950171869,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "chinnor_primary",
+        "mean_embedded_capacity_mw": 0.3379176722815463,
+        "gsp_numeric_id": 9.0
+    },
+    {
+        "location": "church_end_primary",
+        "mean_embedded_capacity_mw": 0.1702556022293659,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "clacton",
+        "mean_embedded_capacity_mw": 0.2686322642871029,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "claydon_cement_primary",
+        "mean_embedded_capacity_mw": 1.127164040755611,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "cobham_kent",
+        "mean_embedded_capacity_mw": 0.5000555735925285,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "cobham_surrey",
+        "mean_embedded_capacity_mw": 0.9907430886783214,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "cockfosters_primary",
+        "mean_embedded_capacity_mw": 0.4079467933261372,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "coggeshall_primary",
+        "mean_embedded_capacity_mw": 0.3832703716847119,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "cornard_primary",
+        "mean_embedded_capacity_mw": 0.51730784747482,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "cotton_primary",
+        "mean_embedded_capacity_mw": 0.7397595999649217,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "coulsdon",
+        "mean_embedded_capacity_mw": 0.1061986062847228,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "cowfold",
+        "mean_embedded_capacity_mw": 1.7378762994242856,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "coxford_primary",
+        "mean_embedded_capacity_mw": 1.2578514377495642,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "cranbrook",
+        "mean_embedded_capacity_mw": 1.1808499660720262,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "cranham_primary",
+        "mean_embedded_capacity_mw": 1.1039281713369802,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "cranleigh",
+        "mean_embedded_capacity_mw": 1.382932424150119,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "crawley_ind_east",
+        "mean_embedded_capacity_mw": 0.2691758811803154,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "crawley_industrial_west",
+        "mean_embedded_capacity_mw": 0.5634248221557224,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "crawley_town",
+        "mean_embedded_capacity_mw": 0.4688116503025287,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "cringleford_primary",
+        "mean_embedded_capacity_mw": 0.9189933514946292,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "cromer_primary",
+        "mean_embedded_capacity_mw": 0.6094413975106199,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "crossways",
+        "mean_embedded_capacity_mw": 0.9122152793912378,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "crowhurst",
+        "mean_embedded_capacity_mw": 1.225992911779639,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "croydon_central",
+        "mean_embedded_capacity_mw": 0.9861130775887224,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "croydon_grid",
+        "mean_embedded_capacity_mw": 0.1228404616124063,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "croydon_primary",
+        "mean_embedded_capacity_mw": 0.3930844781752229,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "cuffley_primary",
+        "mean_embedded_capacity_mw": 0.575661382446851,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "danbury_primary",
+        "mean_embedded_capacity_mw": 0.4918411506912765,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "deal",
+        "mean_embedded_capacity_mw": 1.6652264652331232,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "debenham_primary",
+        "mean_embedded_capacity_mw": 0.520121653896669,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "diss_grid",
+        "mean_embedded_capacity_mw": 0.7989311123860255,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "dock_rd_primary",
+        "mean_embedded_capacity_mw": 0.514376958342986,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "dorking_town",
+        "mean_embedded_capacity_mw": 1.0028071385940356,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "dover",
+        "mean_embedded_capacity_mw": 0.6223206362452076,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "dovercourt_primary",
+        "mean_embedded_capacity_mw": 0.6954566120223227,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "downham_market_primary",
+        "mean_embedded_capacity_mw": 1.1425705921364533,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "drinkstone_primary",
+        "mean_embedded_capacity_mw": 0.6396304129676046,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "dunmow_primary",
+        "mean_embedded_capacity_mw": 1.4290417203587065,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "dunstable_primary",
+        "mean_embedded_capacity_mw": 0.7610247332746811,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "durham_rd_primary",
+        "mean_embedded_capacity_mw": 0.4899770383676771,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "dymchurch",
+        "mean_embedded_capacity_mw": 1.37474969935022,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "earlham_grid_local",
+        "mean_embedded_capacity_mw": 0.5155477572102134,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "earlham_grid_local_b",
+        "mean_embedded_capacity_mw": 0.3422028904297075,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "earlham_west_primary",
+        "mean_embedded_capacity_mw": 0.9068205920811296,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "east_barnet_primary",
+        "mean_embedded_capacity_mw": 1.015291541320843,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "east_bay_primary",
+        "mean_embedded_capacity_mw": 0.5783566000931389,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "east_dereham_primary",
+        "mean_embedded_capacity_mw": 1.4578983630045124,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "east_enfield_primary",
+        "mean_embedded_capacity_mw": 0.7348446450839385,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "east_finchley_primary",
+        "mean_embedded_capacity_mw": 0.982969059228458,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "east_grinstead",
+        "mean_embedded_capacity_mw": 0.8370665357916395,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "east_harpenden_primary",
+        "mean_embedded_capacity_mw": 0.3950966126242615,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "east_hertford_primary",
+        "mean_embedded_capacity_mw": 1.0327331053837447,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "east_letchworth_primary",
+        "mean_embedded_capacity_mw": 0.6445030990446031,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "east_stevenage_primary",
+        "mean_embedded_capacity_mw": 1.0495593449028815,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "eastcote_primary",
+        "mean_embedded_capacity_mw": 0.8747426796135104,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "ebbsfleet",
+        "mean_embedded_capacity_mw": 0.6485281122323557,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "edenbridge",
+        "mean_embedded_capacity_mw": 0.7008056304072806,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "effingham",
+        "mean_embedded_capacity_mw": 0.9907961365926332,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "egmere_primary",
+        "mean_embedded_capacity_mw": 0.1499730346940499,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "elm_park_primary",
+        "mean_embedded_capacity_mw": 1.4422875859899853,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "elmswell_primary",
+        "mean_embedded_capacity_mw": 0.740349551030944,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "elstree_primary",
+        "mean_embedded_capacity_mw": 1.6683065460970827,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "ely_primary",
+        "mean_embedded_capacity_mw": 1.4452742114690569,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "epsom",
+        "mean_embedded_capacity_mw": 1.421972150302065,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "esher",
+        "mean_embedded_capacity_mw": 0.4759724122604173,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "ewell",
+        "mean_embedded_capacity_mw": 1.002907731036894,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "exchange_st_primary",
+        "mean_embedded_capacity_mw": 0.4072930321069932,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "exning_primary",
+        "mean_embedded_capacity_mw": 0.9193262417891628,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "eye_primary",
+        "mean_embedded_capacity_mw": 0.4855273007029327,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "fairstead_primary",
+        "mean_embedded_capacity_mw": 0.5116866385739153,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "fakenham_primary",
+        "mean_embedded_capacity_mw": 0.4979042080445404,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "farcet_primary",
+        "mean_embedded_capacity_mw": 1.6248096559148686,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "farningham",
+        "mean_embedded_capacity_mw": 0.7844307072035296,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "faversham",
+        "mean_embedded_capacity_mw": 0.4559145248177741,
+        "gsp_numeric_id": 164.0
+    },
+    {
+        "location": "feltwell_primary",
+        "mean_embedded_capacity_mw": 1.7631683995051937,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "fleethall_local_primary",
+        "mean_embedded_capacity_mw": 0.3160337339777972,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "folkestone_east",
+        "mean_embedded_capacity_mw": 0.5745891987948127,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "fords_dunton_primary",
+        "mean_embedded_capacity_mw": 0.0,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "fore_hamlet_primary",
+        "mean_embedded_capacity_mw": 0.8285252160349823,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "forest_row",
+        "mean_embedded_capacity_mw": 1.0581437312437023,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "fornham_primary",
+        "mean_embedded_capacity_mw": 0.9137503382909364,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "four_elms",
+        "mean_embedded_capacity_mw": 0.3263800937771577,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "foxash_primary",
+        "mean_embedded_capacity_mw": 0.7374764185035207,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "framlingham_primary",
+        "mean_embedded_capacity_mw": 0.713079047576279,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "frogmore_primary",
+        "mean_embedded_capacity_mw": 0.0294556619932199,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "funthams_ln_primary",
+        "mean_embedded_capacity_mw": 0.1237351055742407,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "gardiners_ln_primary",
+        "mean_embedded_capacity_mw": 0.7815764521147445,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "gaywood_bridge_primary",
+        "mean_embedded_capacity_mw": 0.5098316557499585,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "george_hill_primary",
+        "mean_embedded_capacity_mw": 0.2798578986146832,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "glaxo_primary",
+        "mean_embedded_capacity_mw": 0.4582963139093163,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "glemsford_primary",
+        "mean_embedded_capacity_mw": 0.3874785823277566,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "goddards_green",
+        "mean_embedded_capacity_mw": 0.6405764578730142,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "godmanchester_primary",
+        "mean_embedded_capacity_mw": 0.9127952385124362,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "golders_grn_primary",
+        "mean_embedded_capacity_mw": 1.001993499539834,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "gooseberry_grn_primary",
+        "mean_embedded_capacity_mw": 0.2886503669603095,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "goudhurst",
+        "mean_embedded_capacity_mw": 0.2189306113272082,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "grain",
+        "mean_embedded_capacity_mw": 0.2966629888690857,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "gravesend_south",
+        "mean_embedded_capacity_mw": 0.1405743452725489,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "gravesend_west",
+        "mean_embedded_capacity_mw": 1.478637229232718,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "grays_primary",
+        "mean_embedded_capacity_mw": 0.701759174164268,
+        "gsp_numeric_id": 314.0
+    },
+    {
+        "location": "greenhill_primary",
+        "mean_embedded_capacity_mw": 0.3506096269983393,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "groton_primary",
+        "mean_embedded_capacity_mw": 0.8347969687226509,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "grove_mill_primary",
+        "mean_embedded_capacity_mw": 0.5739292084182823,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "grovehurst_local",
+        "mean_embedded_capacity_mw": 1.4107622129921535,
+        "gsp_numeric_id": 164.0
+    },
+    {
+        "location": "gt_missenden_primary",
+        "mean_embedded_capacity_mw": 0.5652592149228681,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "gt_yarmouth_grid",
+        "mean_embedded_capacity_mw": 0.9234531690622124,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "guildford_'a'",
+        "mean_embedded_capacity_mw": 0.9554600791158376,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "guildford_'b'",
+        "mean_embedded_capacity_mw": 1.4194631767536394,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "guyhirn_primary",
+        "mean_embedded_capacity_mw": 0.298190150532055,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "hadleigh_primary",
+        "mean_embedded_capacity_mw": 0.9487595373754344,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "hailsham",
+        "mean_embedded_capacity_mw": 0.5294335649926798,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "hainault_av_primary",
+        "mean_embedded_capacity_mw": 1.6983399871963163,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "halesworth_primary",
+        "mean_embedded_capacity_mw": 1.369982116305806,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "halling",
+        "mean_embedded_capacity_mw": 1.24193705972387,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "halstead_primary",
+        "mean_embedded_capacity_mw": 1.0399164427051228,
+        "gsp_numeric_id": 34.0
+    },
+    {
+        "location": "ham",
+        "mean_embedded_capacity_mw": 0.6335716583452172,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "hampden_park",
+        "mean_embedded_capacity_mw": 1.49185488243788,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "hampton",
+        "mean_embedded_capacity_mw": 0.9793412930618552,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "hanger_lea_primary",
+        "mean_embedded_capacity_mw": 0.1206824677699617,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "hangleton",
+        "mean_embedded_capacity_mw": 0.7455611518733409,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "hapton_primary",
+        "mean_embedded_capacity_mw": 0.6651302403288433,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "hardingham_primary",
+        "mean_embedded_capacity_mw": 0.5147946978471555,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "hardwick_rd_primary",
+        "mean_embedded_capacity_mw": 1.4034711845452394,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "harleston_primary",
+        "mean_embedded_capacity_mw": 0.605743953097152,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "harlow_west_grid",
+        "mean_embedded_capacity_mw": 0.8802874035598165,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "harold_wood_primary",
+        "mean_embedded_capacity_mw": 0.804126863541085,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "harrietsham",
+        "mean_embedded_capacity_mw": 0.4284880227146886,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "harrow_north_grid",
+        "mean_embedded_capacity_mw": 0.8010946066559569,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "harrowden_primary",
+        "mean_embedded_capacity_mw": 0.3032765050125385,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "hartspring_primary",
+        "mean_embedded_capacity_mw": 0.7086396098795517,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "hatch_end_primary",
+        "mean_embedded_capacity_mw": 0.5339676051728194,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "hatfield_primary",
+        "mean_embedded_capacity_mw": 0.384617337974176,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "haverhill_primary",
+        "mean_embedded_capacity_mw": 0.8645809783461345,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "hawkhurst",
+        "mean_embedded_capacity_mw": 0.6406576271215196,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "haywards_heath",
+        "mean_embedded_capacity_mw": 1.291243214018876,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "hedley_av_hss",
+        "mean_embedded_capacity_mw": 0.729045625110577,
+        "gsp_numeric_id": 314.0
+    },
+    {
+        "location": "hemblington_primary",
+        "mean_embedded_capacity_mw": 0.7970460830252912,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "hemel_east_primary",
+        "mean_embedded_capacity_mw": 0.8422186778614754,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "hemel_north_primary",
+        "mean_embedded_capacity_mw": 1.404788304429028,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "hendon_way_primary",
+        "mean_embedded_capacity_mw": 0.8854582037495425,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "henstead_primary",
+        "mean_embedded_capacity_mw": 0.5940392378065906,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "herne_bay",
+        "mean_embedded_capacity_mw": 1.4666019456382176,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "high_st_primary",
+        "mean_embedded_capacity_mw": 0.4778996174726257,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "highfield_primary",
+        "mean_embedded_capacity_mw": 1.2532229319461805,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "hilton_primary",
+        "mean_embedded_capacity_mw": 0.4569019854178525,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "histon_primary",
+        "mean_embedded_capacity_mw": 1.3082578748848777,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "hitcham_primary",
+        "mean_embedded_capacity_mw": 0.8274115241693528,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "hoddesdon_primary",
+        "mean_embedded_capacity_mw": 1.5138826219635992,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "honington_primary",
+        "mean_embedded_capacity_mw": 0.0095572513879772,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "horam",
+        "mean_embedded_capacity_mw": 1.2614145377503354,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "horley",
+        "mean_embedded_capacity_mw": 0.1539541938467359,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "hornchurch_local_primary",
+        "mean_embedded_capacity_mw": 0.8702129674440809,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "horsebridge",
+        "mean_embedded_capacity_mw": 0.1849432747337699,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "horsell",
+        "mean_embedded_capacity_mw": 1.4064535471176791,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "horsford_primary",
+        "mean_embedded_capacity_mw": 0.6181561231613159,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "houghton_regis_primary",
+        "mean_embedded_capacity_mw": 0.8389954720632367,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "hunstanton_primary",
+        "mean_embedded_capacity_mw": 1.3989671787504332,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "hurstpierpoint",
+        "mean_embedded_capacity_mw": 1.3675821741422018,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "hutton_primary",
+        "mean_embedded_capacity_mw": 0.7911714826938636,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "hythe_main",
+        "mean_embedded_capacity_mw": 1.0122222856482967,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "icklingham_primary",
+        "mean_embedded_capacity_mw": 0.1588122521974763,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "ilmer_primary",
+        "mean_embedded_capacity_mw": 0.579735776315517,
+        "gsp_numeric_id": 9.0
+    },
+    {
+        "location": "industrial_primary",
+        "mean_embedded_capacity_mw": 0.0349028150021041,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "ingatestone_primary",
+        "mean_embedded_capacity_mw": 0.4054468002876963,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "kemp_town",
+        "mean_embedded_capacity_mw": 1.2703860270823344,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "kempstone_primary",
+        "mean_embedded_capacity_mw": 0.2079336110180034,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "kennett_primary",
+        "mean_embedded_capacity_mw": 0.6183215048212153,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "kenninghall_primary",
+        "mean_embedded_capacity_mw": 1.0107294652782532,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "kensworth_primary",
+        "mean_embedded_capacity_mw": 0.3088931806865757,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "kenton_primary",
+        "mean_embedded_capacity_mw": 0.4833233415751167,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "kimbolton_primary",
+        "mean_embedded_capacity_mw": 0.4173966441584775,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "kimms_belt_primary",
+        "mean_embedded_capacity_mw": 1.34559232901034,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "kings_langley_primary",
+        "mean_embedded_capacity_mw": 0.3447765902261049,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "kingsbury_primary",
+        "mean_embedded_capacity_mw": 0.1265168090935789,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "kingston",
+        "mean_embedded_capacity_mw": 0.7971558790400103,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "kingswood_primary",
+        "mean_embedded_capacity_mw": 0.6617324428663729,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "knapton_primary",
+        "mean_embedded_capacity_mw": 0.5422181898059107,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "knebworth_primary",
+        "mean_embedded_capacity_mw": 0.8774803366230777,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "ladysmith_rd_primary",
+        "mean_embedded_capacity_mw": 0.7227288740335468,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "lake_&_elliot_primary",
+        "mean_embedded_capacity_mw": 0.463144300194735,
+        "gsp_numeric_id": 34.0
+    },
+    {
+        "location": "lakenheath_primary",
+        "mean_embedded_capacity_mw": 0.4823623924185118,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "lakeside_primary",
+        "mean_embedded_capacity_mw": 1.3268003862426647,
+        "gsp_numeric_id": 314.0
+    },
+    {
+        "location": "landbeach_primary",
+        "mean_embedded_capacity_mw": 0.6861220428737268,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "langdon_primary",
+        "mean_embedded_capacity_mw": 0.3817906744133262,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "langley_av_primary",
+        "mean_embedded_capacity_mw": 0.740757354385945,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "laxfield_primary",
+        "mean_embedded_capacity_mw": 0.3130489251368832,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "leatherhead_town",
+        "mean_embedded_capacity_mw": 0.0387167179123472,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "leigh_primary",
+        "mean_embedded_capacity_mw": 0.1116254980612415,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "leighton_buzzard_primary",
+        "mean_embedded_capacity_mw": 1.4740128685097669,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "leiston_primary",
+        "mean_embedded_capacity_mw": 1.8245777672606056,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "letchworth_factory",
+        "mean_embedded_capacity_mw": 0.8970061768703917,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "leverington_primary",
+        "mean_embedded_capacity_mw": 1.2979515703124016,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "lewes_central",
+        "mean_embedded_capacity_mw": 0.3441786312705684,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "lewes_town",
+        "mean_embedded_capacity_mw": 0.8656857676708017,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "lewsey_primary",
+        "mean_embedded_capacity_mw": 0.4697615157613877,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "lexden_primary",
+        "mean_embedded_capacity_mw": 0.0,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "lightweight_aggregates",
+        "mean_embedded_capacity_mw": 0.5321174917519641,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "lindsey_st_primary",
+        "mean_embedded_capacity_mw": 0.8607602795623723,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "linton_primary",
+        "mean_embedded_capacity_mw": 0.1758581235263887,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "little_belhus_primary",
+        "mean_embedded_capacity_mw": 0.7289288947595417,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "little_common",
+        "mean_embedded_capacity_mw": 1.153141989233744,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "littlehampton",
+        "mean_embedded_capacity_mw": 0.0824327956247066,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "littleport_primary",
+        "mean_embedded_capacity_mw": 0.652710674244835,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "long_rd_primary",
+        "mean_embedded_capacity_mw": 0.001726833935381,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "longfield",
+        "mean_embedded_capacity_mw": 0.5685652544320617,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "longstanton_primary",
+        "mean_embedded_capacity_mw": 0.9777694870314764,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "lonsdale_dr_primary",
+        "mean_embedded_capacity_mw": 1.1726211272989626,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "lordswood",
+        "mean_embedded_capacity_mw": 2.11628404287124,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "lowestoft_grid",
+        "mean_embedded_capacity_mw": 0.4947648636434179,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "lt_massingham_primary",
+        "mean_embedded_capacity_mw": 0.3987374778500797,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "luton_airport_primary",
+        "mean_embedded_capacity_mw": 0.6800165773535741,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "luton_north_grid",
+        "mean_embedded_capacity_mw": 0.7355552711978582,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "lyle_primary",
+        "mean_embedded_capacity_mw": 0.7213575523861205,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "madingley_rd_primary",
+        "mean_embedded_capacity_mw": 1.4148718682881,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "magdalen_way_primary",
+        "mean_embedded_capacity_mw": 1.2088858686099395,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "maldon_wick_primary",
+        "mean_embedded_capacity_mw": 0.82655402792971,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "manns_rd_primary",
+        "mean_embedded_capacity_mw": 0.5644565772395547,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "manor_road_primary",
+        "mean_embedded_capacity_mw": 0.9084304203095795,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "manor_way_primary",
+        "mean_embedded_capacity_mw": 1.0314251411027011,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "manston",
+        "mean_embedded_capacity_mw": 0.9505562690081516,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "manton_ln_primary",
+        "mean_embedded_capacity_mw": 1.0499376438379726,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "march_primary",
+        "mean_embedded_capacity_mw": 0.4709286974938535,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "marden",
+        "mean_embedded_capacity_mw": 1.107028122413663,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "margate",
+        "mean_embedded_capacity_mw": 0.9292688346699456,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "marks_tey_primary",
+        "mean_embedded_capacity_mw": 0.7838260446573928,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "marshalswick_primary",
+        "mean_embedded_capacity_mw": 0.4169873436072474,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "marshfoot_road_primary",
+        "mean_embedded_capacity_mw": 1.0224129106019304,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "marston_rd_primary",
+        "mean_embedded_capacity_mw": 0.170538338014434,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "martham_primary",
+        "mean_embedded_capacity_mw": 0.264610386095104,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "martlesham_primary",
+        "mean_embedded_capacity_mw": 1.560566982950734,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "may_&_baker_primary",
+        "mean_embedded_capacity_mw": 0.458077611844184,
+        "gsp_numeric_id": 322.0
+    },
+    {
+        "location": "medway",
+        "mean_embedded_capacity_mw": 0.3773061177568102,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "melbourn_primary",
+        "mean_embedded_capacity_mw": 0.3314865930194574,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "melton_primary",
+        "mean_embedded_capacity_mw": 0.2862953627087574,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "mereworth",
+        "mean_embedded_capacity_mw": 0.1508900506720358,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "merrow",
+        "mean_embedded_capacity_mw": 0.8720213049683123,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "merryhill_primary",
+        "mean_embedded_capacity_mw": 0.2126504362727177,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "mersea_rd_primary",
+        "mean_embedded_capacity_mw": 1.174625743884408,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "mildenhall_primary",
+        "mean_embedded_capacity_mw": 1.195972082364625,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "mill_hill_primary",
+        "mean_embedded_capacity_mw": 0.3232970887565261,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "milton_rd_primary",
+        "mean_embedded_capacity_mw": 0.972821928695201,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "molesey",
+        "mean_embedded_capacity_mw": 0.9560723769511088,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "moulsecoomb",
+        "mean_embedded_capacity_mw": 1.286252245455157,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "mountfield",
+        "mean_embedded_capacity_mw": 0.8205363470107371,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "mousehold_primary",
+        "mean_embedded_capacity_mw": 1.1043992593582603,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "much_hadham_primary",
+        "mean_embedded_capacity_mw": 1.0239686670004773,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "mulbarton_primary",
+        "mean_embedded_capacity_mw": 1.043826533571352,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "nacton_primary",
+        "mean_embedded_capacity_mw": 1.7797063371753166,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "narborough_primary",
+        "mean_embedded_capacity_mw": 0.7079097057464593,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "new_harlow_primary",
+        "mean_embedded_capacity_mw": 0.988781150972426,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "newhaven_town",
+        "mean_embedded_capacity_mw": 0.7974590311612433,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "newick",
+        "mean_embedded_capacity_mw": 0.8268646574591185,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "newmarket_primary",
+        "mean_embedded_capacity_mw": 1.4808677634701106,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "newtown_primary",
+        "mean_embedded_capacity_mw": 0.9206813215989872,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "ninfield_local",
+        "mean_embedded_capacity_mw": 0.4509327655668416,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "noak_hill_primary",
+        "mean_embedded_capacity_mw": 1.740218232525427,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "nork",
+        "mean_embedded_capacity_mw": 0.8885997421394616,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "north_cheam",
+        "mean_embedded_capacity_mw": 0.5566510631673683,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "north_chessington",
+        "mean_embedded_capacity_mw": 1.3451615900624525,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "north_chingford_primary",
+        "mean_embedded_capacity_mw": 0.3620130493276466,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "north_dr_primary",
+        "mean_embedded_capacity_mw": 0.4634148303975058,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "north_enfield_primary",
+        "mean_embedded_capacity_mw": 1.1625469076479775,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "north_finchley_primary",
+        "mean_embedded_capacity_mw": 0.4630224575214842,
+        "gsp_numeric_id": 201.0
+    },
+    {
+        "location": "north_hitchin_primary",
+        "mean_embedded_capacity_mw": 1.0438758290714103,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "north_sevenoaks",
+        "mean_embedded_capacity_mw": 1.072062578912598,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "north_shoreham",
+        "mean_embedded_capacity_mw": 0.6763613239397221,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "north_stevenage_primary",
+        "mean_embedded_capacity_mw": 1.0965784557616514,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "north_walsham_primary",
+        "mean_embedded_capacity_mw": 1.230239947516176,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "north_wembley_primary",
+        "mean_embedded_capacity_mw": 0.1610288412860744,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "north_worthing",
+        "mean_embedded_capacity_mw": 0.9703318436062358,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "northiam",
+        "mean_embedded_capacity_mw": 0.7099983394694811,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "northwold_primary",
+        "mean_embedded_capacity_mw": 0.7200174550105634,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "nutfield",
+        "mean_embedded_capacity_mw": 0.6940215318901104,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "ocklynge",
+        "mean_embedded_capacity_mw": 1.0421796123845362,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "offord_primary",
+        "mean_embedded_capacity_mw": 1.3302930058695337,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "old_rd_primary",
+        "mean_embedded_capacity_mw": 1.357019125866407,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "old_welwyn_primary",
+        "mean_embedded_capacity_mw": 0.4650497775819859,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "old_woking",
+        "mean_embedded_capacity_mw": 1.0811959511667326,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "ongar_primary",
+        "mean_embedded_capacity_mw": 0.3331471595974917,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "orford_primary",
+        "mean_embedded_capacity_mw": 1.2315599091364753,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "ormesby_primary",
+        "mean_embedded_capacity_mw": 0.3727488968692871,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "orpington",
+        "mean_embedded_capacity_mw": 0.7370469135474105,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "orton_primary",
+        "mean_embedded_capacity_mw": 1.91719584087421,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "outwell_moors_primary",
+        "mean_embedded_capacity_mw": 0.7041530868186038,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "oxted",
+        "mean_embedded_capacity_mw": 0.8122892025645486,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "paddock_wood",
+        "mean_embedded_capacity_mw": 1.4054462419249956,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "park_st_primary",
+        "mean_embedded_capacity_mw": 0.1181708638400223,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "parsons_heath_primary",
+        "mean_embedded_capacity_mw": 1.2675241732465627,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "peacehaven",
+        "mean_embedded_capacity_mw": 0.8158498916836733,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "peachman_way_primary",
+        "mean_embedded_capacity_mw": 0.1001476838663357,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "peasenhall_primary",
+        "mean_embedded_capacity_mw": 0.4489047041035928,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "penshurst",
+        "mean_embedded_capacity_mw": 0.5765153760189948,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "perry_primary",
+        "mean_embedded_capacity_mw": 1.4220822477648052,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "peterborough_central",
+        "mean_embedded_capacity_mw": 0.7652189251906745,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "peterborough_east_grid",
+        "mean_embedded_capacity_mw": 0.4430982747459938,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "peterborough_north_grid",
+        "mean_embedded_capacity_mw": 1.917202433169876,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "peterborough_south_grid",
+        "mean_embedded_capacity_mw": 0.2541835546273992,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "petts_wood",
+        "mean_embedded_capacity_mw": 0.3995941482196197,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "pevensey_bay",
+        "mean_embedded_capacity_mw": 0.8994254677774278,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "pinner_grn_primary",
+        "mean_embedded_capacity_mw": 0.7548561542732282,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "pitstone_primary",
+        "mean_embedded_capacity_mw": 0.9433174120128484,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "playfield_primary",
+        "mean_embedded_capacity_mw": 1.0546367876876563,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "polegate_town",
+        "mean_embedded_capacity_mw": 1.240479851405704,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "ponders_end_primary",
+        "mean_embedded_capacity_mw": 1.0401617254341504,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "portslade",
+        "mean_embedded_capacity_mw": 1.3577461669019133,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "prebend_st_primary",
+        "mean_embedded_capacity_mw": 1.4527650421715137,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "pulborough",
+        "mean_embedded_capacity_mw": 0.7892283320042749,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "purfleet_primary",
+        "mean_embedded_capacity_mw": 0.1185267911212,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "purley_local",
+        "mean_embedded_capacity_mw": 1.080330673502295,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "queens_park",
+        "mean_embedded_capacity_mw": 0.1605104107444018,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "radnor_primary",
+        "mean_embedded_capacity_mw": 0.5863269273088783,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "rainbow_ln_primary",
+        "mean_embedded_capacity_mw": 1.9235573587716173,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "rainham",
+        "mean_embedded_capacity_mw": 0.7926800027078028,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "rainham_mark",
+        "mean_embedded_capacity_mw": 1.1070939997063596,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "rainham_primary",
+        "mean_embedded_capacity_mw": 0.3782287369007124,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "ramsgate",
+        "mean_embedded_capacity_mw": 1.3453216921558695,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "rayleigh_local_primary",
+        "mean_embedded_capacity_mw": 1.0125456688812424,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "redhill_primary",
+        "mean_embedded_capacity_mw": 0.0290121531618234,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "reed_primary",
+        "mean_embedded_capacity_mw": 0.497504643692496,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "reigate",
+        "mean_embedded_capacity_mw": 0.1145733070197904,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "reydon_primary",
+        "mean_embedded_capacity_mw": 0.901869195556992,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "richborough",
+        "mean_embedded_capacity_mw": 1.080928924268122,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "richmond",
+        "mean_embedded_capacity_mw": 0.801110733499404,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "rickinghall_primary",
+        "mean_embedded_capacity_mw": 0.4606126101197019,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "ripe",
+        "mean_embedded_capacity_mw": 0.7457737205875952,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "robertsbridge",
+        "mean_embedded_capacity_mw": 0.9398050681442626,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "romford_north_primary",
+        "mean_embedded_capacity_mw": 0.6829982346592687,
+        "gsp_numeric_id": 320.0
+    },
+    {
+        "location": "romford_primary",
+        "mean_embedded_capacity_mw": 0.0862957812145928,
+        "gsp_numeric_id": 320.0
+    },
+    {
+        "location": "romney_warren",
+        "mean_embedded_capacity_mw": 0.4451494091782122,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "rottingdean",
+        "mean_embedded_capacity_mw": 0.6741603840121907,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "roundwood_rd_primary",
+        "mean_embedded_capacity_mw": 0.2429168888986879,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "rowley_ln_primary",
+        "mean_embedded_capacity_mw": 0.8803234857309808,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "royston_primary",
+        "mean_embedded_capacity_mw": 1.0520504148845076,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "rusthall",
+        "mean_embedded_capacity_mw": 0.4262373208780095,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "ruxley",
+        "mean_embedded_capacity_mw": 0.1636483778501303,
+        "gsp_numeric_id": 188.0
+    },
+    {
+        "location": "rye",
+        "mean_embedded_capacity_mw": 0.5510484309486263,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "rye_house_local_primary",
+        "mean_embedded_capacity_mw": 0.1112489694774041,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "saffron_walden_primary",
+        "mean_embedded_capacity_mw": 0.9980785790727942,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "sall",
+        "mean_embedded_capacity_mw": 0.7150987465737274,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "sandy_primary",
+        "mean_embedded_capacity_mw": 1.660051759435327,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "saunderton_primary",
+        "mean_embedded_capacity_mw": 1.2645282919894263,
+        "gsp_numeric_id": 9.0
+    },
+    {
+        "location": "sawston_primary",
+        "mean_embedded_capacity_mw": 0.3053714816302445,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "scottow_primary",
+        "mean_embedded_capacity_mw": 1.513784490544932,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "seaford",
+        "mean_embedded_capacity_mw": 1.0861168539985109,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "selinas_ln_primary",
+        "mean_embedded_capacity_mw": 0.5615267404535199,
+        "gsp_numeric_id": 320.0
+    },
+    {
+        "location": "selsdon",
+        "mean_embedded_capacity_mw": 0.5594689613328234,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "selwyn_rd_primary",
+        "mean_embedded_capacity_mw": 0.7985238941115349,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "severalls_ln_primary",
+        "mean_embedded_capacity_mw": 0.5431632227880081,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "shalford",
+        "mean_embedded_capacity_mw": 1.2634909335640474,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "shefford_primary",
+        "mean_embedded_capacity_mw": 0.561225907798191,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "shenley_primary",
+        "mean_embedded_capacity_mw": 0.4990179725553888,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "shepreth_primary",
+        "mean_embedded_capacity_mw": 0.4366973247756396,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "shepway",
+        "mean_embedded_capacity_mw": 2.116249028270855,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "shirley",
+        "mean_embedded_capacity_mw": 0.5025936409035221,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "shotley_primary",
+        "mean_embedded_capacity_mw": 0.9211079033698824,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "shrub_end_primary",
+        "mean_embedded_capacity_mw": 0.6972262416096682,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "sittingbourne_west",
+        "mean_embedded_capacity_mw": 0.9221194712496594,
+        "gsp_numeric_id": 164.0
+    },
+    {
+        "location": "sleaford_st_primary",
+        "mean_embedded_capacity_mw": 0.3031811554568029,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "smeeth",
+        "mean_embedded_capacity_mw": 0.0455363812985011,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "snettisham_primary",
+        "mean_embedded_capacity_mw": 0.7022104836300592,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "soham_primary",
+        "mean_embedded_capacity_mw": 1.330474521683505,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "sompting",
+        "mean_embedded_capacity_mw": 0.8834519667300511,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "south_benfleet_primary",
+        "mean_embedded_capacity_mw": 0.4461232727952644,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "south_chelmsford_primary",
+        "mean_embedded_capacity_mw": 0.3204630242307322,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "south_chingford_primary",
+        "mean_embedded_capacity_mw": 0.3919325756543688,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "south_harlow_primary",
+        "mean_embedded_capacity_mw": 0.5257779181991493,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "south_harrow_primary",
+        "mean_embedded_capacity_mw": 0.5612035127634502,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "south_hitchin_primary",
+        "mean_embedded_capacity_mw": 0.7674313349618438,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "south_hove",
+        "mean_embedded_capacity_mw": 1.6925905974530382,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "south_orpington",
+        "mean_embedded_capacity_mw": 0.877083912738779,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "south_ruislip_primary",
+        "mean_embedded_capacity_mw": 0.3951108752254184,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "south_stevenage_primary",
+        "mean_embedded_capacity_mw": 0.36466660288816,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "south_witham_primary",
+        "mean_embedded_capacity_mw": 0.6858242590783051,
+        "gsp_numeric_id": 34.0
+    },
+    {
+        "location": "south_woodham_primary",
+        "mean_embedded_capacity_mw": 1.1180793172088117,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "south_worthing",
+        "mean_embedded_capacity_mw": 0.6551513248605183,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "southend_grid",
+        "mean_embedded_capacity_mw": 1.0345416859368592,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "southend_west_primary",
+        "mean_embedded_capacity_mw": 0.8750417109571987,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "southgate",
+        "mean_embedded_capacity_mw": 0.8037855919333892,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "southwater",
+        "mean_embedded_capacity_mw": 0.3630679490926296,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "southwick",
+        "mean_embedded_capacity_mw": 0.823533233917879,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "sprowston_primary",
+        "mean_embedded_capacity_mw": 0.9549756378100064,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "st_anthony_st_primary",
+        "mean_embedded_capacity_mw": 0.1170782794829451,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "st_helier",
+        "mean_embedded_capacity_mw": 0.4833192032784169,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "st_ives_primary",
+        "mean_embedded_capacity_mw": 0.0394142696033635,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "st_pauls_primary",
+        "mean_embedded_capacity_mw": 0.4165066741887157,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "st_peters",
+        "mean_embedded_capacity_mw": 2.01373839659366,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "st_stephens_primary",
+        "mean_embedded_capacity_mw": 0.8184839811114316,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "stalham_primary",
+        "mean_embedded_capacity_mw": 1.3783041320013956,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "stanford",
+        "mean_embedded_capacity_mw": 0.3298526529558894,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "stanton_primary",
+        "mean_embedded_capacity_mw": 0.3209257485897282,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "stevenage_primary",
+        "mean_embedded_capacity_mw": 0.7698973722440323,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "steyning",
+        "mean_embedded_capacity_mw": 0.039500274263583,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "stody_primary",
+        "mean_embedded_capacity_mw": 0.970883939806269,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "stone",
+        "mean_embedded_capacity_mw": 0.2138374261434565,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "stonegrove_primary",
+        "mean_embedded_capacity_mw": 0.8854615732231632,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "stopsley",
+        "mean_embedded_capacity_mw": 0.5960192827449539,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "storeys_way_primary",
+        "mean_embedded_capacity_mw": 0.6813667988469807,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "stowmarket_grid",
+        "mean_embedded_capacity_mw": 1.7002513213271813,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "straight_rd_primary",
+        "mean_embedded_capacity_mw": 0.3693081265655011,
+        "gsp_numeric_id": 299.0
+    },
+    {
+        "location": "sudbury_court_primary",
+        "mean_embedded_capacity_mw": 0.8037780089163209,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "sudbury_primary",
+        "mean_embedded_capacity_mw": 1.1334686112886854,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "sundon",
+        "mean_embedded_capacity_mw": 0.4708901886342858,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "sundridge",
+        "mean_embedded_capacity_mw": 0.7682419257488917,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "surbiton",
+        "mean_embedded_capacity_mw": 0.916310478530097,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "sutton_a",
+        "mean_embedded_capacity_mw": 0.4164408309518961,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "sutton_b",
+        "mean_embedded_capacity_mw": 0.8736537547840378,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "swaffham_grid",
+        "mean_embedded_capacity_mw": 0.3257197946858889,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "swanley",
+        "mean_embedded_capacity_mw": 1.0769722126685013,
+        "gsp_numeric_id": 210.0
+    },
+    {
+        "location": "takeley_primary",
+        "mean_embedded_capacity_mw": 0.8023566178524691,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "tapster_st_primary",
+        "mean_embedded_capacity_mw": 0.8331512851609709,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "tattingstone_primary",
+        "mean_embedded_capacity_mw": 0.7816089347800717,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "teddington",
+        "mean_embedded_capacity_mw": 1.024739745308681,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "thame_primary",
+        "mean_embedded_capacity_mw": 0.3229526639204218,
+        "gsp_numeric_id": 9.0
+    },
+    {
+        "location": "thanet",
+        "mean_embedded_capacity_mw": 0.6566288555140434,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "thaxted_local",
+        "mean_embedded_capacity_mw": 0.7739615265286869,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "the_cross",
+        "mean_embedded_capacity_mw": 0.8911362971829226,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "the_droveway",
+        "mean_embedded_capacity_mw": 1.025393652213432,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "the_limes",
+        "mean_embedded_capacity_mw": 0.7601795609265182,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "thetford_grid",
+        "mean_embedded_capacity_mw": 1.001143378008356,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "thompsons_ln_primary",
+        "mean_embedded_capacity_mw": 0.5703583211529979,
+        "gsp_numeric_id": 47.0
+    },
+    {
+        "location": "thorley_primary",
+        "mean_embedded_capacity_mw": 0.4546407581912439,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "thorpe_bay_primary",
+        "mean_embedded_capacity_mw": 1.272527023793145,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "ticehurst",
+        "mean_embedded_capacity_mw": 0.4583321951041564,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "tilbury_local_primary",
+        "mean_embedded_capacity_mw": 1.0742491576004205,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "tillingham_primary",
+        "mean_embedded_capacity_mw": 0.388220277741469,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "tiptree_primary",
+        "mean_embedded_capacity_mw": 0.4986498346205794,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "tivetshall_primary",
+        "mean_embedded_capacity_mw": 0.3617564962274681,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "tottenham_grid",
+        "mean_embedded_capacity_mw": 0.8529481739409501,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "tring_primary",
+        "mean_embedded_capacity_mw": 1.0174224960650309,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "tuckswood_primary",
+        "mean_embedded_capacity_mw": 1.1402443165937182,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "tunnel_primary",
+        "mean_embedded_capacity_mw": 0.5343032148881073,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "turnford_primary",
+        "mean_embedded_capacity_mw": 0.8874359642383582,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "turret_ln_primary",
+        "mean_embedded_capacity_mw": 0.9516131484267022,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "twickenham",
+        "mean_embedded_capacity_mw": 0.0858432645077643,
+        "gsp_numeric_id": 65.0
+    },
+    {
+        "location": "uckfield",
+        "mean_embedded_capacity_mw": 1.892388205062838,
+        "gsp_numeric_id": 212.0
+    },
+    {
+        "location": "uplands_pk_primary",
+        "mean_embedded_capacity_mw": 0.8890062173207601,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "upwell_lakes_end_primary",
+        "mean_embedded_capacity_mw": 0.1323207139886545,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "valleybridge_rd_primary",
+        "mean_embedded_capacity_mw": 1.737645881171604,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "verity_way_primary",
+        "mean_embedded_capacity_mw": 0.5001658053687922,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "waddesdon_primary",
+        "mean_embedded_capacity_mw": 0.8285798719080772,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "walsoken_grid",
+        "mean_embedded_capacity_mw": 0.4671267101997389,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "waltham_abbey_primary",
+        "mean_embedded_capacity_mw": 1.3473125170607594,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "walton",
+        "mean_embedded_capacity_mw": 0.6934317848574829,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "ware_primary",
+        "mean_embedded_capacity_mw": 0.4589547450151672,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "warehorne",
+        "mean_embedded_capacity_mw": 0.3210768788613886,
+        "gsp_numeric_id": 258.0
+    },
+    {
+        "location": "warners_end_primary",
+        "mean_embedded_capacity_mw": 1.3991931642397113,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "water_ln_primary",
+        "mean_embedded_capacity_mw": 1.0350568265546094,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "waterside",
+        "mean_embedded_capacity_mw": 0.4370962776970907,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "watlington_primary",
+        "mean_embedded_capacity_mw": 0.5096654362880503,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "watsons_rd_primary",
+        "mean_embedded_capacity_mw": 1.3769763616786697,
+        "gsp_numeric_id": 291.0
+    },
+    {
+        "location": "watton_primary",
+        "mean_embedded_capacity_mw": 1.232534656208523,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "wealdstone_primary",
+        "mean_embedded_capacity_mw": 1.0243512552307017,
+        "gsp_numeric_id": 110.0
+    },
+    {
+        "location": "welwyn_primary",
+        "mean_embedded_capacity_mw": 1.3249045592425717,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "wendover_primary",
+        "mean_embedded_capacity_mw": 0.7983139476723434,
+        "gsp_numeric_id": 9.0
+    },
+    {
+        "location": "west_beckham_primary",
+        "mean_embedded_capacity_mw": 1.247458831447264,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "west_bedford_primary",
+        "mean_embedded_capacity_mw": 0.5603924562917888,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "west_braintree_primary",
+        "mean_embedded_capacity_mw": 0.5451487741033456,
+        "gsp_numeric_id": 34.0
+    },
+    {
+        "location": "west_chelmsford_primary",
+        "mean_embedded_capacity_mw": 1.4950002657993942,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "west_croydon",
+        "mean_embedded_capacity_mw": 0.7426169173274031,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "west_grn_primary",
+        "mean_embedded_capacity_mw": 0.4598379157085664,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "west_hanningfield_pri",
+        "mean_embedded_capacity_mw": 0.4996735496415618,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "west_hertford_primary",
+        "mean_embedded_capacity_mw": 1.0423178591561362,
+        "gsp_numeric_id": 251.0
+    },
+    {
+        "location": "west_hoathly",
+        "mean_embedded_capacity_mw": 1.02311255655236,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "west_horndon_primary",
+        "mean_embedded_capacity_mw": 0.1067871495285525,
+        "gsp_numeric_id": 290.0
+    },
+    {
+        "location": "west_letchworth_primary",
+        "mean_embedded_capacity_mw": 0.7499187465091656,
+        "gsp_numeric_id": 317.0
+    },
+    {
+        "location": "west_potters_bar_primary",
+        "mean_embedded_capacity_mw": 0.8661033054522168,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "west_weybridge",
+        "mean_embedded_capacity_mw": 0.3892372004674065,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "west_wickham",
+        "mean_embedded_capacity_mw": 0.676760425005609,
+        "gsp_numeric_id": 20.0
+    },
+    {
+        "location": "west_worthing",
+        "mean_embedded_capacity_mw": 1.048695036499979,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "westbury_primary",
+        "mean_embedded_capacity_mw": 0.3989326487917926,
+        "gsp_numeric_id": 300.0
+    },
+    {
+        "location": "westgate",
+        "mean_embedded_capacity_mw": 1.7762481847740228,
+        "gsp_numeric_id": 334.0
+    },
+    {
+        "location": "weston_longville_primary",
+        "mean_embedded_capacity_mw": 1.457765011497624,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "westoning_primary",
+        "mean_embedded_capacity_mw": 0.957434170417364,
+        "gsp_numeric_id": 280.0
+    },
+    {
+        "location": "wethersfield_primary",
+        "mean_embedded_capacity_mw": 0.6866208421920544,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "weybridge",
+        "mean_embedded_capacity_mw": 0.387739115492415,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "whapload_rd_primary",
+        "mean_embedded_capacity_mw": 0.8492785971687205,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "whetstone_primary",
+        "mean_embedded_capacity_mw": 0.3845438295306422,
+        "gsp_numeric_id": 40.0
+    },
+    {
+        "location": "white_roding_primary",
+        "mean_embedded_capacity_mw": 0.0082021670666408,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "whitstable",
+        "mean_embedded_capacity_mw": 1.6471784509128409,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "whittlesey_primary",
+        "mean_embedded_capacity_mw": 1.3029045684122469,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "wickford_primary",
+        "mean_embedded_capacity_mw": 1.5203064098762105,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "wiggenhall_primary",
+        "mean_embedded_capacity_mw": 0.3036999921772361,
+        "gsp_numeric_id": 297.0
+    },
+    {
+        "location": "wingham",
+        "mean_embedded_capacity_mw": 0.5686549692522755,
+        "gsp_numeric_id": 323.0
+    },
+    {
+        "location": "withdean",
+        "mean_embedded_capacity_mw": 1.1335229129861513,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "wix_primary",
+        "mean_embedded_capacity_mw": 0.2429125676717108,
+        "gsp_numeric_id": 38.0
+    },
+    {
+        "location": "woking",
+        "mean_embedded_capacity_mw": 1.3300370361703977,
+        "gsp_numeric_id": 315.0
+    },
+    {
+        "location": "woodwalton_primary",
+        "mean_embedded_capacity_mw": 0.6145359922728706,
+        "gsp_numeric_id": 101.0
+    },
+    {
+        "location": "worstead_primary",
+        "mean_embedded_capacity_mw": 0.447023932226894,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "worthing_town",
+        "mean_embedded_capacity_mw": 1.0160510002139742,
+        "gsp_numeric_id": 30.0
+    },
+    {
+        "location": "wratting_primary",
+        "mean_embedded_capacity_mw": 0.4631255559938828,
+        "gsp_numeric_id": 226.0
+    },
+    {
+        "location": "writtle_st_primary",
+        "mean_embedded_capacity_mw": 0.8151214112234378,
+        "gsp_numeric_id": 245.0
+    },
+    {
+        "location": "wrotham_heath",
+        "mean_embedded_capacity_mw": 0.5778498614471043,
+        "gsp_numeric_id": 174.0
+    },
+    {
+        "location": "wroxham_primary",
+        "mean_embedded_capacity_mw": 0.4470324806416232,
+        "gsp_numeric_id": 214.0
+    },
+    {
+        "location": "wymondham_primary",
+        "mean_embedded_capacity_mw": 0.3455070469480413,
+        "gsp_numeric_id": 214.0
+    }
+]
