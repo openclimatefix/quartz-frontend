@@ -83,10 +83,10 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
     >
       <span></span>
-      {/*<PlayButton*/}
-      {/*  startTime={get30MinNow()}*/}
-      {/*  endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}*/}
-      {/*></PlayButton>*/}
+      <PlayButton
+        startTime={get30MinNow()}
+        endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}
+      ></PlayButton>
     </ForecastHeaderUI>
   );
 };

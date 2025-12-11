@@ -13,6 +13,8 @@ import nationalShapeData from "../../data/national_gsp_shape.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
 import dnoGspGroupings from "../../data/dno_gsp_groupings.json";
 import nationalGspZone from "../../data/national_gsp_zone.json";
+import ukpnData from "../../data/ukpn_primary_postcode_area.json";
+import primaryCapacities from "../../data/primary_capacities.json";
 import ngZones from "../../data/ng_zones.json";
 import { formatISODateString, getOpacityValueFromPVNormalized, getRoundedPv } from "./utils";
 import { get30MinNow } from "./globalState";
@@ -72,6 +74,86 @@ const setFeatureObjectProps = (
   };
 };
 
+const UKPNRegionGspIds = [
+  dnoGspGroupings["UKPN (East)"],
+  dnoGspGroupings["UKPN (London)"],
+  dnoGspGroupings["UKPN (South)"]
+].flat();
+
+const mapGspFeature: (
+  featureObj: Feature,
+  combinedData?: CombinedData,
+  gspForecastsDataByTimestamp?: components["schemas"]["OneDatetimeManyForecastValues"][],
+  targetTime?: string,
+  gspDeltas?: Map<string, GspDeltaValue>
+) => Feature | undefined = (
+  featureObj,
+  combinedData,
+  gspForecastsDataByTimestamp = [],
+  targetTime,
+  gspDeltas
+) => {
+  const gspSystemInfo = combinedData?.allGspSystemData?.find(
+    (system) => system.gspName === featureObj?.properties?.GSPs
+  );
+  // TODO better handling for if gsp not found
+  const gspId = gspSystemInfo?.gspId || 1000;
+  // Exclude feature if GSP id is not in one of UKPN's DNO areas
+  if (!gspSystemInfo) return;
+  if (!UKPNRegionGspIds.includes(gspId)) return;
+  let selectedFC;
+  let selectedFCValue;
+  let selectedActualValueMW: number | undefined;
+  const gspRealData =
+    combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
+  // If targetTime selected on chart, find the forecast/actuals data for that time
+  if (gspForecastsDataByTimestamp && targetTime) {
+    selectedFC = getGspForecastForTime(
+      gspForecastsDataByTimestamp,
+      formatISODateString(targetTime)
+    );
+    if (selectedFC && gspSystemInfo) selectedFCValue = selectedFC.forecastValues[gspId];
+    selectedActualValueMW = getGspActualValueMwForTime(
+      gspRealData,
+      formatISODateString(targetTime),
+      gspId
+    );
+  } else if (gspForecastsDataByTimestamp) {
+    // If no targetTime selected, find the latest forecast/actuals data
+    let latestTimestamp = get30MinNow();
+    selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
+      ?.forecastValues[gspId];
+    selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, gspId);
+  }
+
+  // Update the feature object with the calculated forecast/actuals data
+  const updatedFeatureObj: MapFeatureObject = {
+    ...featureObj,
+    properties: setFeatureObjectProps(
+      { ...featureObj.properties, id: gspId },
+      gspSystemInfo,
+      selectedFCValue,
+      selectedActualValueMW
+    )
+  };
+  if (gspDeltas) {
+    const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(gspId));
+    updatedFeatureObj.properties = {
+      ...updatedFeatureObj.properties,
+      [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
+      [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
+      [SelectedData.expectedPowerGenerationNormalized]:
+        Number(currentGspDelta?.deltaNormalized) || 0,
+      [SelectedData.expectedPowerGenerationNormalizedRounded]:
+        Number(currentGspDelta?.deltaNormalized) || 0,
+      [SelectedData.delta]: currentGspDelta?.delta || 0,
+      deltaBucket: currentGspDelta?.deltaBucket || 0
+    };
+  }
+
+  return updatedFeatureObj;
+};
+
 const mapGspFeatures: (
   features: Feature[],
   combinedData?: CombinedData,
@@ -85,72 +167,15 @@ const mapGspFeatures: (
   targetTime,
   gspDeltas
 ) => {
-  const UKPNRegionGspIds = [
-    dnoGspGroupings["UKPN (East)"],
-    dnoGspGroupings["UKPN (London)"],
-    dnoGspGroupings["UKPN (South)"]
-  ].flat();
   return features
     .map((featureObj, index) => {
-      const gspSystemInfo = combinedData?.allGspSystemData?.find(
-        (system) => system.gspName === featureObj?.properties?.GSPs
+      return mapGspFeature(
+        featureObj,
+        combinedData,
+        gspForecastsDataByTimestamp,
+        targetTime,
+        gspDeltas
       );
-      // TODO better handling for if gsp not found
-      const gspId = gspSystemInfo?.gspId || 1000;
-      // Exclude feature if GSP id is not in one of UKPN's DNO areas
-      if (!gspSystemInfo) return;
-      if (!UKPNRegionGspIds.includes(gspId)) return;
-      let selectedFC;
-      let selectedFCValue;
-      let selectedActualValueMW: number | undefined;
-      const gspRealData =
-        combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
-      // If targetTime selected on chart, find the forecast/actuals data for that time
-      if (gspForecastsDataByTimestamp && targetTime) {
-        selectedFC = getGspForecastForTime(
-          gspForecastsDataByTimestamp,
-          formatISODateString(targetTime)
-        );
-        if (selectedFC && gspSystemInfo) selectedFCValue = selectedFC.forecastValues[gspId];
-        selectedActualValueMW = getGspActualValueMwForTime(
-          gspRealData,
-          formatISODateString(targetTime),
-          gspId
-        );
-      } else if (gspForecastsDataByTimestamp) {
-        // If no targetTime selected, find the latest forecast/actuals data
-        let latestTimestamp = get30MinNow();
-        selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
-          ?.forecastValues[gspId];
-        selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, gspId);
-      }
-
-      // Update the feature object with the calculated forecast/actuals data
-      const updatedFeatureObj: MapFeatureObject = {
-        ...featureObj,
-        properties: setFeatureObjectProps(
-          { ...featureObj.properties, id: gspId },
-          gspSystemInfo,
-          selectedFCValue,
-          selectedActualValueMW
-        )
-      };
-      if (gspDeltas) {
-        const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(gspId));
-        updatedFeatureObj.properties = {
-          ...updatedFeatureObj.properties,
-          [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
-          [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
-          [SelectedData.expectedPowerGenerationNormalized]:
-            Number(currentGspDelta?.deltaNormalized) || 0,
-          [SelectedData.expectedPowerGenerationNormalizedRounded]:
-            Number(currentGspDelta?.deltaNormalized) || 0,
-          [SelectedData.delta]: currentGspDelta?.delta || 0,
-          deltaBucket: currentGspDelta?.deltaBucket || 0
-        };
-      }
-
-      return updatedFeatureObj;
     })
     .filter((feature) => !!feature) as Feature[];
 };
@@ -289,6 +314,67 @@ export const generateGeoJsonForecastData: (
       gspForecastsDataByTimestamp,
       targetTime
     );
+  } else if (aggregation === NationalAggregation.primaries) {
+    console.log("aggregating to primaries");
+    const primariesShapeJson = ukpnData as FeatureCollection;
+    features = primariesShapeJson.features.map((feature) => {
+      // console.log("feature", feature);
+      const id = feature.properties?.primary;
+      const zoneInstalledCapacity = Number(feature.properties?.firmcapacitywinter);
+      const gspName = feature.properties?.grid_supply_point;
+      if (!id || !gspName) return feature;
+
+      const gspMeta = combinedData?.allGspSystemData?.find(
+        (f) => f.regionName?.toLowerCase() === gspName.toLowerCase()
+      );
+      const gspId = gspMeta?.gspId;
+      const gspCode = gspMeta?.gspName;
+      if (!gspMeta) return feature;
+
+      feature = {
+        ...feature,
+        properties: {
+          ...feature.properties,
+          GSPs: gspCode
+        }
+      };
+
+      const gspFeature = mapGspFeature(
+        feature,
+        combinedData,
+        gspForecastsDataByTimestamp,
+        targetTime,
+        gspDeltas
+      );
+      if (!gspFeature) return feature;
+
+      // remove any words with numeric characters from the primary name
+      let strippedName = feature.properties?.primary
+        ?.split(" ")
+        .filter((s: string) => !/\d/.test(s))
+        .join(" ")
+        .toLowerCase();
+      // Capitalise the first letter of each word
+      strippedName = strippedName?.replace(/\b\w/g, (l) => l.toUpperCase());
+      const snakeCaseName = strippedName.replace(/\s+/g, "_").toLowerCase();
+      const primaryCapacityMw =
+        primaryCapacities.find((p) => p.location === snakeCaseName)?.mean_embedded_capacity_mw || 0;
+      const primaryEstimatedGeneration = primaryCapacityMw
+        ? primaryCapacityMw * gspFeature?.properties?.expectedPowerGenerationMegawatts
+        : 0;
+
+      return {
+        ...gspFeature,
+        properties: {
+          ...gspFeature.properties,
+          ...feature.properties,
+          installedCapacityMw: zoneInstalledCapacity,
+          gspId: gspMeta.gspId,
+          gspDisplayName: strippedName,
+          expectedPowerGenerationMegawatts: primaryEstimatedGeneration
+        }
+      };
+    });
   }
   const forecastGeoJson = {
     type: "FeatureCollection" as "FeatureCollection",

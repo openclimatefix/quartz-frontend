@@ -67,7 +67,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
     switch (activeUnit) {
       case ActiveUnit.MW:
-        return SelectedData.expectedPowerGenerationMegawattsRounded;
+        return SelectedData.expectedPowerGenerationMegawatts;
       case ActiveUnit.percentage:
         return SelectedData.expectedPowerGenerationNormalizedRounded;
       case ActiveUnit.capacity:
@@ -141,8 +141,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
   }, [showConstraints, mapRef]);
 
-  const maxPower =
-    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
+  const maxPower = nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 250;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
@@ -197,10 +196,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, [combinedData.allGspSystemData]);
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
-    const geoJsonHasData =
-      generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
-      typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
-        ?.expectedPowerGenerationMegawatts === "number";
+    // const geoJsonHasData =
+    //   generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
+    //   typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
+    //     ?.expectedPowerGenerationMegawatts === "number";
+    const geoJsonHasData = true;
     if (!geoJsonHasData) {
       console.log("geoJsonForecastData empty, trying again...");
       setShouldUpdateMap(true);
@@ -262,7 +262,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
               : "-";
             forecastValue =
               properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(0) || 0;
-            unit = "MW";
+            unit = "KW";
           } else if (currentActiveUnit === ActiveUnit.percentage) {
             // Map in % mode
             actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
@@ -289,9 +289,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             unit = "MW";
           }
 
-          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
+          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Forecast</span>
               <div>
-                <span class="">${actualValue}</span>  /  
+<!--                <span class="">${actualValue}</span>  /  -->
                 <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">${unit}</span>
               </div>`;
           if (currentActiveUnit === ActiveUnit.capacity) {
@@ -465,23 +465,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             }
           });
         }
-        if (!map.getLayer("ukpn-data-labels")) {
-          map.addLayer({
-            id: "ukpn-data-labels",
-            type: "symbol",
-            source: "ukpn-data",
-            // layout: {
-            //   "text-field": "{id}",
-            //   "text-size": 12,
-            //   "symbol-placement": "line"
-            // visibility: showConstraintsRef ? "visible" : "none"
-            // },
-            paint: {
-              "text-color": "#fff"
-              // "text-color": ["case", ["==", ["get", "Constraint"], "TBC"], "#fff", "transparent"]
-            }
-          });
-        }
       }
 
       // set initial visibility from global state
@@ -551,13 +534,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       ) : (
         // ) : !forecastError && !initForecastData ? (
         <>
-          {(!combinedData.allGspForecastData ||
-            combinedLoading.allGspForecastLoading ||
-            mapDataLoading) && (
-            <LoadStateMap>
-              <Spinner />
-            </LoadStateMap>
-          )}
+          {/*{(!combinedData.allGspForecastData ||*/}
+          {/*  combinedLoading.allGspForecastLoading ||*/}
+          {/*  mapDataLoading) && (*/}
+          {/*  <LoadStateMap>*/}
+          {/*    <Spinner />*/}
+          {/*  </LoadStateMap>*/}
+          {/*)}*/}
           <Map
             loadDataOverlay={(map: { current: mapboxgl.Map }) => {
               mapRef.current = map.current;

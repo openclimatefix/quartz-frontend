@@ -7,6 +7,7 @@ export enum ActiveUnit {
 }
 
 export enum NationalAggregation {
+  primaries = "Primaries",
   GSP = "GSP",
   zone = "Zone",
   DNO = "DNO",

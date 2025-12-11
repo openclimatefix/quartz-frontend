@@ -25,15 +25,15 @@ const MeasuringUnit = ({
     aggregation: NationalAggregation
   ) => {
     event.preventDefault();
-    Sentry.captureMessage("Event: Aggregation level changed", {
-      extra: {
-        eventType: "UserAction",
-        aggregation,
-        timestamp: new Date().getTime() // Just to make the event unique
-      }
-    });
+    // Sentry.captureMessage("Event: Aggregation level changed", {
+    //   extra: {
+    //     eventType: "UserAction",
+    //     aggregation,
+    //     timestamp: new Date().getTime() // Just to make the event unique
+    //   }
+    // });
     setNationalAggregation(aggregation);
-    console.log("sent event to Sentry: aggregation", aggregation);
+    // console.log("sent event to Sentry: aggregation", aggregation);
   };
   const buttonClasses =
     "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";
@@ -92,26 +92,34 @@ const MeasuringUnit = ({
           />
         </div>
       </div>
-      {/*<div className="flex justify-end mr-0 mt-3">*/}
-      {/*  <div className="inline-block">*/}
-      {/*    <MapUIButton<NationalAggregation>*/}
-      {/*      id={"GroupButtonGSP"}*/}
-      {/*      active={nationalAggregation === NationalAggregation.GSP}*/}
-      {/*      isLoading={isLoading}*/}
-      {/*      onToggle={onToggleAggregation}*/}
-      {/*      text={"GSP"}*/}
-      {/*      value={NationalAggregation.GSP}*/}
-      {/*    />*/}
-      {/*    <MapUIButton<NationalAggregation>*/}
-      {/*      id={"GroupButtonZones"}*/}
-      {/*      active={nationalAggregation === NationalAggregation.DNO}*/}
-      {/*      isLoading={isLoading}*/}
-      {/*      onToggle={onToggleAggregation}*/}
-      {/*      text={"DNO"}*/}
-      {/*      value={NationalAggregation.DNO}*/}
-      {/*    />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
+      <div className="flex justify-end mr-0 mt-3">
+        <div className="inline-block">
+          <MapUIButton<NationalAggregation>
+            id={"GroupButtonGSP"}
+            active={nationalAggregation === NationalAggregation.primaries}
+            isLoading={isLoading}
+            onToggle={onToggleAggregation}
+            text={"Primaries"}
+            value={NationalAggregation.primaries}
+          />
+          <MapUIButton<NationalAggregation>
+            id={"GroupButtonGSP"}
+            active={nationalAggregation === NationalAggregation.GSP}
+            isLoading={isLoading}
+            onToggle={onToggleAggregation}
+            text={"GSP"}
+            value={NationalAggregation.GSP}
+          />
+          <MapUIButton<NationalAggregation>
+            id={"GroupButtonZones"}
+            active={nationalAggregation === NationalAggregation.DNO}
+            isLoading={isLoading}
+            onToggle={onToggleAggregation}
+            text={"DNO"}
+            value={NationalAggregation.DNO}
+          />
+        </div>
+      </div>
     </>
   );
 };
