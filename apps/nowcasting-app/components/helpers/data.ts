@@ -355,7 +355,7 @@ export const generateGeoJsonForecastData: (
         .join(" ")
         .toLowerCase();
       // Capitalise the first letter of each word
-      strippedName = strippedName?.replace(/\b\w/g, (l) => l.toUpperCase());
+      strippedName = strippedName?.replace(/\b\w/g, (l: string) => l.toUpperCase());
       const snakeCaseName = strippedName.replace(/\s+/g, "_").toLowerCase();
       const primaryCapacityMw =
         primaryCapacities.find((p) => p.location === snakeCaseName)?.mean_embedded_capacity_mw || 0;
