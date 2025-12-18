@@ -23,7 +23,7 @@ import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
 import { FeatureCollection } from "geojson";
-import * as turf from "@turf/turf";
+import nearestPointOnLine from "@turf/nearest-point-on-line";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -490,7 +490,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             ) as LngLatLike;
             const nearestPoint =
               coordinates && feature.geometry.type === "LineString"
-                ? turf.nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
+                ? nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
                 : null;
             popup
               .setLngLat((nearestPoint?.geometry.coordinates as LngLatLike) || [0, 50])

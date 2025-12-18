@@ -1,7 +1,6 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import Layout from "../components/layout/layout";
-import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
@@ -56,6 +55,9 @@ import {
   calculateHistoricDataStartFromForecastValuesIntervalInMinutes,
   getEarliestForecastTimestamp
 } from "../components/helpers/data";
+import dynamic from "next/dynamic";
+
+const PvLatestMap = dynamic(() => import("../components/map/pvLatestMap"), { ssr: false });
 
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
