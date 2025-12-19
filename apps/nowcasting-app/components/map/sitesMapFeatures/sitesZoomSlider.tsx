@@ -101,27 +101,27 @@ const Slider: React.FC<SliderProps> = ({ selected, unselected, aggregation, setA
           Aggregation Level
         </div>
         <div className="flex flex-col justify-between">
-          {/*<div className="flex flex-row justify-around bg-ocf-delta-950 bg-opacity-60 font-bold">*/}
-          {/*  <div*/}
-          {/*    className="p-2 text-base text-white text-opacity-30 hover:cursor-pointer hover:text-white"*/}
-          {/*    onClick={toggleAutoZoom}*/}
-          {/*  >*/}
-          {/*    Select*/}
-          {/*  </div>*/}
-          {/*  <div className="text-ocf-yellow-500 p-2">*/}
-          {/*    <span*/}
-          {/*      className={autoZoom ? "text-ocf-yellow-500" : "text-ocf-yellow-500 text-opacity-30"}*/}
-          {/*    >*/}
-          {/*      Auto*/}
-          {/*    </span>{" "}*/}
-          {/*    |{" "}*/}
-          {/*    <span*/}
-          {/*      className={autoZoom ? "text-ocf-yellow-500 text-opacity-30" : "text-ocf-yellow-500"}*/}
-          {/*    >*/}
-          {/*      Custom*/}
-          {/*    </span>*/}
-          {/*  </div>*/}
-          {/*</div>*/}
+          <div className="flex flex-row justify-around bg-ocf-delta-950 bg-opacity-60 font-bold">
+            <div
+              className="p-2 text-base text-white text-opacity-30 hover:cursor-pointer hover:text-white"
+              onClick={toggleAutoZoom}
+            >
+              Select
+            </div>
+            <div className="text-ocf-yellow-500 p-2">
+              <span
+                className={autoZoom ? "text-ocf-yellow-500" : "text-ocf-yellow-500 text-opacity-30"}
+              >
+                Auto
+              </span>{" "}
+              |{" "}
+              <span
+                className={autoZoom ? "text-ocf-yellow-500 text-opacity-30" : "text-ocf-yellow-500"}
+              >
+                Custom
+              </span>
+            </div>
+          </div>
           <AggregationButton
             text={"National"}
             aggregation={AGGREGATION_LEVELS.NATIONAL}
