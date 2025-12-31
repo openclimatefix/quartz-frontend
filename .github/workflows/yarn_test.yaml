@@ -4,52 +4,51 @@ on: [pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         node-version: [20.x]
-#        containers: [1, 2]
+    #        containers: [1, 2]
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: "yarn"
-    - name: install yarn
-      run: |
-        cd apps/nowcasting-app
-        yarn install
-    - name: build app
-      run: |
-        cd apps/nowcasting-app
-        yarn build
-      env:
-        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-        NODE_OPTIONS: --max_old_space_size=6144
-    - name: run unit tests
-      run: |
-        cd apps/nowcasting-app
-        yarn test --clear-cache --coverage --coverageDirectory=../..
-    - name: Run cypress tests
-      # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
-      uses: cypress-io/github-action@v6
-      with:
-        # Starts web server for E2E tests - replace with your own server invocation
-        # https://docs.cypress.io/guides/continuous-integration/introduction#Boot-your-server
-        working-directory: ./apps/nowcasting-app
-        start: yarn start
-        # Records to Cypress Cloud
-        # https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record
-        record: true
-#        parallel: true # Runs test in parallel using settings above
-        config: chromeWebSecurity=false
-        browser: chrome
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+      - name: install yarn
+        run: |
+          cd apps/nowcasting-app
+          yarn install
+      - name: build app
+        run: |
+          cd apps/nowcasting-app
+          yarn build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          NODE_OPTIONS: --max_old_space_size=6144
+      - name: run unit tests
+        run: |
+          cd apps/nowcasting-app
+          yarn test --clear-cache --coverage --coverageDirectory=../..
+      - name: Run cypress tests
+        # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
+        uses: cypress-io/github-action@v6
+        with:
+          # Starts web server for E2E tests - replace with your own server invocation
+          # https://docs.cypress.io/guides/continuous-integration/introduction#Boot-your-server
+          working-directory: ./apps/nowcasting-app
+          start: yarn start
+          # Records to Cypress Cloud
+          # https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record
+          record: true
+          #        parallel: true # Runs test in parallel using settings above
+          config: chromeWebSecurity=false
+          browser: chrome
 env:
   AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
   AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
@@ -71,7 +70,5 @@ env:
   NEXT_PUBLIC_AUTH0_PASSWORD: ${{ secrets.NEXT_PUBLIC_AUTH0_PASSWORD }}
   NEXT_PUBLIC_AUTH0_SCOPE: ${{ secrets.NEXT_PUBLIC_AUTH0_SCOPE }}
   NEXT_PUBLIC_AUTH0_USERNAME: ${{ secrets.NEXT_PUBLIC_AUTH0_USERNAME }}
-  NEXT_PUBLIC_4H_VIEW: 'true'
+  NEXT_PUBLIC_4H_VIEW: "true"
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-
-

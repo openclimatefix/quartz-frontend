@@ -21,7 +21,7 @@ const LayoutWrapper: FC<{
         username: user.nickname || "",
         name: user.name,
         locale: user.locale,
-        avatar: user.picture,
+        avatar: user.picture
       });
       setSentryUserSet(true);
     }

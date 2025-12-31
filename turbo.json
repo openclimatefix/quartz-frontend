@@ -1,13 +1,8 @@
 {
   "pipeline": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
     },
     "@openclimatefix/nowcasting-app#build": {
       "dependsOn": [
@@ -19,14 +14,10 @@
         "$AUTH0_CLIENT_SECRET",
         "$SENTRY_AUTH_TOKEN"
       ],
-      "outputs": [
-        ".next/**"
-      ]
+      "outputs": [".next/**"]
     },
     "test": {
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "outputs": [],
       "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
     },

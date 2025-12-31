@@ -17,7 +17,7 @@ type InfoIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashed = false,
+  dashed = false
 }) => (
   <svg
     className={className}
@@ -129,27 +129,14 @@ export const DownArrow: React.FC<IconProps> = ({ size = 22 }) => (
   </svg>
 );
 
-export const SitesDownArrow: React.FC<IconProps> = ({
-  className,
-  size = 16,
-}) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height={size}
-    viewBox="0 0 36 25"
-    width={size}
-  >
+export const SitesDownArrow: React.FC<IconProps> = ({ className, size = 16 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" height={size} viewBox="0 0 36 25" width={size}>
     <path d="M4 8 H28 L16 26 z" />
   </svg>
 );
 
 export const SitesUpArrow: React.FC<IconProps> = ({ className, size = 16 }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    height={size}
-    viewBox="0 0 36 16"
-    width={size}
-  >
+  <svg xmlns="http://www.w3.org/2000/svg" height={size} viewBox="0 0 36 16" width={size}>
     <path d="M4 24 H28 L16 6 z" />
   </svg>
 );
@@ -191,12 +178,7 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
     stroke="currentColor"
     viewBox="0 0 24 24"
   >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M5 13l4 4L19 7"
-    />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
   </svg>
 );
 
@@ -315,9 +297,7 @@ export const SpinnerTextInlineSmall = (
   </span>
 );
 
-export const CheckInlineSmall = (
-  props: React.SVGProps<SVGSVGElement> & { title: string }
-) => (
+export const CheckInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
   <span title={props.title || ""}>
     <svg
       width={10}
@@ -326,19 +306,12 @@ export const CheckInlineSmall = (
       xmlns="http://www.w3.org/2000/svg"
       className={props.className}
     >
-      <path
-        d="M1 5l3 3 5-5.5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M1 5l3 3 5-5.5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   </span>
 );
 
-export const CrossInlineSmall = (
-  props: React.SVGProps<SVGSVGElement> & { title: string }
-) => (
+export const CrossInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
   <span title={props.title || ""}>
     <svg
       width={10}
@@ -357,17 +330,9 @@ export const CrossInlineSmall = (
   </span>
 );
 
-export const ClockInlineSmall = (
-  props: React.SVGProps<SVGSVGElement> & { title: string }
-) => (
+export const ClockInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
   <span>
-    <svg
-      width={10}
-      height={10}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
+    <svg width={10} height={10} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <g clipPath="url(#prefix__clip0_2537_298)" stroke="currentColor">
         <path d="M9.5 5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
         <path d="M5 2.5V5H3.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -465,13 +430,7 @@ export const HamburgerMenu: React.FC<IconProps> = ({ className }) => (
 // info icon
 
 export const InfoIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    width={24}
-    height={24}
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    {...props}
-  >
+  <svg width={24} height={24} fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
     <path
       d="M12 21a9 9 0 100-18 9 9 0 000 18zM12 8h.01"
       stroke="#fff"
@@ -559,10 +518,7 @@ export const SolarIcon24: React.FC<IconProps> = ({ className }) => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M11.301.786v3.698H12.7V.786H11.3zM11.301 21.087v3.699H12.7v-3.699H11.3z"
-      fill="#fff"
-    />
+    <path d="M11.301.786v3.698H12.7V.786H11.3zM11.301 21.087v3.699H12.7v-3.699H11.3z" fill="#fff" />
     <path
       fillRule="evenodd"
       clipRule="evenodd"
@@ -616,10 +572,7 @@ export const WindIcon24: React.FC<IconProps> = ({ className, strokeWidth }) => (
   </svg>
 );
 
-export const DownloadIcon: React.FC<IconProps> = ({
-  className,
-  strokeWidth,
-}) => (
+export const DownloadIcon: React.FC<IconProps> = ({ className, strokeWidth }) => (
   <svg
     className={className || ""}
     xmlns="http://www.w3.org/2000/svg"

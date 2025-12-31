@@ -1,9 +1,4 @@
-import {
-  ACTUAL_SOLAR_COLOR,
-  ACTUAL_WIND_COLOR,
-  SOLAR_COLOR,
-  WIND_COLOR,
-} from "@/src/constants";
+import { ACTUAL_SOLAR_COLOR, ACTUAL_WIND_COLOR, SOLAR_COLOR, WIND_COLOR } from "@/src/constants";
 import { LegendItem } from "@/src/components/charts/legend/LegendItem";
 
 export const LegendContainer = () => (
@@ -13,11 +8,7 @@ export const LegendContainer = () => (
       <LegendItem color={WIND_COLOR} label="OCF Past Wind Forecast" />
     </div>
     <div className="flex flex-col gap-1">
-      <LegendItem
-        color={SOLAR_COLOR}
-        label="OCF Solar Forecast"
-        style="dashed"
-      />
+      <LegendItem color={SOLAR_COLOR} label="OCF Solar Forecast" style="dashed" />
       <LegendItem color={WIND_COLOR} label="OCF Wind Forecast" style="dashed" />
     </div>
     <div className="flex flex-col gap-1">

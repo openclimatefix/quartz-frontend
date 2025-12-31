@@ -1,15 +1,16 @@
 # Quartz Energy
+
 ### A set of forecasting products driven by the exciting modelling work in Open Climate Fix and the community
 
 The code is as open source as we can possibly make it (safely) and is powered by various forecast APIs, which are also available as services under the same Quartz umbrella.
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Head to [quartz.solar](https://quartz.solar) to find out more or to get in touch about using our Production services.
-
-
 
 ## Solar Electricity Nowcasting UI
 

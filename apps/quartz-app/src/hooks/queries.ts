@@ -6,7 +6,7 @@ import {
   GET_REGIONS,
   getForecastQuery,
   getGenerationQuery,
-  getRegionsQuery,
+  getRegionsQuery
 } from "@/src/data/queries";
 import { components } from "@/src/types/schema";
 
@@ -24,7 +24,7 @@ export const useGetRegionsQuery = (
 ) => {
   return useQuery({
     queryKey: [GET_REGIONS, "solar"],
-    queryFn: getRegionsQuery(source),
+    queryFn: getRegionsQuery(source)
   });
 };
 
@@ -37,7 +37,7 @@ export const useGetGenerationForRegionQuery = (
   return useQuery({
     queryKey: [GET_GENERATION, source, region],
     queryFn: getGenerationQuery(source, region),
-    enabled,
+    enabled
   });
 };
 
@@ -55,15 +55,10 @@ export const useGetForecastedGenerationForRegionQuery = (
       source,
       region,
       forecastHorizon,
-      forecastHorizon === "horizon" ? forecastHorizonMinutes : "",
+      forecastHorizon === "horizon" ? forecastHorizonMinutes : ""
     ],
-    queryFn: getForecastQuery(
-      source,
-      region,
-      forecastHorizon,
-      forecastHorizonMinutes
-    ),
-    enabled,
+    queryFn: getForecastQuery(source, region, forecastHorizon, forecastHorizonMinutes),
+    enabled
   });
 };
 
