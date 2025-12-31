@@ -436,36 +436,90 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
 };
 
 /**
- * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
+ * Gets the configurable history start mode from environment variables.
+ * @returns "rolling" or "fixed"
+ */
+export const getHistoryStartMode = (): "rolling" | "fixed" => {
+  const mode = process.env.NEXT_PUBLIC_HISTORY_START_MODE || "rolling";
+  if (mode !== "rolling" && mode !== "fixed") {
+    console.warn(`Invalid NEXT_PUBLIC_HISTORY_START_MODE: "${mode}". Defaulting to "rolling".`);
+    return "rolling";
+  }
+  return mode;
+};
+
+/**
+ * Gets the configurable history offset in hours from environment variables.
+ * @returns offset in hours (default: 48)
+ */
+export const getHistoryOffsetHours = (): number => {
+  const offsetStr = process.env.NEXT_PUBLIC_HISTORY_OFFSET_HOURS;
+  const offset = offsetStr ? parseInt(offsetStr, 10) : 48;
+
+  if (isNaN(offset) || offset < 0) {
+    console.warn(`Invalid NEXT_PUBLIC_HISTORY_OFFSET_HOURS: "${offsetStr}". Defaulting to 48.`);
+    return 48;
+  }
+
+  return offset;
+};
+
+/**
+ * Calculates the earliest forecast timestamp based on configurable mode.
  *
- * This function determines the timestamp two days prior to the current time, rounds it down
- * to the nearest 6-hour interval (e.g., 00:00, 06:00, 12:00, 18:00) in local time, and finally
- * converts the result back to UTC as an ISO-8601 string.
+ * This function determines the history window start time based on environment configuration.
+ * It supports two modes:
+ * - "rolling": offset hours back from now, rounded to 6-hour intervals in local time
+ * - "fixed": midnight UTC N days ago (where N = offset hours / 24)
+ *
+ * Environment Variables:
+ * - NEXT_PUBLIC_HISTORY_START_MODE: "rolling" (default) or "fixed"
+ * - NEXT_PUBLIC_HISTORY_OFFSET_HOURS: number of hours (default: 48)
  *
  * Key Features:
- * - Handles time zones correctly by rounding in the user's local timezone first.
- * - Ensures accurate rounding during Daylight Saving Time (DST) changes.
+ * - Configurable via environment variables
+ * - Handles time zones correctly by rounding in the user's local timezone first
+ * - Ensures accurate rounding during Daylight Saving Time (DST) changes
+ * - Maintains backward compatibility (defaults to 48 hours rolling)
  *
  * @returns {string} The earliest forecast timestamp in UTC as an ISO-8601 string.
  *
  * @example
- * // Assuming the current time is 2025-12-07T14:45:00Z:
+ * // Rolling mode (default): 48 hours back with 6-hour rounding
+ * // NEXT_PUBLIC_HISTORY_START_MODE=rolling
+ * // NEXT_PUBLIC_HISTORY_OFFSET_HOURS=48
  * const result = getEarliestForecastTimestamp();
- * console.log(result); // Output: "2025-12-05T12:00:00.000Z"
+ * console.log(result); // Output: "2025-12-28T12:00:00.000Z" (if now is 2025-12-30T14:45:00Z)
+ *
+ * @example
+ * // Fixed mode: 2 days ago at midnight
+ * // NEXT_PUBLIC_HISTORY_START_MODE=fixed
+ * // NEXT_PUBLIC_HISTORY_OFFSET_HOURS=48
+ * const result = getEarliestForecastTimestamp();
+ * console.log(result); // Output: "2025-12-28T00:00:00.000Z" (if now is 2025-12-30T14:45:00Z)
  */
-
 export const getEarliestForecastTimestamp = (): string => {
+  const mode = getHistoryStartMode();
+  const offsetHours = getHistoryOffsetHours();
+
   // Get the current time in the user's local timezone
   // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
   // so they might see slightly different data around the rounding times.
   const now = DateTime.now(); // Defaults to the user's system timezone
 
-  // Two days ago in local time
-  const twoDaysAgoLocal = now.minus({ days: 2 });
+  if (mode === "fixed") {
+    // Fixed mode: midnight UTC N days ago
+    const daysAgo = Math.floor(offsetHours / 24);
+    const fixedDate = now.minus({ days: daysAgo }).startOf("day");
+    return fixedDate.toUTC().toISO();
+  }
+
+  // Rolling mode (default): offset hours back, rounded to 6-hour intervals
+  const hoursAgoLocal = now.minus({ hours: offsetHours });
 
   // Round down to the nearest 6-hour interval in the user's local timezone
-  const roundedDownLocal = twoDaysAgoLocal.startOf("hour").minus({
-    hours: twoDaysAgoLocal.hour % 6 // Rounds down to the last multiple of 6
+  const roundedDownLocal = hoursAgoLocal.startOf("hour").minus({
+    hours: hoursAgoLocal.hour % 6 // Rounds down to the last multiple of 6
   });
 
   // Convert the rounded timestamp back to UTC
