@@ -1,5 +1,5 @@
 import { handleAuth, handleCallback, handleLogin, handleLogout } from "@auth0/nextjs-auth0";
-import { wrapApiHandlerWithSentry, setUser, captureException } from "@sentry/nextjs";
+import { wrapApiHandlerWithSentry, setUser } from "@sentry/nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 function getUrls(req: NextApiRequest) {
