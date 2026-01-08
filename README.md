@@ -19,7 +19,7 @@ The plan is to enable the community to build the world's best near-term forecast
 
 The term "nowcasting" just means "forecasting for the next few hours using statistical techniques".
 
-# Why is all this stuff open-source?
+# Why is all this stuff open-source? 
 
 In OCF, we're curious to see if it's possible to rapidly mitigate climate change by:
 
