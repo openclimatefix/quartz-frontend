@@ -13,7 +13,8 @@ Head to [quartz.solar](https://quartz.solar) to find out more or to get in touch
 
 ## Solar Electricity Nowcasting UI
 
-The `nowcasting-app` is the repository for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project. See [this great Wired article about OCF's solar electricity forecasting work](https://www.wired.co.uk/article/solar-weather-forecasting) for a good intro to solar electricity nowcasting.
+The `nowcasting-app` is the repository for [Open Climate Fix](https://openclimatefix.org/)'s solar electricity nowcasting project. See [Open Climate Fix’s blog post on starting solar electricity nowcasting](https://web.archive.org/web/20210322094406/https://openclimatefix.org/blog/2019-07-01-starting-solar-electricity-nowcasting/) for a good intro to solar electricity nowcasting.
+
 
 The plan is to enable the community to build the world's best near-term forecasting system for solar electricity generation, and then let anyone use it! :) We'll do this by using state-of-the-art machine learning and 5-minutely satellite imagery to predict the movement of clouds over the next few hours, and then use this to predict solar electricity generation.
 
