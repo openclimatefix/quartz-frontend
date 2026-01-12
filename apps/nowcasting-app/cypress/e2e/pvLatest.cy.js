@@ -11,6 +11,72 @@ describe("Load the page", () => {
     // Ensure Auth0 has redirected us back to the local app.
     cy.location("href").should("equal", "http://localhost:3002/");
   });
+  it("matches the snapshot", () => {
+    // Set the clock to a fixed time of 2025-09-23 11:35
+    // This is important to ensure consistent snapshots as the data is time-dependent
+    // and the charts will render differently depending on the current time.
+    const now = new Date(2025, 8, 23, 11, 35); // Note: month is 0-indexed
+    cy.clock(now.getTime(), ["Date"]);
+    // cy.tick(1000);
+
+    // Stub API responses for data as of Tue, 23 Sep 2025 11:35:24 GMT
+    cy.intercept("/v0/solar/GB/national/forecast?historic=false&only_forecast_values=true&UI", {
+      fixture: "national_forecast.json"
+    }).as("getNationalForecast");
+    cy.intercept("/v0/solar/GB/national/pvlive?regime=in-day&UI", {
+      fixture: "national_pvlive.json"
+    }).as("getNationalPvLive");
+
+    cy.intercept(
+      "/v0/solar/GB/gsp/forecast/all/?historic=true&compact=true&start_datetime_utc*&end_datetime_utc*",
+      {
+        fixture: "gsp_forecast_all_history.json"
+      }
+    ).as("getGspForecastAllHistory");
+    cy.intercept(
+      "/v0/solar/GB/gsp/forecast/all/?compact=true&start_datetime_utc=2025-09-23T11%3A30%3A00%2B00%3A00&UI",
+      {
+        fixture: "gsp_forecast_all_latest.json"
+      }
+    ).as("getGspForecastAllLatest");
+
+    cy.intercept("/v0/solar/GB/gsp/pvlive/all?compact=true&end_datetime_utc*", {
+      fixture: "gsp_pvlive_history.json"
+    }).as("getGspPvLiveHistory");
+    cy.intercept(
+      "/v0/solar/GB/gsp/pvlive/all?regime=in-day&compact=true&compact=true&start_datetime_utc*",
+      {
+        fixture: "gsp_pvlive_latest.json"
+      }
+    ).as("getGspPvLiveLatest");
+
+    cy.intercept(
+      "/v0/solar/GB/national/forecast?forecast_horizon_minutes=240&historic=true&only_forecast_values=true&UI",
+      { fixture: "national_4_hour_forecast.json" }
+    ).as("getNational4HourForecast");
+
+    cy.intercept("/v0/system/GB/gsp/?UI", { fixture: "gsp_list.json" }).as("getGspList");
+
+    // Load page
+    cy.visit("http://localhost:3002/");
+
+    // Wait for the stubbed API responses
+    cy.wait("@getNationalForecast");
+    cy.wait("@getNationalPvLive");
+    cy.wait("@getGspForecastAllHistory");
+    // cy.wait("@getGspForecastAllLatest");
+    cy.wait("@getGspPvLiveHistory");
+    cy.wait("@getGspPvLiveLatest");
+    cy.wait("@getNational4HourForecast");
+    cy.wait("@getGspList");
+
+    // Ensure Auth0 has redirected us back to the local app.
+    cy.location("href").should("equal", "http://localhost:3002/");
+    // wait for loading message to disappear
+    // allow up to 10 seconds for the loading message to disappear
+    cy.get("div.chart-data-loading-message", { timeout: 30000 }).should("not.be.visible");
+    cy.percySnapshot("Home - default");
+  });
 
   ////////////////////////////////
   //  GENERAL
