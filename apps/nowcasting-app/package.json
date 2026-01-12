@@ -1,6 +1,6 @@
 {
   "name": "@openclimatefix/nowcasting-app",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
@@ -24,6 +24,7 @@
     "@turf/turf": "^7.1.0",
     "@types/cookies": "^0.7.7",
     "@types/luxon": "^3.6.2",
+    "@vercel/analytics": "^1.6.1",
     "axios": "^0.27.2",
     "cookies": "^0.8.0",
     "cypress-real-events": "^1.13.0",

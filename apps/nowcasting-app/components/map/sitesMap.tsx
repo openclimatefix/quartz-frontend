@@ -54,6 +54,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [currentAggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
   const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  const [autoZoom] = useGlobalState("autoZoom");
+
   const [newDataForMap, setNewDataForMap] = useState(false);
   const [updatingMapData, setUpdatingMapData] = useState(false);
   const latestForecastValue = 0;
@@ -70,10 +72,11 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
   useEffect(() => {
     setNewDataForMap(true);
-  }, [clickedSiteGroupId]);
+  }, [clickedSiteGroupId, autoZoom]);
 
   useEffect(() => {
     setClickedSiteGroupId(undefined);
+    setNewDataForMap(true);
   }, [currentAggregationLevel, setClickedSiteGroupId]);
 
   const forecastLoading = false;
@@ -215,7 +218,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "sites",
       AGGREGATION_LEVELS.SITE,
       AGGREGATION_LEVEL_MIN_ZOOM.SITE,
-      AGGREGATION_LEVEL_MAX_ZOOM.SITE
+      AGGREGATION_LEVEL_MAX_ZOOM.SITE,
+      autoZoom
     );
 
     // GSPs
@@ -225,7 +229,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "gsps",
       AGGREGATION_LEVELS.GSP,
       AGGREGATION_LEVEL_MIN_ZOOM.GSP,
-      AGGREGATION_LEVEL_MAX_ZOOM.GSP
+      AGGREGATION_LEVEL_MAX_ZOOM.GSP,
+      autoZoom
     );
 
     // Regions
@@ -235,7 +240,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "regions",
       AGGREGATION_LEVELS.REGION,
       AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-      AGGREGATION_LEVEL_MAX_ZOOM.REGION
+      AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+      autoZoom
     );
 
     // National
@@ -245,7 +251,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "national",
       AGGREGATION_LEVELS.NATIONAL,
       AGGREGATION_LEVEL_MIN_ZOOM.NATIONAL,
-      AGGREGATION_LEVEL_MAX_ZOOM.NATIONAL
+      AGGREGATION_LEVEL_MAX_ZOOM.NATIONAL,
+      autoZoom
     );
 
     setUpdatingMapData(false);
@@ -260,9 +267,10 @@ const SitesMap: React.FC<SitesMapProps> = ({
     groupName: keyof AggregatedSitesCombinedData,
     groupAggregationLevel: AGGREGATION_LEVELS,
     minZoom: AGGREGATION_LEVEL_MIN_ZOOM,
-    maxZoom: AGGREGATION_LEVEL_MAX_ZOOM
+    maxZoom: AGGREGATION_LEVEL_MAX_ZOOM,
+    autoZoom: boolean = true
   ) => {
-    console.log("start addOrUpdateMapGroup");
+    console.log("start addOrUpdateMapGroup:", groupName);
 
     const source = map.getSource(groupName) as unknown as mapboxgl.GeoJSONSource | undefined;
     const groupFeatureArray = generateFeatureArray(group);
@@ -329,6 +337,18 @@ const SitesMap: React.FC<SitesMapProps> = ({
       }
     }
 
+    // Define visibility depending on currentAggregationLevel and autoZoom
+    let visibility: "visible" | "none";
+    if (!autoZoom) {
+      if (currentAggregationLevel === groupAggregationLevel) {
+        visibility = "visible";
+      } else {
+        visibility = "none";
+      }
+    } else {
+      visibility = "visible";
+    }
+
     // Capacity ring
     let capacityLayer =
       (map.getLayer(`Capacity-${groupName}`) as unknown as CircleLayer) || undefined;
@@ -339,18 +359,22 @@ const SitesMap: React.FC<SitesMapProps> = ({
         getRingMultiplier(groupAggregationLevel)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
-      const visibility = "visible";
       map.setLayoutProperty(`Capacity-${groupName}`, "visibility", visibility);
+      map.setLayerZoomRange(
+        `Capacity-${groupName}`,
+        autoZoom ? minZoom : 0,
+        autoZoom ? maxZoom : 24
+      );
     } else {
       map.addLayer({
         id: `Capacity-${groupName}`,
         type: "circle",
         source: groupName,
-        minzoom: minZoom,
-        maxzoom: maxZoom,
+        minzoom: autoZoom ? minZoom : 0,
+        maxzoom: autoZoom ? maxZoom : 24,
         layout: {
           // visibility: currentAggregationLevel === AGGREGATION_LEVELS.SITE ? "visible" : "none"
-          visibility: "visible"
+          visibility: visibility
         },
         paint: {
           "circle-radius": [
@@ -405,18 +429,22 @@ const SitesMap: React.FC<SitesMapProps> = ({
         getRingMultiplier(groupAggregationLevel)
       ]);
       // const visibility = currentAggregationLevel === groupAggregationLevel ? "visible" : "none";
-      const visibility = "visible";
       map.setLayoutProperty(`Generation-${groupName}`, "visibility", visibility);
+      map.setLayerZoomRange(
+        `Generation-${groupName}`,
+        autoZoom ? minZoom : 0,
+        autoZoom ? maxZoom : 24
+      );
     } else {
       map.addLayer({
         id: `Generation-${groupName}`,
         type: "circle",
         source: groupName,
-        minzoom: minZoom,
-        maxzoom: maxZoom,
+        minzoom: autoZoom ? minZoom : 0,
+        maxzoom: autoZoom ? maxZoom : 24,
         layout: {
           // visibility: currentAggregationLevel !== AGGREGATION_LEVELS.SITE ? "none" : "visible"
-          visibility: "visible"
+          visibility: visibility
         },
         paint: {
           "circle-radius": [
@@ -434,7 +462,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
         }
       });
     }
-    console.log("end addOrUpdateMapGroup");
+    console.log("end addOrUpdateMapGroup", groupName);
   };
 
   const addFCData = (map: mapboxgl.Map) => {
@@ -454,7 +482,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "sites",
       AGGREGATION_LEVELS.SITE,
       AGGREGATION_LEVEL_MIN_ZOOM.SITE,
-      AGGREGATION_LEVEL_MAX_ZOOM.SITE
+      AGGREGATION_LEVEL_MAX_ZOOM.SITE,
+      autoZoom
     );
 
     // GSPs
@@ -464,7 +493,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "gsps",
       AGGREGATION_LEVELS.GSP,
       AGGREGATION_LEVEL_MIN_ZOOM.GSP,
-      AGGREGATION_LEVEL_MAX_ZOOM.GSP
+      AGGREGATION_LEVEL_MAX_ZOOM.GSP,
+      autoZoom
     );
 
     // Regions
@@ -474,7 +504,19 @@ const SitesMap: React.FC<SitesMapProps> = ({
       "regions",
       AGGREGATION_LEVELS.REGION,
       AGGREGATION_LEVEL_MIN_ZOOM.REGION,
-      AGGREGATION_LEVEL_MAX_ZOOM.REGION
+      AGGREGATION_LEVEL_MAX_ZOOM.REGION,
+      autoZoom
+    );
+
+    // National
+    addOrUpdateMapGroup(
+      map,
+      aggregatedSitesData.national,
+      "national",
+      AGGREGATION_LEVELS.NATIONAL,
+      AGGREGATION_LEVEL_MIN_ZOOM.NATIONAL,
+      AGGREGATION_LEVEL_MAX_ZOOM.NATIONAL,
+      autoZoom
     );
     console.log("end addFCData");
   };
