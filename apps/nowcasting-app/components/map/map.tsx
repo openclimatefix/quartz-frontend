@@ -1,13 +1,39 @@
-import mapboxgl from "mapbox-gl";
+import mapboxgl, { Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { FC, useEffect, useRef, useState } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState from "../helpers/globalState";
-import { AGGREGATION_LEVEL_MIN_ZOOM, AGGREGATION_LEVELS } from "../../constant";
+import {
+  AGGREGATION_LEVEL_MIN_ZOOM,
+  AGGREGATION_LEVELS,
+  MAX_POWER_GENERATED
+} from "../../constant";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
+
+const setAggregationLevelByCurrentZoom = (
+  currentZoom: number,
+  autoZoom: boolean,
+  setAggregation: Dispatch<SetStateAction<AGGREGATION_LEVELS>>
+) => {
+  if (currentZoom && autoZoom) {
+    if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.REGION) {
+      console.log("setting aggregation to national");
+      setAggregation(AGGREGATION_LEVELS.NATIONAL);
+    } else if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.GSP) {
+      console.log("setting aggregation to region");
+      setAggregation(AGGREGATION_LEVELS.REGION);
+    } else if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.SITE) {
+      console.log("setting aggregation to gsp");
+      setAggregation(AGGREGATION_LEVELS.GSP);
+    } else {
+      console.log("setting aggregation to site");
+      setAggregation(AGGREGATION_LEVELS.SITE);
+    }
+  }
+};
 
 /**
  * Mapbox wrapper.
@@ -34,6 +60,15 @@ const Map: FC<IMap> = ({
   const [zoom, setZoom] = useGlobalState("zoom");
   const [maps, setMaps] = useGlobalState("maps");
   const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
+  const [autoZoom] = useGlobalState("autoZoom");
+
+  // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
+  const autozoomRef = useRef(autoZoom);
+  useEffect(() => {
+    autozoomRef.current = autoZoom;
+    const currentZoom = map.current?.getZoom() || 0;
+    setAggregationLevelByCurrentZoom(currentZoom, autozoomRef.current, setAggregation);
+  }, [autoZoom]);
 
   useUpdateMapStateOnClick({ map: map.current, isMapReady });
   useEffect(() => {
@@ -43,6 +78,18 @@ const Map: FC<IMap> = ({
   }, [updateData]);
 
   useEffect(() => {
+    const onMoveEnd = () => {
+      console.log("setting map state");
+      const currentZoom = map.current?.getZoom() || 0;
+      const center = map.current?.getCenter();
+
+      setLng(Number(center?.lng.toFixed(4)));
+      setLat(Number(center?.lat.toFixed(4)));
+      setZoom(Number(currentZoom.toFixed(2)));
+
+      setAggregationLevelByCurrentZoom(currentZoom, autozoomRef.current, setAggregation);
+    };
+
     if (map.current) return; // initialize map only once
     if (mapContainer.current) {
       map.current = new mapboxgl.Map({
@@ -74,34 +121,18 @@ const Map: FC<IMap> = ({
         }
       });
 
-      map.current.on("moveend", () => {
-        console.log("setting map state");
-        const currentZoom = map.current?.getZoom() || 0;
-        setLng(Number(map.current?.getCenter().lng.toFixed(4)));
-        setLat(Number(map.current?.getCenter().lat.toFixed(4)));
-        setZoom(Number(currentZoom.toFixed(2)));
-        console.log("zoom", zoom);
-        console.log("currentZoom", currentZoom);
-        if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.REGION) {
-          console.log("setting aggregation to national");
-          setAggregation(AGGREGATION_LEVELS.NATIONAL);
-        } else if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.GSP) {
-          console.log("setting aggregation to region");
-          setAggregation(AGGREGATION_LEVELS.REGION);
-        } else if (currentZoom < AGGREGATION_LEVEL_MIN_ZOOM.SITE) {
-          console.log("setting aggregation to gsp");
-          setAggregation(AGGREGATION_LEVELS.GSP);
-        } else {
-          console.log("setting aggregation to site");
-          setAggregation(AGGREGATION_LEVELS.SITE);
-        }
-      });
+      map.current.on("moveend", onMoveEnd);
     }
     // TODO: unsure as to whether react cleans up/ends up with multiple maps when re-rendering
     // or whether removing will cause more issues elsewhere in the app.
     // Will just keep an eye on performance etc. for now.
     //
-    // return () => map.current?.remove();
+    // Clean up moveend listener
+    return () => {
+      if (map.current) {
+        map.current.off("moveend", onMoveEnd);
+      }
+    };
   }, []);
 
   return (

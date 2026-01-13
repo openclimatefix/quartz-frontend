@@ -181,7 +181,6 @@
 
 - [ ] My code follows [OCF's coding style guidelines](https://github.com/openclimatefix/.github/blob/main/coding_style.md)
 - [ ] I have performed a self-review of my own code
-- [ ] I have made corresponding changes to the documentation
+- [ ] I have made corresponding changes to the README
 - [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] I have checked my code and corrected any misspellings
 - [ ] I have updated the release docs with the contents of this release
