@@ -102,7 +102,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lng: -2.3175601,
     lat: 54.70534432,
     zoom: 5,
-    autoZoom: false,
+    autoZoom: true,
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },

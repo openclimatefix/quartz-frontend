@@ -37,7 +37,7 @@ const getGspForecastForTime = (
 ) => {
   return gspForecastsDataByTimestamp.find((fc) => fc.datetimeUtc.slice(0, 16) === targetTime);
 };
-const setFeatureObjectProps = (
+export const setFeatureObjectProps = (
   existingProperties: any,
   gspSystemInfo: any,
   selectedFCValue: number | undefined,
