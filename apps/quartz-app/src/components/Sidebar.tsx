@@ -11,7 +11,7 @@ import {
   WindIcon,
   SolarIcon24,
   WindIcon24,
-  ChevronRight,
+  ChevronRight
 } from "./icons/icons";
 import { useState } from "react";
 import WideCard from "./sidebar-components/card";
@@ -23,18 +23,10 @@ import { get } from "http";
 
 type SidebarProps = {
   title: string;
-  solarGenerationData:
-    | components["schemas"]["GetHistoricGenerationResponse"]
-    | undefined;
-  windGenerationData:
-    | components["schemas"]["GetHistoricGenerationResponse"]
-    | undefined;
-  windForecastData:
-    | components["schemas"]["GetForecastGenerationResponse"]
-    | undefined;
-  solarForecastData:
-    | components["schemas"]["GetForecastGenerationResponse"]
-    | undefined;
+  solarGenerationData: components["schemas"]["GetHistoricGenerationResponse"] | undefined;
+  windGenerationData: components["schemas"]["GetHistoricGenerationResponse"] | undefined;
+  windForecastData: components["schemas"]["GetForecastGenerationResponse"] | undefined;
+  solarForecastData: components["schemas"]["GetForecastGenerationResponse"] | undefined;
 };
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -42,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   windGenerationData,
   solarForecastData,
   windForecastData,
-  title,
+  title
 }) => {
   const convertDatestampToEpoch = (time: string) => {
     const date = new Date(time.slice(0, 16));
@@ -57,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       hour: now.minute >= 45 ? now.hour + 1 : now.hour,
       minute: now.minute < 45 ? Math.floor(now.minute / 15) * 15 : 0,
       second: 0,
-      millisecond: 0,
+      millisecond: 0
     });
   };
 
@@ -102,15 +94,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   if (windForecastData?.values) {
     for (const value of windForecastData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
-      );
+      const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
       if (existingData) {
         existingData.wind_forecast = value.PowerKW / 1000;
       } else {
         formattedSidebarData.push({
           timestamp,
-          wind_forecast: value.PowerKW / 1000,
+          wind_forecast: value.PowerKW / 1000
         });
       }
     }
@@ -121,16 +111,14 @@ const Sidebar: React.FC<SidebarProps> = ({
     for (const value of solarForecastData?.values) {
       const time = value.Time;
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
-      );
+      const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
       if (existingData) {
         existingData.solar_forecast = value.PowerKW / 1000;
       } else {
         formattedSidebarData.push({
           timestamp,
           time,
-          solar_forecast: value.PowerKW / 1000,
+          solar_forecast: value.PowerKW / 1000
         });
       }
     }
@@ -139,13 +127,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   if (solarGenerationData?.values) {
     for (const value of solarGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
-      );
-      if (
-        existingData &&
-        (existingData.solar_forecast || existingData.wind_forecast)
-      ) {
+      const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
+      if (existingData && (existingData.solar_forecast || existingData.wind_forecast)) {
         existingData.solar_generation = value.PowerKW / 1000;
       }
     }
@@ -154,21 +137,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   if (windGenerationData?.values) {
     for (const value of windGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
-      );
-      if (
-        existingData &&
-        (existingData.solar_forecast || existingData.wind_forecast)
-      ) {
+      const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
+      if (existingData && (existingData.solar_forecast || existingData.wind_forecast)) {
         existingData.wind_generation = value.PowerKW / 1000;
       }
     }
   }
 
-  const formattedSideBarData = formattedSidebarData.sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const formattedSideBarData = formattedSidebarData.sort((a, b) => a.timestamp - b.timestamp);
 
   let solarForecastNow = formattedSideBarData.find(
     (data) => data.timestamp === getEpochNowInTimezone()
@@ -176,23 +152,20 @@ const Sidebar: React.FC<SidebarProps> = ({
   solarForecastNow = Number(solarForecastNow) || 0;
 
   let windForecastNow =
-    formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezone()
-    )?.wind_forecast || 0;
+    formattedSideBarData.find((data) => data.timestamp === getEpochNowInTimezone())
+      ?.wind_forecast || 0;
   windForecastNow = Number(windForecastNow) || 0;
 
   // get the next 15 min slot solar forecast
 
   let solarForecastNext =
-    formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezonePlus15()
-    )?.solar_forecast || 0;
+    formattedSideBarData.find((data) => data.timestamp === getEpochNowInTimezonePlus15())
+      ?.solar_forecast || 0;
   solarForecastNext = Number(solarForecastNext) || 0;
 
   let windForecastNext =
-    formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezonePlus15()
-    )?.wind_forecast || 0;
+    formattedSideBarData.find((data) => data.timestamp === getEpochNowInTimezonePlus15())
+      ?.wind_forecast || 0;
   windForecastNext = Number(windForecastNext) || 0;
 
   const powerForecastNow = Number(windForecastNow + solarForecastNow) || 0;
@@ -204,13 +177,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   actualWindGeneration = Number(actualWindGeneration) || 0;
 
   let actualSolarGeneration =
-    formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezone()
-    )?.solar_generation || 0;
+    formattedSideBarData.find((data) => data.timestamp === getEpochNowInTimezone())
+      ?.solar_generation || 0;
   actualSolarGeneration = Number(actualSolarGeneration) || 0;
 
-  let actualPowerGeneration =
-    Number(actualWindGeneration + actualSolarGeneration) || 0;
+  let actualPowerGeneration = Number(actualWindGeneration + actualSolarGeneration) || 0;
 
   let [expanded, setExpanded] = useState(true);
 
@@ -263,7 +234,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   weekday: "short",
                   day: "numeric",
                   month: "long",
-                  year: "numeric",
+                  year: "numeric"
                 })}
               </div>
             </div>
@@ -289,7 +260,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 actualGeneration={
                   actualPowerGeneration > 0 ? (
                     actualPowerGeneration.toLocaleString("hi-IN", {
-                      maximumFractionDigits: 0,
+                      maximumFractionDigits: 0
                     })
                   ) : (
                     <div className="flex flex-col mb-2 text-base text-gray-300 leading-tight break-word border border-dashed border-gray-300 p-2 px-3 rounded-md">
@@ -300,12 +271,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }
                 currentForecast={
                   powerForecastNow.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: 0
                   }) || 0
                 }
                 nextForecast={
                   powerForecastNext.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: 0
                   }) || 0
                 }
                 energyTag="Power"
@@ -319,18 +290,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                 actualGeneration={
                   actualSolarGeneration > 0
                     ? actualSolarGeneration.toLocaleString("hi-IN", {
-                        maximumFractionDigits: 0,
+                        maximumFractionDigits: 0
                       })
                     : "-.--"
                 }
                 currentForecast={
                   solarForecastNow.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: 0
                   }) || 0
                 }
                 nextForecast={
                   solarForecastNext.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: 0
                   }) || 0
                 }
                 energyTag="Solar"
@@ -344,18 +315,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                 actualGeneration={
                   actualWindGeneration > 0
                     ? actualWindGeneration.toLocaleString("hi-IN", {
-                        maximumFractionDigits: 0,
+                        maximumFractionDigits: 0
                       })
                     : "-.--"
                 }
                 currentForecast={
                   windForecastNow.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: 0
                   }) || 0
                 }
                 nextForecast={
                   windForecastNext.toLocaleString("hi-IN", {
-                    maximumFractionDigits: 0,
+                    maximumFractionDigits: 0
                   }) || 0
                 }
                 energyTag="Wind"
@@ -397,9 +368,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               textTheme={"text-quartz-mint-green"}
               bgTheme={"bg-quartz-mint-green"}
               actualGeneration={
-                actualPowerGeneration > 0
-                  ? actualPowerGeneration.toFixed(0)
-                  : "-.-"
+                actualPowerGeneration > 0 ? actualPowerGeneration.toFixed(0) : "-.-"
               }
               nextForecast={powerForecastNext.toFixed(0) || 0}
               energyTag="Power"
@@ -409,11 +378,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               icon={<WindIcon24 />}
               textTheme={"text-quartz-blue"}
               bgTheme={"bg-quartz-blue"}
-              actualGeneration={
-                actualWindGeneration > 0
-                  ? actualWindGeneration.toFixed(0)
-                  : "-.-"
-              }
+              actualGeneration={actualWindGeneration > 0 ? actualWindGeneration.toFixed(0) : "-.-"}
               nextForecast={windForecastNext.toFixed(0) || 0}
               toggle={true}
               energyTag="Wind"
@@ -424,9 +389,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               textTheme={"text-quartz-yellow"}
               bgTheme={"bg-quartz-yellow"}
               actualGeneration={
-                actualSolarGeneration > 0
-                  ? actualSolarGeneration.toFixed(0)
-                  : "-.-"
+                actualSolarGeneration > 0 ? actualSolarGeneration.toFixed(0) : "-.-"
               }
               nextForecast={solarForecastNext.toFixed(0) || 0}
               toggle={true}

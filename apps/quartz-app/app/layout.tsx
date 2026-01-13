@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Quartz Energy | Rajasthan",
-  description: "Solar and Wind Forecasting Service",
+  description: "Solar and Wind Forecasting Service"
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: ReactNode;
 }>) {

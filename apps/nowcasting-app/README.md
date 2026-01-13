@@ -21,11 +21,10 @@ yarn install
 The environment variables in `.env.example` need to be populated to make sure Auth0 is working properly.
 Place them in a `.env.local` file in the root of this app folder (`nowcasting-app`).
 
-
 ### Running the API locally
 
 The app needs to communicate with the API to fetch the forecasts, even if they are fake data in the local environment.
-To run the API locally, follow the instructions in the 
+To run the API locally, follow the instructions in the
 [nowcasting-api README](https://github.com/openclimatefix/uk-pv-national-gsp-api) to set up and run the API.
 
 ### Running the App

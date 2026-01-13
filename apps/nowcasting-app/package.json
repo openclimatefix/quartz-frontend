@@ -83,6 +83,7 @@
     "typescript": "^5.2.2"
   },
   "prettier": {
+    "endOfLine": "lf",
     "trailingComma": "none",
     "tabWidth": 2,
     "singleQuote": false,

@@ -23,6 +23,6 @@ export const useUserMenu = () => {
   }, [showUserMenu]);
   return {
     showUserMenu,
-    setShowUserMenu,
+    setShowUserMenu
   };
 };

@@ -1,0 +1,12 @@
+# Ignore large data files - these should remain minified
+apps/nowcasting-app/data/
+apps/quartz-app/data/
+
+# Ignore build outputs
+dist/
+build/
+.next/
+
+# Ignore generated files
+coverage/
+*.log

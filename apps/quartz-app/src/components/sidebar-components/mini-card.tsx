@@ -21,22 +21,18 @@ const MiniCard: React.FC<MiniCardProps> = ({
   actualGeneration,
   nextForecast,
   toggle,
-  energyTag,
+  energyTag
 }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(energyTag);
-  const formatToggle = visibleLines.includes(energyTag)
-    ? `after:end-[-2px]`
-    : `after:start-[-2px]`;
+  const formatToggle = visibleLines.includes(energyTag) ? `after:end-[-2px]` : `after:start-[-2px]`;
   const formatBackground = !visibleLines.includes(energyTag)
     ? (bgTheme = `bg-ocf-grey-400`)
     : bgTheme == bgTheme;
 
   const toggleLineVisibility = () => {
     if (isVisible) {
-      const newVisibleLines = visibleLines.filter(
-        (line: string) => line !== energyTag
-      );
+      const newVisibleLines = visibleLines.filter((line: string) => line !== energyTag);
       if (newVisibleLines.length === 0) {
         setVisibleLines(energyTag === "Solar" ? ["Wind"] : ["Solar"]);
       } else {
@@ -58,9 +54,7 @@ const MiniCard: React.FC<MiniCardProps> = ({
   return (
     <div className="self-stretch flex-col justify-start items-start gap-4 flex">
       <div className="self-stretch flex-col justify-start items-center gap-2 flex">
-        <div className="self-stretch justify-center items-center gap-2 inline-flex">
-          {icon}
-        </div>
+        <div className="self-stretch justify-center items-center gap-2 inline-flex">{icon}</div>
         {toggle ? (
           <label className="flex-1 inline-flex justify-center items-center cursor-pointer pt-1 pb-1">
             <div
