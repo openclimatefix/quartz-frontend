@@ -17,6 +17,7 @@ import { useLoadDataFromApi } from "../components/hooks/useLoadDataFromApi";
 import { GspEntities, GspEntity } from "../components/types";
 import dnoGspGroupings from "../data/dno_gsp_groupings.json";
 import { DateTime } from "luxon";
+import { safelyUpdateMapData } from "../components/helpers/mapUtils";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -72,7 +73,7 @@ const UKPNGspNames = [
 ];
 
 type Substation = {
-  capacity_kw: number;
+  capacity_kW: number;
   latitude: number;
   longitude: number;
   substation_name: string;
@@ -80,9 +81,14 @@ type Substation = {
   substation_uuid: number;
 };
 
+type ForecastForPrimary = {
+  PowerKW: number;
+  Time: string;
+}[];
+
 type ForecastForTimestamp = {
   datetime_utc: string;
-  forecast_values_kw: Record<string, number>;
+  forecast_values_kW: Record<string, number>;
 };
 
 export default function Ukpn() {
@@ -93,6 +99,7 @@ export default function Ukpn() {
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [showMap, setShowMap] = useState(true);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
+  const [mapInitialLoadComplete, setMapInitialLoadComplete] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string>(
     DateTime.now()
       .minus({ day: 1 })
@@ -139,6 +146,23 @@ export default function Ukpn() {
       }
     }
   );
+  const getPrimaryUuidByName = (name: string) => {
+    return listSubstationsData?.find((primary) => primary.substation_name === name)
+      ?.substation_uuid;
+  };
+  console.log("=== selectedRegions  ===", selectedRegions[0]);
+  const {
+    data: selectedPrimaryForecastData,
+    isLoading: selectedPrimaryForecastLoading,
+    isValidating: selectedPrimaryForecastValidating,
+    error: selectedPrimaryForecastError
+  } = useLoadDataFromApi<ForecastForPrimary>(
+    selectedRegions.length
+      ? `http://uk-development-quartz-api.eu-west-1.elasticbeanstalk.com/substations/${selectedRegions[0]}/forecast`
+      : null
+  );
+
+  console.log("selectedPrimaryForecastData", selectedPrimaryForecastData);
 
   // // Get only the forecast for UKPN's GSPs
   // const {
@@ -171,6 +195,8 @@ export default function Ukpn() {
   const substationsForecastRef = useRef<ForecastForTimestamp | null>(null);
   const listSubstationsRef = useRef<Substation[] | null>(null);
   const gspSystemRef = useRef<GspEntities | null>(null);
+  const mapInitialLoadCompleteRef = useRef<Boolean>(false);
+  const selectedRegionsRef = useRef<string[]>([]);
 
   useEffect(() => {
     substationsForecastRef.current = substationsForecastData ?? null;
@@ -184,13 +210,21 @@ export default function Ukpn() {
     gspSystemRef.current = gspSystemData ?? null;
   }, [gspSystemData]);
 
+  useEffect(() => {
+    mapInitialLoadCompleteRef.current = mapInitialLoadComplete;
+  }, [mapInitialLoadComplete]);
+
+  useEffect(() => {
+    selectedRegionsRef.current = selectedRegions;
+  }, [selectedRegions]);
+
   const toggleSelectedRegion = (id: string) => {
     console.log("id", id);
-    console.log("currentSelection", selectedRegions);
-    if (selectedRegions.includes(id)) {
-      setSelectedRegions(selectedRegions.filter((region) => region !== id));
+    console.log("currentSelection", selectedRegionsRef.current);
+    if (selectedRegionsRef.current.includes(id)) {
+      setSelectedRegions(selectedRegionsRef.current.filter((region) => region !== id));
     } else {
-      setSelectedRegions([...selectedRegions, id]);
+      setSelectedRegions([...selectedRegionsRef.current, id]);
     }
   };
   const popup = useMemo(() => {
@@ -224,12 +258,11 @@ export default function Ukpn() {
       let primariesFeatures: Feature[];
       const primariesShapeJson = ukpnShapeData as FeatureCollection;
       // const primariesMeta = ukpnData as FeatureCollection;
-      console.log("primariesShapeJson", primariesShapeJson.features);
 
       const substationsForecastData = substationsForecastRef.current;
       const listSubstationsData = listSubstationsRef.current;
       const gspSystemData = gspSystemRef.current;
-      console.log("substationsForecast", substationsForecastData);
+      const initialMapLoadComplete = mapInitialLoadCompleteRef.current;
 
       const primariesWithoutMeta: Record<string, string[]> = {};
 
@@ -257,10 +290,17 @@ export default function Ukpn() {
           .replace("road", "rd")
           .replace(/\|/, " and ");
         // Capitalise the first letter of each word
+        const snakeCaseName = primarySanitizedName.replace(/\s+/g, "_").toLowerCase();
         primarySanitizedName = primarySanitizedName?.replace(/\b\w/g, (l: string) =>
           l.toUpperCase()
         );
-        const snakeCaseName = primarySanitizedName.replace(/\s+/g, "_").toLowerCase();
+        feature = {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            snakeCaseName
+          }
+        };
 
         const primaryMeta = listSubstationsData?.find((f) =>
           f.substation_name?.toLowerCase().includes(snakeCaseName)
@@ -283,8 +323,9 @@ export default function Ukpn() {
             feature
           );
         }
+        feature = { ...feature, properties: { ...feature.properties, primaryUuid } };
 
-        const primaryForecast = substationsForecastData?.forecast_values_kw[primaryUuid];
+        const primaryForecast = substationsForecastData?.forecast_values_kW[primaryUuid];
         if (!primaryForecast) {
           return returnFeatureAndLog(
             primarySanitizedName,
@@ -369,11 +410,11 @@ export default function Ukpn() {
         // const gspFeature = mapFeature(feature, gspMeta, gspForecastsData || [], selectedTime);
         // if (!gspFeature) return feature;
 
-        const primaryCapacityKw = primaryMeta.capacity_kw;
+        const primaryCapacityKw = primaryMeta.capacity_kW;
 
         return {
           ...feature,
-          id: id,
+          id: primaryUuid,
           properties: {
             ...feature.properties,
             installedCapacityKw: primaryCapacityKw,
@@ -401,6 +442,7 @@ export default function Ukpn() {
       if (!primariesSource) {
         map.addSource("primaries-data", {
           type: "geojson",
+          promoteId: "primaryUuid",
           data: { ...primariesShapeJson, features: primariesFeatures } as GeoJSON.FeatureCollection
         });
       } else {
@@ -438,7 +480,7 @@ export default function Ukpn() {
               0,
               0,
               // on value maximum the opacity will be 1
-              700,
+              600,
               1
             ]
           }
@@ -451,17 +493,38 @@ export default function Ukpn() {
           type: "fill",
           source: "primaries-data",
           paint: {
-            "fill-color": [
-              "if",
-              ["get", ["primaryCapacityFromJson", true], false],
-              "#b10400",
-              "#00c"
-            ],
+            "fill-color": "#b10400",
+            // "if",
+            // ["get", ["primaryCapacityFromJson", true], false],
+            // "#b10400"
+            // "#00c"
+            // ],
             "fill-opacity": 0.5
           },
           // filter to show only if doesn't have expectedPowerGenerationMegawatts property
           filter: ["==", ["get", "expectedPowerGenerationMegawatts"], null]
         });
+      }
+      const selectedPrimariesLayer = map.getLayer("primaries-data-selected");
+      if (!selectedPrimariesLayer) {
+        map.addLayer({
+          id: "primaries-data-selected",
+          type: "line",
+          source: "primaries-data",
+          paint: {
+            "line-color": "#ddd",
+            "line-width": 3,
+            "line-opacity": ["case", ["boolean", ["feature-state", "clicked"], false], 1, 0]
+            // "line-opacity": 1
+          }
+          // filter: ["in", "primaryUuid", ...selectedRegionsRef.current]
+        });
+      } else {
+        // map.setFilter("primaries-data-selected", [
+        //   "in",
+        //   "primaryUuid",
+        //   ...selectedRegionsRef.current
+        // ]);
       }
 
       // GSP features/data
@@ -485,16 +548,16 @@ export default function Ukpn() {
         map.removeLayer("gsp-data-selected");
       }
       // if (!layer) {
-      map.addLayer({
-        id: "gsp-data",
-        type: "line",
-        source: "gsp-data",
-        paint: {
-          "line-color": "#ff8c2d",
-          "line-opacity": 0.6,
-          "line-width": 2
-        }
-      });
+      // map.addLayer({
+      //   id: "gsp-data",
+      //   type: "line",
+      //   source: "gsp-data",
+      //   paint: {
+      //     "line-color": "#ff8c2d",
+      //     "line-opacity": 0.6,
+      //     "line-width": 2
+      //   }
+      // });
       // map.addLayer({
       //   id: "gsp-data-fill",
       //   type: "fill",
@@ -504,35 +567,28 @@ export default function Ukpn() {
       //     "fill-opacity": ["case", ["boolean", ["feature-state", "clicked"], false], 0.5, 0.2]
       //   }
       // });
-      map.addLayer({
-        id: "gsp-data-selected",
-        type: "line",
-        source: "gsp-data",
-        paint: {
-          "line-color": "#ddd",
-          "line-width": 3,
-          "line-opacity": ["case", ["boolean", ["feature-state", "clicked"], false], 1, 0]
-        }
-      });
-      map.on("click", "primaries-data-fill", (e): void => {
-        console.log("clicked", e.features?.[0].properties, e.features?.[0].state);
-        toggleSelectedRegion(e.features?.[0].properties?.["GSPs"]);
+      if (!initialMapLoadComplete) {
+        map.on("click", "primaries-data-fill", (e): void => {
+          console.log("clicked", e.features?.[0].properties, e.features?.[0]);
+          if (!e.features?.[0].id) return;
 
-        map.setFeatureState(
-          { source: "primaries-data-fill", id: e.features?.[0].id || "" },
-          { clicked: !e.features?.[0].state?.clicked }
-        );
-      });
-      map.on("mousemove", "primaries-data-fill", (e) => {
-        const features = e.features;
-        if (features && features.length > 0) {
-          const feat = features[0];
-          const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          toggleSelectedRegion(String(e.features?.[0].id));
+
+          map.setFeatureState(
+            { source: "primaries-data", id: String(e.features?.[0].id) },
+            { clicked: !e.features?.[0].state?.clicked }
+          );
+        });
+        map.on("mousemove", "primaries-data-fill", (e) => {
+          const features = e.features;
+          if (features && features.length > 0) {
+            const feat = features[0];
+            const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between gap-3 items-center mb-1">
             <div class="text-sm font-semibold">${feat.properties?.displayName}</div>
             <div class="text-xs text-mapbox-black-300">${feat.properties?.gspId} • ${
-            feat.properties?.GSPs || ""
-          }</div>
+              feat.properties?.GSPs || ""
+            }</div>
           </div>
           <div class="flex justify-between items-center">
             <div class="flex flex-col text-xs">
@@ -553,14 +609,16 @@ export default function Ukpn() {
             </div>
           </div>
         </div>`;
-          popup.trackPointer().setHTML(popupContent).addTo(map);
-        }
-      });
-      map.on("mouseleave", "primaries-data-fill", () => {
-        popup.remove();
-      });
+            popup.trackPointer().setHTML(popupContent).addTo(map);
+          }
+        });
+        map.on("mouseleave", "primaries-data-fill", () => {
+          popup.remove();
+        });
+      }
 
       setShouldUpdateMap(false);
+      setMapInitialLoadComplete(true);
     },
     [selectedRegions]
   );
@@ -571,6 +629,7 @@ export default function Ukpn() {
 
   useEffect(() => {
     console.log("### selectedRegions", selectedRegions);
+    setShouldUpdateMap(true);
   }, [selectedRegions]);
 
   useEffect(() => {
@@ -656,17 +715,17 @@ export default function Ukpn() {
         </header>
         <div
           id="map-container"
-          className={`pv-map relative float-right h-full`}
-          style={{ width: "50%" }}
+          className={`pv-map relative float-right h-full w-full`}
+          style={{ width: "100%" }}
         >
           <Map
             loadDataOverlay={(map: { current: mapboxgl.Map }) => loadData(map.current)}
             controlOverlay={() => (
               <>
-                <button className="btn mr-3" onClick={() => setShouldUpdateMap(true)}>
+                <button className="btn float-right" onClick={() => setShouldUpdateMap(true)}>
                   Update Map
                 </button>
-                <button className="btn" onClick={() => setShowMap(false)}>
+                <button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>
                   Reset Map
                 </button>
               </>
@@ -683,20 +742,26 @@ export default function Ukpn() {
                   map.getCenter().wrap(),
                   map.getCenter().wrap().toArray()
                 );
-                loadData(map);
+                safelyUpdateMapData(map, loadData);
               }
             }}
             title={"Test"}
           />
         </div>
 
-        <SideLayout bottomPadding={false}>
+        <SideLayout closedWidth={selectedRegions.length > 0 ? "50%" : "0%"} bottomPadding={false}>
           {/*<PvRemixChart*/}
           {/*  combinedData={combinedData}*/}
           {/*  combinedErrors={combinedErrors}*/}
           {/*  className={currentView(VIEWS.FORECAST) ? "" : "hidden"}*/}
           {/*/>*/}
-          <span></span>
+          <div className="flex flex-col">
+            {selectedRegions.map((region) => (
+              <span className="text-lg" key={region}>
+                {region}
+              </span>
+            ))}
+          </div>
         </SideLayout>
       </div>
     </Layout>

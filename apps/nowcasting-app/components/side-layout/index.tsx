@@ -11,21 +11,22 @@ type SideLayoutProps = {
   className?: string;
   dashboardModeActive?: boolean;
   bottomPadding?: boolean;
+  closedWidth?: string;
 };
 
 const SideLayout: FC<SideLayoutProps> = ({
   children,
   className,
   dashboardModeActive = false,
-  bottomPadding = true
+  bottomPadding = true,
+  closedWidth = "50%"
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [view] = useGlobalState("view");
   // const closedWidth = dashboardModeActive ? "50%" : "44%";
-  const closedWidth = "50%";
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    if (window.innerWidth < 1024) {
+    if (window.innerWidth < 1024 && closedWidth === "50%") {
       setIsOpen(true);
       setIsMobile(true);
     }
