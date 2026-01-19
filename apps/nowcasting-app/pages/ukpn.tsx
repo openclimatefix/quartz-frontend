@@ -20,6 +20,7 @@ import { DateTime } from "luxon";
 import { safelyUpdateMapData } from "../components/helpers/mapUtils";
 import { CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from "recharts";
 import { theme } from "../tailwind.config";
+import { prettyPrintDayLabelWithDate } from "../components/helpers/utils";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -75,6 +76,7 @@ const UKPNGspNames = [
 ];
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const navyBlue = theme.extend.colors["ocf-blue"]["900"];
 
 type Substation = {
   capacity_kW: number;
@@ -82,7 +84,7 @@ type Substation = {
   longitude: number;
   substation_name: string;
   substation_type: string;
-  substation_uuid: number;
+  substation_uuid: string;
 };
 
 type ForecastForPrimary = {
@@ -154,7 +156,12 @@ export default function Ukpn() {
     return listSubstationsData?.find((primary) => primary.substation_name === name)
       ?.substation_uuid;
   };
-  console.log("=== selectedRegions  ===", selectedRegions[0]);
+  const getPrimaryNameByUuid = (uuid: string) => {
+    return listSubstationsData
+      ?.find((primary) => primary.substation_uuid === uuid)
+      ?.substation_name?.replace("_", " ")
+      .replace(/\b\w/g, (l: string) => l.toUpperCase());
+  };
   const {
     data: selectedPrimaryForecastData,
     isLoading: selectedPrimaryForecastLoading,
@@ -497,7 +504,7 @@ export default function Ukpn() {
           type: "fill",
           source: "primaries-data",
           paint: {
-            "fill-color": "#b10400",
+            "fill-color": navyBlue,
             // "if",
             // ["get", ["primaryCapacityFromJson", true], false],
             // "#b10400"
@@ -643,6 +650,7 @@ export default function Ukpn() {
 
   useEffect(() => {
     if (!showMap) {
+      setMapInitialLoadComplete(false);
       setShowMap(true);
     }
   }, [showMap]);
@@ -700,34 +708,7 @@ export default function Ukpn() {
               <OCFlogo />
             </div>
           </div>
-          <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">
-            {/*{isLoggedIn && (*/}
-            {/*  <Menu>*/}
-            {/*    <HeaderLink*/}
-            {/*      url="/"*/}
-            {/*      view={VIEWS.FORECAST}*/}
-            {/*      currentView={view}*/}
-            {/*      setViewFunc={setView}*/}
-            {/*      text={getViewTitle(VIEWS.FORECAST)}*/}
-            {/*    />*/}
-            {/*    <HeaderLink*/}
-            {/*      url="/"*/}
-            {/*      view={VIEWS.SOLAR_SITES}*/}
-            {/*      currentView={view}*/}
-            {/*      setViewFunc={setView}*/}
-            {/*      text={getViewTitle(VIEWS.SOLAR_SITES)}*/}
-            {/*      disabled={isProduction}*/}
-            {/*    />*/}
-            {/*    <HeaderLink*/}
-            {/*      url="/"*/}
-            {/*      view={VIEWS.DELTA}*/}
-            {/*      currentView={view}*/}
-            {/*      setViewFunc={setView}*/}
-            {/*      text={getViewTitle(VIEWS.DELTA)}*/}
-            {/*    />*/}
-            {/*  </Menu>*/}
-            {/*)}*/}
-          </div>
+          <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center"></div>
           <div className="py-1">{isLoggedIn && <ProfileDropDown />}</div>
         </header>
         <div
@@ -766,65 +747,86 @@ export default function Ukpn() {
           />
         </div>
 
-        <SideLayout closedWidth={selectedRegions.length > 0 ? "40%" : "0%"} bottomPadding={false}>
-          {/*<PvRemixChart*/}
-          {/*  combinedData={combinedData}*/}
-          {/*  combinedErrors={combinedErrors}*/}
-          {/*  className={currentView(VIEWS.FORECAST) ? "" : "hidden"}*/}
-          {/*/>*/}
-          <div className="flex flex-col">
-            {selectedRegions.map((region) => (
-              <span className="text-lg" key={region}>
-                {region}
-              </span>
-            ))}
-            <ComposedChart
-              style={{
-                width: "100%",
-                // maxWidth: "700px",
-                maxHeight: "80vh",
-                aspectRatio: 1.618,
-                color: "white"
-              }}
-              className="select-none"
-              data={formattedData}
-              responsive
-              margin={{
-                top: 20,
-                right: 20,
-                bottom: 20,
-                left: 20
-              }}
-            >
-              <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
-              <XAxis
-                dataKey="time"
-                scale="time"
-                type={"number"}
-                domain={[(dataMin: number) => dataMin, (dataMax: number) => dataMax]}
-                tickFormatter={(t) => new Date(t).toISOString().slice(11, 16)}
-                label={{ value: "Time", position: "insideBottom", offset: -5 }}
-              />
-              <YAxis
-                dataKey={"power"}
-                label={{ value: "Power (kW)", angle: -90, position: "insideLeft" }}
-                width={60}
-              />
-              <Tooltip />
+        {selectedRegions.length > 0 && (
+          <SideLayout closedWidth={"40%"} bottomPadding={false}>
+            <div className="flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
+              <div className="flex flex-initial w-full p-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
+                <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
+              </div>
+              <ComposedChart
+                style={{
+                  width: "100%",
+                  // maxWidth: "700px",
+                  maxHeight: "80vh",
+                  aspectRatio: 1.618,
+                  color: "white"
+                }}
+                className="select-none"
+                data={formattedData}
+                responsive
+                margin={{
+                  top: 20,
+                  right: 32,
+                  bottom: 0,
+                  left: 5
+                }}
+              >
+                <CartesianGrid verticalFill={["#242424", "#3C3C3C"]} fillOpacity={0.5} />
+                <XAxis
+                  dataKey="time"
+                  scale="time"
+                  type={"number"}
+                  tick={{ fill: "white", style: { fontSize: "12px" } }}
+                  tickLine={true}
+                  domain={[(dataMin: number) => dataMin, (dataMax: number) => dataMax]}
+                  tickFormatter={(t) => new Date(t).toISOString().slice(11, 16)}
+                  interval={23}
+                  // label={{ value: "Time", position: "insideBottom", offset: -5 }}
+                />
+                <XAxis
+                  dataKey="time"
+                  xAxisId={"x-axis-2"}
+                  tickFormatter={prettyPrintDayLabelWithDate}
+                  tick={{ fill: "white", style: { fontSize: "12px" } }}
+                  interval={47}
+                  tickLine={false}
+                  orientation="bottom"
+                  axisLine={false}
+                  tickMargin={-12}
+                />
+                <YAxis
+                  dataKey={"power"}
+                  tick={{ fill: "white", style: { fontSize: "12px" } }}
+                  tickLine={true}
+                  // domain={[(dataMin: number) => dataMin, (dataMax: number) => dataMax]}
+                  label={{
+                    value: "Power (kW)",
+                    angle: -90,
+                    position: "insideLeft",
+                    fill: "white",
+                    style: { fontSize: "12px" },
+                    // offset: 0,
+                    dx: 8,
+                    dy: 35
+                  }}
+                  width={60}
+                />
+                <Tooltip />
 
-              <Line
-                type="monotone"
-                dataKey="power"
-                dot={false}
-                stroke={yellow} //yellow
-                fill="transparent"
-                fillOpacity={100}
-                strokeWidth={2}
-                isAnimationActive={false}
-              />
-            </ComposedChart>
-          </div>
-        </SideLayout>
+                <Line
+                  type="monotone"
+                  dataKey="power"
+                  dot={false}
+                  stroke={yellow} //yellow
+                  fill="transparent"
+                  fillOpacity={100}
+                  strokeWidth={2}
+                  isAnimationActive={false}
+                />
+              </ComposedChart>
+            </div>
+          </SideLayout>
+        )}
       </div>
     </Layout>
   );

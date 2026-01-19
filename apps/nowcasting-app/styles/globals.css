@@ -5,6 +5,7 @@
 
 .recharts-surface {
   overflow: visible;
+  outline: none !important;
 }
 
 .btn {

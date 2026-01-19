@@ -26,6 +26,7 @@ import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { ZoomOutIcon } from "@heroicons/react/solid";
+import { ActiveLabel } from "recharts/types/synchronisation/types";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -321,7 +322,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               bottom: -10,
               left: 16
             }}
-            onClick={(e?: { activeLabel?: string }) => {
+            onClick={(e?: { activeLabel?: ActiveLabel }) => {
               if (globalIsZooming) return;
 
               if (setTimeOfInterest && e?.activeLabel) {
@@ -329,10 +330,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   ? setTimeOfInterest(
                       new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
                     )
-                  : setTimeOfInterest(e.activeLabel);
+                  : setTimeOfInterest(String(e.activeLabel));
               }
             }}
-            onMouseDown={(e?: { activeLabel?: string }) => {
+            onMouseDown={(e?: { activeLabel?: ActiveLabel }) => {
               if (!zoomEnabled) return;
               setTemporaryZoomArea(globalZoomArea);
               setGlobalIsZooming(true);
@@ -341,16 +342,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 setGlobalZoomArea({ x1: xValue, x2: xValue });
               }
             }}
-            onMouseMove={(e?: { activeLabel?: string }) => {
+            onMouseMove={(e?: { activeLabel?: ActiveLabel }) => {
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
-                let xValue = e?.activeLabel;
+                let xValue = String(e?.activeLabel);
                 if (!xValue) return;
                 setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
               }
             }}
-            onMouseUp={(e?: { activeLabel?: string }) => {
+            onMouseUp={(e?: { activeLabel?: ActiveLabel }) => {
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -360,10 +361,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   setTimeOfInterest
                 ) {
                   setGlobalZoomArea(temporaryZoomArea);
-                  setTimeOfInterest(e?.activeLabel);
+                  setTimeOfInterest(String(e?.activeLabel));
                 } else if (globalZoomArea?.x1?.length && globalZoomArea?.x2?.length) {
                   let { x1 } = globalZoomArea;
-                  let x2 = e?.activeLabel || "";
+                  let x2 = String(e?.activeLabel) || "";
                   if (x1 > x2) {
                     [x1, x2] = [x2, x1];
                   }
@@ -442,7 +443,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               label={{
                 value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
                 angle: 270,
-                position: "outsideLeft",
+                position: "left",
                 fill: "white",
                 style: { fontSize: "12px" },
                 offset: 0,
