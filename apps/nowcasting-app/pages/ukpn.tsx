@@ -120,17 +120,14 @@ export default function Ukpn() {
     isLoading: listSubstationsLoading,
     isValidating: listSubstationsValidating,
     error: listSubstationsError
-  } = useLoadDataFromApi<Substation[]>(
-    `http://uk-development-quartz-api.eu-west-1.elasticbeanstalk.com/substations`,
-    {}
-  );
+  } = useLoadDataFromApi<Substation[]>(`https://ukpn.quartz.solar/substations`, {});
   const {
     data: substationsForecastData,
     isLoading: substationsForecastLoading,
     isValidating: substationsForecastValidating,
     error: substationsForecastError
   } = useLoadDataFromApi<ForecastForTimestamp>(
-    `http://uk-development-quartz-api.eu-west-1.elasticbeanstalk.com/substations/forecast/?datetime_utc=${selectedTime}`,
+    `https://ukpn.quartz.solar/substations/forecast?datetime_utc=${selectedTime}`,
     {
       onSuccess: (data) => {
         setShouldUpdateMap(true);
@@ -169,7 +166,7 @@ export default function Ukpn() {
     error: selectedPrimaryForecastError
   } = useLoadDataFromApi<ForecastForPrimary>(
     selectedRegions.length
-      ? `http://uk-development-quartz-api.eu-west-1.elasticbeanstalk.com/substations/${selectedRegions[0]}/forecast`
+      ? `https://ukpn.quartz.solar/substations/${selectedRegions[0]}/forecast`
       : null
   );
 
