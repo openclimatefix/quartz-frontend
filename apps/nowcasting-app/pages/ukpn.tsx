@@ -18,6 +18,8 @@ import { GspEntities, GspEntity } from "../components/types";
 import dnoGspGroupings from "../data/dno_gsp_groupings.json";
 import { DateTime } from "luxon";
 import { safelyUpdateMapData } from "../components/helpers/mapUtils";
+import { CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from "recharts";
+import { theme } from "../tailwind.config";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -72,6 +74,8 @@ const UKPNGspNames = [
   "WYMOM_1"
 ];
 
+const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+
 type Substation = {
   capacity_kW: number;
   latitude: number;
@@ -82,8 +86,8 @@ type Substation = {
 };
 
 type ForecastForPrimary = {
-  PowerKW: number;
-  Time: string;
+  power_kW: number;
+  time: string;
 }[];
 
 type ForecastForTimestamp = {
@@ -574,6 +578,8 @@ export default function Ukpn() {
 
           toggleSelectedRegion(String(e.features?.[0].id));
 
+          // Find any clicked map regions
+
           map.setFeatureState(
             { source: "primaries-data", id: String(e.features?.[0].id) },
             { clicked: !e.features?.[0].state?.clicked }
@@ -648,6 +654,14 @@ export default function Ukpn() {
   if (!showMap) {
     return <div>Reset</div>;
   }
+
+  const formattedData =
+    selectedPrimaryForecastData?.map((d) => ({
+      power: d.power_kW,
+      time: new Date(d.time).getTime()
+    })) ?? [];
+
+  console.log("formattedData", formattedData);
 
   return (
     <Layout>
@@ -749,7 +763,7 @@ export default function Ukpn() {
           />
         </div>
 
-        <SideLayout closedWidth={selectedRegions.length > 0 ? "50%" : "0%"} bottomPadding={false}>
+        <SideLayout closedWidth={selectedRegions.length > 0 ? "40%" : "0%"} bottomPadding={false}>
           {/*<PvRemixChart*/}
           {/*  combinedData={combinedData}*/}
           {/*  combinedErrors={combinedErrors}*/}
@@ -761,6 +775,51 @@ export default function Ukpn() {
                 {region}
               </span>
             ))}
+            <ComposedChart
+              style={{
+                width: "100%",
+                // maxWidth: "700px",
+                maxHeight: "80vh",
+                aspectRatio: 1.618,
+                color: "white"
+              }}
+              className="select-none"
+              data={formattedData}
+              responsive
+              margin={{
+                top: 20,
+                right: 20,
+                bottom: 20,
+                left: 20
+              }}
+            >
+              <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
+              <XAxis
+                dataKey="time"
+                scale="time"
+                type={"number"}
+                domain={[(dataMin: number) => dataMin, (dataMax: number) => dataMax]}
+                tickFormatter={(t) => new Date(t).toISOString().slice(11, 16)}
+                label={{ value: "Time", position: "insideBottom", offset: -5 }}
+              />
+              <YAxis
+                dataKey={"power"}
+                label={{ value: "Power (kW)", angle: -90, position: "insideLeft" }}
+                width={60}
+              />
+              <Tooltip />
+
+              <Line
+                type="monotone"
+                dataKey="power"
+                dot={false}
+                stroke={yellow} //yellow
+                fill="transparent"
+                fillOpacity={100}
+                strokeWidth={2}
+                isAnimationActive={false}
+              />
+            </ComposedChart>
           </div>
         </SideLayout>
       </div>

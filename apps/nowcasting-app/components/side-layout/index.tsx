@@ -37,12 +37,12 @@ const SideLayout: FC<SideLayoutProps> = ({
   }
   return (
     <div
-      className={`h-full pt-16 absolute top-0 left-0 z-20 ${className || ""}`}
+      className={`h-auto ml-4 mt-4 pt-16 absolute top-0 left-0 z-20 ${className || ""}`}
       style={{ width: isOpen ? "90%" : closedWidth }}
     >
       <div
         className={
-          "focus:outline-none h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20 "
+          "focus:outline-none h-full text-white justify-between flex flex-col rounded-md bg-mapbox-black-500 z-20 "
         }
       >
         <div className={`min-h-full max-h-full flex flex-col`}>{children}</div>
