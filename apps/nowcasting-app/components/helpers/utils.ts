@@ -420,9 +420,9 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
-    if (process.env.NEXT_PUBLIC_DEV_MODE !== "true" && [401, 403].includes(status)) {
+    if (err?.error?.includes("not_authenticated")) {
       Sentry.captureException(err, {
-        tags: { error: "401/403 auth error" }
+        tags: { error: "401 no auth error" }
       });
       // Redirect but still propagate the error to SWR
       const router = Router;

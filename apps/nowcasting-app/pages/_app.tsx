@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import { GoogleTagManager } from "@next/third-parties/google";
 import CustomUserProvider from "../components/auth/CustomUserProvider";
+import Router from "next/router";
 
 function MyApp({ Component, pageProps }: any) {
   return (
@@ -20,7 +21,10 @@ function MyApp({ Component, pageProps }: any) {
             ) {
               Sentry.captureException(error);
             }
-            console.log("error", key, error);
+            if (error && String(error).includes("not_authenticated")) {
+              const router = Router;
+              router.push("/api/auth/logout?redirectToLogin=true");
+            }
           }
         }}
       >

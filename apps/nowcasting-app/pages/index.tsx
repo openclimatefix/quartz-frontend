@@ -849,9 +849,13 @@ export const getServerSideProps =
         async getServerSideProps(context) {
           const cookies = new Cookies(context.req, context.res);
           return {
-            props: {
-              dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
+            redirect: {
+              destination: "/ukpn",
+              permanent: false
             }
+            // props: {
+            //   dashboardModeServer: cookies.get(CookieStorageKeys.DASHBOARD_MODE) || false
+            // }
           };
         }
       });

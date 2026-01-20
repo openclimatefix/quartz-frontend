@@ -717,12 +717,12 @@ export default function Ukpn() {
             loadDataOverlay={(map: { current: mapboxgl.Map }) => loadData(map.current)}
             controlOverlay={() => (
               <>
-                <button className="btn float-right" onClick={() => setShouldUpdateMap(true)}>
-                  Update Map
-                </button>
-                <button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>
-                  Reset Map
-                </button>
+                {/*<button className="btn float-right" onClick={() => setShouldUpdateMap(true)}>*/}
+                {/*  Update Map*/}
+                {/*</button>*/}
+                {/*<button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>*/}
+                {/*  Reset Map*/}
+                {/*</button>*/}
               </>
             )}
             updateData={{

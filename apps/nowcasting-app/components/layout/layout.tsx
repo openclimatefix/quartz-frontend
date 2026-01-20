@@ -15,7 +15,7 @@ const Layout = ({ children }: ILayout) => {
   const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status`);
   const [view] = useGlobalState("view");
   const viewTitle = getViewTitle(view);
-  const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
+  const pageTitle = "Quartz Solar - UKPN";
 
   return (
     <>
