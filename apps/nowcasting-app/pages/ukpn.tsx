@@ -142,7 +142,7 @@ export default function Ukpn() {
     error: gspSystemError
   } = useLoadDataFromApi<GspEntities>(
     // Currently can only get all GSP systems data, or one
-    `${process.env.NEXT_PUBLIC_API_PREFIX}/system/GB/gsp`,
+    `${process.env.NEXT_PUBLIC_API_PREFIX}/system/GB/gsp/`,
     {
       onSuccess: (data) => {
         setShouldUpdateMap(true);
