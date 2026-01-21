@@ -26,7 +26,7 @@ import {
 } from "../components/helpers/utils";
 import { debounce } from "next/dist/server/utils";
 import Spinner from "../components/icons/spinner";
-import { VIEWS } from "../constant";
+import { CloseIcon } from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -227,6 +227,7 @@ export default function Ukpn() {
   console.log("forecastData", substationsForecastData);
 
   // Map data closure refs
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const substationsForecastRef = useRef<ForecastForTimestamp | null>(null);
   const listSubstationsRef = useRef<Substation[] | null>(null);
   const gspSystemRef = useRef<GspEntities | null>(null);
@@ -287,6 +288,9 @@ export default function Ukpn() {
 
   const loadData = useCallback(
     (map: mapboxgl.Map) => {
+      if (!mapRef?.current) {
+        mapRef.current = map;
+      }
       console.log("loading data");
       // Primary Substation features/data
       // let features = { type: "FeatureCollection", features: [] } as FeatureCollection;
@@ -669,7 +673,14 @@ export default function Ukpn() {
 
   useEffect(() => {
     console.log("### selectedRegions", selectedRegions);
-    // Selection should NOT trigger a full data refresh; we update the selected layer filter directly on click.
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!map.getLayer("primaries-data-selected")) return;
+
+    if (!selectedRegionsRef.current[0]) {
+      map.setFilter("primaries-data-selected", ["==", ["id"], "not-set"]);
+    }
   }, [selectedRegions]);
 
   useEffect(() => {
@@ -852,8 +863,14 @@ export default function Ukpn() {
         {selectedRegions.length > 0 && (
           <SideLayout closedWidth={"40%"} bottomPadding={false}>
             <div className="relative flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
-              <div className="flex flex-initial w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
+              <div className="flex flex-initial justify-between items-center w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
                 <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
+                <button
+                  className="justify-self-end p-3 -m-3"
+                  onClick={() => setSelectedRegions([])}
+                >
+                  <CloseIcon />
+                </button>
               </div>
               {(selectedPrimaryForecastLoading || selectedPrimaryForecastValidating) && (
                 <LoadStateMap>
