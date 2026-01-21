@@ -1,5 +1,5 @@
 import Layout from "../components/layout/layout";
-import { Map } from "../components/map";
+import { LoadStateMap, Map } from "../components/map";
 // import gspShapeData from "../data/GSP_regions_4326_20250109.json";
 // import gspShapeData from "../data/ukpnFilteredGspShapeData.json";
 import ukpnShapeData from "../data/ukpn_primary_postcode_area.json";
@@ -21,6 +21,8 @@ import { safelyUpdateMapData } from "../components/helpers/mapUtils";
 import { CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from "recharts";
 import { theme } from "../tailwind.config";
 import { prettyPrintDayLabelWithDate } from "../components/helpers/utils";
+import { debounce } from "next/dist/server/utils";
+import Spinner from "../components/icons/spinner";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -97,6 +99,18 @@ type ForecastForTimestamp = {
   forecast_values_kW: Record<string, number>;
 };
 
+const getDefaultForecastTimes = () => {
+  const now = DateTime.now();
+  let start = now.startOf("day").minus({ days: 2 });
+  const end = now.endOf("day").plus({ days: 1, minutes: 30 });
+  const times = [];
+  while (start <= end) {
+    times.push(start.toMillis());
+    start = start.plus({ minutes: 30 });
+  }
+  return times;
+};
+
 export default function Ukpn() {
   const { user, isLoading, error } = useUser();
   const isLoggedIn = !isLoading && !!user;
@@ -113,6 +127,12 @@ export default function Ukpn() {
       .toUTC()
       .toISO({ suppressMilliseconds: true })
   );
+
+  const forecastTimes = getDefaultForecastTimes();
+  console.log("forecastTimes", forecastTimes);
+  const forecastPosition =
+    (forecastTimes.indexOf(DateTime.fromISO(selectedTime).toMillis()) / forecastTimes.length) * 100;
+  console.log("forecastPosition", forecastPosition);
 
   // Load data
   const {
@@ -617,7 +637,7 @@ export default function Ukpn() {
               }</span> <span class="text-2xs text-mapbox-black-300">%</span></div>
             </div>
             <div class="flex flex-col text-xs items-end">
-              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Predicted</span>
+              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Forecast</span>
             ${feat.properties?.["expectedPowerGenerationMegawatts"]?.toFixed(2) || "– "} KW
             </div>
           </div>
@@ -723,6 +743,9 @@ export default function Ukpn() {
                 {/*<button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>*/}
                 {/*  Reset Map*/}
                 {/*</button>*/}
+                <span className="float-right text-white bg-black px-3 py-1.5 rounded-md">
+                  {DateTime.fromISO(selectedTime).toFormat("EEE, dd MMMM yyyy, HH:mm")}
+                </span>
               </>
             )}
             updateData={{
@@ -741,20 +764,87 @@ export default function Ukpn() {
               }
             }}
             title={"Test"}
-          />
+          >
+            <div className="flex flex-col absolute bottom-8 left-0 right-0 mx-3 pb-2 pt-0.5 rounded-md bg-black">
+              <div className="absolute flex right-5 left-6">
+                <span
+                  className="text-sm absolute top-1 -translate-x-1/2 bg-ocf-yellow px-2 py-1 text-black border-2 border-black rounded-md z-10"
+                  style={{ left: `${forecastPosition}%` }}
+                >
+                  {DateTime.fromISO(selectedTime).toFormat("HH:mm")}
+                </span>
+              </div>
+              <div className="flex-1 flex justify-around mx-6 text-xs pt-1 text-white">
+                {forecastTimes.map((h, index) => {
+                  const datetime = DateTime.fromMillis(h);
+                  if (datetime.get("minute") !== 0 || datetime.get("hour") !== 12) return null;
+                  const isoDate = datetime.toISO();
+                  if (!isoDate) return null;
+
+                  return (
+                    <div key={`${h}${index}`} className="w-0 flex">
+                      <span className="transform -translate-x-1/2 whitespace-nowrap">
+                        {prettyPrintDayLabelWithDate(isoDate)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex-1 flex justify-between mx-6 text-xs pt-0.5 pb-1 text-white">
+                {forecastTimes.map((h, index) => {
+                  const datetime = DateTime.fromMillis(h);
+                  if (datetime.get("minute") !== 0 || datetime.get("hour") % 6 > 0) return null;
+
+                  return (
+                    <div key={`${h}${index}`} className="w-0 flex">
+                      <span className="transform -translate-x-1/2">
+                        {datetime.toFormat("HH:mm")}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <input
+                type={"range"}
+                className={
+                  "flex-1 mx-4 appearance-none bg-mapbox-black-600 text-ocf-yellow rounded-md"
+                }
+                min={forecastTimes[0]}
+                max={forecastTimes[forecastTimes.length - 1]}
+                step={30 * 60 * 1000}
+                defaultValue={DateTime.fromISO(selectedTime).toMillis()}
+                // onChange={(e) => {
+                //
+                // }}
+                onInput={debounce((e) => {
+                  console.log(
+                    "change forecastTimes",
+                    DateTime.fromMillis(Number(e.target.value))
+                      .toUTC()
+                      .toISO({ suppressMilliseconds: true })
+                  );
+                  setSelectedTime(
+                    DateTime.fromMillis(Number(e.target.value))
+                      .toUTC()
+                      .toISO({ suppressMilliseconds: true }) ?? selectedTime
+                  );
+                }, 500)}
+              />
+            </div>
+          </Map>
         </div>
 
         {selectedRegions.length > 0 && (
           <SideLayout closedWidth={"40%"} bottomPadding={false}>
-            <div className="flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
-              <div className="flex flex-initial w-full p-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
+            <div className="relative flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
+              <div className="flex flex-initial w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
                 <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
               </div>
               <ComposedChart
                 style={{
                   width: "100%",
                   // maxWidth: "700px",
-                  maxHeight: "80vh",
+                  maxHeight: "70vh",
                   aspectRatio: 1.618,
                   color: "white"
                 }}
@@ -764,7 +854,7 @@ export default function Ukpn() {
                 margin={{
                   top: 20,
                   right: 32,
-                  bottom: 0,
+                  bottom: -12,
                   left: 5
                 }}
               >
