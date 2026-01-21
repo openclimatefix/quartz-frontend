@@ -7,7 +7,14 @@ import ukpnData from "../data/ukpn-primary-transformers.json";
 import primaryCapacities from "../data/primary_capacities.json";
 
 import SideLayout from "../components/side-layout";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  MouseEvent as ReactMouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { OCFlogo } from "../components/icons/logo";
 import ProfileDropDown from "../components/layout/header/profile-dropdown";
 import { useUser } from "@auth0/nextjs-auth0/client";
@@ -27,6 +34,7 @@ import {
 import { debounce } from "next/dist/server/utils";
 import Spinner from "../components/icons/spinner";
 import { CloseIcon } from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
+import { MapUIButton } from "../components/map/measuringUnit";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -103,6 +111,12 @@ type ForecastForTimestamp = {
   forecast_values_kW: Record<string, number>;
 };
 
+enum MapUnit {
+  capacity = "capacity",
+  percentage = "percentage",
+  kW = "kW"
+}
+
 const getDefaultForecastTimes = () => {
   const now = DateTime.now();
   let start = now.startOf("day").minus({ days: 2 });
@@ -131,12 +145,21 @@ export default function Ukpn() {
       .toUTC()
       .toISO({ suppressMilliseconds: true })
   );
+  const [mapUnit, setMapUnit] = useState<MapUnit>(MapUnit.kW);
 
   const forecastTimes = getDefaultForecastTimes();
   console.log("forecastTimes", forecastTimes);
   const forecastPosition =
     (forecastTimes.indexOf(DateTime.fromISO(selectedTime).toMillis()) / forecastTimes.length) * 100;
   console.log("forecastPosition", forecastPosition);
+
+  const onToggleUnit = async (
+    event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
+    unit: MapUnit
+  ) => {
+    event.preventDefault();
+    setMapUnit(unit);
+  };
 
   // Load data
   const {
@@ -233,6 +256,7 @@ export default function Ukpn() {
   const gspSystemRef = useRef<GspEntities | null>(null);
   const mapInitialLoadCompleteRef = useRef<Boolean>(false);
   const selectedRegionsRef = useRef<string[]>([]);
+  const mapUnitRef = useRef<MapUnit>();
 
   useEffect(() => {
     substationsForecastRef.current = substationsForecastData ?? null;
@@ -253,6 +277,10 @@ export default function Ukpn() {
   useEffect(() => {
     selectedRegionsRef.current = selectedRegions;
   }, [selectedRegions]);
+
+  useEffect(() => {
+    mapUnitRef.current = mapUnit;
+  }, [mapUnit]);
 
   const toggleSelectedRegion = (id: string) => {
     console.log("id", id);
@@ -503,6 +531,8 @@ export default function Ukpn() {
         });
       }
       const primariesFillLayer = map.getLayer("primaries-data-fill");
+      const unitString =
+        mapUnitRef.current === "kW" ? "expectedPowerGenerationMegawatts" : "installedCapacityKw";
       if (!primariesFillLayer) {
         map.addLayer({
           id: "primaries-data-fill",
@@ -514,7 +544,7 @@ export default function Ukpn() {
             "fill-opacity": [
               "interpolate",
               ["linear"],
-              ["to-number", ["get", "expectedPowerGenerationMegawatts"]],
+              ["to-number", ["get", unitString]],
               // on value 0 the opacity will be 0
               0,
               0,
@@ -557,12 +587,6 @@ export default function Ukpn() {
           },
           filter: ["==", ["id"], "not-set"]
         });
-      } else {
-        map.setFilter("primaries-data-selected", [
-          "==",
-          ["id"],
-          selectedRegionsRef.current[0] ?? "not-set"
-        ]);
       }
 
       // GSP features/data
@@ -644,7 +668,9 @@ export default function Ukpn() {
             <div class="flex flex-col text-xs">
               <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">GSP Yield</span>
               <div><span>${
-                feat.properties?.gspPredictedYield?.toFixed(2) || "– "
+                (Number(feat.properties?.expectedPowerGenerationNormalized || 0) * 100).toFixed(
+                  2
+                ) || "– "
               }</span> <span class="text-2xs text-mapbox-black-300">%</span></div>
             </div>
             <div class="flex flex-col text-xs items-end">
@@ -664,7 +690,7 @@ export default function Ukpn() {
       setShouldUpdateMap(false);
       setMapInitialLoadComplete(true);
     },
-    [selectedRegions]
+    [selectedRegions, mapUnit]
   );
 
   useEffect(() => {
@@ -682,6 +708,42 @@ export default function Ukpn() {
       map.setFilter("primaries-data-selected", ["==", ["id"], "not-set"]);
     }
   }, [selectedRegions]);
+
+  useEffect(() => {
+    console.log("### mapUnit", mapUnit);
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!map.getLayer("primaries-data-fill")) return;
+
+    let unitString = "";
+    let max = 500;
+    switch (mapUnitRef.current) {
+      case MapUnit.kW:
+        unitString = "expectedPowerGenerationMegawatts";
+        max = 500;
+        break;
+      case MapUnit.capacity:
+        unitString = "installedCapacityKw";
+        max = 1500;
+        break;
+      case MapUnit.percentage:
+        unitString = "expectedPowerGenerationNormalized";
+        max = 1;
+    }
+
+    map.setPaintProperty("primaries-data-fill", "fill-opacity", [
+      "interpolate",
+      ["linear"],
+      ["to-number", ["get", unitString]],
+      // on value 0 the opacity will be 0
+      0,
+      0,
+      // on value maximum the opacity will be 1
+      max,
+      1
+    ]);
+  }, [mapUnit]);
 
   useEffect(() => {
     if (!showMap) {
@@ -762,17 +824,47 @@ export default function Ukpn() {
           <Map
             loadDataOverlay={(map: { current: mapboxgl.Map }) => loadData(map.current)}
             controlOverlay={() => (
-              <>
+              <div className="flex flex-col">
                 {/*<button className="btn float-right" onClick={() => setShouldUpdateMap(true)}>*/}
                 {/*  Update Map*/}
                 {/*</button>*/}
                 {/*<button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>*/}
                 {/*  Reset Map*/}
                 {/*</button>*/}
-                <span className="float-right text-white bg-black px-3 py-1.5 rounded-md">
-                  {DateTime.fromISO(selectedTime).toFormat("EEE, dd MMMM yyyy, HH:mm")}
-                </span>
-              </>
+                <div>
+                  <span className="flex-initial block float-right text-white bg-black px-3 py-1.5 rounded-md">
+                    {DateTime.fromISO(selectedTime).toFormat("EEE, dd MMMM yyyy, HH:mm")}
+                  </span>
+                </div>
+                <div className="flex flex-initial mt-2 justify-end mr-0">
+                  <div className="inline-block rounded-md overflow-clip ">
+                    <MapUIButton<MapUnit>
+                      id={"UnitButtonkW"}
+                      active={mapUnit === MapUnit.kW}
+                      isLoading={isLoading}
+                      onToggle={onToggleUnit}
+                      text={"kW"}
+                      value={MapUnit.kW}
+                    />
+                    <MapUIButton<MapUnit>
+                      id={"UnitButtonPercent"}
+                      active={mapUnit === MapUnit.percentage}
+                      isLoading={isLoading}
+                      onToggle={onToggleUnit}
+                      text={"%"}
+                      value={MapUnit.percentage}
+                    />
+                    <MapUIButton<MapUnit>
+                      id={"UnitButtonCapacity"}
+                      active={mapUnit === MapUnit.capacity}
+                      isLoading={isLoading}
+                      onToggle={onToggleUnit}
+                      text={"Capacity"}
+                      value={MapUnit.capacity}
+                    />
+                  </div>
+                </div>
+              </div>
             )}
             updateData={{
               newData: shouldUpdateMap,

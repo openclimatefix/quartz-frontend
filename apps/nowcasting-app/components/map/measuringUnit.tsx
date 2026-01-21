@@ -3,6 +3,40 @@ import { ActiveUnit, NationalAggregation } from "./types";
 import useGlobalState from "../helpers/globalState";
 import * as Sentry from "@sentry/nextjs";
 
+const buttonClasses =
+  "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";
+
+type ButtonProps<T> = {
+  id: string;
+  active: boolean;
+  isLoading: boolean;
+  onToggle: (event: ReactMouseEvent<HTMLButtonElement>, unit: T) => Promise<void>;
+  text: string;
+  value: T;
+};
+export const MapUIButton = <T,>({
+  id,
+  active,
+  isLoading,
+  onToggle,
+  text,
+  value
+}: ButtonProps<T>) => {
+  return (
+    <button
+      onClick={(event) => onToggle(event, value)}
+      disabled={isLoading}
+      id={id}
+      type="button"
+      className={`${buttonClasses} map-ui-btn ${
+        active ? "text-black bg-ocf-yellow" : "text-white bg-black"
+      } ${isLoading ? "cursor-wait" : ""}`}
+    >
+      {text}
+    </button>
+  );
+};
+
 const MeasuringUnit = ({
   activeUnit,
   setActiveUnit,
@@ -34,32 +68,6 @@ const MeasuringUnit = ({
     });
     setNationalAggregation(aggregation);
     console.log("sent event to Sentry: aggregation", aggregation);
-  };
-  const buttonClasses =
-    "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";
-
-  type ButtonProps<T> = {
-    id: string;
-    active: boolean;
-    isLoading: boolean;
-    onToggle: (event: ReactMouseEvent<HTMLButtonElement>, unit: T) => Promise<void>;
-    text: string;
-    value: T;
-  };
-  const MapUIButton = <T,>({ id, active, isLoading, onToggle, text, value }: ButtonProps<T>) => {
-    return (
-      <button
-        onClick={(event) => onToggle(event, value)}
-        disabled={isLoading}
-        id={id}
-        type="button"
-        className={`${buttonClasses}  ${
-          active ? "text-black bg-ocf-yellow" : "text-white bg-black border-r"
-        } ${isLoading ? "cursor-wait" : ""}`}
-      >
-        {text}
-      </button>
-    );
   };
 
   return (
