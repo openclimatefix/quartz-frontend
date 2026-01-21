@@ -187,7 +187,10 @@ export default function Ukpn() {
   } = useLoadDataFromApi<ForecastForPrimary>(
     selectedRegions.length
       ? `https://ukpn.quartz.solar/substations/${selectedRegions[0]}/forecast`
-      : null
+      : null,
+    {
+      keepPreviousData: false
+    }
   );
 
   console.log("selectedPrimaryForecastData", selectedPrimaryForecastData);
@@ -733,6 +736,14 @@ export default function Ukpn() {
           className={`pv-map relative float-right h-full w-full`}
           style={{ width: "100%" }}
         >
+          {(listSubstationsLoading ||
+            listSubstationsValidating ||
+            substationsForecastLoading ||
+            substationsForecastValidating) && (
+            <LoadStateMap>
+              <Spinner />
+            </LoadStateMap>
+          )}
           <Map
             loadDataOverlay={(map: { current: mapboxgl.Map }) => loadData(map.current)}
             controlOverlay={() => (
@@ -840,6 +851,11 @@ export default function Ukpn() {
               <div className="flex flex-initial w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
                 <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
               </div>
+              {(selectedPrimaryForecastLoading || selectedPrimaryForecastValidating) && (
+                <LoadStateMap>
+                  <Spinner />
+                </LoadStateMap>
+              )}
               <ComposedChart
                 style={{
                   width: "100%",
