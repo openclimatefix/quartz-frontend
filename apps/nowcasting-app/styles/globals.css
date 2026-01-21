@@ -3,7 +3,7 @@
 @tailwind utilities;
 @import "./toastify.css";
 
-.recharts-surface {
+.recharts-surface, .recharts-surface * {
   overflow: visible;
   outline: none !important;
 }

@@ -20,9 +20,13 @@ import { DateTime } from "luxon";
 import { safelyUpdateMapData } from "../components/helpers/mapUtils";
 import { CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from "recharts";
 import { theme } from "../tailwind.config";
-import { prettyPrintDayLabelWithDate } from "../components/helpers/utils";
+import {
+  formatISODateStringHumanNumbersOnly,
+  prettyPrintDayLabelWithDate
+} from "../components/helpers/utils";
 import { debounce } from "next/dist/server/utils";
 import Spinner from "../components/icons/spinner";
+import { VIEWS } from "../constant";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -914,7 +918,37 @@ export default function Ukpn() {
                   }}
                   width={60}
                 />
-                <Tooltip />
+                <Tooltip
+                  content={({ payload, label }) => {
+                    const data = payload && payload[0]?.payload;
+                    if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
+                      return <div></div>;
+
+                    const formattedPower = Number(data?.power).toFixed(2);
+
+                    let formattedDate = data?.time;
+
+                    return (
+                      <div className="px-3 py-2 bg-mapbox-black bg-opacity-90 shadow">
+                        <ul className="">
+                          <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
+                            <div className="pr-3">
+                              {formatISODateStringHumanNumbersOnly(formattedDate)}
+                            </div>
+                            <div>KW</div>
+                          </li>
+
+                          <li className={`font-sans text-ocf-yellow font-normal text-xs`}>
+                            <div className={`flex justify-between`}>
+                              <div>Forecast:</div>
+                              <div className={`font-sans ml-4`}>{formattedPower}</div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    );
+                  }}
+                />
 
                 <Line
                   type="monotone"
