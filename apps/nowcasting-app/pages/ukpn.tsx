@@ -393,7 +393,7 @@ export default function Ukpn() {
         feature = { ...feature, properties: { ...feature.properties, primaryUuid } };
 
         const primaryForecast = substationsForecastData?.forecast_values_kW[primaryUuid];
-        if (!primaryForecast) {
+        if (primaryForecast === undefined) {
           return returnFeatureAndLog(
             primarySanitizedName,
             "primary UUID not in subs forecast data",
@@ -568,7 +568,7 @@ export default function Ukpn() {
             // "#b10400"
             // "#00c"
             // ],
-            "fill-opacity": 0.5
+            "fill-opacity": 0.7
           },
           // filter to show only if doesn't have expectedPowerGenerationMegawatts property
           filter: ["==", ["get", "expectedPowerGenerationMegawatts"], null]
