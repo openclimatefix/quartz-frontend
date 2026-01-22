@@ -35,7 +35,7 @@ import { debounce } from "next/dist/server/utils";
 import Spinner from "../components/icons/spinner";
 import { CloseIcon } from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 import { MapUIButton } from "../components/map/measuringUnit";
-import { DownloadIcon } from "@heroicons/react/outline";
+import { DownloadIcon, SearchIcon } from "@heroicons/react/outline";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -121,6 +121,11 @@ enum MapUnit {
   kW = "kW"
 }
 
+type SearchResult = {
+  value: string;
+  label: string;
+};
+
 const getDefaultForecastTimes = () => {
   const now = DateTime.now();
   let start = now.startOf("day").minus({ days: 2 });
@@ -167,6 +172,9 @@ export default function Ukpn() {
   );
   const [mapUnit, setMapUnit] = useState<MapUnit>(MapUnit.kW);
   const [scaleMax, setScaleMax] = useState<number>(500);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchString, setSearchString] = useState<string>();
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
   const forecastTimes = getDefaultForecastTimes();
   console.log("forecastTimes", forecastTimes);
@@ -221,11 +229,13 @@ export default function Ukpn() {
     return listSubstationsData?.find((primary) => primary.substation_name === name)
       ?.substation_uuid;
   };
-  const getPrimaryNameByUuid = (uuid: string) => {
-    return listSubstationsData
-      ?.find((primary) => primary.substation_uuid === uuid)
-      ?.substation_name?.replace("_", " ")
-      .replace(/\b\w/g, (l: string) => l.toUpperCase());
+  const getPrimaryDisplayNameByUuid = (uuid: string) => {
+    return prettifyPrimaryName(
+      listSubstationsData?.find((primary) => primary.substation_uuid === uuid)?.substation_name
+    );
+  };
+  const prettifyPrimaryName = (name: string | undefined) => {
+    return name?.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) || "";
   };
   const getPrimaryCapacityByUuid = (uuid: string) => {
     return listSubstationsData?.find((primary) => primary.substation_uuid === uuid)?.capacity_kW;
@@ -330,6 +340,18 @@ export default function Ukpn() {
 
   useEffect(() => {
     selectedRegionsRef.current = selectedRegions;
+
+    console.log("### selectedRegions", selectedRegions);
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (!map.getLayer("primaries-data-selected")) return;
+
+    if (!selectedRegionsRef.current[0]) {
+      map.setFilter("primaries-data-selected", ["==", ["id"], "not-set"]);
+    } else {
+      map.setFilter("primaries-data-selected", ["==", ["id"], selectedRegionsRef.current[0]]);
+    }
   }, [selectedRegions]);
 
   useEffect(() => {
@@ -752,18 +774,6 @@ export default function Ukpn() {
   }, [shouldUpdate]);
 
   useEffect(() => {
-    console.log("### selectedRegions", selectedRegions);
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (!map.getLayer("primaries-data-selected")) return;
-
-    if (!selectedRegionsRef.current[0]) {
-      map.setFilter("primaries-data-selected", ["==", ["id"], "not-set"]);
-    }
-  }, [selectedRegions]);
-
-  useEffect(() => {
     console.log("### mapUnit", mapUnit);
     const map = mapRef.current;
     if (!map) return;
@@ -808,12 +818,27 @@ export default function Ukpn() {
     }
   }, [showMap]);
 
-  console.log("UKPNRegionGspIds", UKPNRegionGspIds);
+  useEffect(() => {
+    if (!searchString?.length || !listSubstationsData?.length) {
+      setSearchResults([]);
+      return;
+    }
+
+    const matchingPrimaries = listSubstationsData
+      ?.filter((p) => {
+        return p.substation_name.replace("_", " ").includes(searchString.toLowerCase());
+      })
+      .map((match) => ({
+        value: match.substation_uuid,
+        label: prettifyPrimaryName(match.substation_name)
+      }));
+
+    setSearchResults(matchingPrimaries);
+  }, [searchString]);
 
   const UKPNGspNames = gspSystemData
     ?.filter((gsp) => UKPNRegionGspIds.includes(gsp.gspId))
     .map((gsp) => gsp.gspName);
-  console.log("UKPN GSP Names", UKPNGspNames);
 
   if (!showMap) {
     return <div>Reset</div>;
@@ -824,7 +849,7 @@ export default function Ukpn() {
 
     if (!selectedPrimaryForecastData || selectedPrimaryForecastData.length === 0) return;
 
-    const primaryName = getPrimaryNameByUuid(selectedRegions[0]) ?? "primary";
+    const primaryName = getPrimaryDisplayNameByUuid(selectedRegions[0]) ?? "primary";
 
     // Make a safe filename: letters/numbers/spaces/_/- only
     const safePrimaryName = primaryName
@@ -868,7 +893,7 @@ export default function Ukpn() {
 
     const rows = Object.entries(substationsForecastData.forecast_values_kW).map(
       ([substation_uuid, power_kW]) => {
-        const name = getPrimaryNameByUuid(substation_uuid) ?? "";
+        const name = getPrimaryDisplayNameByUuid(substation_uuid) ?? "";
         const safeName = String(name).replace(/\r?\n/g, " ").replace(/"/g, '""');
         const power = Number(power_kW);
         return `${substationsForecastData.datetime_utc},${substation_uuid},"${safeName}",${
@@ -885,10 +910,6 @@ export default function Ukpn() {
       power: d.power_kW,
       time: new Date(d.time).getTime()
     })) ?? [];
-
-  console.log("formattedData", formattedData);
-
-  console.log("scaleMax", scaleMax);
 
   return (
     <Layout>
@@ -983,7 +1004,57 @@ export default function Ukpn() {
                     />
                   </div>
                 </div>
-                <div className="flex flex-initial mt-2 justify-end mr-0">
+                <div className="flex flex-initial mt-2 gap-2 justify-end mr-0">
+                  <div className="inline-block relative rounded-md">
+                    <button className="relative flex bg-black p-2 text-white">
+                      <div id="SearchContainer" className={"group h-5 overflow-visible"}>
+                        <input
+                          id="SearchInput"
+                          className={`transition-all${searchOpen ? "" : " w-0"}`}
+                          onChange={(e) => {
+                            setSearchString(e.target.value);
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setSearchOpen(false);
+                            }, 250);
+                          }}
+                        />
+                        <div
+                          className={`absolute flex flex-col ${
+                            searchOpen ? "h-auto" : "h-0"
+                          } overflow-clip top-9 right-0  left-0 bg-black rounded-md text-white min-w-48 text-left`}
+                        >
+                          {searchResults.map((result) => {
+                            return (
+                              <span
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  console.log("Search result clicked:", result.value);
+                                  setSelectedRegions([result.value]);
+                                  setSearchString("");
+                                  setSearchOpen(false);
+                                }}
+                                key={`SearchResult${result.value}`}
+                                className="px-2 py-1"
+                              >
+                                {result.label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <SearchIcon
+                        className="w-9 p-2 -m-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSearchOpen(true);
+                          const input = document.querySelector("#SearchInput") as HTMLInputElement;
+                          input?.focus();
+                        }}
+                      />
+                    </button>
+                  </div>
                   <div className="inline-block rounded-md overflow-clip ">
                     <button className="bg-black w-9 p-2 text-white" onClick={downloadMapData}>
                       <DownloadIcon />
@@ -1111,7 +1182,7 @@ export default function Ukpn() {
             <div className="relative z-10 flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
               <div className="flex flex-initial justify-between items-center w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
                 {/* Primary title */}
-                <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
+                <h1 className="text-xl">{getPrimaryDisplayNameByUuid(selectedRegions[0])}</h1>
                 <div className="flex gap-6">
                   {/* Primary header info */}
                   <div className="flex flex-col text-sm leading-tight">

@@ -98,6 +98,20 @@ input[type=range]:focus::-ms-fill-upper {
   background: #545454;
 }
 
+#SearchInput {
+  background: #010101;
+  border: 0;
+  border-bottom: 1px solid #ffffff;
+  font-size: 0.8rem;
+  height: 1.25rem;
+  padding: 0;
+}
+#SearchInput:focus {
+  outline: none;
+  box-shadow: none;
+  margin-right: 0.5rem;
+}
+
 .btn {
   @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-mapbox-black bg-ocf-yellow hover:bg-ocf-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ocf-delta-500;
 }
