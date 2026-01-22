@@ -35,6 +35,7 @@ import { debounce } from "next/dist/server/utils";
 import Spinner from "../components/icons/spinner";
 import { CloseIcon } from "next/dist/client/components/react-dev-overlay/internal/icons/CloseIcon";
 import { MapUIButton } from "../components/map/measuringUnit";
+import { DownloadIcon } from "@heroicons/react/outline";
 
 const UKPNRegionGspIds = Object.entries(dnoGspGroupings)
   .filter(([group]) => group.includes("UKPN"))
@@ -149,6 +150,7 @@ export default function Ukpn() {
       .toISO({ suppressMilliseconds: true })
   );
   const [mapUnit, setMapUnit] = useState<MapUnit>(MapUnit.kW);
+  const [scaleMax, setScaleMax] = useState<number>(500);
 
   const forecastTimes = getDefaultForecastTimes();
   console.log("forecastTimes", forecastTimes);
@@ -220,6 +222,28 @@ export default function Ukpn() {
     }
     return gspSystemData?.find((gsp) => gsp.gspId === gspId)?.regionName || "";
   };
+  const getScaleTicks = () => {
+    switch (mapUnit) {
+      case MapUnit.kW:
+        return [0, 100, 200, 300, 400, 500];
+      case MapUnit.capacity:
+        return [0, 300, 600, 900, 1200, 1500];
+      case MapUnit.percentage:
+        return [0, 20, 40, 60, 80, 100];
+    }
+  };
+
+  const getMapUnitString = () => {
+    switch (mapUnit) {
+      case MapUnit.kW:
+        return "kW";
+      case MapUnit.capacity:
+        return "kW";
+      case MapUnit.percentage:
+        return "%";
+    }
+  };
+
   const {
     data: selectedPrimaryForecastData,
     isLoading: selectedPrimaryForecastLoading,
@@ -757,6 +781,8 @@ export default function Ukpn() {
       max,
       1
     ]);
+
+    setScaleMax(mapUnit === MapUnit.percentage ? max * 100 : max);
   }, [mapUnit]);
 
   useEffect(() => {
@@ -777,6 +803,50 @@ export default function Ukpn() {
     return <div>Reset</div>;
   }
 
+  const downloadChartData = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+
+    if (!selectedPrimaryForecastData || selectedPrimaryForecastData.length === 0) return;
+
+    const primaryName = getPrimaryNameByUuid(selectedRegions[0]) ?? "primary";
+
+    // Make a safe filename: letters/numbers/spaces/_/- only
+    const safePrimaryName = primaryName
+      .trim()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-zA-Z0-9_-]/g, "");
+
+    // Timestamp like 2026-01-22_16-05-30Z
+    const timestamp = DateTime.utc().toFormat("yyyy-LL-dd_HH-mm-ss'Z'");
+
+    const filename = `${safePrimaryName}_forecast_${timestamp}.csv`;
+
+    // CSV header + rows
+    const header = "time_utc,power_kW";
+    const rows = selectedPrimaryForecastData.map((d) => {
+      // Ensure we always write a UTC ISO timestamp
+      const timeUtcIso = DateTime.fromISO(d.time, { zone: "utc" }).toISO({
+        suppressMilliseconds: true
+      });
+      const power = Number(d.power_kW);
+      return `${timeUtcIso ?? d.time},${Number.isFinite(power) ? power : ""}`;
+    });
+
+    const csv = [header, ...rows].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+  };
+
   const formattedData =
     selectedPrimaryForecastData?.map((d) => ({
       power: d.power_kW,
@@ -784,6 +854,8 @@ export default function Ukpn() {
     })) ?? [];
 
   console.log("formattedData", formattedData);
+
+  console.log("scaleMax", scaleMax);
 
   return (
     <Layout>
@@ -897,83 +969,115 @@ export default function Ukpn() {
             }}
             title={"Test"}
           >
-            <div className="flex flex-col absolute bottom-8 left-0 right-0 mx-3 pb-2 pt-0.5 rounded-md bg-black">
-              <div className="absolute flex right-5 left-6">
-                <span
-                  className="text-sm absolute top-1 -translate-x-1/2 bg-ocf-yellow px-2 py-1 text-black border-2 border-black rounded-md z-10"
-                  style={{ left: `${forecastPosition}%` }}
-                >
-                  {DateTime.fromISO(selectedTime).toFormat("HH:mm")}
-                </span>
-              </div>
-              <div className="flex-1 flex justify-around mx-6 text-xs pt-1 text-white">
-                {forecastTimes.map((h, index) => {
-                  const datetime = DateTime.fromMillis(h);
-                  if (datetime.get("minute") !== 0 || datetime.get("hour") !== 12) return null;
-                  const isoDate = datetime.toISO();
-                  if (!isoDate) return null;
-
-                  return (
-                    <div key={`${h}${index}`} className="w-0 flex">
-                      <span className="transform -translate-x-1/2 whitespace-nowrap">
-                        {prettyPrintDayLabelWithDate(isoDate)}
+            <div className="flex flex-col absolute bottom-8 left-0 right-0 ">
+              <div className="flex flex-initial mx-3 mb-3">
+                <div className="flex bg-mapbox-black-700 border border-mapbox-black-900 font-bold rounded-md overflow-clip">
+                  <span className="px-2 py-1 min-w-12 text-white font-normal text-xs text-center bg-ocf-blue-900">
+                    No data
+                  </span>
+                  {getScaleTicks().map((fig) => {
+                    return (
+                      <span
+                        key={`scaleItem${fig}${mapUnit}`}
+                        className={`px-2 py-1 min-w-12 text-xs text-center bg-ocf-yellow ${
+                          fig / scaleMax > 0.5 ? "text-black" : "text-white"
+                        }`}
+                        style={{ background: `rgba(255, 208, 83, ${fig / scaleMax})` }}
+                      >
+                        {fig}
+                        {fig === scaleMax && mapUnit !== MapUnit.percentage && "+"}
+                        {fig === scaleMax ? (
+                          <span className="ml-2 font-normal">{getMapUnitString()}</span>
+                        ) : (
+                          ""
+                        )}
                       </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-              <div className="flex-1 flex justify-between mx-6 text-xs pt-0.5 pb-1 text-white">
-                {forecastTimes.map((h, index) => {
-                  const datetime = DateTime.fromMillis(h);
-                  if (datetime.get("minute") !== 0 || datetime.get("hour") % 6 > 0) return null;
+              <div className="flex flex-col  mx-3 pb-2 pt-0.5 rounded-md bg-black">
+                <div className="absolute flex right-5 left-6">
+                  <span
+                    className="text-sm absolute top-1 -translate-x-1/2 bg-ocf-yellow px-2 py-1 text-black border-2 border-black rounded-md z-10"
+                    style={{ left: `${forecastPosition}%` }}
+                  >
+                    {DateTime.fromISO(selectedTime).toFormat("HH:mm")}
+                  </span>
+                </div>
+                <div className="flex-1 flex justify-around mx-6 text-xs pt-1 text-white">
+                  {forecastTimes.map((h, index) => {
+                    const datetime = DateTime.fromMillis(h);
+                    if (datetime.get("minute") !== 0 || datetime.get("hour") !== 12) return null;
+                    const isoDate = datetime.toISO();
+                    if (!isoDate) return null;
 
-                  return (
-                    <div key={`${h}${index}`} className="w-0 flex">
-                      <span className="transform -translate-x-1/2">
-                        {datetime.toFormat("HH:mm")}
-                      </span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div key={`${h}${index}`} className="w-0 flex">
+                        <span className="transform -translate-x-1/2 whitespace-nowrap">
+                          {prettyPrintDayLabelWithDate(isoDate)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex-1 flex justify-between mx-6 text-xs pt-0.5 pb-1 text-white">
+                  {forecastTimes.map((h, index) => {
+                    const datetime = DateTime.fromMillis(h);
+                    if (datetime.get("minute") !== 0 || datetime.get("hour") % 6 > 0) return null;
+
+                    return (
+                      <div key={`${h}${index}`} className="w-0 flex">
+                        <span className="transform -translate-x-1/2">
+                          {datetime.toFormat("HH:mm")}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <input
+                  type={"range"}
+                  className={
+                    "flex-1 mx-4 appearance-none bg-mapbox-black-600 text-ocf-yellow rounded-md"
+                  }
+                  min={forecastTimes[0]}
+                  max={forecastTimes[forecastTimes.length - 1]}
+                  step={30 * 60 * 1000}
+                  defaultValue={DateTime.fromISO(selectedTime).toMillis()}
+                  // onChange={(e) => {
+                  //
+                  // }}
+                  onInput={debounce((e) => {
+                    console.log(
+                      "change forecastTimes",
+                      DateTime.fromMillis(Number(e.target.value))
+                        .toUTC()
+                        .toISO({ suppressMilliseconds: true })
+                    );
+                    setSelectedTime(
+                      DateTime.fromMillis(Number(e.target.value))
+                        .toUTC()
+                        .toISO({ suppressMilliseconds: true }) ?? selectedTime
+                    );
+                  }, 500)}
+                />
               </div>
-              <input
-                type={"range"}
-                className={
-                  "flex-1 mx-4 appearance-none bg-mapbox-black-600 text-ocf-yellow rounded-md"
-                }
-                min={forecastTimes[0]}
-                max={forecastTimes[forecastTimes.length - 1]}
-                step={30 * 60 * 1000}
-                defaultValue={DateTime.fromISO(selectedTime).toMillis()}
-                // onChange={(e) => {
-                //
-                // }}
-                onInput={debounce((e) => {
-                  console.log(
-                    "change forecastTimes",
-                    DateTime.fromMillis(Number(e.target.value))
-                      .toUTC()
-                      .toISO({ suppressMilliseconds: true })
-                  );
-                  setSelectedTime(
-                    DateTime.fromMillis(Number(e.target.value))
-                      .toUTC()
-                      .toISO({ suppressMilliseconds: true }) ?? selectedTime
-                  );
-                }, 500)}
-              />
             </div>
           </Map>
         </div>
 
         {selectedRegions.length > 0 && (
           <SideLayout closedWidth={"40%"} bottomPadding={false}>
-            <div className="relative flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
+            <div className="relative z-10 flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
               <div className="flex flex-initial justify-between items-center w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
+                {/* Primary title */}
                 <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
                 <div className="flex gap-6">
+                  {/* Primary header info */}
                   <div className="flex flex-col text-sm leading-tight">
-                    <span className="text-2xs text-gray-400">Capacity</span>
+                    <span className="text-2xs text-mapbox-black-300 uppercase tracking-wide">
+                      Capacity
+                    </span>
                     <span className="">
                       {Number(getPrimaryCapacityByUuid(selectedRegions[0]))?.toLocaleString()} kW
                     </span>
@@ -982,12 +1086,32 @@ export default function Ukpn() {
                     <span className="text-2xs text-gray-400">GSP</span>
                     <span className="">{getGSPNameByPrimaryUuid(selectedRegions[0])}</span>
                   </div>
-                  <button
-                    className="justify-self-end p-3 -m-3"
-                    onClick={() => setSelectedRegions([])}
-                  >
-                    <CloseIcon />
-                  </button>
+                  <div className="flex gap-4">
+                    {/* Download button */}
+                    <button className="flex w-11 stroke-2 p-3 -m-3" onClick={downloadChartData}>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        ></path>
+                      </svg>
+                    </button>
+                    {/* Close button */}
+                    <button
+                      className="justify-self-end p-3 -m-3"
+                      onClick={() => setSelectedRegions([])}
+                    >
+                      <CloseIcon />
+                    </button>
+                  </div>
                 </div>
               </div>
               {(selectedPrimaryForecastLoading || selectedPrimaryForecastValidating) && (
