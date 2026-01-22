@@ -133,6 +133,22 @@ const getDefaultForecastTimes = () => {
   return times;
 };
 
+const saveToCsv = (filename: string, header: string, rows: string[]) => {
+  const csv = [header, ...rows].join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+};
+
 export default function Ukpn() {
   const { user, isLoading, error } = useUser();
   const isLoggedIn = !isLoading && !!user;
@@ -832,19 +848,36 @@ export default function Ukpn() {
       return `${timeUtcIso ?? d.time},${Number.isFinite(power) ? power : ""}`;
     });
 
-    const csv = [header, ...rows].join("\n");
+    saveToCsv(filename, header, rows);
+  };
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
+  const downloadMapData = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    if (!substationsForecastData?.forecast_values_kW) return;
 
-    URL.revokeObjectURL(url);
+    // Timestamp like 2026-01-22_16-05-30Z
+    const timestamp = DateTime.utc().toFormat("yyyy-LL-dd_HH-mm-ss'Z'");
+
+    // Use the selectedTime (already UTC ISO) to make the filename easier to associate with the snapshot
+    const snapshotIso = selectedTime?.replace(/[:.]/g, "-") ?? "snapshot";
+
+    const filename = `ukpn_primaries_forecast_${snapshotIso}_${timestamp}.csv`;
+
+    const header = "datetime_utc,substation_uuid,substation_name,power_kW";
+
+    const rows = Object.entries(substationsForecastData.forecast_values_kW).map(
+      ([substation_uuid, power_kW]) => {
+        const name = getPrimaryNameByUuid(substation_uuid) ?? "";
+        const safeName = String(name).replace(/\r?\n/g, " ").replace(/"/g, '""');
+        const power = Number(power_kW);
+        return `${substationsForecastData.datetime_utc},${substation_uuid},"${safeName}",${
+          Number.isFinite(power) ? power : ""
+        }`;
+      }
+    );
+
+    saveToCsv(filename, header, rows);
   };
 
   const formattedData =
@@ -948,6 +981,13 @@ export default function Ukpn() {
                       text={"Capacity"}
                       value={MapUnit.capacity}
                     />
+                  </div>
+                </div>
+                <div className="flex flex-initial mt-2 justify-end mr-0">
+                  <div className="inline-block rounded-md overflow-clip ">
+                    <button className="bg-black w-9 p-2 text-white" onClick={downloadMapData}>
+                      <DownloadIcon />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1089,20 +1129,7 @@ export default function Ukpn() {
                   <div className="flex gap-4">
                     {/* Download button */}
                     <button className="flex w-11 stroke-2 p-3 -m-3" onClick={downloadChartData}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="2"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        ></path>
-                      </svg>
+                      <DownloadIcon />
                     </button>
                     {/* Close button */}
                     <button
