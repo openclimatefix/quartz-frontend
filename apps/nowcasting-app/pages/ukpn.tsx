@@ -96,6 +96,9 @@ type Substation = {
   capacity_kW: number;
   latitude: number;
   longitude: number;
+  metadata: {
+    [key: string]: any;
+  };
   substation_name: string;
   substation_type: string;
   substation_uuid: string;
@@ -205,6 +208,17 @@ export default function Ukpn() {
       ?.find((primary) => primary.substation_uuid === uuid)
       ?.substation_name?.replace("_", " ")
       .replace(/\b\w/g, (l: string) => l.toUpperCase());
+  };
+  const getPrimaryCapacityByUuid = (uuid: string) => {
+    return listSubstationsData?.find((primary) => primary.substation_uuid === uuid)?.capacity_kW;
+  };
+  const getGSPNameByPrimaryUuid = (uuid: string) => {
+    const gspId = listSubstationsData?.find((primary) => primary.substation_uuid === uuid)?.metadata
+      ?.gsp_id;
+    if (!gspId) {
+      return "";
+    }
+    return gspSystemData?.find((gsp) => gsp.gspId === gspId)?.regionName || "";
   };
   const {
     data: selectedPrimaryForecastData,
@@ -666,7 +680,7 @@ export default function Ukpn() {
               }</span> <span class="text-2xs text-mapbox-black-300">KW</span></div>
             </div>
             <div class="flex flex-col text-xs">
-              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">GSP Yield</span>
+              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Yield</span>
               <div><span>${
                 (Number(feat.properties?.expectedPowerGenerationNormalized || 0) * 100).toFixed(
                   2
@@ -957,12 +971,24 @@ export default function Ukpn() {
             <div className="relative flex flex-col rounded-md bg-mapbox-black-900 border border-mapbox-black-700 overflow-hidden">
               <div className="flex flex-initial justify-between items-center w-full px-4 py-3 bg-mapbox-black-900 border-b border-mapbox-black-700">
                 <h1 className="text-xl">{getPrimaryNameByUuid(selectedRegions[0])}</h1>
-                <button
-                  className="justify-self-end p-3 -m-3"
-                  onClick={() => setSelectedRegions([])}
-                >
-                  <CloseIcon />
-                </button>
+                <div className="flex gap-6">
+                  <div className="flex flex-col text-sm leading-tight">
+                    <span className="text-2xs text-gray-400">Capacity</span>
+                    <span className="">
+                      {Number(getPrimaryCapacityByUuid(selectedRegions[0]))?.toLocaleString()} kW
+                    </span>
+                  </div>
+                  <div className="flex flex-col text-sm leading-tight">
+                    <span className="text-2xs text-gray-400">GSP</span>
+                    <span className="">{getGSPNameByPrimaryUuid(selectedRegions[0])}</span>
+                  </div>
+                  <button
+                    className="justify-self-end p-3 -m-3"
+                    onClick={() => setSelectedRegions([])}
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
               </div>
               {(selectedPrimaryForecastLoading || selectedPrimaryForecastValidating) && (
                 <LoadStateMap>
@@ -1030,8 +1056,6 @@ export default function Ukpn() {
                 <Tooltip
                   content={({ payload, label }) => {
                     const data = payload && payload[0]?.payload;
-                    if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
-                      return <div></div>;
 
                     const formattedPower = Number(data?.power).toFixed(2);
 
