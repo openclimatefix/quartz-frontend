@@ -1089,7 +1089,7 @@ export default function Ukpn() {
               <div className="flex flex-col  mx-3 pb-2 pt-0.5 rounded-md bg-black">
                 <div className="absolute right-8 left-8 flex pointer-events-none">
                   <div
-                    className="absolute -top-1 bottom-0 w-px h-16 border-x border-mapbox-black box-content bg-white"
+                    className="absolute -top-1 ml-0.5 bottom-0 w-px h-16 border-x border-mapbox-black box-content bg-white"
                     style={{
                       left: `${nowPosition}%`,
                       background: `repeating-linear-gradient(
