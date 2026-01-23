@@ -1059,7 +1059,7 @@ export default function Ukpn() {
                 </div>
               </div>
               <div className="flex flex-col  mx-3 pb-2 pt-0.5 rounded-md bg-black">
-                <div className="absolute flex right-5 left-6">
+                <div className="absolute flex right-7 left-8">
                   <span
                     className="text-sm absolute top-1 -translate-x-1/2 bg-ocf-yellow px-2 py-1 text-black border-2 border-black rounded-md z-10"
                     style={{ left: `${forecastPosition}%` }}
