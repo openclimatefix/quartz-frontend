@@ -786,6 +786,29 @@ export default function Ukpn() {
     ?.filter((gsp) => UKPNRegionGspIds.includes(gsp.gspId))
     .map((gsp) => gsp.gspName);
 
+  const formattedData =
+    selectedPrimaryForecastData?.map((d) => ({
+      power: d.power_kW,
+      time: new Date(d.time).getTime()
+    })) ?? [];
+
+  const noonTicks = useMemo(() => {
+    if (!formattedData.length) return [];
+
+    const min = DateTime.fromMillis(formattedData[0].time, { zone: "utc" });
+    const max = DateTime.fromMillis(formattedData[formattedData.length - 1].time, { zone: "utc" });
+
+    const ticks: number[] = [];
+    let d = min.startOf("day");
+
+    while (d <= max) {
+      ticks.push(d.plus({ hours: 12 }).toMillis());
+      d = d.plus({ days: 1 });
+    }
+
+    return ticks;
+  }, [formattedData]);
+
   if (!showMap) {
     return <div>Reset</div>;
   }
@@ -850,12 +873,6 @@ export default function Ukpn() {
 
     saveToCsv(filename, header, rows);
   };
-
-  const formattedData =
-    selectedPrimaryForecastData?.map((d) => ({
-      power: d.power_kW,
-      time: new Date(d.time).getTime()
-    })) ?? [];
 
   return (
     <Layout>
@@ -1205,12 +1222,15 @@ export default function Ukpn() {
                 <XAxis
                   dataKey="time"
                   xAxisId={"x-axis-2"}
-                  tickFormatter={prettyPrintDayLabelWithDate}
                   tick={{ fill: "white", style: { fontSize: "12px" } }}
-                  interval={47}
+                  interval={0}
+                  ticks={noonTicks}
                   tickLine={false}
                   orientation="bottom"
                   axisLine={false}
+                  tickFormatter={(t) =>
+                    prettyPrintDayLabelWithDate(DateTime.fromMillis(t).toISO()!)
+                  }
                   tickMargin={-12}
                 />
                 <YAxis
