@@ -696,7 +696,7 @@ export default function Ukpn() {
             </div>
             <div class="flex flex-col text-xs items-end">
               <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Forecast</span>
-            ${feat.properties?.["expectedPowerGenerationMegawatts"]?.toFixed(2) || "– "} KW
+            ${feat.properties?.["expectedPowerGenerationMegawatts"]?.toFixed(2) || "– "} kW
             </div>
           </div>
         </div>`;
