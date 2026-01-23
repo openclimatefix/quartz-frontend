@@ -25,7 +25,7 @@ import { GspEntities, GspEntity } from "../components/types";
 import dnoGspGroupings from "../data/dno_gsp_groupings.json";
 import { DateTime } from "luxon";
 import { safelyUpdateMapData } from "../components/helpers/mapUtils";
-import { CartesianGrid, ComposedChart, Line, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, ComposedChart, Line, ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";
 import { theme } from "../tailwind.config";
 import {
   formatISODateStringHumanNumbersOnly,
@@ -91,6 +91,7 @@ const UKPNGspNames = [
 ];
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 const navyBlue = theme.extend.colors["ocf-blue"]["900"];
 
 type Substation = {
@@ -154,6 +155,13 @@ const saveToCsv = (filename: string, header: string, rows: string[]) => {
   URL.revokeObjectURL(url);
 };
 
+const getRoundedNow30MinTime = () => {
+  return DateTime.utc()
+    .set({ second: 0, millisecond: 0 })
+    .minus({ minutes: DateTime.utc().minute % 30 })
+    .toISO({ suppressMilliseconds: true });
+};
+
 export default function Ukpn() {
   const { user, isLoading, error } = useUser();
   const isLoggedIn = !isLoading && !!user;
@@ -163,12 +171,7 @@ export default function Ukpn() {
   const [showMap, setShowMap] = useState(true);
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [mapInitialLoadComplete, setMapInitialLoadComplete] = useState(false);
-  const [selectedTime, setSelectedTime] = useState<string>(
-    DateTime.utc()
-      .set({ second: 0, millisecond: 0 })
-      .minus({ minutes: DateTime.utc().minute % 30 })
-      .toISO({ suppressMilliseconds: true })
-  );
+  const [selectedTime, setSelectedTime] = useState<string>(getRoundedNow30MinTime());
   const [mapUnit, setMapUnit] = useState<MapUnit>(MapUnit.kW);
   const [scaleMax, setScaleMax] = useState<number>(500);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -180,6 +183,10 @@ export default function Ukpn() {
   const forecastPosition =
     (forecastTimes.indexOf(DateTime.fromISO(selectedTime).toMillis()) / forecastTimes.length) * 100;
   console.log("forecastPosition", forecastPosition);
+  const nowPosition =
+    (forecastTimes.indexOf(DateTime.fromISO(getRoundedNow30MinTime()).toMillis()) /
+      forecastTimes.length) *
+    100;
 
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
@@ -1080,6 +1087,21 @@ export default function Ukpn() {
                 </div>
               </div>
               <div className="flex flex-col  mx-3 pb-2 pt-0.5 rounded-md bg-black">
+                <div className="absolute right-8 left-8 flex pointer-events-none">
+                  <div
+                    className="absolute -top-1 bottom-0 w-px h-16 border-x border-mapbox-black box-content bg-white"
+                    style={{
+                      left: `${nowPosition}%`,
+                      background: `repeating-linear-gradient(
+                                    to bottom,
+                                    rgba(255,255,255,0.9) 0px,
+                                    rgba(255,255,255,0.9) 10px,
+                                    rgba(255,255,255,0) 10px,
+                                    rgba(255,255,255,0) 15px
+                                  )`
+                    }}
+                  ></div>
+                </div>
                 <div className="absolute flex right-7 left-8">
                   <span
                     className="text-sm absolute top-1 -translate-x-1/2 bg-ocf-yellow px-2 py-1 text-black border-2 border-black rounded-md z-10"
@@ -1121,7 +1143,7 @@ export default function Ukpn() {
                 <input
                   type={"range"}
                   className={
-                    "flex-1 mx-4 appearance-none bg-mapbox-black-600 text-ocf-yellow rounded-md"
+                    "flex-1 mx-4 z-10 appearance-none bg-mapbox-black-600 text-ocf-yellow rounded-md"
                   }
                   min={forecastTimes[0]}
                   max={forecastTimes[forecastTimes.length - 1]}
@@ -1207,7 +1229,11 @@ export default function Ukpn() {
                   left: 5
                 }}
               >
-                <CartesianGrid verticalFill={["#242424", "#3C3C3C"]} fillOpacity={0.5} />
+                <CartesianGrid
+                  verticalFill={["#242424", "#3C3C3C"]}
+                  stroke={"#656565"}
+                  fillOpacity={0.5}
+                />
                 <XAxis
                   dataKey="time"
                   scale="time"
@@ -1265,7 +1291,7 @@ export default function Ukpn() {
                             <div className="pr-3">
                               {formatISODateStringHumanNumbersOnly(formattedDate)}
                             </div>
-                            <div>KW</div>
+                            <div>kW</div>
                           </li>
 
                           <li className={`font-sans text-ocf-yellow font-normal text-xs`}>
@@ -1289,6 +1315,20 @@ export default function Ukpn() {
                   fillOpacity={100}
                   strokeWidth={2}
                   isAnimationActive={false}
+                />
+                <ReferenceLine
+                  stroke={"#ffffff"}
+                  strokeWidth={1}
+                  strokeDasharray="10 5"
+                  // y={0}
+                  x={DateTime.utc().toMillis()}
+                />
+                <ReferenceLine
+                  stroke={"#ffffff"}
+                  strokeWidth={2}
+                  // strokeDasharray="10 5"
+                  // y={0}
+                  x={DateTime.fromISO(selectedTime).toMillis()}
                 />
               </ComposedChart>
             </div>
