@@ -915,9 +915,9 @@ export default function Ukpn() {
                 {/*<button className="btn float-right" onClick={() => setShouldUpdateMap(true)}>*/}
                 {/*  Update Map*/}
                 {/*</button>*/}
-                <button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>
-                  Reset Map
-                </button>
+                {/*<button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>*/}
+                {/*  Reset Map*/}
+                {/*</button>*/}
                 <div>
                   <span className="flex-initial block float-right text-white bg-black px-3 py-1.5 rounded-md">
                     {DateTime.fromISO(selectedTime).toFormat("EEE, dd MMMM yyyy, HH:mm")}
@@ -957,7 +957,7 @@ export default function Ukpn() {
                       <div id="SearchContainer" className={"group h-5 overflow-visible"}>
                         <input
                           id="SearchInput"
-                          className={`transition-all${searchOpen ? "" : " w-0"}`}
+                          className={`transition-all ${searchOpen ? "w-48" : "w-0"}`}
                           onChange={(e) => {
                             setSearchString(e.target.value);
                           }}
@@ -968,7 +968,7 @@ export default function Ukpn() {
                           }}
                         />
                         <div
-                          className={`absolute flex flex-col ${
+                          className={`absolute flex flex-col transition-all ${
                             searchOpen ? "h-auto" : "h-0"
                           } overflow-clip top-9 right-0  left-0 bg-black rounded-md text-white min-w-48 text-left`}
                         >
