@@ -347,11 +347,11 @@ export default function Ukpn() {
 
     if (!map.getLayer("primaries-data-selected")) return;
 
-    if (!selectedRegionsRef.current[0]) {
-      map.setFilter("primaries-data-selected", ["==", ["id"], "not-set"]);
-    } else {
-      map.setFilter("primaries-data-selected", ["==", ["id"], selectedRegionsRef.current[0]]);
-    }
+    map.setFilter("primaries-data-selected", [
+      "==",
+      ["get", "primaryUuid"],
+      selectedRegions[0] ?? "not-set"
+    ]);
   }, [selectedRegions]);
 
   useEffect(() => {
@@ -661,8 +661,12 @@ export default function Ukpn() {
             "line-width": 3
             // "line-opacity": ["case", ["boolean", ["feature-state", "clicked"], false], 1, 0]
           },
-          filter: ["==", ["id"], "not-set"]
+          filter: ["==", ["get", "primaryUuid"], "not-set"]
         });
+      }
+      const selectedId = selectedRegionsRef.current?.[0] ?? "not-set";
+      if (map.getLayer("primaries-data-selected")) {
+        map.setFilter("primaries-data-selected", ["==", ["get", "primaryUuid"], selectedId]);
       }
 
       // GSP features/data
@@ -713,14 +717,8 @@ export default function Ukpn() {
 
           if (id === selectedRegionsRef.current[0]) {
             setSelectedRegions([]);
-            if (map.getLayer("primaries-data-selected")) {
-              map.setFilter("primaries-data-selected", ["in", ["get", "primaryUuid"], "not-set"]);
-            }
           } else {
             setSelectedRegions([id]);
-            if (map.getLayer("primaries-data-selected")) {
-              map.setFilter("primaries-data-selected", ["in", ["get", "primaryUuid"], id]);
-            }
           }
         });
         map.on("mousemove", "primaries-data-fill", (e) => {
