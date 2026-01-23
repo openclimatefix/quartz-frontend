@@ -892,7 +892,12 @@ export default function Ukpn() {
               <OCFlogo />
             </div>
           </div>
-          <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center"></div>
+          <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">
+            <div className="flex flex-col items-start">
+              <span>UKPN</span>
+              <span className="text-xs text-ocf-yellow">Primary Substation Forecast</span>
+            </div>
+          </div>
           <div className="py-1">{isLoggedIn && <ProfileDropDown />}</div>
         </header>
         <div
@@ -953,7 +958,7 @@ export default function Ukpn() {
                 </div>
                 <div className="flex flex-initial mt-2 gap-2 justify-end mr-0">
                   <div className="inline-block relative rounded-md">
-                    <button className="relative flex bg-black p-2 text-white">
+                    <button className="relative flex bg-black rounded-md p-2 text-white">
                       <div id="SearchContainer" className={"group h-5 overflow-visible"}>
                         <input
                           id="SearchInput"

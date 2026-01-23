@@ -64,93 +64,91 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 top-12 w-52 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          <Menu.Item>
-            {({ active }) => (
-              <div
-                className={classNames(
-                  active ? "bg-gray-100" : "",
-                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                )}
-              >
-                {showNHourView && (
-                  <span className="flex items-center">
-                    <Checkmark />
-                  </span>
-                )}
-                <button
-                  id={"UserMenu-NhViewBtn"}
-                  onClick={toggle4hView}
-                  className="ml-1 text-sm  font-medium text-ocf-black-600"
-                >
-                  {`N-hour forecast`}
-                </button>
-              </div>
-            )}
-          </Menu.Item>
-          <Menu.Item>
-            {({ active }) => (
-              <div
-                className={classNames(
-                  active ? "bg-gray-100" : "",
-                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                )}
-              >
-                {dashboardMode && (
-                  <span className="flex items-center">
-                    <Checkmark />
-                  </span>
-                )}
-                <button
-                  id={"UserMenu-DashboardModeBtn"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    toggleDashboardMode();
-                  }}
-                  className="ml-1 text-sm font-medium text-ocf-black-600"
-                >
-                  {`Dashboard mode`}
-                </button>
-              </div>
-            )}
-          </Menu.Item>
-          <Menu.Item>
-            {({ active }) => (
-              <div
-                className={classNames(
-                  active ? "bg-gray-100" : "",
-                  "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                )}
-              >
-                {showConstraints && (
-                  <span className="flex items-center">
-                    <Checkmark />
-                  </span>
-                )}
-                <button
-                  id={"UserMenu-ConstraintsBtn"}
-                  onClick={toggleConstraints}
-                  className="ml-1 text-sm  font-medium text-ocf-black-600"
-                >
-                  {`Constraint Boundaries`}
-                </button>
-              </div>
-            )}
-          </Menu.Item>
-
-          <div className="w-full border-t border-gray-300" />
-
-          <Menu.Item>
-            <div className="px-4 pt-3 text-ocf-black-600 text-right">
-              <a
-                id={"UserMenu-DocumentationBtn"}
-                href="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
-              >
-                Documentation{" "}
-                <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
-              </a>
-            </div>
-          </Menu.Item>
+        <Menu.Items className="absolute right-0 top-12 w-52 origin-top-right bg-white rounded-md overflow-clip shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          {/*<Menu.Item>*/}
+          {/*  {({ active }) => (*/}
+          {/*    <div*/}
+          {/*      className={classNames(*/}
+          {/*        active ? "bg-gray-100" : "",*/}
+          {/*        "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"*/}
+          {/*      )}*/}
+          {/*    >*/}
+          {/*      {showNHourView && (*/}
+          {/*        <span className="flex items-center">*/}
+          {/*          <Checkmark />*/}
+          {/*        </span>*/}
+          {/*      )}*/}
+          {/*      <button*/}
+          {/*        id={"UserMenu-NhViewBtn"}*/}
+          {/*        onClick={toggle4hView}*/}
+          {/*        className="ml-1 text-sm  font-medium text-ocf-black-600"*/}
+          {/*      >*/}
+          {/*        {`N-hour forecast`}*/}
+          {/*      </button>*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</Menu.Item>*/}
+          {/*<Menu.Item>*/}
+          {/*  {({ active }) => (*/}
+          {/*    <div*/}
+          {/*      className={classNames(*/}
+          {/*        active ? "bg-gray-100" : "",*/}
+          {/*        "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"*/}
+          {/*      )}*/}
+          {/*    >*/}
+          {/*      {dashboardMode && (*/}
+          {/*        <span className="flex items-center">*/}
+          {/*          <Checkmark />*/}
+          {/*        </span>*/}
+          {/*      )}*/}
+          {/*      <button*/}
+          {/*        id={"UserMenu-DashboardModeBtn"}*/}
+          {/*        onClick={(e) => {*/}
+          {/*          e.preventDefault();*/}
+          {/*          toggleDashboardMode();*/}
+          {/*        }}*/}
+          {/*        className="ml-1 text-sm font-medium text-ocf-black-600"*/}
+          {/*      >*/}
+          {/*        {`Dashboard mode`}*/}
+          {/*      </button>*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</Menu.Item>*/}
+          {/*<Menu.Item>*/}
+          {/*  {({ active }) => (*/}
+          {/*    <div*/}
+          {/*      className={classNames(*/}
+          {/*        active ? "bg-gray-100" : "",*/}
+          {/*        "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"*/}
+          {/*      )}*/}
+          {/*    >*/}
+          {/*      {showConstraints && (*/}
+          {/*        <span className="flex items-center">*/}
+          {/*          <Checkmark />*/}
+          {/*        </span>*/}
+          {/*      )}*/}
+          {/*      <button*/}
+          {/*        id={"UserMenu-ConstraintsBtn"}*/}
+          {/*        onClick={toggleConstraints}*/}
+          {/*        className="ml-1 text-sm  font-medium text-ocf-black-600"*/}
+          {/*      >*/}
+          {/*        {`Constraint Boundaries`}*/}
+          {/*      </button>*/}
+          {/*    </div>*/}
+          {/*  )}*/}
+          {/*</Menu.Item>*/}
+          {/*<div className="w-full border-t border-gray-300" />*/}
+          {/*<Menu.Item>*/}
+          {/*  <div className="px-4 pt-3 text-ocf-black-600 text-right">*/}
+          {/*    <a*/}
+          {/*      id={"UserMenu-DocumentationBtn"}*/}
+          {/*      href="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"*/}
+          {/*    >*/}
+          {/*      Documentation{" "}*/}
+          {/*      <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />*/}
+          {/*    </a>*/}
+          {/*  </div>*/}
+          {/*</Menu.Item>*/}
           <Menu.Item>
             <div className="px-4 pt-3 text-ocf-black-600 text-right">
               <Tooltip
@@ -196,11 +194,18 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
 
           <div className="w-full border-t border-gray-300" />
 
-          <div className="px-4 pt-3">
-            <p id={"UserMenu-Version"} className="text-xs font-medium text-ocf-black-300 truncate">
-              Version {version}
-            </p>
-          </div>
+          <Menu.Item>
+            <div className="px-4 pt-3 text-ocf-black-600 text-right flex flex-col gap-1 ">
+              <span className="text-xs text-ocf-black-100 ">Capacities last updated</span>
+              <span>2025-11-16</span>
+            </div>
+          </Menu.Item>
+
+          {/*<div className="px-4 pt-3">*/}
+          {/*  <p id={"UserMenu-Version"} className="text-xs font-medium text-ocf-black-300 truncate">*/}
+          {/*    Version {version}*/}
+          {/*  </p>*/}
+          {/*</div>*/}
           <div id={"UserMenu-SignedInText"} className="px-4 py-3 border-b border-gray-300">
             <p className="text-xs text-ocf-black-300">Signed in as</p>
             <p className="text-xs font-medium text-ocf-black-300 truncate">{user && user.email}</p>
