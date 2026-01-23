@@ -774,6 +774,7 @@ export default function Ukpn() {
       ?.filter((p) => {
         return p.substation_name.replace("_", " ").includes(searchString.toLowerCase());
       })
+      .slice(0, 10)
       .map((match) => ({
         value: match.substation_uuid,
         label: prettifyPrimaryName(match.substation_name)
@@ -994,9 +995,13 @@ export default function Ukpn() {
                         className="w-9 p-2 -m-2"
                         onClick={(e) => {
                           e.preventDefault();
-                          setSearchOpen(true);
-                          const input = document.querySelector("#SearchInput") as HTMLInputElement;
-                          input?.focus();
+                          if (!searchOpen) {
+                            const input = document.querySelector(
+                              "#SearchInput"
+                            ) as HTMLInputElement;
+                            input?.focus();
+                          }
+                          setSearchOpen(!searchOpen);
                         }}
                       />
                     </button>

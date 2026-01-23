@@ -103,8 +103,10 @@ input[type=range]:focus::-ms-fill-upper {
   border: 0;
   border-bottom: 1px solid #ffffff;
   font-size: 0.8rem;
-  height: 1.25rem;
+  height: 1.5rem;
   padding: 0;
+  display: block;
+  margin-top: -3px;
 }
 #SearchInput:focus {
   outline: none;
