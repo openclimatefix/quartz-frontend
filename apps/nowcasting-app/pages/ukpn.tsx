@@ -202,14 +202,14 @@ export default function Ukpn() {
     isLoading: listSubstationsLoading,
     isValidating: listSubstationsValidating,
     error: listSubstationsError
-  } = useLoadDataFromApi<Substation[]>(`https://ukpn.quartz.solar/substations`, {});
+  } = useLoadDataFromApi<Substation[]>(`${process.env.NEXT_PUBLIC_UKPN_API_URL}/substations`, {});
   const {
     data: substationsForecastData,
     isLoading: substationsForecastLoading,
     isValidating: substationsForecastValidating,
     error: substationsForecastError
   } = useLoadDataFromApi<ForecastForTimestamp>(
-    `https://ukpn.quartz.solar/substations/forecast?datetime_utc=${selectedTime}`,
+    `${process.env.NEXT_PUBLIC_UKPN_API_URL}/substations/forecast?datetime_utc=${selectedTime}`,
     {}
   );
   // Get system data for UKPN's GSPs
@@ -279,7 +279,7 @@ export default function Ukpn() {
     error: selectedPrimaryForecastError
   } = useLoadDataFromApi<ForecastForPrimary>(
     selectedRegions.length
-      ? `https://ukpn.quartz.solar/substations/${selectedRegions[0]}/forecast`
+      ? `${process.env.NEXT_PUBLIC_UKPN_API_URL}/substations/${selectedRegions[0]}/forecast`
       : null,
     {
       keepPreviousData: false
