@@ -850,7 +850,7 @@ export const getServerSideProps =
           const cookies = new Cookies(context.req, context.res);
           return {
             redirect: {
-              destination: "/ukpn",
+              destination: "/substations",
               permanent: false
             }
             // props: {

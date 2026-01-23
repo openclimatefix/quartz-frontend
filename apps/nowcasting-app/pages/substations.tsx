@@ -162,7 +162,7 @@ const getRoundedNow30MinTime = () => {
     .toISO({ suppressMilliseconds: true });
 };
 
-export default function Ukpn() {
+export default function Substations() {
   const { user, isLoading, error } = useUser();
   const isLoggedIn = !isLoading && !!user;
   // const isLoggedIn = true;
