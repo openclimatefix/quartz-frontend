@@ -204,11 +204,7 @@ export default function Ukpn() {
     error: substationsForecastError
   } = useLoadDataFromApi<ForecastForTimestamp>(
     `https://ukpn.quartz.solar/substations/forecast?datetime_utc=${selectedTime}`,
-    {
-      onSuccess: (data) => {
-        setShouldUpdateMap(true);
-      }
-    }
+    {}
   );
   // Get system data for UKPN's GSPs
   const {
@@ -324,6 +320,8 @@ export default function Ukpn() {
 
   useEffect(() => {
     substationsForecastRef.current = substationsForecastData ?? null;
+    // TODO: Force full map re-render / loadData for now, but solve better later
+    setShouldUpdateMap(true);
   }, [substationsForecastData]);
 
   useEffect(() => {
@@ -397,10 +395,8 @@ export default function Ukpn() {
       }
       console.log("loading data");
       // Primary Substation features/data
-      // let features = { type: "FeatureCollection", features: [] } as FeatureCollection;
       let primariesFeatures: Feature[];
       const primariesShapeJson = ukpnShapeData as FeatureCollection;
-      // const primariesMeta = ukpnData as FeatureCollection;
 
       const substationsForecastData = substationsForecastRef.current;
       const listSubstationsData = listSubstationsRef.current;
@@ -410,7 +406,6 @@ export default function Ukpn() {
       const primariesWithoutMeta: Record<string, string[]> = {};
 
       primariesFeatures = primariesShapeJson.features.map((feature) => {
-        // console.log("feature", feature);
         const id = feature.properties?.primary;
         const gspName = feature.properties?.grid_supply_point;
         if (!id) {
@@ -491,10 +486,7 @@ export default function Ukpn() {
             feature.properties = { ...feature.properties, primaryCapacityFromJson: true };
           }
         }
-        // console.log("gspMeta", gspMeta);
-        // console.log("feature.properties", feature.properties);
-        // console.log("primaryMeta", primaryMeta);
-        // console.log("snakeCaseName", snakeCaseName);
+
         const gspCode = gspMeta?.gspName;
         if (!gspMeta) {
           return returnFeatureAndLog(
@@ -515,43 +507,6 @@ export default function Ukpn() {
 
         if (!primaryMeta)
           return returnFeatureAndLog(id, "no primaryMeta", primariesWithoutMeta, feature);
-        // if (!gspForecastsData) return feature;
-
-        // Get forecast for selected time and correct GSP
-        // const forecastForTime = getGspForecastForTime(gspForecastsData, selectedTime);
-        // const forecastForGsp = forecastForTime?.forecastValues[gspMeta.gspId] || 0;
-        // const forecastForGspYield = forecastForGsp / gspMeta.installedCapacityMw;
-
-        // // remove any words with numeric characters from the primary name
-        // let strippedName = feature.properties?.primary
-        //   ?.split(" ")
-        //   .filter((s: string) => !/\d/.test(s))
-        //   .join(" ")
-        //   .toLowerCase();
-        // Capitalise the first letter of each word
-        // strippedName = strippedName?.replace(/\b\w/g, (l: string) => l.toUpperCase());
-        // const snakeCaseName = strippedName.replace(/\s+/g, "_").toLowerCase();
-        // const primaryCapacitiesMw =
-        //   primaryCapacities.find((p) => p.location === snakeCaseName)?.mean_embedded_capacity_mw || 0;
-        // const installedCapacityKw = primaryCapacitiesMw || 0;
-
-        // const gspFeature = {
-        //   ...feature,
-        //   properties: {
-        //     ...feature.properties,
-        //     expectedPowerGenerationMegawatts: primaryEstimatedGeneration
-        //   }
-        // };
-
-        // const gspFeature = mapGspFeature(
-        //   feature,
-        //   combinedData,
-        //   gspForecastsDataByTimestamp,
-        //   targetTime,
-        //   gspDeltas
-        // );
-        // const gspFeature = mapFeature(feature, gspMeta, gspForecastsData || [], selectedTime);
-        // if (!gspFeature) return feature;
 
         const primaryCapacityKw = primaryMeta.capacity_kW;
 
@@ -601,7 +556,7 @@ export default function Ukpn() {
           type: "line",
           source: "primaries-data",
           paint: {
-            "line-color": "#ffcc2d",
+            "line-color": "#ffd053",
             "line-opacity": 0.4
           }
         });
@@ -615,7 +570,7 @@ export default function Ukpn() {
           type: "fill",
           source: "primaries-data",
           paint: {
-            "fill-color": "#ffcc2d",
+            "fill-color": "#ffd053",
             // "fill-opacity": ["case", ["boolean", ["feature-state", "clicked"], false], 0.5, 0.2]
             "fill-opacity": [
               "interpolate",
@@ -639,11 +594,6 @@ export default function Ukpn() {
           source: "primaries-data",
           paint: {
             "fill-color": navyBlue,
-            // "if",
-            // ["get", ["primaryCapacityFromJson", true], false],
-            // "#b10400"
-            // "#00c"
-            // ],
             "fill-opacity": 0.7
           },
           // filter to show only if doesn't have expectedPowerGenerationMegawatts property
@@ -659,7 +609,6 @@ export default function Ukpn() {
           paint: {
             "line-color": "#ddd",
             "line-width": 3
-            // "line-opacity": ["case", ["boolean", ["feature-state", "clicked"], false], 1, 0]
           },
           filter: ["==", ["get", "primaryUuid"], "not-set"]
         });
@@ -678,9 +627,6 @@ export default function Ukpn() {
         });
       }
       const gspLayer = map.getLayer("gsp-data");
-      if (gspLayer) {
-        map.removeLayer("gsp-data");
-      }
       const gspFillLayer = map.getLayer("gsp-data-fill");
       if (gspFillLayer) {
         map.removeLayer("gsp-data-fill");
@@ -689,17 +635,19 @@ export default function Ukpn() {
       if (selectedGspLayer) {
         map.removeLayer("gsp-data-selected");
       }
-      // if (!layer) {
-      // map.addLayer({
-      //   id: "gsp-data",
-      //   type: "line",
-      //   source: "gsp-data",
-      //   paint: {
-      //     "line-color": "#ff8c2d",
-      //     "line-opacity": 0.6,
-      //     "line-width": 2
-      //   }
-      // });
+      if (!gspLayer) {
+        map.addLayer({
+          id: "gsp-data",
+          type: "line",
+          source: "gsp-data",
+          paint: {
+            // "line-color": "#c5c5c5",
+            "line-color": "#ff8c2d",
+            "line-opacity": 0.6,
+            "line-width": 1
+          }
+        });
+      }
       // map.addLayer({
       //   id: "gsp-data-fill",
       //   type: "fill",
@@ -966,9 +914,9 @@ export default function Ukpn() {
                 {/*<button className="btn float-right" onClick={() => setShouldUpdateMap(true)}>*/}
                 {/*  Update Map*/}
                 {/*</button>*/}
-                {/*<button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>*/}
-                {/*  Reset Map*/}
-                {/*</button>*/}
+                <button className="btn mr-3 float-right" onClick={() => setShowMap(false)}>
+                  Reset Map
+                </button>
                 <div>
                   <span className="flex-initial block float-right text-white bg-black px-3 py-1.5 rounded-md">
                     {DateTime.fromISO(selectedTime).toFormat("EEE, dd MMMM yyyy, HH:mm")}
