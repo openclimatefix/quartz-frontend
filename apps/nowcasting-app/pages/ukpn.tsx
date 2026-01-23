@@ -164,10 +164,9 @@ export default function Ukpn() {
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
   const [mapInitialLoadComplete, setMapInitialLoadComplete] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string>(
-    DateTime.now()
-      .minus({ day: 1 })
-      .set({ hour: 12, minute: 0, second: 0, millisecond: 0 })
-      .toUTC()
+    DateTime.utc()
+      .set({ second: 0, millisecond: 0 })
+      .minus({ minutes: DateTime.utc().minute % 30 })
       .toISO({ suppressMilliseconds: true })
   );
   const [mapUnit, setMapUnit] = useState<MapUnit>(MapUnit.kW);
