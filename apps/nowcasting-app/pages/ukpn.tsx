@@ -987,7 +987,7 @@ export default function Ukpn() {
                                   setSearchOpen(false);
                                 }}
                                 key={`SearchResult${result.value}`}
-                                className="px-2 py-1"
+                                className="px-2 py-1 hover:bg-mapbox-black-900"
                               >
                                 {result.label}
                               </span>
