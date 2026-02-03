@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 function getUrls(req: NextApiRequest) {
   const host = req.headers["host"];
-  const protocol = process.env.VERCEL_URL ? "https" : "http";
+  const protocol = process.env.VERCEL_PROJECT_PRODUCTION_URL ? "https" : "http";
   const redirectUri = `${protocol}://${host}/api/auth/callback`;
   const returnTo = `${protocol}://${host}`;
   return {
