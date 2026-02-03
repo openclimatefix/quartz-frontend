@@ -3,7 +3,8 @@ import { wrapApiHandlerWithSentry, setUser } from "@sentry/nextjs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 function getUrls(req: NextApiRequest) {
-  const host = req.headers["host"];
+  // const host = req.headers["host"];
+  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL || req.headers["host"];
   const protocol = process.env.VERCEL_PROJECT_PRODUCTION_URL ? "https" : "http";
   const redirectUri = `${protocol}://${host}/api/auth/callback`;
   const returnTo = `${protocol}://${host}`;
