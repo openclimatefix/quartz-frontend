@@ -60,13 +60,37 @@ import {
 } from "../components/helpers/data";
 import { DateTime } from "luxon";
 
+const useGetGspForecast = (selectedTime: string) => {
+  const selectedDatetime = DateTime.fromISO(selectedTime);
+  const targetTime = `${String(selectedDatetime.toISO()).slice(0, 19)}+00:00`;
+  const {
+    data: allGspForecastData,
+    isLoading: allGspForecastFutureLoading,
+    isValidating: allGspForecastFutureValidating,
+    error: allGspForecastFutureError
+  } = useLoadDataFromApi<
+    // TODO: see if we can fully integrate API paths/params into type safe functions
+    // paths["/v0/solar/GB/gsp/forecast/all/"]["get"]["responses"]["200"]["content"]["application/json"]
+    components["schemas"]["OneDatetimeManyForecastValues"][]
+  >(
+    `${API_PREFIX}/solar/GB/gsp/forecast/all/?compact=true&start_datetime_utc=${encodeURIComponent(
+      targetTime
+    )}&end_datetime_utc=${encodeURIComponent(targetTime)}`
+  );
+  return {
+    allGspForecastData,
+    allGspForecastFutureLoading,
+    allGspForecastFutureValidating,
+    allGspForecastFutureError
+  };
+};
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const selectedTime = String(DateTime.fromISO(selectedISOTime).toISO()).slice(0, 16);
   const [timeNow] = useGlobalState("timeNow");
   const { user, isLoading, error } = useUser();
   const [maps] = useGlobalState("maps");
@@ -82,14 +106,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     "nationalAggregationLevel"
   );
   const [, setClickedGspId] = useGlobalState("clickedGspId");
-
-  const [forecastLastFetch30MinISO, setForecastLastFetch30MinISO] = useState(get30MinNow(-30));
-  const [forecastHistoricBackwardIntervalMinutes, setForecastHistoricBackwardIntervalMinutes] =
-    useState(0);
-  const [allGspForecastFuture, setAllGspForecastFuture] =
-    useState<components["schemas"]["OneDatetimeManyForecastValues"][]>();
-  const [allGspForecastHistory, setAllGspForecastHistory] =
-    useState<components["schemas"]["OneDatetimeManyForecastValues"][]>();
 
   const [actualsLastFetch30MinISO, setActualsLastFetch30MinISO] = useState(get30MinNow(-30));
   const [actualsHistoricBackwardIntervalMinutes, setActualsHistoricBackwardIntervalMinutes] =
@@ -172,9 +188,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     });
   }, [lat, lng, zoom]);
 
-  const forecastFrom = getEarliestForecastTimestamp();
-  const forecastTo = getFurthestForecastTimestamp();
-
   const {
     data: nationalForecastData,
     isLoading: nationalForecastLoading,
@@ -184,16 +197,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true&model_name=blend&trend_adjuster_on=true`,
     {
       keepPreviousData: true,
-      refreshInterval: 0, // Only load this once at beginning
-      onSuccess: (data) => {
-        if (!data) return;
-
-        const historicBackwardIntervalMinutes =
-          calculateHistoricDataStartFromForecastValuesIntervalInMinutes(data);
-        const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
-        setForecastLastFetch30MinISO(prev30MinNowISO);
-        setForecastHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
-      }
+      refreshInterval: 0 // Only load this once at beginning
     }
   );
   const {
@@ -317,67 +321,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   //////////////////////////////////////
   // Load future all GSP forecast data (every 5 minutes)
   const {
-    data: allGspForecastFutureData,
-    isLoading: allGspForecastFutureLoading,
-    isValidating: allGspForecastFutureValidating,
-    error: allGspForecastFutureError
-  } = useLoadDataFromApi<
-    // TODO: see if we can fully integrate API paths/params into type safe functions
-    // paths["/v0/solar/GB/gsp/forecast/all/"]["get"]["responses"]["200"]["content"]["application/json"]
-    components["schemas"]["OneDatetimeManyForecastValues"][]
-  >(
-    // `/v0/solar/GB/gsp/forecast/all/`,
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?compact=true&start_datetime_utc=${encodeURIComponent(
-      `${forecastLastFetch30MinISO.slice(0, 19)}+00:00`
-    )}`,
-    {
-      keepPreviousData: true,
-      onSuccess: (data) => {
-        const forecastHistoricStart = get30MinNow(forecastHistoricBackwardIntervalMinutes);
-        const prev30MinFromNowISO = `${get30MinNow(-30)}:00+00:00`;
-        setForecastLastFetch30MinISO(prev30MinFromNowISO);
-        setAllGspForecastHistory(
-          allGspForecastHistory
-            ? filterCompactHistoricData(
-                [...allGspForecastHistory, ...data],
-                forecastHistoricStart,
-                prev30MinFromNowISO
-              )
-            : filterCompactHistoricData(data, forecastHistoricStart, prev30MinFromNowISO)
-        );
-        setAllGspForecastFuture(filterCompactFutureData(data, prev30MinFromNowISO));
-      }
-    }
-  );
-  // Load historic all GSP forecast data (once, at page load)
-  const {
-    data: allGspForecastHistoricData,
-    isLoading: allGspForecastHistoricLoading,
-    isValidating: allGspForecastHistoricValidating,
-    error: allGspForecastHistoricError
-  } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?historic=true&compact=true&start_datetime_utc=${encodeURIComponent(
-      `${forecastFrom.slice(0, 19)}+00:00`
-    )}&end_datetime_utc=${encodeURIComponent(`${forecastLastFetch30MinISO.slice(0, 19)}+00:00`)}`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0, // Only load this once at beginning
-      onSuccess: (data) => {
-        if (!data) return;
+    allGspForecastData,
+    allGspForecastFutureLoading,
+    allGspForecastFutureValidating,
+    allGspForecastFutureError
+  } = useGetGspForecast(selectedTime);
 
-        const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
-        const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
-        setAllGspForecastHistory(filterCompactHistoricData(data, oldestTimestamp, prev30MinNowISO));
-      }
-    }
-  );
-
-  // Combine historic and future forecast data & fetch states
-  const allGspForecastData = useMemo(() => {
-    return allGspForecastHistory && allGspForecastFuture
-      ? [...allGspForecastHistory, ...allGspForecastFuture]
-      : [];
-  }, [allGspForecastHistory, allGspForecastFuture]);
   const allGspForecastLoading = useMemo(() => {
     return allGspForecastFutureLoading;
   }, [allGspForecastFutureLoading]);
@@ -385,8 +334,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     return allGspForecastFutureValidating;
   }, [allGspForecastFutureValidating]);
   const allGspForecastError = useMemo(() => {
-    return allGspForecastHistoricError || allGspForecastFutureError;
-  }, [allGspForecastHistoricError, allGspForecastFutureError]);
+    return allGspForecastFutureError;
+  }, [allGspForecastFutureError]);
 
   //////////////////////////////////////
   // ALL GSP REAL DATA
@@ -512,6 +461,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
   const gspDeltas = useMemo(() => {
     console.log("about to calc deltas");
+    if (allGspForecastLoading || allGspRealLoading) return new Map();
+
     let tempGspDeltas = new Map();
     const currentForecasts = allGspForecastData?.find((forecast) => {
       return forecast.datetimeUtc.slice(0, 16) === `${selectedTime}`;
@@ -552,7 +503,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     //     })
     // );
     return tempGspDeltas;
-  }, [allGspForecastData, currentYields, selectedTime, timeNow]);
+  }, [
+    allGspForecastData,
+    currentYields,
+    selectedTime,
+    allGspRealLoading,
+    allGspForecastLoading,
+    timeNow
+  ]);
 
   const combinedData: CombinedData = {
     nationalForecastData,
