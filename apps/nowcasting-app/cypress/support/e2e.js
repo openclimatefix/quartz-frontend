@@ -16,10 +16,15 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
-Cypress.on("uncaught:exception", (err) => {
-  if (err.message.includes("Failed to initialize WebGL")) {
-    return false; // prevents Cypress from failing the test
-  }
+Cypress.on("window:before:load", (win) => {
+  win.addEventListener("error", (event) => {
+    if (
+      event?.message &&
+      /WebGL|initialize WebGL|Failed to initialize WebGL/i.test(event.message)
+    ) {
+      event.preventDefault();
+    }
+  });
 });
 
 // Alternatively you can use CommonJS syntax:
