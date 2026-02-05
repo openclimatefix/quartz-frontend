@@ -34,6 +34,11 @@ Cypress.Commands.add("loginToAuth0", (username: string, password: string) => {
   cy.session(
     `auth0-${username}`,
     () => {
+      // ADD THESE INTERCEPTS FIRST - before loginViaAuth0 runs
+      cy.intercept("https://api.mapbox.com/**", { forceNetworkError: true });
+      cy.intercept("**/mapbox-gl*.js", { forceNetworkError: true });
+      cy.intercept("**/mapbox-gl*.css", { forceNetworkError: true });
+
       loginViaAuth0Ui(username, password);
     },
     {
