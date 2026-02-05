@@ -25,6 +25,18 @@ Cypress.on("window:before:load", (win) => {
       event.preventDefault();
     }
   });
+  win.mapboxgl = {
+    supported: () => false,
+    Map: class MockMap {
+      on() {
+        return this;
+      }
+      off() {
+        return this;
+      }
+      remove() {}
+    }
+  };
 });
 
 // Alternatively you can use CommonJS syntax:
