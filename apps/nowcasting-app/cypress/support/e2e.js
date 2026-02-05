@@ -16,6 +16,20 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
+// Ignore WebGL errors from Mapbox
+Cypress.on("uncaught:exception", (err, runnable) => {
+  // Ignore WebGL errors from Mapbox
+  if (
+    err.message.includes("Failed to initialize WebGL") ||
+    err.message.includes("mapboxgl") ||
+    err.message.includes("WebGL")
+  ) {
+    return false; // Prevent Cypress from failing the test
+  }
+  // Let other errors fail the test
+  return true;
+});
+
 // Intercept at the network level
 beforeEach(() => {
   cy.intercept("https://api.mapbox.com/**", { forceNetworkError: true });
