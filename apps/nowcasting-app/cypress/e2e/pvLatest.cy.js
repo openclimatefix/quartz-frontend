@@ -1,11 +1,5 @@
 import "cypress-real-events/support";
 
-Cypress.on("uncaught:exception", (err) => {
-  if (err.message.includes("Failed to initialize WebGL")) {
-    return false; // prevents Cypress from failing the test
-  }
-});
-
 describe("Load the page", () => {
   beforeEach(function () {
     // cy.visit("http://localhost:3002/");
