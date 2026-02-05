@@ -16,39 +16,36 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
-// Block Mapbox globally before any test runs
-Cypress.on("window:before:load", (win) => {
-  // Stub mapboxgl globally
-  Object.defineProperty(win, "mapboxgl", {
-    get() {
-      return {
-        supported: () => false,
-        Map: class MockMap {
-          on() {
-            return this;
-          }
-          off() {
-            return this;
-          }
-          remove() {}
-          addControl() {}
-          resize() {}
-          getCanvas() {
-            return document.createElement("canvas");
-          }
-        },
-        accessToken: ""
-      };
-    },
-    set() {} // Prevent overwriting
-  });
+// Intercept at the network level
+beforeEach(() => {
+  cy.intercept("https://api.mapbox.com/**", { forceNetworkError: true });
+  cy.intercept("**/mapbox-gl*.js", { forceNetworkError: true });
+  cy.intercept("**/mapbox-gl*.css", { forceNetworkError: true });
 });
 
-// Also intercept Mapbox API calls
-beforeEach(() => {
-  cy.intercept("https://api.mapbox.com/**", { statusCode: 204 });
-  cy.intercept("**/mapbox-gl*.js", { statusCode: 204 });
-  cy.intercept("**/mapbox-gl*.css", { statusCode: 204 });
+// Stub Mapbox at the window level
+Cypress.on("window:before:load", (win) => {
+  // Delete any existing mapboxgl
+  delete win.mapboxgl;
+
+  Object.defineProperty(win, "mapboxgl", {
+    value: {
+      supported: () => false,
+      Map: function () {
+        return {
+          on: () => {},
+          off: () => {},
+          remove: () => {},
+          addControl: () => {},
+          resize: () => {},
+          getCanvas: () => document.createElement("canvas")
+        };
+      },
+      accessToken: ""
+    },
+    writable: false,
+    configurable: false
+  });
 });
 
 // Alternatively you can use CommonJS syntax:

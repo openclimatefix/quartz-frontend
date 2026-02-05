@@ -25,6 +25,7 @@ export default defineConfig({
       on("before:browser:launch", (browser, launchOptions) => {
         if (browser.family === "chromium" && browser.name !== "electron") {
           launchOptions.args.push("--disable-gpu");
+          launchOptions.args.push("--disable-webgl");
           launchOptions.args.push("--disable-software-rasterizer");
           launchOptions.args.push("--disable-dev-shm-usage");
         }
