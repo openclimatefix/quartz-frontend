@@ -16,27 +16,39 @@
 // Import commands.js using ES2015 syntax:
 import "./commands";
 
+// Block Mapbox globally before any test runs
 Cypress.on("window:before:load", (win) => {
-  win.addEventListener("error", (event) => {
-    if (
-      event?.message &&
-      /WebGL|initialize WebGL|Failed to initialize WebGL/i.test(event.message)
-    ) {
-      event.preventDefault();
-    }
+  // Stub mapboxgl globally
+  Object.defineProperty(win, "mapboxgl", {
+    get() {
+      return {
+        supported: () => false,
+        Map: class MockMap {
+          on() {
+            return this;
+          }
+          off() {
+            return this;
+          }
+          remove() {}
+          addControl() {}
+          resize() {}
+          getCanvas() {
+            return document.createElement("canvas");
+          }
+        },
+        accessToken: ""
+      };
+    },
+    set() {} // Prevent overwriting
   });
-  win.mapboxgl = {
-    supported: () => false,
-    Map: class MockMap {
-      on() {
-        return this;
-      }
-      off() {
-        return this;
-      }
-      remove() {}
-    }
-  };
+});
+
+// Also intercept Mapbox API calls
+beforeEach(() => {
+  cy.intercept("https://api.mapbox.com/**", { statusCode: 204 });
+  cy.intercept("**/mapbox-gl*.js", { statusCode: 204 });
+  cy.intercept("**/mapbox-gl*.css", { statusCode: 204 });
 });
 
 // Alternatively you can use CommonJS syntax:

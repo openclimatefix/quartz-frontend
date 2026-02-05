@@ -4,6 +4,15 @@ describe("Load the page", () => {
   beforeEach(function () {
     // cy.visit("http://localhost:3002/");
     cy.loginToAuth0(Cypress.env("auth0_username"), Cypress.env("auth0_password"));
+    const originalVisit = cy.visit;
+    cy.visit = (url, options = {}) => {
+      const onBeforeLoad = options.onBeforeLoad;
+      options.onBeforeLoad = (win) => {
+        win.mapboxgl = { supported: () => false };
+        if (onBeforeLoad) onBeforeLoad(win);
+      };
+      return originalVisit(url, options);
+    };
   });
   it("successfully loads", () => {
     // Should now already be logged in and have a session cookie.
