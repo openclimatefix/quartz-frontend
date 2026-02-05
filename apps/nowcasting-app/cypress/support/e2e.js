@@ -25,26 +25,31 @@ beforeEach(() => {
 
 // Stub Mapbox at the window level
 Cypress.on("window:before:load", (win) => {
-  // Delete any existing mapboxgl
-  delete win.mapboxgl;
+  // Create a mock that allows assignment but always returns the stub
+  let mockMapbox = {
+    supported: () => false,
+    Map: function () {
+      return {
+        on: () => {},
+        off: () => {},
+        remove: () => {},
+        addControl: () => {},
+        resize: () => {},
+        getCanvas: () => document.createElement("canvas")
+      };
+    },
+    accessToken: ""
+  };
 
   Object.defineProperty(win, "mapboxgl", {
-    value: {
-      supported: () => false,
-      Map: function () {
-        return {
-          on: () => {},
-          off: () => {},
-          remove: () => {},
-          addControl: () => {},
-          resize: () => {},
-          getCanvas: () => document.createElement("canvas")
-        };
-      },
-      accessToken: ""
+    get() {
+      return mockMapbox;
     },
-    writable: false,
-    configurable: false
+    set(val) {
+      // Allow assignment but ignore it
+      return true;
+    },
+    configurable: true
   });
 });
 
