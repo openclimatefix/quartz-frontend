@@ -43,7 +43,7 @@ jobs:
         # Starts web server for E2E tests - replace with your own server invocation
         # https://docs.cypress.io/guides/continuous-integration/introduction#Boot-your-server
         working-directory: ./apps/nowcasting-app
-        start: yarn start
+        start: yarn dev
         # Records to Cypress Cloud
         # https://docs.cypress.io/guides/cloud/projects#Set-up-a-project-to-record
         record: true
