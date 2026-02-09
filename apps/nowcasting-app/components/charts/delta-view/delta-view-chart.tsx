@@ -317,14 +317,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   //   }
   // }, [view]);
 
-  if (
-    nationalForecastError ||
-    pvRealDayInError ||
-    pvRealDayAfterError ||
-    nationalNHourError ||
-    allGspForecastError
-  )
-    return <div className={`h-full flex ${className}`}>Failed to load data.</div>;
+  const hasError = Object.entries(combinedErrors).some(([, value]) => value !== null);
 
   if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
     return (
@@ -352,6 +345,13 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
             pvLiveData={pvRealDayInData}
             deltaView={true}
           ></ForecastHeader>
+          {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
+            <div
+              className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
+            >
+              <Spinner></Spinner>
+            </div>
+          )}
           <div className={"flex-1 relative"}>
             <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
             <RemixLine
