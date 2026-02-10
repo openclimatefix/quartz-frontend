@@ -29,7 +29,7 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
         }
         return addMinutesToISODate(selectedISOTime || "", 30);
       });
-    }, 2000);
+    }, 1000);
   };
 
   return (
