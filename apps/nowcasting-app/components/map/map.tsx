@@ -78,6 +78,8 @@ const Map: FC<IMap> = ({
   }, [updateData]);
 
   useEffect(() => {
+    if (process.env.NEXT_PUBLIC_CI === "true") return;
+
     const onMoveEnd = () => {
       console.log("setting map state");
       const currentZoom = map.current?.getZoom() || 0;
