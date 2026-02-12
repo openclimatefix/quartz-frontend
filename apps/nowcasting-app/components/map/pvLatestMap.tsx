@@ -197,9 +197,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, [combinedData.allGspSystemData]);
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
-    console.log("### initForecastData", initForecastData);
-    console.log("### combinedData", combinedData);
-    console.log("### generatedGeoJsonForecastData", generatedGeoJsonForecastData);
     const geoJsonHasData =
       generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
       typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
@@ -481,7 +478,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   };
 
   // if mapDataLoading has been true for 3 seconds, set it to false
-  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<number | null>(null);
   useEffect(() => {
     if (mapDataLoadingTimeout) {
       clearTimeout(mapDataLoadingTimeout);
