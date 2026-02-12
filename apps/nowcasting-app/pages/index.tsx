@@ -90,7 +90,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const selectedTime = String(DateTime.fromISO(selectedISOTime).toISO()).slice(0, 16);
+  const selectedTime = String(DateTime.fromISO(selectedISOTime).toUTC().toISO()).slice(0, 16);
   const [timeNow] = useGlobalState("timeNow");
   const { user, isLoading, error } = useUser();
   const [maps] = useGlobalState("maps");
