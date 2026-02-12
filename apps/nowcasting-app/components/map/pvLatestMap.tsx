@@ -197,6 +197,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   }, [combinedData.allGspSystemData]);
 
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
+    console.log("### initForecastData", initForecastData);
+    console.log("### combinedData", combinedData);
     console.log("### generatedGeoJsonForecastData", generatedGeoJsonForecastData);
     const geoJsonHasData =
       generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
