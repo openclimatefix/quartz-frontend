@@ -478,7 +478,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   };
 
   // if mapDataLoading has been true for 3 seconds, set it to false
-  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<number | null>(null);
+  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (mapDataLoadingTimeout) {
       clearTimeout(mapDataLoadingTimeout);
