@@ -104,10 +104,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   // Update map data when forecast data is loaded
   useEffect(() => {
-    if (!combinedData?.allGspForecastData) return;
+    if (!initForecastData) return;
 
     setShouldUpdateMap(true);
   }, [
+    initForecastData,
     combinedData,
     combinedLoading,
     combinedValidating,
