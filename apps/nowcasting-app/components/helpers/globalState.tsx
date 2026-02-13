@@ -16,7 +16,7 @@ export function get30MinNow(offsetMinutes = 0) {
   let minutes: number = date.minute;
   if (offsetMinutes !== 0) {
     minutes += offsetMinutes;
-    date.set({ minute: minutes });
+    date = date.set({ minute: minutes });
   }
   const jsDate = getNext30MinSlot(date.toJSDate());
   const newDate = DateTime.fromJSDate(jsDate);
