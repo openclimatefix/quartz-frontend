@@ -35,6 +35,9 @@ export default wrapApiHandlerWithSentry(
         }
         await handleCallback(req, res, { redirectUri: redirectUri });
       } catch (error: any) {
+        if (error.code === "ERR_CALLBACK_HANDLER_FAILURE") {
+          res.redirect("/api/auth/login");
+        }
         res.status(error.status || 500).end(error.message);
       }
     },

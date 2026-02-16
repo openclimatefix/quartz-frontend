@@ -7,18 +7,20 @@ import {
 } from "./cookieStorage";
 import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
 import { NationalAggregation } from "../map/types";
+import { DateTime } from "luxon";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
-  let date = new Date();
+  let date = DateTime.utc();
 
-  let minutes = date.getMinutes();
+  let minutes: number = date.minute;
   if (offsetMinutes !== 0) {
     minutes += offsetMinutes;
-    date.setMinutes(minutes);
+    date = date.set({ minute: minutes });
   }
-  date = getNext30MinSlot(date);
-  return date.toISOString();
+  const jsDate = getNext30MinSlot(date.toJSDate());
+  const newDate = DateTime.fromJSDate(jsDate);
+  return newDate.toUTC().toISO() as string;
 }
 export function get30MinSlot(isoTime: Date) {
   if (isoTime.getMinutes() === 30) {
@@ -102,12 +104,12 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lng: -2.3175601,
     lat: 54.70534432,
     zoom: 5,
-    autoZoom: false,
+    autoZoom: true,
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },
     showSiteCount: undefined,
-    aggregationLevel: AGGREGATION_LEVELS.REGION,
+    aggregationLevel: AGGREGATION_LEVELS.NATIONAL,
     sortBy: SORT_BY.CAPACITY,
     showNHourView: false,
     showConstraints: getBooleanSettingFromCookieStorage(CookieStorageKeys.CONSTRAINTS),

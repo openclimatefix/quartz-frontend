@@ -1,4 +1,5 @@
 import Head from "next/head";
+import { Analytics } from "@vercel/analytics/next";
 import { API_PREFIX, getViewTitle } from "../../constant";
 import { useLoadDataFromApi } from "../hooks/useLoadDataFromApi";
 import { SolarStatus } from "../types";
@@ -29,6 +30,7 @@ const Layout = ({ children }: ILayout) => {
           </div>
         )}
         {children}
+        <Analytics />
       </main>
     </>
   );
