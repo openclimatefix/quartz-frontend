@@ -94,13 +94,9 @@ const toolTiplabels: Record<string, string> = {
   N_HOUR_FORECAST: `N-hour`,
   N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
-  SEASONAL_P95: "Seasonal P95",
   SEASONAL_P90: "Seasonal P90",
-  SEASONAL_P75: "Seasonal P75",
   SEASONAL_MEAN: "Seasonal Mean",
-  SEASONAL_P25: "Seasonal P25",
-  SEASONAL_P10: "Seasonal P10",
-  SEASONAL_P5: "Seasonal P5"
+  SEASONAL_P10: "Seasonal P10"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -119,13 +115,9 @@ const toolTipColors: Record<string, string> = {
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
   PROBABILISTIC_LOWER_BOUND: yellow,
-  SEASONAL_P95: seasonal,
   SEASONAL_P90: seasonal,
-  SEASONAL_P75: seasonal,
   SEASONAL_MEAN: seasonal,
-  SEASONAL_P25: seasonal,
-  SEASONAL_P10: seasonal,
-  SEASONAL_P5: seasonal
+  SEASONAL_P10: seasonal
 };
 type RemixLineProps = {
   timeOfInterest: string;
