@@ -44,12 +44,26 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const seasonalMeanTooltipContent = (
     <div className="flex flex-col text-left justify-center items-start gap-2 text-xs text-ocf-gray-300 py-1">
       <p>
-        The seasonal mean is calculated by taking the average of the PV generation for each day of
-        the year over the past 8 years.
+        The seasonal mean is calculated by taking the rolling 30-day average of the PV generation
+        centred around each day of the year over the past 8 years.
       </p>
       <p>
         This provides a baseline for understanding typical PV generation patterns and can be useful
         for comparing against actual generation data.
+      </p>
+    </div>
+  );
+
+  const seasonalQuantilesTooltipContent = (
+    <div className="flex flex-col text-left justify-center items-start gap-2 text-xs text-ocf-gray-300 py-1">
+      <p>
+        The seasonal quantiles are calculated by taking the 10th and 90th percentiles of the PV
+        generation for the rolling 30-day period centred on each day of the year over the past 8
+        years.
+      </p>
+      <p>
+        These quantiles provide a measure of the variability in PV generation patterns and can be
+        useful for understanding the range of possible generation values.
       </p>
     </div>
   );
@@ -206,12 +220,18 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               dataKey={`SEASONAL_MEAN`}
             />
           </LegendTooltip>
-          <LegendItem
-            iconClasses={"text-[#ffdfd1]"}
-            symbolStyle={"area"}
-            label={"Seasonal quantiles"}
-            dataKey={`SEASONAL_BOUNDS`}
-          />
+          <LegendTooltip
+            tip={seasonalQuantilesTooltipContent}
+            position={"top"}
+            className="relative w-full whitespace-pre-wrap"
+          >
+            <LegendItem
+              iconClasses={"text-[#ffdfd1]"}
+              symbolStyle={"area"}
+              label={"Seasonal quantiles"}
+              dataKey={`SEASONAL_BOUNDS`}
+            />
+          </LegendTooltip>
         </div>
         {showNHourView && (
           <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 pb-1 pt-1 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
