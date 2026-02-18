@@ -11,9 +11,6 @@ import {
 } from "./remix-line";
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
-import seasonalRollingMeans from "../../data/monthly_rolling_averages.json";
-import seasonalP10s from "../../data/monthly_p10_rolling.json";
-import seasonalP90s from "../../data/monthly_p90_rolling.json";
 import nationalMetrics from "../../data/national_metrics.json";
 import { getSettlementPeriodForDate } from "../helpers/chartUtils";
 
