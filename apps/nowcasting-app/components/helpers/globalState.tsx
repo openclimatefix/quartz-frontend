@@ -95,7 +95,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       "GENERATION",
       "GENERATION_UPDATED",
       "FORECAST",
-      "N_HOUR_FORECAST"
+      "N_HOUR_FORECAST",
+      "SEASONAL_MEAN"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
