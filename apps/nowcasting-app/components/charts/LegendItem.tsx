@@ -1,14 +1,14 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import useGlobalState from "../helpers/globalState";
-import { LegendLineGraphIcon } from "../icons/icons";
+import { LegendAreaGraphIcon, LegendLineGraphIcon } from "../icons/icons";
 import Toggle from "../Toggle";
 
 const LegendItem: FC<{
   iconClasses: string;
   label: string;
-  dashStyle?: "both" | "dashed" | "solid";
+  symbolStyle?: "both" | "dashed" | "solid" | "area";
   dataKey: string;
-}> = ({ iconClasses, label, dashStyle, dataKey }) => {
+}> = ({ iconClasses, label, symbolStyle, dataKey }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const [mounted, setMounted] = useState(false);
 
@@ -31,7 +31,11 @@ const LegendItem: FC<{
 
   return (
     <div className="flex items-center flex-initial">
-      <LegendLineGraphIcon className={iconClasses} dashStyle={dashStyle} />
+      {symbolStyle === "area" ? (
+        <LegendAreaGraphIcon className={iconClasses} />
+      ) : (
+        <LegendLineGraphIcon className={iconClasses} dashStyle={symbolStyle} />
+      )}
       <button
         className="inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-2xs @lg:pr-1 @xl:pr-0 @xl:text-2xs dash:text-base dash:tracking-wider dash:pb-1"
         onClick={toggleLineVisibility}

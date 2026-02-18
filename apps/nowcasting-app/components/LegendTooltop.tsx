@@ -1,4 +1,4 @@
-type TipPosition = "left" | "right" | "middle" | "top";
+type TipPosition = "left" | "right" | "middle" | "top" | "top-right";
 
 type LegendTooltipProps = {
   children: React.ReactNode;
@@ -13,6 +13,8 @@ const getPositionClass = (position: TipPosition) => {
   if (position === "middle") return "bottom-1 left-1/2 transform -translate-x-1/2 translate-y-full";
   if (position === "top")
     return "-top-[calc(100%+0.75rem)] left-1/2 transform -translate-x-1/2 -translate-y-full";
+  if (position === "top-right")
+    return "-top-[calc(100%+0.75rem)] left-0 transform -translate-y-full";
 
   return "top-0 left-0"; // Default case for top-left
 };
@@ -24,13 +26,13 @@ const LegendTooltip: React.FC<LegendTooltipProps> = ({
   className
 }) => {
   return (
-    <div className={`relative z-[100] overflow-visible cursor-default group ${className || ""}`}>
+    <div className={`relative overflow-visible cursor-default group ${className || ""}`}>
       {children}
       {tip && (
         <div
           className={`absolute ${getPositionClass(
             position
-          )} hidden w-max max-w-64 mt-6 group-hover:flex flex-wrap`}
+          )} hidden z-[100] w-max max-w-64 mt-6 group-hover:flex flex-wrap`}
         >
           <span
             className={`flex top-0 text-center mb-0 mt-2 text-xs px-3 py-1 leading-snug bg-mapbox-black bg-opacity-95 rounded-lg text-white drop-shadow-lg`}
