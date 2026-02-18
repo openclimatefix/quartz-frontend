@@ -4,59 +4,10 @@ import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import { GoogleTagManager } from "@next/third-parties/google";
 import CustomUserProvider from "../components/auth/CustomUserProvider";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { PresenceProvider, usePresenceClient } from "../components/presence/presenceProvider";
 import useGlobalState from "../components/helpers/globalState";
-
-// --- Presence hook for user status ---
-// function usePresence(email?: string) {
-//   const wsRef = useRef<WebSocket | null>(null);
-//   const heartbeatRef = useRef<number | null>(null);
-//
-//   useEffect(() => {
-//     console.log("UE: usePresence");
-//     console.log("email", email);
-//     if (typeof window === "undefined") return;
-//
-//     let wsUrl = process.env.NEXT_PUBLIC_STATUS_URL;
-//     if (!wsUrl) return;
-//
-//     wsUrl = wsUrl?.replace(/^http/, "ws") + "/ws";
-//     console.log(`Connecting to WebSocket at ${wsUrl}`);
-//
-//     const ws = new WebSocket(wsUrl);
-//     wsRef.current = ws;
-//
-//     const sendPresence = () => {
-//       console.log("Sending presence");
-//       if (ws.readyState !== WebSocket.OPEN) return;
-//     };
-//
-//     ws.addEventListener("open", () => {
-//       console.log("WebSocket connection opened");
-//       sendPresence();
-//       heartbeatRef.current = window.setInterval(sendPresence, 30_000);
-//     });
-//
-//     ws.addEventListener("message", (event) => {
-//       console.log("Received message from WebSocket", event.data);
-//     });
-//
-//     return () => {
-//       if (heartbeatRef.current) {
-//         window.clearInterval(heartbeatRef.current);
-//         heartbeatRef.current = null;
-//       }
-//       try {
-//         ws.close();
-//       } catch {
-//         // ignore
-//       }
-//       wsRef.current = null;
-//     };
-//   }, []);
-// }
 
 function PresenceAuthBridge() {
   const { user } = useUser();
@@ -112,7 +63,6 @@ function PresenceAuthBridge() {
 }
 
 function MyApp({ Component, pageProps }: any) {
-  // usePresence();
   return (
     <CustomUserProvider>
       <SWRConfig
