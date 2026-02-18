@@ -2,8 +2,19 @@ import { useMemo } from "react";
 import { get30MinNow, useGlobalState } from "../helpers/globalState";
 import { ForecastData, PvRealData } from "../types";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
-import { ChartData } from "./remix-line";
+import {
+  ChartData,
+  ChartDataBase,
+  SeasonalBound,
+  SeasonalPValue,
+  SeasonalQuantile
+} from "./remix-line";
 import { DateTime } from "luxon";
+import { Invalid, Valid } from "luxon/src/_util";
+import nationalMetrics from "../../data/national_metrics.json";
+import { getSettlementPeriodForDate } from "../helpers/chartUtils";
+
+const NATIONAL_CAPACITY = 21504.629;
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -46,6 +57,36 @@ const getDelta: (datum: ChartData) => number = (datum) => {
   return 0;
 };
 
+const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) => {
+  if (date.isValid === false) return { seasonalMean: 0, seasonalBounds: [] };
+
+  const month = date.month;
+  const day = date.day;
+  const seasonalQuantiles = nationalMetrics["keys"]["pLevels"];
+  // @ts-ignore
+  const seasonalMetricData = nationalMetrics["data"][month][day];
+  const seasonalMetrics = {
+    seasonalMean: seasonalMetricData.mean,
+    seasonalBounds: [] as SeasonalBound[]
+  };
+  // Split quantiles into pairs from beginning and end of array
+  const quantilePairs = [];
+  for (let i = 0; i < seasonalQuantiles.length / 2; i += 1) {
+    quantilePairs.push([seasonalQuantiles[i], seasonalQuantiles[seasonalQuantiles.length - i - 1]]);
+  }
+  for (const [lowerQuantile, upperQuantile] of quantilePairs) {
+    seasonalMetrics["seasonalBounds"].push({
+      [lowerQuantile.toUpperCase()]:
+        seasonalMetricData.pLevels[seasonalQuantiles.indexOf(lowerQuantile)],
+      [upperQuantile.toUpperCase()]:
+        seasonalMetricData.pLevels[seasonalQuantiles.indexOf(upperQuantile)]
+    } as SeasonalPValue);
+  }
+
+  console.log("seasonalMetrics", seasonalMetrics);
+  return seasonalMetrics;
+};
+
 const useFormatChartData = ({
   forecastData,
   nationalIntradayECMWFOnlyData,
@@ -58,7 +99,8 @@ const useFormatChartData = ({
   pvRealDayAfterData,
   pvRealDayInData,
   timeTrigger,
-  delta = false
+  delta = false,
+  gsp = false
 }: {
   forecastData?: ForecastData;
   nationalIntradayECMWFOnlyData?: ForecastData;
@@ -72,6 +114,7 @@ const useFormatChartData = ({
   pvRealDayInData?: PvRealData;
   timeTrigger?: string;
   delta?: boolean;
+  gsp?: boolean;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
 
@@ -83,7 +126,7 @@ const useFormatChartData = ({
       const addDataToMap = (
         dataPoint: any,
         getDatetimeUtc: (dp: any) => string,
-        getPvdata: (dp: any) => Partial<ChartData>
+        getPvdata: (dp: any) => Partial<ChartDataBase>
       ) => {
         const pvData = getPvdata(dataPoint);
         const formattedDate = getDatetimeUtc(dataPoint);
@@ -175,15 +218,35 @@ const useFormatChartData = ({
         }
       }
 
-      // Add settlement period
+      // Add settlement period and seasonal norm data
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key);
-        const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-        // Compute settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
-        const interval = date.diff(midnightBefore, "minutes").minutes;
-        // console.log("date", date);
-        // console.log("interval", interval);
-        chartMap[key].SETTLEMENT_PERIOD = Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed
+        const settlementPeriod = getSettlementPeriodForDate(date);
+        chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
+        if (!gsp) {
+          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
+
+          chartMap[key].SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
+          chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
+          for (const boundPair of seasonalBounds) {
+            for (const [index, bound] of Object.entries(boundPair)) {
+              if (bound) {
+                chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
+                  bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+              }
+            }
+            chartMap[key][
+              `SEASONAL_BOUND_${Object.keys(boundPair).join(
+                "_"
+              )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
+            ] = Object.values(boundPair).map((bound) => {
+              if (bound) {
+                return bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+              }
+              return 0;
+            });
+          }
+        }
       }
 
       if (fourHourData) {

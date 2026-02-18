@@ -16,7 +16,7 @@ export const getSettingFromCookieStorage = <T>(key: string): null | T => {
 export const setSettingInCookieStorage = <T>(key: string, value: T) => {
   if (typeof window === "undefined") return;
 
-  Cookies.set(key, JSON.stringify(value));
+  Cookies.set(key, JSON.stringify(value), { expires: 7 });
 };
 
 export const getBooleanSettingFromCookieStorage = (
