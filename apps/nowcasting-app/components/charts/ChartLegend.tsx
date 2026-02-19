@@ -212,7 +212,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           <LegendTooltip
             tip={seasonalMeanTooltipContent}
             position={"top"}
-            className="relative w-full whitespace-pre-wrap @2xl:hidden"
+            className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"
           >
             <LegendItem
               iconClasses={"text-[#ffdfd1]"}
@@ -232,6 +232,17 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               dataKey={`SEASONAL_BOUNDS`}
             />
           </LegendTooltip>
+          {/*<LegendTooltip*/}
+          {/*  tip={seasonalMeanTooltipContent}*/}
+          {/*  position={"top-right"}*/}
+          {/*  className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"*/}
+          {/*>*/}
+          {/*  <LegendItem*/}
+          {/*    iconClasses={"text-[#ffdfd1]"}*/}
+          {/*    label={"Seasonal Mean"}*/}
+          {/*    dataKey={`SEASONAL_MEAN`}*/}
+          {/*  />*/}
+          {/*</LegendTooltip>*/}
         </div>
         <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 pb-1 pt-1 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
           {showNHourView && (
