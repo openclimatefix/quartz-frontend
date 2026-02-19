@@ -20,7 +20,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
 
   const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
-    showNHourView ? "flex-col @sm:gap-0" : "flex-col @md:gap-1"
+    showNHourView ? "flex-col @sm:gap-0" : "flex-col @md:gap-0"
   }${className ? ` ${className}` : ""}`;
 
   let nHrTipText;
@@ -233,8 +233,8 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             />
           </LegendTooltip>
         </div>
-        {showNHourView && (
-          <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 pb-1 pt-1 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
+        <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 pb-1 pt-1 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
+          {showNHourView && (
             <div className="flex">
               <>
                 <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">
@@ -258,8 +258,8 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 forecast
               </>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
