@@ -18,106 +18,106 @@
 # UAT
 
 ## Quartz-specific points
-- [x] Does the logo look like the new Quartz logo?
-- [x] Does the logo link to the new Quartz website?
-- [x] Is the OCF logo present in the logo area?
-- [x] Does the OCF logo link to the OCF website?
-- [x] Does the Documentation link go to the new Quartz docs?
+- [ ] Does the logo look like the new Quartz logo?
+- [ ] Does the logo link to the new Quartz website?
+- [ ] Is the OCF logo present in the logo area?
+- [ ] Does the OCF logo link to the OCF website?
+- [ ] Does the Documentation link go to the new Quartz docs?
 
 
 ## PV Forecast
 
 ### National & GSP Charts (both charts wherever relevant)
-- [x] Clicking on a GSP makes the GSP plot show up?
-- [x] Clicking on a GSP when already selected, makes the GSP plot go away?
-- [x] Does the data look like solar profiles?
-- [x] Does PV live estimate show on the plot? (dashed black)
-- [x] Does PV live updated show on the plot? (solid black)
-- [x] Does the Current forecast show up on plot? (yellow)
-- [x] Does the seasonal mean show up on the plot? (light pink line)
-- [x] Do the seasonal bounds show up on the plot when toggled on? (light pink shading)
-- [x] For OCF forecasts, is the future a dashed line?
-- [x] Can I hover on the plot to show the values on the plot?
-- [x] Can I click on a past time in the plot which then updates the map?
-- [x] Can I click on a future time in the plot which then updates the map?
+- [ ] Clicking on a GSP makes the GSP plot show up?
+- [ ] Clicking on a GSP when already selected, makes the GSP plot go away?
+- [ ] Does the data look like solar profiles?
+- [ ] Does PV live estimate show on the plot? (dashed black)
+- [ ] Does PV live updated show on the plot? (solid black)
+- [ ] Does the Current forecast show up on plot? (yellow)
+- [ ] Does the seasonal mean show up on the plot? (light pink line)
+- [ ] Do the seasonal bounds show up on the plot when toggled on? (light pink shading)
+- [ ] For OCF forecasts, is the future a dashed line?
+- [ ] Can I hover on the plot to show the values on the plot?
+- [ ] Can I click on a past time in the plot which then updates the map?
+- [ ] Can I click on a future time in the plot which then updates the map?
 
 #### Headers (Nat & GSP charts)
-- [x] Does `National` / the GSP name show up in the header?
-- [x] Is the current estimated PV visible?
-- [x] Is the next forecast figure visible?
-- [x] Are the above figures in GW (National / MW (GSP) respectively?
+- [ ] Does `National` / the GSP name show up in the header?
+- [ ] Is the current estimated PV visible?
+- [ ] Is the next forecast figure visible?
+- [ ] Are the above figures in GW (National / MW (GSP) respectively?
 
 #### Time (Nat & GSP charts)
-- [x] Is time now in Europe London time?
-- [x] Is the hover time in Europe London time?
-- [x] Are the X axis in Europe London time?
-- [x] Does the data show yesterday, today, and tomorrow?
+- [ ] Is time now in Europe London time?
+- [ ] Is the hover time in Europe London time?
+- [ ] Are the X axis in Europe London time?
+- [ ] Does the data show yesterday, today, and tomorrow?
 
 #### Probabilistic (Nat & GSP charts)
-- [x] Shading appears around the lines.
-- [x] P-level values in the tooltip are 0.0 or above.
-- [x] Probabilistic range shading and tooltip values appear on the Delta View charts.
+- [ ] Shading appears around the lines.
+- [ ] P-level values in the tooltip are 0.0 or above.
+- [ ] Probabilistic range shading and tooltip values appear on the Delta View charts.
 
 ### Map
-- [x] Does a map of the UK show up?
-- [x] Are the GSP boundaries displayed?
-- [x] Can I click on '%', 'MW' and 'Capacity' to show different map shading?
-- [x] Are values "higher" on the map in the middle of the day, compared to early morning?
-- [x] On 'Capacity' view, is there very little coloured shading in Scotland, and Melksham a shining beacon of renewables?
-- [x] Can I click the DNO grouping button and see the regions change on the map?
-- [x] If I select a DNO, does the aggregated chart show for that DNO?
-- [x] If I have a DNO selected, and click the "GSP" map button, does it deselect the DNO?
-- [x] If I have a GSP selected, and click the "DNO" map button, does it deselect the GSP?
+- [ ] Does a map of the UK show up?
+- [ ] Are the GSP boundaries displayed?
+- [ ] Can I click on '%', 'MW' and 'Capacity' to show different map shading?
+- [ ] Are values "higher" on the map in the middle of the day, compared to early morning?
+- [ ] On 'Capacity' view, is there very little coloured shading in Scotland, and Melksham a shining beacon of renewables?
+- [ ] Can I click the DNO grouping button and see the regions change on the map?
+- [ ] If I select a DNO, does the aggregated chart show for that DNO?
+- [ ] If I have a DNO selected, and click the "GSP" map button, does it deselect the DNO?
+- [ ] If I have a GSP selected, and click the "DNO" map button, does it deselect the GSP?
 
 
 ## Delta View
 
 ### National & GSP Charts (both charts wherever relevant)
-- [x] Clicking on a GSP makes the GSP plot show up?
-- [x] Clicking on a GSP when already selected, makes the GSP plot go away?
-- [x] Does the data look like solar profiles?
-- [x] Does PV live estimate show on the plot? (dashed black)
-- [x] Does PV live updated show on the plot? (solid black)
-- [x] Does the Current forecast show up on plot? (yellow)
-- [x] Does the seasonal mean show up on the plot? (light pink line)
-- [x] Do the seasonal bounds show up on the plot when toggled on? (light pink shading)
-- [x] For OCF forecasts, is the future a dashed line?
-- [x] Can I hover on the plot to show the values on the plot?
+- [ ] Clicking on a GSP makes the GSP plot show up?
+- [ ] Clicking on a GSP when already selected, makes the GSP plot go away?
+- [ ] Does the data look like solar profiles?
+- [ ] Does PV live estimate show on the plot? (dashed black)
+- [ ] Does PV live updated show on the plot? (solid black)
+- [ ] Does the Current forecast show up on plot? (yellow)
+- [ ] Does the seasonal mean show up on the plot? (light pink line)
+- [ ] Do the seasonal bounds show up on the plot when toggled on? (light pink shading)
+- [ ] For OCF forecasts, is the future a dashed line?
+- [ ] Can I hover on the plot to show the values on the plot?
 - [ ] Does the delta value show up on the chart tooltip on hover?
-- [x] Can I click on a past time in the plot which then updates the map?
-- [x] Can I click on a future time in the plot which then updates the map?
+- [ ] Can I click on a past time in the plot which then updates the map?
+- [ ] Can I click on a future time in the plot which then updates the map?
 
 #### Headers (Nat & GSP charts)
-- [x] Does `National` / the GSP name show up in the header?
-- [x] Is the "current" estimated PV visible?
-- [x] Is the "current" forecast value visible?
-- [x] Is the "next" forecast value visible?
-- [x] Are the above figures in GW (National / MW (GSP) respectively?
+- [ ] Does `National` / the GSP name show up in the header?
+- [ ] Is the "current" estimated PV visible?
+- [ ] Is the "current" forecast value visible?
+- [ ] Is the "next" forecast value visible?
+- [ ] Are the above figures in GW (National / MW (GSP) respectively?
 
 #### Time (Nat & GSP charts)
-- [x] Is time now in Europe London time? It should be now rounded up to the next 30 min.
-- [x] Is the hover time in Europe London time?
-- [x] Are the X axis in Europe London time?
-- [x] Does the data show yesterday, today, and tomorrow?
+- [ ] Is time now in Europe London time? It should be now rounded up to the next 30 min.
+- [ ] Is the hover time in Europe London time?
+- [ ] Are the X axis in Europe London time?
+- [ ] Does the data show yesterday, today, and tomorrow?
 
 #### Probabilistic (Nat & GSP charts)
-- [x] Shading appears around the lines.
-- [x] P-level values in the tooltip are 0.0 or above.
-- [x] Probabilistic range shading and tooltip values appear on the Delta View charts.
+- [ ] Shading appears around the lines.
+- [ ] P-level values in the tooltip are 0.0 or above.
+- [ ] Probabilistic range shading and tooltip values appear on the Delta View charts.
 
 #### Time
-- [x] Is time now in Europe London time?
-- [x] Is the hover time in Europe London time?
-- [x] Are the X axis in Europe London time?
+- [ ] Is time now in Europe London time?
+- [ ] Is the hover time in Europe London time?
+- [ ] Are the X axis in Europe London time?
 
 ###  Map
-- [x] Does a map of the UK show up?
-- [x] Are the GSP boundaries displayed?
-- [x] Where Deltas are available, do the correct colours for the GSP delta buckets display and match the table?
+- [ ] Does a map of the UK show up?
+- [ ] Are the GSP boundaries displayed?
+- [ ] Where Deltas are available, do the correct colours for the GSP delta buckets display and match the table?
 
 ### Delta GSP Table
-- [x] Does the table appear and populate when Delta values are available?
-- [x] Does clicking a GSP in the table select the GSP on the map?
+- [ ] Does the table appear and populate when Delta values are available?
+- [ ] Does clicking a GSP in the table select the GSP on the map?
 
 
 ## N Hour View
@@ -165,7 +165,6 @@
 - [ ] Is the version visible in the Profile Dropdown (top right)?
 - [ ] Has the version been bumped?
 - [ ] Does the feedback button work?
-- [ ] Is the legend visible
 - [ ] Is the database stable, check on AWS
 
 ### Auth
