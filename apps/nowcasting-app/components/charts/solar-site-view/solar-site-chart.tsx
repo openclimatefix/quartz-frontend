@@ -365,7 +365,7 @@ const SolarSiteChart: FC<{
           />
           <LegendItem
             iconClasses={"text-ocf-yellow"}
-            dashStyle={"both"}
+            symbolStyle={"both"}
             label={"OCF Forecast"}
             dataKey={`FORECAST`}
           />

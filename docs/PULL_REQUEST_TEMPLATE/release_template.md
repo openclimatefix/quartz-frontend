@@ -33,8 +33,10 @@
 - [ ] Does the data look like solar profiles?
 - [ ] Does PV live estimate show on the plot? (dashed black)
 - [ ] Does PV live updated show on the plot? (solid black)
-- [ ] Does OCF forecast show up on plot? (yellow)
-- [ ] For OCF forecast, is the future a dashed line?
+- [ ] Does the Current forecast show up on plot? (yellow)
+- [ ] Does the seasonal mean show up on the plot? (light pink line)
+- [ ] Do the seasonal bounds show up on the plot when toggled on? (light pink shading)
+- [ ] For OCF forecasts, is the future a dashed line?
 - [ ] Can I hover on the plot to show the values on the plot?
 - [ ] Can I click on a past time in the plot which then updates the map?
 - [ ] Can I click on a future time in the plot which then updates the map?
@@ -49,12 +51,12 @@
 - [ ] Is time now in Europe London time?
 - [ ] Is the hover time in Europe London time?
 - [ ] Are the X axis in Europe London time?
-- [ ] Does the data show yesterday, today, and tomorrow? 
+- [ ] Does the data show yesterday, today, and tomorrow?
 
 #### Probabilistic (Nat & GSP charts)
 - [ ] Shading appears around the lines.
-- [ ] Plevel values in the tooltip are 0.0 or above.
-- [ ] Probabilistic range shading and tooltip values appear on the DeltaView charts.
+- [ ] P-level values in the tooltip are 0.0 or above.
+- [ ] Probabilistic range shading and tooltip values appear on the Delta View charts.
 
 ### Map
 - [ ] Does a map of the UK show up?
@@ -76,9 +78,12 @@
 - [ ] Does the data look like solar profiles?
 - [ ] Does PV live estimate show on the plot? (dashed black)
 - [ ] Does PV live updated show on the plot? (solid black)
-- [ ] Does OCF forecast show up on plot? (yellow)
-- [ ] For OCF forecast, is the future a dashed line?
+- [ ] Does the Current forecast show up on plot? (yellow)
+- [ ] Does the seasonal mean show up on the plot? (light pink line)
+- [ ] Do the seasonal bounds show up on the plot when toggled on? (light pink shading)
+- [ ] For OCF forecasts, is the future a dashed line?
 - [ ] Can I hover on the plot to show the values on the plot?
+- [ ] Does the delta value show up on the chart tooltip on hover?
 - [ ] Can I click on a past time in the plot which then updates the map?
 - [ ] Can I click on a future time in the plot which then updates the map?
 
@@ -90,15 +95,15 @@
 - [ ] Are the above figures in GW (National / MW (GSP) respectively?
 
 #### Time (Nat & GSP charts)
-- [ ] Is time now in Europe London time? It should be 30minute, but rounded up.
+- [ ] Is time now in Europe London time? It should be now rounded up to the next 30 min.
 - [ ] Is the hover time in Europe London time?
 - [ ] Are the X axis in Europe London time?
 - [ ] Does the data show yesterday, today, and tomorrow?
 
 #### Probabilistic (Nat & GSP charts)
 - [ ] Shading appears around the lines.
-- [ ] Plevel values in the tooltip are 0.0 or above.
-- [ ] Probabilistic range shading and tooltip values appear on the DeltaView charts.
+- [ ] P-level values in the tooltip are 0.0 or above.
+- [ ] Probabilistic range shading and tooltip values appear on the Delta View charts.
 
 #### Time
 - [ ] Is time now in Europe London time?
@@ -160,7 +165,6 @@
 - [ ] Is the version visible in the Profile Dropdown (top right)?
 - [ ] Has the version been bumped?
 - [ ] Does the feedback button work?
-- [ ] Is the legend visible
 - [ ] Is the database stable, check on AWS
 
 ### Auth
@@ -171,7 +175,9 @@
 - [ ] After 10 mins, does the forecast update?
 
 ### Documentation
-- [ ] Update documentation - https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf
+- Update documentation - https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf
+  - [ ] Yes, done
+  - [ ] No
 - Do we need to email the users
   - [ ] Yes, done
   - [ ] No
@@ -181,6 +187,7 @@
 
 - [ ] My code follows [OCF's coding style guidelines](https://github.com/openclimatefix/.github/blob/main/coding_style.md)
 - [ ] I have performed a self-review of my own code
-- [ ] I have made corresponding changes to the README
+- [ ] I have made any corresponding changes to the README
 - [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] I have updated the release docs with the contents of this release
+- [ ] New and existing unit tests pass locally with my changes
+- [ ] I have bumped the version in `package.json`

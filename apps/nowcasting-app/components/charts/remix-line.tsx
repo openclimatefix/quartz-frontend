@@ -34,46 +34,69 @@ const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
 const satOnly = theme.extend.colors["ocf-yellow"]["200"];
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
+const seasonal = "#ffdfd1";
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
-export type ChartData = {
+export type SeasonalQuantile = `P${string}`;
+export type SeasonalPValue = { [K in SeasonalQuantile]?: number };
+export type SeasonalScalars = {
+  [K in `SEASONAL_${SeasonalQuantile}`]?: number;
+};
+
+export type SeasonalBound = {
+  [K in `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`]?: number[];
+};
+
+export type ChartDataBase = {
+  formattedDate: string; // "2022-05-16T15:00",
+  SETTLEMENT_PERIOD?: number | undefined;
+
   GENERATION_UPDATED?: number;
   GENERATION?: number;
+
   FORECAST?: number;
+  PAST_FORECAST?: number;
+  N_HOUR_FORECAST?: number;
+  N_HOUR_PAST_FORECAST?: number;
+
   INTRADAY_ECMWF_ONLY?: number;
   PAST_INTRADAY_ECMWF_ONLY?: number;
   MET_OFFICE_ONLY?: number;
   PAST_MET_OFFICE_ONLY?: number;
   SAT_ONLY?: number;
-  PAST_FORECAST?: number;
-  N_HOUR_FORECAST?: number;
-  N_HOUR_PAST_FORECAST?: number;
+
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
+
+  PROBABILISTIC_RANGE?: Array<number>;
   PROBABILISTIC_UPPER_BOUND?: number;
   PROBABILISTIC_LOWER_BOUND?: number;
-  PROBABILISTIC_RANGE?: Array<number>;
-  formattedDate: string; // "2022-05-16T15:00",
-  SETTLEMENT_PERIOD?: number | undefined;
+
+  SEASONAL_MEAN?: number | undefined;
+  SEASONAL_BOUNDS?: string[][] | undefined;
 };
+export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound;
 
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
-  GENERATION_UPDATED: "PV Actual",
-  PROBABILISTIC_UPPER_BOUND: "OCF 90%",
-  FORECAST: "OCF Latest",
-  PAST_FORECAST: "OCF Latest",
-  PROBABILISTIC_LOWER_BOUND: "OCF 10%",
-  INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
-  PAST_INTRADAY_ECMWF_ONLY: "OCF ECMWF-only",
-  MET_OFFICE_ONLY: "OCF Met Office-only",
-  PAST_MET_OFFICE_ONLY: "OCF Met Office-only",
-  SAT_ONLY: "OCF Satellite-only",
-  PAST_SAT_ONLY: "OCF Satellite-only",
-  N_HOUR_FORECAST: `OCF N-hour`,
-  N_HOUR_PAST_FORECAST: "OCF N-hour",
-  DELTA: "Delta"
+  GENERATION_UPDATED: "PV Live Actual",
+  PROBABILISTIC_UPPER_BOUND: "OCF P90",
+  FORECAST: "Current",
+  PAST_FORECAST: "Current",
+  PROBABILISTIC_LOWER_BOUND: "OCF P10",
+  INTRADAY_ECMWF_ONLY: "ECMWF-only",
+  PAST_INTRADAY_ECMWF_ONLY: "ECMWF-only",
+  MET_OFFICE_ONLY: "Met Office-only",
+  PAST_MET_OFFICE_ONLY: "Met Office-only",
+  SAT_ONLY: "Satellite-only",
+  PAST_SAT_ONLY: "Satellite-only",
+  N_HOUR_FORECAST: `N-hour`,
+  N_HOUR_PAST_FORECAST: "N-hour",
+  DELTA: "Delta",
+  SEASONAL_P90: "Seasonal P90",
+  SEASONAL_MEAN: "Seasonal Mean",
+  SEASONAL_P10: "Seasonal P10"
 };
 
 const toolTipColors: Record<string, string> = {
@@ -91,7 +114,10 @@ const toolTipColors: Record<string, string> = {
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
   PROBABILISTIC_UPPER_BOUND: yellow,
-  PROBABILISTIC_LOWER_BOUND: yellow
+  PROBABILISTIC_LOWER_BOUND: yellow,
+  SEASONAL_P90: seasonal,
+  SEASONAL_MEAN: seasonal,
+  SEASONAL_P10: seasonal
 };
 type RemixLineProps = {
   timeOfInterest: string;
@@ -293,6 +319,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
       rightChartMargin = 0;
     }
   }
+  console.log("chartData", data);
+  console.log("DELTA", deltaView);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -582,6 +610,45 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <Line
               type="monotone"
+              dataKey="SEASONAL_MEAN"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={seasonal}
+              fill="transparent"
+              fillOpacity={50}
+              strokeWidth={largeScreenMode ? 3 : 2}
+              hide={!visibleLines.includes("SEASONAL_MEAN")}
+              isAnimationActive={false}
+            />
+
+            {data.length > 0 &&
+              data[0].SEASONAL_BOUNDS?.map((boundPair) => {
+                return (
+                  <Area
+                    key={`SEASONAL_BOUND_${boundPair.join("_")}`}
+                    dataKey={`SEASONAL_BOUND_${boundPair.join("_")}`}
+                    type="monotone"
+                    dot={false}
+                    xAxisId={"x-axis"}
+                    yAxisId={"y-axis"}
+                    stroke={"#ffdfd1"}
+                    fill={"#ffdfd1"}
+                    fillOpacity={
+                      (1 /
+                        (Number(boundPair[1].replace("P", "")) -
+                          Number(boundPair[0].replace("P", "")))) *
+                      15
+                    }
+                    strokeWidth={0}
+                    hide={!visibleLines.includes("SEASONAL_BOUNDS")}
+                    isAnimationActive={false}
+                  />
+                );
+              })}
+
+            <Line
+              type="monotone"
               dataKey="PAST_INTRADAY_ECMWF_ONLY"
               dot={false}
               xAxisId={"x-axis"}
@@ -746,9 +813,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                       {Object.entries(toolTiplabels)
                         .filter(
                           ([key]) =>
-                            data[key] !== undefined &&
-                            (visibleLines.includes(key.replace("PAST_", "")) ||
-                              key.includes("PROBABILISTIC"))
+                            (data[key] !== undefined &&
+                              visibleLines.includes(key.replace("PAST_", ""))) ||
+                            key === "DELTA" ||
+                            key.includes("PROBABILISTIC") ||
+                            (key.includes("SEASONAL") && visibleLines.includes("SEASONAL_BOUNDS"))
                         )
                         .map(([key, name]) => {
                           const value = data[key];
@@ -767,7 +836,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           if (["FORECAST", "PAST_FORECAST"].includes(key))
                             textClass = "font-semibold";
                           if (
-                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(key)
+                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(
+                              key
+                            ) ||
+                            key.includes("SEASONAL_P")
                           )
                             textClass = "text-2xs";
                           const pvLiveTextClass =

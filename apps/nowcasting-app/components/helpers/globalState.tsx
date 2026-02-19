@@ -97,7 +97,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       "GENERATION",
       "GENERATION_UPDATED",
       "FORECAST",
-      "N_HOUR_FORECAST"
+      "N_HOUR_FORECAST",
+      "SEASONAL_MEAN"
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
@@ -111,7 +112,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.NATIONAL,
     sortBy: SORT_BY.CAPACITY,
-    showNHourView: false,
+    showNHourView: getBooleanSettingFromCookieStorage(CookieStorageKeys.N_HOUR_VIEW, true),
     showConstraints: getBooleanSettingFromCookieStorage(CookieStorageKeys.CONSTRAINTS),
     dashboardMode: getBooleanSettingFromCookieStorage(CookieStorageKeys.DASHBOARD_MODE),
     loadingState: {

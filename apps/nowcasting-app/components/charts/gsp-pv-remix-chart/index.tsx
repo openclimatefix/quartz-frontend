@@ -55,7 +55,8 @@ const GspPvRemixChart: FC<{
     pvRealDayInData: pvRealDataIn,
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,
-    delta: deltaView
+    delta: deltaView,
+    gsp: true
   });
   const now30min = formatISODateString(get30MinNow());
   const dataMissing =
