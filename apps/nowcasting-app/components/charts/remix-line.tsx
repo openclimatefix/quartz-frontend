@@ -319,6 +319,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
       rightChartMargin = 0;
     }
   }
+  console.log("chartData", data);
+  console.log("DELTA", deltaView);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -813,6 +815,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           ([key]) =>
                             (data[key] !== undefined &&
                               visibleLines.includes(key.replace("PAST_", ""))) ||
+                            key === "DELTA" ||
                             key.includes("PROBABILISTIC") ||
                             (key.includes("SEASONAL") && visibleLines.includes("SEASONAL_BOUNDS"))
                         )

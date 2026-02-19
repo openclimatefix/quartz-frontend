@@ -83,7 +83,6 @@ const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) =>
     } as SeasonalPValue);
   }
 
-  console.log("seasonalMetrics", seasonalMetrics);
   return seasonalMetrics;
 };
 
@@ -284,7 +283,7 @@ const useFormatChartData = ({
     nationalPvnetIntraday,
     probabilisticRangeData
   ]);
-  console.log("returning chartData", data);
+
   return data;
 };
 
