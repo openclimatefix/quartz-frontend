@@ -269,7 +269,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <hr className="border-white/50 my-3 mb-5" />
 
-            <div className="flex-1 self-stretch h-[39px] justify-between mb-6 items-start gap-16 flex">
+            <div className="flex-1 self-stretch min-h-[39px] justify-between mb-6 items-start gap-16 flex">
               <ForecastTimeDisplay
                 time={prettyPrintNowTime()}
                 icon={<ClockIcon />}
