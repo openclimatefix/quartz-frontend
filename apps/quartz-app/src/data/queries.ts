@@ -2,6 +2,7 @@
 import { QueryFunction, useQuery } from "@tanstack/react-query";
 import { components, operations, paths } from "../types/schema";
 import client from "./apiClient";
+import { getHistoryStartISO } from "../helpers/historyWindow";
 
 // paths
 export const GET_REGIONS = "/{source}/regions";
@@ -56,6 +57,7 @@ export const getGenerationQuery = (
         query: {
           ...sharedQueryParams,
           resample_minutes: 15,
+          start_datetime_utc: getHistoryStartISO() as any,
         },
       },
       // Add bearer token to headers
@@ -90,6 +92,7 @@ export const getForecastQuery = (
           forecast_horizon,
           forecast_horizon_minutes:
             forecast_horizon === "horizon" ? forecast_horizon_minutes : null,
+          start_datetime_utc: getHistoryStartISO() as any,
         },
       },
       // Add bearer token to headers
