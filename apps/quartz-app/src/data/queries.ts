@@ -2,6 +2,7 @@
 import { QueryFunction, useQuery } from "@tanstack/react-query";
 import { components, operations, paths } from "../types/schema";
 import client from "./apiClient";
+import { getHistoryStartISO } from "../helpers/historyWindow";
 
 // paths
 export const GET_REGIONS = "/{source}/regions";
@@ -46,6 +47,7 @@ export const getGenerationQuery = (
   region: operations["get_historic_timeseries_route__source___region__generation_get"]["parameters"]["path"]["region"]
 ): QueryFunction<components["schemas"]["GetHistoricGenerationResponse"]> => {
   return async ({ meta, signal }) => {
+    const startISO = getHistoryStartISO();
     const { accessToken } = await fetch("/api/token").then((res) => res.json());
     const { data, error } = await client.GET(GET_GENERATION, {
       params: {
@@ -56,6 +58,9 @@ export const getGenerationQuery = (
         query: {
           ...sharedQueryParams,
           resample_minutes: 15,
+          // start of history window for UI
+          // @ts-ignore – schema typing may not include this yet
+          start_datetime_utc: startISO,
         },
       },
       // Add bearer token to headers
@@ -78,6 +83,7 @@ export const getForecastQuery = (
   forecast_horizon_minutes?: number
 ): QueryFunction<components["schemas"]["GetForecastGenerationResponse"]> => {
   return async ({ meta, signal }) => {
+    const startISO = getHistoryStartISO();
     const { accessToken } = await fetch("/api/token").then((res) => res.json());
     const { data, error } = await client.GET(GET_FORECAST, {
       params: {
@@ -90,6 +96,9 @@ export const getForecastQuery = (
           forecast_horizon,
           forecast_horizon_minutes:
             forecast_horizon === "horizon" ? forecast_horizon_minutes : null,
+          // start of history window for UI
+          // @ts-ignore – schema typing may not include this yet
+          start_datetime_utc: startISO,
         },
       },
       // Add bearer token to headers
