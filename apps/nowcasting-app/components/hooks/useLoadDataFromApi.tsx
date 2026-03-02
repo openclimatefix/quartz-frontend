@@ -38,7 +38,7 @@ export const useLoadDataFromApi = <T extends APIResponseType>(
   url: string | null,
   config: SWRConfiguration<T, Error> = {}
 ): SWRResponse<T, Error> => {
-  const uiFlag = url?.includes("?") ? "&UI" : "?UI";
+  const uiFlag = url?.includes("?") ? "&UI=true" : "?UI=true";
   return useSWR<T, Error>(url ? `${url}${uiFlag}` : null, axiosFetcherAuth, {
     refreshInterval: t5min,
     dedupingInterval: t2min,
