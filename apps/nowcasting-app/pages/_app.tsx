@@ -4,6 +4,8 @@ import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import { GoogleTagManager } from "@next/third-parties/google";
 import CustomUserProvider from "../components/auth/CustomUserProvider";
+import { PresenceProvider } from "../components/presence/presenceProvider";
+import { PresenceMetadataBridge } from "../components/presence/presenceMetadataBridge";
 
 function MyApp({ Component, pageProps }: any) {
   return (
@@ -24,8 +26,11 @@ function MyApp({ Component, pageProps }: any) {
           }
         }}
       >
-        <Component {...pageProps} />
-        <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
+        <PresenceProvider>
+          <PresenceMetadataBridge />
+          <Component {...pageProps} />
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
+        </PresenceProvider>
       </SWRConfig>
     </CustomUserProvider>
   );
