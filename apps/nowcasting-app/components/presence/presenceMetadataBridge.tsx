@@ -55,4 +55,6 @@ export function PresenceMetadataBridge() {
     selectedMapRegionIds,
     dashboardMode
   ]);
+
+  return null;
 }
