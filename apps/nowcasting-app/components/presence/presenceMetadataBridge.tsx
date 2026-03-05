@@ -31,7 +31,10 @@ export function PresenceMetadataBridge() {
 
   // Sync app state
   useEffect(() => {
-    client?.setMeta({
+    if (!client) return;
+
+    client.setMeta({
+      domain: window.location.host,
       view,
       aggregation: nationalAggregationLevel,
       visibleLines,
@@ -52,6 +55,4 @@ export function PresenceMetadataBridge() {
     selectedMapRegionIds,
     dashboardMode
   ]);
-
-  return null;
 }

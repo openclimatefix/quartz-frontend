@@ -1,4 +1,5 @@
 export type PresenceMeta = {
+  domain?: string;
   email?: string;
   userHash?: string;
   view?: string;
