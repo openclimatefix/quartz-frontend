@@ -37,7 +37,8 @@ const getForecastChartData = (
     };
   else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: fr.expectedPowerGenerationMegawatts
+      [futureKey]: fr.expectedPowerGenerationMegawatts,
+      [pastKey]: fr.expectedPowerGenerationMegawatts
     };
   else
     return {
