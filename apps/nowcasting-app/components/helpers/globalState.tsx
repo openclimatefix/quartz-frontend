@@ -85,7 +85,7 @@ export type GlobalStateType = {
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
   createGlobalState<GlobalStateType>({
-    activeUnit: ActiveUnit.MW,
+    activeUnit: ActiveUnit.percentage,
     selectedISOTime: get30MinNow(),
     timeNow: get30MinNow(),
     intervals: [],
