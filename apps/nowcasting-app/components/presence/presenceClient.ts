@@ -3,6 +3,7 @@ export type PresenceMeta = {
   email?: string;
   userHash?: string;
   view?: string;
+  mapUnit?: string;
   aggregation?: string;
   visibleLines?: string[];
   nHourForecast?: number;

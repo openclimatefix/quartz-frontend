@@ -14,6 +14,7 @@ export function PresenceMetadataBridge() {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [dashboardMode] = useGlobalState("dashboardMode");
+  const [mapUnit] = useGlobalState("activeUnit");
 
   // Sync user email (swap to userHash below when user IDs are set up)
   useEffect(() => {
@@ -37,6 +38,7 @@ export function PresenceMetadataBridge() {
       domain: window.location.host,
       view,
       aggregation: nationalAggregationLevel,
+      mapUnit,
       visibleLines,
       nHourForecast,
       showNHourView: !!showNHourView,
@@ -49,6 +51,7 @@ export function PresenceMetadataBridge() {
     view,
     nationalAggregationLevel,
     visibleLines,
+    mapUnit,
     nHourForecast,
     showNHourView,
     selectedISOTime,

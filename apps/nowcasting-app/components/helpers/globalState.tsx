@@ -6,7 +6,7 @@ import {
   getBooleanSettingFromCookieStorage
 } from "./cookieStorage";
 import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
-import { NationalAggregation } from "../map/types";
+import { ActiveUnit, NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
 
 export function get30MinNow(offsetMinutes = 0) {
@@ -51,6 +51,7 @@ export function getNext30MinSlot(isoTime: Date) {
 }
 
 export type GlobalStateType = {
+  activeUnit: ActiveUnit;
   selectedISOTime: string;
   timeNow: string;
   intervals: any[];
@@ -84,6 +85,7 @@ export type GlobalStateType = {
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
   createGlobalState<GlobalStateType>({
+    activeUnit: ActiveUnit.MW,
     selectedISOTime: get30MinNow(),
     timeNow: get30MinNow(),
     intervals: [],
