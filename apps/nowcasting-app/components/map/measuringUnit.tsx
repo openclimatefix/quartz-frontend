@@ -36,7 +36,7 @@ const MeasuringUnit = ({
     console.log("sent event to Sentry: aggregation", aggregation);
   };
   const buttonClasses =
-    "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow border-gray-600";
+    "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border-gray-600";
 
   type ButtonProps<T> = {
     id: string;
@@ -54,8 +54,8 @@ const MeasuringUnit = ({
         id={id}
         type="button"
         className={`${buttonClasses}  ${
-          active ? "text-black bg-ocf-yellow" : "text-white bg-black border-r"
-        } ${isLoading ? "cursor-wait" : ""}`}
+          active ? "text-black bg-ocf-yellow" : "text-white bg-black"
+        } ${isLoading ? "cursor-wait" : ""} border-r last:border-r-0`}
       >
         {text}
       </button>
@@ -67,20 +67,20 @@ const MeasuringUnit = ({
       <div className="flex justify-end mr-0">
         <div className="inline-block">
           <MapUIButton<ActiveUnit>
-            id={"UnitButtonMW"}
-            active={activeUnit === ActiveUnit.MW}
-            isLoading={isLoading}
-            onToggle={onToggleUnit}
-            text={"MW"}
-            value={ActiveUnit.MW}
-          />
-          <MapUIButton<ActiveUnit>
             id={"UnitButtonPercentage"}
             active={activeUnit === ActiveUnit.percentage}
             isLoading={isLoading}
             onToggle={onToggleUnit}
             text={"%"}
             value={ActiveUnit.percentage}
+          />
+          <MapUIButton<ActiveUnit>
+            id={"UnitButtonMW"}
+            active={activeUnit === ActiveUnit.MW}
+            isLoading={isLoading}
+            onToggle={onToggleUnit}
+            text={"MW"}
+            value={ActiveUnit.MW}
           />
           <MapUIButton<ActiveUnit>
             id={"UnitButtonCapacity"}

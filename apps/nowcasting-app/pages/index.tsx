@@ -87,7 +87,7 @@ const useGetGspForecast = (selectedTime: string) => {
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
-  const [activeUnit, setActiveUnit] = useState<ActiveUnit>(ActiveUnit.MW);
+  const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const selectedTime = String(DateTime.fromISO(selectedISOTime).toUTC().toISO()).slice(0, 16);
