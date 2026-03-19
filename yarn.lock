@@ -11251,6 +11251,13 @@ next@14.1.0:
     "@next/swc-win32-ia32-msvc" "14.1.0"
     "@next/swc-win32-x64-msvc" "14.1.0"
 
+nextjs-linkedin-insight-tag@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/nextjs-linkedin-insight-tag/-/nextjs-linkedin-insight-tag-0.0.6.tgz#bf6d4531c3dfdeedae16c2233051ba43d32fac2c"
+  integrity sha512-hk3cHpz+1SLbe0hd2nFjUP2AlFmgeDMHHudXGTYrtIvRri/qliFEIpURH7FJWKxQLXm9f1X8B5O20Wvj2wNPCg==
+  dependencies:
+    typescript "^4.9.4"
+
 no-case@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-3.0.4.tgz#d361fd5c9800f558551a8369fc0dcd4662b6124d"
@@ -13899,6 +13906,11 @@ types-ramda@^0.29.4:
   integrity sha512-5PJiW/eiTPyXXBYGZOYGezMl6qj7keBiZheRwfjJZY26QPHsNrjfJnz0mru6oeqqoTHOni893Jfd6zyUXfQRWg==
   dependencies:
     ts-toolbelt "^9.6.0"
+
+typescript@^4.9.4:
+  version "4.9.5"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.5.tgz#095979f9bcc0d09da324d58d03ce8f8374cbe65a"
+  integrity sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==
 
 typescript@^5, typescript@^5.2.2:
   version "5.4.5"
