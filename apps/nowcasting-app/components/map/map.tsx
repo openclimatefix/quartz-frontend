@@ -61,6 +61,7 @@ const Map: FC<IMap> = ({
   const [maps, setMaps] = useGlobalState("maps");
   const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
+  const resetButtonDiv = useRef<HTMLDivElement | null>(null);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
@@ -84,12 +85,26 @@ const Map: FC<IMap> = ({
       console.log("setting map state");
       const currentZoom = map.current?.getZoom() || 0;
       const center = map.current?.getCenter();
+      const currentBearing = map.current?.getBearing() || 0;
+      const currentPitch = map.current?.getPitch() || 0;
 
       setLng(Number(center?.lng.toFixed(4)));
       setLat(Number(center?.lat.toFixed(4)));
       setZoom(Number(currentZoom.toFixed(2)));
 
       setAggregationLevelByCurrentZoom(currentZoom, autozoomRef.current, setAggregation);
+
+      // Check if map has been modified from default state
+      const mapModified =
+        currentZoom !== zoom || // Check if zoom has changed
+        center?.lng.toFixed(4) !== lng.toFixed(4) || // Check if longitude has changed
+        center?.lat.toFixed(4) !== lat.toFixed(4) || // Check if latitude has changed
+        currentBearing.toFixed(2) !== bearing.toFixed(2) || // Check if bearing has changed
+        currentPitch.toFixed(2) !== "0.00"; // Check if pitch has changed
+
+      if (mapModified) {
+        resetButtonDiv.current?.style.setProperty("display", "block");
+      }
     };
 
     if (map.current) return; // initialize map only once
@@ -108,6 +123,31 @@ const Map: FC<IMap> = ({
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });
       map.current.addControl(nav, "bottom-right");
+      map.current.addControl(
+        {
+          onAdd: function (m) {
+            const div = document.createElement("div");
+            div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+            div.style.setProperty("display", "none");
+            div.innerHTML = `<button title="Reset Zoom" style="font-size:24px;">⟳</button>`;
+            div.onclick = () => {
+              m.flyTo({
+                center: [lng, lat],
+                zoom: zoom,
+                pitch: 0,
+                bearing: 0,
+                duration: 1500,
+                essential: true
+              });
+              div.style.setProperty("display", "none");
+            };
+            resetButtonDiv.current = div;
+            return div;
+          },
+          onRemove: function () {}
+        },
+        "bottom-right"
+      );
 
       map.current.on("load", (event) => {
         setIsMapReady(true);
