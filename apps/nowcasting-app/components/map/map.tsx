@@ -86,8 +86,6 @@ const Map: FC<IMap> = ({
       console.log("setting map state");
       const currentZoom = map.current?.getZoom() || 0;
       const center = map.current?.getCenter();
-      const currentBearing = map.current?.getBearing() || 0;
-      const currentPitch = map.current?.getPitch() || 0;
 
       setLng(Number(center?.lng.toFixed(4)));
       setLat(Number(center?.lat.toFixed(4)));
@@ -99,9 +97,7 @@ const Map: FC<IMap> = ({
       const mapModified =
         currentZoom !== zoom || // Check if zoom has changed
         center?.lng.toFixed(4) !== lng.toFixed(4) || // Check if longitude has changed
-        center?.lat.toFixed(4) !== lat.toFixed(4) || // Check if latitude has changed
-        currentBearing.toFixed(2) !== bearing.toFixed(2) || // Check if bearing has changed
-        currentPitch.toFixed(2) !== "0.00"; // Check if pitch has changed
+        center?.lat.toFixed(4) !== lat.toFixed(4); // Check if latitude has changed
 
       if (mapModified) {
         resetButtonDiv.current?.style.setProperty("display", "block");
@@ -116,7 +112,10 @@ const Map: FC<IMap> = ({
         center: [lng, lat],
         boxZoom: false,
         zoom,
-        bearing,
+        bearing: 0,
+        pitch: 0,
+        dragRotate: false,
+        touchPitch: false,
         keyboard: false
       });
       // Updater function to prevent state updates overriding each other in race condition on load
