@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
@@ -10,7 +10,7 @@ type PlayButtonProps = {
 };
 
 const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const { stopTime } = useStopAndResetTime();
   const intervalRef = useRef<any>();
@@ -31,6 +31,12 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
       });
     }, 1000);
   };
+
+  useEffect(() => {
+    if (!isPlaying && intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  }, [isPlaying]);
 
   return (
     <Ui
