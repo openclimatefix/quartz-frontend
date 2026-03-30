@@ -4,6 +4,7 @@ import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState from "../helpers/globalState";
+import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
@@ -129,7 +130,7 @@ const Map: FC<IMap> = ({
             const div = document.createElement("div");
             div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
             div.style.setProperty("display", "none");
-            div.innerHTML = `<button title="Reset Zoom" style="font-size:24px;">⟳</button>`;
+            div.innerHTML = `<button title="Reset Zoom" style="padding:7px;">${ResetIcon()}</button>`;
             div.onclick = () => {
               m.flyTo({
                 center: [lng, lat],
