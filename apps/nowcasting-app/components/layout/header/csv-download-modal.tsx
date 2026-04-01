@@ -3,6 +3,7 @@ import React, { useState } from "react";
 export type CSVColumn =
   | "startDateTime"
   | "endDateTime"
+  | "settlementPeriod"
   | "solarGenerationPvliveInitial"
   | "solarGenerationPvliveUpdated"
   | "solarForecast"
@@ -13,6 +14,7 @@ export type CSVColumn =
 const FIXED_COLUMNS: CSVColumn[] = ["startDateTime", "endDateTime"];
 
 const SELECTABLE_COLUMNS: { id: CSVColumn; label: string }[] = [
+  { id: "settlementPeriod", label: "Settlement Period" },
   { id: "solarGenerationPvliveInitial", label: "PVLive Initial (MW)" },
   { id: "solarGenerationPvliveUpdated", label: "PVLive Updated (MW)" },
   { id: "solarForecast", label: "Solar Forecast (MW)" },

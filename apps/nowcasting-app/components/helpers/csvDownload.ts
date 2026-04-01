@@ -1,10 +1,12 @@
 import { CombinedData } from "../types";
 import { DateTime } from "luxon";
 import { CSVColumn } from "../layout/header/csv-download-modal";
+import { getSettlementPeriodForDate } from "./chartUtils";
 
 interface CSVRow {
   startDateTime: string;
   endDateTime: string;
+  settlementPeriod: number | null;
   solarGenerationPvliveInitial: number | null;
   solarGenerationPvliveUpdated: number | null;
   solarForecast: number | null;
@@ -16,6 +18,7 @@ interface CSVRow {
 const COLUMN_CONFIG: Record<CSVColumn, { key: keyof CSVRow; header: string }> = {
   startDateTime: { key: "startDateTime", header: "Start DateTime" },
   endDateTime: { key: "endDateTime", header: "End DateTime" },
+  settlementPeriod: { key: "settlementPeriod", header: "Settlement Period" },
   solarGenerationPvliveInitial: {
     key: "solarGenerationPvliveInitial",
     header: "Solar Generation PVLive Initial (MW)"
@@ -33,10 +36,12 @@ const COLUMN_CONFIG: Record<CSVColumn, { key: keyof CSVRow; header: string }> = 
 const createEmptyRow = (timestamp: string): CSVRow => {
   const start = DateTime.fromISO(timestamp);
   const end = start.plus({ minutes: 30 });
+  const settlementPeriod = getSettlementPeriodForDate(start);
 
   return {
     startDateTime: start.toISO() || "",
     endDateTime: end.toISO() || "",
+    settlementPeriod,
     solarGenerationPvliveInitial: null,
     solarGenerationPvliveUpdated: null,
     solarForecast: null,
