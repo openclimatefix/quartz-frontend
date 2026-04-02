@@ -1,5 +1,5 @@
-import React, { useRef, useState } from "react";
-import useGlobalState from "../helpers/globalState";
+import React, { useRef, useEffect } from "react";
+import useGlobalState, { get30MinNow } from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
 import Ui from "./ui";
@@ -10,8 +10,9 @@ type PlayButtonProps = {
 };
 
 const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const [view] = useGlobalState("view");
   const { stopTime } = useStopAndResetTime();
   const intervalRef = useRef<any>();
   const pause = () => {
@@ -31,6 +32,18 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
       });
     }, 1000);
   };
+
+  useEffect(() => {
+    if (!isPlaying && intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+  }, [isPlaying]);
+
+  // Pause and reset to "now" when tab changes
+  useEffect(() => {
+    pause();
+    setSelectedISOTime(get30MinNow());
+  }, [view]);
 
   return (
     <Ui

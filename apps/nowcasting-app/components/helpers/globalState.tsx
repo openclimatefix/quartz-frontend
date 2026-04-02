@@ -74,6 +74,7 @@ export type GlobalStateType = {
   dashboardMode: boolean;
   sortBy: SORT_BY;
   autoZoom: boolean;
+  isPlaying: boolean;
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
@@ -108,6 +109,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     lat: 54.70534432,
     zoom: 5,
     autoZoom: true,
+    isPlaying: false,
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },
