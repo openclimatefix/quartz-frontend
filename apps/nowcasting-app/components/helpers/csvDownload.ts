@@ -1,6 +1,6 @@
 import { CombinedData } from "../types";
 import { DateTime } from "luxon";
-import { CSVColumn } from "../layout/header/csv-download-modal";
+import { CSVColumn } from "../layout/header/csvDownloadModal";
 import { getSettlementPeriodForDate } from "./chartUtils";
 
 interface CSVRow {

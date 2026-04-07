@@ -9,7 +9,7 @@ import { ExternalLinkIcon, DownloadIcon } from "../../icons/icons";
 import useGlobalState from "../../helpers/globalState";
 import { CombinedData } from "../../types";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
-import { CSVDownloadModal, CSVColumn } from "./csv-download-modal";
+import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
 
 type HeaderLinkProps = {
   url: string;
@@ -159,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
         <div className="flex items-center gap-2">
-          {isLoggedIn && combinedData && (
+          {isLoggedIn && combinedData && view !== VIEWS.SOLAR_SITES && (
             <button
               onClick={() => setShowDownloadModal(true)}
               title="Download CSV"
