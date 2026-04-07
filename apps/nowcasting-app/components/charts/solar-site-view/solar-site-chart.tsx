@@ -1,8 +1,7 @@
 import React, { FC } from "react";
 import RemixLine from "../remix-line";
-import { AGGREGATION_LEVELS, SITES_API_PREFIX } from "../../../constant";
+import { AGGREGATION_LEVELS } from "../../../constant";
 import useGlobalState from "../../helpers/globalState";
-import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 import {
   convertISODateStringToLondonTime,
   formatISODateString,
@@ -16,8 +15,7 @@ import {
   CombinedSitesData,
   LoadingState,
   Site,
-  SitesEndpointStates,
-  SolarStatus
+  SitesEndpointStates
 } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
@@ -35,7 +33,6 @@ const SolarSiteChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedSitesData, aggregatedSitesData, className }) => {
-  const { data: sitesStatus } = useLoadDataFromApi<SolarStatus>(`${SITES_API_PREFIX}/api_status`);
   const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
   const [visibleLines] = useGlobalState("visibleLines");
   const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
@@ -239,11 +236,6 @@ const SolarSiteChart: FC<{
   };
   return (
     <div className={`flex flex-col flex-1 ${className || ""}`}>
-      {!sitesStatus || sitesStatus?.status === "ok" ? null : (
-        <div className="text-white text-m px-4 py-2" style={{ backgroundColor: "#48B0DF" }}>
-          <p>{sitesStatus?.message}</p>
-        </div>
-      )}
       <div className="flex-1 flex flex-col">
         <div className="flex flex-col flex-1 relative">
           <div className="flex content-between bg-ocf-gray-800 mb-4">
