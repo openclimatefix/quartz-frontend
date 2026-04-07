@@ -39,10 +39,9 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
     }
   }, [isPlaying]);
 
-  // Pause and reset to "now" when tab changes
+  // Pause when tab changes
   useEffect(() => {
     pause();
-    setSelectedISOTime(get30MinNow());
   }, [view]);
 
   return (

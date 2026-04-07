@@ -1,9 +1,10 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import RemixLine from "../remix-line";
-import { AGGREGATION_LEVELS } from "../../../constant";
+import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
 import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import {
   convertISODateStringToLondonTime,
+  convertToLocaleDateString,
   formatISODateString,
   getRoundedTickBoundary
 } from "../../helpers/utils";
@@ -51,6 +52,18 @@ const SolarSiteChart: FC<{
     pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
+
+  const [view] = useGlobalState("view");
+  useEffect(() => {
+    if (view === VIEWS.SOLAR_SITES && chartData?.length) {
+      const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
+        .getTime()
+        .toString();
+      if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
+        setSelectedISOTime(get30MinNow());
+      }
+    }
+  }, [view, chartData, selectedTime, setSelectedISOTime]);
 
   const getSelectedSitesData = (
     sitesData: Site[],
