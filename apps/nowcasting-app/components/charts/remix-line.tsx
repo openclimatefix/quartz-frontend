@@ -823,6 +823,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           const value = data[key];
                           if (key === "DELTA" && !deltaView) return null;
                           if (typeof value !== "number") return null;
+                          // At the "now" boundary both PAST_ and future keys are set — skip the PAST_ duplicate
+                          if (key.startsWith("PAST_") && data[key.slice(5)] !== undefined)
+                            return null;
+                          if (
+                            key === "N_HOUR_PAST_FORECAST" &&
+                            data["N_HOUR_FORECAST"] !== undefined
+                          )
+                            return null;
                           if (deltaView && key === "GENERATION" && data["GENERATION_UPDATED"] >= 0)
                             return null;
                           if (

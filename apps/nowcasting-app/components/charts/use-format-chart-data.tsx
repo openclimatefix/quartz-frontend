@@ -220,7 +220,7 @@ const useFormatChartData = ({
 
       // Add settlement period and seasonal norm data
       for (const key of Object.keys(chartMap)) {
-        const date = DateTime.fromISO(key);
+        const date = DateTime.fromISO(key).toUTC();
         const settlementPeriod = getSettlementPeriodForDate(date);
         chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
         if (!gsp) {

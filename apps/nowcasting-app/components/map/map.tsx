@@ -4,6 +4,7 @@ import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState from "../helpers/globalState";
+import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
@@ -61,6 +62,7 @@ const Map: FC<IMap> = ({
   const [maps, setMaps] = useGlobalState("maps");
   const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
+  const resetButtonDiv = useRef<HTMLDivElement | null>(null);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
@@ -90,6 +92,16 @@ const Map: FC<IMap> = ({
       setZoom(Number(currentZoom.toFixed(2)));
 
       setAggregationLevelByCurrentZoom(currentZoom, autozoomRef.current, setAggregation);
+
+      // Check if map has been modified from default state
+      const mapModified =
+        currentZoom !== zoom || // Check if zoom has changed
+        center?.lng.toFixed(4) !== lng.toFixed(4) || // Check if longitude has changed
+        center?.lat.toFixed(4) !== lat.toFixed(4); // Check if latitude has changed
+
+      if (mapModified) {
+        resetButtonDiv.current?.style.setProperty("display", "block");
+      }
     };
 
     if (map.current) return; // initialize map only once
@@ -100,7 +112,10 @@ const Map: FC<IMap> = ({
         center: [lng, lat],
         boxZoom: false,
         zoom,
-        bearing,
+        bearing: 0,
+        pitch: 0,
+        dragRotate: false,
+        touchPitch: false,
         keyboard: false
       });
       // Updater function to prevent state updates overriding each other in race condition on load
@@ -108,6 +123,31 @@ const Map: FC<IMap> = ({
 
       const nav = new mapboxgl.NavigationControl({ showCompass: false });
       map.current.addControl(nav, "bottom-right");
+      map.current.addControl(
+        {
+          onAdd: function (m) {
+            const div = document.createElement("div");
+            div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
+            div.style.setProperty("display", "none");
+            div.innerHTML = `<button title="Reset Zoom" style="padding:7px;">${ResetIcon()}</button>`;
+            div.onclick = () => {
+              m.flyTo({
+                center: [lng, lat],
+                zoom: zoom,
+                pitch: 0,
+                bearing: 0,
+                duration: 1500,
+                essential: true
+              });
+              div.style.setProperty("display", "none");
+            };
+            resetButtonDiv.current = div;
+            return div;
+          },
+          onRemove: function () {}
+        },
+        "bottom-right"
+      );
 
       map.current.on("load", (event) => {
         setIsMapReady(true);
