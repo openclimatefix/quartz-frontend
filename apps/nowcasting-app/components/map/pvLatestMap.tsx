@@ -6,13 +6,7 @@ import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
-import {
-  CombinedData,
-  CombinedErrors,
-  CombinedLoading,
-  CombinedValidating,
-  SitePvForecast
-} from "../types";
+import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import {
@@ -24,7 +18,7 @@ import {
 import { components } from "../../types/quartz-api";
 import {
   generateGeoJsonForecastData,
-  generateNetherlandsGeoJsonForecastData
+  generateNetherlandsRegionalGeoJsonForecastData
 } from "../helpers/data";
 import boundariesData from "../../data/ng_constraint_boundaries.json";
 import dynamic from "next/dynamic";
@@ -104,10 +98,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
   const forecastError = combinedErrors?.allGspForecastError;
 
-  const nlForecastData = useMemo(() => {
-    return combinedData?.nlForecastData as SitePvForecast;
-  }, [combinedData?.nlForecastData]);
-
   // Show loading spinner when selectedISOTime changes
   useEffect(() => {
     if (!combinedData?.allGspForecastData) return;
@@ -176,8 +166,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     // on value 0 the opacity will be 0
     0,
     0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : 16000000,
+    // on value maximum the opacity will be 1 (capacity of largest NL province ~5 GW in kW)
+    isNormalized ? 1 : 5000000,
     1
   ];
 
@@ -199,8 +189,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   ]);
 
   const generatedNetherlandsGeoJsonForecastData = useMemo(() => {
-    return generateNetherlandsGeoJsonForecastData(nlForecastData, selectedISOTime);
-  }, [nlForecastData, selectedISOTime]);
+    return generateNetherlandsRegionalGeoJsonForecastData(
+      combinedData?.nlRegionalForecastData,
+      selectedISOTime
+    );
+  }, [combinedData?.nlRegionalForecastData, selectedISOTime]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -439,9 +432,66 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         source: "nlSource",
         layout: { visibility: "visible" },
         paint: {
-          "fill-color": "#ffcc2d",
+          "fill-color": theme.extend.colors["ocf-yellow"].DEFAULT || "#FFD053",
           "fill-opacity": getNLFillOpacity(selectedDataName, isNormalized)
         }
+      });
+
+      map.on(
+        "mousemove",
+        "nl-forecast",
+        throttle(
+          (e) => {
+            map.getCanvas().style.cursor = "pointer";
+            const currentActiveUnit = getActiveUnitFromMap(map);
+            const properties = e.features?.[0].properties;
+            if (!properties) return;
+
+            const toMW = (kw: number) =>
+              (kw / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+            let forecastValue = "";
+            let unit = "";
+            if (currentActiveUnit === ActiveUnit.percentage) {
+              forecastValue = (
+                Number(properties?.[SelectedData.expectedPowerGenerationNormalized] || 0) * 100
+              ).toFixed(0);
+              unit = "%";
+            } else {
+              forecastValue = toMW(
+                Number(properties?.[SelectedData.expectedPowerGenerationMegawatts] || 0)
+              );
+              unit = "MW";
+            }
+
+            const capacityMW = toMW(Number(properties?.[SelectedData.installedCapacityMw] || 0));
+
+            const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+              <div class="flex justify-between gap-3 items-center mb-1">
+                <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
+              </div>
+              <div class="flex justify-between items-center">
+                <div class="flex flex-col text-xs">
+                  <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
+                  <div><span>${capacityMW}</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
+                </div>
+                <div class="flex flex-col text-xs items-end">
+                  <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Forecast</span>
+                  <div><span class="text-ocf-yellow">${forecastValue}</span> <span class="text-2xs text-mapbox-black-300">${unit}</span></div>
+                </div>
+              </div>
+            </div>`;
+
+            popup.setHTML(popupContent).trackPointer().addTo(map);
+          },
+          32,
+          {}
+        )
+      );
+
+      map.on("mouseleave", "nl-forecast", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
       });
     } else {
       if (generatedNetherlandsGeoJsonForecastData && nlSource) {

@@ -40,6 +40,7 @@ import {
 import { ActiveUnit, NationalAggregation } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
+import netherlandsSitesData from "../data/netherlands_sites.json";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 import SitesMap from "../components/map/sitesMap";
 import { useAggregateSitesDataForTimestamp } from "../components/hooks/useAggregateSitesDataForTimestamp";
@@ -84,6 +85,12 @@ const useGetGspForecast = (selectedTime: string) => {
     allGspForecastFutureError
   };
 };
+const nlRegionalUuids = new Set(
+  netherlandsSitesData.site_list
+    .filter((s) => s.client_site_name !== "nl_national")
+    .map((s) => s.site_uuid)
+);
+
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
@@ -189,6 +196,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [lat, lng, zoom]);
 
   const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
+  // Get time and round down to start of 6h window:
+  const nlForecastStartTime = DateTime.now()
+    .startOf("hour")
+    .minus({ days: 2, hours: 6 % DateTime.now().hour })
+    .toUTC()
+    .toISO();
 
   // Sites API data
   const {
@@ -214,7 +227,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: sitePvForecastValidating,
     error: sitePvForecastError
   } = useLoadDataFromApi<SitesPvForecast>(
-    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}&start_utc=${nlForecastStartTime}`,
     {
       // isPaused: () => {
       //   console.log(
@@ -616,6 +629,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     return sitePvForecastData?.find((d) => d.site_uuid === "d1cfe577-aad8-4ffd-b238-1c7799fbf5d1");
   }, [sitePvForecastData]);
 
+  const nlRegionalForecastData = useMemo(() => {
+    return sitePvForecastData?.filter((d) => nlRegionalUuids.has(d.site_uuid)) || [];
+  }, [sitePvForecastData]);
+
   const combinedData: CombinedData = {
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
@@ -630,7 +647,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     allGspForecastData,
     allGspRealData,
     gspDeltas,
-    nlForecastData
+    nlForecastData,
+    nlRegionalForecastData
   };
   const combinedLoading: CombinedLoading = useMemo(
     () => ({
