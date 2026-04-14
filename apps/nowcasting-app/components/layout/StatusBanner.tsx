@@ -21,8 +21,8 @@ const StatusBanner = ({ view, solarStatus, sitesStatus }: StatusBannerProps) => 
   }
 
   return (
-    <div className="text-white text-m px-4 py-2" style={{ backgroundColor: "#48B0DF" }}>
-      <p>{status.message}</p>
+    <div className="bg-mapbox-black text-ocf-gray-600 text-center px-4 py-2">
+      <p>⚠️&nbsp;{solarStatus?.message}</p>
     </div>
   );
 };
