@@ -188,6 +188,106 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     });
   }, [lat, lng, zoom]);
 
+  const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
+
+  // Sites API data
+  const {
+    data: allSitesData,
+    isLoading: allSitesLoading,
+    isValidating: allSitesValidating,
+    error: allSitesError
+  } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites`, {
+    isPaused: () => {
+      console.log("Sites API data paused?", !sitesViewSelected);
+      return false;
+    }
+  });
+  const slicedSitesData = useMemo(
+    () => allSitesData?.site_list.slice(0, 100) || [],
+    [allSitesData]
+  );
+  const siteUuids = slicedSitesData.map((site) => site.site_uuid);
+  const siteUuidsString = siteUuids?.join(",") || "";
+  const {
+    data: sitePvForecastData,
+    isLoading: sitePvForecastLoading,
+    isValidating: sitePvForecastValidating,
+    error: sitePvForecastError
+  } = useLoadDataFromApi<SitesPvForecast>(
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+    {
+      // isPaused: () => {
+      //   console.log(
+      //     "Sites Forecast API data paused",
+      //     !siteUuidsString?.length || !sitesViewSelected
+      //   );
+      //   return !siteUuidsString?.length;
+      //   // return !siteUuidsString?.length || !sitesViewSelected;
+      // }
+    }
+  );
+
+  const {
+    data: sitesPvActualData,
+    isLoading: sitePvActualLoading,
+    isValidating: sitePvActualValidating,
+    error: sitePvActualError
+  } = useLoadDataFromApi<SitesPvActual>(
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    {
+      // isPaused: () => {
+      //   console.log(
+      //     "Sites Actual API data paused",
+      //     !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
+      //   );
+      //   return !siteUuidsString?.length;
+      //   // return !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES);
+      // }
+    }
+  );
+
+  const sitesData: CombinedSitesData = {
+    allSitesData: slicedSitesData,
+    sitesPvForecastData: useMemo(
+      () => sitePvForecastData?.filter((d): d is SitePvForecast => !!d) || [],
+      [sitePvForecastData]
+    ),
+    sitesPvActualData: useMemo(
+      () => sitesPvActualData?.filter((d): d is SitePvActual => !!d) || [],
+      [sitesPvActualData]
+    )
+  };
+
+  const sitesCombinedLoading = useMemo(
+    () => ({
+      allSitesLoading,
+      sitePvForecastLoading,
+      sitePvActualLoading
+    }),
+    [allSitesLoading, sitePvForecastLoading, sitePvActualLoading]
+  );
+
+  const sitesCombinedValidating = useMemo(
+    () => ({
+      allSitesValidating,
+      sitePvForecastValidating,
+      sitePvActualValidating
+    }),
+    [allSitesValidating, sitePvForecastValidating, sitePvActualValidating]
+  );
+
+  const sitesCombinedErrors = {
+    allSitesError,
+    sitesPvForecastError: sitePvForecastError,
+    sitesPvActualError: sitePvActualError
+  };
+
+  const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
+
+  /////////////////////////////
+  // UK National / GSP Data
+  /////////////////////////////
+
   const {
     data: nationalForecastData,
     isLoading: nationalForecastLoading,
@@ -513,7 +613,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   ]);
 
   const nlForecastData = useMemo(() => {
-    return sitePvForecastData?.find((d) => d.site_uuid === "22c63590-8065-4237-b665-42c6a4fc22cc");
+    return sitePvForecastData?.find((d) => d.site_uuid === "d1cfe577-aad8-4ffd-b238-1c7799fbf5d1");
   }, [sitePvForecastData]);
 
   const combinedData: CombinedData = {
@@ -581,102 +681,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     allGspForecastError,
     allGspRealError: allGspActualError
   };
-
-  const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
-
-  // Sites API data
-  const {
-    data: allSitesData,
-    isLoading: allSitesLoading,
-    isValidating: allSitesValidating,
-    error: allSitesError
-  } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites`, {
-    isPaused: () => {
-      console.log("Sites API data paused?", !sitesViewSelected);
-      return false;
-    }
-  });
-  const slicedSitesData = useMemo(
-    () => allSitesData?.site_list.slice(0, 100) || [],
-    [allSitesData]
-  );
-  const siteUuids = slicedSitesData.map((site) => site.site_uuid);
-  const siteUuidsString = siteUuids?.join(",") || "";
-  const {
-    data: sitePvForecastData,
-    isLoading: sitePvForecastLoading,
-    isValidating: sitePvForecastValidating,
-    error: sitePvForecastError
-  } = useLoadDataFromApi<SitesPvForecast>(
-    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
-    {
-      // isPaused: () => {
-      //   console.log(
-      //     "Sites Forecast API data paused",
-      //     !siteUuidsString?.length || !sitesViewSelected
-      //   );
-      //   return !siteUuidsString?.length;
-      //   // return !siteUuidsString?.length || !sitesViewSelected;
-      // }
-    }
-  );
-
-  const {
-    data: sitesPvActualData,
-    isLoading: sitePvActualLoading,
-    isValidating: sitePvActualValidating,
-    error: sitePvActualError
-  } = useLoadDataFromApi<SitesPvActual>(
-    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
-    {
-      // isPaused: () => {
-      //   console.log(
-      //     "Sites Actual API data paused",
-      //     !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
-      //   );
-      //   return !siteUuidsString?.length;
-      //   // return !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES);
-      // }
-    }
-  );
-
-  const sitesData: CombinedSitesData = {
-    allSitesData: slicedSitesData,
-    sitesPvForecastData: useMemo(
-      () => sitePvForecastData?.filter((d): d is SitePvForecast => !!d) || [],
-      [sitePvForecastData]
-    ),
-    sitesPvActualData: useMemo(
-      () => sitesPvActualData?.filter((d): d is SitePvActual => !!d) || [],
-      [sitesPvActualData]
-    )
-  };
-
-  const sitesCombinedLoading = useMemo(
-    () => ({
-      allSitesLoading,
-      sitePvForecastLoading,
-      sitePvActualLoading
-    }),
-    [allSitesLoading, sitePvForecastLoading, sitePvActualLoading]
-  );
-
-  const sitesCombinedValidating = useMemo(
-    () => ({
-      allSitesValidating,
-      sitePvForecastValidating,
-      sitePvActualValidating
-    }),
-    [allSitesValidating, sitePvForecastValidating, sitePvActualValidating]
-  );
-
-  const sitesCombinedErrors = {
-    allSitesError,
-    sitesPvForecastError: sitePvForecastError,
-    sitesPvActualError: sitePvActualError
-  };
-
-  const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
 
   const combinedErrorsLength = Object.values(combinedErrors).filter((e) => !!e).length;
   // Watch and update loading state
