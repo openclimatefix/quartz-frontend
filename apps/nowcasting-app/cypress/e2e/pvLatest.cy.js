@@ -62,40 +62,38 @@ describe("Load the page", () => {
     cy.location("href").should("equal", "http://localhost:3002/");
     // TODO: Add tests for the PV Forecast page elements, probably with mocked data.
     // national chart header
-    cy.get('[data-test="national-chart-header"]').contains("National").should("exist");
-    cy.get('[data-test="pv-ocf-forecast-headline-figure"]')
-      .contains("National")
-      .should("be.visible");
-    cy.get('[data-test="forecast-headline-figures"]').siblings().first().should("exist").click();
-    cy.get('[data-test="forecast-headline-figures"]').siblings().next().should("exist");
-    cy.get('[data-test="forecast-headline-figures"]').siblings().first().trigger("mouseover");
-    cy.get('[data-test="forecast-headline-figures"]')
+    cy.get('[data-cy="national-chart-header"]').contains("National").should("exist");
+    cy.get('[data-cy="pv-ocf-forecast-headline-figure"]').contains("National").should("be.visible");
+    cy.get('[data-cy="forecast-headline-figures"]').siblings().first().should("exist").click();
+    cy.get('[data-cy="forecast-headline-figures"]').siblings().next().should("exist");
+    cy.get('[data-cy="forecast-headline-figures"]').siblings().first().trigger("mouseover");
+    cy.get('[data-cy="forecast-headline-figures"]')
       .siblings()
       .first()
       .invoke("mouseover")
       .should("contain", "PV Live / OCF Forecast");
-    cy.get('[data-test="forecast-headline-figures"]')
+    cy.get('[data-cy="forecast-headline-figures"]')
       .siblings()
       .first()
       .trigger("mouseout")
       .should("not.contain", "PV Live / OCF Forecast");
-    cy.get('[data-test="forecast-headline-figures"]')
+    cy.get('[data-cy="forecast-headline-figures"]')
       .siblings()
       .next()
       .trigger("mouseover")
       .contains("Next OCF Forecast");
-    cy.get('[data-test="forecast-headline-figures"]')
+    cy.get('[data-cy="forecast-headline-figures"]')
       .siblings()
       .next()
       .trigger("mouseout")
       .should("not.contain", "Next OCF Forecast");
     // national chart play button
     // play icon visible
-    // cy.get("data-test=national-chart-play-button").should("exist", "be.visible");
+    // cy.get("data-cy=national-chart-play-button").should("exist", "be.visible");
     // // pause icon not visible
     // // play icon visible
-    // cy.get("data-test=national-chart-play-button").should("exist", "be.visible").click();
-    // cy.get("data-test=national-chart-play-button").should("exist", "be.visible").click();
+    // cy.get("data-cy=national-chart-play-button").should("exist", "be.visible").click();
+    // cy.get("data-cy=national-chart-play-button").should("exist", "be.visible").click();
 
     // national chart
     // gsp chart header

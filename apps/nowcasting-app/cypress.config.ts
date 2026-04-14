@@ -22,7 +22,13 @@ export default defineConfig({
 
   e2e: {
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      on("before:browser:launch", (browser: any, launchOptions) => {
+        if (browser.name === "chromium" || browser.family === "chromium") {
+          launchOptions.args = launchOptions.args.filter((arg) => arg !== "--disable-gpu");
+          launchOptions.args.push("--ignore-gpu-blacklist");
+          return launchOptions;
+        }
+      });
     }
   }
 });
