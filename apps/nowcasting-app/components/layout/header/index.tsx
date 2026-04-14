@@ -95,6 +95,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const canDownloadCsv = Boolean(isLoggedIn && combinedData && view !== VIEWS.SOLAR_SITES);
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
     downloadNationalCsv(combinedData, selectedColumns, nHourForecast);
@@ -160,7 +161,7 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
         <div className="flex items-center gap-2">
-          {isLoggedIn && combinedData && view !== VIEWS.SOLAR_SITES && (
+          {canDownloadCsv && (
             <button
               onClick={() => setShowDownloadModal(true)}
               title="Download CSV"
@@ -169,7 +170,14 @@ const Header: React.FC<HeaderProps> = ({
               <DownloadIcon />
             </button>
           )}
-          <div className="py-1">{isLoggedIn && <ProfileDropDown />}</div>
+          <div className="py-1">
+            {isLoggedIn && (
+              <ProfileDropDown
+                canDownloadCsv={canDownloadCsv}
+                onDownloadCsv={() => setShowDownloadModal(true)}
+              />
+            )}
+          </div>
         </div>
       </header>
 

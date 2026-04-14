@@ -14,9 +14,12 @@ import {
 } from "../../helpers/cookieStorage";
 const { version } = pkg;
 
-interface IProfileDropDown {}
+interface IProfileDropDown {
+  canDownloadCsv?: boolean;
+  onDownloadCsv?: () => void;
+}
 
-const ProfileDropDown = ({}: IProfileDropDown) => {
+const ProfileDropDown = ({ canDownloadCsv = false, onDownloadCsv }: IProfileDropDown) => {
   const { user } = useUser();
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
@@ -137,6 +140,30 @@ const ProfileDropDown = ({}: IProfileDropDown) => {
               </div>
             )}
           </Menu.Item>
+
+          {canDownloadCsv && (
+            <>
+              <div className="w-full border-t border-gray-300" />
+              <Menu.Item>
+                {({ active }) => (
+                  <div
+                    className={classNames(
+                      active ? "bg-gray-100" : "",
+                      "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                    )}
+                  >
+                    <button
+                      id={"UserMenu-DownloadCsvBtn"}
+                      onClick={onDownloadCsv}
+                      className="ml-1 text-sm font-medium text-ocf-black-600"
+                    >
+                      {`Download CSV`}
+                    </button>
+                  </div>
+                )}
+              </Menu.Item>
+            </>
+          )}
 
           <div className="w-full border-t border-gray-300" />
 
