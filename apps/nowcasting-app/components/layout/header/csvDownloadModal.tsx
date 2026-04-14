@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { getNHourForecastLabel } from "../../helpers/csvDownload";
+import { VIEWS } from "../../../constant";
 
 export type CSVColumn =
   | "startDateTime"
@@ -9,7 +11,8 @@ export type CSVColumn =
   | "solarForecast"
   | "solarForecastP10"
   | "solarForecastP90"
-  | "nForecast";
+  | "nForecast"
+  | "delta";
 
 const FIXED_COLUMNS: CSVColumn[] = ["startDateTime", "endDateTime"];
 
@@ -20,19 +23,51 @@ const SELECTABLE_COLUMNS: { id: CSVColumn; label: string }[] = [
   { id: "solarForecast", label: "Solar Forecast (MW)" },
   { id: "solarForecastP10", label: "Forecast P10 (MW)" },
   { id: "solarForecastP90", label: "Forecast P90 (MW)" },
-  { id: "nForecast", label: "N Forecast (MW)" }
+  { id: "nForecast", label: "N Forecast (MW)" },
+  { id: "delta", label: "Delta (MW)" }
 ];
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onDownload: (cols: CSVColumn[]) => void;
+  nHourForecast: number;
+  view: VIEWS;
 }
 
-export const CSVDownloadModal: React.FC<Props> = ({ isOpen, onClose, onDownload }) => {
-  const allSelectableIds = SELECTABLE_COLUMNS.map((c) => c.id);
+export const CSVDownloadModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  onDownload,
+  nHourForecast,
+  view
+}) => {
+  const selectableColumns = useMemo(
+    () =>
+      SELECTABLE_COLUMNS.map((column) =>
+        column.id === "nForecast"
+          ? { ...column, label: `${getNHourForecastLabel(nHourForecast)} (MW)` }
+          : column
+      ),
+    [nHourForecast]
+  );
+
+  const availableSelectableColumns = useMemo(
+    () => selectableColumns.filter((column) => column.id !== "delta" || view === VIEWS.DELTA),
+    [selectableColumns, view]
+  );
+
+  const allSelectableIds = useMemo(
+    () => availableSelectableColumns.map((column) => column.id),
+    [availableSelectableColumns]
+  );
 
   const [selected, setSelected] = useState<CSVColumn[]>(allSelectableIds);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelected(allSelectableIds);
+  }, [allSelectableIds, isOpen]);
 
   const toggle = (id: CSVColumn) =>
     setSelected((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
@@ -47,7 +82,8 @@ export const CSVDownloadModal: React.FC<Props> = ({ isOpen, onClose, onDownload 
 
   if (!isOpen) return null;
 
-  const allSelected = selected.length === allSelectableIds.length;
+  const allSelected =
+    allSelectableIds.length > 0 && allSelectableIds.every((id) => selected.includes(id));
 
   return (
     <>
@@ -62,14 +98,22 @@ export const CSVDownloadModal: React.FC<Props> = ({ isOpen, onClose, onDownload 
           <div className="p-4 space-y-3">
             <label className="flex items-center gap-3 font-semibold border-b pb-2 cursor-pointer">
               <input type="checkbox" checked={allSelected} onChange={toggleAll} />
-              Select All
+              {allSelected ? "Deselect All" : "Select All"}
             </label>
 
-            {SELECTABLE_COLUMNS.map((col) => (
-              <label key={col.id} className="flex items-center gap-3 cursor-pointer">
+            {selectableColumns.map((col) => (
+              <label
+                key={col.id}
+                className={`flex items-center gap-3 ${
+                  col.id === "delta" && view !== VIEWS.DELTA
+                    ? "cursor-not-allowed text-gray-400"
+                    : "cursor-pointer"
+                }`}
+              >
                 <input
                   type="checkbox"
                   checked={selected.includes(col.id)}
+                  disabled={col.id === "delta" && view !== VIEWS.DELTA}
                   onChange={() => toggle(col.id)}
                 />
                 {col.label}

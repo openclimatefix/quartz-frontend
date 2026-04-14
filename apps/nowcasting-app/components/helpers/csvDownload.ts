@@ -9,13 +9,18 @@ interface CSVRow {
   settlementPeriod: number | null;
   solarGenerationPvliveInitial: number | null;
   solarGenerationPvliveUpdated: number | null;
+  delta: number | null;
   solarForecast: number | null;
   solarForecastP10: number | null;
   solarForecastP90: number | null;
   nForecast: number | null;
 }
 
-const COLUMN_CONFIG: Record<CSVColumn, { key: keyof CSVRow; header: string }> = {
+export const getNHourForecastLabel = (nHourForecast: number) => `${nHourForecast}-hour forecast`;
+
+const getColumnConfig = (
+  nHourForecast: number
+): Record<CSVColumn, { key: keyof CSVRow; header: string }> => ({
   startDateTime: { key: "startDateTime", header: "Start DateTime" },
   endDateTime: { key: "endDateTime", header: "End DateTime" },
   settlementPeriod: { key: "settlementPeriod", header: "Settlement Period" },
@@ -27,11 +32,15 @@ const COLUMN_CONFIG: Record<CSVColumn, { key: keyof CSVRow; header: string }> = 
     key: "solarGenerationPvliveUpdated",
     header: "Solar Generation PVLive Updated (MW)"
   },
+  delta: { key: "delta", header: "Delta (MW)" },
   solarForecast: { key: "solarForecast", header: "Solar Forecast (MW)" },
   solarForecastP10: { key: "solarForecastP10", header: "Solar Forecast P10 (MW)" },
   solarForecastP90: { key: "solarForecastP90", header: "Solar Forecast P90 (MW)" },
-  nForecast: { key: "nForecast", header: "N Forecast (MW)" }
-};
+  nForecast: {
+    key: "nForecast",
+    header: `${getNHourForecastLabel(nHourForecast)} (MW)`
+  }
+});
 
 const createEmptyRow = (timestamp: string): CSVRow => {
   const start = DateTime.fromISO(timestamp);
@@ -44,6 +53,7 @@ const createEmptyRow = (timestamp: string): CSVRow => {
     settlementPeriod,
     solarGenerationPvliveInitial: null,
     solarGenerationPvliveUpdated: null,
+    delta: null,
     solarForecast: null,
     solarForecastP10: null,
     solarForecastP90: null,
@@ -60,7 +70,8 @@ const getOrCreateRow = (map: Map<string, CSVRow>, ts: string): CSVRow => {
 
 export const downloadNationalCsv = (
   combinedData: CombinedData | null,
-  selectedColumns: CSVColumn[]
+  selectedColumns: CSVColumn[],
+  nHourForecast: number
 ) => {
   if (!combinedData) return;
 
@@ -82,6 +93,12 @@ export const downloadNationalCsv = (
       : null;
   });
 
+  const updateRowDelta = (row: CSVRow) => {
+    const actualMw = row.solarGenerationPvliveUpdated ?? row.solarGenerationPvliveInitial;
+    row.delta =
+      actualMw !== null && row.solarForecast !== null ? actualMw - row.solarForecast : null;
+  };
+
   // Forecast
   combinedData.nationalForecastData?.forEach((entry) => {
     const row = getOrCreateRow(dataByTimestamp, entry.targetTime);
@@ -96,12 +113,14 @@ export const downloadNationalCsv = (
     row.nForecast = entry.expectedPowerGenerationMegawatts;
   });
 
+  dataByTimestamp.forEach((row) => updateRowDelta(row));
+
   // sort + build rows
   const csvRows = Array.from(dataByTimestamp.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, row]) => row);
 
-  const csv = generateCsv(csvRows, selectedColumns);
+  const csv = generateCsv(csvRows, selectedColumns, nHourForecast);
 
   // download
   const blob = new Blob([csv], { type: "text/csv" });
@@ -119,7 +138,8 @@ export const downloadNationalCsv = (
   URL.revokeObjectURL(url);
 };
 
-function generateCsv(rows: CSVRow[], selectedColumns: CSVColumn[]): string {
+function generateCsv(rows: CSVRow[], selectedColumns: CSVColumn[], nHourForecast: number): string {
+  const COLUMN_CONFIG = getColumnConfig(nHourForecast);
   const headers = selectedColumns.map((col) => COLUMN_CONFIG[col].header);
 
   const lines = rows.map((row) =>

@@ -94,9 +94,10 @@ const Header: React.FC<HeaderProps> = ({
   combinedData = null
 }) => {
   const [showDownloadModal, setShowDownloadModal] = useState(false);
+  const [nHourForecast] = useGlobalState("nHourForecast");
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
-    downloadNationalCsv(combinedData, selectedColumns);
+    downloadNationalCsv(combinedData, selectedColumns, nHourForecast);
   };
 
   return (
@@ -176,6 +177,8 @@ const Header: React.FC<HeaderProps> = ({
         isOpen={showDownloadModal}
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleDownload}
+        nHourForecast={nHourForecast}
+        view={view}
       />
     </>
   );
