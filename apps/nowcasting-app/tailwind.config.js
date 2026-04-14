@@ -217,6 +217,7 @@ module.exports = {
     "bg-ocf-yellow/70",
     "bg-ocf-yellow/80",
     "bg-ocf-yellow/90",
+    "bg-ocf-yellow/95",
     "bg-ocf-yellow/100"
   ],
   plugins: [

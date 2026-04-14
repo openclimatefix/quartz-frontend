@@ -166,8 +166,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     // on value 0 the opacity will be 0
     0,
     0,
-    // on value maximum the opacity will be 1 (capacity of largest NL province ~5 GW in kW)
-    isNormalized ? 1 : 5000000,
+    // on value maximum the opacity will be 1 (province-scale, aligned with UK zone/DNO view)
+    isNormalized ? 1 : 5000,
     1
   ];
 
@@ -447,8 +447,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             const properties = e.features?.[0].properties;
             if (!properties) return;
 
-            const toMW = (kw: number) =>
-              (kw / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 });
+            const toMW = (mw: number) => mw.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
             let forecastValue = "";
             let unit = "";
