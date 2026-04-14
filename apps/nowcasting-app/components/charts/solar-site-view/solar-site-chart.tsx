@@ -55,15 +55,13 @@ const SolarSiteChart: FC<{
 
   const [view] = useGlobalState("view");
   useEffect(() => {
-    if (view === VIEWS.SOLAR_SITES && chartData?.length) {
-      const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
-        .getTime()
-        .toString();
-      if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
-        setSelectedISOTime(get30MinNow());
-      }
+    const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
+      .getTime()
+      .toString();
+    if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
+      setSelectedISOTime(get30MinNow());
     }
-  }, [view, chartData, selectedTime, setSelectedISOTime]);
+  }, [view]);
 
   const getSelectedSitesData = (
     sitesData: Site[],
