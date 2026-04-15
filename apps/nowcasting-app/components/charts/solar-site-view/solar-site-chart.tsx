@@ -316,6 +316,7 @@ const SolarSiteChart: FC<{
                 timeOfInterest={selectedTime}
                 setTimeOfInterest={setSelectedTime}
                 data={filteredChartData}
+                zoomEnabled={false}
                 yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
                 visibleLines={visibleLines}
               />
