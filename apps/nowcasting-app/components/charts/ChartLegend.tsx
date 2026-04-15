@@ -201,12 +201,12 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           <LegendItem
             iconClasses={"text-ocf-black"}
             symbolStyle={"dashed"}
-            label={"PV live initial"}
+            label={"Generation initial"}
             dataKey={`GENERATION`}
           />
           <LegendItem
             iconClasses={"text-ocf-black"}
-            label={"PV live updated"}
+            label={"Generation updated"}
             dataKey={`GENERATION_UPDATED`}
           />
           <LegendTooltip

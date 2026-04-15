@@ -755,7 +755,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               type="monotone"
               dataKey="PAST_FORECAST"
               dot={false}
-              connectNulls={true}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={yellow} //yellow

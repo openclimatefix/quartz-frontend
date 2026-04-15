@@ -10,7 +10,6 @@ import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
-import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
 import { getTicks } from "../helpers/chartUtils";
@@ -96,53 +95,50 @@ const PvRemixChart: FC<{
   }
 
   return (
-    <>
-      <div className={`flex flex-col flex-auto ${className || ""}`}>
-        <div className="flex flex-col flex-1 dash:h-auto">
-          <ForecastHeader
-            pvForecastData={nationalForecastData || []}
-            pvLiveData={pvRealDayInData || []}
-            deltaView={false}
-          ></ForecastHeader>
-          {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
-            <div
-              className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
-            >
-              <Spinner></Spinner>
-            </div>
-          )}
-          <div className="flex-1 relative">
-            <DataLoadingChartStatus loadingState={loadingState} />
-            <RemixLine
-              resetTime={resetTime}
-              timeNow={formatISODateString(timeNow)}
-              timeOfInterest={selectedTime}
-              setTimeOfInterest={setSelectedTime}
-              data={chartData}
-              yMax={yMax}
-              visibleLines={visibleLines}
-              yTicks={getTicks(yMax, Y_MAX_TICKS)}
-            />
-          </div>
-        </div>
-        {selectedRegions && selectedRegions.length > 0 && (
-          <div className="flex-1 flex flex-col relative dash:h-auto">
-            <GspPvRemixChart
-              close={() => {
-                setSelectedMapRegionIds([]);
-              }}
-              setTimeOfInterest={setSelectedTime}
-              selectedTime={selectedTime}
-              selectedRegions={selectedRegions}
-              timeNow={formatISODateString(timeNow)}
-              resetTime={resetTime}
-              visibleLines={visibleLines}
-            ></GspPvRemixChart>
+    <div className={`flex flex-col flex-1 ${className || ""}`}>
+      <div className="flex flex-col flex-1 dash:h-auto">
+        <ForecastHeader
+          pvForecastData={nationalForecastData || []}
+          pvLiveData={pvRealDayInData || []}
+          deltaView={false}
+        ></ForecastHeader>
+        {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
+          <div
+            className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
+          >
+            <Spinner></Spinner>
           </div>
         )}
+        <div className="flex-1 relative">
+          <DataLoadingChartStatus loadingState={loadingState} />
+          <RemixLine
+            resetTime={resetTime}
+            timeNow={formatISODateString(timeNow)}
+            timeOfInterest={selectedTime}
+            setTimeOfInterest={setSelectedTime}
+            data={chartData}
+            yMax={yMax}
+            visibleLines={visibleLines}
+            yTicks={getTicks(yMax, Y_MAX_TICKS)}
+          />
+        </div>
       </div>
-      {!className?.includes("hidden") && <ChartLegend />}
-    </>
+      {selectedRegions && selectedRegions.length > 0 && (
+        <div className="flex-1 flex flex-col relative dash:h-auto">
+          <GspPvRemixChart
+            close={() => {
+              setSelectedMapRegionIds([]);
+            }}
+            setTimeOfInterest={setSelectedTime}
+            selectedTime={selectedTime}
+            selectedRegions={selectedRegions}
+            timeNow={formatISODateString(timeNow)}
+            resetTime={resetTime}
+            visibleLines={visibleLines}
+          ></GspPvRemixChart>
+        </div>
+      )}
+    </div>
   );
 };
 

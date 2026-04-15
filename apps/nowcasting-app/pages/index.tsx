@@ -4,6 +4,7 @@ import Layout from "../components/layout/layout";
 import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
+import NlNationalChart from "../components/charts/nl-national-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
 import Cookies from "cookies";
@@ -41,6 +42,7 @@ import { ActiveUnit, NationalAggregation } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
 import netherlandsSitesData from "../data/netherlands_sites.json";
+import { ChartLegend } from "../components/charts/ChartLegend";
 import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 import SitesMap from "../components/map/sitesMap";
 import { useAggregateSitesDataForTimestamp } from "../components/hooks/useAggregateSitesDataForTimestamp";
@@ -197,9 +199,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
   // Get time and round down to start of 6h window:
-  const nlForecastStartTime = DateTime.now()
-    .startOf("hour")
-    .minus({ days: 2, hours: 6 % DateTime.now().hour })
+  const now = DateTime.now().startOf("hour");
+  const nlForecastStartTime = now
+    .minus({ days: 2, hours: now.hour % 6 })
     .toUTC()
     .toISO();
 
@@ -246,7 +248,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: sitePvActualValidating,
     error: sitePvActualError
   } = useLoadDataFromApi<SitesPvActual>(
-    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}&start_utc=${nlForecastStartTime}`,
     {
       // isPaused: () => {
       //   console.log(
@@ -633,6 +635,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     return sitePvForecastData?.filter((d) => nlRegionalUuids.has(d.site_uuid)) || [];
   }, [sitePvForecastData]);
 
+  const nlActualData = useMemo(() => {
+    return sitesPvActualData?.find((d) => d.site_uuid === "d1cfe577-aad8-4ffd-b238-1c7799fbf5d1");
+  }, [sitesPvActualData]);
+
   const combinedData: CombinedData = {
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
@@ -648,7 +654,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     allGspRealData,
     gspDeltas,
     nlForecastData,
-    nlRegionalForecastData
+    nlRegionalForecastData,
+    nlActualData
   };
   const combinedLoading: CombinedLoading = useMemo(
     () => ({
@@ -780,6 +787,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             combinedErrors={combinedErrors}
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
           />
+          <NlNationalChart
+            combinedData={combinedData}
+            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+          />
           {!isProduction && (
             <SolarSiteChart
               combinedSitesData={sitesData}
@@ -792,6 +803,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             combinedErrors={combinedErrors}
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
           />
+          {currentView(VIEWS.FORECAST) && <ChartLegend />}
         </SideLayout>
         {isOldNowcastingDomain && (
           // Tailwind popup with deprecated domain message

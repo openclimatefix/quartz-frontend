@@ -108,6 +108,7 @@ type CombinedData = {
   gspDeltas: Map<string, GspDeltaValue> | undefined;
   nlForecastData?: SitePvForecast;
   nlRegionalForecastData?: SitePvForecast[];
+  nlActualData?: SitePvActual;
 };
 type CombinedLoading = {
   nationalForecastLoading: boolean;
