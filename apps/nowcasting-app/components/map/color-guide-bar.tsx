@@ -14,7 +14,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
         { value: "20-35", opacity: 40, textColor: "ocf-gray-300" },
         { value: "35-50", opacity: 60, textColor: "black" },
         { value: "50-75", opacity: 80, textColor: "black" },
-        { value: "75+", opacity: 95, textColor: "black" }
+        { value: "75+", opacity: 90, textColor: "black" }
       ];
     }
     if (nationalAggregationLevel === NationalAggregation.GSP) {
@@ -25,7 +25,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
           { value: "150-250", opacity: 40, textColor: "ocf-gray-300" },
           { value: "250-350", opacity: 60, textColor: "black" },
           { value: "350-450", opacity: 80, textColor: "black" },
-          { value: "450+", opacity: 95, textColor: "black" }
+          { value: "450+", opacity: 90, textColor: "black" }
         ];
       } else if (unit === ActiveUnit.capacity) {
         return [
@@ -34,7 +34,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
           { value: "150-250", opacity: 40, textColor: "ocf-gray-300" },
           { value: "250-350", opacity: 60, textColor: "black" },
           { value: "350-450", opacity: 80, textColor: "black" },
-          { value: "450+", opacity: 95, textColor: "black" }
+          { value: "450+", opacity: 90, textColor: "black" }
         ];
       }
     } else if (
