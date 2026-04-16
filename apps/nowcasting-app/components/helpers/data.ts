@@ -371,15 +371,20 @@ export const generateNetherlandsRegionalGeoJsonForecastData: (
 
       const capacityMw = (site?.capacity_kw || 1) / 1000;
       const forecastMw = (selectedFCValue?.expected_generation_kw || 0) / 1000;
+      const normalizedRatio = capacityMw > 0 ? forecastMw / capacityMw : 0;
 
       return {
         ...f,
-        properties: setFeatureObjectProps(
-          { ...f.properties, id: site?.site_uuid || provinceName },
-          { regionName: provinceName, installedCapacityMw: capacityMw },
-          forecastMw,
-          undefined
-        )
+        properties: {
+          ...setFeatureObjectProps(
+            { ...f.properties, id: site?.site_uuid || provinceName },
+            { regionName: provinceName, installedCapacityMw: capacityMw },
+            forecastMw,
+            undefined
+          ),
+          [SelectedData.expectedPowerGenerationNormalized]: normalizedRatio,
+          [SelectedData.expectedPowerGenerationNormalizedRounded]: normalizedRatio
+        }
       };
     })
   };
