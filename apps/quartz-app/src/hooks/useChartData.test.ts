@@ -60,14 +60,14 @@ describe("useChartData", () => {
     const formattedChartData = useChartData(combinedData);
     expect(formattedChartData).toEqual([
       {
-        timestamp: 1712124000000,
+        timestamp: 1712107800000,
         solar_forecast_past: 0.5,
         solar_generation: 0.5,
         wind_forecast_past: 1,
         wind_generation: 0.5,
       },
       {
-        timestamp: 1712124900000,
+        timestamp: 1712108700000,
         solar_forecast_past: 1,
         solar_generation: 1,
         wind_forecast_past: 2,
@@ -129,21 +129,21 @@ describe("useChartData", () => {
     const formattedChartData = useChartData(combinedData);
     expect(formattedChartData).toEqual([
       {
-        timestamp: 1712124000000,
+        timestamp: 1712107800000,
         solar_forecast_past: 0.5,
         solar_generation: 0.5,
         wind_forecast_past: 1,
         wind_generation: null,
       },
       {
-        timestamp: 1712124900000,
+        timestamp: 1712108700000,
         solar_forecast_past: 1,
         solar_generation: null,
         wind_forecast_past: 2,
         wind_generation: 1,
       },
       {
-        timestamp: 1712125800000,
+        timestamp: 1712109600000,
         solar_forecast_past: 3,
         solar_generation: null,
         wind_forecast_past: 1.5,

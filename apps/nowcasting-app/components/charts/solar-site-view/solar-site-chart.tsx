@@ -1,9 +1,10 @@
-import React, { FC } from "react";
+import React, { FC, useEffect } from "react";
 import RemixLine from "../remix-line";
-import { AGGREGATION_LEVELS } from "../../../constant";
-import useGlobalState from "../../helpers/globalState";
+import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
+import useGlobalState, { get30MinNow } from "../../helpers/globalState";
 import {
   convertISODateStringToLondonTime,
+  convertToLocaleDateString,
   formatISODateString,
   getRoundedTickBoundary
 } from "../../helpers/utils";
@@ -26,6 +27,7 @@ import ForecastHeaderSite from "./forecast-header";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
 import Link from "next/link";
 import LegendItem from "../LegendItem";
+import PlayButton from "../../play-button";
 
 const SolarSiteChart: FC<{
   combinedSitesData: CombinedSitesData;
@@ -50,6 +52,16 @@ const SolarSiteChart: FC<{
     pvActualData: combinedSitesData.sitesPvActualData,
     timeTrigger: selectedTime
   });
+
+  const [view] = useGlobalState("view");
+  useEffect(() => {
+    const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
+      .getTime()
+      .toString();
+    if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
+      setSelectedISOTime(get30MinNow());
+    }
+  }, [view]);
 
   const getSelectedSitesData = (
     sitesData: Site[],
@@ -170,6 +182,10 @@ const SolarSiteChart: FC<{
   const nationalPVExpected = allSitesYield[0]?.expectedPV || 0;
   const allSitesSelectedTime = formatISODateString(selectedTime);
   const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
+  const forecastEndTime =
+    combinedSitesData.sitesPvForecastData?.[0]?.forecast_values?.[
+      combinedSitesData.sitesPvForecastData[0]?.forecast_values?.length - 1
+    ]?.target_datetime_utc || new Date().toISOString();
 
   // if () return <div>failed to load</div>;
 
@@ -264,6 +280,7 @@ const SolarSiteChart: FC<{
                 {/*/>*/}
               </div>
             </div>
+            <PlayButton startTime={get30MinNow()} endTime={forecastEndTime} />
           </div>
           <div className="flex-1 relative">
             <DataLoadingChartStatus loadingState={sitesLoadingState} />
@@ -316,6 +333,7 @@ const SolarSiteChart: FC<{
                 timeOfInterest={selectedTime}
                 setTimeOfInterest={setSelectedTime}
                 data={filteredChartData}
+                zoomEnabled={false}
                 yMax={getRoundedTickBoundary(Number(selectedSiteCapacity), yMax_levels)}
                 visibleLines={visibleLines}
               />
