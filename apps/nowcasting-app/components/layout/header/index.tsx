@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { getViewTitle, VIEWS } from "../../../constant";
 import { Dispatch, SetStateAction, useState } from "react";
-import { ExternalLinkIcon, DownloadIcon } from "../../icons/icons";
+import { ExternalLinkIcon } from "../../icons/icons";
 import useGlobalState from "../../helpers/globalState";
 import { CombinedData } from "../../types";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
@@ -161,15 +161,6 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </div>
         <div className="flex items-center gap-2">
-          {canDownloadCsv && (
-            <button
-              onClick={() => setShowDownloadModal(true)}
-              title="Download CSV"
-              className="p-2 hover:text-ocf-yellow-400 transition-colors"
-            >
-              <DownloadIcon />
-            </button>
-          )}
           <div className="py-1">
             {isLoggedIn && (
               <ProfileDropDown
