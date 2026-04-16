@@ -223,21 +223,19 @@ export const formatISODateString = (date: string) => {
   return dateid;
 };
 
-export const formatISODateAsLondonTime = (date: Date) => {
-  const date_london_time_str = date
-    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
-    .slice(0, 5);
+export const formatISODateAsLondonTime = (date: Date, tz = "Europe/London") => {
+  const date_london_time_str = date.toLocaleTimeString("en-GB", { timeZone: tz }).slice(0, 5);
 
   return date_london_time_str;
 };
-export const convertISODateStringToLondonTime = (date: string) => {
+export const convertISODateStringToLondonTime = (date: string, tz = "Europe/London") => {
   if (!date || date === ":00.000Z") return "00:00";
-  // Changes the ISO date string to Europe London time, and return time only
+  // Changes the ISO date string to the given timezone, and return time only
   const d = new Date(date);
   if (typeof d !== "object" || isNaN(d.getTime())) {
     throw new Error(`Invalid date: ${date}`);
   }
-  return formatISODateAsLondonTime(d);
+  return formatISODateAsLondonTime(d, tz);
 };
 
 export const convertToLocaleDateString = (date: string) => {
@@ -259,17 +257,15 @@ export const formatISODateStringHuman = (date: string) => {
   return dateToLondonDateTimeString(d);
 };
 
-export const dateToLondonDateTimeString = (date: Date) => {
+export const dateToLondonDateTimeString = (date: Date, tz = "Europe/London") => {
   const date_london = date.toLocaleString("en-GB", {
     weekday: "long",
     day: "numeric",
     month: "long",
     year: "numeric",
-    timeZone: "Europe/London"
+    timeZone: tz
   });
-  const date_london_time = date
-    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
-    .slice(0, 5);
+  const date_london_time = date.toLocaleTimeString("en-GB", { timeZone: tz }).slice(0, 5);
 
   return `${date_london}, ${date_london_time}`;
 };
@@ -284,15 +280,14 @@ export const dateToLondonDateTimeOnlyString = (date: Date) => {
   return date_london + " ";
 };
 
-export const formatISODateStringHumanNumbersOnly = (date: string) => {
+export const formatISODateStringHumanNumbersOnly = (date: string, tz = "Europe/London") => {
   // Change date to nice human readable format.
-  // Note that this converts the string to Europe London Time
   // timezone and seconds are removed
 
   const d = new Date(date);
 
-  const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
-  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
+  const date_london = d.toLocaleDateString("en-GB", { timeZone: tz });
+  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: tz }).slice(0, 5);
 
   // further formatting could be done to make it yyyy/mm/dd HH:MM
   return `${date_london} ${date_london_time}`;
@@ -310,14 +305,14 @@ export const prettyPrintDayLabelWithDate = (d: string | number) => {
   })} ${parsedDate.toLocaleDateString("en-GB", { day: "numeric" })}`;
 };
 
-export function prettyPrintChartAxisLabelDate(x: string | number) {
+export function prettyPrintChartAxisLabelDate(x: string | number, tz = "Europe/London") {
   // Check if x is a number, if so then it might be a UNIX timestamp
   if (typeof x === "number") {
     if (!Number.isNaN(x)) {
       if (!x) return "Invalid date 1";
       const parsedDate = new Date(x);
       if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 2";
-      return convertISODateStringToLondonTime(parsedDate.toISOString());
+      return convertISODateStringToLondonTime(parsedDate.toISOString(), tz);
     }
   } else {
     // x is a string, check if it is a valid ISO date string
@@ -327,11 +322,11 @@ export function prettyPrintChartAxisLabelDate(x: string | number) {
       if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 3";
 
       if (x.includes("+")) {
-        return convertISODateStringToLondonTime(x);
+        return convertISODateStringToLondonTime(x, tz);
       } else if (x.length > 16) {
-        return convertISODateStringToLondonTime(x + "+00:00");
+        return convertISODateStringToLondonTime(x + "+00:00", tz);
       } else {
-        return convertISODateStringToLondonTime(x + ":00+00:00");
+        return convertISODateStringToLondonTime(x + ":00+00:00", tz);
       }
     }
   }

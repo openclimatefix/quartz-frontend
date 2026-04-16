@@ -111,10 +111,12 @@ const NlNationalChart: React.FC<{
 
     return {
       currentActualGW: latestActual ? KWtoGW(latestActual.actual_generation_kw) : "–",
-      currentActualTime: latestISO ? convertISODateStringToLondonTime(latestISO) || "" : "",
+      currentActualTime: latestISO
+        ? convertISODateStringToLondonTime(latestISO, "Europe/Amsterdam") || ""
+        : "",
       currentForecastGW: currentFv ? KWtoGW(currentFv.expected_generation_kw) : "–",
       nextForecastGW: nextFv ? KWtoGW(nextFv.expected_generation_kw) : "–",
-      nextForecastTime: nextSlot ? formatISODateAsLondonTime(nextSlot) : ""
+      nextForecastTime: nextSlot ? formatISODateAsLondonTime(nextSlot, "Europe/Amsterdam") : ""
     };
   }, [nlForecastData, nlActualData, timeNowFormatted]);
 
@@ -160,6 +162,7 @@ const NlNationalChart: React.FC<{
           yTicks={getTicks(yMax, Y_MAX_TICKS)}
           visibleLines={visibleLines}
           resetTime={resetTime}
+          timezone="Europe/Amsterdam"
         />
       </div>
     </div>

@@ -131,6 +131,7 @@ type RemixLineProps = {
   deltaView?: boolean;
   deltaYMaxOverride?: number;
   yTicks?: number[];
+  timezone?: string;
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -189,7 +190,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   zoomEnabled = true,
   deltaView = false,
   deltaYMaxOverride,
-  yTicks
+  yTicks,
+  timezone = "Europe/London"
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
@@ -322,6 +324,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   console.log("chartData", data);
   console.log("DELTA", deltaView);
 
+  const axisTickFormatter = (x: string | number) => prettyPrintChartAxisLabelDate(x, timezone);
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
@@ -406,7 +410,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis"}
-              tickFormatter={prettyPrintChartAxisLabelDate}
+              tickFormatter={axisTickFormatter}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
@@ -419,7 +423,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               className="select-none"
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
-              tickFormatter={prettyPrintChartAxisLabelDate}
+              tickFormatter={axisTickFormatter}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
@@ -547,7 +551,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               label={
                 <CustomizedLabel
                   className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
-                  value={prettyPrintChartAxisLabelDate(timeOfInterest)}
+                  value={prettyPrintChartAxisLabelDate(timeOfInterest, timezone)}
                   solidLine={true}
                 ></CustomizedLabel>
               }
@@ -797,7 +801,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 let formattedDate = data?.formattedDate + ":00+00:00";
                 if (view === VIEWS.SOLAR_SITES) {
                   const date = new Date(Number(data?.formattedDate));
-                  formattedDate = dateToLondonDateTimeString(date);
+                  formattedDate = dateToLondonDateTimeString(date, timezone);
                 }
 
                 return (
@@ -805,7 +809,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     <ul className="">
                       <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
                         <div className="pr-3">
-                          {formatISODateStringHumanNumbersOnly(formattedDate)}
+                          {formatISODateStringHumanNumbersOnly(formattedDate, timezone)}
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
