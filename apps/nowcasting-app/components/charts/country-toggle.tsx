@@ -1,6 +1,5 @@
 import React from "react";
-
-export type Country = "GB" | "NL";
+import { Country } from "../types";
 
 const CountryToggle: React.FC<{
   selected: Country;

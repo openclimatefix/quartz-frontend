@@ -5,7 +5,7 @@ import {
   getArraySettingFromCookieStorage,
   getBooleanSettingFromCookieStorage
 } from "./cookieStorage";
-import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
+import { Country, LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
 import { ActiveUnit, NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
 
@@ -77,6 +77,7 @@ export type GlobalStateType = {
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
+  selectedCountry: Country;
   selectedNlRegionUuid?: string;
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
@@ -112,6 +113,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },
+    selectedCountry: "GB",
     selectedNlRegionUuid: undefined,
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.NATIONAL,

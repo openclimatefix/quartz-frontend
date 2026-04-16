@@ -13,6 +13,7 @@ const MeasuringUnit = ({
   isLoading: boolean;
 }) => {
   const [nationalAggregation, setNationalAggregation] = useGlobalState("nationalAggregationLevel");
+  const [selectedCountry, setSelectedCountry] = useGlobalState("selectedCountry");
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit
@@ -93,40 +94,42 @@ const MeasuringUnit = ({
         </div>
       </div>
       <div className="flex justify-end mr-0 mt-3">
-        <div className="inline-block">
-          <MapUIButton<NationalAggregation>
-            id={"GroupButtonGSP"}
-            active={nationalAggregation === NationalAggregation.GSP}
-            isLoading={isLoading}
-            onToggle={onToggleAggregation}
-            text={"GSP"}
-            value={NationalAggregation.GSP}
-          />
-          {/*<MapUIButton<NationalAggregation>*/}
-          {/*  id={"GroupButtonZones"}*/}
-          {/*  active={nationalAggregation === NationalAggregation.zone}*/}
-          {/*  isLoading={isLoading}*/}
-          {/*  onToggle={onToggleAggregation}*/}
-          {/*  text={"NG Zones"}*/}
-          {/*  value={NationalAggregation.zone}*/}
-          {/*/>*/}
-          <MapUIButton<NationalAggregation>
-            id={"GroupButtonZones"}
-            active={nationalAggregation === NationalAggregation.DNO}
-            isLoading={isLoading}
-            onToggle={onToggleAggregation}
-            text={"DNO"}
-            value={NationalAggregation.DNO}
-          />
-          {/*<MapUIButton<NationalAggregation>*/}
-          {/*  id={"GroupButtonZones"}*/}
-          {/*  active={nationalAggregation === NationalAggregation.national}*/}
-          {/*  isLoading={isLoading}*/}
-          {/*  onToggle={onToggleAggregation}*/}
-          {/*  text={"National"}*/}
-          {/*  value={NationalAggregation.national}*/}
-          {/*/>*/}
-        </div>
+        {selectedCountry === "GB" && (
+          <div className="inline-block">
+            <MapUIButton<NationalAggregation>
+              id={"GroupButtonGSP"}
+              active={nationalAggregation === NationalAggregation.GSP}
+              isLoading={isLoading}
+              onToggle={onToggleAggregation}
+              text={"GSP"}
+              value={NationalAggregation.GSP}
+            />
+            {/*<MapUIButton<NationalAggregation>*/}
+            {/*  id={"GroupButtonZones"}*/}
+            {/*  active={nationalAggregation === NationalAggregation.zone}*/}
+            {/*  isLoading={isLoading}*/}
+            {/*  onToggle={onToggleAggregation}*/}
+            {/*  text={"NG Zones"}*/}
+            {/*  value={NationalAggregation.zone}*/}
+            {/*/>*/}
+            <MapUIButton<NationalAggregation>
+              id={"GroupButtonZones"}
+              active={nationalAggregation === NationalAggregation.DNO}
+              isLoading={isLoading}
+              onToggle={onToggleAggregation}
+              text={"DNO"}
+              value={NationalAggregation.DNO}
+            />
+            {/*<MapUIButton<NationalAggregation>*/}
+            {/*  id={"GroupButtonZones"}*/}
+            {/*  active={nationalAggregation === NationalAggregation.national}*/}
+            {/*  isLoading={isLoading}*/}
+            {/*  onToggle={onToggleAggregation}*/}
+            {/*  text={"National"}*/}
+            {/*  value={NationalAggregation.national}*/}
+            {/*/>*/}
+          </div>
+        )}
       </div>
     </>
   );

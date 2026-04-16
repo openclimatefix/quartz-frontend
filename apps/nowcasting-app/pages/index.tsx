@@ -6,7 +6,6 @@ import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import NLNationalChart from "../components/charts/NLNationalChart";
 import NLRegionalChart from "../components/charts/NLRegionalChart";
-import { Country } from "../components/charts/country-toggle";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
 import Cookies from "cookies";
@@ -98,7 +97,7 @@ const nlRegionalUuids = new Set(
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
-  const [selectedCountry, setSelectedCountry] = useState<Country>("GB");
+  const [selectedCountry, setSelectedCountry] = useGlobalState("selectedCountry");
   const [selectedNlRegionUuid] = useGlobalState("selectedNlRegionUuid");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");

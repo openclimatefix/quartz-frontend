@@ -328,3 +328,5 @@ export type MapFeatureObject = {
 export type GspZoneGroupings = {
   [key]: number[];
 };
+
+export type Country = "GB" | "NL";

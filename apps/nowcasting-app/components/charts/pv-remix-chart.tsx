@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
-import CountryToggle, { Country } from "./country-toggle";
+import CountryToggle from "./country-toggle";
 import useGlobalState from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
@@ -10,7 +10,7 @@ import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { CombinedData, CombinedErrors } from "../types";
+import { CombinedData, CombinedErrors, Country } from "../types";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
 import { getTicks } from "../helpers/chartUtils";

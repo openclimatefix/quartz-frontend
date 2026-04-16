@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import RemixLine, { ChartData } from "./remix-line";
-import { CombinedData } from "../types";
+import { CombinedData, Country } from "../types";
 import useGlobalState, { get30MinNow, getNext30MinSlot } from "../helpers/globalState";
 import {
   formatISODateString,
@@ -13,7 +13,7 @@ import { getTicks } from "../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../constant";
 import { ForecastHeadlineFigure } from "./forecast-header/ui";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import CountryToggle, { Country } from "./country-toggle";
+import CountryToggle from "./country-toggle";
 
 const NL_NATIONAL_Y_MAX = 20000;
 
