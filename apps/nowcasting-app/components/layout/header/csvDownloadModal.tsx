@@ -48,7 +48,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
     () =>
       SELECTABLE_COLUMNS.map((column) =>
         column.id === "nForecast"
-          ? { ...column, label: `${getNHourForecastLabel(nHourForecast)} Forecast` }
+          ? { ...column, label: `${getNHourForecastLabel(nHourForecast)}` }
           : column
       ),
     [nHourForecast]
