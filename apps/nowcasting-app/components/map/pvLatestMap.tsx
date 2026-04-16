@@ -29,6 +29,8 @@ import * as turf from "@turf/turf";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
+const regionBordersLineColor = "#cccccc";
+const regionBordersLineOpacity = 0.3;
 
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
@@ -416,23 +418,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         type: "line",
         source: "latestPV",
         paint: {
-          "line-color": "#ffffff",
+          "line-color": regionBordersLineColor,
           "line-width": 0.6,
-          "line-opacity": 0.2
-        }
-      });
-    }
-
-    const nlBordersLayer = map.getLayer("nl-borders");
-    if (!nlBordersLayer) {
-      map.addLayer({
-        id: "nl-borders",
-        type: "line",
-        source: "nlSource",
-        paint: {
-          "line-color": "#ffffff",
-          "line-width": 0.6,
-          "line-opacity": 0.2
+          "line-opacity": regionBordersLineOpacity
         }
       });
     }
@@ -522,6 +510,20 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       } else {
         console.log("nlForecastLayer not updated");
       }
+    }
+
+    const nlBordersLayer = map.getLayer("nl-borders");
+    if (!nlBordersLayer) {
+      map.addLayer({
+        id: "nl-borders",
+        type: "line",
+        source: "nlSource",
+        paint: {
+          "line-color": regionBordersLineColor,
+          "line-width": 0.6,
+          "line-opacity": regionBordersLineOpacity
+        }
+      });
     }
 
     const nlSelectBordersLayer = map.getLayer("nl-forecast-select-borders");
