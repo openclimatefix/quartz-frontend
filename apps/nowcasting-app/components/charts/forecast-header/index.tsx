@@ -18,12 +18,16 @@ type ForecastHeaderProps = {
   pvLiveData: PvRealData;
   pvForecastData: ForecastData;
   deltaView: boolean;
+  children?: React.ReactNode;
+  titleSlot?: React.ReactNode;
 };
 
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   pvLiveData,
   pvForecastData,
-  deltaView
+  deltaView,
+  children,
+  titleSlot
 }) => {
   const timeNow = useTimeNow();
 
@@ -68,8 +72,10 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
         forecastPV={selectedPvForecastInGW}
         pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
         forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
+        titleSlot={titleSlot}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
+        {children}
       </ForecastHeaderUI>
     );
   }
@@ -81,11 +87,13 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastPV={selectedPvForecastInGW}
       pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
       forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
+      titleSlot={titleSlot}
     >
       <PlayButton
         startTime={get30MinNow()}
         endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}
       ></PlayButton>
+      {children}
     </ForecastHeaderUI>
   );
 };

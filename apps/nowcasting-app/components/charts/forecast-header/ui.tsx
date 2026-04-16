@@ -146,6 +146,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
 
 type ForecastHeaderProps = {
   children: React.ReactNode;
+  titleSlot?: React.ReactNode;
   forecastNextPV: string;
   forecastPV: string;
   actualPV: string;
@@ -159,6 +160,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastPV,
   actualPV,
   children,
+  titleSlot,
   // selectedTimeOnly,
   pvTimeOnly,
   forecastNextTimeOnly
@@ -168,8 +170,12 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       data-test="national-chart-header"
       className="flex flex-initial content-between bg-ocf-gray-800 h-auto mb-4"
     >
-      <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
-        Great Britain
+      <div className="m-auto ml-1 flex items-center">
+        {titleSlot ?? (
+          <span className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black">
+            Great Britain
+          </span>
+        )}
       </div>
       <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 3xl:px-6">
         <div className="pr-4 lg:pr-4 3xl:pr-6">

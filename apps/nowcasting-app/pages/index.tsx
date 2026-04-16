@@ -5,6 +5,7 @@ import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import NlNationalChart from "../components/charts/nl-national-chart";
+import { Country } from "../components/charts/country-toggle";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
 import Cookies from "cookies";
@@ -96,6 +97,7 @@ const nlRegionalUuids = new Set(
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
+  const [selectedCountry, setSelectedCountry] = useState<Country>("GB");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
@@ -785,11 +787,15 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           <PvRemixChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}
-            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+            selectedCountry={selectedCountry}
+            setSelectedCountry={setSelectedCountry}
+            className={currentView(VIEWS.FORECAST) && selectedCountry === "GB" ? "" : "hidden"}
           />
           <NlNationalChart
             combinedData={combinedData}
-            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
+            selectedCountry={selectedCountry}
+            setSelectedCountry={setSelectedCountry}
+            className={currentView(VIEWS.FORECAST) && selectedCountry === "NL" ? "" : "hidden"}
           />
           {!isProduction && (
             <SolarSiteChart

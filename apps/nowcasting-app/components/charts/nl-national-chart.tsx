@@ -13,6 +13,7 @@ import { getTicks } from "../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../constant";
 import { ForecastHeadlineFigure } from "./forecast-header/ui";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
+import CountryToggle, { Country } from "./country-toggle";
 
 const NL_NATIONAL_Y_MAX = 20000;
 
@@ -29,7 +30,9 @@ const toISO = (dt: string): string => {
 const NlNationalChart: React.FC<{
   combinedData: CombinedData;
   className?: string;
-}> = ({ combinedData, className }) => {
+  selectedCountry?: Country;
+  setSelectedCountry?: (c: Country) => void;
+}> = ({ combinedData, className, selectedCountry, setSelectedCountry }) => {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -126,8 +129,14 @@ const NlNationalChart: React.FC<{
         data-test="nl-national-chart-header"
         className="flex flex-initial content-between bg-ocf-gray-800 h-auto mb-4"
       >
-        <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
-          Netherlands
+        <div className="m-auto ml-1 flex items-center">
+          {selectedCountry && setSelectedCountry ? (
+            <CountryToggle selected={selectedCountry} onChange={setSelectedCountry} size="title" />
+          ) : (
+            <span className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black">
+              Netherlands
+            </span>
+          )}
         </div>
         <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 3xl:px-6">
           <div className="pr-4 lg:pr-4 3xl:pr-6">

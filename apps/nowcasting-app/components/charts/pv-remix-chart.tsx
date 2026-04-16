@@ -1,6 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
+import CountryToggle, { Country } from "./country-toggle";
 import useGlobalState from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
@@ -19,7 +20,9 @@ const PvRemixChart: FC<{
   combinedErrors: CombinedErrors;
   date?: string;
   className?: string;
-}> = ({ combinedData, combinedErrors, className }) => {
+  selectedCountry?: Country;
+  setSelectedCountry?: (c: Country) => void;
+}> = ({ combinedData, combinedErrors, className, selectedCountry, setSelectedCountry }) => {
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
@@ -101,7 +104,16 @@ const PvRemixChart: FC<{
           pvForecastData={nationalForecastData || []}
           pvLiveData={pvRealDayInData || []}
           deltaView={false}
-        ></ForecastHeader>
+          titleSlot={
+            selectedCountry && setSelectedCountry ? (
+              <CountryToggle
+                selected={selectedCountry}
+                onChange={setSelectedCountry}
+                size="title"
+              />
+            ) : undefined
+          }
+        />
         {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
           <div
             className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
