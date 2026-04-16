@@ -229,7 +229,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     isValidating: sitePvForecastValidating,
     error: sitePvForecastError
   } = useLoadDataFromApi<SitesPvForecast>(
-    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}&start_utc=${nlForecastStartTime}`,
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}&start_utc=${nlForecastStartTime}&horizon_minutes=15`,
     {
       // isPaused: () => {
       //   console.log(
