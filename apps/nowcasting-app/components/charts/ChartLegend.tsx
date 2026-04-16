@@ -18,6 +18,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [selectedCountry] = useGlobalState("selectedCountry");
 
   const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
     showNHourView ? "flex-col @sm:gap-0" : "flex-col @md:gap-0"
@@ -100,11 +101,11 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               <LegendItem
                 iconClasses={"text-ocf-yellow"}
                 symbolStyle={"both"}
-                label={"Current"}
+                label={"Forecast"}
                 dataKey={`FORECAST`}
               />
             </LegendTooltip>
-            {showNHourView && (
+            {showNHourView && selectedCountry !== "NL" && (
               <LegendTooltip
                 tip={ocfNHrForecastTooltipContent}
                 position={"top"}
@@ -113,23 +114,25 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 <LegendItem
                   iconClasses={"text-ocf-orange"}
                   symbolStyle={"both"}
-                  label={`${nHourForecast} hour`}
+                  label={`${nHourForecast} hour forecast`}
                   dataKey={`N_HOUR_FORECAST`}
                 />
               </LegendTooltip>
             )}
 
-            <LegendTooltip
-              tip={seasonalMeanTooltipContent}
-              position={"top-right"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-[#ffdfd1]"}
-                label={"Seasonal Mean"}
-                dataKey={`SEASONAL_MEAN`}
-              />
-            </LegendTooltip>
+            {selectedCountry !== "NL" && (
+              <LegendTooltip
+                tip={seasonalMeanTooltipContent}
+                position={"top-right"}
+                className="relative w-full whitespace-pre-wrap"
+              >
+                <LegendItem
+                  iconClasses={"text-[#ffdfd1]"}
+                  label={"Seasonal Mean"}
+                  dataKey={`SEASONAL_MEAN`}
+                />
+              </LegendTooltip>
+            )}
           </div>
 
           <div className={legendItemContainerClasses}>
@@ -141,11 +144,11 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
               <LegendItem
                 iconClasses={"text-ocf-yellow"}
                 symbolStyle={"both"}
-                label={"OCF Latest"}
+                label={"Forecast"}
                 dataKey={`FORECAST`}
               />
             </LegendTooltip>
-            {showNHourView && (
+            {showNHourView && selectedCountry !== "NL" && (
               <LegendTooltip
                 tip={ocfNHrForecastTooltipContent}
                 position={"top"}
@@ -154,84 +157,92 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 <LegendItem
                   iconClasses={"text-ocf-orange"}
                   symbolStyle={"both"}
-                  label={`OCF ${nHourForecast}hr`}
+                  label={`${nHourForecast}hr Forecast`}
                   dataKey={`N_HOUR_FORECAST`}
                 />
               </LegendTooltip>
             )}
-            <LegendTooltip
-              tip={ocfEcmwfForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-teal-500"}
-                symbolStyle={"both"}
-                label={`ECMWF-only`}
-                dataKey={`INTRADAY_ECMWF_ONLY`}
-              />
-            </LegendTooltip>
-            <LegendTooltip
-              tip={ocfMetOfficeForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-metOffice"}
-                symbolStyle={"both"}
-                label={`Met Office-only`}
-                dataKey={`MET_OFFICE_ONLY`}
-              />
-            </LegendTooltip>
-            <LegendTooltip
-              tip={ocfSatForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-yellow-200"}
-                symbolStyle={"both"}
-                label={`Satellite-only`}
-                dataKey={`SAT_ONLY`}
-              />
-            </LegendTooltip>
+            {selectedCountry !== "NL" && (
+              <>
+                <LegendTooltip
+                  tip={ocfEcmwfForecastTooltipContent}
+                  position={"top"}
+                  className="relative w-full whitespace-pre-wrap"
+                >
+                  <LegendItem
+                    iconClasses={"text-ocf-teal-500"}
+                    symbolStyle={"both"}
+                    label={`ECMWF-only`}
+                    dataKey={`INTRADAY_ECMWF_ONLY`}
+                  />
+                </LegendTooltip>
+                <LegendTooltip
+                  tip={ocfMetOfficeForecastTooltipContent}
+                  position={"top"}
+                  className="relative w-full whitespace-pre-wrap"
+                >
+                  <LegendItem
+                    iconClasses={"text-metOffice"}
+                    symbolStyle={"both"}
+                    label={`Met Office-only`}
+                    dataKey={`MET_OFFICE_ONLY`}
+                  />
+                </LegendTooltip>
+                <LegendTooltip
+                  tip={ocfSatForecastTooltipContent}
+                  position={"top"}
+                  className="relative w-full whitespace-pre-wrap"
+                >
+                  <LegendItem
+                    iconClasses={"text-ocf-yellow-200"}
+                    symbolStyle={"both"}
+                    label={`Satellite-only`}
+                    dataKey={`SAT_ONLY`}
+                  />
+                </LegendTooltip>
+              </>
+            )}
           </div>
         </div>
         <div className={legendItemContainerClasses}>
           <LegendItem
             iconClasses={"text-ocf-black"}
             symbolStyle={"dashed"}
-            label={"Actual initial"}
+            label={selectedCountry === "NL" ? "NED NL Initial" : "PV Live Initial"}
             dataKey={`GENERATION`}
           />
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            label={"Actual updated"}
-            dataKey={`GENERATION_UPDATED`}
-          />
-          <LegendTooltip
-            tip={seasonalMeanTooltipContent}
-            position={"top"}
-            className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"
-          >
-            <LegendItem
-              iconClasses={"text-[#ffdfd1]"}
-              label={"Seasonal Mean"}
-              dataKey={`SEASONAL_MEAN`}
-            />
-          </LegendTooltip>
-          <LegendTooltip
-            tip={seasonalQuantilesTooltipContent}
-            position={"top"}
-            className="relative w-full whitespace-pre-wrap"
-          >
-            <LegendItem
-              iconClasses={"text-[#ffdfd1]"}
-              symbolStyle={"area"}
-              label={"Seasonal quantiles"}
-              dataKey={`SEASONAL_BOUNDS`}
-            />
-          </LegendTooltip>
+          {selectedCountry !== "NL" && (
+            <>
+              <LegendItem
+                iconClasses={"text-ocf-black"}
+                label={"PV Live Actual"}
+                dataKey={`GENERATION_UPDATED`}
+              />
+              <LegendTooltip
+                tip={seasonalMeanTooltipContent}
+                position={"top"}
+                className="relative w-full whitespace-pre-wrap @2xl:hidden dash:flex flex-col @4xl:dash:hidden"
+              >
+                <LegendItem
+                  iconClasses={"text-[#ffdfd1]"}
+                  label={"Seasonal Mean"}
+                  dataKey={`SEASONAL_MEAN`}
+                />
+              </LegendTooltip>
+              <LegendTooltip
+                tip={seasonalQuantilesTooltipContent}
+                position={"top"}
+                className="relative w-full whitespace-pre-wrap"
+              >
+                <LegendItem
+                  iconClasses={"text-[#ffdfd1]"}
+                  symbolStyle={"area"}
+                  label={"Seasonal quantiles"}
+                  dataKey={`SEASONAL_BOUNDS`}
+                />
+              </LegendTooltip>
+            </>
+          )}
           {/*<LegendTooltip*/}
           {/*  tip={seasonalMeanTooltipContent}*/}
           {/*  position={"top-right"}*/}
@@ -245,7 +256,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
           {/*</LegendTooltip>*/}
         </div>
         <div className="flex flex-1 w-full justify-end items-end gap-3 pr-3 pb-1 pt-1 @md:flex-col @lg:gap-4 @2xl:flex-row @3xl:gap-12">
-          {showNHourView && (
+          {showNHourView && selectedCountry !== "NL" && (
             <div className="flex">
               <>
                 <div className="h-8 w-10 mr-2 custom-select bg-mapbox-black-600 rounded-md">
