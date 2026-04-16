@@ -132,6 +132,7 @@ type RemixLineProps = {
   deltaYMaxOverride?: number;
   yTicks?: number[];
   timezone?: string;
+  lineLabels?: Record<string, string>;
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -191,7 +192,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   deltaView = false,
   deltaYMaxOverride,
   yTicks,
-  timezone = "Europe/London"
+  timezone = "Europe/London",
+  lineLabels
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
@@ -813,7 +815,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
-                      {Object.entries(toolTiplabels)
+                      {Object.entries({ ...toolTiplabels, ...lineLabels })
                         .filter(
                           ([key]) =>
                             (data[key] !== undefined &&

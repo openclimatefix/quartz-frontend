@@ -77,6 +77,7 @@ export type GlobalStateType = {
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
+  selectedNlRegionUuid?: string;
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
@@ -111,6 +112,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },
+    selectedNlRegionUuid: undefined,
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.NATIONAL,
     sortBy: SORT_BY.CAPACITY,

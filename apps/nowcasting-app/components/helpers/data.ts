@@ -375,7 +375,7 @@ export const generateNetherlandsRegionalGeoJsonForecastData: (
       return {
         ...f,
         properties: setFeatureObjectProps(
-          { ...f.properties, id: provinceName },
+          { ...f.properties, id: site?.site_uuid || provinceName },
           { regionName: provinceName, installedCapacityMw: capacityMw },
           forecastMw,
           undefined

@@ -56,6 +56,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedNlRegionUuid] = useGlobalState("selectedNlRegionUuid");
   const [showConstraints] = useGlobalState("showConstraints");
   const [showMap, setShowMap] = useState(true);
 
@@ -63,6 +64,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   useEffect(() => {
     showConstraintsRef.current = showConstraints;
   }, [showConstraints]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const layer = map.getLayer("nl-forecast-select-borders");
+    if (!layer) return;
+    if (selectedNlRegionUuid) {
+      map.setFilter("nl-forecast-select-borders", ["in", "id", selectedNlRegionUuid]);
+    } else {
+      map.setFilter("nl-forecast-select-borders", ["in", "id", ""]);
+    }
+  }, [selectedNlRegionUuid]);
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -509,6 +522,17 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       } else {
         console.log("nlForecastLayer not updated");
       }
+    }
+
+    const nlSelectBordersLayer = map.getLayer("nl-forecast-select-borders");
+    if (!nlSelectBordersLayer) {
+      map.addLayer({
+        id: "nl-forecast-select-borders",
+        type: "line",
+        source: "nlSource",
+        paint: { "line-color": "#ffffff", "line-width": 2, "line-opacity": 1 },
+        filter: ["in", "id", ""]
+      });
     }
 
     const pvForecastSelectBordersLayer = map.getLayer("latestPV-forecast-select-borders");

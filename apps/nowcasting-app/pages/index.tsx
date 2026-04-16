@@ -5,6 +5,7 @@ import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import NlNationalChart from "../components/charts/nl-national-chart";
+import NlRegionalChart from "../components/charts/nl-regional-chart";
 import { Country } from "../components/charts/country-toggle";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
@@ -12,7 +13,7 @@ import Cookies from "cookies";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
-import useGlobalState, { get30MinNow } from "../components/helpers/globalState";
+import useGlobalState, { get30MinNow, setGlobalState } from "../components/helpers/globalState";
 import {
   AllGspRealData,
   AllSites,
@@ -98,6 +99,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [selectedCountry, setSelectedCountry] = useState<Country>("GB");
+  const [selectedNlRegionUuid] = useGlobalState("selectedNlRegionUuid");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
@@ -156,6 +159,22 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [view]);
 
   const currentView = (v: VIEWS) => v === view;
+
+  // Auto-switch to NL when a province is clicked on the map
+  useEffect(() => {
+    if (selectedNlRegionUuid) setSelectedCountry("NL");
+  }, [selectedNlRegionUuid]);
+
+  // Auto-switch to GB when a GSP region is clicked on the map
+  useEffect(() => {
+    if (selectedMapRegionIds && selectedMapRegionIds.length > 0) setSelectedCountry("GB");
+  }, [selectedMapRegionIds]);
+
+  // Cross-clear the other country's region selection on toggle
+  useEffect(() => {
+    if (selectedCountry === "GB") setGlobalState("selectedNlRegionUuid", undefined);
+    if (selectedCountry === "NL") setSelectedMapRegionIds([]);
+  }, [selectedCountry]);
 
   useEffect(() => {
     if (user && !isLoading && !error) {
@@ -641,6 +660,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     return sitesPvActualData?.find((d) => d.site_uuid === "d1cfe577-aad8-4ffd-b238-1c7799fbf5d1");
   }, [sitesPvActualData]);
 
+  const nlRegionalActualData = useMemo(() => {
+    return sitesPvActualData?.filter((d) => nlRegionalUuids.has(d.site_uuid)) || [];
+  }, [sitesPvActualData]);
+
   const combinedData: CombinedData = {
     nationalForecastData,
     nationalIntradayECMWFOnlyData,
@@ -657,7 +680,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     gspDeltas,
     nlForecastData,
     nlRegionalForecastData,
-    nlActualData
+    nlActualData,
+    nlRegionalActualData
   };
   const combinedLoading: CombinedLoading = useMemo(
     () => ({
@@ -797,6 +821,15 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             setSelectedCountry={setSelectedCountry}
             className={currentView(VIEWS.FORECAST) && selectedCountry === "NL" ? "" : "hidden"}
           />
+          {selectedCountry === "NL" && selectedNlRegionUuid && currentView(VIEWS.FORECAST) && (
+            <div className="flex-1 flex flex-col relative dash:h-auto">
+              <NlRegionalChart
+                combinedData={combinedData}
+                siteUuid={selectedNlRegionUuid}
+                onClose={() => setGlobalState("selectedNlRegionUuid", undefined)}
+              />
+            </div>
+          )}
           {!isProduction && (
             <SolarSiteChart
               combinedSitesData={sitesData}

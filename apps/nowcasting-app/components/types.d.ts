@@ -109,6 +109,7 @@ type CombinedData = {
   nlForecastData?: SitePvForecast;
   nlRegionalForecastData?: SitePvForecast[];
   nlActualData?: SitePvActual;
+  nlRegionalActualData?: SitePvActual[];
 };
 type CombinedLoading = {
   nationalForecastLoading: boolean;

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { setGlobalState } from "../helpers/globalState";
 import { NationalAggregation } from "./types";
 import { PointLike } from "mapbox-gl";
 
@@ -24,6 +24,7 @@ const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) =>
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
   const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedNlRegionUuid] = useGlobalState("selectedNlRegionUuid");
   const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
   const [, setVisibleLines] = useGlobalState("visibleLines");
 
@@ -31,6 +32,8 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   clickedMapRegionIdsRef.current = clickedMapRegionIds;
   const selectedMapRegionIdsRef = useRef(selectedMapRegionIds);
   selectedMapRegionIdsRef.current = selectedMapRegionIds;
+  const selectedNlRegionUuidRef = useRef(selectedNlRegionUuid);
+  selectedNlRegionUuidRef.current = selectedNlRegionUuid;
   const isEventRegistertedRef = useRef(false);
   const nationalAggregationLevelRef = useRef(nationalAggregationLevel);
   nationalAggregationLevelRef.current = nationalAggregationLevel;
@@ -94,6 +97,14 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   useEffect(() => {
     if (map && isMapReady && !isEventRegistertedRef.current) {
       isEventRegistertedRef.current = true;
+      map.on("click", "nl-forecast", (e) => {
+        const feature = e.features?.[0];
+        if (!feature) return;
+        const uuid = String(feature.properties?.id);
+        const current = selectedNlRegionUuidRef.current;
+        setGlobalState("selectedNlRegionUuid", current === uuid ? undefined : uuid);
+      });
+
       map.on("click", "latestPV-forecast", (e) => {
         const clickedFeature = e.features && e.features[0];
         if (clickedFeature) {
