@@ -2,7 +2,7 @@ import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
 import { ForecastHeadlineFigure } from "../forecast-header/ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 import React, { FC } from "react";
-import ForecastLabel from "../../national_forecast_labels";
+import ForecastLabel from "../../NationalForecastLabels";
 
 type ForecastHeaderGSPProps = {
   title: string;

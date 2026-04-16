@@ -1,6 +1,6 @@
 import { theme } from "../../../tailwind.config";
 import { ClockIcon } from "../../icons/icons";
-import ForecastLabel from "../../national_forecast_labels";
+import ForecastLabel from "../../NationalForecastLabels";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 export const ForecastHeadlineFigure: React.FC<{

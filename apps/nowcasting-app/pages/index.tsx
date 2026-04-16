@@ -4,8 +4,8 @@ import Layout from "../components/layout/layout";
 import { PvLatestMap } from "../components/map";
 import SideLayout from "../components/side-layout";
 import PvRemixChart from "../components/charts/pv-remix-chart";
-import NlNationalChart from "../components/charts/nl-national-chart";
-import NlRegionalChart from "../components/charts/nl-regional-chart";
+import NLNationalChart from "../components/charts/NLNationalChart";
+import NLRegionalChart from "../components/charts/NLRegionalChart";
 import { Country } from "../components/charts/country-toggle";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import React, { useEffect, useMemo, useState } from "react";
@@ -815,7 +815,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             setSelectedCountry={setSelectedCountry}
             className={currentView(VIEWS.FORECAST) && selectedCountry === "GB" ? "" : "hidden"}
           />
-          <NlNationalChart
+          <NLNationalChart
             combinedData={combinedData}
             selectedCountry={selectedCountry}
             setSelectedCountry={setSelectedCountry}
@@ -823,7 +823,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           />
           {selectedCountry === "NL" && selectedNlRegionUuid && currentView(VIEWS.FORECAST) && (
             <div className="flex-1 flex flex-col relative dash:h-auto">
-              <NlRegionalChart
+              <NLRegionalChart
                 combinedData={combinedData}
                 siteUuid={selectedNlRegionUuid}
                 onClose={() => setGlobalState("selectedNlRegionUuid", undefined)}
