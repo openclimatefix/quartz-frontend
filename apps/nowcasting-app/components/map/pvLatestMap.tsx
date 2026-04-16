@@ -177,25 +177,17 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const getNLFillOpacity = (selectedData: string, isNormalized: boolean): Expression =>
     isNormalized
       ? [
-          // Piecewise steps matching the color guide bar legend buckets:
-          // 0-10% → 0.03, 10-20% → 0.2, 20-35% → 0.4, 35-50% → 0.6, 50-75% → 0.8, 75%+ → 0.9
-          "interpolate",
-          ["linear"],
+          // Hard bucket steps matching the color guide bar legend:
+          // <10% → 0.03, 10-20% → 0.2, 20-35% → 0.4, 35-50% → 0.6, 50-75% → 0.8, 75-100% → 0.9, 100% → 1
+          "step",
           ["to-number", ["get", selectedData]],
-          0,
           0.03,
-          0.1,
-          0.2,
-          0.2,
-          0.4,
-          0.35,
-          0.6,
-          0.5,
-          0.8,
-          0.75,
-          0.9,
-          1,
-          1
+          0.1, 0.2,
+          0.2, 0.4,
+          0.35, 0.6,
+          0.5, 0.8,
+          0.75, 0.9,
+          1.0, 1.0
         ]
       : ["interpolate", ["linear"], ["to-number", ["get", selectedData]], 0, 0, 5000, 1];
 
