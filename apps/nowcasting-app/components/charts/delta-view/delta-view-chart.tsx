@@ -1,8 +1,8 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
-import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
+import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../../constant";
 import ForecastHeader from "../forecast-header";
-import useGlobalState, { get30MinSlot } from "../../helpers/globalState";
+import useGlobalState, { get30MinSlot, get30MinNow } from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
   calculateChartYMax,
@@ -309,6 +309,15 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const yMax = useMemo(() => {
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
+
+  const [view] = useGlobalState("view");
+  useEffect(() => {
+    if (view === VIEWS.DELTA && chartData?.length) {
+      if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
+        setSelectedISOTime(get30MinNow());
+      }
+    }
+  }, [view, chartData, selectedTime, setSelectedISOTime]);
 
   // While N-hour is not available, we default to the latest interval with an Initial Estimate
   // useEffect(() => {
