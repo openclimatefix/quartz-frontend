@@ -1,0 +1,2754 @@
+[
+  {
+    "label": "National-GB",
+    "gspId": 0,
+    "gspName": "National",
+    "gspGroup": "National",
+    "regionName": " National",
+    "installedCapacityMw": 20992.869
+  },
+  {
+    "label": "GSP_1",
+    "gspId": 1,
+    "gspName": "ABHA1",
+    "gspGroup": "ABHA1",
+    "regionName": "Abham",
+    "installedCapacityMw": 214.78077
+  },
+  {
+    "label": "GSP_2",
+    "gspId": 2,
+    "gspName": "ABNE_P",
+    "gspGroup": "ABNE_P",
+    "regionName": "Abernethy",
+    "installedCapacityMw": 30.391408
+  },
+  {
+    "label": "GSP_3",
+    "gspId": 3,
+    "gspName": "ABTH_1",
+    "gspGroup": "ABTH_1",
+    "regionName": "Aberthaw",
+    "installedCapacityMw": 108.93069
+  },
+  {
+    "label": "GSP_4",
+    "gspId": 4,
+    "gspName": "ACTL_2|CBNK_H|GREE_H|PERI_H|WESA_H",
+    "gspGroup": "ACTL_2|CBNK_H|GREE_H|PERI_H",
+    "regionName": "Willesden (Zone 1)",
+    "installedCapacityMw": 5.2165197
+  },
+  {
+    "label": "GSP_5",
+    "gspId": 5,
+    "gspName": "ACTL_C|WISD_1|WISD_6",
+    "gspGroup": "ACTL_C|WISD_1|WISD_6",
+    "regionName": "Willesden (Zone 2)",
+    "installedCapacityMw": 12.228883
+  },
+  {
+    "label": "GSP_6",
+    "gspId": 6,
+    "gspName": "ALNE_P",
+    "gspGroup": "ALNE_P",
+    "regionName": "Alness",
+    "installedCapacityMw": 4.917321
+  },
+  {
+    "label": "GSP_7",
+    "gspId": 7,
+    "gspName": "ALST_3|USKM_1",
+    "gspGroup": "ALST_3|USKM_1",
+    "regionName": "Uskmouth",
+    "installedCapacityMw": 195.41181
+  },
+  {
+    "label": "GSP_8",
+    "gspId": 8,
+    "gspName": "ALVE1",
+    "gspGroup": "ALVE1",
+    "regionName": "Alverdiscott",
+    "installedCapacityMw": 427.5827
+  },
+  {
+    "label": "GSP_9",
+    "gspId": 9,
+    "gspName": "AMEM_1",
+    "gspGroup": "AMEM_1",
+    "regionName": "Amersham Main",
+    "installedCapacityMw": 139.20714
+  },
+  {
+    "label": "GSP_10",
+    "gspId": 10,
+    "gspName": "ARBR_P",
+    "gspGroup": "ARBR_P",
+    "regionName": "Arbroath",
+    "installedCapacityMw": 27.483313
+  },
+  {
+    "label": "GSP_11",
+    "gspId": 11,
+    "gspName": "ARDK_P|CLAC_P",
+    "gspGroup": "ARDK_P|CLAC_P",
+    "regionName": "Clachan",
+    "installedCapacityMw": 0.42582375
+  },
+  {
+    "label": "GSP_12",
+    "gspId": 12,
+    "gspName": "ARMO_P|HARG_P",
+    "gspGroup": "ARMO_P",
+    "regionName": "Ardmore",
+    "installedCapacityMw": 0.91897727
+  },
+  {
+    "label": "GSP_13",
+    "gspId": 13,
+    "gspName": "AXMI1",
+    "gspGroup": "AXMI1",
+    "regionName": "Axminster",
+    "installedCapacityMw": 129.36107
+  },
+  {
+    "label": "GSP_14",
+    "gspId": 14,
+    "gspName": "AYRR",
+    "gspGroup": "AYRR",
+    "regionName": "Ayr",
+    "installedCapacityMw": 3.8586816
+  },
+  {
+    "label": "GSP_15",
+    "gspId": 15,
+    "gspName": "BAGA",
+    "gspGroup": "BAGA",
+    "regionName": "Bathgate",
+    "installedCapacityMw": 7.7612898
+  },
+  {
+    "label": "GSP_16",
+    "gspId": 16,
+    "gspName": "BAIN",
+    "gspGroup": "BAIN",
+    "regionName": "Bainsford",
+    "installedCapacityMw": 1.9949863
+  },
+  {
+    "label": "GSP_17",
+    "gspId": 17,
+    "gspName": "BARKC1|BARKW3",
+    "gspGroup": "BARKC1|BARKW3",
+    "regionName": "Barking",
+    "installedCapacityMw": 20.075912
+  },
+  {
+    "label": "GSP_18",
+    "gspId": 18,
+    "gspName": "BEAU_P|ORRI_P",
+    "gspGroup": "BEAU_P|ORRI_P",
+    "regionName": "Beauly",
+    "installedCapacityMw": 7.6409848
+  },
+  {
+    "label": "GSP_19",
+    "gspId": 19,
+    "gspName": "BEDDT1",
+    "gspGroup": "BEDDT1",
+    "regionName": "Beddington (Zone 1)",
+    "installedCapacityMw": 10.161916
+  },
+  {
+    "label": "GSP_20",
+    "gspId": 20,
+    "gspName": "BEDD_1",
+    "gspGroup": "BEDD_1",
+    "regionName": "Beddington (Zone 2)",
+    "installedCapacityMw": 41.862672
+  },
+  {
+    "label": "GSP_21",
+    "gspId": 21,
+    "gspName": "BERB_P|CAIF_P|DALL_P|GLEF_P|KEIT_P",
+    "gspGroup": "BERB_P|CAIF_P|DALL_P|GLEF_P|KEIT_P",
+    "regionName": "Keith",
+    "installedCapacityMw": 14.939964
+  },
+  {
+    "label": "GSP_22",
+    "gspId": 22,
+    "gspName": "BERW",
+    "gspGroup": "BERW",
+    "regionName": "Berwick",
+    "installedCapacityMw": 8.2243299
+  },
+  {
+    "label": "GSP_23",
+    "gspId": 23,
+    "gspName": "BESW_1",
+    "gspGroup": "BESW_1",
+    "regionName": "Berkswell",
+    "installedCapacityMw": 195.44674
+  },
+  {
+    "label": "GSP_24",
+    "gspId": 24,
+    "gspName": "BICF_1",
+    "gspGroup": "BICF_1",
+    "regionName": "Bicker Fen",
+    "installedCapacityMw": 307.82677
+  },
+  {
+    "label": "GSP_25",
+    "gspId": 25,
+    "gspName": "BIRK_1",
+    "gspGroup": "BIRK_1",
+    "regionName": "Birkenhead",
+    "installedCapacityMw": 25.292678
+  },
+  {
+    "label": "GSP_26",
+    "gspId": 26,
+    "gspName": "BISW_1",
+    "gspGroup": "BISW_1",
+    "regionName": "Bishops Wood",
+    "installedCapacityMw": 306.29955
+  },
+  {
+    "label": "GSP_27",
+    "gspId": 27,
+    "gspName": "BLYTB1",
+    "gspGroup": "BLYTB1",
+    "regionName": "Blyth (Zone 1)",
+    "installedCapacityMw": 33.119131
+  },
+  {
+    "label": "GSP_28",
+    "gspId": 28,
+    "gspName": "BLYTH132",
+    "gspGroup": "BLYTH132",
+    "regionName": "Blyth (Zone 2)",
+    "installedCapacityMw": 16.92589
+  },
+  {
+    "label": "GSP_29",
+    "gspId": 29,
+    "gspName": "BOAG_P",
+    "gspGroup": "BOAG_P",
+    "regionName": "Boat of Garten",
+    "installedCapacityMw": 3.8602138
+  },
+  {
+    "label": "GSP_30",
+    "gspId": 30,
+    "gspName": "BOLN_1",
+    "gspGroup": "BOLN_1",
+    "regionName": "Bolney",
+    "installedCapacityMw": 170.22303
+  },
+  {
+    "label": "GSP_31",
+    "gspId": 31,
+    "gspName": "BONN",
+    "gspGroup": "BONN",
+    "regionName": "Bonnybridge",
+    "installedCapacityMw": 7.1513786
+  },
+  {
+    "label": "GSP_32",
+    "gspId": 32,
+    "gspName": "BOTW_1",
+    "gspGroup": "BOTW_1",
+    "regionName": "Botley Wood",
+    "installedCapacityMw": 70.967708
+  },
+  {
+    "label": "GSP_33",
+    "gspId": 33,
+    "gspName": "BRAC_P",
+    "gspGroup": "BRAC_P",
+    "regionName": "Braco West",
+    "installedCapacityMw": 13.884611
+  },
+  {
+    "label": "GSP_34",
+    "gspId": 34,
+    "gspName": "BRAI_1",
+    "gspGroup": "BRAI_1",
+    "regionName": "Braintree",
+    "installedCapacityMw": 81.788879
+  },
+  {
+    "label": "GSP_35",
+    "gspId": 35,
+    "gspName": "BRAP",
+    "gspGroup": "BRAP",
+    "regionName": "Braehead Park",
+    "installedCapacityMw": 3.1241035
+  },
+  {
+    "label": "GSP_36",
+    "gspId": 36,
+    "gspName": "BRAW_1",
+    "gspGroup": "BRAW_1",
+    "regionName": "Bradford West",
+    "installedCapacityMw": 51.85529
+  },
+  {
+    "label": "GSP_37",
+    "gspId": 37,
+    "gspName": "BRED_1",
+    "gspGroup": "BRED_1",
+    "regionName": "Bredbury",
+    "installedCapacityMw": 30.97883
+  },
+  {
+    "label": "GSP_38",
+    "gspId": 38,
+    "gspName": "BRFO_1|CLT03",
+    "gspGroup": "BRFO_1|CLT03",
+    "regionName": "Bramford",
+    "installedCapacityMw": 503.45947
+  },
+  {
+    "label": "GSP_39",
+    "gspId": 39,
+    "gspName": "BRID_P",
+    "gspGroup": "BRID_P",
+    "regionName": "Bridge of Dun",
+    "installedCapacityMw": 6.1455631
+  },
+  {
+    "label": "GSP_40",
+    "gspId": 40,
+    "gspName": "BRIM_1",
+    "gspGroup": "BRIM_1",
+    "regionName": "Brimsdown",
+    "installedCapacityMw": 39.14326
+  },
+  {
+    "label": "GSP_41",
+    "gspId": 41,
+    "gspName": "BRLE_1|FLEE_1",
+    "gspGroup": "BRLE_1|FLEE_1",
+    "regionName": "Bramley",
+    "installedCapacityMw": 465.51872
+  },
+  {
+    "label": "GSP_42",
+    "gspId": 42,
+    "gspName": "BROA_P",
+    "gspGroup": "BROA_P",
+    "regionName": "Broadford",
+    "installedCapacityMw": 1.6366169
+  },
+  {
+    "label": "GSP_43",
+    "gspId": 43,
+    "gspName": "BROR_P",
+    "gspGroup": "BROR_P",
+    "regionName": "Brora",
+    "installedCapacityMw": 1.7615427
+  },
+  {
+    "label": "GSP_44",
+    "gspId": 44,
+    "gspName": "BROX",
+    "gspGroup": "BROX",
+    "regionName": "Broxburn",
+    "installedCapacityMw": 9.2195452
+  },
+  {
+    "label": "GSP_45",
+    "gspId": 45,
+    "gspName": "BRWA1",
+    "gspGroup": "BRWA1",
+    "regionName": "Bridgewater",
+    "installedCapacityMw": 217.75543
+  },
+  {
+    "label": "GSP_46",
+    "gspId": 46,
+    "gspName": "BUMU_P",
+    "gspGroup": "BUMU_P",
+    "regionName": "Burghmuir",
+    "installedCapacityMw": 7.5318479
+  },
+  {
+    "label": "GSP_47",
+    "gspId": 47,
+    "gspName": "BURM_1",
+    "gspGroup": "BURM_1",
+    "regionName": "Burwell Main",
+    "installedCapacityMw": 363.5291
+  },
+  {
+    "label": "GSP_48",
+    "gspId": 48,
+    "gspName": "BUSH_1",
+    "gspGroup": "BUSH_1",
+    "regionName": "Bushbury",
+    "installedCapacityMw": 53.406638
+  },
+  {
+    "label": "GSP_49",
+    "gspId": 49,
+    "gspName": "BUST_1",
+    "gspGroup": "BUST_1",
+    "regionName": "Bustleholme",
+    "installedCapacityMw": 22.496915
+  },
+  {
+    "label": "GSP_50",
+    "gspId": 50,
+    "gspName": "CAAD_P",
+    "gspGroup": "CAAD_P",
+    "regionName": "Carradale",
+    "installedCapacityMw": 4.9956327
+  },
+  {
+    "label": "GSP_51",
+    "gspId": 51,
+    "gspName": "CAFA|EAST|GLLE|KEOO|TONG1",
+    "gspGroup": "CAFA|EAST|GLLE|KEOO|TONG",
+    "regionName": "Tongland",
+    "installedCapacityMw": 4.8837522
+  },
+  {
+    "label": "GSP_52",
+    "gspId": 52,
+    "gspName": "CAMB_01",
+    "gspGroup": "CAMB_01",
+    "regionName": "Camblesforth",
+    "installedCapacityMw": 8.0323775
+  },
+  {
+    "label": "GSP_53",
+    "gspId": 53,
+    "gspName": "CANTN1|RICH_J|RICH1",
+    "gspGroup": "CANTN1|RICH_J|RICH1",
+    "regionName": "Canterbury",
+    "installedCapacityMw": 192.45035
+  },
+  {
+    "label": "GSP_54",
+    "gspId": 54,
+    "gspName": "CAPEA1",
+    "gspGroup": "CAPEA1",
+    "regionName": "Capenhurst",
+    "installedCapacityMw": 30.193714
+  },
+  {
+    "label": "GSP_55",
+    "gspId": 55,
+    "gspName": "CARE_1",
+    "gspGroup": "CARE_1",
+    "regionName": "Cardiff East",
+    "installedCapacityMw": 36.711926
+  },
+  {
+    "label": "GSP_56",
+    "gspId": 56,
+    "gspName": "CARR_1",
+    "gspGroup": "CARR_1",
+    "regionName": "Carrington",
+    "installedCapacityMw": 19.042726
+  },
+  {
+    "label": "GSP_57",
+    "gspId": 57,
+    "gspName": "CASS_P",
+    "gspGroup": "CASS_P",
+    "regionName": "Cassley",
+    "installedCapacityMw": 0.18023028
+  },
+  {
+    "label": "GSP_58",
+    "gspId": 58,
+    "gspName": "CATY",
+    "gspGroup": "CATY",
+    "regionName": "Carntyne",
+    "installedCapacityMw": 2.1209381
+  },
+  {
+    "label": "GSP_59",
+    "gspId": 59,
+    "gspName": "CEAN_P",
+    "gspGroup": "CEAN_P",
+    "regionName": "Ceannacroc",
+    "installedCapacityMw": 0.090568375
+  },
+  {
+    "label": "GSP_60",
+    "gspId": 60,
+    "gspName": "CELL_1",
+    "gspGroup": "CELL_1",
+    "regionName": "Cellarhead",
+    "installedCapacityMw": 166.43056
+  },
+  {
+    "label": "GSP_61",
+    "gspId": 61,
+    "gspName": "CHAP",
+    "gspGroup": "CHAP",
+    "regionName": "Chapelcross",
+    "installedCapacityMw": 9.9758589
+  },
+  {
+    "label": "GSP_62",
+    "gspId": 62,
+    "gspName": "CHAR_P",
+    "gspGroup": "CHAR_P",
+    "regionName": "Charleston",
+    "installedCapacityMw": 4.5181044
+  },
+  {
+    "label": "GSP_63",
+    "gspId": 63,
+    "gspName": "CHAS",
+    "gspGroup": "CHAS",
+    "regionName": "Charlotte Street",
+    "installedCapacityMw": 2.581481
+  },
+  {
+    "label": "GSP_64",
+    "gspId": 64,
+    "gspName": "CHIC_1",
+    "gspGroup": "CHIC_1",
+    "regionName": "Chickerell",
+    "installedCapacityMw": 64.295083
+  },
+  {
+    "label": "GSP_65",
+    "gspId": 65,
+    "gspName": "CHSI_1",
+    "gspGroup": "CHSI_1",
+    "regionName": "Chessington",
+    "installedCapacityMw": 34.423944
+  },
+  {
+    "label": "GSP_66",
+    "gspId": 66,
+    "gspName": "CHTE_1",
+    "gspGroup": "CHTE_1",
+    "regionName": "Chesterfield",
+    "installedCapacityMw": 306.5616
+  },
+  {
+    "label": "GSP_67",
+    "gspId": 67,
+    "gspName": "CITR_1",
+    "gspGroup": "CITR_1",
+    "regionName": "City Road",
+    "installedCapacityMw": 3.8003946
+  },
+  {
+    "label": "GSP_68",
+    "gspId": 68,
+    "gspName": "CLAY_P",
+    "gspGroup": "CLAY_P",
+    "regionName": "Clayhills",
+    "installedCapacityMw": 0.74359247
+  },
+  {
+    "label": "GSP_69",
+    "gspId": 69,
+    "gspName": "CLYM",
+    "gspGroup": "CLYM",
+    "regionName": "Clyde’s Mill",
+    "installedCapacityMw": 6.4362094
+  },
+  {
+    "label": "GSP_70",
+    "gspId": 70,
+    "gspName": "COAT",
+    "gspGroup": "COAT",
+    "regionName": "Coatbridge",
+    "installedCapacityMw": 6.5366986
+  },
+  {
+    "label": "GSP_71",
+    "gspId": 71,
+    "gspName": "COCK",
+    "gspGroup": "COCK",
+    "regionName": "Cockenzie",
+    "installedCapacityMw": 11.9982
+  },
+  {
+    "label": "GSP_72",
+    "gspId": 72,
+    "gspName": "CONQA1|SASA",
+    "gspGroup": "CONQA1|SASA",
+    "regionName": "Connahs Quay",
+    "installedCapacityMw": 135.49833
+  },
+  {
+    "label": "GSP_73",
+    "gspId": 73,
+    "gspName": "COUA_P",
+    "gspGroup": "COUA_P",
+    "regionName": "Coupar Angus",
+    "installedCapacityMw": 8.3742162
+  },
+  {
+    "label": "GSP_74",
+    "gspId": 74,
+    "gspName": "COVE_1",
+    "gspGroup": "COVE_1",
+    "regionName": "Coventry",
+    "installedCapacityMw": 280.76176
+  },
+  {
+    "label": "GSP_75",
+    "gspId": 75,
+    "gspName": "COWL_1|ECLA_H",
+    "gspGroup": "COWL_1|ECLA_H",
+    "regionName": "Cowley",
+    "installedCapacityMw": 368.05336
+  },
+  {
+    "label": "GSP_76",
+    "gspId": 76,
+    "gspName": "COYL",
+    "gspGroup": "COYL",
+    "regionName": "Coylton",
+    "installedCapacityMw": 6.7125637
+  },
+  {
+    "label": "GSP_77",
+    "gspId": 77,
+    "gspName": "CRAI_P",
+    "gspGroup": "CRAI_P",
+    "regionName": "Craigiebuckler",
+    "installedCapacityMw": 3.6788882
+  },
+  {
+    "label": "GSP_78",
+    "gspId": 78,
+    "gspName": "CREB_1",
+    "gspGroup": "CREB_1",
+    "regionName": "Creyke Beck",
+    "installedCapacityMw": 201.59443
+  },
+  {
+    "label": "GSP_79",
+    "gspId": 79,
+    "gspName": "CROO",
+    "gspGroup": "CROO",
+    "regionName": "Crookston",
+    "installedCapacityMw": 5.2573543
+  },
+  {
+    "label": "GSP_80",
+    "gspId": 80,
+    "gspName": "CUMB",
+    "gspGroup": "CUMB",
+    "regionName": "Cumbernauld",
+    "installedCapacityMw": 5.7669518
+  },
+  {
+    "label": "GSP_81",
+    "gspId": 81,
+    "gspName": "CUPA",
+    "gspGroup": "CUPA",
+    "regionName": "Cupar",
+    "installedCapacityMw": 17.876036
+  },
+  {
+    "label": "GSP_82",
+    "gspId": 82,
+    "gspName": "CURR",
+    "gspGroup": "CURR",
+    "regionName": "Currie",
+    "installedCapacityMw": 1.5133159
+  },
+  {
+    "label": "GSP_83",
+    "gspId": 83,
+    "gspName": "DALM3",
+    "gspGroup": "DALM3",
+    "regionName": "Dalmarnock",
+    "installedCapacityMw": 2.6113848
+  },
+  {
+    "label": "GSP_84",
+    "gspId": 84,
+    "gspName": "DEVM",
+    "gspGroup": "DEVM",
+    "regionName": "Devol Moor",
+    "installedCapacityMw": 2.5785119
+  },
+  {
+    "label": "GSP_85",
+    "gspId": 85,
+    "gspName": "DEVO",
+    "gspGroup": "DEVO",
+    "regionName": "Devonside",
+    "installedCapacityMw": 16.785377
+  },
+  {
+    "label": "GSP_86",
+    "gspId": 86,
+    "gspName": "DEWP",
+    "gspGroup": "DEWP",
+    "regionName": "Dewar Place",
+    "installedCapacityMw": 1.0391302
+  },
+  {
+    "label": "GSP_87",
+    "gspId": 87,
+    "gspName": "DOUN_P",
+    "gspGroup": "DOUN_P",
+    "regionName": "Dounreay",
+    "installedCapacityMw": 0.53599154
+  },
+  {
+    "label": "GSP_88",
+    "gspId": 88,
+    "gspName": "DRAK_1",
+    "gspGroup": "DRAK_1",
+    "regionName": "Drakelow",
+    "installedCapacityMw": 132.7595
+  },
+  {
+    "label": "GSP_89",
+    "gspId": 89,
+    "gspName": "DRAX_1",
+    "gspGroup": "DRAX_1",
+    "regionName": "Drax",
+    "installedCapacityMw": 10.027629
+  },
+  {
+    "label": "GSP_90",
+    "gspId": 90,
+    "gspName": "DRCR",
+    "gspGroup": "DRCR",
+    "regionName": "Drumcross",
+    "installedCapacityMw": 1.444743
+  },
+  {
+    "label": "GSP_91",
+    "gspId": 91,
+    "gspName": "DRUM",
+    "gspGroup": "DRUM",
+    "regionName": "Drumchapel",
+    "installedCapacityMw": 4.0196918
+  },
+  {
+    "label": "GSP_92",
+    "gspId": 92,
+    "gspName": "DUBE_P",
+    "gspGroup": "DUBE_P",
+    "regionName": "Dunbeath",
+    "installedCapacityMw": 0
+  },
+  {
+    "label": "GSP_93",
+    "gspId": 93,
+    "gspName": "DUDH_P|GLAG_P",
+    "gspGroup": "DUDH_P",
+    "regionName": "Dudhope",
+    "installedCapacityMw": 1.8374834
+  },
+  {
+    "label": "GSP_94",
+    "gspId": 94,
+    "gspName": "DUGR_P",
+    "gspGroup": "DUGR_P",
+    "regionName": "Dunvegan",
+    "installedCapacityMw": 0.9790245
+  },
+  {
+    "label": "GSP_95",
+    "gspId": 95,
+    "gspName": "DUMF",
+    "gspGroup": "DUMF",
+    "regionName": "Dumfries",
+    "installedCapacityMw": 12.277916
+  },
+  {
+    "label": "GSP_96",
+    "gspId": 96,
+    "gspName": "DUNB",
+    "gspGroup": "DUNB",
+    "regionName": "Dunbar",
+    "installedCapacityMw": 7.0878099
+  },
+  {
+    "label": "GSP_97",
+    "gspId": 97,
+    "gspName": "DUNF|TOWH",
+    "gspGroup": "DUNF",
+    "regionName": "Dunfermline",
+    "installedCapacityMw": 7.9935279
+  },
+  {
+    "label": "GSP_98",
+    "gspId": 98,
+    "gspName": "DUNO_P",
+    "gspGroup": "DUNO_P",
+    "regionName": "Dunoon",
+    "installedCapacityMw": 3.1527399
+  },
+  {
+    "label": "GSP_99",
+    "gspId": 99,
+    "gspName": "DYCE_P",
+    "gspGroup": "DYCE_P",
+    "regionName": "Dyce",
+    "installedCapacityMw": 7.9088703
+  },
+  {
+    "label": "GSP_100",
+    "gspId": 100,
+    "gspName": "EALI_6",
+    "gspGroup": "EALI_6",
+    "regionName": "Ealing",
+    "installedCapacityMw": 13.907549
+  },
+  {
+    "label": "GSP_101",
+    "gspId": 101,
+    "gspName": "EASO_1",
+    "gspGroup": "EASO_1",
+    "regionName": "Eaton Socon",
+    "installedCapacityMw": 321.62676
+  },
+  {
+    "label": "GSP_102",
+    "gspId": 102,
+    "gspName": "ECCL",
+    "gspGroup": "ECCL",
+    "regionName": "Eccles",
+    "installedCapacityMw": 9.83947
+  },
+  {
+    "label": "GSP_103",
+    "gspId": 103,
+    "gspName": "ECLA_1",
+    "gspGroup": "ECLA_1",
+    "regionName": "East Claydon",
+    "installedCapacityMw": 220.84934
+  },
+  {
+    "label": "GSP_104",
+    "gspId": 104,
+    "gspName": "EERH",
+    "gspGroup": "EERH",
+    "regionName": "Easterhouse",
+    "installedCapacityMw": 9.6730145
+  },
+  {
+    "label": "GSP_105",
+    "gspId": 105,
+    "gspName": "EKIL",
+    "gspGroup": "EKIL",
+    "regionName": "East Kilbride",
+    "installedCapacityMw": 7.0459627
+  },
+  {
+    "label": "GSP_106",
+    "gspId": 106,
+    "gspName": "EKIS",
+    "gspGroup": "EKIS",
+    "regionName": "East Kilbride South",
+    "installedCapacityMw": 1.202488
+  },
+  {
+    "label": "GSP_107",
+    "gspId": 107,
+    "gspName": "ELDE",
+    "gspGroup": "ELDE",
+    "regionName": "Elderslie",
+    "installedCapacityMw": 2.3293737
+  },
+  {
+    "label": "GSP_108",
+    "gspId": 108,
+    "gspName": "ELGI_P",
+    "gspGroup": "ELGI_P",
+    "regionName": "Elgin",
+    "installedCapacityMw": 9.9351222
+  },
+  {
+    "label": "GSP_109",
+    "gspId": 109,
+    "gspName": "ELLA_1",
+    "gspGroup": "ELLA_1",
+    "regionName": "Elland",
+    "installedCapacityMw": 40.657317
+  },
+  {
+    "label": "GSP_110",
+    "gspId": 110,
+    "gspName": "ELST_1",
+    "gspGroup": "ELST_1",
+    "regionName": "Elstree",
+    "installedCapacityMw": 43.539888
+  },
+  {
+    "label": "GSP_111",
+    "gspId": 111,
+    "gspName": "ENDE_1",
+    "gspGroup": "ENDE_1",
+    "regionName": "Enderby",
+    "installedCapacityMw": 214.26342
+  },
+  {
+    "label": "GSP_112",
+    "gspId": 112,
+    "gspName": "ERSK",
+    "gspGroup": "ERSK",
+    "regionName": "Erskine",
+    "installedCapacityMw": 3.6935293
+  },
+  {
+    "label": "GSP_113",
+    "gspId": 113,
+    "gspName": "EXET1",
+    "gspGroup": "EXET1",
+    "regionName": "Exeter",
+    "installedCapacityMw": 275.01851
+  },
+  {
+    "label": "GSP_114",
+    "gspId": 114,
+    "gspName": "FASN_P",
+    "gspGroup": "FASN_P",
+    "regionName": "Fasnakyle",
+    "installedCapacityMw": 0.14888543
+  },
+  {
+    "label": "GSP_115",
+    "gspId": 115,
+    "gspName": "FAUG_P",
+    "gspGroup": "FAUG_P",
+    "regionName": "Fort Augustus",
+    "installedCapacityMw": 0.88268576
+  },
+  {
+    "label": "GSP_116",
+    "gspId": 116,
+    "gspName": "FAWL_1",
+    "gspGroup": "FAWL_1",
+    "regionName": "Fawley",
+    "installedCapacityMw": 117.56743
+  },
+  {
+    "label": "GSP_117",
+    "gspId": 117,
+    "gspName": "FECK_6",
+    "gspGroup": "FECK_6",
+    "regionName": "Feckenham",
+    "installedCapacityMw": 366.49484
+  },
+  {
+    "label": "GSP_118",
+    "gspId": 118,
+    "gspName": "FERRA2",
+    "gspGroup": "FERRA2",
+    "regionName": "Ferrybridge (Zone 1)",
+    "installedCapacityMw": 29.982947
+  },
+  {
+    "label": "GSP_119",
+    "gspId": 119,
+    "gspName": "FERRB_M",
+    "gspGroup": "FERRB_M|FERRB1",
+    "regionName": "Ferrybridge (Zone 2)",
+    "installedCapacityMw": 59.847627
+  },
+  {
+    "label": "GSP_120",
+    "gspId": 120,
+    "gspName": "FETT_P|KINT_P|ROTI3",
+    "gspGroup": "FETT_P|KINT_P",
+    "regionName": "Kintore",
+    "installedCapacityMw": 21.649971
+  },
+  {
+    "label": "GSP_121",
+    "gspId": 121,
+    "gspName": "FIDD_P",
+    "gspGroup": "FIDD_P",
+    "regionName": "Fiddes",
+    "installedCapacityMw": 6.7610443
+  },
+  {
+    "label": "GSP_122",
+    "gspId": 122,
+    "gspName": "FIDF_1",
+    "gspGroup": "FIDF_1",
+    "regionName": "Fiddlers Ferry",
+    "installedCapacityMw": 51.027986
+  },
+  {
+    "label": "GSP_123",
+    "gspId": 123,
+    "gspName": "FINN",
+    "gspGroup": "FINN",
+    "regionName": "Finnieston",
+    "installedCapacityMw": 0.066066592
+  },
+  {
+    "label": "GSP_124",
+    "gspId": 124,
+    "gspName": "FOUR_1",
+    "gspGroup": "FOUR_1",
+    "regionName": "Fourstones",
+    "installedCapacityMw": 3.9526945
+  },
+  {
+    "label": "GSP_125",
+    "gspId": 125,
+    "gspName": "FRAS_P",
+    "gspGroup": "FRAS_P",
+    "regionName": "Fraserburgh",
+    "installedCapacityMw": 7.3169461
+  },
+  {
+    "label": "GSP_126",
+    "gspId": 126,
+    "gspName": "FROD_1",
+    "gspGroup": "FROD_1",
+    "regionName": "Frodsham",
+    "installedCapacityMw": 12.32109
+  },
+  {
+    "label": "GSP_127",
+    "gspId": 127,
+    "gspName": "FWIL_P",
+    "gspGroup": "FWIL_P",
+    "regionName": "Fort William",
+    "installedCapacityMw": 3.637955
+  },
+  {
+    "label": "GSP_128",
+    "gspId": 128,
+    "gspName": "GALA",
+    "gspGroup": "GALA",
+    "regionName": "Galashiels",
+    "installedCapacityMw": 8.6694866
+  },
+  {
+    "label": "GSP_129",
+    "gspId": 129,
+    "gspName": "GIFF",
+    "gspGroup": "GIFF",
+    "regionName": "Giffnock",
+    "installedCapacityMw": 5.7785511
+  },
+  {
+    "label": "GSP_130",
+    "gspId": 130,
+    "gspName": "GLLU",
+    "gspGroup": "GLLU",
+    "regionName": "Glenluce",
+    "installedCapacityMw": 4.2416748
+  },
+  {
+    "label": "GSP_131",
+    "gspId": 131,
+    "gspName": "GLNI",
+    "gspGroup": "GLNI",
+    "regionName": "Glenniston",
+    "installedCapacityMw": 3.0236201
+  },
+  {
+    "label": "GSP_132",
+    "gspId": 132,
+    "gspName": "GLRO",
+    "gspGroup": "GLRO",
+    "regionName": "Glenrothes",
+    "installedCapacityMw": 3.8922162
+  },
+  {
+    "label": "GSP_133",
+    "gspId": 133,
+    "gspName": "GORG",
+    "gspGroup": "GORG",
+    "regionName": "Gorgie",
+    "installedCapacityMw": 0.36325598
+  },
+  {
+    "label": "GSP_134",
+    "gspId": 134,
+    "gspName": "GOVA",
+    "gspGroup": "GOVA",
+    "regionName": "Govan",
+    "installedCapacityMw": 1.5809465
+  },
+  {
+    "label": "GSP_135",
+    "gspId": 135,
+    "gspName": "GREN_1",
+    "gspGroup": "GREN_1",
+    "regionName": "Grendon",
+    "installedCapacityMw": 396.53536
+  },
+  {
+    "label": "GSP_136",
+    "gspId": 136,
+    "gspName": "GRIW_1",
+    "gspGroup": "GRIW_1",
+    "regionName": "Grimsby West",
+    "installedCapacityMw": 101.31275
+  },
+  {
+    "label": "GSP_137",
+    "gspId": 137,
+    "gspName": "GRMO",
+    "gspGroup": "GRMO",
+    "regionName": "Grangemouth",
+    "installedCapacityMw": 5.9018177
+  },
+  {
+    "label": "GSP_138",
+    "gspId": 138,
+    "gspName": "GRUB_P",
+    "gspGroup": "GRUB_P",
+    "regionName": "Grudie Bridge",
+    "installedCapacityMw": 1.7390251
+  },
+  {
+    "label": "GSP_139",
+    "gspId": 139,
+    "gspName": "G_EXTRA_12",
+    "gspGroup": "G_EXTRA_12",
+    "regionName": "G_EXTRA_12",
+    "installedCapacityMw": 1.4514739
+  },
+  {
+    "label": "GSP_140",
+    "gspId": 140,
+    "gspName": "HACK_1|HACK_6",
+    "gspGroup": "HACK_1|HACK_6",
+    "regionName": "Hackney",
+    "installedCapacityMw": 16.537302
+  },
+  {
+    "label": "GSP_141",
+    "gspId": 141,
+    "gspName": "HAGR",
+    "gspGroup": "HAGR",
+    "regionName": "Haggs Road",
+    "installedCapacityMw": 2.1566081
+  },
+  {
+    "label": "GSP_142",
+    "gspId": 142,
+    "gspName": "HAMHC1",
+    "gspGroup": "HAMHC1",
+    "regionName": "Hams Hall",
+    "installedCapacityMw": 87.911509
+  },
+  {
+    "label": "GSP_143",
+    "gspId": 143,
+    "gspName": "HARK_1|HUTT_1|RRIG",
+    "gspGroup": "HARK_1|HUTT_1|RRIG",
+    "regionName": "Hutton",
+    "installedCapacityMw": 148.02427
+  },
+  {
+    "label": "GSP_144",
+    "gspId": 144,
+    "gspName": "HARM_6",
+    "gspGroup": "HARM_6",
+    "regionName": "Hart Moor",
+    "installedCapacityMw": 92.655566
+  },
+  {
+    "label": "GSP_145",
+    "gspId": 145,
+    "gspName": "HAWI",
+    "gspGroup": "HAWI",
+    "regionName": "Hawick",
+    "installedCapacityMw": 3.8200642
+  },
+  {
+    "label": "GSP_146",
+    "gspId": 146,
+    "gspName": "HAWP_6",
+    "gspGroup": "HAWP_6",
+    "regionName": "Hawthorn Pit",
+    "installedCapacityMw": 25.734544
+  },
+  {
+    "label": "GSP_147",
+    "gspId": 147,
+    "gspName": "HELE",
+    "gspGroup": "HELE",
+    "regionName": "Helensburgh",
+    "installedCapacityMw": 3.0547686
+  },
+  {
+    "label": "GSP_148",
+    "gspId": 148,
+    "gspName": "HEYS_1|HEYS1|ORMO",
+    "gspGroup": "HEYS_1|HEYS1|ORMO",
+    "regionName": "Heysham",
+    "installedCapacityMw": 32.129241
+  },
+  {
+    "label": "GSP_149",
+    "gspId": 149,
+    "gspName": "HUER",
+    "gspGroup": "HUER",
+    "regionName": "Hunterston Farm",
+    "installedCapacityMw": 0.27203596
+  },
+  {
+    "label": "GSP_150",
+    "gspId": 150,
+    "gspName": "HURS_1",
+    "gspGroup": "HURS_1",
+    "regionName": "Hurst",
+    "installedCapacityMw": 18.268627
+  },
+  {
+    "label": "GSP_151",
+    "gspId": 151,
+    "gspName": "IMPK_1",
+    "gspGroup": "IMPK_1",
+    "regionName": "Imperial Park",
+    "installedCapacityMw": 0
+  },
+  {
+    "label": "GSP_152",
+    "gspId": 152,
+    "gspName": "INDQ1",
+    "gspGroup": "INDQ1",
+    "regionName": "Indian Queens",
+    "installedCapacityMw": 438.46515
+  },
+  {
+    "label": "GSP_153",
+    "gspId": 153,
+    "gspName": "INKE",
+    "gspGroup": "INKE",
+    "regionName": "Inverkeithing",
+    "installedCapacityMw": 4.3055325
+  },
+  {
+    "label": "GSP_154",
+    "gspId": 154,
+    "gspName": "INNE_P",
+    "gspGroup": "INNE_P",
+    "regionName": "Inverness",
+    "installedCapacityMw": 9.0926394
+  },
+  {
+    "label": "GSP_155",
+    "gspId": 155,
+    "gspName": "IROA1",
+    "gspGroup": "IROA1",
+    "regionName": "Iron Acton",
+    "installedCapacityMw": 232.52247
+  },
+  {
+    "label": "GSP_156",
+    "gspId": 156,
+    "gspName": "IRONB1",
+    "gspGroup": "IRONB1",
+    "regionName": "Ironbridge",
+    "installedCapacityMw": 118.54359
+  },
+  {
+    "label": "GSP_157",
+    "gspId": 157,
+    "gspName": "ISLI_1|WHAM_1",
+    "gspGroup": "ISLI_1|WHAM_1",
+    "regionName": "West Ham",
+    "installedCapacityMw": 15.095795
+  },
+  {
+    "label": "GSP_158",
+    "gspId": 158,
+    "gspName": "IVER_1|IVER_6",
+    "gspGroup": "IVER_1|IVER_6",
+    "regionName": "Iver",
+    "installedCapacityMw": 35.081175
+  },
+  {
+    "label": "GSP_159",
+    "gspId": 159,
+    "gspName": "JOHN",
+    "gspGroup": "JOHN",
+    "regionName": "Johnstone",
+    "installedCapacityMw": 5.770687
+  },
+  {
+    "label": "GSP_160",
+    "gspId": 160,
+    "gspName": "JORD_3",
+    "gspGroup": "JORD_3",
+    "regionName": "Jordanthorpe",
+    "installedCapacityMw": 7.766248
+  },
+  {
+    "label": "GSP_161",
+    "gspId": 161,
+    "gspName": "KAIM",
+    "gspGroup": "KAIM",
+    "regionName": "Kaimes",
+    "installedCapacityMw": 21.933768
+  },
+  {
+    "label": "GSP_162",
+    "gspId": 162,
+    "gspName": "KEAD_1",
+    "gspGroup": "KEAD_1",
+    "regionName": "Keadby",
+    "installedCapacityMw": 180.48881
+  },
+  {
+    "label": "GSP_163",
+    "gspId": 163,
+    "gspName": "KEAR_1|KEAR_3",
+    "gspGroup": "KEAR_1|KEAR_3",
+    "regionName": "Kearsley",
+    "installedCapacityMw": 62.717654
+  },
+  {
+    "label": "GSP_164",
+    "gspId": 164,
+    "gspName": "KEMS_1",
+    "gspGroup": "KEMS_1",
+    "regionName": "Kemsley",
+    "installedCapacityMw": 93.676292
+  },
+  {
+    "label": "GSP_165",
+    "gspId": 165,
+    "gspName": "KIBY_1",
+    "gspGroup": "KIBY_1",
+    "regionName": "Kirkby (Zone 1)",
+    "installedCapacityMw": 34.090932
+  },
+  {
+    "label": "GSP_166",
+    "gspId": 166,
+    "gspName": "KIBY_G|WASF_1",
+    "gspGroup": "KIBY_G|WASF_1",
+    "regionName": "Kirkby (Zone 2)",
+    "installedCapacityMw": 15.081889
+  },
+  {
+    "label": "GSP_167",
+    "gspId": 167,
+    "gspName": "KIER",
+    "gspGroup": "KIER",
+    "regionName": "Killermont",
+    "installedCapacityMw": 11.766638
+  },
+  {
+    "label": "GSP_168",
+    "gspId": 168,
+    "gspName": "KIIN_P",
+    "gspGroup": "KIIN_P",
+    "regionName": "Killin",
+    "installedCapacityMw": 0.77627744
+  },
+  {
+    "label": "GSP_169",
+    "gspId": 169,
+    "gspName": "KILB",
+    "gspGroup": "KILB",
+    "regionName": "Kilbowie",
+    "installedCapacityMw": 1.946007
+  },
+  {
+    "label": "GSP_170",
+    "gspId": 170,
+    "gspName": "KILS",
+    "gspGroup": "KILS",
+    "regionName": "Kilmarnock South",
+    "installedCapacityMw": 23.488975
+  },
+  {
+    "label": "GSP_171",
+    "gspId": 171,
+    "gspName": "KILT",
+    "gspGroup": "KILT",
+    "regionName": "Kilmarnock Town",
+    "installedCapacityMw": 7.7109295
+  },
+  {
+    "label": "GSP_172",
+    "gspId": 172,
+    "gspName": "KILW",
+    "gspGroup": "KILW",
+    "regionName": "Kilwinning",
+    "installedCapacityMw": 11.846534
+  },
+  {
+    "label": "GSP_173",
+    "gspId": 173,
+    "gspName": "KINL_P",
+    "gspGroup": "KINL_P",
+    "regionName": "Kinlochleven",
+    "installedCapacityMw": 0.31005182
+  },
+  {
+    "label": "GSP_174",
+    "gspId": 174,
+    "gspName": "KINO_1",
+    "gspGroup": "KINO_1",
+    "regionName": "Kingsnorth",
+    "installedCapacityMw": 27.92096
+  },
+  {
+    "label": "GSP_175",
+    "gspId": 175,
+    "gspName": "KIRKB1",
+    "gspGroup": "KIRKB1",
+    "regionName": "Kirkstall",
+    "installedCapacityMw": 22.192071
+  },
+  {
+    "label": "GSP_176",
+    "gspId": 176,
+    "gspName": "KITW_1",
+    "gspGroup": "KITW_1",
+    "regionName": "Kitwell",
+    "installedCapacityMw": 30.136207
+  },
+  {
+    "label": "GSP_177",
+    "gspId": 177,
+    "gspName": "KNAR",
+    "gspGroup": "KNAR",
+    "regionName": "Knaresborough",
+    "installedCapacityMw": 80.152051
+  },
+  {
+    "label": "GSP_178",
+    "gspId": 178,
+    "gspName": "LACK_6",
+    "gspGroup": "LACK_6",
+    "regionName": "Lackenby",
+    "installedCapacityMw": 24.477144
+  },
+  {
+    "label": "GSP_179",
+    "gspId": 179,
+    "gspName": "LAIR_P",
+    "gspGroup": "LAIR_P",
+    "regionName": "Lairg",
+    "installedCapacityMw": 0.34193804
+  },
+  {
+    "label": "GSP_180",
+    "gspId": 180,
+    "gspName": "LALE1SG003",
+    "gspGroup": "LALE1SG003",
+    "regionName": "Laleham",
+    "installedCapacityMw": 19.722887
+  },
+  {
+    "label": "GSP_181",
+    "gspId": 181,
+    "gspName": "LAND1",
+    "gspGroup": "LAND1",
+    "regionName": "Landulph",
+    "installedCapacityMw": 163.70433
+  },
+  {
+    "label": "GSP_182",
+    "gspId": 182,
+    "gspName": "LEGA_1",
+    "gspGroup": "LEGA_1",
+    "regionName": "Legacy",
+    "installedCapacityMw": 242.96856
+  },
+  {
+    "label": "GSP_183",
+    "gspId": 183,
+    "gspName": "LEVE",
+    "gspGroup": "LEVE",
+    "regionName": "Leven",
+    "installedCapacityMw": 8.8507453
+  },
+  {
+    "label": "GSP_184",
+    "gspId": 184,
+    "gspName": "LING",
+    "gspGroup": "LING",
+    "regionName": "Livingston East",
+    "installedCapacityMw": 10.958706
+  },
+  {
+    "label": "GSP_185",
+    "gspId": 185,
+    "gspName": "LINM",
+    "gspGroup": "LINM",
+    "regionName": "Linnmill",
+    "installedCapacityMw": 11.814091
+  },
+  {
+    "label": "GSP_186",
+    "gspId": 186,
+    "gspName": "LISD_1",
+    "gspGroup": "LISD_1",
+    "regionName": "Lister Drive",
+    "installedCapacityMw": 17.424686
+  },
+  {
+    "label": "GSP_187",
+    "gspId": 187,
+    "gspName": "LITT_C",
+    "gspGroup": "LITT_C",
+    "regionName": "Littlebrook (Zone 1)",
+    "installedCapacityMw": 11.556179
+  },
+  {
+    "label": "GSP_188",
+    "gspId": 188,
+    "gspName": "LITT_J",
+    "gspGroup": "LITT_J",
+    "regionName": "Littlebrook (Zone 2)",
+    "installedCapacityMw": 2.1212405
+  },
+  {
+    "label": "GSP_189",
+    "gspId": 189,
+    "gspName": "LODR_6",
+    "gspGroup": "LODR_6",
+    "regionName": "Lodge Road",
+    "installedCapacityMw": 5.609965
+  },
+  {
+    "label": "GSP_190",
+    "gspId": 190,
+    "gspName": "LOUD_H",
+    "gspGroup": "LOUD_H",
+    "regionName": "Loudwater",
+    "installedCapacityMw": 7.7992697
+  },
+  {
+    "label": "GSP_191",
+    "gspId": 191,
+    "gspName": "LOVE_1",
+    "gspGroup": "LOVE_1",
+    "regionName": "Lovedean",
+    "installedCapacityMw": 301.29785
+  },
+  {
+    "label": "GSP_192",
+    "gspId": 192,
+    "gspName": "LUNA_P",
+    "gspGroup": "LUNA_P",
+    "regionName": "Lunanhead",
+    "installedCapacityMw": 25.253179
+  },
+  {
+    "label": "GSP_193",
+    "gspId": 193,
+    "gspName": "LYND_P",
+    "gspGroup": "LYND_P",
+    "regionName": "Lyndhurst",
+    "installedCapacityMw": 2.5257388
+  },
+  {
+    "label": "GSP_194",
+    "gspId": 194,
+    "gspName": "MACC_3",
+    "gspGroup": "MACC_3",
+    "regionName": "Macclesfield",
+    "installedCapacityMw": 10.794797
+  },
+  {
+    "label": "GSP_195",
+    "gspId": 195,
+    "gspName": "MACD_P",
+    "gspGroup": "MACD_P",
+    "regionName": "Macduff",
+    "installedCapacityMw": 4.3943106
+  },
+  {
+    "label": "GSP_196",
+    "gspId": 196,
+    "gspName": "MAGA_6",
+    "gspGroup": "MAGA_6",
+    "regionName": "Margam",
+    "installedCapacityMw": 3.7428612
+  },
+  {
+    "label": "GSP_197",
+    "gspId": 197,
+    "gspName": "MANN_1",
+    "gspGroup": "MANN_1",
+    "regionName": "Mannington",
+    "installedCapacityMw": 578.61568
+  },
+  {
+    "label": "GSP_198",
+    "gspId": 198,
+    "gspName": "MAYB",
+    "gspGroup": "MAYB",
+    "regionName": "Maybole",
+    "installedCapacityMw": 3.130269
+  },
+  {
+    "label": "GSP_199",
+    "gspId": 199,
+    "gspName": "MELK_1",
+    "gspGroup": "MELK_1",
+    "regionName": "Melksham",
+    "installedCapacityMw": 608.16952
+  },
+  {
+    "label": "GSP_200",
+    "gspId": 200,
+    "gspName": "MILC_P",
+    "gspGroup": "MILC_P",
+    "regionName": "Milton of Craigie",
+    "installedCapacityMw": 7.4991672
+  },
+  {
+    "label": "GSP_201",
+    "gspId": 201,
+    "gspName": "MILH_1",
+    "gspGroup": "MILH_1",
+    "regionName": "Mill Hill",
+    "installedCapacityMw": 12.845365
+  },
+  {
+    "label": "GSP_202",
+    "gspId": 202,
+    "gspName": "MITY_1",
+    "gspGroup": "MITY_1",
+    "regionName": "Minety",
+    "installedCapacityMw": 414.34587
+  },
+  {
+    "label": "GSP_203",
+    "gspId": 203,
+    "gspName": "MYBS_P",
+    "gspGroup": "MYBS_P",
+    "regionName": "Mybster",
+    "installedCapacityMw": 1.6161352
+  },
+  {
+    "label": "GSP_204",
+    "gspId": 204,
+    "gspName": "NAIR_P",
+    "gspGroup": "NAIR_P",
+    "regionName": "Nairn",
+    "installedCapacityMw": 8.0900397
+  },
+  {
+    "label": "GSP_205",
+    "gspId": 205,
+    "gspName": "NEAR",
+    "gspGroup": "NEAR",
+    "regionName": "Newarthill",
+    "installedCapacityMw": 10.889957
+  },
+  {
+    "label": "GSP_206",
+    "gspId": 206,
+    "gspName": "NECE_1",
+    "gspGroup": "NECE_1",
+    "regionName": "Nechells",
+    "installedCapacityMw": 20.219579
+  },
+  {
+    "label": "GSP_207",
+    "gspId": 207,
+    "gspName": "NEEP_3",
+    "gspGroup": "NEEP_3",
+    "regionName": "Neepsend",
+    "installedCapacityMw": 8.1996342
+  },
+  {
+    "label": "GSP_208",
+    "gspId": 208,
+    "gspName": "NETS",
+    "gspGroup": "NETS",
+    "regionName": "Newton Stewart",
+    "installedCapacityMw": 3.4831948
+  },
+  {
+    "label": "GSP_209",
+    "gspId": 209,
+    "gspName": "NEWX_6",
+    "gspGroup": "NEWX_6",
+    "regionName": "New Cross",
+    "installedCapacityMw": 19.610014
+  },
+  {
+    "label": "GSP_210",
+    "gspId": 210,
+    "gspName": "NFLE",
+    "gspGroup": "NFLE",
+    "regionName": "Northfleet East",
+    "installedCapacityMw": 120.28292
+  },
+  {
+    "label": "GSP_211",
+    "gspId": 211,
+    "gspName": "NHYD_6",
+    "gspGroup": "NHYD_6",
+    "regionName": "North Hyde",
+    "installedCapacityMw": 12.942358
+  },
+  {
+    "label": "GSP_212",
+    "gspId": 212,
+    "gspName": "NINF_1",
+    "gspGroup": "NINF_1",
+    "regionName": "Ninfield",
+    "installedCapacityMw": 239.25165
+  },
+  {
+    "label": "GSP_213",
+    "gspId": 213,
+    "gspName": "NORL_3",
+    "gspGroup": "NORL_3",
+    "regionName": "Norton Lees",
+    "installedCapacityMw": 7.5094261
+  },
+  {
+    "label": "GSP_214",
+    "gspId": 214,
+    "gspName": "NORM_1|SALL1",
+    "gspGroup": "NORM_1|SALL1",
+    "regionName": "Norwich Main",
+    "installedCapacityMw": 455.98592
+  },
+  {
+    "label": "GSP_215",
+    "gspId": 215,
+    "gspName": "NORT_1",
+    "gspGroup": "NORT_1",
+    "regionName": "Norton",
+    "installedCapacityMw": 218.33321
+  },
+  {
+    "label": "GSP_216",
+    "gspId": 216,
+    "gspName": "NURS_1",
+    "gspGroup": "NURS_1",
+    "regionName": "Nursling",
+    "installedCapacityMw": 165.95463
+  },
+  {
+    "label": "GSP_217",
+    "gspId": 217,
+    "gspName": "OCKH_1",
+    "gspGroup": "OCKH_1",
+    "regionName": "Ocker Hill",
+    "installedCapacityMw": 6.1624148
+  },
+  {
+    "label": "GSP_218",
+    "gspId": 218,
+    "gspName": "OFFE_3",
+    "gspGroup": "OFFE_3",
+    "regionName": "Offerton",
+    "installedCapacityMw": 7.4310279
+  },
+  {
+    "label": "GSP_219",
+    "gspId": 219,
+    "gspName": "OLDB_1",
+    "gspGroup": "OLDB_1",
+    "regionName": "Oldbury",
+    "installedCapacityMw": 9.4855101
+  },
+  {
+    "label": "GSP_220",
+    "gspId": 220,
+    "gspName": "OSBA_1",
+    "gspGroup": "OSBA_1",
+    "regionName": "Osbaldwick",
+    "installedCapacityMw": 55.605043
+  },
+  {
+    "label": "GSP_221",
+    "gspId": 221,
+    "gspName": "PADIB1",
+    "gspGroup": "PADIB1",
+    "regionName": "Padiham",
+    "installedCapacityMw": 36.46781
+  },
+  {
+    "label": "GSP_222",
+    "gspId": 222,
+    "gspName": "PAIS",
+    "gspGroup": "PAIS",
+    "regionName": "Paisley",
+    "installedCapacityMw": 2.4200323
+  },
+  {
+    "label": "GSP_223",
+    "gspId": 223,
+    "gspName": "PART",
+    "gspGroup": "PART",
+    "regionName": "Partick",
+    "installedCapacityMw": 1.1873657
+  },
+  {
+    "label": "GSP_224",
+    "gspId": 224,
+    "gspName": "PEHG_P",
+    "gspGroup": "PEHG_P",
+    "regionName": "Peterhead Grange",
+    "installedCapacityMw": 3.7887637
+  },
+  {
+    "label": "GSP_225",
+    "gspId": 225,
+    "gspName": "PEHS_P|STRI_P",
+    "gspGroup": "PEHS_P|STRI_P",
+    "regionName": "Peterhead Shell",
+    "installedCapacityMw": 13.093462
+  },
+  {
+    "label": "GSP_226",
+    "gspId": 226,
+    "gspName": "PELH_1",
+    "gspGroup": "PELH_1",
+    "regionName": "Pelham",
+    "installedCapacityMw": 347.90657
+  },
+  {
+    "label": "GSP_227",
+    "gspId": 227,
+    "gspName": "PEMB_1",
+    "gspGroup": "PEMB_1",
+    "regionName": "Pembroke",
+    "installedCapacityMw": 223.01101
+  },
+  {
+    "label": "GSP_228",
+    "gspId": 228,
+    "gspName": "PENE_1",
+    "gspGroup": "PENE_1",
+    "regionName": "Penwortham",
+    "installedCapacityMw": 71.072735
+  },
+  {
+    "label": "GSP_229",
+    "gspId": 229,
+    "gspName": "PENN_1",
+    "gspGroup": "PENN_1",
+    "regionName": "Penn",
+    "installedCapacityMw": 59.493295
+  },
+  {
+    "label": "GSP_230",
+    "gspId": 230,
+    "gspName": "PENT_1",
+    "gspGroup": "PENT_1",
+    "regionName": "Pentir",
+    "installedCapacityMw": 58.055847
+  },
+  {
+    "label": "GSP_231",
+    "gspId": 231,
+    "gspName": "PENW_1|STAH_1|WABO",
+    "gspGroup": "PENW_1|STAH_1|WABO",
+    "regionName": "Penwortham",
+    "installedCapacityMw": 106.00534
+  },
+  {
+    "label": "GSP_232",
+    "gspId": 232,
+    "gspName": "PERS_P",
+    "gspGroup": "PERS_P",
+    "regionName": "Persley",
+    "installedCapacityMw": 5.2377322
+  },
+  {
+    "label": "GSP_233",
+    "gspId": 233,
+    "gspName": "PITS_3",
+    "gspGroup": "PITS_3",
+    "regionName": "Pitsmoor",
+    "installedCapacityMw": 5.5532588
+  },
+  {
+    "label": "GSP_234",
+    "gspId": 234,
+    "gspName": "POOB",
+    "gspGroup": "POOB",
+    "regionName": "Portobello",
+    "installedCapacityMw": 9.1963611
+  },
+  {
+    "label": "GSP_235",
+    "gspId": 235,
+    "gspName": "POPP_3",
+    "gspGroup": "POPP_3",
+    "regionName": "Poppleton",
+    "installedCapacityMw": 6.9055946
+  },
+  {
+    "label": "GSP_236",
+    "gspId": 236,
+    "gspName": "PORA_P",
+    "gspGroup": "PORA_P",
+    "regionName": "Port Ann",
+    "installedCapacityMw": 3.0130176
+  },
+  {
+    "label": "GSP_237",
+    "gspId": 237,
+    "gspName": "PORD",
+    "gspGroup": "PORD",
+    "regionName": "Port Dundas",
+    "installedCapacityMw": 1.8455395
+  },
+  {
+    "label": "GSP_238",
+    "gspId": 238,
+    "gspName": "PYLE_1",
+    "gspGroup": "PYLE_1",
+    "regionName": "Pyle",
+    "installedCapacityMw": 47.597268
+  },
+  {
+    "label": "GSP_239",
+    "gspId": 239,
+    "gspName": "QUOI_P",
+    "gspGroup": "QUOI_P",
+    "regionName": "Quoich",
+    "installedCapacityMw": 0.010416265
+  },
+  {
+    "label": "GSP_240",
+    "gspId": 240,
+    "gspName": "RAIN_1",
+    "gspGroup": "RAIN_1",
+    "regionName": "Rainhill",
+    "installedCapacityMw": 48.7963
+  },
+  {
+    "label": "GSP_241",
+    "gspId": 241,
+    "gspName": "RANN_P",
+    "gspGroup": "RANN_P",
+    "regionName": "Rannoch",
+    "installedCapacityMw": 0.17192352
+  },
+  {
+    "label": "GSP_242",
+    "gspId": 242,
+    "gspName": "RASS_1",
+    "gspGroup": "RASS_1",
+    "regionName": "Rassau",
+    "installedCapacityMw": 113.03228
+  },
+  {
+    "label": "GSP_243",
+    "gspId": 243,
+    "gspName": "RATS_1",
+    "gspGroup": "RATS_1",
+    "regionName": "Ratcliffe",
+    "installedCapacityMw": 110.6252
+  },
+  {
+    "label": "GSP_244",
+    "gspId": 244,
+    "gspName": "RAVE|WISH",
+    "gspGroup": "RAVE|WISH",
+    "regionName": "Ravenscraig",
+    "installedCapacityMw": 9.7687342
+  },
+  {
+    "label": "GSP_245",
+    "gspId": 245,
+    "gspName": "RAYL_1",
+    "gspGroup": "RAYL_1",
+    "regionName": "Rayleigh",
+    "installedCapacityMw": 340.87264
+  },
+  {
+    "label": "GSP_246",
+    "gspId": 246,
+    "gspName": "REBR_3",
+    "gspGroup": "REBR_3",
+    "regionName": "Redbridge",
+    "installedCapacityMw": 6.2804315
+  },
+  {
+    "label": "GSP_247",
+    "gspId": 247,
+    "gspName": "REDH",
+    "gspGroup": "REDH",
+    "regionName": "Redhouse",
+    "installedCapacityMw": 14.027151
+  },
+  {
+    "label": "GSP_248",
+    "gspId": 248,
+    "gspName": "REDM_P",
+    "gspGroup": "REDM_P",
+    "regionName": "Redmoss",
+    "installedCapacityMw": 4.7034158
+  },
+  {
+    "label": "GSP_249",
+    "gspId": 249,
+    "gspName": "ROCH_1",
+    "gspGroup": "ROCH_1",
+    "regionName": "Rochdale",
+    "installedCapacityMw": 25.871942
+  },
+  {
+    "label": "GSP_250",
+    "gspId": 250,
+    "gspName": "RUGEB1",
+    "gspGroup": "RUGEB1",
+    "regionName": "Rugeley",
+    "installedCapacityMw": 31.00959
+  },
+  {
+    "label": "GSP_251",
+    "gspId": 251,
+    "gspName": "RYEH_1",
+    "gspGroup": "RYEH_1",
+    "regionName": "Rye House",
+    "installedCapacityMw": 35.343525
+  },
+  {
+    "label": "GSP_252",
+    "gspId": 252,
+    "gspName": "SACO",
+    "gspGroup": "SACO",
+    "regionName": "Saltcoats",
+    "installedCapacityMw": 26.760274
+  },
+  {
+    "label": "GSP_253",
+    "gspId": 253,
+    "gspName": "SALH_1",
+    "gspGroup": "SALH_1",
+    "regionName": "Saltholme",
+    "installedCapacityMw": 1.5984723
+  },
+  {
+    "label": "GSP_254",
+    "gspId": 254,
+    "gspName": "SALT_1",
+    "gspGroup": "SALT_1",
+    "regionName": "Saltend North",
+    "installedCapacityMw": 14.136508
+  },
+  {
+    "label": "GSP_255",
+    "gspId": 255,
+    "gspName": "SANX",
+    "gspGroup": "SANX",
+    "regionName": "St Andrews Cross",
+    "installedCapacityMw": 1.1247161
+  },
+  {
+    "label": "GSP_256",
+    "gspId": 256,
+    "gspName": "SBAR",
+    "gspGroup": "SBAR",
+    "regionName": "Stoke Bardolph",
+    "installedCapacityMw": 85.443415
+  },
+  {
+    "label": "GSP_257",
+    "gspId": 257,
+    "gspName": "SEAB1|SAFO_1",
+    "gspGroup": "SEAB1",
+    "regionName": "Seabank",
+    "installedCapacityMw": 247.74037
+  },
+  {
+    "label": "GSP_258",
+    "gspId": 258,
+    "gspName": "SELL_1",
+    "gspGroup": "SELL_1",
+    "regionName": "Sellindge",
+    "installedCapacityMw": 110.41108
+  },
+  {
+    "label": "GSP_259",
+    "gspId": 259,
+    "gspName": "SFEG_P",
+    "gspGroup": "SFEG_P",
+    "regionName": "St Fergus Gas Terminal",
+    "installedCapacityMw": 0.8077869
+  },
+  {
+    "label": "GSP_260",
+    "gspId": 260,
+    "gspName": "SFIL_P",
+    "gspGroup": "SFIL_P",
+    "regionName": "St Fillans",
+    "installedCapacityMw": 0.44411988
+  },
+  {
+    "label": "GSP_261",
+    "gspId": 261,
+    "gspName": "SHEC_3",
+    "gspGroup": "SHEC_3",
+    "regionName": "Sheffield City",
+    "installedCapacityMw": 2.5994505
+  },
+  {
+    "label": "GSP_262",
+    "gspId": 262,
+    "gspName": "SHIN_P",
+    "gspGroup": "SHIN_P",
+    "regionName": "Shin",
+    "installedCapacityMw": 0.46929336
+  },
+  {
+    "label": "GSP_263",
+    "gspId": 263,
+    "gspName": "SHRU",
+    "gspGroup": "SHRU",
+    "regionName": "Shrubhill",
+    "installedCapacityMw": 1.3462747
+  },
+  {
+    "label": "GSP_264",
+    "gspId": 264,
+    "gspName": "SHRW_1",
+    "gspGroup": "SHRW_1",
+    "regionName": "Shrewsbury",
+    "installedCapacityMw": 90.316288
+  },
+  {
+    "label": "GSP_265",
+    "gspId": 265,
+    "gspName": "SIGH",
+    "gspGroup": "SIGH",
+    "regionName": "Sighthill",
+    "installedCapacityMw": 17.462962
+  },
+  {
+    "label": "GSP_266",
+    "gspId": 266,
+    "gspName": "SJOW_1",
+    "gspGroup": "SJOW_1",
+    "regionName": "St Johns Wood",
+    "installedCapacityMw": 7.9500891
+  },
+  {
+    "label": "GSP_267",
+    "gspId": 267,
+    "gspName": "SKLGB1",
+    "gspGroup": "SKLGB1",
+    "regionName": "Skelton Grange",
+    "installedCapacityMw": 57.540652
+  },
+  {
+    "label": "GSP_268",
+    "gspId": 268,
+    "gspName": "SLOY_P",
+    "gspGroup": "SLOY_P",
+    "regionName": "Sloy",
+    "installedCapacityMw": 0.1980093
+  },
+  {
+    "label": "GSP_269",
+    "gspId": 269,
+    "gspName": "SMAN_1",
+    "gspGroup": "SMAN_1",
+    "regionName": "South Manchester",
+    "installedCapacityMw": 23.557979
+  },
+  {
+    "label": "GSP_270",
+    "gspId": 270,
+    "gspName": "SPAV",
+    "gspGroup": "SPAV",
+    "regionName": "Spango Valley",
+    "installedCapacityMw": 1.8380147
+  },
+  {
+    "label": "GSP_271",
+    "gspId": 271,
+    "gspName": "SPEN_1",
+    "gspGroup": "SPEN_1",
+    "regionName": "Spennymoor",
+    "installedCapacityMw": 92.184895
+  },
+  {
+    "label": "GSP_272",
+    "gspId": 272,
+    "gspName": "SSHI_3",
+    "gspGroup": "SSHI_3",
+    "regionName": "South Shields",
+    "installedCapacityMw": 6.8314619
+  },
+  {
+    "label": "GSP_273",
+    "gspId": 273,
+    "gspName": "STAL_1",
+    "gspGroup": "STAL_1",
+    "regionName": "Stalybridge",
+    "installedCapacityMw": 41.990781
+  },
+  {
+    "label": "GSP_274",
+    "gspId": 274,
+    "gspName": "STAY_1",
+    "gspGroup": "STAY_1",
+    "regionName": "Staythorpe",
+    "installedCapacityMw": 432.6421
+  },
+  {
+    "label": "GSP_275",
+    "gspId": 275,
+    "gspName": "STEN_1",
+    "gspGroup": "STEN_1",
+    "regionName": "Stella North",
+    "installedCapacityMw": 22.876181
+  },
+  {
+    "label": "GSP_276",
+    "gspId": 276,
+    "gspName": "STES_1",
+    "gspGroup": "STES_1",
+    "regionName": "Stella South",
+    "installedCapacityMw": 32.057593
+  },
+  {
+    "label": "GSP_277",
+    "gspId": 277,
+    "gspName": "STHA",
+    "gspGroup": "STHA",
+    "regionName": "Strathaven",
+    "installedCapacityMw": 4.1990382
+  },
+  {
+    "label": "GSP_278",
+    "gspId": 278,
+    "gspName": "STIR",
+    "gspGroup": "STIR",
+    "regionName": "Stirling",
+    "installedCapacityMw": 18.170878
+  },
+  {
+    "label": "GSP_279",
+    "gspId": 279,
+    "gspName": "STLE",
+    "gspGroup": "STLE",
+    "regionName": "Strathleven",
+    "installedCapacityMw": 7.0288037
+  },
+  {
+    "label": "GSP_280",
+    "gspId": 280,
+    "gspName": "SUND_1",
+    "gspGroup": "SUND_1",
+    "regionName": "Sundon",
+    "installedCapacityMw": 207.40435
+  },
+  {
+    "label": "GSP_281",
+    "gspId": 281,
+    "gspName": "SWAN_1",
+    "gspGroup": "SWAN_1",
+    "regionName": "Swansea North",
+    "installedCapacityMw": 466.48082
+  },
+  {
+    "label": "GSP_282",
+    "gspId": 282,
+    "gspName": "TARL_P",
+    "gspGroup": "TARL_P",
+    "regionName": "Tarland",
+    "installedCapacityMw": 11.086455
+  },
+  {
+    "label": "GSP_283",
+    "gspId": 283,
+    "gspName": "TAUN1",
+    "gspGroup": "TAUN1",
+    "regionName": "Taunton",
+    "installedCapacityMw": 94.431822
+  },
+  {
+    "label": "GSP_284",
+    "gspId": 284,
+    "gspName": "TAYN_P",
+    "gspGroup": "TAYN_P",
+    "regionName": "Taynuilt",
+    "installedCapacityMw": 4.7481228
+  },
+  {
+    "label": "GSP_285",
+    "gspId": 285,
+    "gspName": "TELR",
+    "gspGroup": "TELR",
+    "regionName": "Telford Road",
+    "installedCapacityMw": 2.5412797
+  },
+  {
+    "label": "GSP_286",
+    "gspId": 286,
+    "gspName": "TEMP_3",
+    "gspGroup": "TEMP_3",
+    "regionName": "Templeborough",
+    "installedCapacityMw": 0.53969251
+  },
+  {
+    "label": "GSP_287",
+    "gspId": 287,
+    "gspName": "THOM_6",
+    "gspGroup": "THOM_6",
+    "regionName": "Thorpe Marsh",
+    "installedCapacityMw": 77.058758
+  },
+  {
+    "label": "GSP_288",
+    "gspId": 288,
+    "gspName": "THSO_P",
+    "gspGroup": "THSO_P",
+    "regionName": "Thurso",
+    "installedCapacityMw": 4.9722479
+  },
+  {
+    "label": "GSP_289",
+    "gspId": 289,
+    "gspName": "THUR_6",
+    "gspGroup": "THUR_6",
+    "regionName": "Thurcroft",
+    "installedCapacityMw": 30.01782
+  },
+  {
+    "label": "GSP_290",
+    "gspId": 290,
+    "gspName": "TILBB_1",
+    "gspGroup": "TILBB_1",
+    "regionName": "Tilbury",
+    "installedCapacityMw": 97.677296
+  },
+  {
+    "label": "GSP_291",
+    "gspId": 291,
+    "gspName": "TOTT_1",
+    "gspGroup": "TOTT_1",
+    "regionName": "Tottenham",
+    "installedCapacityMw": 16.049611
+  },
+  {
+    "label": "GSP_292",
+    "gspId": 292,
+    "gspName": "TRAW_1",
+    "gspGroup": "TRAW_1",
+    "regionName": "Trawsfynydd",
+    "installedCapacityMw": 40.370753
+  },
+  {
+    "label": "GSP_293",
+    "gspId": 293,
+    "gspName": "TUMB_P",
+    "gspGroup": "TUMB_P",
+    "regionName": "Tummel Bridge",
+    "installedCapacityMw": 3.0793849
+  },
+  {
+    "label": "GSP_294",
+    "gspId": 294,
+    "gspName": "TYNE_1|TYNE_2",
+    "gspGroup": "TYNE_1|TYNE_2",
+    "regionName": "Tynemouth",
+    "installedCapacityMw": 39.937134
+  },
+  {
+    "label": "GSP_295",
+    "gspId": 295,
+    "gspName": "UPPB_1|UPPB_3",
+    "gspGroup": "UPPB_1|UPPB_3",
+    "regionName": "Upper Boat",
+    "installedCapacityMw": 87.502963
+  },
+  {
+    "label": "GSP_296",
+    "gspId": 296,
+    "gspName": "WALH_1",
+    "gspGroup": "WALH_1",
+    "regionName": "Walham",
+    "installedCapacityMw": 122.05124
+  },
+  {
+    "label": "GSP_297",
+    "gspId": 297,
+    "gspName": "WALP_1",
+    "gspGroup": "WALP_1",
+    "regionName": "Walpole (Zone 1)",
+    "installedCapacityMw": 360.17001
+  },
+  {
+    "label": "GSP_298",
+    "gspId": 298,
+    "gspName": "WALP_B",
+    "gspGroup": "WALP_B",
+    "regionName": "Walpole (Zone 2)",
+    "installedCapacityMw": 225.09406
+  },
+  {
+    "label": "GSP_299",
+    "gspId": 299,
+    "gspName": "WARL_1",
+    "gspGroup": "WARL_1",
+    "regionName": "Warley",
+    "installedCapacityMw": 149.62312
+  },
+  {
+    "label": "GSP_300",
+    "gspId": 300,
+    "gspName": "WATFS_1",
+    "gspGroup": "WATFS_1",
+    "regionName": "Watford South",
+    "installedCapacityMw": 29.855303
+  },
+  {
+    "label": "GSP_301",
+    "gspId": 301,
+    "gspName": "WBOL_6",
+    "gspGroup": "WBOL_6",
+    "regionName": "West Boldon",
+    "installedCapacityMw": 41.815721
+  },
+  {
+    "label": "GSP_302",
+    "gspId": 302,
+    "gspName": "WBUR_1",
+    "gspGroup": "WBUR_1",
+    "regionName": "West Burton",
+    "installedCapacityMw": 166.68004
+  },
+  {
+    "label": "GSP_303",
+    "gspId": 303,
+    "gspName": "WFIE",
+    "gspGroup": "WFIE",
+    "regionName": "Westfield",
+    "installedCapacityMw": 3.9390927
+  },
+  {
+    "label": "GSP_304",
+    "gspId": 304,
+    "gspName": "WGEO",
+    "gspGroup": "WGEO",
+    "regionName": "West George Street",
+    "installedCapacityMw": 0.11493983
+  },
+  {
+    "label": "GSP_305",
+    "gspId": 305,
+    "gspName": "WHGA_1",
+    "gspGroup": "WHGA_1",
+    "regionName": "Whitegate",
+    "installedCapacityMw": 26.265023
+  },
+  {
+    "label": "GSP_306",
+    "gspId": 306,
+    "gspName": "WHHO",
+    "gspGroup": "WHHO",
+    "regionName": "Whitehouse",
+    "installedCapacityMw": 2.6471751
+  },
+  {
+    "label": "GSP_307",
+    "gspId": 307,
+    "gspName": "WIBA_3",
+    "gspGroup": "WIBA_3",
+    "regionName": "Wincobank",
+    "installedCapacityMw": 4.6525007
+  },
+  {
+    "label": "GSP_308",
+    "gspId": 308,
+    "gspName": "WIEN_1",
+    "gspGroup": "WIEN_1",
+    "regionName": "Willenhall",
+    "installedCapacityMw": 7.1365978
+  },
+  {
+    "label": "GSP_309",
+    "gspId": 309,
+    "gspName": "WILL_1",
+    "gspGroup": "WILL_1",
+    "regionName": "Willington",
+    "installedCapacityMw": 129.13934
+  },
+  {
+    "label": "GSP_310",
+    "gspId": 310,
+    "gspName": "WIMBN1|WIMBS1",
+    "gspGroup": "WIMBN1|WIMBS1",
+    "regionName": "Wimbledon",
+    "installedCapacityMw": 26.641973
+  },
+  {
+    "label": "GSP_311",
+    "gspId": 311,
+    "gspName": "WIOW_P",
+    "gspGroup": "WIOW_P",
+    "regionName": "Willowdale",
+    "installedCapacityMw": 1.1382259
+  },
+  {
+    "label": "GSP_312",
+    "gspId": 312,
+    "gspName": "WMEL_1",
+    "gspGroup": "WMEL_1",
+    "regionName": "West Melton",
+    "installedCapacityMw": 47.309535
+  },
+  {
+    "label": "GSP_313",
+    "gspId": 313,
+    "gspName": "WOHI_P",
+    "gspGroup": "WOHI_P",
+    "regionName": "Woodhill",
+    "installedCapacityMw": 3.3375375
+  },
+  {
+    "label": "GSP_314",
+    "gspId": 314,
+    "gspName": "WTHU31",
+    "gspGroup": "WTHU31",
+    "regionName": "West Thurrock",
+    "installedCapacityMw": 2.8592256
+  },
+  {
+    "label": "GSP_315",
+    "gspId": 315,
+    "gspName": "WWEY_1",
+    "gspGroup": "WWEY_1",
+    "regionName": "West Weybridge",
+    "installedCapacityMw": 55.672096
+  },
+  {
+    "label": "GSP_316",
+    "gspId": 316,
+    "gspName": "WYLF_1",
+    "gspGroup": "WYLF_1",
+    "regionName": "Wylfa",
+    "installedCapacityMw": 123.01579
+  },
+  {
+    "label": "GSP_317",
+    "gspId": 317,
+    "gspName": "WYMOM_1",
+    "gspGroup": "WYMOM_1",
+    "regionName": "Wymondley",
+    "installedCapacityMw": 74.745147
+  },
+  {
+    "label": "GSP_318",
+    "gspId": 318,
+    "gspName": "ACTL_C",
+    "gspGroup": "ACTL_C",
+    "regionName": "Acton Lane",
+    "installedCapacityMw": 1.8451385
+  },
+  {
+    "label": "GSP_319",
+    "gspId": 319,
+    "gspName": "AXMI_H",
+    "gspGroup": "AXMI_H",
+    "regionName": "Axminster",
+    "installedCapacityMw": 147.70121
+  },
+  {
+    "label": "GSP_320",
+    "gspId": 320,
+    "gspName": "BARKR_A",
+    "gspGroup": "BARKR_A",
+    "regionName": "Barking A",
+    "installedCapacityMw": 3.5438853
+  },
+  {
+    "label": "GSP_321",
+    "gspId": 321,
+    "gspName": "BARKR_C",
+    "gspGroup": "BARKR_C",
+    "regionName": "Barking C",
+    "installedCapacityMw": 1.6309642
+  },
+  {
+    "label": "GSP_322",
+    "gspId": 322,
+    "gspName": "BARKW3",
+    "gspGroup": "BARKW3",
+    "regionName": "Barking W3",
+    "installedCapacityMw": 19.385231
+  },
+  {
+    "label": "GSP_323",
+    "gspId": 323,
+    "gspName": "CANTN1",
+    "gspGroup": "CANTN1",
+    "regionName": "Canterbury",
+    "installedCapacityMw": 142.7197
+  },
+  {
+    "label": "GSP_324",
+    "gspId": 324,
+    "gspName": "COWL_1",
+    "gspGroup": "COWL_1",
+    "regionName": "Cowley",
+    "installedCapacityMw": 471.98423
+  },
+  {
+    "label": "GSP_325",
+    "gspId": 325,
+    "gspName": "ECLA_H",
+    "gspGroup": "ECLA_H",
+    "regionName": "East Claydon 2",
+    "installedCapacityMw": 14.110416
+  },
+  {
+    "label": "GSP_326",
+    "gspId": 326,
+    "gspName": "HACK_1",
+    "gspGroup": "HACK_1",
+    "regionName": "Hackney 1",
+    "installedCapacityMw": 14.715626
+  },
+  {
+    "label": "GSP_327",
+    "gspId": 327,
+    "gspName": "HACK_6",
+    "gspGroup": "HACK_6",
+    "regionName": "Hackney 6",
+    "installedCapacityMw": 9.502693
+  },
+  {
+    "label": "GSP_328",
+    "gspId": 328,
+    "gspName": "HARK_1|RRIG",
+    "gspGroup": "HARK_1|RRIG",
+    "regionName": "Harker and Robin Rigg",
+    "installedCapacityMw": 108.48902
+  },
+  {
+    "label": "GSP_329",
+    "gspId": 329,
+    "gspName": "HUTT_1",
+    "gspGroup": "HUTT_1",
+    "regionName": "Hutton",
+    "installedCapacityMw": 60.27608
+  },
+  {
+    "label": "GSP_330",
+    "gspId": 330,
+    "gspName": "ISLI_1",
+    "gspGroup": "ISLI_1",
+    "regionName": "Islington",
+    "installedCapacityMw": 4.4956837
+  },
+  {
+    "label": "GSP_331",
+    "gspId": 331,
+    "gspName": "KEAR_1",
+    "gspGroup": "KEAR_1",
+    "regionName": "Kearsley 1",
+    "installedCapacityMw": 52.87321
+  },
+  {
+    "label": "GSP_332",
+    "gspId": 332,
+    "gspName": "KEAR_3",
+    "gspGroup": "KEAR_3",
+    "regionName": "Kearsley 3",
+    "installedCapacityMw": 21.415146
+  },
+  {
+    "label": "GSP_333",
+    "gspId": 333,
+    "gspName": "PEHS_P",
+    "gspGroup": "PEHS_P",
+    "regionName": "Peterhead",
+    "installedCapacityMw": 0.40758776
+  },
+  {
+    "label": "GSP_334",
+    "gspId": 334,
+    "gspName": "RICH_J|RICH1",
+    "gspGroup": "RICH_J|RICH1",
+    "regionName": "Richborough",
+    "installedCapacityMw": 70.203235
+  },
+  {
+    "label": "GSP_335",
+    "gspId": 335,
+    "gspName": "STOR_P",
+    "gspGroup": "STOR_P",
+    "regionName": "Stornoway",
+    "installedCapacityMw": 1.5503694
+  },
+  {
+    "label": "GSP_336",
+    "gspId": 336,
+    "gspName": "STRI_P",
+    "gspGroup": "STRI_P",
+    "regionName": "Strichen",
+    "installedCapacityMw": 14.327333
+  },
+  {
+    "label": "GSP_337",
+    "gspId": 337,
+    "gspName": "TONG",
+    "gspGroup": "TONG",
+    "regionName": "Tongland",
+    "installedCapacityMw": 1.5536978
+  },
+  {
+    "label": "GSP_338",
+    "gspId": 338,
+    "gspName": "WHAM_1",
+    "gspGroup": "WHAM_1",
+    "regionName": "West Ham",
+    "installedCapacityMw": 8.4891099
+  },
+  {
+    "label": "GSP_339",
+    "gspId": 339,
+    "gspName": "WIMBN1",
+    "gspGroup": "WIMBN1",
+    "regionName": "Willesden 6",
+    "installedCapacityMw": 2.1282925
+  },
+  {
+    "label": "GSP_340",
+    "gspId": 340,
+    "gspName": "WIMBS1",
+    "gspGroup": "WIMBS1",
+    "regionName": "Willesden 1",
+    "installedCapacityMw": 28.380504
+  },
+  {
+    "label": "GSP_341",
+    "gspId": 341,
+    "gspName": "WISD_1",
+    "gspGroup": "WISD_1",
+    "regionName": "Wimbledon South",
+    "installedCapacityMw": 10.786201
+  },
+  {
+    "label": "GSP_342",
+    "gspId": 342,
+    "gspName": "WISD_6",
+    "gspGroup": "WISD_6",
+    "regionName": "Wimbledon North",
+    "installedCapacityMw": 1.4625939
+  },
+  {
+    "label": "GSP_1000",
+    "gspId": 1000,
+    "gspName": null,
+    "gspGroup": null,
+    "regionName": null,
+    "installedCapacityMw": null
+  }
+]
