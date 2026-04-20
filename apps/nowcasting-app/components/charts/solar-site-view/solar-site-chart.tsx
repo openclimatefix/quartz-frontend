@@ -101,7 +101,7 @@ const SolarSiteChart: FC<{
     1, 2, 3, 4, 6, 8, 9, 20, 28, 36, 45, 60, 80, 100, 120, 160, 200, 240, 300, 320, 360, 400, 450,
     600
   ];
-  yMax = getRoundedTickBoundary(yMax, yMax_levels);
+  yMax = Math.ceil(getRoundedTickBoundary(yMax, yMax_levels));
 
   const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
     const siteForecast = combinedSitesData.sitesPvForecastData.find(
