@@ -3,15 +3,15 @@ set -euo pipefail
 
 # Generate full DNO -> [GSP IDs] mapping directly from:
 # 1) source.geojson
-# 2) gspidmapping.json
+# 2) gsp_id_mapping.json
 # 3) dno_gsp_groupings.json
 #
-# Default output: _new_gsps.json
+# Default output: new_gsps.json
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GEOJSON_FILE="${1:-$SCRIPT_DIR/source.geojson}"
-GSPIDMAPPING_FILE="${2:-$SCRIPT_DIR/gspidmapping.json}"
+GSPIDMAPPING_FILE="${2:-$SCRIPT_DIR/gsp_id_mapping.json}"
 DNO_GROUPINGS_FILE="${3:-$SCRIPT_DIR/dno_gsp_groupings.json}"
-OUTPUT_FILE="${4:-$SCRIPT_DIR/_new_gsps.json}"
+OUTPUT_FILE="${4:-$SCRIPT_DIR/new_gsps.json}"
 MIN_MATCH="${5:-5}"
 
 for f in "$GEOJSON_FILE" "$GSPIDMAPPING_FILE" "$DNO_GROUPINGS_FILE"; do
