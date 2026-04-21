@@ -84,7 +84,7 @@ const useFormatChartDataSites = ({
         const formattedDate = getDatetimeUtc(dataPoint);
         if (!chartMap[formattedDate]) {
           chartMap[formattedDate] = {
-            formattedDate: new Date(convertToLocaleDateString(formattedDate)).getTime().toString(),
+            formattedDate: new Date(formattedDate).getTime().toString(),
             ...sitePvData
           };
         } else {

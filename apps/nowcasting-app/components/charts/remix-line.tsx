@@ -15,7 +15,6 @@ import {
 } from "recharts";
 import {
   convertToLocaleDateString,
-  dateToLondonDateTimeString,
   formatISODateStringHumanNumbersOnly,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate,
@@ -516,7 +515,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
-              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
+              x={
+                view === VIEWS.SOLAR_SITES
+                  ? new Date(currentTime + ":00.000Z").getTime()
+                  : currentTime
+              }
               stroke="white"
               strokeWidth={currentTime === timeOfInterest ? 2 : 1}
               yAxisId={"y-axis"}
@@ -797,8 +800,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
                 let formattedDate = data?.formattedDate + ":00+00:00";
                 if (view === VIEWS.SOLAR_SITES) {
-                  const date = new Date(Number(data?.formattedDate));
-                  formattedDate = dateToLondonDateTimeString(date);
+                  formattedDate = new Date(Number(data?.formattedDate)).toISOString();
                 }
 
                 return (
