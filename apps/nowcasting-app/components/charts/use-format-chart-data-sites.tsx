@@ -18,18 +18,14 @@ const getForecastChartData = (
   const generation =
     fr.expected_generation_kw > 20 ? fr.expected_generation_kw / 7000 : fr.expected_generation_kw;
 
-  if (new Date(fr.target_datetime_utc).getTime() > new Date(timeNow + ":00.000Z").getTime())
-    return {
-      [futureKey]: generation
-    };
-  else if (new Date(fr.target_datetime_utc).getTime() === new Date(timeNow + ":00.000Z").getTime())
-    return {
-      [futureKey]: generation
-    };
-  else
-    return {
-      [pastKey]: generation
-    };
+  const targetEpoch = new Date(
+    fr.target_datetime_utc.endsWith("Z") ? fr.target_datetime_utc : fr.target_datetime_utc + "Z"
+  ).getTime();
+  const timeNowEpoch = new Date(timeNow + ":00.000Z").getTime();
+
+  if (targetEpoch > timeNowEpoch) return { [futureKey]: generation };
+  else if (targetEpoch === timeNowEpoch) return { [futureKey]: generation };
+  else return { [pastKey]: generation };
 };
 // const getDelta: (datum: ChartData) => number = (datum) => {
 //   if (datum.PAST_FORECAST !== undefined) {
@@ -84,7 +80,11 @@ const useFormatChartDataSites = ({
         const formattedDate = getDatetimeUtc(dataPoint);
         if (!chartMap[formattedDate]) {
           chartMap[formattedDate] = {
-            formattedDate: new Date(formattedDate).getTime().toString(),
+            formattedDate: new Date(
+              formattedDate.endsWith("Z") ? formattedDate : formattedDate + "Z"
+            )
+              .getTime()
+              .toString(),
             ...sitePvData
           };
         } else {
