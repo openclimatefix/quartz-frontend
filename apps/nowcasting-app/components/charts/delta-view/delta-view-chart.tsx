@@ -376,7 +376,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
             />
           </div>
         </div>
-        {selectedMapRegionIds?.length && (
+        {selectedMapRegionIds && selectedMapRegionIds.length > 0 && (
           <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
               close={() => {
