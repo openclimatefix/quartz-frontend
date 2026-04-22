@@ -15,6 +15,19 @@
 
 // Import commands.js using ES2015 syntax:
 import "./commands";
+import "@percy/cypress";
+
+// Ignore known React hydration mismatches that can happen in test runs.
+Cypress.on("uncaught:exception", (err) => {
+	const message = err?.message || "";
+	if (
+		message.includes("Text content does not match server-rendered HTML") ||
+		message.includes("Hydration failed") ||
+		message.includes("hydrating")
+	) {
+		return false;
+	}
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
