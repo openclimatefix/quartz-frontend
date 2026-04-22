@@ -182,9 +182,8 @@ const mapZoneFeatures: (
         formatISODateString(targetTime),
         gsp
       );
-      zoneInstalledCapacity += Number(
-        combinedData?.allGspSystemData?.find((system) => system.gspId === gsp)?.installedCapacityMw
-      );
+      const gspSystemData = combinedData?.allGspSystemData?.find((system) => system.gspId === gsp);
+      zoneInstalledCapacity += Number(gspSystemData?.installedCapacityMw || 0);
     });
     return {
       ...feature,
