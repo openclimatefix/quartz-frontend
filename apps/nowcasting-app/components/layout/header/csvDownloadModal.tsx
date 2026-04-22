@@ -92,9 +92,9 @@ export const CSVDownloadModal: React.FC<Props> = ({
       <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div className="w-full max-w-[30rem] max-h-[85vh] overflow-y-auto rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
+        <div className="w-full max-w-[25rem] max-h-[85vh] overflow-y-auto rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between border-b border-white/35 bg-[#1d1e20] px-4 py-3">
+          <div className="sticky top-0 flex items-center justify-between border-b border-white/35 bg-[#1d1e20] px-4 py-2">
             <h2 className="font-semibold text-white">Select Data for Download</h2>
             <button
               type="button"
@@ -139,7 +139,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-[#1d1e20] px-4 pb-4 pt-2">
+          <div className="sticky bottom-0 bg-[#1d1e20] p-2">
             <button
               onClick={download}
               disabled={!selected.length}

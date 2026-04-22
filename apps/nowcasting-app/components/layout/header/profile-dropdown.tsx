@@ -170,7 +170,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                         onClick={() => setShowDownloadModal(true)}
                         className="ml-1 text-sm font-medium text-ocf-black-600"
                       >
-                        {`Download CSV`}
+                        {`Download CSV...`}
                       </button>
                     </div>
                   )}
