@@ -43,7 +43,7 @@ const getColumnConfig = (
 });
 
 const createEmptyRow = (timestamp: string): CSVRow => {
-  const end = DateTime.fromISO(timestamp);
+  const end = DateTime.fromISO(timestamp).setZone("Europe/London");
   const start = end.minus({ minutes: 30 });
   const settlementPeriod = getSettlementPeriodForDate(start);
 
