@@ -516,7 +516,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
-              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
+              x={
+                view === VIEWS.SOLAR_SITES
+                  ? new Date(currentTime + ":00.000Z").getTime()
+                  : currentTime
+              }
               stroke="white"
               strokeWidth={currentTime === timeOfInterest ? 2 : 1}
               yAxisId={"y-axis"}

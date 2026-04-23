@@ -595,6 +595,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     () => allSitesData?.site_list.slice(0, 100) || [],
     [allSitesData]
   );
+
+  // Remove NL sites
+  slicedSitesData.forEach((site, index) => {
+    if (site.client_site_name.startsWith("nl_")) {
+      slicedSitesData.splice(index, 1);
+    }
+  });
+
   const siteUuids = slicedSitesData.map((site) => site.site_uuid);
   const siteUuidsString = siteUuids?.join(",") || "";
   const {
@@ -710,7 +718,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           combinedDashboardModeActive ? " @container dashboard-mode" : ""
         }`}
       >
-        <Header view={view} setView={setView} />
+        <Header view={view} setView={setView} combinedData={combinedData} />
         <div
           id="map-container"
           className={`relative float-right h-full`}
