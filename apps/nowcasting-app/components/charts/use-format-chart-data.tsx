@@ -51,6 +51,8 @@ const getDelta: (datum: ChartData) => number = (datum) => {
       return Number(datum.GENERATION_UPDATED) - Number(datum.PAST_FORECAST);
     } else if (datum.GENERATION !== undefined) {
       return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
+    } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
+      return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
     }
   } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
     return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
