@@ -70,6 +70,10 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
         forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
+        <PlayButton
+          startTime={get30MinNow()}
+          endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}
+        ></PlayButton>
       </ForecastHeaderUI>
     );
   }

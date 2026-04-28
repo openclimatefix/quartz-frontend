@@ -108,9 +108,11 @@ const useGetGspData = (selectedRegions: string[]) => {
     isLoading: pvRealInDayLoading,
     error: pvRealInDayError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&gsp_ids=${encodeURIComponent(
-      selectedGspIds.join(",")
-    )}&compact=true`
+    selectedGspIds.length > 0
+      ? `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&gsp_ids=${encodeURIComponent(
+          selectedGspIds.join(",")
+        )}&compact=true`
+      : null
   );
   const pvRealDataIn = aggregateTruthData(pvRealDataInRaw, selectedGspIds, "solarGenerationKw");
 
@@ -119,9 +121,11 @@ const useGetGspData = (selectedRegions: string[]) => {
     isLoading: pvRealDayAfterLoading,
     error: pvRealDayAfterError
   } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=day-after&gsp_ids=${encodeURIComponent(
-      selectedGspIds.join(",")
-    )}&compact=true`
+    selectedGspIds.length > 0
+      ? `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=day-after&gsp_ids=${encodeURIComponent(
+          selectedGspIds.join(",")
+        )}&compact=true`
+      : null
   );
   const pvRealDataAfter = aggregateTruthData(
     pvRealDataAfterRaw,
@@ -135,9 +139,11 @@ const useGetGspData = (selectedRegions: string[]) => {
     isLoading: gspForecastSelectedGSPsLoading,
     error: gspForecastDataOneGSPError
   } = useLoadDataFromApi<components["schemas"]["OneDatetimeManyForecastValues"][]>(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
-      selectedGspIds.join(",")
-    )}&compact=true&historic=true&start_datetime_utc=${encodeURIComponent(startDatetime)}`,
+    selectedGspIds.length > 0
+      ? `${API_PREFIX}/solar/GB/gsp/forecast/all/?gsp_ids=${encodeURIComponent(
+          selectedGspIds.join(",")
+        )}&compact=true&historic=true&start_datetime_utc=${encodeURIComponent(startDatetime)}`
+      : null,
     {
       dedupingInterval: 1000 * 30
     }

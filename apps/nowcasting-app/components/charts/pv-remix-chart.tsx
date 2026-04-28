@@ -1,13 +1,13 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { get30MinNow } from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
+import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
@@ -94,6 +94,15 @@ const PvRemixChart: FC<{
   if (selectedMapRegionIds && selectedMapRegionIds.length > 0) {
     selectedRegions = selectedMapRegionIds.map((id) => String(id));
   }
+
+  const [view] = useGlobalState("view");
+  useEffect(() => {
+    if (view === VIEWS.FORECAST && chartData?.length) {
+      if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
+        setSelectedISOTime(get30MinNow());
+      }
+    }
+  }, [view, chartData, selectedTime, setSelectedISOTime]);
 
   return (
     <>

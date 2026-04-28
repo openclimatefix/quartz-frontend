@@ -80,7 +80,7 @@ const Header: React.FC<HeaderProps> = () => {
     let csv = csvHeader + csvBody;
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    const now = DateTime.now().setZone("ist");
+    const now = DateTime.now().setZone("Asia/Kolkata");
     const forecastHorizonString = forecastHorizon
       .split("_")
       .map((type) => type.charAt(0).toUpperCase() + type.slice(1))

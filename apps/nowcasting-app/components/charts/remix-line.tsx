@@ -516,7 +516,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
-              x={view === VIEWS.SOLAR_SITES ? new Date(currentTime).getTime() : currentTime}
+              x={
+                view === VIEWS.SOLAR_SITES
+                  ? new Date(currentTime + ":00.000Z").getTime()
+                  : currentTime
+              }
               stroke="white"
               strokeWidth={currentTime === timeOfInterest ? 2 : 1}
               yAxisId={"y-axis"}
@@ -805,9 +809,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
                     <ul className="">
                       <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
-                        <div className="pr-3">
-                          {formatISODateStringHumanNumbersOnly(formattedDate)}
-                        </div>
+                        <div className="pr-3">{formattedDate}</div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
                       {Object.entries(toolTiplabels)

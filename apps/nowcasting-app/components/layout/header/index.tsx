@@ -6,7 +6,7 @@ import { Menu } from "@headlessui/react";
 import { getViewTitle, VIEWS } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
-import useGlobalState from "../../helpers/globalState";
+import { CombinedData } from "../../types";
 
 type HeaderLinkProps = {
   url: string;
@@ -77,9 +77,19 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   );
 };
 
-type HeaderProps = { view: VIEWS; setView: Dispatch<SetStateAction<VIEWS>>; isLoggedIn?: boolean };
+type HeaderProps = {
+  view: VIEWS;
+  setView: Dispatch<SetStateAction<VIEWS>>;
+  isLoggedIn?: boolean;
+  combinedData?: CombinedData | null;
+};
 
-const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true }) => {
+const Header: React.FC<HeaderProps> = ({
+  view,
+  setView,
+  isLoggedIn = true,
+  combinedData = null
+}) => {
   return (
     <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
@@ -138,7 +148,11 @@ const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true }) => 
           </Menu>
         )}
       </div>
-      <div className="py-1">{isLoggedIn && <ProfileDropDown />}</div>
+      <div className="flex items-center gap-2">
+        <div className="py-1">
+          {isLoggedIn && <ProfileDropDown view={view} combinedData={combinedData} />}
+        </div>
+      </div>
     </header>
   );
 };

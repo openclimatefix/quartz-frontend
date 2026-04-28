@@ -1,0 +1,13 @@
+name: Reply to internal issue comment
+run-name: Reply to internal issue comment by ${{ github.actor }}
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  comment-nocontribution:
+    uses: openclimatefix/.github/.github/workflows/internal-issue-comment.yml@main
+    permissions:
+      issues: write
+    secrets: inherit

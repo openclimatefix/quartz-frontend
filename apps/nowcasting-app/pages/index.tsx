@@ -718,7 +718,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           combinedDashboardModeActive ? " @container dashboard-mode" : ""
         }`}
       >
-        <Header view={view} setView={setView} />
+        <Header view={view} setView={setView} combinedData={combinedData} />
         <div
           id="map-container"
           className={`relative float-right h-full`}

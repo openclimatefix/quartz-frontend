@@ -71,8 +71,8 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     version="1.1"
-    width="2rem"
-    height="2rem"
+    width="1.5rem"
+    height="1.5rem"
     viewBox="0 0 24 24"
   >
     <path
@@ -387,4 +387,33 @@ export const ZoomOutIcon = (props: React.SVGProps<SVGSVGElement> & { title: stri
     </svg>
   </span>
 );
+
+export const DownloadIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    className={className || ""}
+    xmlns="http://www.w3.org/2000/svg"
+    width={24}
+    height={24}
+    fill="none"
+  >
+    <path
+      fill="currentColor"
+      fillRule="evenodd"
+      d="m16.75 8.96-4.01 4.01-.707.708-.708-.707-4.01-4.01 1.414-1.415 2.304 2.303V2h2v7.85l2.303-2.304zM1 20.34v-9h6v2H3v5h18v-5h-4v-2h6v9H1"
+      clipRule="evenodd"
+    />
+  </svg>
+);
+
+export const ResetIcon = () => {
+  return `<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+    <g id="SVGRepo_iconCarrier">
+      <path d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0" fill-rule="evenodd">
+      </path>
+    </g>
+  </svg>`;
+};
+
 export default ZoomOutIcon;

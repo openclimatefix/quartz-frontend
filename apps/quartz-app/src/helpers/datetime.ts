@@ -42,7 +42,7 @@ export const formatEpochToPrettyTime = (time: number) => {
 };
 
 export const getNowInTimezone = () => {
-  const now = DateTime.now().setZone("ist");
+  const now = DateTime.now().setZone("Asia/Kolkata");
   return DateTime.fromISO(now.toString().slice(0, 16)).set({
     hour: now.minute >= 45 ? now.hour + 1 : now.hour,
     minute: now.minute < 45 ? Math.floor(now.minute / 15) * 15 : 0,
