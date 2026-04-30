@@ -11,7 +11,8 @@
     "lint": "next lint",
     "pre-commit": "pre-commit run",
     "test": "jest",
-    "test:cypress": "cypress run --browser chrome"
+    "test:cypress": "cypress run --browser chrome",
+    "fixtures:update": "node data/scripts/update_fixtures/update-cypress-fixtures.mjs"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
@@ -76,6 +77,7 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "cypress": "^13.6.4",
+    "dotenv": "^17.4.2",
     "eslint": "^8.23.1",
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",

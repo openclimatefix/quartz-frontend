@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "generatedAt": "2026-04-30T09:50:26.973Z",
+  "referenceTime": "2026-04-30T09:50:08.487Z",
+  "nHourForecast": 4,
+  "routes": [
+    {
+      "id": "solar-status",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/status\\??.*UI=true/",
+      "fixture": "solar_status.json"
+    },
+    {
+      "id": "gsp-system-zones",
+      "method": "GET",
+      "pattern": "/\\/v0\\/system\\/GB\\/gsp\\/\\?[^#]*zones=true.*UI=true/",
+      "fixture": "gsp_system_zones.json"
+    },
+    {
+      "id": "gsp-system-by-id",
+      "method": "GET",
+      "pattern": "/\\/v0\\/system\\/GB\\/gsp\\/\\?[^#]*gsp_id=\\d+.*UI=true/",
+      "fixture": "gsp_system_single.json"
+    },
+    {
+      "id": "gsp-system-list",
+      "method": "GET",
+      "pattern": "/\\/v0\\/system\\/GB\\/gsp\\/\\?[^#]*UI=true/",
+      "fixture": "gsp_system_list.json"
+    },
+    {
+      "id": "national-forecast-blend",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*model_name=blend.*trend_adjuster_on=true.*UI=true/",
+      "fixture": "national_forecast_blend.json"
+    },
+    {
+      "id": "national-forecast-pvnet-intraday-ecmwf-only",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*model_name=pvnet_intraday_ecmwf_only.*trend_adjuster_on=true.*UI=true/",
+      "fixture": "national_forecast_pvnet_intraday_ecmwf_only.json"
+    },
+    {
+      "id": "national-forecast-pvnet-day-ahead",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*model_name=pvnet_day_ahead.*trend_adjuster_on=true.*UI=true/",
+      "fixture": "national_forecast_pvnet_day_ahead.json"
+    },
+    {
+      "id": "national-forecast-pvnet-intraday",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*model_name=pvnet_intraday.*trend_adjuster_on=true.*UI=true/",
+      "fixture": "national_forecast_pvnet_intraday.json"
+    },
+    {
+      "id": "national-forecast-pvnet-met-office-only",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*model_name=pvnet_intraday_met_office_only.*trend_adjuster_on=true.*UI=true/",
+      "fixture": "national_forecast_pvnet_intraday_met_office_only.json"
+    },
+    {
+      "id": "national-forecast-pvnet-sat-only",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*model_name=pvnet_intraday_sat_only.*trend_adjuster_on=true.*UI=true/",
+      "fixture": "national_forecast_pvnet_intraday_sat_only.json"
+    },
+    {
+      "id": "national-pvlive-in-day",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/pvlive\\?.*regime=in-day.*UI=true/",
+      "fixture": "national_pvlive_in_day.json"
+    },
+    {
+      "id": "national-pvlive-day-after",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/pvlive\\?.*regime=day-after.*UI=true/",
+      "fixture": "national_pvlive_day_after.json"
+    },
+    {
+      "id": "national-forecast-n-hour",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/national\\/forecast\\?.*forecast_horizon_minutes=\\d+.*historic=true.*only_forecast_values=true.*UI=true/",
+      "fixture": "national_forecast_n_hour.json"
+    },
+    {
+      "id": "gsp-forecast-all-target",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/forecast\\/all\\/\\?.*compact=true.*start_datetime_utc=.*end_datetime_utc=.*UI=true/",
+      "fixture": "gsp_forecast_all_target.json"
+    },
+    {
+      "id": "gsp-forecast-all-historic",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/forecast\\/all\\/\\?.*historic=true.*start_datetime_utc=.*UI=true/",
+      "fixture": "gsp_forecast_all_historic.json"
+    },
+    {
+      "id": "gsp-forecast-all-by-ids",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/forecast\\/all\\/\\?.*gsp_ids=.*historic=true.*start_datetime_utc=.*UI=true/",
+      "fixture": "gsp_forecast_all_historic.json"
+    },
+    {
+      "id": "gsp-pvlive-all-future",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*regime=in-day.*start_datetime_utc=.*UI=true/",
+      "fixture": "gsp_pvlive_all_in_day.json"
+    },
+    {
+      "id": "gsp-pvlive-all-historic",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*end_datetime_utc=.*UI=true/",
+      "fixture": "gsp_pvlive_all_historic.json"
+    },
+    {
+      "id": "gsp-pvlive-by-ids-in-day",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*gsp_ids=.*regime=in-day.*UI=true/",
+      "fixture": "gsp_pvlive_all_in_day.json"
+    },
+    {
+      "id": "gsp-pvlive-by-ids-day-after",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*gsp_ids=.*regime=day-after.*UI=true/",
+      "fixture": "gsp_pvlive_all_day_after.json"
+    },
+    {
+      "id": "gsp-pvlive-all-day-after",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*regime=day-after.*UI=true/",
+      "fixture": "gsp_pvlive_all_day_after.json"
+    },
+    {
+      "id": "gsp-forecast-n-hour",
+      "method": "GET",
+      "pattern": "/\\/v0\\/solar\\/GB\\/gsp\\/\\d+\\/forecast\\?.*forecast_horizon_minutes=\\d+.*historic=true.*only_forecast_values=true.*UI=true/",
+      "fixture": "gsp_forecast_n_hour.json"
+    },
+    {
+      "id": "sites-status",
+      "method": "GET",
+      "pattern": "/\\/api_status\\??.*UI=true/",
+      "fixture": "sites_status.json"
+    },
+    {
+      "id": "sites-list",
+      "method": "GET",
+      "pattern": "/\\/sites\\??.*UI=true/",
+      "fixture": "sites_list.json"
+    },
+    {
+      "id": "sites-pv-forecast",
+      "method": "GET",
+      "pattern": "/\\/sites\\/pv_forecast\\?.*site_uuids=.*UI=true/",
+      "fixture": "sites_pv_forecast.json"
+    },
+    {
+      "id": "sites-pv-actual",
+      "method": "GET",
+      "pattern": "/\\/sites\\/pv_actual\\?.*site_uuids=.*UI=true/",
+      "fixture": "sites_pv_actual.json"
+    }
+  ]
+}

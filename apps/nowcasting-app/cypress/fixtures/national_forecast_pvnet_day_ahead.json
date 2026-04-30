@@ -1,0 +1,978 @@
+[
+  {
+    "targetTime": "2026-04-28T05:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 43.638
+    }
+  },
+  {
+    "targetTime": "2026-04-28T05:30:00Z",
+    "expectedPowerGenerationMegawatts": 24.24,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 126.758
+    }
+  },
+  {
+    "targetTime": "2026-04-28T06:00:00Z",
+    "expectedPowerGenerationMegawatts": 247.97,
+    "plevels": {
+      "plevel_10": 164.162,
+      "plevel_90": 405.21
+    }
+  },
+  {
+    "targetTime": "2026-04-28T06:30:00Z",
+    "expectedPowerGenerationMegawatts": 597.77,
+    "plevels": {
+      "plevel_10": 438.458,
+      "plevel_90": 829.122
+    }
+  },
+  {
+    "targetTime": "2026-04-28T07:00:00Z",
+    "expectedPowerGenerationMegawatts": 972.5,
+    "plevels": {
+      "plevel_10": 667.038,
+      "plevel_90": 1354.857
+    }
+  },
+  {
+    "targetTime": "2026-04-28T07:30:00Z",
+    "expectedPowerGenerationMegawatts": 1588.98,
+    "plevels": {
+      "plevel_10": 1213.553,
+      "plevel_90": 2071.768
+    }
+  },
+  {
+    "targetTime": "2026-04-28T08:00:00Z",
+    "expectedPowerGenerationMegawatts": 1913.84,
+    "plevels": {
+      "plevel_10": 1527.331,
+      "plevel_90": 2497.758
+    }
+  },
+  {
+    "targetTime": "2026-04-28T08:30:00Z",
+    "expectedPowerGenerationMegawatts": 2649.45,
+    "plevels": {
+      "plevel_10": 2258.788,
+      "plevel_90": 3272.853
+    }
+  },
+  {
+    "targetTime": "2026-04-28T09:00:00Z",
+    "expectedPowerGenerationMegawatts": 2819.16,
+    "plevels": {
+      "plevel_10": 2435.418,
+      "plevel_90": 3434.937
+    }
+  },
+  {
+    "targetTime": "2026-04-28T09:30:00Z",
+    "expectedPowerGenerationMegawatts": 3865.08,
+    "plevels": {
+      "plevel_10": 3426.625,
+      "plevel_90": 4478.094
+    }
+  },
+  {
+    "targetTime": "2026-04-28T10:00:00Z",
+    "expectedPowerGenerationMegawatts": 4469.78,
+    "plevels": {
+      "plevel_10": 3948.204,
+      "plevel_90": 5047.467
+    }
+  },
+  {
+    "targetTime": "2026-04-28T10:30:00Z",
+    "expectedPowerGenerationMegawatts": 5483.85,
+    "plevels": {
+      "plevel_10": 4883.305,
+      "plevel_90": 6074
+    }
+  },
+  {
+    "targetTime": "2026-04-28T11:00:00Z",
+    "expectedPowerGenerationMegawatts": 6693.94,
+    "plevels": {
+      "plevel_10": 6026.206,
+      "plevel_90": 7241.838
+    }
+  },
+  {
+    "targetTime": "2026-04-28T11:30:00Z",
+    "expectedPowerGenerationMegawatts": 7370.67,
+    "plevels": {
+      "plevel_10": 6753.507,
+      "plevel_90": 7873.55
+    }
+  },
+  {
+    "targetTime": "2026-04-28T12:00:00Z",
+    "expectedPowerGenerationMegawatts": 8749.77,
+    "plevels": {
+      "plevel_10": 8214.343,
+      "plevel_90": 9151.522
+    }
+  },
+  {
+    "targetTime": "2026-04-28T12:30:00Z",
+    "expectedPowerGenerationMegawatts": 8778.17,
+    "plevels": {
+      "plevel_10": 8359.803,
+      "plevel_90": 8985.281
+    }
+  },
+  {
+    "targetTime": "2026-04-28T13:00:00Z",
+    "expectedPowerGenerationMegawatts": 10212.69,
+    "plevels": {
+      "plevel_10": 9789.468,
+      "plevel_90": 10489.756
+    }
+  },
+  {
+    "targetTime": "2026-04-28T13:30:00Z",
+    "expectedPowerGenerationMegawatts": 9638.47,
+    "plevels": {
+      "plevel_10": 9186.847,
+      "plevel_90": 9993.112
+    }
+  },
+  {
+    "targetTime": "2026-04-28T14:00:00Z",
+    "expectedPowerGenerationMegawatts": 10429.49,
+    "plevels": {
+      "plevel_10": 10026.36,
+      "plevel_90": 10890.81
+    }
+  },
+  {
+    "targetTime": "2026-04-28T14:30:00Z",
+    "expectedPowerGenerationMegawatts": 9472.92,
+    "plevels": {
+      "plevel_10": 9085.026,
+      "plevel_90": 10003.503
+    }
+  },
+  {
+    "targetTime": "2026-04-28T15:00:00Z",
+    "expectedPowerGenerationMegawatts": 9607.99,
+    "plevels": {
+      "plevel_10": 9257.499,
+      "plevel_90": 10217.537
+    }
+  },
+  {
+    "targetTime": "2026-04-28T15:30:00Z",
+    "expectedPowerGenerationMegawatts": 8603.62,
+    "plevels": {
+      "plevel_10": 8272.526,
+      "plevel_90": 9226.33
+    }
+  },
+  {
+    "targetTime": "2026-04-28T16:00:00Z",
+    "expectedPowerGenerationMegawatts": 8068.88,
+    "plevels": {
+      "plevel_10": 7634.58,
+      "plevel_90": 8690.205
+    }
+  },
+  {
+    "targetTime": "2026-04-28T16:30:00Z",
+    "expectedPowerGenerationMegawatts": 6481.98,
+    "plevels": {
+      "plevel_10": 5984.646,
+      "plevel_90": 7061.051
+    }
+  },
+  {
+    "targetTime": "2026-04-28T17:00:00Z",
+    "expectedPowerGenerationMegawatts": 5228.25,
+    "plevels": {
+      "plevel_10": 4569.526,
+      "plevel_90": 5737.364
+    }
+  },
+  {
+    "targetTime": "2026-04-28T17:30:00Z",
+    "expectedPowerGenerationMegawatts": 3764.65,
+    "plevels": {
+      "plevel_10": 3131.549,
+      "plevel_90": 4224.578
+    }
+  },
+  {
+    "targetTime": "2026-04-28T18:00:00Z",
+    "expectedPowerGenerationMegawatts": 2387.62,
+    "plevels": {
+      "plevel_10": 1895.138,
+      "plevel_90": 2801.147
+    }
+  },
+  {
+    "targetTime": "2026-04-28T18:30:00Z",
+    "expectedPowerGenerationMegawatts": 1404.04,
+    "plevels": {
+      "plevel_10": 997.441,
+      "plevel_90": 1760.068
+    }
+  },
+  {
+    "targetTime": "2026-04-28T19:00:00Z",
+    "expectedPowerGenerationMegawatts": 572.14,
+    "plevels": {
+      "plevel_10": 353.26,
+      "plevel_90": 824.966
+    }
+  },
+  {
+    "targetTime": "2026-04-28T19:30:00Z",
+    "expectedPowerGenerationMegawatts": 198.1,
+    "plevels": {
+      "plevel_10": 49.872,
+      "plevel_90": 378.196
+    }
+  },
+  {
+    "targetTime": "2026-04-28T20:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 81.042
+    }
+  },
+  {
+    "targetTime": "2026-04-28T20:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-28T21:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-28T21:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-28T22:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-28T22:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-28T23:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-28T23:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T00:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T00:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T01:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T01:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T02:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T02:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T03:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T03:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T04:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T04:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 97.666
+    }
+  },
+  {
+    "targetTime": "2026-04-29T05:00:00Z",
+    "expectedPowerGenerationMegawatts": 193.25,
+    "plevels": {
+      "plevel_10": 18.702,
+      "plevel_90": 288.842
+    }
+  },
+  {
+    "targetTime": "2026-04-29T05:30:00Z",
+    "expectedPowerGenerationMegawatts": 437.07,
+    "plevels": {
+      "plevel_10": 236.892,
+      "plevel_90": 558.982
+    }
+  },
+  {
+    "targetTime": "2026-04-29T06:00:00Z",
+    "expectedPowerGenerationMegawatts": 1084.02,
+    "plevels": {
+      "plevel_10": 833.278,
+      "plevel_90": 1180.305
+    }
+  },
+  {
+    "targetTime": "2026-04-29T06:30:00Z",
+    "expectedPowerGenerationMegawatts": 2163.89,
+    "plevels": {
+      "plevel_10": 1812.018,
+      "plevel_90": 2337.752
+    }
+  },
+  {
+    "targetTime": "2026-04-29T07:00:00Z",
+    "expectedPowerGenerationMegawatts": 3428.7,
+    "plevels": {
+      "plevel_10": 3079.599,
+      "plevel_90": 3684.298
+    }
+  },
+  {
+    "targetTime": "2026-04-29T07:30:00Z",
+    "expectedPowerGenerationMegawatts": 4690.05,
+    "plevels": {
+      "plevel_10": 4359.648,
+      "plevel_90": 5014.219
+    }
+  },
+  {
+    "targetTime": "2026-04-29T08:00:00Z",
+    "expectedPowerGenerationMegawatts": 6509.69,
+    "plevels": {
+      "plevel_10": 6339.984,
+      "plevel_90": 6886.499
+    }
+  },
+  {
+    "targetTime": "2026-04-29T08:30:00Z",
+    "expectedPowerGenerationMegawatts": 8063.34,
+    "plevels": {
+      "plevel_10": 7915.11,
+      "plevel_90": 8457.469
+    }
+  },
+  {
+    "targetTime": "2026-04-29T09:00:00Z",
+    "expectedPowerGenerationMegawatts": 9880.21,
+    "plevels": {
+      "plevel_10": 9816.483,
+      "plevel_90": 10244.551
+    }
+  },
+  {
+    "targetTime": "2026-04-29T09:30:00Z",
+    "expectedPowerGenerationMegawatts": 11364.59,
+    "plevels": {
+      "plevel_10": 11246.148,
+      "plevel_90": 11719.933
+    }
+  },
+  {
+    "targetTime": "2026-04-29T10:00:00Z",
+    "expectedPowerGenerationMegawatts": 12957.04,
+    "plevels": {
+      "plevel_10": 12779.714,
+      "plevel_90": 13122.584
+    }
+  },
+  {
+    "targetTime": "2026-04-29T10:30:00Z",
+    "expectedPowerGenerationMegawatts": 13909.45,
+    "plevels": {
+      "plevel_10": 13702.346,
+      "plevel_90": 13924.692
+    }
+  },
+  {
+    "targetTime": "2026-04-29T11:00:00Z",
+    "expectedPowerGenerationMegawatts": 15049.58,
+    "plevels": {
+      "plevel_10": 14988.63,
+      "plevel_90": 14735.114
+    }
+  },
+  {
+    "targetTime": "2026-04-29T11:30:00Z",
+    "expectedPowerGenerationMegawatts": 15420.16,
+    "plevels": {
+      "plevel_10": 15323.188,
+      "plevel_90": 15144.48
+    }
+  },
+  {
+    "targetTime": "2026-04-29T12:00:00Z",
+    "expectedPowerGenerationMegawatts": 15533.76,
+    "plevels": {
+      "plevel_10": 15503.975,
+      "plevel_90": 15177.729
+    }
+  },
+  {
+    "targetTime": "2026-04-29T12:30:00Z",
+    "expectedPowerGenerationMegawatts": 15697.92,
+    "plevels": {
+      "plevel_10": 16069.191,
+      "plevel_90": 15634.888
+    }
+  },
+  {
+    "targetTime": "2026-04-29T13:00:00Z",
+    "expectedPowerGenerationMegawatts": 15640.43,
+    "plevels": {
+      "plevel_10": 15612.03,
+      "plevel_90": 15397.996
+    }
+  },
+  {
+    "targetTime": "2026-04-29T13:30:00Z",
+    "expectedPowerGenerationMegawatts": 14878.5,
+    "plevels": {
+      "plevel_10": 14849.404,
+      "plevel_90": 14710.178
+    }
+  },
+  {
+    "targetTime": "2026-04-29T14:00:00Z",
+    "expectedPowerGenerationMegawatts": 13682.26,
+    "plevels": {
+      "plevel_10": 13471.688,
+      "plevel_90": 13937.161
+    }
+  },
+  {
+    "targetTime": "2026-04-29T14:30:00Z",
+    "expectedPowerGenerationMegawatts": 12735.38,
+    "plevels": {
+      "plevel_10": 12484.637,
+      "plevel_90": 13141.286
+    }
+  },
+  {
+    "targetTime": "2026-04-29T15:00:00Z",
+    "expectedPowerGenerationMegawatts": 11315.41,
+    "plevels": {
+      "plevel_10": 11036.269,
+      "plevel_90": 11844.612
+    }
+  },
+  {
+    "targetTime": "2026-04-29T15:30:00Z",
+    "expectedPowerGenerationMegawatts": 10202.99,
+    "plevels": {
+      "plevel_10": 9941.162,
+      "plevel_90": 10764.052
+    }
+  },
+  {
+    "targetTime": "2026-04-29T16:00:00Z",
+    "expectedPowerGenerationMegawatts": 8518.42,
+    "plevels": {
+      "plevel_10": 8106.287,
+      "plevel_90": 9130.741
+    }
+  },
+  {
+    "targetTime": "2026-04-29T16:30:00Z",
+    "expectedPowerGenerationMegawatts": 6895.5,
+    "plevels": {
+      "plevel_10": 6410.636,
+      "plevel_90": 7466.262
+    }
+  },
+  {
+    "targetTime": "2026-04-29T17:00:00Z",
+    "expectedPowerGenerationMegawatts": 5260.81,
+    "plevels": {
+      "plevel_10": 4604.853,
+      "plevel_90": 5764.378
+    }
+  },
+  {
+    "targetTime": "2026-04-29T17:30:00Z",
+    "expectedPowerGenerationMegawatts": 3771.57,
+    "plevels": {
+      "plevel_10": 3137.783,
+      "plevel_90": 4222.5
+    }
+  },
+  {
+    "targetTime": "2026-04-29T18:00:00Z",
+    "expectedPowerGenerationMegawatts": 2415.33,
+    "plevels": {
+      "plevel_10": 1932.542,
+      "plevel_90": 2832.317
+    }
+  },
+  {
+    "targetTime": "2026-04-29T18:30:00Z",
+    "expectedPowerGenerationMegawatts": 1464.99,
+    "plevels": {
+      "plevel_10": 1068.093,
+      "plevel_90": 1855.656
+    }
+  },
+  {
+    "targetTime": "2026-04-29T19:00:00Z",
+    "expectedPowerGenerationMegawatts": 547.21,
+    "plevels": {
+      "plevel_10": 330.402,
+      "plevel_90": 785.484
+    }
+  },
+  {
+    "targetTime": "2026-04-29T19:30:00Z",
+    "expectedPowerGenerationMegawatts": 200.18,
+    "plevels": {
+      "plevel_10": 45.716,
+      "plevel_90": 367.806
+    }
+  },
+  {
+    "targetTime": "2026-04-29T20:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 76.886
+    }
+  },
+  {
+    "targetTime": "2026-04-29T20:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T21:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T21:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T22:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T22:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T23:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-29T23:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T00:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T00:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T01:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T01:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T02:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T02:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T03:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T03:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T04:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 0
+    }
+  },
+  {
+    "targetTime": "2026-04-30T04:30:00Z",
+    "expectedPowerGenerationMegawatts": 37.4,
+    "plevels": {
+      "plevel_10": 0,
+      "plevel_90": 143.382
+    }
+  },
+  {
+    "targetTime": "2026-04-30T05:00:00Z",
+    "expectedPowerGenerationMegawatts": 195.33,
+    "plevels": {
+      "plevel_10": 105.978,
+      "plevel_90": 305.466
+    }
+  },
+  {
+    "targetTime": "2026-04-30T05:30:00Z",
+    "expectedPowerGenerationMegawatts": 358.8,
+    "plevels": {
+      "plevel_10": 220.268,
+      "plevel_90": 531.968
+    }
+  },
+  {
+    "targetTime": "2026-04-30T06:00:00Z",
+    "expectedPowerGenerationMegawatts": 1070.17,
+    "plevels": {
+      "plevel_10": 806.264,
+      "plevel_90": 1234.333
+    }
+  },
+  {
+    "targetTime": "2026-04-30T06:30:00Z",
+    "expectedPowerGenerationMegawatts": 2047.52,
+    "plevels": {
+      "plevel_10": 1672.791,
+      "plevel_90": 2273.334
+    }
+  },
+  {
+    "targetTime": "2026-04-30T07:00:00Z",
+    "expectedPowerGenerationMegawatts": 3171.72,
+    "plevels": {
+      "plevel_10": 2801.147,
+      "plevel_90": 3447.405
+    }
+  },
+  {
+    "targetTime": "2026-04-30T07:30:00Z",
+    "expectedPowerGenerationMegawatts": 4261.98,
+    "plevels": {
+      "plevel_10": 3879.63,
+      "plevel_90": 4611.087
+    }
+  },
+  {
+    "targetTime": "2026-04-30T08:00:00Z",
+    "expectedPowerGenerationMegawatts": 6142.57,
+    "plevels": {
+      "plevel_10": 5818.406,
+      "plevel_90": 6566.487
+    }
+  },
+  {
+    "targetTime": "2026-04-30T08:30:00Z",
+    "expectedPowerGenerationMegawatts": 7611.72,
+    "plevels": {
+      "plevel_10": 7306.255,
+      "plevel_90": 8039.791
+    }
+  },
+  {
+    "targetTime": "2026-04-30T09:00:00Z",
+    "expectedPowerGenerationMegawatts": 9800.55,
+    "plevels": {
+      "plevel_10": 9490.236,
+      "plevel_90": 10254.941
+    }
+  },
+  {
+    "targetTime": "2026-04-30T09:30:00Z",
+    "expectedPowerGenerationMegawatts": 11196.97,
+    "plevels": {
+      "plevel_10": 10824.314,
+      "plevel_90": 11653.437
+    }
+  },
+  {
+    "targetTime": "2026-04-30T10:00:00Z",
+    "expectedPowerGenerationMegawatts": 12781.1,
+    "plevels": {
+      "plevel_10": 12312.163,
+      "plevel_90": 13211.938
+    }
+  },
+  {
+    "targetTime": "2026-04-30T10:30:00Z",
+    "expectedPowerGenerationMegawatts": 13796.55,
+    "plevels": {
+      "plevel_10": 13351.164,
+      "plevel_90": 14275.875
+    }
+  },
+  {
+    "targetTime": "2026-04-30T11:00:00Z",
+    "expectedPowerGenerationMegawatts": 14721.26,
+    "plevels": {
+      "plevel_10": 14253.017,
+      "plevel_90": 15021.878
+    }
+  },
+  {
+    "targetTime": "2026-04-30T11:30:00Z",
+    "expectedPowerGenerationMegawatts": 15287.17,
+    "plevels": {
+      "plevel_10": 14672.773,
+      "plevel_90": 15589.172
+    }
+  },
+  {
+    "targetTime": "2026-04-30T12:00:00Z",
+    "expectedPowerGenerationMegawatts": 15368.21,
+    "plevels": {
+      "plevel_10": 14836.936,
+      "plevel_90": 15630.733
+    }
+  },
+  {
+    "targetTime": "2026-04-30T12:30:00Z",
+    "expectedPowerGenerationMegawatts": 15301.02,
+    "plevels": {
+      "plevel_10": 14749.66,
+      "plevel_90": 15535.145
+    }
+  },
+  {
+    "targetTime": "2026-04-30T13:00:00Z",
+    "expectedPowerGenerationMegawatts": 15388.3,
+    "plevels": {
+      "plevel_10": 15036.424,
+      "plevel_90": 15643.201
+    }
+  },
+  {
+    "targetTime": "2026-04-30T13:30:00Z",
+    "expectedPowerGenerationMegawatts": 14781.52,
+    "plevels": {
+      "plevel_10": 14460.818,
+      "plevel_90": 15038.502
+    }
+  },
+  {
+    "targetTime": "2026-04-30T14:00:00Z",
+    "expectedPowerGenerationMegawatts": 14196.22,
+    "plevels": {
+      "plevel_10": 13885.211,
+      "plevel_90": 14477.441
+    }
+  },
+  {
+    "targetTime": "2026-04-30T14:30:00Z",
+    "expectedPowerGenerationMegawatts": 12991.67,
+    "plevels": {
+      "plevel_10": 12736.076,
+      "plevel_90": 13357.398
+    }
+  },
+  {
+    "targetTime": "2026-04-30T15:00:00Z",
+    "expectedPowerGenerationMegawatts": 11774.65,
+    "plevels": {
+      "plevel_10": 11431.091,
+      "plevel_90": 12158.391
+    }
+  },
+  {
+    "targetTime": "2026-04-30T15:30:00Z",
+    "expectedPowerGenerationMegawatts": 10269.49,
+    "plevels": {
+      "plevel_10": 9957.787,
+      "plevel_90": 10649.761
+    }
+  },
+  {
+    "targetTime": "2026-04-30T16:00:00Z",
+    "expectedPowerGenerationMegawatts": 8537.13,
+    "plevels": {
+      "plevel_10": 8164.47,
+      "plevel_90": 8887.616
+    }
+  },
+  {
+    "targetTime": "2026-04-30T16:30:00Z",
+    "expectedPowerGenerationMegawatts": 6798.53,
+    "plevels": {
+      "plevel_10": 6394.013,
+      "plevel_90": 7050.661
+    }
+  },
+  {
+    "targetTime": "2026-04-30T17:00:00Z",
+    "expectedPowerGenerationMegawatts": 5253.19,
+    "plevels": {
+      "plevel_10": 4877.071,
+      "plevel_90": 5593.982
+    }
+  },
+  {
+    "targetTime": "2026-04-30T17:30:00Z",
+    "expectedPowerGenerationMegawatts": 3827.68,
+    "plevels": {
+      "plevel_10": 3509.745,
+      "plevel_90": 4116.522
+    }
+  }
+]
