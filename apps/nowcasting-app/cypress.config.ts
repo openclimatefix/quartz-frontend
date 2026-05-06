@@ -1,11 +1,13 @@
 import { defineConfig } from "cypress";
 // Populate process.env with values from .env file
 const dotenv = require("dotenv");
+const { addMatchImageSnapshotPlugin } = require('@simonsmith/cypress-image-snapshot/plugin');
 
 dotenv.config({ path: ".env.local" });
 dotenv.config();
 
 export default defineConfig({
+  screenshotOnRunFailure: false,
   env: {
     auth0_username: process.env.NEXT_PUBLIC_AUTH0_USERNAME,
     auth0_password: process.env.NEXT_PUBLIC_AUTH0_PASSWORD,
@@ -27,12 +29,14 @@ export default defineConfig({
 
   e2e: {
     setupNodeEvents(on, config) {
+      addMatchImageSnapshotPlugin(on);
       on("before:browser:launch", (browser: any, launchOptions) => {
         if (browser.name === "chromium" || browser.family === "chromium") {
           launchOptions.args = launchOptions.args.filter((arg) => arg !== "--disable-gpu");
           launchOptions.args.push("--ignore-gpu-blacklist");
           return launchOptions;
         }
+        return launchOptions;
       });
     }
   }

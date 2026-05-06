@@ -21,15 +21,15 @@ describe("Load the page", () => {
     cy.location("href").should("equal", "http://localhost:3002/");
   });
 
-  // it("matches the snapshot", () => {
-  //   cy.visit("http://localhost:3002/");
-  //   cy.location("href").should("equal", "http://localhost:3002/");
-  //   cy.get("div.chart-data-loading-message", { timeout: 30000 }).should("not.be.visible");
-  //   cy.get(".mapboxgl-canvas", { timeout: 15000 }).should("be.visible");
-  //   cy.get(".recharts-surface", { timeout: 15000 }).should("be.visible");
-  //   cy.wait(2000);
-  //   cy.matchImageSnapshot("Home - default");
-  // });
+  it("matches the snapshot", () => {
+    cy.visit("http://localhost:3002/");
+    cy.location("href").should("equal", "http://localhost:3002/");
+    cy.get("div.chart-data-loading-message", { timeout: 30000 }).should("not.be.visible");
+    cy.get(".mapboxgl-canvas", { timeout: 15000 }).should("be.visible");
+    cy.get(".recharts-surface", { timeout: 15000 }).should("be.visible");
+    cy.wait(20000);
+    cy.matchImageSnapshot("Home - default");
+  });
 
   ////////////////////////////////
   //  GENERAL

@@ -1,12 +1,18 @@
 import "./commands";
 import "@percy/cypress";
+import { addMatchImageSnapshotCommand } from '@simonsmith/cypress-image-snapshot/command';
 
-beforeEach(() => {
-  // Global beforeEach - stubs are registered in each test file's beforeEach after login
+addMatchImageSnapshotCommand({
+  failureThreshold: 0.0,
+  failureThresholdType: 'percent',
+  customDiffConfig: { threshold: 0.1 },
+  capture: 'fullPage',
 });
 
 Cypress.on("uncaught:exception", () => {
-  // Ignore all uncaught exceptions from application code
-  // TODO make it more spefic
   return false;
+});
+
+beforeEach(() => {
+  cy.on("uncaught:exception", () => false);
 });

@@ -12,6 +12,7 @@
     "pre-commit": "pre-commit run",
     "test": "jest",
     "test:cypress": "cypress run --browser chrome",
+    "test:cypress:update-snapshots": "cypress run --browser chrome --env updateSnapshots=true",
     "fixtures:update": "node data/scripts/update_fixtures/update-cypress-fixtures.mjs"
   },
   "dependencies": {
@@ -57,6 +58,7 @@
     "@openclimatefix/nowcasting-tsconfig": "*",
     "@percy/cli": "^1.31.2",
     "@percy/cypress": "^3.1.6",
+    "@simonsmith/cypress-image-snapshot": "^10.0.3",
     "@storybook/addon-actions": "^8.0.8",
     "@storybook/addon-essentials": "^8.0.8",
     "@storybook/addon-links": "^8.0.8",
