@@ -1,0 +1,622 @@
+[
+  {
+    "targetTime": "2026-05-04T05:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T05:30:00Z",
+    "expectedPowerGenerationMegawatts": 1.616,
+    "expectedPowerGenerationNormalized": 0.008
+  },
+  {
+    "targetTime": "2026-05-04T06:00:00Z",
+    "expectedPowerGenerationMegawatts": 4.633,
+    "expectedPowerGenerationNormalized": 0.0228
+  },
+  {
+    "targetTime": "2026-05-04T06:30:00Z",
+    "expectedPowerGenerationMegawatts": 8.522,
+    "expectedPowerGenerationNormalized": 0.042
+  },
+  {
+    "targetTime": "2026-05-04T07:00:00Z",
+    "expectedPowerGenerationMegawatts": 13.352,
+    "expectedPowerGenerationNormalized": 0.0658
+  },
+  {
+    "targetTime": "2026-05-04T07:30:00Z",
+    "expectedPowerGenerationMegawatts": 21.881,
+    "expectedPowerGenerationNormalized": 0.1078
+  },
+  {
+    "targetTime": "2026-05-04T08:00:00Z",
+    "expectedPowerGenerationMegawatts": 28.016,
+    "expectedPowerGenerationNormalized": 0.1381
+  },
+  {
+    "targetTime": "2026-05-04T08:30:00Z",
+    "expectedPowerGenerationMegawatts": 42.802,
+    "expectedPowerGenerationNormalized": 0.2109
+  },
+  {
+    "targetTime": "2026-05-04T09:00:00Z",
+    "expectedPowerGenerationMegawatts": 58.251,
+    "expectedPowerGenerationNormalized": 0.2871
+  },
+  {
+    "targetTime": "2026-05-04T09:30:00Z",
+    "expectedPowerGenerationMegawatts": 76.947,
+    "expectedPowerGenerationNormalized": 0.3792
+  },
+  {
+    "targetTime": "2026-05-04T10:00:00Z",
+    "expectedPowerGenerationMegawatts": 95.392,
+    "expectedPowerGenerationNormalized": 0.4701
+  },
+  {
+    "targetTime": "2026-05-04T10:30:00Z",
+    "expectedPowerGenerationMegawatts": 114.758,
+    "expectedPowerGenerationNormalized": 0.5655
+  },
+  {
+    "targetTime": "2026-05-04T11:00:00Z",
+    "expectedPowerGenerationMegawatts": 125.357,
+    "expectedPowerGenerationNormalized": 0.6178
+  },
+  {
+    "targetTime": "2026-05-04T11:30:00Z",
+    "expectedPowerGenerationMegawatts": 129.801,
+    "expectedPowerGenerationNormalized": 0.6397
+  },
+  {
+    "targetTime": "2026-05-04T12:00:00Z",
+    "expectedPowerGenerationMegawatts": 134.569,
+    "expectedPowerGenerationNormalized": 0.6632
+  },
+  {
+    "targetTime": "2026-05-04T12:30:00Z",
+    "expectedPowerGenerationMegawatts": 134.008,
+    "expectedPowerGenerationNormalized": 0.6604
+  },
+  {
+    "targetTime": "2026-05-04T13:00:00Z",
+    "expectedPowerGenerationMegawatts": 133.298,
+    "expectedPowerGenerationNormalized": 0.6569
+  },
+  {
+    "targetTime": "2026-05-04T13:30:00Z",
+    "expectedPowerGenerationMegawatts": 134.116,
+    "expectedPowerGenerationNormalized": 0.6609
+  },
+  {
+    "targetTime": "2026-05-04T14:00:00Z",
+    "expectedPowerGenerationMegawatts": 130.903,
+    "expectedPowerGenerationNormalized": 0.6451
+  },
+  {
+    "targetTime": "2026-05-04T14:30:00Z",
+    "expectedPowerGenerationMegawatts": 125.715,
+    "expectedPowerGenerationNormalized": 0.6195
+  },
+  {
+    "targetTime": "2026-05-04T15:00:00Z",
+    "expectedPowerGenerationMegawatts": 116.455,
+    "expectedPowerGenerationNormalized": 0.5739
+  },
+  {
+    "targetTime": "2026-05-04T15:30:00Z",
+    "expectedPowerGenerationMegawatts": 101.196,
+    "expectedPowerGenerationNormalized": 0.4987
+  },
+  {
+    "targetTime": "2026-05-04T16:00:00Z",
+    "expectedPowerGenerationMegawatts": 86.22,
+    "expectedPowerGenerationNormalized": 0.4249
+  },
+  {
+    "targetTime": "2026-05-04T16:30:00Z",
+    "expectedPowerGenerationMegawatts": 70.027,
+    "expectedPowerGenerationNormalized": 0.3451
+  },
+  {
+    "targetTime": "2026-05-04T17:00:00Z",
+    "expectedPowerGenerationMegawatts": 49.451,
+    "expectedPowerGenerationNormalized": 0.2437
+  },
+  {
+    "targetTime": "2026-05-04T17:30:00Z",
+    "expectedPowerGenerationMegawatts": 34.929,
+    "expectedPowerGenerationNormalized": 0.1721
+  },
+  {
+    "targetTime": "2026-05-04T18:00:00Z",
+    "expectedPowerGenerationMegawatts": 21.042,
+    "expectedPowerGenerationNormalized": 0.1037
+  },
+  {
+    "targetTime": "2026-05-04T18:30:00Z",
+    "expectedPowerGenerationMegawatts": 11.214,
+    "expectedPowerGenerationNormalized": 0.0553
+  },
+  {
+    "targetTime": "2026-05-04T19:00:00Z",
+    "expectedPowerGenerationMegawatts": 4.917,
+    "expectedPowerGenerationNormalized": 0.0242
+  },
+  {
+    "targetTime": "2026-05-04T19:30:00Z",
+    "expectedPowerGenerationMegawatts": 1.914,
+    "expectedPowerGenerationNormalized": 0.0094
+  },
+  {
+    "targetTime": "2026-05-04T20:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T20:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T21:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T21:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T22:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T22:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T23:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-04T23:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T00:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T00:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T01:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T01:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T02:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T02:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T03:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T03:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T04:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T04:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T05:00:00Z",
+    "expectedPowerGenerationMegawatts": 0.372,
+    "expectedPowerGenerationNormalized": 0.0018
+  },
+  {
+    "targetTime": "2026-05-05T05:30:00Z",
+    "expectedPowerGenerationMegawatts": 2.367,
+    "expectedPowerGenerationNormalized": 0.0117
+  },
+  {
+    "targetTime": "2026-05-05T06:00:00Z",
+    "expectedPowerGenerationMegawatts": 4.903,
+    "expectedPowerGenerationNormalized": 0.0242
+  },
+  {
+    "targetTime": "2026-05-05T06:30:00Z",
+    "expectedPowerGenerationMegawatts": 10.031,
+    "expectedPowerGenerationNormalized": 0.0494
+  },
+  {
+    "targetTime": "2026-05-05T07:00:00Z",
+    "expectedPowerGenerationMegawatts": 14.792,
+    "expectedPowerGenerationNormalized": 0.0729
+  },
+  {
+    "targetTime": "2026-05-05T07:30:00Z",
+    "expectedPowerGenerationMegawatts": 24.742,
+    "expectedPowerGenerationNormalized": 0.1219
+  },
+  {
+    "targetTime": "2026-05-05T08:00:00Z",
+    "expectedPowerGenerationMegawatts": 35.788,
+    "expectedPowerGenerationNormalized": 0.1764
+  },
+  {
+    "targetTime": "2026-05-05T08:30:00Z",
+    "expectedPowerGenerationMegawatts": 45.115,
+    "expectedPowerGenerationNormalized": 0.2223
+  },
+  {
+    "targetTime": "2026-05-05T09:00:00Z",
+    "expectedPowerGenerationMegawatts": 56.445,
+    "expectedPowerGenerationNormalized": 0.2782
+  },
+  {
+    "targetTime": "2026-05-05T09:30:00Z",
+    "expectedPowerGenerationMegawatts": 64.731,
+    "expectedPowerGenerationNormalized": 0.319
+  },
+  {
+    "targetTime": "2026-05-05T10:00:00Z",
+    "expectedPowerGenerationMegawatts": 71.272,
+    "expectedPowerGenerationNormalized": 0.3512
+  },
+  {
+    "targetTime": "2026-05-05T10:30:00Z",
+    "expectedPowerGenerationMegawatts": 74.512,
+    "expectedPowerGenerationNormalized": 0.3672
+  },
+  {
+    "targetTime": "2026-05-05T11:00:00Z",
+    "expectedPowerGenerationMegawatts": 78.381,
+    "expectedPowerGenerationNormalized": 0.3863
+  },
+  {
+    "targetTime": "2026-05-05T11:30:00Z",
+    "expectedPowerGenerationMegawatts": 83.325,
+    "expectedPowerGenerationNormalized": 0.4106
+  },
+  {
+    "targetTime": "2026-05-05T12:00:00Z",
+    "expectedPowerGenerationMegawatts": 77.786,
+    "expectedPowerGenerationNormalized": 0.3833
+  },
+  {
+    "targetTime": "2026-05-05T12:30:00Z",
+    "expectedPowerGenerationMegawatts": 73.957,
+    "expectedPowerGenerationNormalized": 0.3645
+  },
+  {
+    "targetTime": "2026-05-05T13:00:00Z",
+    "expectedPowerGenerationMegawatts": 79.727,
+    "expectedPowerGenerationNormalized": 0.3929
+  },
+  {
+    "targetTime": "2026-05-05T13:30:00Z",
+    "expectedPowerGenerationMegawatts": 82.46,
+    "expectedPowerGenerationNormalized": 0.4064
+  },
+  {
+    "targetTime": "2026-05-05T14:00:00Z",
+    "expectedPowerGenerationMegawatts": 79.909,
+    "expectedPowerGenerationNormalized": 0.3938
+  },
+  {
+    "targetTime": "2026-05-05T14:30:00Z",
+    "expectedPowerGenerationMegawatts": 82.906,
+    "expectedPowerGenerationNormalized": 0.4086
+  },
+  {
+    "targetTime": "2026-05-05T15:00:00Z",
+    "expectedPowerGenerationMegawatts": 77.224,
+    "expectedPowerGenerationNormalized": 0.3806
+  },
+  {
+    "targetTime": "2026-05-05T15:30:00Z",
+    "expectedPowerGenerationMegawatts": 66.003,
+    "expectedPowerGenerationNormalized": 0.3253
+  },
+  {
+    "targetTime": "2026-05-05T16:00:00Z",
+    "expectedPowerGenerationMegawatts": 57.061,
+    "expectedPowerGenerationNormalized": 0.2812
+  },
+  {
+    "targetTime": "2026-05-05T16:30:00Z",
+    "expectedPowerGenerationMegawatts": 44.71,
+    "expectedPowerGenerationNormalized": 0.2203
+  },
+  {
+    "targetTime": "2026-05-05T17:00:00Z",
+    "expectedPowerGenerationMegawatts": 31.817,
+    "expectedPowerGenerationNormalized": 0.1568
+  },
+  {
+    "targetTime": "2026-05-05T17:30:00Z",
+    "expectedPowerGenerationMegawatts": 25.06,
+    "expectedPowerGenerationNormalized": 0.1235
+  },
+  {
+    "targetTime": "2026-05-05T18:00:00Z",
+    "expectedPowerGenerationMegawatts": 19.331,
+    "expectedPowerGenerationNormalized": 0.0953
+  },
+  {
+    "targetTime": "2026-05-05T18:30:00Z",
+    "expectedPowerGenerationMegawatts": 11.113,
+    "expectedPowerGenerationNormalized": 0.0548
+  },
+  {
+    "targetTime": "2026-05-05T19:00:00Z",
+    "expectedPowerGenerationMegawatts": 5.417,
+    "expectedPowerGenerationNormalized": 0.0267
+  },
+  {
+    "targetTime": "2026-05-05T19:30:00Z",
+    "expectedPowerGenerationMegawatts": 1.609,
+    "expectedPowerGenerationNormalized": 0.0079
+  },
+  {
+    "targetTime": "2026-05-05T20:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T20:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T21:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T21:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T22:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T22:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T23:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-05T23:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T00:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T00:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T01:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T01:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T02:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T02:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T03:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T03:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T04:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T04:30:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T05:00:00Z",
+    "expectedPowerGenerationMegawatts": 0,
+    "expectedPowerGenerationNormalized": 0
+  },
+  {
+    "targetTime": "2026-05-06T05:30:00Z",
+    "expectedPowerGenerationMegawatts": 1.751,
+    "expectedPowerGenerationNormalized": 0.0086
+  },
+  {
+    "targetTime": "2026-05-06T06:00:00Z",
+    "expectedPowerGenerationMegawatts": 4.883,
+    "expectedPowerGenerationNormalized": 0.0241
+  },
+  {
+    "targetTime": "2026-05-06T06:30:00Z",
+    "expectedPowerGenerationMegawatts": 9.09,
+    "expectedPowerGenerationNormalized": 0.0448
+  },
+  {
+    "targetTime": "2026-05-06T07:00:00Z",
+    "expectedPowerGenerationMegawatts": 15.083,
+    "expectedPowerGenerationNormalized": 0.0743
+  },
+  {
+    "targetTime": "2026-05-06T07:30:00Z",
+    "expectedPowerGenerationMegawatts": 26.339,
+    "expectedPowerGenerationNormalized": 0.1298
+  },
+  {
+    "targetTime": "2026-05-06T08:00:00Z",
+    "expectedPowerGenerationMegawatts": 34.848,
+    "expectedPowerGenerationNormalized": 0.1717
+  },
+  {
+    "targetTime": "2026-05-06T08:30:00Z",
+    "expectedPowerGenerationMegawatts": 49.986,
+    "expectedPowerGenerationNormalized": 0.2463
+  },
+  {
+    "targetTime": "2026-05-06T09:00:00Z",
+    "expectedPowerGenerationMegawatts": 58.542,
+    "expectedPowerGenerationNormalized": 0.2885
+  },
+  {
+    "targetTime": "2026-05-06T09:30:00Z",
+    "expectedPowerGenerationMegawatts": 65.468,
+    "expectedPowerGenerationNormalized": 0.3226
+  },
+  {
+    "targetTime": "2026-05-06T10:00:00Z",
+    "expectedPowerGenerationMegawatts": 79.355,
+    "expectedPowerGenerationNormalized": 0.3911
+  },
+  {
+    "targetTime": "2026-05-06T10:30:00Z",
+    "expectedPowerGenerationMegawatts": 81.939,
+    "expectedPowerGenerationNormalized": 0.4038
+  },
+  {
+    "targetTime": "2026-05-06T11:00:00Z",
+    "expectedPowerGenerationMegawatts": 82.635,
+    "expectedPowerGenerationNormalized": 0.4072
+  },
+  {
+    "targetTime": "2026-05-06T11:30:00Z",
+    "expectedPowerGenerationMegawatts": 82.372,
+    "expectedPowerGenerationNormalized": 0.4059
+  },
+  {
+    "targetTime": "2026-05-06T12:00:00Z",
+    "expectedPowerGenerationMegawatts": 81.364,
+    "expectedPowerGenerationNormalized": 0.401
+  },
+  {
+    "targetTime": "2026-05-06T12:30:00Z",
+    "expectedPowerGenerationMegawatts": 80.268,
+    "expectedPowerGenerationNormalized": 0.3956
+  },
+  {
+    "targetTime": "2026-05-06T13:00:00Z",
+    "expectedPowerGenerationMegawatts": 76.115,
+    "expectedPowerGenerationNormalized": 0.3751
+  },
+  {
+    "targetTime": "2026-05-06T13:30:00Z",
+    "expectedPowerGenerationMegawatts": 72.902,
+    "expectedPowerGenerationNormalized": 0.3593
+  },
+  {
+    "targetTime": "2026-05-06T14:00:00Z",
+    "expectedPowerGenerationMegawatts": 70.088,
+    "expectedPowerGenerationNormalized": 0.3454
+  },
+  {
+    "targetTime": "2026-05-06T14:30:00Z",
+    "expectedPowerGenerationMegawatts": 66.544,
+    "expectedPowerGenerationNormalized": 0.3279
+  },
+  {
+    "targetTime": "2026-05-06T15:00:00Z",
+    "expectedPowerGenerationMegawatts": 63.121,
+    "expectedPowerGenerationNormalized": 0.3111
+  },
+  {
+    "targetTime": "2026-05-06T15:30:00Z",
+    "expectedPowerGenerationMegawatts": 58.326,
+    "expectedPowerGenerationNormalized": 0.2874
+  },
+  {
+    "targetTime": "2026-05-06T16:00:00Z",
+    "expectedPowerGenerationMegawatts": 51.081,
+    "expectedPowerGenerationNormalized": 0.2517
+  },
+  {
+    "targetTime": "2026-05-06T16:30:00Z",
+    "expectedPowerGenerationMegawatts": 42.755,
+    "expectedPowerGenerationNormalized": 0.2107
+  },
+  {
+    "targetTime": "2026-05-06T17:00:00Z",
+    "expectedPowerGenerationMegawatts": 32.731,
+    "expectedPowerGenerationNormalized": 0.1613
+  },
+  {
+    "targetTime": "2026-05-06T17:30:00Z",
+    "expectedPowerGenerationMegawatts": 23.274,
+    "expectedPowerGenerationNormalized": 0.1147
+  },
+  {
+    "targetTime": "2026-05-06T18:00:00Z",
+    "expectedPowerGenerationMegawatts": 14.799,
+    "expectedPowerGenerationNormalized": 0.0729
+  },
+  {
+    "targetTime": "2026-05-06T18:30:00Z",
+    "expectedPowerGenerationMegawatts": 8.231,
+    "expectedPowerGenerationNormalized": 0.0406
+  }
+]

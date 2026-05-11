@@ -48,6 +48,7 @@ export const DeltaHeaderBlock: React.FC<{
     >
       <div className="flex">
         <div
+          data-cy="delta-header-large-text"
           className={`${svg ? "ml-7 dash:ml-8 " : ""}${
             unit === "MW" ? " dash:3xl:text-4xl " : " dash:3xl:text-5xl "
           }dash:text-3xl dash:leading-none text-2xl gap-0.5 dash:gap-0 dash:mb-0.5 items-start flex flex-col font-semibold leading-none text-center`}

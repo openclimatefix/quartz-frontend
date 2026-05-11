@@ -43,7 +43,10 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   );
   return (
     <div className={`flex content-between bg-ocf-gray-800 h-12 mb-4 ${height}`}>
-      <div className="dash:xl:text-2xl dash:2xl:text-3xl dash:3xl:text-4xl text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
+      <div
+        data-cy="gsp-header-title"
+        className="dash:xl:text-2xl dash:2xl:text-3xl dash:3xl:text-4xl text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly"
+      >
         {titleTooltipText.length ? (
           <ForecastLabel className="" position={"left"} tip={titleTooltipContent}>
             {title}
