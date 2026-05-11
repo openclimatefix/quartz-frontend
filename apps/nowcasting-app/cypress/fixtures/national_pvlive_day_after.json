@@ -1,154 +1,154 @@
 [
   {
-    "datetimeUtc": "2026-04-28T23:30:00Z",
+    "datetimeUtc": "2026-05-04T23:30:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T23:00:00Z",
+    "datetimeUtc": "2026-05-04T23:00:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T22:30:00Z",
+    "datetimeUtc": "2026-05-04T22:30:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T22:00:00Z",
+    "datetimeUtc": "2026-05-04T22:00:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T21:30:00Z",
+    "datetimeUtc": "2026-05-04T21:30:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T21:00:00Z",
+    "datetimeUtc": "2026-05-04T21:00:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T20:30:00Z",
+    "datetimeUtc": "2026-05-04T20:30:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T20:00:00Z",
+    "datetimeUtc": "2026-05-04T20:00:00Z",
     "solarGenerationKw": 0
   },
   {
-    "datetimeUtc": "2026-04-28T19:30:00Z",
-    "solarGenerationKw": 44330
+    "datetimeUtc": "2026-05-04T19:30:00Z",
+    "solarGenerationKw": 83108
   },
   {
-    "datetimeUtc": "2026-04-28T19:00:00Z",
-    "solarGenerationKw": 499413
+    "datetimeUtc": "2026-05-04T19:00:00Z",
+    "solarGenerationKw": 297805
   },
   {
-    "datetimeUtc": "2026-04-28T18:30:00Z",
-    "solarGenerationKw": 1485079
+    "datetimeUtc": "2026-05-04T18:30:00Z",
+    "solarGenerationKw": 726506
   },
   {
-    "datetimeUtc": "2026-04-28T18:00:00Z",
-    "solarGenerationKw": 2636984
+    "datetimeUtc": "2026-05-04T18:00:00Z",
+    "solarGenerationKw": 1448164
   },
   {
-    "datetimeUtc": "2026-04-28T17:30:00Z",
-    "solarGenerationKw": 3949589
+    "datetimeUtc": "2026-05-04T17:30:00Z",
+    "solarGenerationKw": 2215533
   },
   {
-    "datetimeUtc": "2026-04-28T17:00:00Z",
-    "solarGenerationKw": 5223405
+    "datetimeUtc": "2026-05-04T17:00:00Z",
+    "solarGenerationKw": 2915721
   },
   {
-    "datetimeUtc": "2026-04-28T16:30:00Z",
-    "solarGenerationKw": 6608047
+    "datetimeUtc": "2026-05-04T16:30:00Z",
+    "solarGenerationKw": 3629762
   },
   {
-    "datetimeUtc": "2026-04-28T16:00:00Z",
-    "solarGenerationKw": 7942124
+    "datetimeUtc": "2026-05-04T16:00:00Z",
+    "solarGenerationKw": 4331335
   },
   {
-    "datetimeUtc": "2026-04-28T15:30:00Z",
-    "solarGenerationKw": 8918785
+    "datetimeUtc": "2026-05-04T15:30:00Z",
+    "solarGenerationKw": 4713634
   },
   {
-    "datetimeUtc": "2026-04-28T15:00:00Z",
-    "solarGenerationKw": 9673793
+    "datetimeUtc": "2026-05-04T15:00:00Z",
+    "solarGenerationKw": 4947031
   },
   {
-    "datetimeUtc": "2026-04-28T14:30:00Z",
-    "solarGenerationKw": 10428800
+    "datetimeUtc": "2026-05-04T14:30:00Z",
+    "solarGenerationKw": 5625057
   },
   {
-    "datetimeUtc": "2026-04-28T14:00:00Z",
-    "solarGenerationKw": 10705868
+    "datetimeUtc": "2026-05-04T14:00:00Z",
+    "solarGenerationKw": 6087694
   },
   {
-    "datetimeUtc": "2026-04-28T13:30:00Z",
-    "solarGenerationKw": 10291652
+    "datetimeUtc": "2026-05-04T13:30:00Z",
+    "solarGenerationKw": 6381344
   },
   {
-    "datetimeUtc": "2026-04-28T13:00:00Z",
-    "solarGenerationKw": 9823409
+    "datetimeUtc": "2026-05-04T13:00:00Z",
+    "solarGenerationKw": 6508777
   },
   {
-    "datetimeUtc": "2026-04-28T12:30:00Z",
-    "solarGenerationKw": 8764321
+    "datetimeUtc": "2026-05-04T12:30:00Z",
+    "solarGenerationKw": 6491463
   },
   {
-    "datetimeUtc": "2026-04-28T12:00:00Z",
-    "solarGenerationKw": 7879784
+    "datetimeUtc": "2026-05-04T12:00:00Z",
+    "solarGenerationKw": 6515010
   },
   {
-    "datetimeUtc": "2026-04-28T11:30:00Z",
-    "solarGenerationKw": 7182268
+    "datetimeUtc": "2026-05-04T11:30:00Z",
+    "solarGenerationKw": 6174958
   },
   {
-    "datetimeUtc": "2026-04-28T11:00:00Z",
-    "solarGenerationKw": 6123180
+    "datetimeUtc": "2026-05-04T11:00:00Z",
+    "solarGenerationKw": 5598739
   },
   {
-    "datetimeUtc": "2026-04-28T10:30:00Z",
-    "solarGenerationKw": 4615243
+    "datetimeUtc": "2026-05-04T10:30:00Z",
+    "solarGenerationKw": 5303704
   },
   {
-    "datetimeUtc": "2026-04-28T10:00:00Z",
-    "solarGenerationKw": 4091586
+    "datetimeUtc": "2026-05-04T10:00:00Z",
+    "solarGenerationKw": 4617367
   },
   {
-    "datetimeUtc": "2026-04-28T09:30:00Z",
-    "solarGenerationKw": 3277009
+    "datetimeUtc": "2026-05-04T09:30:00Z",
+    "solarGenerationKw": 4023142
   },
   {
-    "datetimeUtc": "2026-04-28T09:00:00Z",
-    "solarGenerationKw": 2952148
+    "datetimeUtc": "2026-05-04T09:00:00Z",
+    "solarGenerationKw": 3521720
   },
   {
-    "datetimeUtc": "2026-04-28T08:30:00Z",
-    "solarGenerationKw": 2150732
+    "datetimeUtc": "2026-05-04T08:30:00Z",
+    "solarGenerationKw": 2906025
   },
   {
-    "datetimeUtc": "2026-04-28T08:00:00Z",
-    "solarGenerationKw": 1652011
+    "datetimeUtc": "2026-05-04T08:00:00Z",
+    "solarGenerationKw": 2318725
   },
   {
-    "datetimeUtc": "2026-04-28T07:30:00Z",
-    "solarGenerationKw": 1160910
+    "datetimeUtc": "2026-05-04T07:30:00Z",
+    "solarGenerationKw": 1585986
   },
   {
-    "datetimeUtc": "2026-04-28T07:00:00Z",
-    "solarGenerationKw": 804186
+    "datetimeUtc": "2026-05-04T07:00:00Z",
+    "solarGenerationKw": 925966
   },
   {
-    "datetimeUtc": "2026-04-28T06:30:00Z",
-    "solarGenerationKw": 414215
+    "datetimeUtc": "2026-05-04T06:30:00Z",
+    "solarGenerationKw": 514579
   },
   {
-    "datetimeUtc": "2026-04-28T06:00:00Z",
-    "solarGenerationKw": 155850
+    "datetimeUtc": "2026-05-04T06:00:00Z",
+    "solarGenerationKw": 225085
   },
   {
-    "datetimeUtc": "2026-04-28T05:30:00Z",
-    "solarGenerationKw": 29784
+    "datetimeUtc": "2026-05-04T05:30:00Z",
+    "solarGenerationKw": 48479
   },
   {
-    "datetimeUtc": "2026-04-28T05:00:00Z",
-    "solarGenerationKw": 0
+    "datetimeUtc": "2026-05-04T05:00:00Z",
+    "solarGenerationKw": 1385
   }
 ]
