@@ -43,8 +43,8 @@ const getColumnConfig = (
 });
 
 const createEmptyRow = (timestamp: string): CSVRow => {
-  const start = DateTime.fromISO(timestamp);
-  const end = start.plus({ minutes: 30 });
+  const end = DateTime.fromISO(timestamp).setZone("Europe/London");
+  const start = end.minus({ minutes: 30 });
   const settlementPeriod = getSettlementPeriodForDate(start);
 
   return {
@@ -129,8 +129,8 @@ export const downloadNationalCsv = (
   const a = document.createElement("a");
   a.href = url;
 
-  const now = DateTime.now().toUTC().toFormat("yyyy-MM-dd_HH-mm");
-  a.download = `Quartz-National-${now}.csv`;
+  const now = DateTime.now().toLocal().toFormat("yyyy-MM-dd_HH-mm-ssZZZ");
+  a.download = `Quartz_National_${now}.csv`;
 
   document.body.appendChild(a);
   a.click();

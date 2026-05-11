@@ -809,7 +809,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
                     <ul className="">
                       <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
-                        <div className="pr-3">{formattedDate}</div>
+                        <div className="pr-3">
+                          {formatISODateStringHumanNumbersOnly(formattedDate)}
+                        </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
                       {Object.entries(toolTiplabels)
