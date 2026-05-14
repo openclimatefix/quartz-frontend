@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     for (const value of windForecastData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
+        (data) => data.timestamp === timestamp,
       );
       if (existingData) {
         existingData.wind_forecast = value.PowerKW / 1000;
@@ -122,7 +122,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       const time = value.Time;
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
+        (data) => data.timestamp === timestamp,
       );
       if (existingData) {
         existingData.solar_forecast = value.PowerKW / 1000;
@@ -140,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     for (const value of solarGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
+        (data) => data.timestamp === timestamp,
       );
       if (
         existingData &&
@@ -155,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     for (const value of windGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find(
-        (data) => data.timestamp === timestamp
+        (data) => data.timestamp === timestamp,
       );
       if (
         existingData &&
@@ -167,17 +167,17 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   const formattedSideBarData = formattedSidebarData.sort(
-    (a, b) => a.timestamp - b.timestamp
+    (a, b) => a.timestamp - b.timestamp,
   );
 
   let solarForecastNow = formattedSideBarData.find(
-    (data) => data.timestamp === getEpochNowInTimezone()
+    (data) => data.timestamp === getEpochNowInTimezone(),
   )?.solar_forecast;
   solarForecastNow = Number(solarForecastNow) || 0;
 
   let windForecastNow =
     formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezone()
+      (data) => data.timestamp === getEpochNowInTimezone(),
     )?.wind_forecast || 0;
   windForecastNow = Number(windForecastNow) || 0;
 
@@ -185,13 +185,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   let solarForecastNext =
     formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezonePlus15()
+      (data) => data.timestamp === getEpochNowInTimezonePlus15(),
     )?.solar_forecast || 0;
   solarForecastNext = Number(solarForecastNext) || 0;
 
   let windForecastNext =
     formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezonePlus15()
+      (data) => data.timestamp === getEpochNowInTimezonePlus15(),
     )?.wind_forecast || 0;
   windForecastNext = Number(windForecastNext) || 0;
 
@@ -199,13 +199,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   const powerForecastNext = Number(windForecastNext + solarForecastNext) || 0;
 
   let actualWindGeneration = formattedSideBarData.find(
-    (data) => data.timestamp === getEpochNowInTimezone()
+    (data) => data.timestamp === getEpochNowInTimezone(),
   )?.wind_generation;
   actualWindGeneration = Number(actualWindGeneration) || 0;
 
   let actualSolarGeneration =
     formattedSideBarData.find(
-      (data) => data.timestamp === getEpochNowInTimezone()
+      (data) => data.timestamp === getEpochNowInTimezone(),
     )?.solar_generation || 0;
   actualSolarGeneration = Number(actualSolarGeneration) || 0;
 
@@ -378,18 +378,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="w-14 h-full px-2 py-4 bg-neutral-700 flex-col justify-start items-center gap-5 inline-flex">
           <div className="justify-start items-start gap-[110px] inline-flex ">
             {/* // on hover, set showChevronRight to true show the chevron, otherwise show the hamburger menu*/}
-            {showChevronRight ? (
-              <button
-                className="p-2 -mt-1 -ml-1 flex justify-center items-center rounded-lg hover:bg-ocf-grey-400 hover:duration-300"
-                onClick={handleClick}
-              >
+            <button
+              className="p-2 -mt-1 -ml-1 flex justify-center items-center rounded-lg hover:bg-ocf-grey-400 hover:duration-300"
+              onClick={handleClick}
+            >
+              {showChevronRight ? (
                 <ChevronRight />
-              </button>
-            ) : (
-              <div className="p-2 -mt-1 -ml-1 flex justify-center items-center rounded-lg">
+              ) : (
                 <HamburgerMenu className="text-white" />
-              </div>
-            )}
+              )}
+            </button>
           </div>
           <div className="self-stretch flex-col justify-start items-start flex">
             <MiniCard
