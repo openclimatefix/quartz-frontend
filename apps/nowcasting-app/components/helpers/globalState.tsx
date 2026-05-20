@@ -78,7 +78,7 @@ export type GlobalStateType = {
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
   selectedCountry: Country;
-  selectedNlRegionUuid?: string;
+  selectedNlRegion?: string;
   loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
@@ -97,13 +97,23 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     clickedSiteGroupId: undefined,
     forecastCreationTime: undefined,
     view: VIEWS.FORECAST,
-    visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
-      "GENERATION",
-      "GENERATION_UPDATED",
-      "FORECAST",
-      "N_HOUR_FORECAST",
-      "SEASONAL_MEAN"
-    ],
+    visibleLines: (() => {
+      const stored = getArraySettingFromCookieStorage<string>(CookieStorageKeys.VISIBLE_LINES);
+      if (!stored)
+        return [
+          "GENERATION",
+          "GENERATION_UPDATED",
+          "FORECAST",
+          "NL_UNCURTAILED",
+          "N_HOUR_FORECAST",
+          "SEASONAL_MEAN"
+        ];
+      // Migrate old cookies: add NL_UNCURTAILED alongside FORECAST
+      if (stored.includes("FORECAST") && !stored.includes("NL_UNCURTAILED")) {
+        return [...stored, "NL_UNCURTAILED"];
+      }
+      return stored;
+    })(),
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
     lng: -0.2947,
@@ -114,7 +124,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },
     selectedCountry: "GB",
-    selectedNlRegionUuid: undefined,
+    selectedNlRegion: undefined,
     showSiteCount: undefined,
     aggregationLevel: AGGREGATION_LEVELS.NATIONAL,
     sortBy: SORT_BY.CAPACITY,

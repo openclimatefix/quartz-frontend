@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Cookies from "cookies";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
+import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, V1_API_PREFIX, VIEWS } from "../constant";
 import useGlobalState, { get30MinNow, setGlobalState } from "../components/helpers/globalState";
 import {
   AllGspRealData,
@@ -29,7 +29,10 @@ import {
   SitePvActual,
   SitePvForecast,
   SitesPvActual,
-  SitesPvForecast
+  SitesPvForecast,
+  V1ForecastResponse,
+  V1GenerationMatrix,
+  V1GenerationResponse
 } from "../components/types";
 import { components } from "../types/quartz-api";
 import {
@@ -88,17 +91,12 @@ const useGetGspForecast = (selectedTime: string) => {
     allGspForecastFutureError
   };
 };
-const nlRegionalUuids = new Set(
-  netherlandsSitesData.site_list
-    .filter((s) => s.client_site_name !== "nl_national")
-    .map((s) => s.site_uuid)
-);
 
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [selectedCountry, setSelectedCountry] = useGlobalState("selectedCountry");
-  const [selectedNlRegionUuid] = useGlobalState("selectedNlRegionUuid");
+  const [selectedNlRegion] = useGlobalState("selectedNlRegion");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
   const [showNHourView] = useGlobalState("showNHourView");
@@ -161,8 +159,8 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   // Auto-switch to NL when a province is clicked on the map
   useEffect(() => {
-    if (selectedNlRegionUuid) setSelectedCountry("NL");
-  }, [selectedNlRegionUuid]);
+    if (selectedNlRegion) setSelectedCountry("NL");
+  }, [selectedNlRegion]);
 
   // Auto-switch to GB when a GSP region is clicked on the map
   useEffect(() => {
@@ -171,7 +169,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
 
   // Cross-clear the other country's region selection on toggle
   useEffect(() => {
-    if (selectedCountry === "GB") setGlobalState("selectedNlRegionUuid", undefined);
+    if (selectedCountry === "GB") setGlobalState("selectedNlRegion", undefined);
     if (selectedCountry === "NL") setSelectedMapRegionIds([]);
   }, [selectedCountry]);
 
@@ -647,21 +645,43 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     timeNow
   ]);
 
-  const nlForecastData = useMemo(() => {
-    return sitePvForecastData?.find((d) => d.site_uuid === "d1cfe577-aad8-4ffd-b238-1c7799fbf5d1");
-  }, [sitePvForecastData]);
+  const { data: nlForecastData } = useLoadDataFromApi<V1ForecastResponse>(
+    `${V1_API_PREFIX}/NL/solar/regions/national/forecast?start_utc=${encodeURIComponent(
+      nlForecastStartTime || ""
+    )}`,
+    {
+      keepPreviousData: true
+    }
+  );
 
-  const nlRegionalForecastData = useMemo(() => {
-    return sitePvForecastData?.filter((d) => nlRegionalUuids.has(d.site_uuid)) || [];
-  }, [sitePvForecastData]);
+  const { data: nlUncurtailedForecastData } = useLoadDataFromApi<V1ForecastResponse>(
+    `${V1_API_PREFIX}/NL/solar/regions/national/forecast?model=ecmwf_mo_sat_uncurtailed&start_utc=${encodeURIComponent(
+      nlForecastStartTime || ""
+    )}`,
+    {
+      keepPreviousData: true
+    }
+  );
 
-  const nlActualData = useMemo(() => {
-    return sitesPvActualData?.find((d) => d.site_uuid === "d1cfe577-aad8-4ffd-b238-1c7799fbf5d1");
-  }, [sitesPvActualData]);
+  const { data: nlActualData } = useLoadDataFromApi<V1GenerationResponse>(
+    `${V1_API_PREFIX}/NL/solar/regions/national/generation?start_utc=${encodeURIComponent(
+      nlForecastStartTime || ""
+    )}&observer=ned_nl`,
+    {
+      keepPreviousData: true
+    }
+  );
 
-  const nlRegionalActualData = useMemo(() => {
-    return sitesPvActualData?.filter((d) => nlRegionalUuids.has(d.site_uuid)) || [];
-  }, [sitesPvActualData]);
+  const { data: nlRegionalActualData } = useLoadDataFromApi<V1GenerationMatrix>(
+    `${V1_API_PREFIX}/NL/solar/generation/period?region_type=province&&start_utc=${encodeURIComponent(
+      nlForecastStartTime || ""
+    )}&end_utc=${encodeURIComponent(
+      now.plus({ hours: 48 }).toUTC().toISO() || ""
+    )}&observer=ned_nl`,
+    {
+      keepPreviousData: true
+    }
+  );
 
   const combinedData: CombinedData = {
     nationalForecastData,
@@ -678,7 +698,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     allGspRealData,
     gspDeltas,
     nlForecastData,
-    nlRegionalForecastData,
+    nlUncurtailedForecastData: nlUncurtailedForecastData,
     nlActualData,
     nlRegionalActualData
   };
@@ -820,12 +840,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             setSelectedCountry={setSelectedCountry}
             className={currentView(VIEWS.FORECAST) && selectedCountry === "NL" ? "" : "hidden"}
           />
-          {selectedCountry === "NL" && selectedNlRegionUuid && currentView(VIEWS.FORECAST) && (
+          {selectedCountry === "NL" && selectedNlRegion && currentView(VIEWS.FORECAST) && (
             <div className="flex-1 flex flex-col relative dash:h-auto">
               <NLRegionalChart
                 combinedData={combinedData}
-                siteUuid={selectedNlRegionUuid}
-                onClose={() => setGlobalState("selectedNlRegionUuid", undefined)}
+                regionName={selectedNlRegion}
+                onClose={() => setGlobalState("selectedNlRegion", undefined)}
               />
             </div>
           )}

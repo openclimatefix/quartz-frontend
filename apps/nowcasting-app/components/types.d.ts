@@ -87,6 +87,24 @@ type PvRealData = {
 }[];
 type NationalNHourData = ForecastValue[];
 type AllGspRealData = GspRealData[];
+type V1ForecastValue = { time_utc: string; power_kW: number; plevels_kW?: Record<string, number> };
+type V1ForecastResponse = { region_name: string; capacity_kW: number; values: V1ForecastValue[] };
+type V1GenerationValue = { time_utc: string; power_kW: number };
+type V1GenerationResponse = {
+  region_name: string;
+  capacity_kW: number;
+  values: V1GenerationValue[];
+};
+type V1RegionForecast = { region_name: string; capacity_kW: number; power_kW: number[] };
+type V1ForecastMatrix = { times: string[]; regions: V1RegionForecast[] };
+type V1ForecastSnapshotValue = { region_name: string; capacity_kW: number; power_kW: number };
+type V1ForecastSnapshot = {
+  time_utc: string;
+  model_name?: string | null;
+  values: V1ForecastSnapshotValue[];
+};
+type V1RegionGeneration = { region_name: string; capacity_kW: number; power_kW: number[] };
+type V1GenerationMatrix = { times_utc: string[]; regions: V1RegionGeneration[] };
 type CombinedData = {
   nationalForecastData: ForecastData | undefined;
   nationalIntradayECMWFOnlyData?: ForecastData | undefined;
@@ -106,10 +124,10 @@ type CombinedData = {
     | undefined;
   allGspRealData: AllGspRealData | components["schemas"]["GSPYieldGroupByDatetime"][] | undefined;
   gspDeltas: Map<string, GspDeltaValue> | undefined;
-  nlForecastData?: SitePvForecast;
-  nlRegionalForecastData?: SitePvForecast[];
-  nlActualData?: SitePvActual;
-  nlRegionalActualData?: SitePvActual[];
+  nlForecastData?: V1ForecastResponse;
+  nlUncurtailedForecastData?: V1ForecastResponse;
+  nlActualData?: V1GenerationResponse;
+  nlRegionalActualData?: V1GenerationMatrix;
 };
 type CombinedLoading = {
   nationalForecastLoading: boolean;

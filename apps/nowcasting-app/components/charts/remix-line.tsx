@@ -104,6 +104,8 @@ const toolTipColors: Record<string, string> = {
   GENERATION: "white",
   FORECAST: yellow,
   PAST_FORECAST: yellow,
+  NL_UNCURTAILED: satOnly,
+  PAST_NL_UNCURTAILED: satOnly,
   INTRADAY_ECMWF_ONLY: ecmwfOnly,
   PAST_INTRADAY_ECMWF_ONLY: ecmwfOnly,
   MET_OFFICE_ONLY: metOfficeOnly,
@@ -755,6 +757,33 @@ const RemixLine: React.FC<RemixLineProps> = ({
               yAxisId={"y-axis"}
               dot={false}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="PAST_NL_UNCURTAILED"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={satOnly}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 2}
+              hide={!visibleLines.includes("NL_UNCURTAILED")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="NL_UNCURTAILED"
+              dot={false}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={satOnly}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 2}
+              hide={!visibleLines.includes("NL_UNCURTAILED")}
               isAnimationActive={false}
             />
             <Line

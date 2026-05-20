@@ -204,12 +204,28 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
             )}
           </div>
         </div>
+        {selectedCountry === "NL" && (
+          <div className={legendItemContainerClasses}>
+            <LegendTooltip
+              tip={""}
+              position={"top"}
+              className="relative w-full whitespace-pre-wrap"
+            >
+              <LegendItem
+                iconClasses={"text-ocf-yellow-200"}
+                symbolStyle={"both"}
+                label={"Uncurtailed"}
+                dataKey={"NL_UNCURTAILED"}
+              />
+            </LegendTooltip>
+          </div>
+        )}
         <div className={legendItemContainerClasses}>
           <LegendItem
             iconClasses={"text-ocf-black"}
-            symbolStyle={"dashed"}
+            symbolStyle={"solid"}
             label={selectedCountry === "NL" ? "NED NL Initial" : "PV Live Initial"}
-            dataKey={`GENERATION`}
+            dataKey={`GENERATION_UPDATED`}
           />
           {selectedCountry !== "NL" && (
             <>

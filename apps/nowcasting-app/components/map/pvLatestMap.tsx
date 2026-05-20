@@ -3,8 +3,10 @@ import mapboxgl, { Expression, LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
-import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
+import { MAX_POWER_GENERATED, V1_API_PREFIX, VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
+import { useLoadDataFromApi } from "../hooks/useLoadDataFromApi";
+import { V1ForecastSnapshot } from "../types";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
@@ -58,9 +60,19 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
-  const [selectedNlRegionUuid] = useGlobalState("selectedNlRegionUuid");
+  const [selectedNlRegion] = useGlobalState("selectedNlRegion");
   const [showConstraints] = useGlobalState("showConstraints");
   const [showMap, setShowMap] = useState(true);
+
+  const snapshotTimeUtc = `${selectedISOTime.slice(0, 16)}:00Z`;
+  const { data: nlForecastSnapshot } = useLoadDataFromApi<V1ForecastSnapshot>(
+    `${V1_API_PREFIX}/NL/solar/forecasts/snapshot?region_type=province&time_utc=${encodeURIComponent(
+      snapshotTimeUtc
+    )}`,
+    {
+      keepPreviousData: true
+    }
+  );
 
   const showConstraintsRef = useRef(showConstraints);
   useEffect(() => {
@@ -72,12 +84,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     if (!map) return;
     const layer = map.getLayer("nl-forecast-select-borders");
     if (!layer) return;
-    if (selectedNlRegionUuid) {
-      map.setFilter("nl-forecast-select-borders", ["in", "id", selectedNlRegionUuid]);
+    if (selectedNlRegion) {
+      map.setFilter("nl-forecast-select-borders", ["in", "id", selectedNlRegion]);
     } else {
       map.setFilter("nl-forecast-select-borders", ["in", "id", ""]);
     }
-  }, [selectedNlRegionUuid]);
+  }, [selectedNlRegion]);
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -215,11 +227,23 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   ]);
 
   const generatedNetherlandsGeoJsonForecastData = useMemo(() => {
-    return generateNetherlandsRegionalGeoJsonForecastData(
-      combinedData?.nlRegionalForecastData,
-      selectedISOTime
+    return generateNetherlandsRegionalGeoJsonForecastData(nlForecastSnapshot);
+  }, [nlForecastSnapshot]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !generatedNetherlandsGeoJsonForecastData) return;
+    const nlSource = map.getSource("nlSource") as unknown as mapboxgl.GeoJSONSource;
+    if (!nlSource) return;
+    const selectedDataName = getActiveUnitFromMap(map);
+    const isNormalized = getActiveUnitFromMap(map) === ActiveUnit.percentage;
+    nlSource.setData(generatedNetherlandsGeoJsonForecastData.forecastGeoJson);
+    map.setPaintProperty(
+      "nl-forecast",
+      "fill-opacity",
+      getNLFillOpacity(selectedDataName, isNormalized)
     );
-  }, [combinedData?.nlRegionalForecastData, selectedISOTime]);
+  }, [generatedNetherlandsGeoJsonForecastData]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {

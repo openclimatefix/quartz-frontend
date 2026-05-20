@@ -5,13 +5,13 @@ import {
   GspDeltaValue,
   GspZoneGroupings,
   MapFeatureObject,
-  SitePvForecast
+  V1ForecastResponse,
+  V1ForecastSnapshot
 } from "../types";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import gspShapeData from "../../data/GSP_regions_4326_20250109.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import netherlandsShapeData from "../../data/netherlands.json";
-import netherlandsSitesData from "../../data/netherlands_sites.json";
 import nationalShapeData from "../../data/national_gsp_shape.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
 import dnoGspGroupings from "../../data/dno_gsp_groupings.json";
@@ -292,92 +292,60 @@ export const generateGeoJsonForecastData: (
 };
 
 export const generateNetherlandsGeoJsonForecastData: (
-  forecastData?: SitePvForecast,
+  forecastData?: V1ForecastResponse,
   targetTime?: string
 ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-  const gspForecastsDataByTimestamp = forecastData || [];
   const gspShapeJson = netherlandsShapeData as FeatureCollection;
-  let features = gspShapeJson.features;
+
+  const targetSlice = targetTime
+    ? formatISODateString(targetTime)?.slice(0, 16)
+    : formatISODateString(get30MinNow())?.slice(0, 16);
+
+  const selectedFCValue = forecastData?.values?.find(
+    (fv) => fv.time_utc.slice(0, 16) === targetSlice
+  );
+
+  const capacityKw = forecastData?.capacity_kW || 23900000;
 
   const forecastGeoJson = {
     type: "FeatureCollection" as "FeatureCollection",
-    features: features.map((f) => {
-      const gspId = "NL";
-      let selectedFCValue;
-      if (gspForecastsDataByTimestamp && targetTime) {
-        selectedFCValue = forecastData?.forecast_values?.find((fv) => {
-          return (
-            fv.target_datetime_utc.slice(0, 16) === formatISODateString(targetTime)?.slice(0, 16)
-          );
-        });
-      } else if (gspForecastsDataByTimestamp) {
-        let latestTimestamp = get30MinNow();
-        selectedFCValue = forecastData?.forecast_values?.find((fv) => {
-          return (
-            fv.target_datetime_utc.slice(0, 16) ===
-            formatISODateString(latestTimestamp)?.slice(0, 16)
-          );
-        });
-      }
-
-      console.log("=== selectedFCValue", selectedFCValue);
-      return {
-        ...f,
-        properties: setFeatureObjectProps(
-          { ...f.properties, id: gspId },
-          { regionName: gspId, installedCapacityMw: 23900000 }, // 23.9 GW installed capacity in Netherlands
-          selectedFCValue?.expected_generation_kw || 0,
-          undefined
-        )
-      };
-    })
+    features: gspShapeJson.features.map((f) => ({
+      ...f,
+      properties: setFeatureObjectProps(
+        { ...f.properties, id: "NL" },
+        { regionName: "NL", installedCapacityMw: capacityKw / 1000 },
+        (selectedFCValue?.power_kW || 0) / 1000,
+        undefined
+      )
+    }))
   };
 
   return { forecastGeoJson } as { forecastGeoJson: FeatureCollection };
 };
 
-export const generateNetherlandsRegionalGeoJsonForecastData: (
-  regionalForecastData?: SitePvForecast[],
-  targetTime?: string
-) => { forecastGeoJson: FeatureCollection } = (regionalForecastData, targetTime) => {
+export const generateNetherlandsRegionalGeoJsonForecastData: (snapshot?: V1ForecastSnapshot) => {
+  forecastGeoJson: FeatureCollection;
+} = (snapshot) => {
   const gspShapeJson = netherlandsShapeData as FeatureCollection;
 
   const forecastGeoJson = {
     type: "FeatureCollection" as "FeatureCollection",
     features: gspShapeJson.features.map((f) => {
       const provinceName = f.properties?.name as string; // e.g. "Noord-Holland"
-      const normalizedName = provinceName.toLowerCase().replace(/-/g, "_"); // "noord_holland"
 
-      const site = netherlandsSitesData.site_list.find((s) =>
-        s.client_site_name.includes(normalizedName)
+      const regionValue = snapshot?.values.find(
+        (v) => v.region_name.toLowerCase() === provinceName.toLowerCase()
       );
 
-      const siteForecast = regionalForecastData?.find((d) => d.site_uuid === site?.site_uuid);
-
-      let selectedFCValue: { expected_generation_kw: number } | undefined;
-      if (siteForecast && targetTime) {
-        selectedFCValue = siteForecast.forecast_values?.find(
-          (fv) =>
-            fv.target_datetime_utc.slice(0, 16) === formatISODateString(targetTime)?.slice(0, 16)
-        );
-      } else if (siteForecast) {
-        const latestTimestamp = get30MinNow();
-        selectedFCValue = siteForecast.forecast_values?.find(
-          (fv) =>
-            fv.target_datetime_utc.slice(0, 16) ===
-            formatISODateString(latestTimestamp)?.slice(0, 16)
-        );
-      }
-
-      const capacityMw = (site?.capacity_kw || 1) / 1000;
-      const forecastMw = (selectedFCValue?.expected_generation_kw || 0) / 1000;
+      const capacityMw = (regionValue?.capacity_kW || 1) / 1000;
+      const forecastMw = (regionValue?.power_kW || 0) / 1000;
       const normalizedRatio = capacityMw > 0 ? forecastMw / capacityMw : 0;
 
       return {
         ...f,
         properties: {
           ...setFeatureObjectProps(
-            { ...f.properties, id: site?.site_uuid || provinceName },
+            { ...f.properties, id: provinceName },
             { regionName: provinceName, installedCapacityMw: capacityMw },
             forecastMw,
             undefined

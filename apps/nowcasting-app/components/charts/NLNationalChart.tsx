@@ -17,16 +17,6 @@ import CountryToggle from "./country-toggle";
 
 const NL_NATIONAL_Y_MAX = 20000;
 
-// Sites API returns datetimes as epoch seconds, epoch ms, or ISO strings depending on endpoint.
-// Normalise all three to ISO string before any date processing.
-const toISO = (dt: string): string => {
-  if (/^\d+$/.test(dt)) {
-    const ms = dt.length <= 11 ? Number(dt) * 1000 : Number(dt);
-    return new Date(ms).toISOString();
-  }
-  return dt;
-};
-
 const NLNationalChart: React.FC<{
   combinedData: CombinedData;
   className?: string;
@@ -39,6 +29,7 @@ const NLNationalChart: React.FC<{
   const { stopTime, resetTime } = useStopAndResetTime();
 
   const nlForecastData = combinedData?.nlForecastData;
+  const nlUncurtailedForecastData = combinedData?.nlUncurtailedForecastData;
   const nlActualData = combinedData?.nlActualData;
 
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
@@ -51,35 +42,35 @@ const NLNationalChart: React.FC<{
   const chartData: ChartData[] = useMemo(() => {
     const timeNowFormatted = formatISODateString(get30MinNow());
     const chartMap: Record<string, ChartData> = {};
-    // NL data is 5-minutely; keep only half-hour slots to match RemixLine's interval=11 assumption
-    const is30MinSlot = (iso: string) => {
-      const mins = new Date(iso).getUTCMinutes();
-      return mins === 0 || mins === 30;
-    };
 
-    nlActualData?.pv_actual_values.forEach((av) => {
-      const iso = toISO(av.datetime_utc);
-      if (!is30MinSlot(iso)) return;
-      chartMap[iso] = {
-        ...chartMap[iso],
-        formattedDate: formatISODateString(iso) || "",
-        GENERATION_UPDATED: av.actual_generation_kw / 1000
+    nlActualData?.values.forEach((av) => {
+      chartMap[av.time_utc] = {
+        ...chartMap[av.time_utc],
+        formattedDate: formatISODateString(av.time_utc) || "",
+        GENERATION_UPDATED: av.power_kW / 1000
       };
     });
 
-    nlForecastData?.forecast_values.forEach((fv) => {
-      const iso = toISO(fv.target_datetime_utc);
-      if (!is30MinSlot(iso)) return;
-      const isAfterNow = iso.slice(0, 16) >= (timeNowFormatted || "");
-      chartMap[iso] = {
-        ...chartMap[iso],
-        formattedDate: formatISODateString(iso) || "",
-        [isAfterNow ? "FORECAST" : "PAST_FORECAST"]: fv.expected_generation_kw / 1000
+    nlForecastData?.values.forEach((fv) => {
+      const isAfterNow = fv.time_utc.slice(0, 16) >= (timeNowFormatted || "");
+      chartMap[fv.time_utc] = {
+        ...chartMap[fv.time_utc],
+        formattedDate: formatISODateString(fv.time_utc) || "",
+        [isAfterNow ? "FORECAST" : "PAST_FORECAST"]: fv.power_kW / 1000
+      };
+    });
+
+    nlUncurtailedForecastData?.values.forEach((fv) => {
+      const isAfterNow = fv.time_utc.slice(0, 16) >= (timeNowFormatted || "");
+      chartMap[fv.time_utc] = {
+        ...chartMap[fv.time_utc],
+        formattedDate: formatISODateString(fv.time_utc) || "",
+        [isAfterNow ? "NL_UNCURTAILED" : "PAST_NL_UNCURTAILED"]: fv.power_kW / 1000
       };
     });
 
     return Object.values(chartMap).sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
-  }, [nlForecastData, nlActualData]);
+  }, [nlForecastData, nlUncurtailedForecastData, nlActualData]);
 
   const timeNowFormatted = formatISODateString(get30MinNow());
 
@@ -92,33 +83,30 @@ const NLNationalChart: React.FC<{
     nextForecastGW,
     nextForecastTime
   } = useMemo(() => {
-    const sorted = [...(nlActualData?.pv_actual_values || [])].sort(
-      (a, b) =>
-        new Date(toISO(b.datetime_utc)).getTime() - new Date(toISO(a.datetime_utc)).getTime()
+    const sorted = [...(nlActualData?.values || [])].sort(
+      (a, b) => new Date(b.time_utc).getTime() - new Date(a.time_utc).getTime()
     );
     const latestActual = sorted[0];
-    const latestISO = latestActual ? toISO(latestActual.datetime_utc) : null;
+    const latestISO = latestActual?.time_utc || null;
     const latestFormatted = latestISO ? formatISODateString(latestISO) : timeNowFormatted;
 
     const nextSlot = latestISO ? getNext30MinSlot(new Date(latestISO)) : null;
     const nextSlotFormatted = nextSlot ? formatISODateString(nextSlot.toISOString()) : null;
 
-    const currentFv = nlForecastData?.forecast_values.find(
-      (f) => toISO(f.target_datetime_utc).slice(0, 16) === latestFormatted
+    const currentFv = nlForecastData?.values.find(
+      (f) => f.time_utc.slice(0, 16) === latestFormatted
     );
     const nextFv = nextSlotFormatted
-      ? nlForecastData?.forecast_values.find(
-          (f) => toISO(f.target_datetime_utc).slice(0, 16) === nextSlotFormatted
-        )
+      ? nlForecastData?.values.find((f) => f.time_utc.slice(0, 16) === nextSlotFormatted)
       : undefined;
 
     return {
-      currentActualGW: latestActual ? KWtoGW(latestActual.actual_generation_kw) : "–",
+      currentActualGW: latestActual ? KWtoGW(latestActual.power_kW) : "–",
       currentActualTime: latestISO
         ? convertISODateStringToLondonTime(latestISO, "Europe/Amsterdam") || ""
         : "",
-      currentForecastGW: currentFv ? KWtoGW(currentFv.expected_generation_kw) : "–",
-      nextForecastGW: nextFv ? KWtoGW(nextFv.expected_generation_kw) : "–",
+      currentForecastGW: currentFv ? KWtoGW(currentFv.power_kW) : "–",
+      nextForecastGW: nextFv ? KWtoGW(nextFv.power_kW) : "–",
       nextForecastTime: nextSlot ? formatISODateAsLondonTime(nextSlot, "Europe/Amsterdam") : ""
     };
   }, [nlForecastData, nlActualData, timeNowFormatted]);
@@ -172,7 +160,12 @@ const NLNationalChart: React.FC<{
           visibleLines={visibleLines}
           resetTime={resetTime}
           timezone="Europe/Amsterdam"
-          lineLabels={{ GENERATION_UPDATED: "NED NL", GENERATION: "NED NL" }}
+          lineLabels={{
+            GENERATION_UPDATED: "NED NL",
+            GENERATION: "NED NL",
+            NL_UNCURTAILED: "Uncurtailed",
+            PAST_NL_UNCURTAILED: "Uncurtailed"
+          }}
         />
       </div>
     </div>
