@@ -5,6 +5,7 @@ import Head from "next/head";
 import { useSearchParams } from "next/navigation";
 import Header from "../components/layout/header";
 import { VIEWS } from "../constant";
+import React from "react";
 
 const TrialExpiredPage = () => {
   const queryParams = useSearchParams();
@@ -17,7 +18,13 @@ const TrialExpiredPage = () => {
       </Head>
 
       <div className="bg-mapbox-black min-h-screen flex flex-col">
-        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false} />
+        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false}>
+          <Link href="/api/auth/logout?redirectToLogin=true" legacyBehavior>
+            <a id={"UserMenu-LogoutBtn"} className="!text-xs btn btn-outline rounded-md">
+              Sign out&nbsp;→
+            </a>
+          </Link>
+        </Header>
         <main className="w-full px-4 mx-auto max-w-2xl sm:px-6 lg:px-8 flex-1 flex flex-col items-center justify-center">
           <div className="max-w-xl py-16 mx-auto sm:py-24 text-center gap-4 flex flex-col mt-2 text-lg text-white">
             <p className="font-light">Your Quartz Solar trial has now ended.</p>
