@@ -12,6 +12,7 @@ import {
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
+import { SeasonalMetrics } from "./gsp-pv-remix-chart/use-gsp-seasonal-metrics";
 import { getSettlementPeriodForDate } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
@@ -58,14 +59,17 @@ const getDelta: (datum: ChartData) => number = (datum) => {
   return 0;
 };
 
-const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) => {
+const getSeasonalMetricsForDate = (
+  date: DateTime<Valid> | DateTime<Invalid>,
+  metrics: SeasonalMetrics
+) => {
   if (date.isValid === false) return { seasonalMean: 0, seasonalBounds: [] };
 
   const month = date.month;
   const day = date.day;
-  const seasonalQuantiles = nationalMetrics["keys"]["pLevels"];
-  // @ts-ignore
-  const seasonalMetricData = nationalMetrics["data"][month][day];
+  const seasonalQuantiles = metrics["keys"]["pLevels"];
+  // @ts-ignore - month/day are numbers indexing the string-keyed metrics map
+  const seasonalMetricData: any = metrics["data"][month][day];
   const seasonalMetrics = {
     seasonalMean: seasonalMetricData.mean,
     seasonalBounds: [] as SeasonalBound[]
@@ -100,7 +104,9 @@ const useFormatChartData = ({
   pvRealDayInData,
   timeTrigger,
   delta = false,
-  gsp = false
+  gsp = false,
+  seasonalMetrics,
+  seasonalCapacity
 }: {
   forecastData?: ForecastData;
   nationalIntradayECMWFOnlyData?: ForecastData;
@@ -115,6 +121,11 @@ const useFormatChartData = ({
   timeTrigger?: string;
   delta?: boolean;
   gsp?: boolean;
+  // For GSP charts: the (capacity-weighted, normalised) seasonal metrics for the
+  // selected GSP(s) and their total installed capacity. National charts fall
+  // back to the bundled national_metrics.json + NATIONAL_CAPACITY.
+  seasonalMetrics?: SeasonalMetrics | null;
+  seasonalCapacity?: number;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
 
@@ -218,33 +229,44 @@ const useFormatChartData = ({
         }
       }
 
-      // Add settlement period and seasonal norm data
+      // Add settlement period and seasonal norm data. National charts use the
+      // bundled national metrics; GSP charts use the selected GSP(s)' metrics and
+      // installed capacity (when loaded).
+      const metricsSource = gsp ? seasonalMetrics : (nationalMetrics as unknown as SeasonalMetrics);
+      const metricsCapacity = gsp ? seasonalCapacity : NATIONAL_CAPACITY;
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key).toUTC();
         const settlementPeriod = getSettlementPeriodForDate(date);
         chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
-        if (!gsp) {
-          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
+        if (metricsSource && metricsCapacity) {
+          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date, metricsSource);
 
-          chartMap[key].SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
+          // Values can be null where a GSP has no data for this settlement
+          // period; leave those keys unset so the chart shows a gap, not a 0.
+          const meanValue = seasonalMean[settlementPeriod - 1];
+          if (Number.isFinite(meanValue)) {
+            chartMap[key].SEASONAL_MEAN = meanValue * metricsCapacity;
+          }
           chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
           for (const boundPair of seasonalBounds) {
             for (const [index, bound] of Object.entries(boundPair)) {
-              if (bound) {
+              const boundValue = bound?.[settlementPeriod - 1];
+              if (Number.isFinite(boundValue)) {
                 chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
-                  bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+                  (boundValue as number) * metricsCapacity;
               }
             }
-            chartMap[key][
-              `SEASONAL_BOUND_${Object.keys(boundPair).join(
-                "_"
-              )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
-            ] = Object.values(boundPair).map((bound) => {
-              if (bound) {
-                return bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
-              }
-              return 0;
-            });
+            // Only draw the band where both bounds have data for this period.
+            const bandValues = Object.values(boundPair).map(
+              (bound) => bound?.[settlementPeriod - 1]
+            );
+            if (bandValues.every((value) => Number.isFinite(value))) {
+              chartMap[key][
+                `SEASONAL_BOUND_${Object.keys(boundPair).join(
+                  "_"
+                )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
+              ] = bandValues.map((value) => (value as number) * metricsCapacity);
+            }
           }
         }
       }
@@ -282,7 +304,10 @@ const useFormatChartData = ({
     nationalIntradayECMWFOnlyData,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
-    probabilisticRangeData
+    probabilisticRangeData,
+    gsp,
+    seasonalMetrics,
+    seasonalCapacity
   ]);
 
   return data;
