@@ -4,9 +4,10 @@
  *
  * The metrics are generated upstream with Python, which can emit `NaN` /
  * `Infinity` literals for settlement periods with missing/insufficient data.
- * Those are NOT valid JSON, so webpack's JSON loader (and JSON.parse) reject the
- * file and the app fails to build. This rewrites any such literals to `null`,
- * which the chart treats as "no value" (a gap in the line) rather than a 0.
+ * Those are NOT valid JSON, so `JSON.parse` (used by the runtime `fetch().json()`
+ * that loads these files) rejects the whole file and the GSP silently loses its
+ * seasonal line. This rewrites any such literals to `null`, which the chart
+ * treats as "no value" (a gap in the line) rather than a 0.
  *
  * Only files that actually contain invalid tokens are rewritten, and we preserve
  * their original formatting (a plain token replace), so the diff stays minimal.
@@ -21,7 +22,9 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const APP_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const GSP_METRICS_DIR = join(APP_ROOT, "data", "gsp_metrics");
+// Per-GSP metrics are served as static assets (not webpacked), so they live
+// under public/. See scripts/generate-dno-metrics.mjs for the DNO equivalent.
+const GSP_METRICS_DIR = join(APP_ROOT, "public", "metrics", "gsp_metrics");
 
 // Replace bare NaN / Infinity / -Infinity numeric tokens with null. These never
 // appear inside the (known) string keys of these files, so a token replace is

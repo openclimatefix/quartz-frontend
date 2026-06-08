@@ -2,7 +2,7 @@
   "ENWL": {
     "file": "ENWL.json",
     "dnoName": "ENWL",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       37,
@@ -31,7 +31,7 @@
   "NGED (East Midlands)": {
     "file": "NGED_East_Midlands.json",
     "dnoName": "NGED (East Midlands)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       23,
@@ -57,7 +57,7 @@
   "NGED (Midlands)": {
     "file": "NGED_Midlands.json",
     "dnoName": "NGED (Midlands)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       26,
@@ -86,7 +86,7 @@
   "NGED (South Wales)": {
     "file": "NGED_South_Wales.json",
     "dnoName": "NGED (South Wales)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       3,
@@ -108,7 +108,7 @@
   "NGED (South West)": {
     "file": "NGED_South_West.json",
     "dnoName": "NGED (South West)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       1,
@@ -132,7 +132,7 @@
   "NPG (Northern Electric)": {
     "file": "NPG_Northern_Electric.json",
     "dnoName": "NPG (Northern Electric)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       27,
@@ -163,7 +163,7 @@
   "NPG (Yorkshire Electric)": {
     "file": "NPG_Yorkshire_Electric.json",
     "dnoName": "NPG (Yorkshire Electric)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       36,
@@ -196,7 +196,7 @@
   "SPEN (SP Distribution)": {
     "file": "SPEN_SP_Distribution.json",
     "dnoName": "SPEN (SP Distribution)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       14,
@@ -288,7 +288,7 @@
   "SPEN (SP MANWEB)": {
     "file": "SPEN_SP_MANWEB.json",
     "dnoName": "SPEN (SP MANWEB)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       25,
@@ -313,7 +313,7 @@
   "SSE": {
     "file": "SSE.json",
     "dnoName": "SSE",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       2,
@@ -389,7 +389,7 @@
   "SSE (Southern)": {
     "file": "SSE_Southern.json",
     "dnoName": "SSE (Southern)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       4,
@@ -421,7 +421,7 @@
   "UKPN (East)": {
     "file": "UKPN_East.json",
     "dnoName": "UKPN (East)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       9,
@@ -457,7 +457,7 @@
   "UKPN (London)": {
     "file": "UKPN_London.json",
     "dnoName": "UKPN (London)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       19,
@@ -489,7 +489,7 @@
   "UKPN (South)": {
     "file": "UKPN_South.json",
     "dnoName": "UKPN (South)",
-    "generatedAt": "2026-06-05T20:25:26.156Z",
+    "generatedAt": "2026-06-08T12:03:58.413Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       20,

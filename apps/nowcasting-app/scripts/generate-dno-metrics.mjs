@@ -15,8 +15,12 @@
  * extrapolated to the full current DNO capacity at runtime.
  *
  * Output:
- *   data/dno_metrics/<slug>.json   one file per DNO (national_metrics shape + meta)
- *   data/dno_metrics/manifest.json name -> file map (so the runtime needn't slugify)
+ *   public/metrics/dno_metrics/<slug>.json  one file per DNO (national_metrics
+ *                                           shape + meta), served as a static
+ *                                           asset and fetched at runtime (not
+ *                                           webpacked).
+ *   data/dno_metrics/manifest.json          name -> file map; bundled (imported)
+ *                                           so the runtime needn't slugify.
  *
  * Usage:
  *   node scripts/generate-dno-metrics.mjs [capacitiesFile]
@@ -31,18 +35,20 @@ import { fileURLToPath } from "node:url";
 
 const APP_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DATA_DIR = join(APP_ROOT, "data");
-const GSP_METRICS_DIR = join(DATA_DIR, "gsp_metrics");
-const OUT_DIR = join(DATA_DIR, "dno_metrics");
+// GSP/DNO metrics are large and served as static assets (fetched at runtime, not
+// webpacked), so they live under public/. The manifest is small and imported, so
+// it stays bundled in data/.
+const PUBLIC_METRICS_DIR = join(APP_ROOT, "public", "metrics");
+const GSP_METRICS_DIR = join(PUBLIC_METRICS_DIR, "gsp_metrics");
+const OUT_DIR = join(PUBLIC_METRICS_DIR, "dno_metrics");
+const MANIFEST_DIR = join(DATA_DIR, "dno_metrics");
 const GROUPINGS_FILE = join(DATA_DIR, "dno_gsp_groupings.json");
 
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
 
 // Stable, filesystem-safe slug for a DNO name, e.g.
 // "NGED (East Midlands)" -> "NGED_East_Midlands".
-const slugify = (name) =>
-  name
-    .replace(/[^a-z0-9]+/gi, "_")
-    .replace(/^_+|_+$/g, "");
+const slugify = (name) => name.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
 
 // Pick the capacities file: CLI arg, else newest data/gsp_metadata_*.json.
 const resolveCapacitiesFile = () => {
@@ -124,6 +130,7 @@ const main = () => {
   };
 
   mkdirSync(OUT_DIR, { recursive: true });
+  mkdirSync(MANIFEST_DIR, { recursive: true });
 
   const generatedAt = new Date().toISOString();
   const manifest = {};
@@ -179,9 +186,9 @@ const main = () => {
     });
   }
 
-  writeFileSync(join(OUT_DIR, "manifest.json"), JSON.stringify(manifest, null, 2));
+  writeFileSync(join(MANIFEST_DIR, "manifest.json"), JSON.stringify(manifest, null, 2));
 
-  console.log(`\nGenerated ${summary.length} DNO metrics files in data/dno_metrics/`);
+  console.log(`\nGenerated ${summary.length} DNO metrics files in public/metrics/dno_metrics/`);
   console.log(`Capacities: ${capacitiesFile.split("/data/").pop()}`);
   console.table(summary);
 };

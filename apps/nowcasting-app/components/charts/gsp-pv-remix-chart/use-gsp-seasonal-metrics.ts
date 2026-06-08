@@ -78,10 +78,12 @@ type DnoManifest = Record<string, { file: string }>;
  * metrics are available.
  *
  * - GSP aggregation: combines the selected GSPs' per-GSP metrics
- *   (data/gsp_metrics/gsp_{gspId}.json), weighted by capacity, on the fly. GSPs
+ *   (public/metrics/gsp_metrics/gsp_{gspId}.json), weighted by capacity, on the
+ *   fly. GSPs
  *   without a metrics file (e.g. newly added GSPs) are skipped and the effective
  *   capacity covers only the GSPs we have data for.
- * - DNO aggregation: loads the pre-baked DNO file (data/dno_metrics/, generated
+ * - DNO aggregation: fetches the pre-baked DNO file (public/metrics/dno_metrics/,
+ *   generated
  *   by scripts/generate-dno-metrics.mjs) and scales by the DNO's current total
  *   installed capacity from the live API, extrapolating the normalised shape to
  *   the full present-day capacity.
@@ -123,10 +125,11 @@ const useGspSeasonalMetrics = (
         setMetrics(null);
         return;
       }
-      import(`../../../data/dno_metrics/${dnoFile}`)
+      fetch(`/metrics/dno_metrics/${dnoFile}`)
+        .then((r) => r.json())
         .then((m) => {
           if (cancelled) return;
-          setMetrics({ metrics: (m.default || m) as SeasonalMetrics, capacity: totalCapacity });
+          setMetrics({ metrics: m as SeasonalMetrics, capacity: totalCapacity });
         })
         .catch(() => {
           if (!cancelled) setMetrics(null);
@@ -150,12 +153,13 @@ const useGspSeasonalMetrics = (
 
     Promise.all(
       gsps.map((g) =>
-        import(`../../../data/gsp_metrics/gsp_${g.gspId}.json`)
+        fetch(`/metrics/gsp_metrics/gsp_${g.gspId}.json`)
+          .then((r) => r.json())
           .then(
             (m) =>
               ({
                 cap: g.installedCapacityMw || 0,
-                metrics: (m.default || m) as SeasonalMetrics
+                metrics: m as SeasonalMetrics
               } as LoadedGspMetrics)
           )
           .catch(() => null)
