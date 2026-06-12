@@ -8,8 +8,18 @@ import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
-  MAX_POWER_GENERATED
+  MAX_POWER_GENERATED,
+  VIEWS
 } from "../../constant";
+import {
+  SATELLITE_CHANNELS,
+  SatelliteChannel,
+  TifLayerData,
+  fetchAndDecodeSatelliteTif,
+  applyTifLayerToMap,
+  setSatelliteLayerVisibility
+} from "../helpers/satelliteLayer";
+import { addMinutesToISODate } from "../helpers/utils";
 
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
@@ -63,6 +73,66 @@ const Map: FC<IMap> = ({
   const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
+  const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
+  const showCloudRef = useRef(showCloudLayer);
+  const channelRef = useRef(activeChannel);
+  const tifCache = useRef<globalThis.Map<string, TifLayerData>>(new globalThis.Map());
+  const currentKeyRef = useRef<string | null>(null);
+  const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
+
+  const SAT_LAYER_ID = "satellite-layer";
+  const SAT_SOURCE_ID = "satellite-source";
+
+  useEffect(() => {
+    showCloudRef.current = showCloudLayer;
+    if (!map.current) return;
+    setSatelliteLayerVisibility(map.current, showCloudLayer, SAT_LAYER_ID);
+  }, [showCloudLayer]);
+
+  useEffect(() => {
+    channelRef.current = activeChannel;
+    currentKeyRef.current = null;
+    if (isMapReady && selectedISOTime) {
+      applyForTimestamp(activeChannel, selectedISOTime);
+    }
+  }, [activeChannel, isMapReady]);
+
+  const satCacheKey = (ch: SatelliteChannel, ts: string) => `${ch}__${ts}`;
+
+  const fetchIntoCache = async (ch: SatelliteChannel, ts: string): Promise<TifLayerData | null> => {
+    const key = satCacheKey(ch, ts);
+    if (tifCache.current.has(key)) return tifCache.current.get(key)!;
+    const data = await fetchAndDecodeSatelliteTif(ch, ts);
+    if (data) tifCache.current.set(key, data);
+    return data;
+  };
+
+  const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
+    if (!map.current || !showCloudRef.current) return;
+    const key = satCacheKey(ch, ts);
+    if (currentKeyRef.current === key) return;
+    setIsSatelliteLoading(true);
+    try {
+      const data = await fetchIntoCache(ch, ts);
+      if (!map.current) return;
+      currentKeyRef.current = key;
+      applyTifLayerToMap(map.current, data, SAT_LAYER_ID, SAT_SOURCE_ID, showCloudRef.current);
+    } finally {
+      setIsSatelliteLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!showCloudLayer || !isMapReady || !selectedISOTime) return;
+    applyForTimestamp(activeChannel, selectedISOTime);
+    for (let offset = -3; offset <= 3; offset++) {
+      if (offset === 0) continue;
+      const ts = addMinutesToISODate(selectedISOTime, offset * 30);
+      fetchIntoCache(activeChannel, ts).catch(() => {});
+    }
+  }, [selectedISOTime, activeChannel, showCloudLayer, isMapReady]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
@@ -179,9 +249,61 @@ const Map: FC<IMap> = ({
 
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
-      <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full">
-        {controlOverlay(map)}
+      <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full flex flex-col gap-1 pointer-events-none">
+        <div className="pointer-events-auto">{controlOverlay(map)}</div>
+        <div
+          className={`pointer-events-auto flex flex-row items-center justify-end gap-2 transition-all duration-300 ${
+            title === VIEWS.SOLAR_SITES ? "mt-[240px]" : "mt-3"
+          }`}
+        >
+          {showCloudLayer && (
+            <select
+              value={activeChannel}
+              onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
+              className="w-24 bg-black text-white text-xs font-semibold py-1 px-1.5 border border-gray-600 outline-none cursor-pointer focus:border-ocf-yellow"
+            >
+              {SATELLITE_CHANNELS.map((ch) => (
+                <option key={ch} value={ch}>
+                  {ch}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowCloudLayer((c) => !c)}
+            className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border border-gray-600 transition-all active:scale-95 ${
+              showCloudLayer ? "text-black bg-ocf-yellow" : "text-white bg-black"
+            }`}
+          >
+            {isSatelliteLoading && (
+              <svg
+                className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            )}
+            Clouds
+          </button>
+        </div>
       </div>
+
       <div ref={mapContainer} id={`Map-${title}`} data-title={title} className="h-full w-full" />
       <div className="map-overlay top">{children}</div>
     </div>
