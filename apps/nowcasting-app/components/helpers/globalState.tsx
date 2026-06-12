@@ -8,6 +8,7 @@ import {
 import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
 import { ActiveUnit, NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
+import { SatelliteChannel } from "./satelliteLayer";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -82,6 +83,8 @@ export type GlobalStateType = {
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
   nationalAggregationLevel: NationalAggregation;
+  showCloudLayer: boolean;
+  activeChannel: SatelliteChannel;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -130,7 +133,9 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       message: "Loading data"
     },
     nHourForecast: 4,
-    nationalAggregationLevel: NationalAggregation.GSP
+    nationalAggregationLevel: NationalAggregation.GSP,
+    showCloudLayer: false,
+    activeChannel: "IR_016"
   });
 
 export default useGlobalState;
