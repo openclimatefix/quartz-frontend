@@ -77,13 +77,21 @@ export async function fetchSatelliteTif(
   return null;
 }
 
+function mercToWgs84(x: number, y: number): [number, number] {
+  const lon = (x / 20037508.34) * 180;
+  const lat = (Math.atan(Math.exp((y / 20037508.34) * Math.PI)) * 360) / Math.PI - 90;
+  return [lon, lat];
+}
+
 export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
   const tiff = await fromArrayBuffer(buf);
   const image = await tiff.getImage();
   const width = image.getWidth();
   const height = image.getHeight();
   const data = await image.readRasters();
-  const bbox = image.getBoundingBox() as [number, number, number, number];
+  const [minX, minY, maxX, maxY] = image.getBoundingBox();
+  const [minLon, minLat] = mercToWgs84(minX, minY);
+  const [maxLon, maxLat] = mercToWgs84(maxX, maxY);
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -125,7 +133,7 @@ export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
   }
 
   ctx.putImageData(imageData, 0, 0);
-  return { imageDataUrl: canvas.toDataURL(), bounds: bbox };
+  return { imageDataUrl: canvas.toDataURL(), bounds: [minLon, minLat, maxLon, maxLat] };
 }
 
 export async function fetchAndDecodeSatelliteTif(
