@@ -257,6 +257,28 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return new Date(now).setHours(o, 0, 0, 0);
   });
 
+  // Derive the data cadence (e.g. 15- vs 30-min) so the x-axis tick intervals
+  // adapt to it. A fixed interval assumes 30-min resolution and cramps the time
+  // labels / duplicates the day labels on higher-resolution charts (e.g. NL).
+  const stepMinutes = (() => {
+    const first = preppedData[0]?.formattedDate;
+    const second = preppedData[1]?.formattedDate;
+    if (!first || !second) return 30;
+    const diff = Math.abs(new Date(second).getTime() - new Date(first).getTime()) / 60000;
+    return diff > 0 ? diff : 30;
+  })();
+  const pointsPerDay = Math.round((24 * 60) / stepMinutes);
+  // Show a time label every 6 hours, and a day label once per day, whatever the resolution
+  const timeAxisInterval = Math.max(0, Math.round(pointsPerDay / 4) - 1);
+  const dayAxisInterval = Math.max(0, pointsPerDay - 1);
+  // Explicit tick values at those intervals so that, combined with minTickGap +
+  // "preserveStartEnd" on the axes, Recharts can additionally drop labels that
+  // would collide on narrow widths — i.e. the ticks reflow on resize.
+  const everyNthDate = (stride: number) =>
+    preppedData.filter((_, i) => i % stride === 0).map((d) => d.formattedDate);
+  const timeTickValues = everyNthDate(timeAxisInterval + 1);
+  const dayTickValues = everyNthDate(dayAxisInterval + 1);
+
   //get Y axis boundary
 
   const yMaxZoom_Levels = [
@@ -419,9 +441,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
               type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
+              ticks={view === VIEWS.SOLAR_SITES ? ticks : timeTickValues}
               domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : "preserveStartEnd"}
+              minTickGap={6}
             />
             <XAxis
               className="select-none"
@@ -432,9 +455,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
               type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
+              ticks={view === VIEWS.SOLAR_SITES ? ticks : timeTickValues}
               domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : "preserveStartEnd"}
+              minTickGap={6}
               orientation="top"
               padding="no-gap"
               hide={true}
@@ -447,13 +471,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
               type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
+              ticks={view === VIEWS.SOLAR_SITES ? timeTicks : dayTickValues}
               domain={
                 view === VIEWS.SOLAR_SITES
                   ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
                   : undefined
               }
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
+              interval={view === VIEWS.SOLAR_SITES ? undefined : "preserveStartEnd"}
+              minTickGap={10}
               orientation="bottom"
               axisLine={false}
               tickMargin={-12}
