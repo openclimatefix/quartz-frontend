@@ -30,6 +30,18 @@ export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       addMatchImageSnapshotPlugin(on);
+
+      on("task", {
+        async generateAuth0Cookie(session: any) {
+          const { generateSessionCookie } = require("@auth0/nextjs-auth0/testing");
+          const secret = process.env.AUTH0_SECRET;
+          const cookieVal = await generateSessionCookie(session, {
+            secret: secret
+          });
+          return cookieVal;
+        }
+      });
+
       on("before:browser:launch", (browser: any, launchOptions) => {
         if (browser.name === "chromium" || browser.family === "chromium") {
           launchOptions.args = launchOptions.args.filter((arg) => arg !== "--disable-gpu");

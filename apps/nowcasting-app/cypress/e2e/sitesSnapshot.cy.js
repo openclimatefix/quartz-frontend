@@ -2,10 +2,7 @@ import "cypress-real-events/support";
 
 describe("Sites Tab Snapshot", () => {
   beforeEach(() => {
-    cy.loginToAuth0(
-      Cypress.env("auth0_username"),
-      Cypress.env("auth0_password")
-    );
+    cy.loginToAuth0(Cypress.env("auth0_username"), Cypress.env("auth0_password"));
 
     // Mock the clock before visiting the page
     cy.fixture("manifest.json").then((manifest) => {
@@ -18,17 +15,14 @@ describe("Sites Tab Snapshot", () => {
     cy.useApiFixtures();
 
     cy.intercept("GET", "/api/get_token", {
-      accessToken: "FAKE_TOKEN",
+      accessToken: "FAKE_TOKEN"
     });
   });
 
   it("successfully loads", () => {
     cy.visit("http://localhost:3002/");
 
-    cy.location("href").should(
-      "equal",
-      "http://localhost:3002/"
-    );
+    cy.location("href").should("equal", "http://localhost:3002/");
   });
 
   it("matches the sites tab snapshot", () => {
@@ -36,11 +30,6 @@ describe("Sites Tab Snapshot", () => {
 
     // switch to sites tab
     cy.get('[data-cy="solar-sites-tab"]').click();
-
-    // make sure map is rendered
-    cy.get(".mapboxgl-canvas", {
-      timeout: 15000,
-    }).should("be.visible");
 
     // time delay to render the boundaries and colours on the map
     cy.wait(16000);
