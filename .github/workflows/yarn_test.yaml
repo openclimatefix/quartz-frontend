@@ -49,7 +49,7 @@ jobs:
         record: true
 #        parallel: true # Runs test in parallel using settings above
         config: chromeWebSecurity=false
-        browser: chrome
+        browser: electron
 env:
   AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
   AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
