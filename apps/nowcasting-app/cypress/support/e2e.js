@@ -3,10 +3,11 @@ import "@percy/cypress";
 import { addMatchImageSnapshotCommand } from '@simonsmith/cypress-image-snapshot/command';
 
 addMatchImageSnapshotCommand({
-  failureThreshold: 0.1,
+  failureThreshold: 0.001,
   failureThresholdType: 'percent',
   customDiffConfig: { threshold: 0.1 },
   capture: 'fullPage',
+  blur: 0.5,
 });
 
 Cypress.on("uncaught:exception", () => {
