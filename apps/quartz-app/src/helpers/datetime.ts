@@ -28,9 +28,7 @@ export const formatEpochToHumanDayName = (time: number | undefined) => {
   if (date.toFormat("DDD") === DateTime.now().toFormat("DDD")) {
     return "Today";
   }
-  if (
-    date.toFormat("DDD") === DateTime.now().plus({ days: 1 }).toFormat("DDD")
-  ) {
+  if (date.toFormat("DDD") === DateTime.now().plus({ days: 1 }).toFormat("DDD")) {
     return "Tomorrow";
   }
   return day;
@@ -47,7 +45,7 @@ export const getNowInTimezone = () => {
     hour: now.minute >= 45 ? now.hour + 1 : now.hour,
     minute: now.minute < 45 ? Math.floor(now.minute / 15) * 15 : 0,
     second: 0,
-    millisecond: 0,
+    millisecond: 0
   });
 };
 

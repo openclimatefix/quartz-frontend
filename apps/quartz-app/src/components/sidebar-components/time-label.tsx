@@ -11,7 +11,7 @@ const ForecastTimeDisplay: React.FC<ForecastTimeDisplayProps> = ({
   time,
   icon,
   forecastTag,
-  alignRight = false,
+  alignRight = false
 }) => {
   return (
     <div
@@ -19,14 +19,10 @@ const ForecastTimeDisplay: React.FC<ForecastTimeDisplayProps> = ({
         alignRight ? "items-end text-right" : "items-start"
       }`}
     >
-      <div className="text-white text-xs font-sans uppercase">
-        {forecastTag}
-      </div>
+      <div className="text-white text-xs font-sans uppercase">{forecastTag}</div>
       <div className="justify-start items-center inline-flex">
         <div className="w-4 h-4 relative mr-1">{icon}</div>
-        <div className="text-white text-xl font-bold font-sans uppercase leading-3">
-          {time}
-        </div>
+        <div className="text-white text-xl font-bold font-sans uppercase leading-3">{time}</div>
       </div>
     </div>
   );
