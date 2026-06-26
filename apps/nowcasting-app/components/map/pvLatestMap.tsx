@@ -497,13 +497,27 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     };
   }, [mapDataLoading]);
 
+  // Debounce the spinner so it only shows for data loads, not the brief
+  // mapDataLoading rerender that happens when flipping between already-cached
+  // timesteps. If loading resolves within the threshold (cached re-render),
+  // the spinner never appears.
+  const isLoading =
+    !combinedData.allGspForecastData || combinedLoading.allGspForecastLoading || mapDataLoading;
+  const [showSpinner, setShowSpinner] = useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSpinner(false);
+      return;
+    }
+    const t = setTimeout(() => setShowSpinner(true), 700);
+    return () => clearTimeout(t);
+  }, [isLoading]);
+
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>
       {
         <>
-          {(!combinedData.allGspForecastData ||
-            combinedLoading.allGspForecastLoading ||
-            mapDataLoading) && (
+          {showSpinner && (
             <LoadStateMap>
               <Spinner />
             </LoadStateMap>
