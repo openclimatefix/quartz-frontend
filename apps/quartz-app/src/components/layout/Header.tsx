@@ -94,7 +94,7 @@ const Header: React.FC<HeaderProps> = () => {
       .replaceAll("T", "_")}.csv`;
     Sentry.captureEvent({
       message: "Downloaded CSV",
-      level: "log",
+      level: "info",
       tags: {
         forecastHorizon: `${forecastHorizon}${forecastHorizonTimeString}`,
       },
