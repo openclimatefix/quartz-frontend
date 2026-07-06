@@ -13,6 +13,7 @@ import {
 } from "../../constant";
 import {
   SATELLITE_CHANNELS,
+  SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
   TifLayerData,
   fetchAndDecodeSatelliteTif,
@@ -260,11 +261,11 @@ const Map: FC<IMap> = ({
             <select
               value={activeChannel}
               onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
-              className="w-24 bg-black text-white text-xs font-semibold py-1 px-1.5 border border-gray-600 outline-none cursor-pointer focus:border-ocf-yellow"
+              className="w-40 bg-black text-white text-xs font-semibold py-1 px-1.5 border border-gray-600 outline-none cursor-pointer focus:border-ocf-yellow"
             >
               {SATELLITE_CHANNELS.map((ch) => (
                 <option key={ch} value={ch}>
-                  {ch}
+                  {SATELLITE_CHANNEL_LABELS[ch]}
                 </option>
               ))}
             </select>
