@@ -85,6 +85,7 @@ export type GlobalStateType = {
   nationalAggregationLevel: NationalAggregation;
   showCloudLayer: boolean;
   activeChannel: SatelliteChannel;
+  showPvLayer: boolean;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -135,7 +136,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     nHourForecast: 4,
     nationalAggregationLevel: NationalAggregation.GSP,
     showCloudLayer: false,
-    activeChannel: "IR_016"
+    activeChannel: "IR_016",
+    showPvLayer: true
   });
 
 export default useGlobalState;

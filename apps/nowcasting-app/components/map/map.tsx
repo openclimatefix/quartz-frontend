@@ -25,6 +25,21 @@ import { addMinutesToISODate } from "../helpers/utils";
 mapboxgl.accessToken =
   "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
 
+// Yellow PV/GSP forecast fill layers added by pvLatestMap/deltaMap that can obscure the cloud layer
+const PV_LAYER_IDS = [
+  "latestPV-forecast",
+  "latestPV-forecast-borders",
+  "latestPV-forecast-select-borders"
+];
+
+const applyPvLayerVisibility = (m: mapboxgl.Map, visible: boolean) => {
+  PV_LAYER_IDS.forEach((id) => {
+    if (m.getLayer(id)) {
+      m.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+    }
+  });
+};
+
 const setAggregationLevelByCurrentZoom = (
   currentZoom: number,
   autoZoom: boolean,
@@ -77,6 +92,8 @@ const Map: FC<IMap> = ({
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
   const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
+  const [showPvLayer, setShowPvLayer] = useGlobalState("showPvLayer");
+  const showPvRef = useRef(showPvLayer);
   const showCloudRef = useRef(showCloudLayer);
   const channelRef = useRef(activeChannel);
   const tifCache = useRef<globalThis.Map<string, TifLayerData>>(new globalThis.Map());
@@ -91,6 +108,12 @@ const Map: FC<IMap> = ({
     if (!map.current) return;
     setSatelliteLayerVisibility(map.current, showCloudLayer, SAT_LAYER_ID);
   }, [showCloudLayer]);
+
+  useEffect(() => {
+    showPvRef.current = showPvLayer;
+    if (!map.current) return;
+    applyPvLayerVisibility(map.current, showPvLayer);
+  }, [showPvLayer]);
 
   useEffect(() => {
     channelRef.current = activeChannel;
@@ -147,6 +170,7 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     if (map.current && updateData.newData) {
       updateData.updateMapData(map.current);
+      applyPvLayerVisibility(map.current, showPvRef.current);
     }
   }, [updateData]);
 
@@ -253,7 +277,7 @@ const Map: FC<IMap> = ({
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full flex flex-col gap-1 pointer-events-none">
         <div className="pointer-events-auto">{controlOverlay(map)}</div>
         <div
-          className={`pointer-events-auto flex flex-row items-center justify-end gap-2 transition-all duration-300 ${
+          className={`pointer-events-auto flex flex-row items-start justify-end gap-2 transition-all duration-300 ${
             title === VIEWS.SOLAR_SITES ? "mt-[240px]" : "mt-3"
           }`}
         >
@@ -271,37 +295,56 @@ const Map: FC<IMap> = ({
             </select>
           )}
 
-          <button
-            type="button"
-            onClick={() => setShowCloudLayer((c) => !c)}
-            className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border border-gray-600 transition-all active:scale-95 ${
-              showCloudLayer ? "text-black bg-ocf-yellow" : "text-white bg-black"
-            }`}
-          >
-            {isSatelliteLoading && (
-              <svg
-                className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+          <div className="flex flex-col items-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const turningOff = showCloudLayer;
+                setShowCloudLayer(!showCloudLayer);
+                if (turningOff) setShowPvLayer(true);
+              }}
+              className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border border-gray-600 transition-all active:scale-95 ${
+                showCloudLayer ? "text-black bg-ocf-yellow" : "text-white bg-black"
+              }`}
+            >
+              {isSatelliteLoading && (
+                <svg
+                  className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              )}
+              Clouds
+            </button>
+
+            {showCloudLayer && title === VIEWS.FORECAST && (
+              <button
+                type="button"
+                title="Toggle the yellow PV forecast overlay so clouds are easier to see"
+                onClick={() => setShowPvLayer((v) => !v)}
+                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border border-gray-600 transition-all active:scale-95 ${
+                  showPvLayer ? "text-black bg-ocf-yellow" : "text-white bg-black"
+                }`}
               >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+                PV Forecast
+              </button>
             )}
-            Clouds
-          </button>
+          </div>
         </div>
       </div>
 

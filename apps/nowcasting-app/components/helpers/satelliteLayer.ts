@@ -39,7 +39,12 @@ const API_PREFIX = process.env.NEXT_PUBLIC_QUARTZ_API_URL || "https://api-dev.qu
 // --- double buffer slots ---
 const SLOT_A = { layer: "satellite-layer-a", source: "satellite-source-a" };
 const SLOT_B = { layer: "satellite-layer-b", source: "satellite-source-b" };
-let activeSlot = SLOT_A;
+type Slot = typeof SLOT_A;
+
+const SAT_OPACITY = 0.6;
+const activeSlotByMap = new WeakMap<mapboxgl.Map, Slot>();
+const swapTokenByMap = new WeakMap<mapboxgl.Map, number>();
+const pendingCleanupByMap = new WeakMap<mapboxgl.Map, () => void>();
 
 async function getToken(): Promise<string> {
   const res = await fetch("/api/get_token");
@@ -181,10 +186,14 @@ export function applyTifLayerToMap(
     [minLon, minLat]
   ];
 
+  const activeSlot = activeSlotByMap.get(map) ?? SLOT_A;
   const next = activeSlot === SLOT_A ? SLOT_B : SLOT_A;
   const prev = activeSlot;
 
-  // load into the inactive slot
+  const token = (swapTokenByMap.get(map) ?? 0) + 1;
+  swapTokenByMap.set(map, token);
+  pendingCleanupByMap.get(map)?.();
+  pendingCleanupByMap.delete(map);
   const existingSource = map.getSource(next.source) as mapboxgl.ImageSource | undefined;
   if (existingSource) {
     existingSource.updateImage({ url: imageDataUrl, coordinates: coords });
@@ -204,20 +213,32 @@ export function applyTifLayerToMap(
     });
   }
 
-  // once the new image is loaded, crossfade
-  map.once("idle", () => {
+  const swap = () => {
+    if (swapTokenByMap.get(map) !== token) return; // superseded by a newer frame
     if (!map.getLayer(next.layer)) return;
-
-    map.setPaintProperty(next.layer, "raster-opacity-transition", { duration: 300 });
-    map.setPaintProperty(next.layer, "raster-opacity", isVisible ? 0.6 : 0);
-
+    map.moveLayer(next.layer);
+    map.setPaintProperty(next.layer, "raster-opacity", isVisible ? SAT_OPACITY : 0);
     if (map.getLayer(prev.layer)) {
-      map.setPaintProperty(prev.layer, "raster-opacity-transition", { duration: 300 });
       map.setPaintProperty(prev.layer, "raster-opacity", 0);
     }
-
-    activeSlot = next;
-  });
+    activeSlotByMap.set(map, next);
+  };
+  const onSourceData = (e: mapboxgl.MapSourceDataEvent) => {
+    if (e.sourceId !== next.source || !map.isSourceLoaded(next.source)) return;
+    cleanup();
+    swap();
+  };
+  const timeoutId = window.setTimeout(() => {
+    cleanup();
+    swap();
+  }, 500);
+  const cleanup = () => {
+    map.off("sourcedata", onSourceData);
+    window.clearTimeout(timeoutId);
+    if (pendingCleanupByMap.get(map) === cleanup) pendingCleanupByMap.delete(map);
+  };
+  pendingCleanupByMap.set(map, cleanup);
+  map.on("sourcedata", onSourceData);
 }
 
 export function setSatelliteLayerVisibility(
