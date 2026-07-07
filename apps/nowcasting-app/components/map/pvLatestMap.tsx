@@ -54,6 +54,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [mapDataLoading, setMapDataLoading] = useState(true);
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [showConstraints] = useGlobalState("showConstraints");
+  const [showPvLayer] = useGlobalState("showPvLayer");
   const [showMap, setShowMap] = useState(true);
 
   const showConstraintsRef = useRef(showConstraints);
@@ -220,7 +221,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         data: forecastGeoJson,
         promoteId: "id"
       });
-    } else {
+    } else if (showPvLayer) {
       forecastSource.setData(generatedGeoJsonForecastData.forecastGeoJson);
     }
     console.log("latestPV source set");
@@ -347,7 +348,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     } else {
-      if (generatedGeoJsonForecastData && forecastSource) {
+      if (showPvLayer && generatedGeoJsonForecastData && forecastSource) {
         const currentActiveUnit = getActiveUnitFromMap(map);
         const isNormalized = currentActiveUnit === ActiveUnit.percentage;
         forecastSource?.setData(generatedGeoJsonForecastData.forecastGeoJson);
@@ -517,7 +518,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     <div className={`pv-map relative h-full w-full ${className}`}>
       {
         <>
-          {showSpinner && (
+          {showSpinner && showPvLayer && (
             <LoadStateMap>
               <Spinner />
             </LoadStateMap>
