@@ -14,6 +14,7 @@ type HeaderProps = {};
 const Header: React.FC<HeaderProps> = () => {
   const { showUserMenu, setShowUserMenu } = useUserMenu();
   const [combinedData] = useGlobalState("combinedData");
+  const [isLoading] = useGlobalState("isLoading");
   const [forecastHorizon] = useGlobalState("forecastHorizon");
   const [forecastHorizonMinutes] = useGlobalState("forecastHorizonMinutes");
   const { user } = useUser();
@@ -150,9 +151,10 @@ const Header: React.FC<HeaderProps> = () => {
             <>
               <button
                 id="DownloadCsvButton"
-                className="text-sm p-2"
+                className={`text-sm p-2 ${isLoading ? "opacity-40 cursor-not-allowed" : ""}`}
                 title={"Download CSV"}
                 tabIndex={0}
+                disabled={isLoading}
                 onClick={downloadCsv}
               >
                 <DownloadIcon />
