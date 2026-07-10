@@ -36,15 +36,18 @@ export type TifLayerData = {
 
 const API_PREFIX = process.env.NEXT_PUBLIC_QUARTZ_API_URL || "https://api-dev.quartz.solar";
 
-// --- double buffer slots ---
-const SLOT_A = { layer: "satellite-layer-a", source: "satellite-source-a" };
-const SLOT_B = { layer: "satellite-layer-b", source: "satellite-source-b" };
-type Slot = typeof SLOT_A;
-
+const SAT_LAYER = "satellite-layer";
+const SAT_SOURCE = "satellite-source";
 const SAT_OPACITY = 0.6;
-const activeSlotByMap = new WeakMap<mapboxgl.Map, Slot>();
+const SAT_TEXTURE_SIZE = 512;
 const swapTokenByMap = new WeakMap<mapboxgl.Map, number>();
-const pendingCleanupByMap = new WeakMap<mapboxgl.Map, () => void>();
+const MERCATOR_MAX = 20037508.34;
+
+function mercToWgs84(x: number, y: number): [number, number] {
+  const lon = (x / MERCATOR_MAX) * 180;
+  const lat = (Math.atan(Math.exp((y / MERCATOR_MAX) * Math.PI)) * 360) / Math.PI - 90;
+  return [lon, lat];
+}
 
 async function getToken(): Promise<string> {
   const res = await fetch("/api/get_token");
@@ -63,19 +66,16 @@ export async function fetchSatelliteTif(
   )}&timestamp=${encodeURIComponent(timestamp)}`;
 
   const maxRetries = 5;
-  let attempt = 0;
 
-  while (attempt < maxRetries) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     const apiRes = await fetch(apiUrl, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
     if (apiRes.status === 429) {
-      attempt++;
-      if (attempt >= maxRetries) {
+      if (attempt === maxRetries - 1) {
         throw new Error("Satellite API rate limited: max retries reached (429)");
       }
-      // Retry after 1.2 to 1.5 seconds (1.some fraction seconds)
       const delayMs = 1200 + Math.random() * 300;
       await new Promise((resolve) => setTimeout(resolve, delayMs));
       continue;
@@ -96,34 +96,28 @@ export async function fetchSatelliteTif(
   return null;
 }
 
-function mercToWgs84(x: number, y: number): [number, number] {
-  const lon = (x / 20037508.34) * 180;
-  const lat = (Math.atan(Math.exp((y / 20037508.34) * Math.PI)) * 360) / Math.PI - 90;
-  return [lon, lat];
-}
-
 export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
   const tiff = await fromArrayBuffer(buf);
   const image = await tiff.getImage();
   const width = image.getWidth();
   const height = image.getHeight();
   const data = await image.readRasters();
-  const [minX, minY, maxX, maxY] = image.getBoundingBox();
-  const [minLon, minLat] = mercToWgs84(minX, minY);
-  const [maxLon, maxLat] = mercToWgs84(maxX, maxY);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
-  const imageData = ctx.createImageData(width, height);
-  const px = imageData.data;
+  let minLon: number, minLat: number, maxLon: number, maxLat: number;
+  const meta = (await image.getGDALMetadata()) as { bounds_wgs84?: string } | null;
+  const tag = meta?.bounds_wgs84?.split(",").map(Number);
+  if (tag && tag.length === 4 && tag.every((n) => isFinite(n))) {
+    [minLon, minLat, maxLon, maxLat] = tag as [number, number, number, number];
+  } else {
+    const [minX, minY, maxX, maxY] = image.getBoundingBox();
+    [minLon, minLat] = mercToWgs84(minX, minY);
+    [maxLon, maxLat] = mercToWgs84(maxX, maxY);
+  }
 
   const bands = Array.isArray(data) ? data : [data];
   const band = bands[0] as Float32Array | Uint16Array | Uint8Array;
 
-  let minVal = Infinity,
-    maxVal = -Infinity;
+  let minVal = Infinity;
+  let maxVal = -Infinity;
   for (let i = 0; i < band.length; i++) {
     const v = band[i];
     if (isFinite(v)) {
@@ -136,12 +130,20 @@ export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
     maxVal = 1;
   }
   const range = maxVal - minVal || 1;
+  const scale = 255 / range;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d")!;
+  const imageData = ctx.createImageData(width, height);
+  const px = imageData.data;
 
   for (let i = 0; i < band.length; i++) {
     const pi = i * 4;
     const v = band[i];
     if (isFinite(v)) {
-      const g = Math.max(0, Math.min(255, ((v - minVal) / range) * 255));
+      const g = Math.max(0, Math.min(255, (v - minVal) * scale));
       px[pi] = g;
       px[pi + 1] = g;
       px[pi + 2] = g;
@@ -152,7 +154,12 @@ export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
   }
 
   ctx.putImageData(imageData, 0, 0);
-  return { imageDataUrl: canvas.toDataURL(), bounds: [minLon, minLat, maxLon, maxLat] };
+  const outCanvas = document.createElement("canvas");
+  outCanvas.width = SAT_TEXTURE_SIZE;
+  outCanvas.height = SAT_TEXTURE_SIZE;
+  const outCtx = outCanvas.getContext("2d")!;
+  outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, SAT_TEXTURE_SIZE, SAT_TEXTURE_SIZE);
+  return { imageDataUrl: outCanvas.toDataURL(), bounds: [minLon, minLat, maxLon, maxLat] };
 }
 
 export async function fetchAndDecodeSatelliteTif(
@@ -186,59 +193,33 @@ export function applyTifLayerToMap(
     [minLon, minLat]
   ];
 
-  const activeSlot = activeSlotByMap.get(map) ?? SLOT_A;
-  const next = activeSlot === SLOT_A ? SLOT_B : SLOT_A;
-  const prev = activeSlot;
-
   const token = (swapTokenByMap.get(map) ?? 0) + 1;
   swapTokenByMap.set(map, token);
-  pendingCleanupByMap.get(map)?.();
-  pendingCleanupByMap.delete(map);
-  const existingSource = map.getSource(next.source) as mapboxgl.ImageSource | undefined;
+
+  const existingSource = map.getSource(SAT_SOURCE) as mapboxgl.ImageSource | undefined;
   if (existingSource) {
     existingSource.updateImage({ url: imageDataUrl, coordinates: coords });
   } else {
-    map.addSource(next.source, { type: "image", url: imageDataUrl, coordinates: coords });
+    map.addSource(SAT_SOURCE, { type: "image", url: imageDataUrl, coordinates: coords });
   }
 
-  if (!map.getLayer(next.layer)) {
+  if (!map.getLayer(SAT_LAYER)) {
     map.addLayer({
-      id: next.layer,
+      id: SAT_LAYER,
       type: "raster",
-      source: next.source,
+      source: SAT_SOURCE,
       paint: {
         "raster-opacity": 0,
-        "raster-opacity-transition": { duration: 0 }
+        "raster-opacity-transition": { duration: 0 },
+        // Disable the cross-fade between old and new textures.
+        "raster-fade-duration": 0
       }
     });
   }
 
-  const swap = () => {
-    if (swapTokenByMap.get(map) !== token) return; // superseded by a newer frame
-    if (!map.getLayer(next.layer)) return;
-    map.moveLayer(next.layer);
-    map.setPaintProperty(next.layer, "raster-opacity", isVisible ? SAT_OPACITY : 0);
-    if (map.getLayer(prev.layer)) {
-      map.setPaintProperty(prev.layer, "raster-opacity", 0);
-    }
-    activeSlotByMap.set(map, next);
-  };
-  const onSourceData = (e: mapboxgl.MapSourceDataEvent) => {
-    if (e.sourceId !== next.source || !map.isSourceLoaded(next.source)) return;
-    cleanup();
-    swap();
-  };
-  const timeoutId = window.setTimeout(() => {
-    cleanup();
-    swap();
-  }, 500);
-  const cleanup = () => {
-    map.off("sourcedata", onSourceData);
-    window.clearTimeout(timeoutId);
-    if (pendingCleanupByMap.get(map) === cleanup) pendingCleanupByMap.delete(map);
-  };
-  pendingCleanupByMap.set(map, cleanup);
-  map.on("sourcedata", onSourceData);
+  if (swapTokenByMap.get(map) === token) {
+    map.setPaintProperty(SAT_LAYER, "raster-opacity", isVisible ? SAT_OPACITY : 0);
+  }
 }
 
 export function setSatelliteLayerVisibility(
@@ -246,9 +227,7 @@ export function setSatelliteLayerVisibility(
   isVisible: boolean,
   _layerId: string
 ): void {
-  for (const slot of [SLOT_A, SLOT_B]) {
-    if (map.getLayer(slot.layer)) {
-      map.setPaintProperty(slot.layer, "raster-opacity", isVisible ? 0.6 : 0);
-    }
+  if (map.getLayer(SAT_LAYER)) {
+    map.setPaintProperty(SAT_LAYER, "raster-opacity", isVisible ? SAT_OPACITY : 0);
   }
 }
