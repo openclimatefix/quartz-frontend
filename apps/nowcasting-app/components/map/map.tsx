@@ -123,23 +123,32 @@ const Map: FC<IMap> = ({
     }
   }, [activeChannel, isMapReady]);
 
+  const satelliteTimestampFor = (ts: string) => addMinutesToISODate(ts, -15);
+  const isFutureTimestamp = (ts: string) => new Date(ts).getTime() > Date.now();
+
   const satCacheKey = (ch: SatelliteChannel, ts: string) => `${ch}__${ts}`;
 
-  const fetchIntoCache = async (ch: SatelliteChannel, ts: string): Promise<TifLayerData | null> => {
-    const key = satCacheKey(ch, ts);
+  const fetchIntoCache = async (
+    ch: SatelliteChannel,
+    satTs: string
+  ): Promise<TifLayerData | null> => {
+    if (isFutureTimestamp(satTs)) return null;
+    const key = satCacheKey(ch, satTs);
     if (tifCache.current.has(key)) return tifCache.current.get(key)!;
-    const data = await fetchAndDecodeSatelliteTif(ch, ts);
+    const data = await fetchAndDecodeSatelliteTif(ch, satTs);
     if (data) tifCache.current.set(key, data);
     return data;
   };
 
   const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
     if (!map.current || !showCloudRef.current) return;
-    const key = satCacheKey(ch, ts);
+    const satTs = satelliteTimestampFor(ts);
+    if (isFutureTimestamp(satTs)) return;
+    const key = satCacheKey(ch, satTs);
     if (currentKeyRef.current === key) return;
     setIsSatelliteLoading(true);
     try {
-      const data = await fetchIntoCache(ch, ts);
+      const data = await fetchIntoCache(ch, satTs);
       if (!map.current) return;
       currentKeyRef.current = key;
       applyTifLayerToMap(map.current, data, SAT_LAYER_ID, SAT_SOURCE_ID, showCloudRef.current);
@@ -153,8 +162,9 @@ const Map: FC<IMap> = ({
     applyForTimestamp(activeChannel, selectedISOTime);
     for (let offset = -3; offset <= 3; offset++) {
       if (offset === 0) continue;
-      const ts = addMinutesToISODate(selectedISOTime, offset * 30);
-      fetchIntoCache(activeChannel, ts).catch(() => {});
+      const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
+      if (isFutureTimestamp(satTs)) continue;
+      fetchIntoCache(activeChannel, satTs).catch(() => {});
     }
   }, [selectedISOTime, activeChannel, showCloudLayer, isMapReady]);
 
@@ -281,6 +291,14 @@ const Map: FC<IMap> = ({
             title === VIEWS.SOLAR_SITES ? "mt-[240px]" : "mt-3"
           }`}
         >
+          {showCloudLayer && (
+            <span
+              title="The selected time is the end of a 30-minute settlement period. The satellite image shown is from the middle of that period (15 minutes earlier) to best match the forecast window."
+              className="flex h-6 w-6 shrink-0 cursor-help items-center justify-center border border-gray-600 bg-black text-xs font-bold text-white"
+            >
+              i
+            </span>
+          )}
           {showCloudLayer && (
             <select
               value={activeChannel}
