@@ -313,18 +313,10 @@ const Map: FC<IMap> = ({
           }`}
         >
           {showCloudLayer && (
-            <span
-              title="The selected time is the end of a 30-minute settlement period. The satellite image shown is from the middle of that period (15 minutes earlier) to best match the forecast window."
-              className="flex h-6 w-6 shrink-0 cursor-help items-center justify-center border border-gray-600 bg-black text-xs font-bold text-white"
-            >
-              i
-            </span>
-          )}
-          {showCloudLayer && (
             <select
               value={activeChannel}
               onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
-              className="w-40 bg-black text-white text-xs font-semibold py-1 px-1.5 border border-gray-600 outline-none cursor-pointer focus:border-ocf-yellow"
+              className="w-40 bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer"
             >
               {SATELLITE_CHANNELS.map((ch) => (
                 <option key={ch} value={ch}>
@@ -334,7 +326,7 @@ const Map: FC<IMap> = ({
             </select>
           )}
 
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-row items-end gap-2">
             <button
               type="button"
               onClick={() => {
@@ -342,8 +334,10 @@ const Map: FC<IMap> = ({
                 setShowCloudLayer(!showCloudLayer);
                 if (turningOff) setShowPvLayer(true);
               }}
-              className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border border-gray-600 transition-all active:scale-95 ${
-                showCloudLayer ? "text-black bg-ocf-yellow" : "text-white bg-black"
+              className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
+                showCloudLayer
+                  ? "text-black bg-ocf-yellow"
+                  : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
               }`}
             >
               {isSatelliteLoading && (
@@ -376,11 +370,13 @@ const Map: FC<IMap> = ({
                 type="button"
                 title="Toggle the yellow PV forecast overlay so clouds are easier to see"
                 onClick={() => setShowPvLayer((v) => !v)}
-                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border border-gray-600 transition-all active:scale-95 ${
-                  showPvLayer ? "text-black bg-ocf-yellow" : "text-white bg-black"
+                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
+                  showPvLayer
+                    ? "text-black bg-ocf-yellow"
+                    : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
                 }`}
               >
-                PV Forecast
+                PV
               </button>
             )}
           </div>
