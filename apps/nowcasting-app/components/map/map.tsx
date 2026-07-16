@@ -144,7 +144,11 @@ const Map: FC<IMap> = ({
   const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
     if (!map.current || !showCloudRef.current) return;
     const satTs = satelliteTimestampFor(ts);
-    if (isFutureTimestamp(satTs)) return;
+    if (isFutureTimestamp(satTs)) {
+      setSatelliteLayerVisibility(map.current, false, SAT_LAYER_ID);
+      currentKeyRef.current = null;
+      return;
+    }
     const key = satCacheKey(ch, satTs);
     if (currentKeyRef.current === key) return;
     setIsSatelliteLoading(true);
@@ -161,7 +165,7 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     if (!showCloudLayer || !isMapReady || !selectedISOTime) return;
     applyForTimestamp(activeChannel, selectedISOTime);
-    for (let offset = -3; offset <= 3; offset++) {
+    for (let offset = -12; offset <= 12; offset++) {
       if (offset === 0) continue;
       const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
       if (isFutureTimestamp(satTs)) continue;
