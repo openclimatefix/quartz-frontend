@@ -1,6 +1,8 @@
 import { fromArrayBuffer } from "geotiff";
 
 export const SATELLITE_CHANNELS = [
+  "VIS006",
+  "VIS008",
   "IR_016",
   "IR_039",
   "IR_087",
@@ -8,14 +10,14 @@ export const SATELLITE_CHANNELS = [
   "IR_108",
   "IR_120",
   "IR_134",
-  "VIS006",
-  "VIS008",
   "WV_062",
   "WV_073"
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
 export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
+  VIS006: "Visible 0.6µm",
+  VIS008: "Visible 0.8µm",
   IR_016: "Near-IR 1.6µm",
   IR_039: "Infrared 3.9µm",
   IR_087: "Infrared 8.7µm",
@@ -23,8 +25,6 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_108: "Infrared 10.8µm",
   IR_120: "Infrared 12.0µm",
   IR_134: "Infrared 13.4µm",
-  VIS006: "Visible 0.6µm",
-  VIS008: "Visible 0.8µm",
   WV_062: "Water Vapour 6.2µm",
   WV_073: "Water Vapour 7.3µm"
 };

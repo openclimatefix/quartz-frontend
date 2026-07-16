@@ -136,7 +136,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     nHourForecast: 4,
     nationalAggregationLevel: NationalAggregation.GSP,
     showCloudLayer: false,
-    activeChannel: "IR_016",
+    activeChannel: "VIS006",
     showPvLayer: true
   });
 
