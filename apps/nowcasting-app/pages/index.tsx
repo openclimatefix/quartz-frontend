@@ -646,7 +646,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   ]);
 
   const { data: nlForecastData } = useLoadDataFromApi<V1ForecastResponse>(
-    `${V1_API_PREFIX}/NL/solar/regions/national/forecast?start_utc=${encodeURIComponent(
+    `${V1_API_PREFIX}/NL/solar/regions/national/forecast?model=blend_adjust&start_utc=${encodeURIComponent(
       nlForecastStartTime || ""
     )}`,
     {
@@ -655,7 +655,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   );
 
   const { data: nlUncurtailedForecastData } = useLoadDataFromApi<V1ForecastResponse>(
-    `${V1_API_PREFIX}/NL/solar/regions/national/forecast?model=ecmwf_mo_sat_uncurtailed&start_utc=${encodeURIComponent(
+    `${V1_API_PREFIX}/NL/solar/regions/national/forecast?model=ecmwf_mo_sat_uncurtailed_adjust&start_utc=${encodeURIComponent(
       nlForecastStartTime || ""
     )}`,
     {
