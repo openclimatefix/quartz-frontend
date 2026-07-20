@@ -221,7 +221,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         data: forecastGeoJson,
         promoteId: "id"
       });
-    } else if (showPvLayer) {
+    } else {
       forecastSource.setData(generatedGeoJsonForecastData.forecastGeoJson);
     }
     console.log("latestPV source set");
@@ -348,7 +348,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     } else {
-      if (showPvLayer && generatedGeoJsonForecastData && forecastSource) {
+      if (generatedGeoJsonForecastData && forecastSource) {
         const currentActiveUnit = getActiveUnitFromMap(map);
         const isNormalized = currentActiveUnit === ActiveUnit.percentage;
         forecastSource?.setData(generatedGeoJsonForecastData.forecastGeoJson);
