@@ -117,10 +117,7 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     channelRef.current = activeChannel;
     currentKeyRef.current = null;
-    if (isMapReady && selectedISOTime) {
-      applyForTimestamp(activeChannel, selectedISOTime);
-    }
-  }, [activeChannel, isMapReady]);
+  }, [activeChannel]);
 
   const satelliteTimestampFor = (ts: string) => addMinutesToISODate(ts, -15);
   const isFutureTimestamp = (ts: string) => new Date(ts).getTime() > Date.now();
