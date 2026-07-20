@@ -4,7 +4,8 @@ import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState from "../helpers/globalState";
+import QuickLRU from "quick-lru";
 import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
@@ -93,13 +94,14 @@ const Map: FC<IMap> = ({
   const [autoZoom] = useGlobalState("autoZoom");
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const [timeNow] = useGlobalState("timeNow");
   const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
   const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
   const [showPvLayer, setShowPvLayer] = useGlobalState("showPvLayer");
   const showPvRef = useRef(showPvLayer);
   const showCloudRef = useRef(showCloudLayer);
   const channelRef = useRef(activeChannel);
-  const tifCache = useRef<globalThis.Map<string, TifLayerData>>(new globalThis.Map());
+  const tifCache = useRef(new QuickLRU<string, TifLayerData>({ maxSize: 20 }));
   const currentKeyRef = useRef<string | null>(null);
   const requestedKeyRef = useRef<string | null>(null);
   const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
@@ -132,7 +134,7 @@ const Map: FC<IMap> = ({
     satTs: string,
     latest = false
   ): Promise<TifLayerData | null> => {
-    if (isFutureTimestamp(satTs)) return null;
+    if (!latest && isFutureTimestamp(satTs)) return null;
     const key = satCacheKey(ch, satTs);
     if (!latest && tifCache.current.has(key)) return tifCache.current.get(key)!;
     const data = await fetchAndDecodeSatelliteTif(ch, satTs, latest);
@@ -143,7 +145,7 @@ const Map: FC<IMap> = ({
   const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
     if (!map.current) return;
     const satTs = satelliteTimestampFor(ts);
-    const isNow = ts === get30MinNow();
+    const isNow = ts === timeNow;
     if (!isNow && isFutureTimestamp(satTs)) {
       setSatelliteLayerVisibility(map.current, false, SAT_LAYER);
       currentKeyRef.current = null;
@@ -178,13 +180,21 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     if (!isMapReady || !selectedISOTime) return;
     applyForTimestamp(activeChannel, selectedISOTime);
-    for (let offset = -12; offset <= 12; offset++) {
+    for (let offset = -2; offset <= 2; offset++) {
       if (offset === 0) continue;
       const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
       if (isFutureTimestamp(satTs)) continue;
       fetchIntoCache(activeChannel, satTs).catch(() => {});
     }
   }, [selectedISOTime, activeChannel, isMapReady]);
+
+  // selectedISOTime only changes once per 30-min slot, so nothing above re-triggers
+  // the fetch while parked on "now". timeNow (kept ticking every 60s by useTimeNow,
+  // mounted elsewhere in the app) gives us a live signal to keep pulling the latest frame.
+  useEffect(() => {
+    if (!isMapReady || selectedISOTime !== timeNow) return;
+    applyForTimestamp(activeChannel, selectedISOTime);
+  }, [timeNow, isMapReady, selectedISOTime, activeChannel]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
