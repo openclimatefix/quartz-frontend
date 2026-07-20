@@ -1,5 +1,6 @@
 import mapboxgl, { Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
@@ -102,6 +103,7 @@ const Map: FC<IMap> = ({
   const currentKeyRef = useRef<string | null>(null);
   const requestedKeyRef = useRef<string | null>(null);
   const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
+  const [satelliteError, setSatelliteError] = useState<string | null>(null);
 
   useEffect(() => {
     showCloudRef.current = showCloudLayer;
@@ -145,6 +147,7 @@ const Map: FC<IMap> = ({
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
       setIsSatelliteLoading(false);
+      setSatelliteError("Satellite not yet available for future");
       return;
     }
     const key = satCacheKey(ch, satTs);
@@ -159,6 +162,12 @@ const Map: FC<IMap> = ({
       if (requestedKeyRef.current !== key || !map.current) return;
       currentKeyRef.current = key;
       applyTifLayerToMap(map.current, data, SAT_LAYER, SAT_SOURCE, showCloudRef.current);
+      setSatelliteError(data ? null : "Satellite unavailable for this time");
+    } catch (err) {
+      Sentry.captureException(err, {
+        tags: { error: "satellite tif fetch/decode failed" }
+      });
+      setSatelliteError("Couldn't load satellite imagery");
     } finally {
       if (requestedKeyRef.current === key) setIsSatelliteLoading(false);
     }
@@ -302,13 +311,18 @@ const Map: FC<IMap> = ({
             <select
               value={activeChannel}
               onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
-              className="w-40 bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer"
+              disabled={!!satelliteError}
+              className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {SATELLITE_CHANNELS.map((ch) => (
-                <option key={ch} value={ch}>
-                  {SATELLITE_CHANNEL_LABELS[ch]}
-                </option>
-              ))}
+              {satelliteError ? (
+                <option value={activeChannel}>{satelliteError}</option>
+              ) : (
+                SATELLITE_CHANNELS.map((ch) => (
+                  <option key={ch} value={ch}>
+                    {SATELLITE_CHANNEL_LABELS[ch]}
+                  </option>
+                ))
+              )}
             </select>
           )}
 

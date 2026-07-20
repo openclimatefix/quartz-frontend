@@ -88,6 +88,7 @@ export async function fetchSatelliteTif(
     if (contentType.includes("application/json")) {
       const { url } = await apiRes.json();
       const s3Res = await fetch(url);
+      if (s3Res.status === 404) return null;
       if (!s3Res.ok) throw new Error(`S3 fetch failed: ${s3Res.status}`);
       return s3Res.arrayBuffer();
     }
