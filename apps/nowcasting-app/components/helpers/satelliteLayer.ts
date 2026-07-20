@@ -58,12 +58,13 @@ async function getToken(): Promise<string> {
 
 export async function fetchSatelliteTif(
   channel: SatelliteChannel,
-  timestamp: string
+  timestamp: string,
+  latest = false
 ): Promise<ArrayBuffer | null> {
   const token = await getToken();
   const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
     channel
-  )}&timestamp=${encodeURIComponent(timestamp)}`;
+  )}&timestamp=${encodeURIComponent(timestamp)}${latest ? "&latest=true" : ""}`;
 
   const maxRetries = 5;
 
@@ -165,9 +166,10 @@ export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
 
 export async function fetchAndDecodeSatelliteTif(
   channel: SatelliteChannel,
-  timestamp: string
+  timestamp: string,
+  latest = false
 ): Promise<TifLayerData | null> {
-  const buf = await fetchSatelliteTif(channel, timestamp);
+  const buf = await fetchSatelliteTif(channel, timestamp, latest);
   if (!buf) return null;
   return decodeTif(buf);
 }

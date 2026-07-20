@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { get30MinNow } from "../helpers/globalState";
 import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
@@ -130,20 +130,22 @@ const Map: FC<IMap> = ({
 
   const fetchIntoCache = async (
     ch: SatelliteChannel,
-    satTs: string
+    satTs: string,
+    latest = false
   ): Promise<TifLayerData | null> => {
     if (isFutureTimestamp(satTs)) return null;
     const key = satCacheKey(ch, satTs);
-    if (tifCache.current.has(key)) return tifCache.current.get(key)!;
-    const data = await fetchAndDecodeSatelliteTif(ch, satTs);
-    if (data) tifCache.current.set(key, data);
+    if (!latest && tifCache.current.has(key)) return tifCache.current.get(key)!;
+    const data = await fetchAndDecodeSatelliteTif(ch, satTs, latest);
+    if (data && !latest) tifCache.current.set(key, data);
     return data;
   };
 
   const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
     if (!map.current) return;
     const satTs = satelliteTimestampFor(ts);
-    if (isFutureTimestamp(satTs)) {
+    const isNow = ts === get30MinNow();
+    if (!isNow && isFutureTimestamp(satTs)) {
       setSatelliteLayerVisibility(map.current, false, SAT_LAYER);
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
@@ -153,13 +155,13 @@ const Map: FC<IMap> = ({
     }
     const key = satCacheKey(ch, satTs);
     requestedKeyRef.current = key;
-    if (currentKeyRef.current === key) {
+    if (!isNow && currentKeyRef.current === key) {
       setIsSatelliteLoading(false);
       return;
     }
     setIsSatelliteLoading(true);
     try {
-      const data = await fetchIntoCache(ch, satTs);
+      const data = await fetchIntoCache(ch, satTs, isNow);
       if (requestedKeyRef.current !== key || !map.current) return;
       currentKeyRef.current = key;
       applyTifLayerToMap(map.current, data, SAT_LAYER, SAT_SOURCE, showCloudRef.current);
