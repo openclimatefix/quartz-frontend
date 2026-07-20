@@ -138,7 +138,7 @@ const Map: FC<IMap> = ({
   };
 
   const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
-    if (!map.current || !showCloudRef.current) return;
+    if (!map.current) return;
     const satTs = satelliteTimestampFor(ts);
     if (isFutureTimestamp(satTs)) {
       setSatelliteLayerVisibility(map.current, false, SAT_LAYER);
@@ -165,7 +165,7 @@ const Map: FC<IMap> = ({
   };
 
   useEffect(() => {
-    if (!showCloudLayer || !isMapReady || !selectedISOTime) return;
+    if (!isMapReady || !selectedISOTime) return;
     applyForTimestamp(activeChannel, selectedISOTime);
     for (let offset = -12; offset <= 12; offset++) {
       if (offset === 0) continue;
@@ -173,7 +173,7 @@ const Map: FC<IMap> = ({
       if (isFutureTimestamp(satTs)) continue;
       fetchIntoCache(activeChannel, satTs).catch(() => {});
     }
-  }, [selectedISOTime, activeChannel, showCloudLayer, isMapReady]);
+  }, [selectedISOTime, activeChannel, isMapReady]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
