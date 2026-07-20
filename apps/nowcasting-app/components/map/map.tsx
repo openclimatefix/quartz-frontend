@@ -351,7 +351,7 @@ const Map: FC<IMap> = ({
               Clouds
             </button>
 
-            {title === VIEWS.FORECAST && (
+            {(title === VIEWS.FORECAST || title === VIEWS.DELTA) && (
               <button
                 type="button"
                 title="Toggle the yellow PV forecast overlay so clouds are easier to see"
