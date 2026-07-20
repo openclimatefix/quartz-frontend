@@ -100,6 +100,7 @@ const Map: FC<IMap> = ({
   const channelRef = useRef(activeChannel);
   const tifCache = useRef<globalThis.Map<string, TifLayerData>>(new globalThis.Map());
   const currentKeyRef = useRef<string | null>(null);
+  const requestedKeyRef = useRef<string | null>(null);
   const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
@@ -143,18 +144,24 @@ const Map: FC<IMap> = ({
     if (isFutureTimestamp(satTs)) {
       setSatelliteLayerVisibility(map.current, false, SAT_LAYER);
       currentKeyRef.current = null;
+      requestedKeyRef.current = null;
+      setIsSatelliteLoading(false);
       return;
     }
     const key = satCacheKey(ch, satTs);
-    if (currentKeyRef.current === key) return;
+    requestedKeyRef.current = key;
+    if (currentKeyRef.current === key) {
+      setIsSatelliteLoading(false);
+      return;
+    }
     setIsSatelliteLoading(true);
     try {
       const data = await fetchIntoCache(ch, satTs);
-      if (!map.current) return;
+      if (requestedKeyRef.current !== key || !map.current) return;
       currentKeyRef.current = key;
       applyTifLayerToMap(map.current, data, SAT_LAYER, SAT_SOURCE, showCloudRef.current);
     } finally {
-      setIsSatelliteLoading(false);
+      if (requestedKeyRef.current === key) setIsSatelliteLoading(false);
     }
   };
 
