@@ -36,8 +36,8 @@ export type TifLayerData = {
 
 const API_PREFIX = process.env.NEXT_PUBLIC_QUARTZ_API_URL || "https://api-dev.quartz.solar";
 
-export const SAT_LAYER = "satellite-layer";
-export const SAT_SOURCE = "satellite-source";
+const SAT_LAYER = "satellite-layer";
+const SAT_SOURCE = "satellite-source";
 const SAT_OPACITY = 0.6;
 const SAT_TEXTURE_SIZE = 512;
 const swapTokenByMap = new WeakMap<mapboxgl.Map, number>();
@@ -177,12 +177,10 @@ export async function fetchAndDecodeSatelliteTif(
 export function applyTifLayerToMap(
   map: mapboxgl.Map,
   layerData: TifLayerData | null,
-  _layerId: string,
-  _sourceId: string,
   isVisible = true
 ): void {
   if (!layerData) {
-    setSatelliteLayerVisibility(map, false, _layerId);
+    setSatelliteLayerVisibility(map, false);
     return;
   }
   const {
@@ -225,11 +223,7 @@ export function applyTifLayerToMap(
   }
 }
 
-export function setSatelliteLayerVisibility(
-  map: mapboxgl.Map,
-  isVisible: boolean,
-  _layerId: string
-): void {
+export function setSatelliteLayerVisibility(map: mapboxgl.Map, isVisible: boolean): void {
   if (map.getLayer(SAT_LAYER)) {
     map.setPaintProperty(SAT_LAYER, "raster-opacity", isVisible ? SAT_OPACITY : 0);
   }
