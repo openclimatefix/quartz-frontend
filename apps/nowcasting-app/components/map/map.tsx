@@ -16,6 +16,8 @@ import {
   SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
   TifLayerData,
+  SAT_LAYER,
+  SAT_SOURCE,
   fetchAndDecodeSatelliteTif,
   applyTifLayerToMap,
   setSatelliteLayerVisibility
@@ -100,13 +102,10 @@ const Map: FC<IMap> = ({
   const currentKeyRef = useRef<string | null>(null);
   const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
 
-  const SAT_LAYER_ID = "satellite-layer";
-  const SAT_SOURCE_ID = "satellite-source";
-
   useEffect(() => {
     showCloudRef.current = showCloudLayer;
     if (!map.current) return;
-    setSatelliteLayerVisibility(map.current, showCloudLayer, SAT_LAYER_ID);
+    setSatelliteLayerVisibility(map.current, showCloudLayer, SAT_LAYER);
   }, [showCloudLayer]);
 
   useEffect(() => {
@@ -144,7 +143,7 @@ const Map: FC<IMap> = ({
     if (!map.current || !showCloudRef.current) return;
     const satTs = satelliteTimestampFor(ts);
     if (isFutureTimestamp(satTs)) {
-      setSatelliteLayerVisibility(map.current, false, SAT_LAYER_ID);
+      setSatelliteLayerVisibility(map.current, false, SAT_LAYER);
       currentKeyRef.current = null;
       return;
     }
@@ -155,7 +154,7 @@ const Map: FC<IMap> = ({
       const data = await fetchIntoCache(ch, satTs);
       if (!map.current) return;
       currentKeyRef.current = key;
-      applyTifLayerToMap(map.current, data, SAT_LAYER_ID, SAT_SOURCE_ID, showCloudRef.current);
+      applyTifLayerToMap(map.current, data, SAT_LAYER, SAT_SOURCE, showCloudRef.current);
     } finally {
       setIsSatelliteLoading(false);
     }
