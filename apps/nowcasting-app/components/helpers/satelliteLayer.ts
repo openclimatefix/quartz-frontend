@@ -36,8 +36,8 @@ export type TifLayerData = {
 
 const API_PREFIX = process.env.NEXT_PUBLIC_QUARTZ_API_URL || "https://api-dev.quartz.solar";
 
-const SAT_LAYER = "satellite-layer";
-const SAT_SOURCE = "satellite-source";
+export const SAT_LAYER = "satellite-layer";
+export const SAT_SOURCE = "satellite-source";
 const SAT_OPACITY = 0.6;
 const SAT_TEXTURE_SIZE = 512;
 const swapTokenByMap = new WeakMap<mapboxgl.Map, number>();
