@@ -15,6 +15,81 @@ export const SATELLITE_CHANNELS = [
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
+// SEVIRI channels grouped by how they sense. IR_016 (1.6um) is near-IR and
+// *reflective* despite the "IR_" prefix, so it groups with the visible ones.
+//
+// STACK ORDER: every list here is ordered **bottom-most first** — the last entry
+// renders on top. This matters a lot, because each layer only contributes about
+// 0.42 effective alpha (texture alpha 180/255 x raster-opacity 0.6), so five
+// layers above something leave only (1-0.42)^5 ~= 7% of it visible. Anything
+// buried is effectively gone, and the stack averages out to flat grey. So the
+// crisp, high-contrast bands go last, and the flat ones go underneath.
+export const REFLECTIVE_CHANNELS: SatelliteChannel[] = [
+  "IR_016", // near-IR, useful for ice/water cloud discrimination
+  "VIS008",
+  "VIS006" // the classic visible band, most interpretable — keep it on top
+];
+
+// The "true" emissive IR channels. The API already inverts these before saving,
+// so they arrive with cold cloud tops bright and need no client-side flip.
+export const THERMAL_CHANNELS: SatelliteChannel[] = [
+  "IR_134",
+  "IR_097",
+  "IR_120",
+  "IR_087",
+  "IR_108" // the standard atmospheric window channel, most informative thermal
+];
+
+// Also emissive, and likewise already inverted API-side.
+export const WATER_VAPOUR_CHANNELS: SatelliteChannel[] = ["WV_073", "WV_062"];
+
+// IR_039 (3.9um) carries both reflected solar and emitted thermal signal, so the
+// two partly cancel in daylight. That makes it washed out, and makes its polarity
+// behave unlike the true IR channels the API inverts. Its genuine uses (night fog
+// / low cloud via the 3.9-10.8 difference, hotspot detection) aren't served by a
+// brightness composite, so it stays out of the composites and is offered only as
+// a single channel.
+export const MIXED_CHANNELS: SatelliteChannel[] = ["IR_039"];
+
+// Only IR_039 needs a client-side flip, to line it up with the API-inverted
+// channels when viewed on its own.
+//
+// TEMPORARY: this belongs in the API, done client-side only to try the composites.
+const INVERTED_CHANNELS: SatelliteChannel[] = [...MIXED_CHANNELS];
+
+export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
+  INVERTED_CHANNELS.includes(ch);
+
+// Selections that overlay several channels into one combined view. Keys are
+// stored in global state, so renaming one invalidates a user's saved se lection.
+export const COMPOSITE_SELECTIONS = {
+  COMPOSITE: {
+    label: "Composite (visible + IR)",
+    // Thermals underneath, reflective on top — see STACK ORDER above.
+    channels: [...THERMAL_CHANNELS, ...REFLECTIVE_CHANNELS] as SatelliteChannel[]
+  },
+  COMPOSITE_VISIBLE: { label: "Visible Composite", channels: REFLECTIVE_CHANNELS },
+  COMPOSITE_INFRARED: { label: "Infrared Composite", channels: THERMAL_CHANNELS },
+  COMPOSITE_BLUE: { label: "Blue Composite", channels: WATER_VAPOUR_CHANNELS }
+};
+
+export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
+export type ChannelSelection = SatelliteChannel | CompositeSelection;
+
+// Default selection: the full visible + IR stack.
+export const COMPOSITE_CHANNEL: CompositeSelection = "COMPOSITE";
+
+// Resolve a dropdown selection to the actual channels to render.
+export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] =>
+  sel in COMPOSITE_SELECTIONS
+    ? COMPOSITE_SELECTIONS[sel as CompositeSelection].channels
+    : [sel as SatelliteChannel];
+
+// Widest composite, used to size the tif cache so a full stack still fits.
+export const MAX_COMPOSITE_CHANNELS = Math.max(
+  ...Object.values(COMPOSITE_SELECTIONS).map((c) => c.channels.length)
+);
+
 export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   VIS006: "Visible 0.6µm",
   VIS008: "Visible 0.8µm",
@@ -37,11 +112,36 @@ export type TifLayerData = {
 const API_PREFIX =
   process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
 
-const SAT_LAYER = "satellite-layer";
-const SAT_SOURCE = "satellite-source";
+// One layer/source per channel, so a composite can stack them. Kept here rather
+// than in map.tsx so the ids have a single home.
+export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
+export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
+
 const SAT_OPACITY = 0.6;
 const SAT_TEXTURE_SIZE = 512;
-const swapTokenByMap = new WeakMap<mapboxgl.Map, number>();
+// Alpha of the brightest pixel in a decoded texture. Everything darker scales
+// down from here, so the effective ceiling matches the old flat value.
+const SAT_MAX_ALPHA = 180;
+
+// Per-map, per-layer counter, so a slow texture swap can't clobber a newer one on
+// the same layer. Must be per-layer: with a single counter, stacking N channels
+// means only the last one applied would pass the token check.
+const swapTokenByMap = new WeakMap<mapboxgl.Map, Map<string, number>>();
+
+function nextSwapToken(map: mapboxgl.Map, layerId: string): number {
+  let tokens = swapTokenByMap.get(map);
+  if (!tokens) {
+    tokens = new Map();
+    swapTokenByMap.set(map, tokens);
+  }
+  const token = (tokens.get(layerId) ?? 0) + 1;
+  tokens.set(layerId, token);
+  return token;
+}
+
+function currentSwapToken(map: mapboxgl.Map, layerId: string): number {
+  return swapTokenByMap.get(map)?.get(layerId) ?? 0;
+}
 const MERCATOR_MAX = 20037508.34;
 
 function mercToWgs84(x: number, y: number): [number, number] {
@@ -99,7 +199,7 @@ export async function fetchSatelliteTif(
   return null;
 }
 
-export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
+export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLayerData> {
   const tiff = await fromArrayBuffer(buf);
   const image = await tiff.getImage();
   const width = image.getWidth();
@@ -146,11 +246,17 @@ export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
     const pi = i * 4;
     const v = band[i];
     if (isFinite(v)) {
-      const g = Math.max(0, Math.min(255, (v - minVal) * scale));
+      const stretched = Math.max(0, Math.min(255, (v - minVal) * scale));
+      const g = invert ? 255 - stretched : stretched;
       px[pi] = g;
       px[pi + 1] = g;
       px[pi + 2] = g;
-      px[pi + 3] = 180;
+      // Alpha tracks brightness rather than being flat, which turns a stack from
+      // "average everything" into roughly "brightest wins": bright cloud stays
+      // opaque and dominates, while dark pixels (clear sky, and the whole visible
+      // band at night) go transparent and let the layers beneath show through.
+      // Scaled so the brightest pixel still tops out at the previous flat value.
+      px[pi + 3] = (g * SAT_MAX_ALPHA) / 255;
     } else {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
     }
@@ -172,16 +278,21 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest);
   if (!buf) return null;
-  return decodeTif(buf);
+  return decodeTif(buf, shouldInvertChannel(channel));
 }
 
 export function applyTifLayerToMap(
   map: mapboxgl.Map,
   layerData: TifLayerData | null,
-  isVisible = true
+  channel: SatelliteChannel,
+  isVisible = true,
+  beforeId?: string
 ): void {
+  const layerId = satLayerId(channel);
+  const sourceId = satSourceId(channel);
+
   if (!layerData) {
-    setSatelliteLayerVisibility(map, false);
+    setSatelliteLayerVisibility(map, false, channel);
     return;
   }
   const {
@@ -195,37 +306,74 @@ export function applyTifLayerToMap(
     [minLon, minLat]
   ];
 
-  const token = (swapTokenByMap.get(map) ?? 0) + 1;
-  swapTokenByMap.set(map, token);
+  const token = nextSwapToken(map, layerId);
 
-  const existingSource = map.getSource(SAT_SOURCE) as mapboxgl.ImageSource | undefined;
+  const existingSource = map.getSource(sourceId) as mapboxgl.ImageSource | undefined;
   if (existingSource) {
     existingSource.updateImage({ url: imageDataUrl, coordinates: coords });
   } else {
-    map.addSource(SAT_SOURCE, { type: "image", url: imageDataUrl, coordinates: coords });
+    map.addSource(sourceId, { type: "image", url: imageDataUrl, coordinates: coords });
   }
 
-  if (!map.getLayer(SAT_LAYER)) {
-    map.addLayer({
-      id: SAT_LAYER,
-      type: "raster",
-      source: SAT_SOURCE,
-      paint: {
-        "raster-opacity": 0,
-        "raster-opacity-transition": { duration: 0 },
-        // Disable the cross-fade between old and new textures.
-        "raster-fade-duration": 0
-      }
-    });
+  if (!map.getLayer(layerId)) {
+    map.addLayer(
+      {
+        id: layerId,
+        type: "raster",
+        source: sourceId,
+        // Hidden layers use layout visibility rather than zero opacity: Mapbox
+        // skips a "none" layer entirely, whereas an opacity-0 layer is still drawn
+        // every frame — which matters once a composite stacks several of them.
+        layout: { visibility: "none" },
+        paint: {
+          "raster-opacity": SAT_OPACITY,
+          "raster-opacity-transition": { duration: 0 },
+          // Disable the cross-fade between old and new textures.
+          "raster-fade-duration": 0
+        }
+      },
+      // Insert beneath the forecast/PV layers so clouds sit under them.
+      beforeId && map.getLayer(beforeId) ? beforeId : undefined
+    );
   }
 
-  if (swapTokenByMap.get(map) === token) {
-    map.setPaintProperty(SAT_LAYER, "raster-opacity", isVisible ? SAT_OPACITY : 0);
+  if (currentSwapToken(map, layerId) === token) {
+    setSatelliteLayerVisibility(map, isVisible, channel);
   }
 }
 
-export function setSatelliteLayerVisibility(map: mapboxgl.Map, isVisible: boolean): void {
-  if (map.getLayer(SAT_LAYER)) {
-    map.setPaintProperty(SAT_LAYER, "raster-opacity", isVisible ? SAT_OPACITY : 0);
+export function setSatelliteLayerVisibility(
+  map: mapboxgl.Map,
+  isVisible: boolean,
+  channel: SatelliteChannel
+): void {
+  const layerId = satLayerId(channel);
+  if (map.getLayer(layerId)) {
+    map.setLayoutProperty(layerId, "visibility", isVisible ? "visible" : "none");
   }
+}
+
+// Show exactly the channels in `visible`, hiding every other satellite layer.
+export function setVisibleSatelliteChannels(map: mapboxgl.Map, visible: SatelliteChannel[]): void {
+  const visibleSet = new Set(visible);
+  SATELLITE_CHANNELS.forEach((ch) => setSatelliteLayerVisibility(map, visibleSet.has(ch), ch));
+}
+
+// Restack the given channels, bottom-most first. Layers are created lazily — the
+// first time a composite containing them is selected — so creation order depends
+// on which selections the user happened to visit and can't be relied on. Moving
+// each layer in turn to just below the anchor reproduces the intended order
+// exactly, whatever the history. Cheap: a style reorder over at most a few layers.
+export function orderSatelliteLayers(
+  map: mapboxgl.Map,
+  channels: SatelliteChannel[],
+  beforeId?: string
+): void {
+  // A missing anchor means "move to the top of the stack", which still gives the
+  // right relative order when iterating bottom-most first.
+  const anchor = beforeId && map.getLayer(beforeId) ? beforeId : undefined;
+  channels.forEach((ch) => {
+    const layerId = satLayerId(ch);
+    if (map.getLayer(layerId)) map.moveLayer(layerId, anchor);
+  });
 }

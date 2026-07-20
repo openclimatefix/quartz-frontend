@@ -17,10 +17,15 @@ import {
   SATELLITE_CHANNELS,
   SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
+  ChannelSelection,
+  COMPOSITE_SELECTIONS,
+  MAX_COMPOSITE_CHANNELS,
+  channelsForSelection,
   TifLayerData,
   fetchAndDecodeSatelliteTif,
   applyTifLayerToMap,
-  setSatelliteLayerVisibility
+  setVisibleSatelliteChannels,
+  orderSatelliteLayers
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
 
@@ -41,6 +46,16 @@ const applyPvLayerVisibility = (m: mapboxgl.Map, visible: boolean) => {
     }
   });
 };
+
+// The bottom-most forecast/boundary layer that satellite layers should sit under.
+const SAT_BELOW_LAYER_IDS = [...PV_LAYER_IDS, "boundary-data"];
+const getSatelliteBeforeId = (m: mapboxgl.Map): string | undefined =>
+  SAT_BELOW_LAYER_IDS.find((id) => m.getLayer(id));
+
+// Prefetch reaches +/-2 timesteps either side, so a full composite needs
+// channels x 5 entries resident to avoid thrashing the cache.
+const PREFETCH_STEPS = 2;
+const TIF_CACHE_SIZE = MAX_COMPOSITE_CHANNELS * (PREFETCH_STEPS * 2 + 1);
 
 const setAggregationLevelByCurrentZoom = (
   currentZoom: number,
@@ -99,17 +114,23 @@ const Map: FC<IMap> = ({
   const showPvRef = useRef(showPvLayer);
   const showCloudRef = useRef(showCloudLayer);
   const channelRef = useRef(activeChannel);
-  const tifCache = useRef(new QuickLRU<string, TifLayerData>({ maxSize: 20 }));
+  const tifCache = useRef(new QuickLRU<string, TifLayerData>({ maxSize: TIF_CACHE_SIZE }));
   const currentKeyRef = useRef<string | null>(null);
   const requestedKeyRef = useRef<string | null>(null);
   const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
   const [satelliteError, setSatelliteError] = useState<string | null>(null);
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
+  // Show the selected channel(s) and hide the rest. A composite selection resolves
+  // to several channels, each with its own layer, so they stack.
+  const applySatelliteVisibility = (m: mapboxgl.Map, visible: boolean) => {
+    setVisibleSatelliteChannels(m, visible ? channelsForSelection(channelRef.current) : []);
+  };
+
   useEffect(() => {
     showCloudRef.current = showCloudLayer;
     if (!map.current) return;
-    setSatelliteLayerVisibility(map.current, showCloudLayer);
+    applySatelliteVisibility(map.current, showCloudLayer);
   }, [showCloudLayer]);
 
   useEffect(() => {
@@ -121,12 +142,15 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     channelRef.current = activeChannel;
     currentKeyRef.current = null;
+    // Hide layers dropped by the new selection before the fetch resolves.
+    if (map.current) applySatelliteVisibility(map.current, showCloudRef.current);
   }, [activeChannel]);
 
   const satelliteTimestampFor = (ts: string) => addMinutesToISODate(ts, -15);
   const isFutureTimestamp = (ts: string) => new Date(ts).getTime() > Date.now();
 
-  const satCacheKey = (ch: SatelliteChannel, ts: string) => `${ch}__${ts}`;
+  // Doubles as the per-channel cache key and the per-selection request key.
+  const satCacheKey = (sel: ChannelSelection, ts: string) => `${sel}__${ts}`;
 
   const fetchIntoCache = async (
     ch: SatelliteChannel,
@@ -141,36 +165,50 @@ const Map: FC<IMap> = ({
     return data;
   };
 
-  const applyForTimestamp = async (ch: SatelliteChannel, ts: string) => {
+  const applyForTimestamp = async (sel: ChannelSelection, ts: string) => {
     if (!map.current) return;
     const satTs = satelliteTimestampFor(ts);
     const isNow = ts === timeNow;
     if (!isNow && isFutureTimestamp(satTs)) {
-      setSatelliteLayerVisibility(map.current, false);
+      applySatelliteVisibility(map.current, false);
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
       setIsSatelliteLoading(false);
       setSatelliteError("Satellite not yet available for future");
       return;
     }
-    const key = satCacheKey(ch, satTs);
+    // Key on the whole selection, since a composite applies several channels as
+    // one unit and must be superseded as one unit.
+    const key = satCacheKey(sel, satTs);
     requestedKeyRef.current = key;
     if (!isNow && currentKeyRef.current === key) {
       setIsSatelliteLoading(false);
       return;
     }
+    const channels = channelsForSelection(sel);
     setIsSatelliteLoading(true);
     try {
-      const data = await fetchIntoCache(ch, satTs, isNow);
+      const results = await Promise.all(
+        channels.map(async (ch) => ({ ch, data: await fetchIntoCache(ch, satTs, isNow) }))
+      );
+      // Bail if the selection or timestamp moved on while we were fetching.
       if (requestedKeyRef.current !== key || !map.current) return;
       currentKeyRef.current = key;
-      applyTifLayerToMap(map.current, data, showCloudRef.current);
-      setSatelliteError(data ? null : "Satellite unavailable for this time");
+      const beforeId = getSatelliteBeforeId(map.current);
+      results.forEach(({ ch, data }) =>
+        applyTifLayerToMap(map.current!, data, ch, showCloudRef.current, beforeId)
+      );
+      // `channels` is ordered bottom-most first; enforce it explicitly since
+      // lazily-created layers won't be in the right order on their own.
+      orderSatelliteLayers(map.current, channels, beforeId);
+      setSatelliteError(results.some((r) => r.data) ? null : "Satellite unavailable for this time");
     } catch (err) {
       Sentry.captureException(err, {
         tags: { error: "satellite tif fetch/decode failed" }
       });
       setSatelliteError("Couldn't load satellite imagery");
+      // Let a retry of this key through, rather than stranding it as "current".
+      if (requestedKeyRef.current === key) currentKeyRef.current = null;
     } finally {
       if (requestedKeyRef.current === key) setIsSatelliteLoading(false);
     }
@@ -179,11 +217,12 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     if (!isMapReady || !selectedISOTime) return;
     applyForTimestamp(activeChannel, selectedISOTime);
-    for (let offset = -2; offset <= 2; offset++) {
+    const channels = channelsForSelection(activeChannel);
+    for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
       if (offset === 0) continue;
       const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
       if (isFutureTimestamp(satTs)) continue;
-      fetchIntoCache(activeChannel, satTs).catch(() => {});
+      channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
     }
   }, [selectedISOTime, activeChannel, isMapReady]);
 
@@ -341,18 +380,29 @@ const Map: FC<IMap> = ({
           {showCloudLayer && (
             <select
               value={activeChannel}
-              onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
+              onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
               disabled={!!satelliteError}
               className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
             >
               {satelliteError ? (
                 <option value={activeChannel}>{satelliteError}</option>
               ) : (
-                SATELLITE_CHANNELS.map((ch) => (
-                  <option key={ch} value={ch}>
-                    {SATELLITE_CHANNEL_LABELS[ch]}
-                  </option>
-                ))
+                <>
+                  <optgroup label="Composites">
+                    {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Single channels">
+                    {SATELLITE_CHANNELS.map((ch) => (
+                      <option key={ch} value={ch}>
+                        {SATELLITE_CHANNEL_LABELS[ch]}
+                      </option>
+                    ))}
+                  </optgroup>
+                </>
               )}
             </select>
           )}
