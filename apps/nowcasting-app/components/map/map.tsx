@@ -193,6 +193,7 @@ const Map: FC<IMap> = ({
     if (!isMapReady || selectedISOTime !== timeNow) return;
     applyForTimestamp(activeChannel, selectedISOTime);
   }, [timeNow, isMapReady, selectedISOTime, activeChannel]);
+  const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
@@ -212,6 +213,12 @@ const Map: FC<IMap> = ({
 
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_CI === "true") return;
+
+    // check if webgl is supported
+    if (!mapboxgl.supported()) {
+      setWebGlSupported(false);
+      return;
+    }
 
     const onMoveEnd = () => {
       console.log("setting map state");
@@ -307,6 +314,20 @@ const Map: FC<IMap> = ({
       }
     };
   }, []);
+
+  if (!webGlSupported) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-ocf-black-500 p-6 text-center">
+        <div>
+          <h3 className="text-lg font-semibold text-ocf-yellow">Map Unavailable</h3>
+          <p className="mt-2 text-sm text-ocf-gray-600">
+            Your browser does not support WebGL, which is required to display the map. <br />
+            Please update your browser or use the latest version of Chrome.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
