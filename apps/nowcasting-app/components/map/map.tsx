@@ -18,8 +18,6 @@ import {
   SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
   TifLayerData,
-  SAT_LAYER,
-  SAT_SOURCE,
   fetchAndDecodeSatelliteTif,
   applyTifLayerToMap,
   setSatelliteLayerVisibility
@@ -111,7 +109,7 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     showCloudRef.current = showCloudLayer;
     if (!map.current) return;
-    setSatelliteLayerVisibility(map.current, showCloudLayer, SAT_LAYER);
+    setSatelliteLayerVisibility(map.current, showCloudLayer);
   }, [showCloudLayer]);
 
   useEffect(() => {
@@ -148,7 +146,7 @@ const Map: FC<IMap> = ({
     const satTs = satelliteTimestampFor(ts);
     const isNow = ts === timeNow;
     if (!isNow && isFutureTimestamp(satTs)) {
-      setSatelliteLayerVisibility(map.current, false, SAT_LAYER);
+      setSatelliteLayerVisibility(map.current, false);
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
       setIsSatelliteLoading(false);
@@ -166,7 +164,7 @@ const Map: FC<IMap> = ({
       const data = await fetchIntoCache(ch, satTs, isNow);
       if (requestedKeyRef.current !== key || !map.current) return;
       currentKeyRef.current = key;
-      applyTifLayerToMap(map.current, data, SAT_LAYER, SAT_SOURCE, showCloudRef.current);
+      applyTifLayerToMap(map.current, data, showCloudRef.current);
       setSatelliteError(data ? null : "Satellite unavailable for this time");
     } catch (err) {
       Sentry.captureException(err, {
