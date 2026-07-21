@@ -34,7 +34,8 @@ export type TifLayerData = {
   bounds: [number, number, number, number];
 };
 
-const API_PREFIX = process.env.NEXT_PUBLIC_QUARTZ_API_URL || "https://api-dev.quartz.solar";
+const API_PREFIX =
+  process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
 
 const SAT_LAYER = "satellite-layer";
 const SAT_SOURCE = "satellite-source";
