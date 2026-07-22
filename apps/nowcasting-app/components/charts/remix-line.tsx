@@ -69,9 +69,8 @@ export type ChartDataBase = {
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
 
-  PROBABILISTIC_RANGE?: Array<number>;
+  // PROBABILISTIC_UPPER_BOUND is used by getZoomYMax to fit the bands
   PROBABILISTIC_UPPER_BOUND?: number;
-  PROBABILISTIC_LOWER_BOUND?: number;
 
   SEASONAL_MEAN?: number | undefined;
   SEASONAL_BOUNDS?: string[][] | undefined;
@@ -81,10 +80,8 @@ export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound;
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Live Actual",
-  PROBABILISTIC_UPPER_BOUND: "OCF P90",
   FORECAST: "Current",
   PAST_FORECAST: "Current",
-  PROBABILISTIC_LOWER_BOUND: "OCF P10",
   INTRADAY_ECMWF_ONLY: "ECMWF-only",
   PAST_INTRADAY_ECMWF_ONLY: "ECMWF-only",
   MET_OFFICE_ONLY: "Met Office-only",
@@ -113,8 +110,6 @@ const toolTipColors: Record<string, string> = {
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
-  PROBABILISTIC_UPPER_BOUND: yellow,
-  PROBABILISTIC_LOWER_BOUND: yellow,
   SEASONAL_P90: seasonal,
   SEASONAL_MEAN: seasonal,
   SEASONAL_P10: seasonal
@@ -206,6 +201,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [pLevels] = useGlobalState("pLevels");
 
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -598,19 +594,22 @@ const RemixLine: React.FC<RemixLineProps> = ({
               </>
             )}
 
-            <Area
-              type="monotone"
-              dataKey="PROBABILISTIC_RANGE"
-              dot={false}
-              xAxisId={"x-axis"}
-              yAxisId={"y-axis"}
-              stroke={yellow}
-              fill={yellow}
-              fillOpacity={0.4}
-              strokeWidth={0}
-              hide={!visibleLines.includes("FORECAST")}
-              isAnimationActive={false}
-            />
+            {pLevels.map(([lower, upper]) => (
+              <Area
+                key={`${lower}-${upper}`}
+                type="monotone"
+                dataKey={`PROBABILISTIC_RANGE_${lower}_${upper}`}
+                dot={false}
+                xAxisId={"x-axis"}
+                yAxisId={"y-axis"}
+                stroke={yellow}
+                fill={yellow}
+                fillOpacity={1 - Math.pow(1 - 0.4, 1 / pLevels.length)}
+                strokeWidth={0}
+                hide={!visibleLines.includes("FORECAST")}
+                isAnimationActive={false}
+              />
+            ))}
 
             <Line
               type="monotone"
@@ -805,6 +804,28 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   formattedDate = dateToLondonDateTimeString(date);
                 }
 
+                // Show the p-levels in the tooltip higer ones above the current and lower below
+                const pLevelRows = pLevels
+                  .flatMap(([lower, upper]) => {
+                    const [min, max] = data[`PROBABILISTIC_RANGE_${lower}_${upper}`] || [];
+                    return [
+                      [lower, min],
+                      [upper, max]
+                    ];
+                  })
+                  .filter(([, value]) => Math.round(value * 100) >= 0)
+                  .sort(([a], [b]) => b - a);
+                const pLevelRow = ([level, value]: number[]) => (
+                  <li key={level} className="font-sans text-2xs" style={{ color: yellow }}>
+                    <div className="flex justify-between">
+                      <div>{`OCF P${level}`}:</div>
+                      <div className="ml-4">{prettyPrintYNumberWithCommas(String(value), 1)}</div>
+                    </div>
+                  </li>
+                );
+                const upperRows = pLevelRows.filter(([level]) => level > 50).map(pLevelRow);
+                const lowerRows = pLevelRows.filter(([level]) => level < 50).map(pLevelRow);
+
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
                     <ul className="">
@@ -814,13 +835,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
+                      {upperRows}
                       {Object.entries(toolTiplabels)
                         .filter(
                           ([key]) =>
                             (data[key] !== undefined &&
                               visibleLines.includes(key.replace("PAST_", ""))) ||
                             key === "DELTA" ||
-                            key.includes("PROBABILISTIC") ||
                             (key.includes("SEASONAL") && visibleLines.includes("SEASONAL_BOUNDS"))
                         )
                         .map(([key, name]) => {
@@ -842,18 +863,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             (!showNHourView || !visibleLines.some((key) => key.includes("N_HOUR")))
                           )
                             return null;
-                          if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0)
-                            return null;
                           let textClass = "font-normal text-xs";
                           if (["FORECAST", "PAST_FORECAST"].includes(key))
                             textClass = "font-semibold";
-                          if (
-                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(
-                              key
-                            ) ||
-                            key.includes("SEASONAL_P")
-                          )
-                            textClass = "text-2xs";
+                          if (key.includes("SEASONAL_P")) textClass = "text-2xs";
                           const pvLiveTextClass =
                             data["GENERATION_UPDATED"] >= 0 &&
                             data["GENERATION"] >= 0 &&
@@ -881,7 +894,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             title = title.replace("N-hour", `${nHourForecast}-hour`);
                           }
 
-                          return (
+                          return [
                             <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                               <div
                                 className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
@@ -892,8 +905,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                                   {computedValue}{" "}
                                 </div>
                               </div>
-                            </li>
-                          );
+                            </li>,
+                            // put lower p-levels directly under the current row
+                            ["FORECAST", "PAST_FORECAST"].includes(key) && lowerRows
+                          ];
                         })}
                     </ul>
                   </div>

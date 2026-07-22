@@ -82,6 +82,7 @@ export type GlobalStateType = {
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
   nationalAggregationLevel: NationalAggregation;
+  pLevels: [number, number][];
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -130,7 +131,11 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       message: "Loading data"
     },
     nHourForecast: 4,
-    nationalAggregationLevel: NationalAggregation.GSP
+    nationalAggregationLevel: NationalAggregation.GSP,
+    // if no cooike is there default to p10,p90
+    pLevels: getArraySettingFromCookieStorage<[number, number]>(CookieStorageKeys.P_LEVELS) || [
+      [10, 90]
+    ]
   });
 
 export default useGlobalState;

@@ -117,6 +117,7 @@ const useFormatChartData = ({
   gsp?: boolean;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [pLevels] = useGlobalState("pLevels");
 
   const data = useMemo(() => {
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
@@ -167,34 +168,24 @@ const useFormatChartData = ({
           (db) => db.targetTime,
           (db) => getForecastChartData(timeNow, db)
         );
-        if (fc.plevels) {
+        if (fc.plevels && pLevels.length) {
+          const p = fc.plevels as Record<string, number>;
           addDataToMap(
             fc,
             (db) => db.targetTime,
-            //add an array here for the probabilistic area in the chart
-            (db) => ({
-              PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
-            })
-          );
-        }
-        if (fc.plevels?.plevel_10) {
-          addDataToMap(
-            fc,
-            (db) => db.targetTime,
-            // probabilistic lower bound for the tooltip to use
-            (db) => ({
-              PROBABILISTIC_LOWER_BOUND: db.plevels.plevel_10
-            })
-          );
-        }
-        if (fc.plevels?.plevel_90) {
-          addDataToMap(
-            fc,
-            (db) => db.targetTime,
-            (db) => ({
-              // probabilistic upper bound for the tooltip to use
-              PROBABILISTIC_UPPER_BOUND: db.plevels.plevel_90
-            })
+            () =>
+              Object.fromEntries([
+                // widest selected upper bound, so the chart's y-axis zoom fits every band
+                [
+                  "PROBABILISTIC_UPPER_BOUND",
+                  Math.max(...pLevels.map(([, hi]) => p[`plevel_${hi}`]))
+                ],
+                // one [min, max] range per selected pair, for the shaded bands
+                ...pLevels.map(([lo, hi]) => [
+                  `PROBABILISTIC_RANGE_${lo}_${hi}`,
+                  [p[`plevel_${lo}`], p[`plevel_${hi}`]]
+                ])
+              ])
           );
         }
       });
@@ -282,7 +273,8 @@ const useFormatChartData = ({
     nationalIntradayECMWFOnlyData,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
-    probabilisticRangeData
+    probabilisticRangeData,
+    pLevels
   ]);
 
   return data;

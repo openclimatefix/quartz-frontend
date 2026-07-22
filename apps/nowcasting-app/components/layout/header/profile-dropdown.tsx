@@ -16,6 +16,7 @@ import { CombinedData } from "../../types";
 import { VIEWS } from "../../../constant";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
+import { PLevelsModal } from "./pLevelsModal";
 const { version } = pkg;
 
 interface IProfileDropDown {
@@ -30,6 +31,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
+  const [showPLevelsModal, setShowPLevelsModal] = useState(false);
   const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
@@ -149,6 +151,26 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                     className="ml-1 text-sm  font-medium text-ocf-black-600"
                   >
                     {`Constraint Boundaries`}
+                  </button>
+                </div>
+              )}
+            </Menu.Item>
+
+            <div className="w-full border-t border-gray-300" />
+            <Menu.Item>
+              {({ active }) => (
+                <div
+                  className={classNames(
+                    active ? "bg-gray-100" : "",
+                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                  )}
+                >
+                  <button
+                    id={"UserMenu-PLevelsBtn"}
+                    onClick={() => setShowPLevelsModal(true)}
+                    className="ml-1 text-sm font-medium text-ocf-black-600"
+                  >
+                    {`p-level Settings`}
                   </button>
                 </div>
               )}
@@ -276,6 +298,8 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
         nHourForecast={nHourForecast}
         view={view}
       />
+
+      <PLevelsModal isOpen={showPLevelsModal} onClose={() => setShowPLevelsModal(false)} />
     </>
   );
 };
