@@ -8,7 +8,7 @@ import {
 import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
 import { ActiveUnit, NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
-import { ChannelSelection, COMPOSITE_CHANNEL } from "./satelliteLayer";
+import { ChannelSelection, DEFAULT_CHANNEL_SELECTION } from "./satelliteLayer";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -136,7 +136,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     nHourForecast: 4,
     nationalAggregationLevel: NationalAggregation.GSP,
     showCloudLayer: false,
-    activeChannel: COMPOSITE_CHANNEL,
+    activeChannel: DEFAULT_CHANNEL_SELECTION,
     showPvLayer: true
   });
 

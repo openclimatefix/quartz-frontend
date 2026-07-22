@@ -60,14 +60,12 @@ const INVERTED_CHANNELS: SatelliteChannel[] = [...MIXED_CHANNELS];
 export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
   INVERTED_CHANNELS.includes(ch);
 
-// Selections that overlay several channels into one combined view. Keys are
-// stored in global state, so renaming one invalidates a user's saved se lection.
+// Selections that overlay several same-family channels into one combined view.
+// Keys are stored in global state, so renaming one invalidates a user's saved
+// selection. (A full visible+IR composite was tried and dropped: greyscale-
+// averaging reflective and thermal bands muddied both and lost the per-band
+// nuance, for little gain in a daytime-centric solar app.)
 export const COMPOSITE_SELECTIONS = {
-  COMPOSITE: {
-    label: "Composite (visible + IR)",
-    // Thermals underneath, reflective on top — see STACK ORDER above.
-    channels: [...THERMAL_CHANNELS, ...REFLECTIVE_CHANNELS] as SatelliteChannel[]
-  },
   COMPOSITE_VISIBLE: { label: "Visible Composite", channels: REFLECTIVE_CHANNELS },
   COMPOSITE_INFRARED: { label: "Infrared Composite", channels: THERMAL_CHANNELS },
   COMPOSITE_BLUE: { label: "Blue Composite", channels: WATER_VAPOUR_CHANNELS }
@@ -76,8 +74,10 @@ export const COMPOSITE_SELECTIONS = {
 export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
 export type ChannelSelection = SatelliteChannel | CompositeSelection;
 
-// Default selection: the full visible + IR stack.
-export const COMPOSITE_CHANNEL: CompositeSelection = "COMPOSITE";
+// Default selection: the visible composite — the most legible view in daylight,
+// the hours that matter for solar. (It is dark at night, when the reflective
+// bands see no sunlight; acceptable since generation is zero then.)
+export const DEFAULT_CHANNEL_SELECTION: CompositeSelection = "COMPOSITE_VISIBLE";
 
 // Resolve a dropdown selection to the actual channels to render.
 export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] =>
@@ -85,7 +85,7 @@ export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] 
     ? COMPOSITE_SELECTIONS[sel as CompositeSelection].channels
     : [sel as SatelliteChannel];
 
-// Widest composite, used to size the tif cache so a full stack still fits.
+// Widest composite, used to size the tif cache so a full selection still fits.
 export const MAX_COMPOSITE_CHANNELS = Math.max(
   ...Object.values(COMPOSITE_SELECTIONS).map((c) => c.channels.length)
 );
