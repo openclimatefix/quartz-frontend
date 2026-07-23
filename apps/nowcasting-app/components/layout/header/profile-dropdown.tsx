@@ -166,11 +166,11 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                   )}
                 >
                   <button
-                    id={"UserMenu-PLevelsBtn"}
+                    id={"UserMenu-SettingsBtn"}
                     onClick={() => setShowPLevelsModal(true)}
                     className="ml-1 text-sm font-medium text-ocf-black-600"
                   >
-                    {`p-level Settings`}
+                    {`Settings`}
                   </button>
                 </div>
               )}

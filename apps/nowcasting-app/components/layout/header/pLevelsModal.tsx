@@ -31,10 +31,10 @@ export const PLevelsModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <div className="w-full max-w-[25rem] rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/35 px-4 py-2">
-            <h2 className="font-semibold text-white">P-levels bands to show</h2>
+            <h2 className="font-semibold text-white">Settings</h2>
             <button
               type="button"
-              aria-label="Close p-levels modal"
+              aria-label="Close settings modal"
               onClick={onClose}
               className="leading-none opacity-70 hover:opacity-100"
             >
@@ -43,6 +43,7 @@ export const PLevelsModal: React.FC<Props> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="px-4 py-3">
+            <h3 className="mb-2 text-sm text-left font-semibold text-white/70">P-levels</h3>
             {P_LEVEL_OPTIONS.map(([lower, upper]) => (
               <div key={lower} className="flex items-center gap-3">
                 <div className="-ml-2">
@@ -51,7 +52,7 @@ export const PLevelsModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     visible={pLevels.some(([l]) => l === lower)}
                   />
                 </div>
-                <span className="text-sm font-semibold text-white">{`P${lower} / P${upper} band`}</span>
+                <span className="text-sm font-semibold text-white">{`P${lower} / P${upper}`}</span>
               </div>
             ))}
           </div>
