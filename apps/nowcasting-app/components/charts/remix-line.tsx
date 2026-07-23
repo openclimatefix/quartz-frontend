@@ -835,7 +835,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>
-                      {upperRows}
                       {Object.entries(toolTiplabels)
                         .filter(
                           ([key]) =>
@@ -863,9 +862,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             (!showNHourView || !visibleLines.some((key) => key.includes("N_HOUR")))
                           )
                             return null;
+                          const isForecast = ["FORECAST", "PAST_FORECAST"].includes(key);
                           let textClass = "font-normal text-xs";
-                          if (["FORECAST", "PAST_FORECAST"].includes(key))
-                            textClass = "font-semibold";
+                          if (isForecast) textClass = "font-semibold";
                           if (key.includes("SEASONAL_P")) textClass = "text-2xs";
                           const pvLiveTextClass =
                             data["GENERATION_UPDATED"] >= 0 &&
@@ -895,6 +894,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           }
 
                           return [
+                            // the forecast is the p50, wrap it with the higher p-levels above
+                            isForecast && upperRows,
                             <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
                               <div
                                 className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
@@ -907,7 +908,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               </div>
                             </li>,
                             // put lower p-levels directly under the current row
-                            ["FORECAST", "PAST_FORECAST"].includes(key) && lowerRows
+                            isForecast && lowerRows
                           ];
                         })}
                     </ul>
