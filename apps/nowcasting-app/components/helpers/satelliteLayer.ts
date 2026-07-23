@@ -122,6 +122,12 @@ const SAT_TEXTURE_SIZE = 512;
 // Alpha of the brightest pixel in a decoded texture. Everything darker scales
 // down from here, so the effective ceiling matches the old flat value.
 const SAT_MAX_ALPHA = 180;
+// Encoding for the cached texture. WebP is much smaller than PNG and preserves
+// alpha; quality is a lossy/size trade — raise toward 1 if artefacts show. (Size
+// is largely alpha-bound, and WebP stores alpha losslessly, so quality has little
+// effect here — kept high for free colour fidelity.)
+const SAT_IMAGE_TYPE = "image/webp";
+const SAT_IMAGE_QUALITY = 0.9;
 
 // Per-map, per-layer counter, so a slow texture swap can't clobber a newer one on
 // the same layer. Must be per-layer: with a single counter, stacking N channels
@@ -268,7 +274,11 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
   outCanvas.height = SAT_TEXTURE_SIZE;
   const outCtx = outCanvas.getContext("2d")!;
   outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, SAT_TEXTURE_SIZE, SAT_TEXTURE_SIZE);
-  return { imageDataUrl: outCanvas.toDataURL(), bounds: [minLon, minLat, maxLon, maxLat] };
+  // WebP keeps the alpha channel (unlike JPEG) but compresses far better than the
+  // default PNG (~4x smaller here), so each cached entry is a fraction of the size.
+  // Falls back to the browser default if WebP isn't supported (a PNG data URL).
+  const imageDataUrl = outCanvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
+  return { imageDataUrl, bounds: [minLon, minLat, maxLon, maxLat] };
 }
 
 export async function fetchAndDecodeSatelliteTif(

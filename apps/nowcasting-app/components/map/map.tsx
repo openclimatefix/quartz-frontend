@@ -52,10 +52,18 @@ const SAT_BELOW_LAYER_IDS = [...PV_LAYER_IDS, "boundary-data"];
 const getSatelliteBeforeId = (m: mapboxgl.Map): string | undefined =>
   SAT_BELOW_LAYER_IDS.find((id) => m.getLayer(id));
 
-// Prefetch reaches +/-2 timesteps either side, so a full composite needs
-// channels x 5 entries resident to avoid thrashing the cache.
-const PREFETCH_STEPS = 2;
-const TIF_CACHE_SIZE = MAX_COMPOSITE_CHANNELS * (PREFETCH_STEPS * 2 + 1);
+// Prefetch one timestep either side — enough to keep single-step scrubbing and
+// the play button smooth, without front-loading speculative frames the forecast
+// latency would mask anyway.
+const PREFETCH_STEPS = 1;
+
+// Retain roughly this many distinct timesteps of scrub history. A selection costs
+// up to MAX_COMPOSITE_CHANNELS entries per timestep, so the cache is sized to fit.
+// (QuickLRU keeps up to 2x maxSize resident, and the cache is cleared when the
+// cloud layer is switched off — see the showCloudLayer effect.) Kept modest as
+// each decoded entry is ~0.5MB and this runs on always-on wallboards.
+const CACHE_TIMESTEPS = 6;
+const TIF_CACHE_SIZE = MAX_COMPOSITE_CHANNELS * CACHE_TIMESTEPS;
 
 const setAggregationLevelByCurrentZoom = (
   currentZoom: number,
@@ -131,6 +139,15 @@ const Map: FC<IMap> = ({
     showCloudRef.current = showCloudLayer;
     if (!map.current) return;
     applySatelliteVisibility(map.current, showCloudLayer);
+    if (!showCloudLayer) {
+      // Drop the scrub-ahead cache when the layer is switched off — the visible
+      // frame stays on its (now hidden) map layer, so re-enabling is still instant,
+      // but we stop holding decoded frames a user has chosen not to see. Reset the
+      // keys so re-enabling re-applies the currently-selected timestep afresh.
+      tifCache.current.clear();
+      currentKeyRef.current = null;
+      requestedKeyRef.current = null;
+    }
   }, [showCloudLayer]);
 
   useEffect(() => {
@@ -215,24 +232,36 @@ const Map: FC<IMap> = ({
   };
 
   useEffect(() => {
-    if (!isMapReady || !selectedISOTime) return;
-    applyForTimestamp(activeChannel, selectedISOTime);
-    const channels = channelsForSelection(activeChannel);
-    for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
-      if (offset === 0) continue;
-      const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
-      if (isFutureTimestamp(satTs)) continue;
-      channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
-    }
-  }, [selectedISOTime, activeChannel, isMapReady]);
+    // Nothing satellite-related runs until the user actually enables clouds, so a
+    // visitor who never turns the layer on pays no satellite requests at all.
+    if (!showCloudLayer || !isMapReady || !selectedISOTime) return;
+    let cancelled = false;
+    (async () => {
+      // Load the frame the user is actually looking at first, then warm the
+      // neighbours in the background — so the visible frame is never queued behind
+      // speculative prefetches.
+      await applyForTimestamp(activeChannel, selectedISOTime);
+      if (cancelled) return;
+      const channels = channelsForSelection(activeChannel);
+      for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
+        if (offset === 0) continue;
+        const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
+        if (isFutureTimestamp(satTs)) continue;
+        channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer]);
 
   // selectedISOTime only changes once per 30-min slot, so nothing above re-triggers
   // the fetch while parked on "now". timeNow (kept ticking every 60s by useTimeNow,
   // mounted elsewhere in the app) gives us a live signal to keep pulling the latest frame.
   useEffect(() => {
-    if (!isMapReady || selectedISOTime !== timeNow) return;
+    if (!showCloudLayer || !isMapReady || selectedISOTime !== timeNow) return;
     applyForTimestamp(activeChannel, selectedISOTime);
-  }, [timeNow, isMapReady, selectedISOTime, activeChannel]);
+  }, [timeNow, isMapReady, selectedISOTime, activeChannel, showCloudLayer]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
