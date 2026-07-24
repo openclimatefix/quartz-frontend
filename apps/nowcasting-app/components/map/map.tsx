@@ -234,7 +234,7 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     // Nothing satellite-related runs until the user actually enables clouds, so a
     // visitor who never turns the layer on pays no satellite requests at all.
-    if (!showCloudLayer || !isMapReady || !selectedISOTime) return;
+    if (title !== VIEWS.FORECAST || !showCloudLayer || !isMapReady || !selectedISOTime) return;
     let cancelled = false;
     (async () => {
       // Load the frame the user is actually looking at first, then warm the
@@ -259,7 +259,8 @@ const Map: FC<IMap> = ({
   // the fetch while parked on "now". timeNow (kept ticking every 60s by useTimeNow,
   // mounted elsewhere in the app) gives us a live signal to keep pulling the latest frame.
   useEffect(() => {
-    if (!showCloudLayer || !isMapReady || selectedISOTime !== timeNow) return;
+    if (title !== VIEWS.FORECAST || !showCloudLayer || !isMapReady || selectedISOTime !== timeNow)
+      return;
     applyForTimestamp(activeChannel, selectedISOTime);
   }, [timeNow, isMapReady, selectedISOTime, activeChannel, showCloudLayer]);
 
@@ -401,81 +402,79 @@ const Map: FC<IMap> = ({
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full flex flex-col gap-1 pointer-events-none">
         <div className="pointer-events-auto">{controlOverlay(map)}</div>
-        <div
-          className={`pointer-events-auto flex flex-row items-start justify-end gap-2 transition-all duration-300 ${
-            title === VIEWS.SOLAR_SITES ? "mt-[240px]" : "mt-3"
-          }`}
-        >
-          {showCloudLayer && (
-            <select
-              value={activeChannel}
-              onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
-              disabled={!!satelliteError}
-              className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {satelliteError ? (
-                <option value={activeChannel}>{satelliteError}</option>
-              ) : (
-                <>
-                  <optgroup label="Composites">
-                    {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
-                      <option key={key} value={key}>
-                        {label}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Single channels">
-                    {SATELLITE_CHANNELS.map((ch) => (
-                      <option key={ch} value={ch}>
-                        {SATELLITE_CHANNEL_LABELS[ch]}
-                      </option>
-                    ))}
-                  </optgroup>
-                </>
-              )}
-            </select>
-          )}
+        {title === VIEWS.FORECAST && (
+          <div
+            className={`pointer-events-auto flex flex-row items-start justify-end gap-2 transition-all duration-300 mt-3`}
+          >
+            {showCloudLayer && (
+              <select
+                value={activeChannel}
+                onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
+                disabled={!!satelliteError}
+                className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {satelliteError ? (
+                  <option value={activeChannel}>{satelliteError}</option>
+                ) : (
+                  <>
+                    <optgroup label="Composites">
+                      {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Single channels">
+                      {SATELLITE_CHANNELS.map((ch) => (
+                        <option key={ch} value={ch}>
+                          {SATELLITE_CHANNEL_LABELS[ch]}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </>
+                )}
+              </select>
+            )}
 
-          <div className="flex flex-row items-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const turningOff = showCloudLayer;
-                setShowCloudLayer(!showCloudLayer);
-                if (turningOff) setShowPvLayer(true);
-              }}
-              className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-                showCloudLayer
-                  ? "text-black bg-ocf-yellow"
-                  : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
-              }`}
-            >
-              {isSatelliteLoading && (
-                <svg
-                  className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              )}
-              Clouds
-            </button>
+            <div className="flex flex-row items-end gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const turningOff = showCloudLayer;
+                  setShowCloudLayer(!showCloudLayer);
+                  if (turningOff) setShowPvLayer(true);
+                }}
+                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
+                  showCloudLayer
+                    ? "text-black bg-ocf-yellow"
+                    : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
+                }`}
+              >
+                {isSatelliteLoading && (
+                  <svg
+                    className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                )}
+                Clouds
+              </button>
 
-            {(title === VIEWS.FORECAST || title === VIEWS.DELTA) && (
               <button
                 type="button"
                 title="Toggle the yellow PV forecast overlay so clouds are easier to see"
@@ -488,9 +487,9 @@ const Map: FC<IMap> = ({
               >
                 PV
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div ref={mapContainer} id={`Map-${title}`} data-title={title} className="h-full w-full" />
