@@ -53,19 +53,23 @@ const NLNationalChart: React.FC<{
 
     nlForecastData?.values.forEach((fv) => {
       const isAfterNow = fv.time_utc.slice(0, 16) >= (timeNowFormatted || "");
+      const isNow = fv.time_utc.slice(0, 16) === (timeNowFormatted || "");
       chartMap[fv.time_utc] = {
         ...chartMap[fv.time_utc],
         formattedDate: formatISODateString(fv.time_utc) || "",
-        [isAfterNow ? "FORECAST" : "PAST_FORECAST"]: fv.power_kW / 1000
+        [isAfterNow ? "FORECAST" : "PAST_FORECAST"]: fv.power_kW / 1000,
+        ...(isNow && { PAST_FORECAST: fv.power_kW / 1000 })
       };
     });
 
     nlUncurtailedForecastData?.values.forEach((fv) => {
       const isAfterNow = fv.time_utc.slice(0, 16) >= (timeNowFormatted || "");
+      const isNow = fv.time_utc.slice(0, 16) === (timeNowFormatted || "");
       chartMap[fv.time_utc] = {
         ...chartMap[fv.time_utc],
         formattedDate: formatISODateString(fv.time_utc) || "",
-        [isAfterNow ? "NL_UNCURTAILED" : "PAST_NL_UNCURTAILED"]: fv.power_kW / 1000
+        [isAfterNow ? "NL_UNCURTAILED" : "PAST_NL_UNCURTAILED"]: fv.power_kW / 1000,
+        ...(isNow && { PAST_NL_UNCURTAILED: fv.power_kW / 1000 })
       };
     });
 
