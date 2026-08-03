@@ -156,17 +156,83 @@ function mercToWgs84(x: number, y: number): [number, number] {
   return [lon, lat];
 }
 
+// /api/get_token is an Auth0 session round-trip on the Next server, not a cheap
+// read, and every channel fetch used to pay for its own. A composite with the
+// +/-1 prefetch meant ~15 of them per timestep, each one sitting in front of its
+// tif request. Share one token instead. The TTL is far shorter than the token's
+// own lifetime, so this only collapses the burst — it can't serve a stale token.
+const TOKEN_TTL_MS = 60_000;
+let tokenPromise: Promise<string> | null = null;
+let tokenFetchedAt = 0;
+
 async function getToken(): Promise<string> {
-  const res = await fetch("/api/get_token");
-  if (!res.ok) throw new Error("Failed to get auth token");
-  const data = await res.json();
-  return data.accessToken as string;
+  if (tokenPromise && Date.now() - tokenFetchedAt < TOKEN_TTL_MS) return tokenPromise;
+
+  tokenFetchedAt = Date.now();
+  tokenPromise = (async () => {
+    const res = await fetch("/api/get_token");
+    if (!res.ok) throw new Error("Failed to get auth token");
+    const data = await res.json();
+    return data.accessToken as string;
+  })();
+
+  // Never cache a rejection: drop it so the next caller retries, rather than
+  // replaying one failed auth call for the rest of the TTL. The caller still
+  // sees this rejection — clearing the cache doesn't swallow it.
+  const pending = tokenPromise;
+  pending.catch(() => {
+    if (tokenPromise === pending) tokenPromise = null;
+  });
+
+  return pending;
+}
+
+// Cap concurrent satellite requests. A composite fetches one tif per channel and
+// the +/-1 prefetch triples that, so an uncapped selection can put ~15 requests
+// in flight — enough to trip the API's rate limit and drop the whole batch into
+// the 429 backoff path below, which is slower than simply queuing in the first
+// place. The visible frame is always requested before the prefetches (see
+// map.tsx), so it takes the slots first and can't be starved by speculative work.
+const MAX_CONCURRENT_SAT_REQUESTS = 4;
+
+let activeRequests = 0;
+const waitingForSlot: (() => void)[] = [];
+
+function acquireRequestSlot(): Promise<void> {
+  if (activeRequests < MAX_CONCURRENT_SAT_REQUESTS) {
+    activeRequests++;
+    return Promise.resolve();
+  }
+  return new Promise<void>((resolve) => waitingForSlot.push(resolve));
+}
+
+function releaseRequestSlot(): void {
+  // Hand the slot directly to the next waiter rather than decrementing, so a
+  // queued request can't have it stolen by a newly-arriving one.
+  const next = waitingForSlot.shift();
+  if (next) next();
+  else activeRequests--;
 }
 
 export async function fetchSatelliteTif(
   channel: SatelliteChannel,
   timestamp: string,
   latest = false
+): Promise<ArrayBuffer | null> {
+  // The slot is held across the 429 retries too: a rate limit means the API is
+  // already saturated, so keeping the queue closed is the useful backpressure.
+  await acquireRequestSlot();
+  try {
+    return await requestSatelliteTif(channel, timestamp, latest);
+  } finally {
+    releaseRequestSlot();
+  }
+}
+
+async function requestSatelliteTif(
+  channel: SatelliteChannel,
+  timestamp: string,
+  latest: boolean
 ): Promise<ArrayBuffer | null> {
   const token = await getToken();
   const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
