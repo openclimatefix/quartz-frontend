@@ -57,6 +57,11 @@ const getSatelliteBeforeId = (m: mapboxgl.Map): string | undefined =>
 // latency would mask anyway.
 const PREFETCH_STEPS = 1;
 
+// How often to re-pull the latest frame while parked on "now". SEVIRI lands
+// roughly every 5 minutes, so polling faster mostly re-decodes an image we
+// already have.
+const LATEST_REFRESH_MS = 5 * 60 * 1000;
+
 // Retain roughly this many distinct timesteps of scrub history. A selection costs
 // up to MAX_COMPOSITE_CHANNELS entries per timestep, so the cache is sized to fit.
 // (QuickLRU keeps up to 2x maxSize resident, and the cache is cleared when the
@@ -182,15 +187,21 @@ const Map: FC<IMap> = ({
     return data;
   };
 
-  const applyForTimestamp = async (sel: ChannelSelection, ts: string) => {
+  // `silent` suppresses the spinner: used by the background refresh below, where
+  // a frame is already on screen and flashing a loader every few minutes on an
+  // always-on wallboard is just noise.
+  const applyForTimestamp = async (sel: ChannelSelection, ts: string, silent = false) => {
     if (!map.current) return;
+    const setLoading = (loading: boolean) => {
+      if (!silent) setIsSatelliteLoading(loading);
+    };
     const satTs = satelliteTimestampFor(ts);
     const isNow = ts === timeNow;
     if (!isNow && isFutureTimestamp(satTs)) {
       applySatelliteVisibility(map.current, false);
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
-      setIsSatelliteLoading(false);
+      setLoading(false);
       setSatelliteError("Satellite not yet available for future");
       return;
     }
@@ -199,11 +210,11 @@ const Map: FC<IMap> = ({
     const key = satCacheKey(sel, satTs);
     requestedKeyRef.current = key;
     if (!isNow && currentKeyRef.current === key) {
-      setIsSatelliteLoading(false);
+      setLoading(false);
       return;
     }
     const channels = channelsForSelection(sel);
-    setIsSatelliteLoading(true);
+    setLoading(true);
     try {
       const results = await Promise.all(
         channels.map(async (ch) => ({ ch, data: await fetchIntoCache(ch, satTs, isNow) }))
@@ -227,10 +238,16 @@ const Map: FC<IMap> = ({
       // Let a retry of this key through, rather than stranding it as "current".
       if (requestedKeyRef.current === key) currentKeyRef.current = null;
     } finally {
-      if (requestedKeyRef.current === key) setIsSatelliteLoading(false);
+      if (requestedKeyRef.current === key) setLoading(false);
     }
   };
 
+  // One effect owns all satellite loading. It used to be two — one keyed on
+  // selectedISOTime, one on timeNow — but both of those change in the same commit
+  // when the half-hour rolls over, so both fired and each did a full uncached
+  // fetch/decode of every channel (the `latest` path deliberately bypasses the
+  // cache, so the second pass was not free). Folding them together makes the
+  // boundary cost exactly one pass.
   useEffect(() => {
     // Nothing satellite-related runs until the user actually enables clouds, so a
     // visitor who never turns the layer on pays no satellite requests at all.
@@ -250,19 +267,25 @@ const Map: FC<IMap> = ({
         channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
       }
     })();
+
+    // Parked on "now": poll for a fresher image. Both selectedISOTime and timeNow
+    // only advance on the half hour (get30MinNow rounds to the slot, so the string
+    // is identical in between and React bails out of the re-render), which would
+    // otherwise leave the displayed frame up to 30 minutes behind imagery that
+    // lands every ~5. Silent, so the spinner doesn't flash on a wallboard.
+    const refresh =
+      selectedISOTime === timeNow
+        ? setInterval(
+            () => applyForTimestamp(activeChannel, selectedISOTime, true),
+            LATEST_REFRESH_MS
+          )
+        : undefined;
+
     return () => {
       cancelled = true;
+      if (refresh) clearInterval(refresh);
     };
-  }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer]);
-
-  // selectedISOTime only changes once per 30-min slot, so nothing above re-triggers
-  // the fetch while parked on "now". timeNow (kept ticking every 60s by useTimeNow,
-  // mounted elsewhere in the app) gives us a live signal to keep pulling the latest frame.
-  useEffect(() => {
-    if (title !== VIEWS.FORECAST || !showCloudLayer || !isMapReady || selectedISOTime !== timeNow)
-      return;
-    applyForTimestamp(activeChannel, selectedISOTime);
-  }, [timeNow, isMapReady, selectedISOTime, activeChannel, showCloudLayer]);
+  }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer, timeNow, title]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
