@@ -263,6 +263,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
   //reset zoom state
   function handleZoomOut() {
+    setGlobalZoomArea({ x1: "", x2: "" });
     setGlobalIsZoomed(false);
     setFilteredPreppedData(preppedData);
   }
