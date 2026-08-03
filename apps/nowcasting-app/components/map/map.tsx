@@ -447,7 +447,7 @@ const Map: FC<IMap> = ({
                         </option>
                       ))}
                     </optgroup>
-                    <optgroup label="Single channels">
+                    <optgroup label="Individual bands">
                       {SATELLITE_CHANNELS.map((ch) => (
                         <option key={ch} value={ch}>
                           {SATELLITE_CHANNEL_LABELS[ch]}

@@ -62,13 +62,18 @@ export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
 
 // Selections that overlay several same-family channels into one combined view.
 // Keys are stored in global state, so renaming one invalidates a user's saved
-// selection. (A full visible+IR composite was tried and dropped: greyscale-
-// averaging reflective and thermal bands muddied both and lost the per-band
-// nuance, for little gain in a daytime-centric solar app.)
+// selection — labels are free to change, keys are not. (A full visible+IR
+// composite was tried and dropped: greyscale-averaging reflective and thermal
+// bands muddied both and lost the per-band nuance, for little gain in a
+// daytime-centric solar app.)
+//
+// Labels name the bands they stack, matching how the single channels below are
+// listed. "Blue" was the odd one out — it described neither the instrument nor
+// the output, so it reads as Water Vapour instead.
 export const COMPOSITE_SELECTIONS = {
   COMPOSITE_VISIBLE: { label: "Visible Composite", channels: REFLECTIVE_CHANNELS },
   COMPOSITE_INFRARED: { label: "Infrared Composite", channels: THERMAL_CHANNELS },
-  COMPOSITE_BLUE: { label: "Blue Composite", channels: WATER_VAPOUR_CHANNELS }
+  COMPOSITE_BLUE: { label: "Water Vapour Composite", channels: WATER_VAPOUR_CHANNELS }
 };
 
 export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
