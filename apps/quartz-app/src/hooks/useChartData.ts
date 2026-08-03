@@ -1,8 +1,5 @@
 import { ChartDatum, CombinedData } from "@/src/types/data";
-import {
-  convertDatestampToEpoch,
-  getEpochNowInTimezone,
-} from "@/src/helpers/datetime";
+import { convertDatestampToEpoch, getEpochNowInTimezone } from "@/src/helpers/datetime";
 
 export const useChartData = (combinedData: CombinedData) => {
   let formattedChartData: ChartDatum[] = [];
@@ -11,29 +8,23 @@ export const useChartData = (combinedData: CombinedData) => {
   if (combinedData.windForecastData?.values) {
     for (const value of combinedData.windForecastData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedChartData?.find(
-        (data) => data.timestamp === timestamp
-      );
+      const existingData = formattedChartData?.find((data) => data.timestamp === timestamp);
       const key =
-        timestamp <= getEpochNowInTimezone()
-          ? "wind_forecast_past"
-          : "wind_forecast_future";
+        timestamp <= getEpochNowInTimezone() ? "wind_forecast_past" : "wind_forecast_future";
       // if the timestamp is now, add to both wind_forecast_past and wind_forecast_future
       // so that the area chart doesn't have a gap
       const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
         existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
         if (isNowEntry) {
-          existingData["wind_forecast_future"] = value.PowerKW
-            ? value.PowerKW / 1000
-            : null;
+          existingData["wind_forecast_future"] = value.PowerKW ? value.PowerKW / 1000 : null;
         }
       } else {
         const newEntry = {
           timestamp,
           [key]: value.PowerKW / 1000,
           solar_generation: null,
-          wind_generation: null,
+          wind_generation: null
         };
         if (isNowEntry) {
           newEntry["wind_forecast_future"] = value.PowerKW / 1000;
@@ -46,29 +37,23 @@ export const useChartData = (combinedData: CombinedData) => {
   if (combinedData.solarForecastData?.values) {
     for (const value of combinedData.solarForecastData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedChartData?.find(
-        (data) => data.timestamp === timestamp
-      );
+      const existingData = formattedChartData?.find((data) => data.timestamp === timestamp);
       const key =
-        timestamp <= getEpochNowInTimezone()
-          ? "solar_forecast_past"
-          : "solar_forecast_future";
+        timestamp <= getEpochNowInTimezone() ? "solar_forecast_past" : "solar_forecast_future";
       // if the timestamp is now, add to both solar_forecast_past and solar_forecast_future
       // so that the area chart doesn't have a gap
       const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
         existingData[key] = value.PowerKW ? value.PowerKW / 1000 : 0;
         if (isNowEntry) {
-          existingData["solar_forecast_future"] = value.PowerKW
-            ? value.PowerKW / 1000
-            : null;
+          existingData["solar_forecast_future"] = value.PowerKW ? value.PowerKW / 1000 : null;
         }
       } else {
         const newEntry = {
           timestamp,
           [key]: value.PowerKW / 1000,
           solar_generation: null,
-          wind_generation: null,
+          wind_generation: null
         };
         if (isNowEntry) {
           newEntry["solar_forecast_future"] = value.PowerKW / 1000;
@@ -82,9 +67,7 @@ export const useChartData = (combinedData: CombinedData) => {
   if (combinedData.solarGenerationData?.values) {
     for (const value of combinedData.solarGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedChartData?.find(
-        (data) => data.timestamp === timestamp
-      );
+      const existingData = formattedChartData?.find((data) => data.timestamp === timestamp);
       if (
         existingData &&
         (existingData.solar_forecast_past ||
@@ -101,9 +84,7 @@ export const useChartData = (combinedData: CombinedData) => {
   if (combinedData.windGenerationData?.values) {
     for (const value of combinedData.windGenerationData?.values) {
       const timestamp = convertDatestampToEpoch(value.Time);
-      const existingData = formattedChartData?.find(
-        (data) => data.timestamp === timestamp
-      );
+      const existingData = formattedChartData?.find((data) => data.timestamp === timestamp);
       if (
         existingData &&
         (existingData.solar_forecast_past ||
@@ -116,8 +97,6 @@ export const useChartData = (combinedData: CombinedData) => {
     }
   }
 
-  formattedChartData = formattedChartData.sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  formattedChartData = formattedChartData.sort((a, b) => a.timestamp - b.timestamp);
   return formattedChartData;
 };
