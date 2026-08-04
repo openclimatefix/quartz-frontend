@@ -32,10 +32,11 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [pLevels] = useGlobalState("pLevels");
   const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
-    downloadNationalCsv(combinedData, selectedColumns, nHourForecast);
+    downloadNationalCsv(combinedData, selectedColumns, nHourForecast, pLevels);
   };
 
   const toggleDashboardMode = () => {
