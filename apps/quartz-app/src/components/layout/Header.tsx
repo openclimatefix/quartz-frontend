@@ -151,7 +151,9 @@ const Header: React.FC<HeaderProps> = () => {
             <>
               <button
                 id="DownloadCsvButton"
-                className={`text-sm p-2 ${isLoading ? "opacity-40 cursor-not-allowed" : ""}`}
+                className={`text-sm p-2 ${
+                  isLoading ? "opacity-40 cursor-not-allowed" : ""
+                }`}
                 title={"Download CSV"}
                 tabIndex={0}
                 disabled={isLoading}
