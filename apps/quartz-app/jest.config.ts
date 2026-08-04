@@ -6,6 +6,18 @@
 import type { Config } from "jest";
 import nextJest from "next/jest";
 
+// `convertDatestampToEpoch` strips the offset off the API's timestamps and lets
+// `new Date` reinterpret the wall clock in the runner's local zone, so every
+// epoch this app computes depends on the machine's timezone. Expected values in
+// useChartData.test.ts were therefore only correct on a machine set to IST, and
+// the suite failed everywhere else.
+//
+// Pin the zone so results are reproducible regardless of where the tests run.
+// This is set here rather than in `setupFiles` because jest.config.ts is
+// evaluated in the parent process before the workers fork, so they inherit it at
+// startup — after Node has cached the zone it is too late to change it.
+process.env.TZ = "Asia/Kolkata";
+
 const createJestConfig = nextJest({
   // Provide the path to your Next.js app to load next.config.js and .env files in your test environment
   dir: "./",
