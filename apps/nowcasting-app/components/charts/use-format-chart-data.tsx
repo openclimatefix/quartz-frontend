@@ -170,24 +170,36 @@ const useFormatChartData = ({
           (db) => getForecastChartData(timeNow, db)
         );
         if (fc.plevels && pLevels.length) {
-          const plevelValues = fc.plevels as Record<string, number>;
-          addDataToMap(
-            fc,
-            (db) => db.targetTime,
-            () =>
-              Object.fromEntries([
-                // widest selected upper bound, so the chart's y-axis zoom fits every band
-                [
-                  "PROBABILISTIC_UPPER_BOUND",
-                  Math.max(...pLevels.map(([, hi]) => plevelValues[`plevel_${hi}`]))
-                ],
-                // one [min, max] range per selected pair, for the shaded bands
-                ...pLevels.map(([lo, hi]) => [
-                  getPLevelRangeKey(lo, hi),
-                  [plevelValues[`plevel_${lo}`], plevelValues[`plevel_${hi}`]]
-                ])
-              ])
+          const plevelValues = fc.plevels as Record<string, number | undefined>;
+          // plevel_2/plevel_98 etc. are individually optional in the payload, so drop any
+          // selected pair this forecast doesn't have both bounds for, rather than letting a
+          // missing value turn into NaN further down.
+          const availablePLevels = pLevels.filter(
+            ([lo, hi]) =>
+              plevelValues[`plevel_${lo}`] !== undefined &&
+              plevelValues[`plevel_${hi}`] !== undefined
           );
+          if (availablePLevels.length) {
+            addDataToMap(
+              fc,
+              (db) => db.targetTime,
+              () =>
+                Object.fromEntries([
+                  // widest selected upper bound, so the chart's y-axis zoom fits every band
+                  [
+                    "PROBABILISTIC_UPPER_BOUND",
+                    Math.max(
+                      ...availablePLevels.map(([, hi]) => plevelValues[`plevel_${hi}`] as number)
+                    )
+                  ],
+                  // one [min, max] range per selected pair, for the shaded bands
+                  ...availablePLevels.map(([lo, hi]) => [
+                    getPLevelRangeKey(lo, hi),
+                    [plevelValues[`plevel_${lo}`], plevelValues[`plevel_${hi}`]]
+                  ])
+                ])
+            );
+          }
         }
       });
 

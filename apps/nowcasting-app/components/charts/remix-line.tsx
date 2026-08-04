@@ -816,7 +816,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 // Show the p-levels in the tooltip higher ones above the current and lower below
                 const pLevelRows = pLevels
                   .flatMap(([lower, upper]) => {
-                    const [min, max] = data[getPLevelRangeKey(lower, upper)] || [];
+                    // this forecast may not have data for a selected pair (e.g. missing plevels) - skip it
+                    const range = data[getPLevelRangeKey(lower, upper)];
+                    if (!range) return [];
+                    const [min, max] = range;
                     return [
                       [lower, min],
                       [upper, max]
