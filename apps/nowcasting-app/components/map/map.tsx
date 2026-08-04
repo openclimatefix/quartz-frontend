@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { get30MinNow } from "../helpers/globalState";
 import QuickLRU from "quick-lru";
 import { ResetIcon } from "../icons/icons";
 import {
@@ -196,7 +196,16 @@ const Map: FC<IMap> = ({
       if (!silent) setIsSatelliteLoading(loading);
     };
     const satTs = satelliteTimestampFor(ts);
-    const isNow = ts === timeNow;
+    // `timeNow` and `selectedISOTime` are written by two independent 60s timers
+    // (use-time-now, mounted via ForecastHeader, and use-and-update-selected-time
+    // in pages/index) whose phase isn't locked — ForecastHeader unmounts on a view
+    // switch and restarts its timer at a fresh offset. Across a half-hour boundary
+    // that leaves a window where selectedISOTime has advanced but timeNow hasn't,
+    // and trusting `timeNow` alone would read the new slot as a future timestamp:
+    // clouds hidden behind "not yet available", healing itself a minute later.
+    // Deriving the slot directly makes this path independent of that race.
+    // Scrubbing to a genuinely future slot still fails the check, as it should.
+    const isNow = ts === timeNow || ts === get30MinNow();
     if (!isNow && isFutureTimestamp(satTs)) {
       applySatelliteVisibility(map.current, false);
       currentKeyRef.current = null;
