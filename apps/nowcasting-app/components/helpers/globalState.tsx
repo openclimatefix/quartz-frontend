@@ -1,5 +1,11 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { AGGREGATION_LEVELS, getDeltaBucketKeys, SORT_BY, VIEWS } from "../../constant";
+import {
+  AGGREGATION_LEVELS,
+  getDeltaBucketKeys,
+  P_LEVEL_OPTIONS,
+  SORT_BY,
+  VIEWS
+} from "../../constant";
 import {
   CookieStorageKeys,
   getArraySettingFromCookieStorage,
@@ -82,6 +88,19 @@ export type GlobalStateType = {
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
   nationalAggregationLevel: NationalAggregation;
+  pLevels: [number, number][];
+};
+
+const DEFAULT_P_LEVELS: [number, number][] = [[10, 90]];
+
+// Drop any stored p-level pair that's no longer in P_LEVEL_OPTIONS, so a stale cookie from
+// before the available p-levels changed can't select a pair the rest of the app doesn't know about.
+const getValidatedPLevels = (): [number, number][] => {
+  const stored = getArraySettingFromCookieStorage<[number, number]>(CookieStorageKeys.P_LEVELS);
+  const validStored = stored?.filter(([lower, upper]) =>
+    P_LEVEL_OPTIONS.some(([l, u]) => l === lower && u === upper)
+  );
+  return validStored?.length ? validStored : DEFAULT_P_LEVELS;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -130,7 +149,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       message: "Loading data"
     },
     nHourForecast: 4,
-    nationalAggregationLevel: NationalAggregation.GSP
+    nationalAggregationLevel: NationalAggregation.GSP,
+    pLevels: getValidatedPLevels()
   });
 
 export default useGlobalState;
