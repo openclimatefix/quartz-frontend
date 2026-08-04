@@ -13,7 +13,7 @@ import {
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
-import { getSettlementPeriodForDate } from "../helpers/chartUtils";
+import { getAvailablePLevels, getSettlementPeriodForDate } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -171,14 +171,7 @@ const useFormatChartData = ({
         );
         if (fc.plevels && pLevels.length) {
           const plevelValues = fc.plevels as Record<string, number | undefined>;
-          // plevel_2/plevel_98 etc. are individually optional in the payload, so drop any
-          // selected pair this forecast doesn't have both bounds for, rather than letting a
-          // missing value turn into NaN further down.
-          const availablePLevels = pLevels.filter(
-            ([lo, hi]) =>
-              plevelValues[`plevel_${lo}`] !== undefined &&
-              plevelValues[`plevel_${hi}`] !== undefined
-          );
+          const availablePLevels = getAvailablePLevels(plevelValues, pLevels);
           if (availablePLevels.length) {
             addDataToMap(
               fc,
