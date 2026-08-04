@@ -1,6 +1,21 @@
 import { ChartDatum, CombinedData } from "@/src/types/data";
 import { convertDatestampToEpoch, getEpochNowInTimezone } from "@/src/helpers/datetime";
 
+// Missing values are written as null, which Recharts renders as a real break in
+// the line (connectNulls defaults to false). Any number — including 0 — is a data
+// point it will draw and join to its neighbours, so a missing reading written as
+// 0 bridges the gap instead of showing one.
+//
+// Hence `!= null` rather than a truthy check: 0 is a legitimate reading (solar
+// overnight) and must stay 0, while only genuinely absent values become null.
+// A truthy check conflates the two and turns real zeros into gaps.
+//
+// Note the raw arithmetic this replaces was wrong in both directions: `null /
+// 1000` is 0 in JS (a fake reading that bridges the gap) and `undefined / 1000`
+// is NaN.
+const toMW = (powerKW: number | null | undefined): number | null =>
+  powerKW != null ? powerKW / 1000 : null;
+
 export const useChartData = (combinedData: CombinedData) => {
   let formattedChartData: ChartDatum[] = [];
 
@@ -15,19 +30,19 @@ export const useChartData = (combinedData: CombinedData) => {
       // so that the area chart doesn't have a gap
       const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
-        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
+        existingData[key] = toMW(value.PowerKW);
         if (isNowEntry) {
-          existingData["wind_forecast_future"] = value.PowerKW ? value.PowerKW / 1000 : null;
+          existingData["wind_forecast_future"] = toMW(value.PowerKW);
         }
       } else {
         const newEntry = {
           timestamp,
-          [key]: value.PowerKW / 1000,
+          [key]: toMW(value.PowerKW),
           solar_generation: null,
           wind_generation: null
         };
         if (isNowEntry) {
-          newEntry["wind_forecast_future"] = value.PowerKW / 1000;
+          newEntry["wind_forecast_future"] = toMW(value.PowerKW);
         }
         formattedChartData?.push(newEntry);
       }
@@ -44,19 +59,19 @@ export const useChartData = (combinedData: CombinedData) => {
       // so that the area chart doesn't have a gap
       const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
-        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : 0;
+        existingData[key] = toMW(value.PowerKW);
         if (isNowEntry) {
-          existingData["solar_forecast_future"] = value.PowerKW ? value.PowerKW / 1000 : null;
+          existingData["solar_forecast_future"] = toMW(value.PowerKW);
         }
       } else {
         const newEntry = {
           timestamp,
-          [key]: value.PowerKW / 1000,
+          [key]: toMW(value.PowerKW),
           solar_generation: null,
           wind_generation: null
         };
         if (isNowEntry) {
-          newEntry["solar_forecast_future"] = value.PowerKW / 1000;
+          newEntry["solar_forecast_future"] = toMW(value.PowerKW);
         }
         formattedChartData?.push(newEntry);
       }
@@ -75,7 +90,7 @@ export const useChartData = (combinedData: CombinedData) => {
           existingData.wind_forecast_future ||
           existingData.wind_forecast_past)
       ) {
-        existingData.solar_generation = value.PowerKW / 1000;
+        existingData.solar_generation = toMW(value.PowerKW);
       }
     }
   }
@@ -92,7 +107,7 @@ export const useChartData = (combinedData: CombinedData) => {
           existingData.wind_forecast_future ||
           existingData.wind_forecast_past)
       ) {
-        existingData.wind_generation = value.PowerKW / 1000;
+        existingData.wind_generation = toMW(value.PowerKW);
       }
     }
   }
