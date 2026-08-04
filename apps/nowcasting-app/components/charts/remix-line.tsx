@@ -50,6 +50,12 @@ export type SeasonalBound = {
   [K in `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`]?: number[];
 };
 
+// Key for a single p-level band's [min, max] range in ChartData, e.g. "PROBABILISTIC_RANGE_10_90".
+export type PLevelRangeKey = `PROBABILISTIC_RANGE_${number}_${number}`;
+export type PLevelBounds = { [K in PLevelRangeKey]?: number[] };
+export const getPLevelRangeKey = (lower: number, upper: number): PLevelRangeKey =>
+  `PROBABILISTIC_RANGE_${lower}_${upper}`;
+
 export type ChartDataBase = {
   formattedDate: string; // "2022-05-16T15:00",
   SETTLEMENT_PERIOD?: number | undefined;
@@ -77,7 +83,7 @@ export type ChartDataBase = {
   SEASONAL_MEAN?: number | undefined;
   SEASONAL_BOUNDS?: string[][] | undefined;
 };
-export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound;
+export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound & PLevelBounds;
 
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
@@ -600,7 +606,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               <Area
                 key={`${lower}-${upper}`}
                 type="monotone"
-                dataKey={`PROBABILISTIC_RANGE_${lower}_${upper}`}
+                dataKey={getPLevelRangeKey(lower, upper)}
                 dot={false}
                 xAxisId={"x-axis"}
                 yAxisId={"y-axis"}
@@ -810,7 +816,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 // Show the p-levels in the tooltip higher ones above the current and lower below
                 const pLevelRows = pLevels
                   .flatMap(([lower, upper]) => {
-                    const [min, max] = data[`PROBABILISTIC_RANGE_${lower}_${upper}`] || [];
+                    const [min, max] = data[getPLevelRangeKey(lower, upper)] || [];
                     return [
                       [lower, min],
                       [upper, max]

@@ -5,6 +5,7 @@ import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import {
   ChartData,
   ChartDataBase,
+  getPLevelRangeKey,
   SeasonalBound,
   SeasonalPValue,
   SeasonalQuantile
@@ -169,7 +170,7 @@ const useFormatChartData = ({
           (db) => getForecastChartData(timeNow, db)
         );
         if (fc.plevels && pLevels.length) {
-          const p = fc.plevels as Record<string, number>;
+          const plevelValues = fc.plevels as Record<string, number>;
           addDataToMap(
             fc,
             (db) => db.targetTime,
@@ -178,12 +179,12 @@ const useFormatChartData = ({
                 // widest selected upper bound, so the chart's y-axis zoom fits every band
                 [
                   "PROBABILISTIC_UPPER_BOUND",
-                  Math.max(...pLevels.map(([, hi]) => p[`plevel_${hi}`]))
+                  Math.max(...pLevels.map(([, hi]) => plevelValues[`plevel_${hi}`]))
                 ],
                 // one [min, max] range per selected pair, for the shaded bands
                 ...pLevels.map(([lo, hi]) => [
-                  `PROBABILISTIC_RANGE_${lo}_${hi}`,
-                  [p[`plevel_${lo}`], p[`plevel_${hi}`]]
+                  getPLevelRangeKey(lo, hi),
+                  [plevelValues[`plevel_${lo}`], plevelValues[`plevel_${hi}`]]
                 ])
               ])
           );
