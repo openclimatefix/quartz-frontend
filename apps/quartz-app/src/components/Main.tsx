@@ -13,6 +13,7 @@ import { useEffect, useMemo } from "react";
 
 export const Main = () => {
   const [combinedData, setCombinedData] = useGlobalState("combinedData");
+  const [, setIsLoading] = useGlobalState("isLoading");
   const [forecastHorizon] = useGlobalState("forecastHorizon");
   const [forecastHorizonMinutes] = useGlobalState("forecastHorizonMinutes");
 
@@ -102,6 +103,10 @@ export const Main = () => {
     solarRegionsLoading,
     windRegionsLoading
   ]);
+
+  useEffect(() => {
+    setIsLoading(isLoading);
+  }, [setIsLoading, isLoading]);
 
   if (
     solarRegionsError ||
