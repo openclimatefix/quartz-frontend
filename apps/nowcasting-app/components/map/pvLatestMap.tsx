@@ -54,6 +54,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   const [mapDataLoading, setMapDataLoading] = useState(true);
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
   const [showConstraints] = useGlobalState("showConstraints");
+  const [showPvLayer] = useGlobalState("showPvLayer");
   const [showMap, setShowMap] = useState(true);
 
   const showConstraintsRef = useRef(showConstraints);
@@ -517,7 +518,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     <div className={`pv-map relative h-full w-full ${className}`}>
       {
         <>
-          {showSpinner && (
+          {showSpinner && showPvLayer && (
             <LoadStateMap>
               <Spinner />
             </LoadStateMap>
