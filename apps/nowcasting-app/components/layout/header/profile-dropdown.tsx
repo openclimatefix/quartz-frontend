@@ -16,7 +16,7 @@ import { CombinedData } from "../../types";
 import { VIEWS } from "../../../constant";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
-import { PLevelsModal } from "./pLevelsModal";
+import { SettingsModal } from "./settingsModal";
 const { version } = pkg;
 
 interface IProfileDropDown {
@@ -31,7 +31,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
-  const [showPLevelsModal, setShowPLevelsModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
@@ -167,7 +167,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                 >
                   <button
                     id={"UserMenu-SettingsBtn"}
-                    onClick={() => setShowPLevelsModal(true)}
+                    onClick={() => setShowSettingsModal(true)}
                     className="ml-1 text-sm font-medium text-ocf-black-600"
                   >
                     {`Settings`}
@@ -299,7 +299,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
         view={view}
       />
 
-      <PLevelsModal isOpen={showPLevelsModal} onClose={() => setShowPLevelsModal(false)} />
+      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
     </>
   );
 };

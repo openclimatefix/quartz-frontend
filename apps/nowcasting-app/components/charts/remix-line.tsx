@@ -804,7 +804,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   formattedDate = dateToLondonDateTimeString(date);
                 }
 
-                // Show the p-levels in the tooltip higer ones above the current and lower below
+                // Show the p-levels in the tooltip higher ones above the current and lower below
                 const pLevelRows = pLevels
                   .flatMap(([lower, upper]) => {
                     const [min, max] = data[`PROBABILISTIC_RANGE_${lower}_${upper}`] || [];

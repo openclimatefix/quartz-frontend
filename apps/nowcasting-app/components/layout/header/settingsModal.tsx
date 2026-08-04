@@ -10,7 +10,7 @@ interface Props {
   onClose: () => void;
 }
 
-export const PLevelsModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [pLevels, setPLevels] = useGlobalState("pLevels");
 
   const toggle = (pair: [number, number]) => {

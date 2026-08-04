@@ -132,7 +132,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     },
     nHourForecast: 4,
     nationalAggregationLevel: NationalAggregation.GSP,
-    // if no cooike is there default to p10,p90
+    // if no cookies is there default to p10,p90
     pLevels: getArraySettingFromCookieStorage<[number, number]>(CookieStorageKeys.P_LEVELS) || [
       [10, 90]
     ]
