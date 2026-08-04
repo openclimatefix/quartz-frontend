@@ -896,23 +896,26 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             title = title.replace("N-hour", `${nHourForecast}-hour`);
                           }
 
-                          return [
-                            // the forecast is the p50, wrap it with the higher p-levels above
-                            isForecast && upperRows,
-                            <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
-                              <div
-                                className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
-                              >
-                                <div>{title}:</div>
-                                <div className={`font-sans ml-4`}>
-                                  {(showNHourView || key !== "DELTA") && sign}
-                                  {computedValue}{" "}
+                          return (
+                            // the forecast is the p50, wrap it with the higher p-levels above and lower below
+                            <React.Fragment key={`item-${key}`}>
+                              {isForecast && upperRows}
+
+                              <li className="font-sans" style={{ color }}>
+                                <div
+                                  className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
+                                >
+                                  <div>{title}:</div>
+                                  <div className={`font-sans ml-4`}>
+                                    {(showNHourView || key !== "DELTA") && sign}
+                                    {computedValue}{" "}
+                                  </div>
                                 </div>
-                              </div>
-                            </li>,
-                            // put lower p-levels directly under the current row
-                            isForecast && lowerRows
-                          ];
+                              </li>
+
+                              {isForecast && lowerRows}
+                            </React.Fragment>
+                          );
                         })}
                     </ul>
                   </div>
