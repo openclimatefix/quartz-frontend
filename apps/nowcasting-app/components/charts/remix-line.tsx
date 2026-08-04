@@ -37,6 +37,8 @@ const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const seasonal = "#ffdfd1";
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+// Target combined opacity for overlapping p-level bands, independent of band count.
+const P_LEVEL_BAND_COMBINED_OPACITY = 0.4;
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
 export type SeasonalQuantile = `P${string}`;
 export type SeasonalPValue = { [K in SeasonalQuantile]?: number };
@@ -604,7 +606,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 yAxisId={"y-axis"}
                 stroke={yellow}
                 fill={yellow}
-                fillOpacity={1 - Math.pow(1 - 0.4, 1 / pLevels.length)}
+                // Lowers each band's opacity as more bands are added, so overlapping bands always look like P_LEVEL_BAND_COMBINED_OPACITY, not darker.
+                fillOpacity={1 - Math.pow(1 - P_LEVEL_BAND_COMBINED_OPACITY, 1 / pLevels.length)}
                 strokeWidth={0}
                 hide={!visibleLines.includes("FORECAST")}
                 isAnimationActive={false}
