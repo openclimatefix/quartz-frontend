@@ -1,4 +1,4 @@
-import { API_PREFIX, getAllForecastUrl } from "../../../constant";
+import { API_PREFIX } from "../../../constant";
 import { FcAllResData, ForecastData, GspEntities, PvRealData } from "../../types";
 import dnoGspGroupings from "../../../data/dno_gsp_groupings.json";
 import ngGspZoneGroupings from "../../../data/ng_gsp_zone_groupings.json";

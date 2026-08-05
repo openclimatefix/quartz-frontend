@@ -18,9 +18,6 @@ import {
 } from "../types.d";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
-import createClient from "openapi-fetch";
-import { paths } from "../../types/quartz-api";
-import { PathsWithMethod } from "openapi-typescript-helpers";
 import { ChartData } from "../charts/remix-line";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
@@ -441,19 +438,6 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
     // IMPORTANT: rethrow so SWR receives the error and onError/onErrorRetry can run
     throw err;
   }
-};
-
-// @ts-ignore
-export const openapiFetcherAuth = async (url: PathsWithMethod<paths, "get">) => {
-  // const response = await fetch("/api/get_token");
-  // const { accessToken } = await response.json();
-  // const router = Router;
-  const { GET, PUT } = createClient<paths>({
-    baseUrl: process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", ""),
-    fetch: axiosFetcherAuth
-  });
-
-  return GET(url, {});
 };
 
 // this is the previous fetcher
