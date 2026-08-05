@@ -2,6 +2,9 @@
 export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.quartz.solar/v0";
 export const SITES_API_PREFIX =
   process.env.NEXT_PUBLIC_SITES_API_PREFIX || "https://api-site-dev.quartz.solar";
+// Production is the only host the current token works against — dev hosts sit behind a
+// different Auth0 tenant, so there is no working dev default to fall back to here.
+export const API_V1_PREFIX = process.env.NEXT_PUBLIC_API_V1_PREFIX || "https://api.quartz.solar/v1";
 export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 13500;
 
