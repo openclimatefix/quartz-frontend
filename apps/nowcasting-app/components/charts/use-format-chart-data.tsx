@@ -13,7 +13,11 @@ import {
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
-import { getAvailablePLevels, getSettlementPeriodForDate } from "../helpers/chartUtils";
+import {
+  getAvailablePLevels,
+  getSettlementPeriodForDate,
+  getUtcHalfHourIndex
+} from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -220,18 +224,23 @@ const useFormatChartData = ({
       // Add settlement period and seasonal norm data
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key).toUTC();
-        const settlementPeriod = getSettlementPeriodForDate(date);
-        chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
+        // Two different questions, and they disagree by two slots throughout BST:
+        // - the seasonal-norm arrays in national_metrics.json are bucketed by UTC time-of-day
+        //   (the generator groups on `datetime_gmt`), so they are indexed by the UTC half-hour slot;
+        // - SETTLEMENT_PERIOD is the GB settlement period, counted from Europe/London midnight.
+        // These used to be the same call, which made the settlement period wrong all summer (B9).
+        const utcSlotIndex = getUtcHalfHourIndex(date);
+        chartMap[key].SETTLEMENT_PERIOD = getSettlementPeriodForDate(date);
         if (!gsp) {
           const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
 
-          chartMap[key].SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
+          chartMap[key].SEASONAL_MEAN = seasonalMean[utcSlotIndex] * NATIONAL_CAPACITY;
           chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
           for (const boundPair of seasonalBounds) {
             for (const [index, bound] of Object.entries(boundPair)) {
               if (bound) {
                 chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
-                  bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+                  bound[utcSlotIndex] * NATIONAL_CAPACITY;
               }
             }
             chartMap[key][
@@ -240,7 +249,7 @@ const useFormatChartData = ({
               )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
             ] = Object.values(boundPair).map((bound) => {
               if (bound) {
-                return bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+                return bound[utcSlotIndex] * NATIONAL_CAPACITY;
               }
               return 0;
             });

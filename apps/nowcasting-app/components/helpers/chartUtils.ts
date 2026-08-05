@@ -142,11 +142,42 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
   return ticks;
 };
 
+/**
+ * Positional index of a 0-based half-hour slot since **UTC** midnight: 00:00 UTC is 0, 00:30 is 1,
+ * 12:30 is 25, 23:30 is 47.
+ *
+ * This is NOT a settlement period, and must not be presented as one. It exists because the
+ * seasonal-norm dataset in `data/national_metrics.json` is bucketed by UTC time-of-day (its
+ * generator groups on `datetime_gmt`, so index 0 is the 00:00 UTC bucket), and indexing into that
+ * array is a different question from "which GB settlement period is this?". The two answers differ
+ * by two slots throughout BST — see `getSettlementPeriodForDate` below.
+ *
+ * Use this for indexing UTC-bucketed data. Use `getSettlementPeriodForDate` for anything a user
+ * reads as a settlement period.
+ */
+export const getUtcHalfHourIndex = (date: DateTime): number => {
+  const utcDate = date.toUTC();
+  const midnightBefore = utcDate.startOf("day");
+  return Math.floor(utcDate.diff(midnightBefore, "minutes").minutes / 30);
+};
+
+/**
+ * The GB settlement period: 1–48, numbered from midnight **Europe/London**. 00:00 London is 1,
+ * 00:30 is 2, 01:00 is 3, and 23:30 is 48.
+ *
+ * B9: this used to count half-hours from midnight of whatever zone the caller's DateTime happened
+ * to carry, so the answer depended on the caller rather than on the definition. `csvDownload.ts`
+ * passes Europe/London and was right; a UTC caller would silently get a number two low all
+ * summer. The conversion now happens here so callers cannot get it wrong. Using `startOf("day")`
+ * rather than `set({ hour: 0, ... })` also makes the clock-change days come out right: 46 periods
+ * on the short day in March, 50 on the long day in October.
+ *
+ * Phase 3: the timezone becomes country-dependent and will come from the country registry rather
+ * than being hardcoded to Europe/London here. Not parameterised yet — that is Phase 3 scope.
+ */
 export const getSettlementPeriodForDate = (date: DateTime) => {
-  /**
-   * Compute the settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
-   */
-  const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-  const interval = date.diff(midnightBefore, "minutes").minutes;
+  const londonDate = date.setZone("Europe/London");
+  const midnightBefore = londonDate.startOf("day");
+  const interval = londonDate.diff(midnightBefore, "minutes").minutes;
   return Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed;
 };
