@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
 import RemixLine from "../remix-line";
 import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
-import useGlobalState, { get30MinNow } from "../../helpers/globalState";
+import useGlobalState, { useCountryState, get30MinNow } from "../../helpers/globalState";
 import {
   convertISODateStringToLondonTime,
   convertToLocaleDateString,
@@ -35,9 +35,9 @@ const SolarSiteChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedSitesData, aggregatedSitesData, className }) => {
-  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
+  const [aggregationLevel, setAggregationLevel] = useCountryState("aggregationLevel");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");

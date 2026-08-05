@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, { useCountryState, get30MinNow } from "../helpers/globalState";
 import useFormatChartData from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
@@ -21,7 +21,7 @@ const PvRemixChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedData, combinedErrors, className }) => {
-  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");

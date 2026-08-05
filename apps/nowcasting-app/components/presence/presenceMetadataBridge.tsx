@@ -1,18 +1,18 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { usePresenceClient } from "./presenceProvider";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { useEffect } from "react";
 
 export function PresenceMetadataBridge() {
   const { user } = useUser();
   const client = usePresenceClient();
   const [view] = useGlobalState("view");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const [visibleLines] = useGlobalState("visibleLines");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [dashboardMode] = useGlobalState("dashboardMode");
   const [mapUnit] = useGlobalState("activeUnit");
 

@@ -2,7 +2,7 @@ import Tooltip from "../tooltip";
 import { ChartInfo } from "../../ChartInfo";
 import { CheckInlineSmall, CrossInlineSmall, InfoIcon, LegendLineGraphIcon } from "../icons/icons";
 import React, { FC, useEffect } from "react";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import LegendItem from "./LegendItem";
 import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 import LegendTooltip from "../LegendTooltop";
@@ -15,9 +15,9 @@ type ChartLegendProps = {
 export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
 
   const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
     showNHourView ? "flex-col @sm:gap-0" : "flex-col @md:gap-0"

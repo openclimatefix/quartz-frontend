@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { NationalAggregation } from "./types";
 import { PointLike } from "mapbox-gl";
 
@@ -22,9 +22,9 @@ const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) =>
 };
 
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
-  const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
-  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [clickedMapRegionIds, setClickedMapRegionIds] = useCountryState("clickedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const [, setVisibleLines] = useGlobalState("visibleLines");
 
   const clickedMapRegionIdsRef = useRef(clickedMapRegionIds);

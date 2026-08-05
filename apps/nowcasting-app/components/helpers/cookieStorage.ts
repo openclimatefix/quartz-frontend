@@ -4,7 +4,10 @@ export enum CookieStorageKeys {
   "N_HOUR_VIEW" = "NHourView",
   "VISIBLE_LINES" = "visibleLines",
   "CONSTRAINTS" = "constraints",
-  "P_LEVELS" = "pLevels"
+  "P_LEVELS" = "pLevels",
+  // The current country, validated on read against the static registry — see
+  // `getValidatedCountry` in globalState.tsx.
+  "COUNTRY" = "country"
 }
 
 export const getSettingFromCookieStorage = <T>(key: string): null | T => {

@@ -2,7 +2,11 @@ import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../../constant";
 import ForecastHeader from "../forecast-header";
-import useGlobalState, { get30MinSlot, get30MinNow } from "../../helpers/globalState";
+import useGlobalState, {
+  useCountryState,
+  get30MinSlot,
+  get30MinNow
+} from "../../helpers/globalState";
 import useFormatChartData from "../use-format-chart-data";
 import {
   calculateChartYMax,
@@ -28,7 +32,7 @@ const GspDeltaColumn: FC<{
   negative?: boolean;
 }> = ({ gspDeltas, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
-  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;
 
@@ -255,7 +259,7 @@ type DeltaChartProps = {
   combinedErrors: CombinedErrors;
 };
 const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
-  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");

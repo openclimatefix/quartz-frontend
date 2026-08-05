@@ -38,6 +38,11 @@ export const getViewTitle = (view: VIEWS) => {
   }
 };
 
+// GB-shaped shim. The country-derived list in `components/helpers/aggregationLevels.ts` is
+// the source of truth for what levels a country has and at what zoom; these three enums
+// survive only because they have ~100 consumers, and `aggregationLevels.test.ts` pins GB's
+// derived list equal to them so the two cannot drift. Phase 4 deletes them as it rewrites
+// those consumers — do not add new call sites.
 export enum AGGREGATION_LEVELS {
   NATIONAL = "NATIONAL",
   REGION = "REGION",

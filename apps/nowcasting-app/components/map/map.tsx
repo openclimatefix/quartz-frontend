@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, { useCountryState, get30MinNow } from "../helpers/globalState";
 import QuickLRU from "quick-lru";
 import { ResetIcon } from "../icons/icons";
 import {
@@ -112,12 +112,27 @@ const Map: FC<IMap> = ({
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
-  const [lng, setLng] = useGlobalState("lng");
-  const [lat, setLat] = useGlobalState("lat");
-  const [zoom, setZoom] = useGlobalState("zoom");
+  const [lng, setLng] = useCountryState("lng");
+  const [lat, setLat] = useCountryState("lat");
+  const [zoom, setZoom] = useCountryState("zoom");
   const [maps, setMaps] = useGlobalState("maps");
-  const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
+  const [currentAggregation, setAggregation] = useCountryState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
+  const [currentCountry] = useGlobalState("currentCountry");
+
+  // Mapbox owns its own camera, so switching country has to move it explicitly. The
+  // viewport it moves to is whatever that country's state slice holds — where the user left
+  // it last visit, or the registry default on a first visit. Read through a ref so panning
+  // (which writes lng/lat/zoom continuously) does not re-run this.
+  const viewportRef = useRef({ lng, lat, zoom });
+  viewportRef.current = { lng, lat, zoom };
+  const renderedCountry = useRef(currentCountry);
+  useEffect(() => {
+    if (renderedCountry.current === currentCountry) return;
+    renderedCountry.current = currentCountry;
+    const viewport = viewportRef.current;
+    map.current?.jumpTo({ center: [viewport.lng, viewport.lat], zoom: viewport.zoom });
+  }, [currentCountry]);
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");

@@ -3,7 +3,7 @@ import { FcAllResData, ForecastData, GspEntities, PvRealData } from "../../types
 import dnoGspGroupings from "../../../data/dno_gsp_groupings.json";
 import ngGspZoneGroupings from "../../../data/ng_gsp_zone_groupings.json";
 import nationalGspZone from "../../../data/national_gsp_zone.json";
-import useGlobalState from "../../helpers/globalState";
+import useGlobalState, { useCountryState } from "../../helpers/globalState";
 import { useLoadDataFromApi } from "../../hooks/useLoadDataFromApi";
 import { NationalAggregation } from "../../map/types";
 import { components } from "../../../types/quartz-api";
@@ -59,8 +59,8 @@ const aggregateForecastData = (
 const useGetGspData = (selectedRegions: string[]) => {
   const [show4hView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   let errors: Error[] = [];
   let isZoneAggregation = [
     NationalAggregation.DNO,

@@ -7,7 +7,7 @@ import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import {
   AllGspRealData,
@@ -46,7 +46,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   activeUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
 
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;

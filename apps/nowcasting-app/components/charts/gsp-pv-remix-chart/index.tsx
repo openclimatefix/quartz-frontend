@@ -8,7 +8,11 @@ import {
 } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
-import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
+import useGlobalState, {
+  useCountryState,
+  get30MinNow,
+  getNext30MinSlot
+} from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import { ForecastValue } from "../../types";
 import React, { FC } from "react";
@@ -35,7 +39,7 @@ const GspPvRemixChart: FC<{
   visibleLines,
   deltaView = false
 }) => {
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   let {
     errors,
     loading,

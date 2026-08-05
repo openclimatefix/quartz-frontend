@@ -1,11 +1,11 @@
 import { useMemo } from "react";
 import { ActiveUnit, NationalAggregation } from "./types";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 
 type ColorGuideBarProps = { unit: ActiveUnit };
 
 const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const values = useMemo(() => {
     if (unit === ActiveUnit.percentage) {
       return [

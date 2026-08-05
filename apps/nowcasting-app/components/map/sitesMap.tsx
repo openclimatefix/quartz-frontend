@@ -12,7 +12,7 @@ import {
 } from "../../constant";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import {
   formatISODateString,
   formatISODateStringHuman,
@@ -52,8 +52,8 @@ const SitesMap: React.FC<SitesMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [currentAggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
-  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  const [currentAggregationLevel, setAggregationLevel] = useCountryState("aggregationLevel");
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const [autoZoom] = useGlobalState("autoZoom");
 
   const [newDataForMap, setNewDataForMap] = useState(false);

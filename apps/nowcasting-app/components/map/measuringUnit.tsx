@@ -1,6 +1,6 @@
 import { Dispatch, MouseEvent as ReactMouseEvent, SetStateAction } from "react";
 import { ActiveUnit, NationalAggregation } from "./types";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import * as Sentry from "@sentry/nextjs";
 
 const MeasuringUnit = ({
@@ -12,7 +12,7 @@ const MeasuringUnit = ({
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
   isLoading: boolean;
 }) => {
-  const [nationalAggregation, setNationalAggregation] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregation, setNationalAggregation] = useCountryState("nationalAggregationLevel");
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit

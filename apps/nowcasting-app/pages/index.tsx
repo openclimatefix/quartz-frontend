@@ -10,7 +10,7 @@ import Cookies from "cookies";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
-import useGlobalState, { get30MinNow } from "../components/helpers/globalState";
+import useGlobalState, { useCountryState, get30MinNow } from "../components/helpers/globalState";
 import {
   AllGspRealData,
   AllSites,
@@ -94,18 +94,18 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [timeNow] = useGlobalState("timeNow");
   const { user, isLoading, error } = useUser();
   const [maps] = useGlobalState("maps");
-  const [lat] = useGlobalState("lat");
-  const [lng] = useGlobalState("lng");
-  const [zoom] = useGlobalState("zoom");
+  const [lat] = useCountryState("lat");
+  const [lng] = useCountryState("lng");
+  const [zoom] = useCountryState("zoom");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
   const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
   const [, setLoadingState] = useGlobalState("loadingState");
   const [nHourForecast] = useGlobalState("nHourForecast");
-  const [nationalAggregationLevel, setNationalAggregationLevel] = useGlobalState(
+  const [nationalAggregationLevel, setNationalAggregationLevel] = useCountryState(
     "nationalAggregationLevel"
   );
-  const [, setClickedGspId] = useGlobalState("clickedGspId");
+  const [, setClickedGspId] = useCountryState("clickedGspId");
 
   const [actualsLastFetch30MinISO, setActualsLastFetch30MinISO] = useState(get30MinNow(-30));
   const [actualsHistoricBackwardIntervalMinutes, setActualsHistoricBackwardIntervalMinutes] =

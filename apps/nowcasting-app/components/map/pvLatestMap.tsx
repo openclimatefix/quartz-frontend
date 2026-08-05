@@ -4,7 +4,7 @@ import mapboxgl, { Expression, LngLatLike } from "mapbox-gl";
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
@@ -49,10 +49,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
   const [showMap, setShowMap] = useState(true);

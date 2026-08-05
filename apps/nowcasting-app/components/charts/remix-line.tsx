@@ -22,7 +22,7 @@ import {
   prettyPrintDayLabelWithDate
 } from "../helpers/utils";
 import { theme } from "../../tailwind.config";
-import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
+import useGlobalState, { useCountryState, getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { ZoomOutIcon } from "@heroicons/react/solid";
@@ -208,7 +208,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
   const [nHourForecast] = useGlobalState("nHourForecast");
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [pLevels] = useGlobalState("pLevels");
 
   function prettyPrintYNumberWithCommas(

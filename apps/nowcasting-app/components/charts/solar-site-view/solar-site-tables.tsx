@@ -17,7 +17,7 @@ import {
   AggregatedSitesDatum,
   AggregatedSitesDataGroupMap
 } from "../../types";
-import useGlobalState from "../../helpers/globalState";
+import useGlobalState, { useCountryState } from "../../helpers/globalState";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { SORT_BY } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
@@ -59,7 +59,7 @@ type TableDataProps = {
 
 const TableData: React.FC<TableDataProps> = ({ rows }) => {
   const [sortBy, setSortBy] = useGlobalState("sortBy");
-  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const sortFn = (a: any, b: any) => {
     if (sortBy === SORT_BY.CAPACITY) {
       return b.capacity - a.capacity;
