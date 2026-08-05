@@ -1,0 +1,4396 @@
+[
+  {
+    "name": "citr_1",
+    "type": "gsp",
+    "capacity_kW": 3982,
+    "centroid": {
+      "lat": 51.52,
+      "lng": -0.096
+    },
+    "metadata": {
+      "gsp_id": 67,
+      "full_name": "City Road"
+    }
+  },
+  {
+    "name": "sjow_1",
+    "type": "gsp",
+    "capacity_kW": 8772,
+    "centroid": {
+      "lat": 51.511,
+      "lng": -0.162
+    },
+    "metadata": {
+      "gsp_id": 266,
+      "full_name": "St Johns Wood"
+    }
+  },
+  {
+    "name": "hack_1",
+    "type": "gsp",
+    "capacity_kW": 14091,
+    "centroid": {
+      "lat": 51.549,
+      "lng": -0.033
+    },
+    "metadata": {
+      "gsp_id": 326,
+      "full_name": "Hackney 1"
+    }
+  },
+  {
+    "name": "hack_6",
+    "type": "gsp",
+    "capacity_kW": 10131,
+    "centroid": {
+      "lat": 51.582,
+      "lng": -0.039
+    },
+    "metadata": {
+      "gsp_id": 327,
+      "full_name": "Hackney 6"
+    }
+  },
+  {
+    "name": "tilbb_1",
+    "type": "gsp",
+    "capacity_kW": 95400,
+    "centroid": {
+      "lat": 51.533,
+      "lng": 0.431
+    },
+    "metadata": {
+      "gsp_id": 290,
+      "full_name": "Tilbury"
+    }
+  },
+  {
+    "name": "wham_1",
+    "type": "gsp",
+    "capacity_kW": 10181,
+    "centroid": {
+      "lat": 51.512,
+      "lng": 0.013
+    },
+    "metadata": {
+      "gsp_id": 338,
+      "full_name": "West Ham"
+    }
+  },
+  {
+    "name": "hurs_1",
+    "type": "gsp",
+    "capacity_kW": 22716,
+    "centroid": {
+      "lat": 51.441,
+      "lng": 0.052
+    },
+    "metadata": {
+      "gsp_id": 150,
+      "full_name": "Hurst"
+    }
+  },
+  {
+    "name": "kems_1",
+    "type": "gsp",
+    "capacity_kW": 87875,
+    "centroid": {
+      "lat": 51.345,
+      "lng": 0.793
+    },
+    "metadata": {
+      "gsp_id": 164,
+      "full_name": "Kemsley"
+    }
+  },
+  {
+    "name": "lodr_6",
+    "type": "gsp",
+    "capacity_kW": 5632,
+    "centroid": {
+      "lat": 51.534,
+      "lng": -0.169
+    },
+    "metadata": {
+      "gsp_id": 189,
+      "full_name": "Lodge Road"
+    }
+  },
+  {
+    "name": "nhyd_6",
+    "type": "gsp",
+    "capacity_kW": 12896,
+    "centroid": {
+      "lat": 51.494,
+      "lng": -0.406
+    },
+    "metadata": {
+      "gsp_id": 211,
+      "full_name": "North Hyde"
+    }
+  },
+  {
+    "name": "ninf_1",
+    "type": "gsp",
+    "capacity_kW": 234877,
+    "centroid": {
+      "lat": 50.962,
+      "lng": 0.348
+    },
+    "metadata": {
+      "gsp_id": 212,
+      "full_name": "Ninfield"
+    }
+  },
+  {
+    "name": "wisd_6",
+    "type": "gsp",
+    "capacity_kW": 1679,
+    "centroid": {
+      "lat": 51.509,
+      "lng": -0.236
+    },
+    "metadata": {
+      "gsp_id": 342,
+      "full_name": "Wimbledon North"
+    }
+  },
+  {
+    "name": "barkw3",
+    "type": "gsp",
+    "capacity_kW": 18889,
+    "centroid": {
+      "lat": 51.522,
+      "lng": 0.116
+    },
+    "metadata": {
+      "gsp_id": 322,
+      "full_name": "Barking W3"
+    }
+  },
+  {
+    "name": "nfle",
+    "type": "gsp",
+    "capacity_kW": 116411,
+    "centroid": {
+      "lat": 51.261,
+      "lng": 0.218
+    },
+    "metadata": {
+      "gsp_id": 210,
+      "full_name": "Northfleet East"
+    }
+  },
+  {
+    "name": "wimbs1",
+    "type": "gsp",
+    "capacity_kW": 30468,
+    "centroid": {
+      "lat": 51.432,
+      "lng": -0.196
+    },
+    "metadata": {
+      "gsp_id": 340,
+      "full_name": "Willesden 1"
+    }
+  },
+  {
+    "name": "boln_1",
+    "type": "gsp",
+    "capacity_kW": 172683,
+    "centroid": {
+      "lat": 51.018,
+      "lng": -0.267
+    },
+    "metadata": {
+      "gsp_id": 30,
+      "full_name": "Bolney"
+    }
+  },
+  {
+    "name": "wthu31",
+    "type": "gsp",
+    "capacity_kW": 2789,
+    "centroid": {
+      "lat": 51.48,
+      "lng": 0.308
+    },
+    "metadata": {
+      "gsp_id": 314,
+      "full_name": "West Thurrock"
+    }
+  },
+  {
+    "name": "litt_c",
+    "type": "gsp",
+    "capacity_kW": 14434,
+    "centroid": {
+      "lat": 51.458,
+      "lng": 0.174
+    },
+    "metadata": {
+      "gsp_id": 187,
+      "full_name": "Littlebrook (Zone 1)"
+    }
+  },
+  {
+    "name": "barkr_c",
+    "type": "gsp",
+    "capacity_kW": 1492,
+    "centroid": {
+      "lat": 51.533,
+      "lng": 0.053
+    },
+    "metadata": {
+      "gsp_id": 321,
+      "full_name": "Barking C"
+    }
+  },
+  {
+    "name": "wimbn1",
+    "type": "gsp",
+    "capacity_kW": 2180,
+    "centroid": {
+      "lat": 51.484,
+      "lng": -0.118
+    },
+    "metadata": {
+      "gsp_id": 339,
+      "full_name": "Willesden 6"
+    }
+  },
+  {
+    "name": "flee_1",
+    "type": "gsp",
+    "capacity_kW": 358548,
+    "centroid": {
+      "lat": 51.196,
+      "lng": -0.856
+    },
+    "metadata": {
+      "gsp_id": 344,
+      "full_name": "Fleet"
+    }
+  },
+  {
+    "name": "iver_1",
+    "type": "gsp",
+    "capacity_kW": 25433,
+    "centroid": {
+      "lat": 51.546,
+      "lng": -0.582
+    },
+    "metadata": {
+      "gsp_id": 345,
+      "full_name": "Iver (Zone 1)"
+    }
+  },
+  {
+    "name": "iver_6",
+    "type": "gsp",
+    "capacity_kW": 9448,
+    "centroid": {
+      "lat": 51.538,
+      "lng": -0.459
+    },
+    "metadata": {
+      "gsp_id": 346,
+      "full_name": "Iver (Zone 2)"
+    }
+  },
+  {
+    "name": "brfo_1|clt03",
+    "type": "gsp",
+    "capacity_kW": 506824,
+    "centroid": {
+      "lat": 52.217,
+      "lng": 1.065
+    },
+    "metadata": {
+      "gsp_id": 38,
+      "full_name": "Bramford"
+    }
+  },
+  {
+    "name": "pelh_1",
+    "type": "gsp",
+    "capacity_kW": 338862,
+    "centroid": {
+      "lat": 51.999,
+      "lng": 0.414
+    },
+    "metadata": {
+      "gsp_id": 226,
+      "full_name": "Pelham"
+    }
+  },
+  {
+    "name": "cean_p",
+    "type": "gsp",
+    "capacity_kW": 96,
+    "centroid": {
+      "lat": 57.187,
+      "lng": -4.913
+    },
+    "metadata": {
+      "gsp_id": 59,
+      "full_name": "Ceannacroc"
+    }
+  },
+  {
+    "name": "char_p",
+    "type": "gsp",
+    "capacity_kW": 4588,
+    "centroid": {
+      "lat": 56.473,
+      "lng": -3.089
+    },
+    "metadata": {
+      "gsp_id": 62,
+      "full_name": "Charleston"
+    }
+  },
+  {
+    "name": "chap",
+    "type": "gsp",
+    "capacity_kW": 11940,
+    "centroid": {
+      "lat": 55.2,
+      "lng": -3.171
+    },
+    "metadata": {
+      "gsp_id": 61,
+      "full_name": "Chapelcross"
+    }
+  },
+  {
+    "name": "cumb",
+    "type": "gsp",
+    "capacity_kW": 5853,
+    "centroid": {
+      "lat": 55.943,
+      "lng": -3.96
+    },
+    "metadata": {
+      "gsp_id": 80,
+      "full_name": "Cumbernauld"
+    }
+  },
+  {
+    "name": "curr",
+    "type": "gsp",
+    "capacity_kW": 2045,
+    "centroid": {
+      "lat": 55.887,
+      "lng": -3.308
+    },
+    "metadata": {
+      "gsp_id": 82,
+      "full_name": "Currie"
+    }
+  },
+  {
+    "name": "dube_p",
+    "type": "gsp",
+    "capacity_kW": 0.001,
+    "centroid": {
+      "lat": 58.3,
+      "lng": -3.438
+    },
+    "metadata": {
+      "gsp_id": 92,
+      "full_name": "Dunbeath"
+    }
+  },
+  {
+    "name": "dumf",
+    "type": "gsp",
+    "capacity_kW": 13468,
+    "centroid": {
+      "lat": 55.171,
+      "lng": -3.798
+    },
+    "metadata": {
+      "gsp_id": 95,
+      "full_name": "Dumfries"
+    }
+  },
+  {
+    "name": "gala",
+    "type": "gsp",
+    "capacity_kW": 9100,
+    "centroid": {
+      "lat": 55.588,
+      "lng": -2.938
+    },
+    "metadata": {
+      "gsp_id": 128,
+      "full_name": "Galashiels"
+    }
+  },
+  {
+    "name": "dunb",
+    "type": "gsp",
+    "capacity_kW": 7462,
+    "centroid": {
+      "lat": 55.969,
+      "lng": -2.562
+    },
+    "metadata": {
+      "gsp_id": 96,
+      "full_name": "Dunbar"
+    }
+  },
+  {
+    "name": "fras_p",
+    "type": "gsp",
+    "capacity_kW": 7957,
+    "centroid": {
+      "lat": 57.66,
+      "lng": -2.021
+    },
+    "metadata": {
+      "gsp_id": 125,
+      "full_name": "Fraserburgh"
+    }
+  },
+  {
+    "name": "glni",
+    "type": "gsp",
+    "capacity_kW": 3142,
+    "centroid": {
+      "lat": 56.089,
+      "lng": -3.225
+    },
+    "metadata": {
+      "gsp_id": 131,
+      "full_name": "Glenniston"
+    }
+  },
+  {
+    "name": "inne_p",
+    "type": "gsp",
+    "capacity_kW": 9539,
+    "centroid": {
+      "lat": 57.351,
+      "lng": -4.254
+    },
+    "metadata": {
+      "gsp_id": 154,
+      "full_name": "Inverness"
+    }
+  },
+  {
+    "name": "glro",
+    "type": "gsp",
+    "capacity_kW": 4413,
+    "centroid": {
+      "lat": 56.223,
+      "lng": -3.193
+    },
+    "metadata": {
+      "gsp_id": 132,
+      "full_name": "Glenrothes"
+    }
+  },
+  {
+    "name": "milc_p",
+    "type": "gsp",
+    "capacity_kW": 8045.999,
+    "centroid": {
+      "lat": 56.511,
+      "lng": -2.873
+    },
+    "metadata": {
+      "gsp_id": 200,
+      "full_name": "Milton of Craigie"
+    }
+  },
+  {
+    "name": "hagr",
+    "type": "gsp",
+    "capacity_kW": 1974,
+    "centroid": {
+      "lat": 55.826,
+      "lng": -4.279
+    },
+    "metadata": {
+      "gsp_id": 141,
+      "full_name": "Haggs Road"
+    }
+  },
+  {
+    "name": "hawi",
+    "type": "gsp",
+    "capacity_kW": 3972,
+    "centroid": {
+      "lat": 55.409,
+      "lng": -2.677
+    },
+    "metadata": {
+      "gsp_id": 145,
+      "full_name": "Hawick"
+    }
+  },
+  {
+    "name": "hawp_6",
+    "type": "gsp",
+    "capacity_kW": 26915,
+    "centroid": {
+      "lat": 54.816,
+      "lng": -1.407
+    },
+    "metadata": {
+      "gsp_id": 146,
+      "full_name": "Hawthorn Pit"
+    }
+  },
+  {
+    "name": "huer",
+    "type": "gsp",
+    "capacity_kW": 261,
+    "centroid": {
+      "lat": 55.724,
+      "lng": -4.904
+    },
+    "metadata": {
+      "gsp_id": 149,
+      "full_name": "Hunterston Farm"
+    }
+  },
+  {
+    "name": "inke",
+    "type": "gsp",
+    "capacity_kW": 4456,
+    "centroid": {
+      "lat": 56.032,
+      "lng": -3.397
+    },
+    "metadata": {
+      "gsp_id": 153,
+      "full_name": "Inverkeithing"
+    }
+  },
+  {
+    "name": "sshi_3",
+    "type": "gsp",
+    "capacity_kW": 6884,
+    "centroid": {
+      "lat": 54.984,
+      "lng": -1.436
+    },
+    "metadata": {
+      "gsp_id": 272,
+      "full_name": "South Shields"
+    }
+  },
+  {
+    "name": "abne_p",
+    "type": "gsp",
+    "capacity_kW": 29598,
+    "centroid": {
+      "lat": 56.319,
+      "lng": -3.401
+    },
+    "metadata": {
+      "gsp_id": 2,
+      "full_name": "Abernethy"
+    }
+  },
+  {
+    "name": "wbol_6",
+    "type": "gsp",
+    "capacity_kW": 41568,
+    "centroid": {
+      "lat": 54.936,
+      "lng": -1.477
+    },
+    "metadata": {
+      "gsp_id": 301,
+      "full_name": "West Boldon"
+    }
+  },
+  {
+    "name": "whho",
+    "type": "gsp",
+    "capacity_kW": 2749,
+    "centroid": {
+      "lat": 55.917,
+      "lng": -3.203
+    },
+    "metadata": {
+      "gsp_id": 306,
+      "full_name": "Whitehouse"
+    }
+  },
+  {
+    "name": "kiin_p",
+    "type": "gsp",
+    "capacity_kW": 951,
+    "centroid": {
+      "lat": 56.46,
+      "lng": -4.364
+    },
+    "metadata": {
+      "gsp_id": 168,
+      "full_name": "Killin"
+    }
+  },
+  {
+    "name": "kilb",
+    "type": "gsp",
+    "capacity_kW": 1880,
+    "centroid": {
+      "lat": 55.936,
+      "lng": -4.411
+    },
+    "metadata": {
+      "gsp_id": 169,
+      "full_name": "Kilbowie"
+    }
+  },
+  {
+    "name": "part",
+    "type": "gsp",
+    "capacity_kW": 1417,
+    "centroid": {
+      "lat": 55.877,
+      "lng": -4.319
+    },
+    "metadata": {
+      "gsp_id": 223,
+      "full_name": "Partick"
+    }
+  },
+  {
+    "name": "redh",
+    "type": "gsp",
+    "capacity_kW": 13432,
+    "centroid": {
+      "lat": 56.153,
+      "lng": -3.132
+    },
+    "metadata": {
+      "gsp_id": 247,
+      "full_name": "Redhouse"
+    }
+  },
+  {
+    "name": "shru",
+    "type": "gsp",
+    "capacity_kW": 1244,
+    "centroid": {
+      "lat": 55.974,
+      "lng": -3.187
+    },
+    "metadata": {
+      "gsp_id": 263,
+      "full_name": "Shrubhill"
+    }
+  },
+  {
+    "name": "sigh",
+    "type": "gsp",
+    "capacity_kW": 17400,
+    "centroid": {
+      "lat": 55.943,
+      "lng": -3.29
+    },
+    "metadata": {
+      "gsp_id": 265,
+      "full_name": "Sighthill"
+    }
+  },
+  {
+    "name": "spav",
+    "type": "gsp",
+    "capacity_kW": 1823,
+    "centroid": {
+      "lat": 55.915,
+      "lng": -4.851
+    },
+    "metadata": {
+      "gsp_id": 270,
+      "full_name": "Spango Valley"
+    }
+  },
+  {
+    "name": "stor_p",
+    "type": "gsp",
+    "capacity_kW": 1761,
+    "centroid": {
+      "lat": 58.183,
+      "lng": -6.615
+    },
+    "metadata": {
+      "gsp_id": 335,
+      "full_name": "Stornoway"
+    }
+  },
+  {
+    "name": "stri_p",
+    "type": "gsp",
+    "capacity_kW": 14336,
+    "centroid": {
+      "lat": 57.531,
+      "lng": -2.175
+    },
+    "metadata": {
+      "gsp_id": 336,
+      "full_name": "Strichen"
+    }
+  },
+  {
+    "name": "brap",
+    "type": "gsp",
+    "capacity_kW": 2327,
+    "centroid": {
+      "lat": 55.87,
+      "lng": -4.388
+    },
+    "metadata": {
+      "gsp_id": 35,
+      "full_name": "Braehead Park"
+    }
+  },
+  {
+    "name": "baga",
+    "type": "gsp",
+    "capacity_kW": 8031,
+    "centroid": {
+      "lat": 55.892,
+      "lng": -3.703
+    },
+    "metadata": {
+      "gsp_id": 15,
+      "full_name": "Bathgate"
+    }
+  },
+  {
+    "name": "dudh_p|glag_p",
+    "type": "gsp",
+    "capacity_kW": 1858,
+    "centroid": {
+      "lat": 56.464,
+      "lng": -2.973
+    },
+    "metadata": {
+      "gsp_id": 93,
+      "full_name": "Dudhope"
+    }
+  },
+  {
+    "name": "berw",
+    "type": "gsp",
+    "capacity_kW": 9176,
+    "centroid": {
+      "lat": 55.761,
+      "lng": -2.094
+    },
+    "metadata": {
+      "gsp_id": 22,
+      "full_name": "Berwick"
+    }
+  },
+  {
+    "name": "brac_p",
+    "type": "gsp",
+    "capacity_kW": 14606,
+    "centroid": {
+      "lat": 56.257,
+      "lng": -3.978
+    },
+    "metadata": {
+      "gsp_id": 33,
+      "full_name": "Braco West"
+    }
+  },
+  {
+    "name": "brid_p",
+    "type": "gsp",
+    "capacity_kW": 6223,
+    "centroid": {
+      "lat": 56.824,
+      "lng": -2.727
+    },
+    "metadata": {
+      "gsp_id": 39,
+      "full_name": "Bridge of Dun"
+    }
+  },
+  {
+    "name": "brox",
+    "type": "gsp",
+    "capacity_kW": 9741,
+    "centroid": {
+      "lat": 55.963,
+      "lng": -3.442
+    },
+    "metadata": {
+      "gsp_id": 44,
+      "full_name": "Broxburn"
+    }
+  },
+  {
+    "name": "coyl",
+    "type": "gsp",
+    "capacity_kW": 7023,
+    "centroid": {
+      "lat": 55.404,
+      "lng": -4.229
+    },
+    "metadata": {
+      "gsp_id": 76,
+      "full_name": "Coylton"
+    }
+  },
+  {
+    "name": "crai_p",
+    "type": "gsp",
+    "capacity_kW": 4170,
+    "centroid": {
+      "lat": 57.095,
+      "lng": -2.239
+    },
+    "metadata": {
+      "gsp_id": 77,
+      "full_name": "Craigiebuckler"
+    }
+  },
+  {
+    "name": "mybs_p",
+    "type": "gsp",
+    "capacity_kW": 1855,
+    "centroid": {
+      "lat": 58.351,
+      "lng": -3.362
+    },
+    "metadata": {
+      "gsp_id": 203,
+      "full_name": "Mybster"
+    }
+  },
+  {
+    "name": "linm",
+    "type": "gsp",
+    "capacity_kW": 12419,
+    "centroid": {
+      "lat": 55.58,
+      "lng": -3.711
+    },
+    "metadata": {
+      "gsp_id": 185,
+      "full_name": "Linnmill"
+    }
+  },
+  {
+    "name": "cupa",
+    "type": "gsp",
+    "capacity_kW": 17465,
+    "centroid": {
+      "lat": 56.327,
+      "lng": -2.993
+    },
+    "metadata": {
+      "gsp_id": 81,
+      "full_name": "Cupar"
+    }
+  },
+  {
+    "name": "dewp",
+    "type": "gsp",
+    "capacity_kW": 1093,
+    "centroid": {
+      "lat": 55.961,
+      "lng": -3.209
+    },
+    "metadata": {
+      "gsp_id": 86,
+      "full_name": "Dewar Place"
+    }
+  },
+  {
+    "name": "dunf|towh",
+    "type": "gsp",
+    "capacity_kW": 58024,
+    "centroid": {
+      "lat": 56.09,
+      "lng": -3.533
+    },
+    "metadata": {
+      "gsp_id": 97,
+      "full_name": "Dunfermline"
+    }
+  },
+  {
+    "name": "duno_p",
+    "type": "gsp",
+    "capacity_kW": 3404,
+    "centroid": {
+      "lat": 55.942,
+      "lng": -5.107
+    },
+    "metadata": {
+      "gsp_id": 98,
+      "full_name": "Dunoon"
+    }
+  },
+  {
+    "name": "dyce_p",
+    "type": "gsp",
+    "capacity_kW": 7764,
+    "centroid": {
+      "lat": 57.311,
+      "lng": -2.11
+    },
+    "metadata": {
+      "gsp_id": 99,
+      "full_name": "Dyce"
+    }
+  },
+  {
+    "name": "bonn",
+    "type": "gsp",
+    "capacity_kW": 7702,
+    "centroid": {
+      "lat": 56.012,
+      "lng": -3.959
+    },
+    "metadata": {
+      "gsp_id": 31,
+      "full_name": "Bonnybridge"
+    }
+  },
+  {
+    "name": "eccl",
+    "type": "gsp",
+    "capacity_kW": 9606,
+    "centroid": {
+      "lat": 55.7,
+      "lng": -2.415
+    },
+    "metadata": {
+      "gsp_id": 102,
+      "full_name": "Eccles"
+    }
+  },
+  {
+    "name": "ekil",
+    "type": "gsp",
+    "capacity_kW": 7166,
+    "centroid": {
+      "lat": 55.75,
+      "lng": -4.173
+    },
+    "metadata": {
+      "gsp_id": 105,
+      "full_name": "East Kilbride"
+    }
+  },
+  {
+    "name": "kier",
+    "type": "gsp",
+    "capacity_kW": 30296,
+    "centroid": {
+      "lat": 55.958,
+      "lng": -4.254
+    },
+    "metadata": {
+      "gsp_id": 167,
+      "full_name": "Killermont"
+    }
+  },
+  {
+    "name": "ekis",
+    "type": "gsp",
+    "capacity_kW": 1392,
+    "centroid": {
+      "lat": 55.746,
+      "lng": -4.178
+    },
+    "metadata": {
+      "gsp_id": 106,
+      "full_name": "East Kilbride South"
+    }
+  },
+  {
+    "name": "fwil_p",
+    "type": "gsp",
+    "capacity_kW": 4577,
+    "centroid": {
+      "lat": 56.799,
+      "lng": -5.405
+    },
+    "metadata": {
+      "gsp_id": 127,
+      "full_name": "Fort William"
+    }
+  },
+  {
+    "name": "lair_p",
+    "type": "gsp",
+    "capacity_kW": 372,
+    "centroid": {
+      "lat": 58.046,
+      "lng": -4.472
+    },
+    "metadata": {
+      "gsp_id": 179,
+      "full_name": "Lairg"
+    }
+  },
+  {
+    "name": "offe_3",
+    "type": "gsp",
+    "capacity_kW": 8330,
+    "centroid": {
+      "lat": 54.882,
+      "lng": -1.453
+    },
+    "metadata": {
+      "gsp_id": 218,
+      "full_name": "Offerton"
+    }
+  },
+  {
+    "name": "pord",
+    "type": "gsp",
+    "capacity_kW": 1978,
+    "centroid": {
+      "lat": 55.881,
+      "lng": -4.229
+    },
+    "metadata": {
+      "gsp_id": 237,
+      "full_name": "Port Dundas"
+    }
+  },
+  {
+    "name": "nair_p",
+    "type": "gsp",
+    "capacity_kW": 8812,
+    "centroid": {
+      "lat": 57.347,
+      "lng": -3.757
+    },
+    "metadata": {
+      "gsp_id": 204,
+      "full_name": "Nairn"
+    }
+  },
+  {
+    "name": "stes_1",
+    "type": "gsp",
+    "capacity_kW": 31479,
+    "centroid": {
+      "lat": 55.026,
+      "lng": -2.022
+    },
+    "metadata": {
+      "gsp_id": 276,
+      "full_name": "Stella South"
+    }
+  },
+  {
+    "name": "stir",
+    "type": "gsp",
+    "capacity_kW": 17879,
+    "centroid": {
+      "lat": 56.102,
+      "lng": -3.954
+    },
+    "metadata": {
+      "gsp_id": 278,
+      "full_name": "Stirling"
+    }
+  },
+  {
+    "name": "ersk",
+    "type": "gsp",
+    "capacity_kW": 4962,
+    "centroid": {
+      "lat": 55.903,
+      "lng": -4.494
+    },
+    "metadata": {
+      "gsp_id": 112,
+      "full_name": "Erskine"
+    }
+  },
+  {
+    "name": "leve",
+    "type": "gsp",
+    "capacity_kW": 8970,
+    "centroid": {
+      "lat": 56.228,
+      "lng": -2.868
+    },
+    "metadata": {
+      "gsp_id": 183,
+      "full_name": "Leven"
+    }
+  },
+  {
+    "name": "fasn_p",
+    "type": "gsp",
+    "capacity_kW": 158,
+    "centroid": {
+      "lat": 57.315,
+      "lng": -4.898
+    },
+    "metadata": {
+      "gsp_id": 114,
+      "full_name": "Fasnakyle"
+    }
+  },
+  {
+    "name": "telr",
+    "type": "gsp",
+    "capacity_kW": 2799,
+    "centroid": {
+      "lat": 55.977,
+      "lng": -3.259
+    },
+    "metadata": {
+      "gsp_id": 285,
+      "full_name": "Telford Road"
+    }
+  },
+  {
+    "name": "kinl_p",
+    "type": "gsp",
+    "capacity_kW": 393,
+    "centroid": {
+      "lat": 56.704,
+      "lng": -5.015
+    },
+    "metadata": {
+      "gsp_id": 173,
+      "full_name": "Kinlochleven"
+    }
+  },
+  {
+    "name": "tyne_1|tyne_2",
+    "type": "gsp",
+    "capacity_kW": 39344,
+    "centroid": {
+      "lat": 55.024,
+      "lng": -1.508
+    },
+    "metadata": {
+      "gsp_id": 294,
+      "full_name": "Tynemouth"
+    }
+  },
+  {
+    "name": "wgeo",
+    "type": "gsp",
+    "capacity_kW": 109,
+    "centroid": {
+      "lat": 55.863,
+      "lng": -4.276
+    },
+    "metadata": {
+      "gsp_id": 304,
+      "full_name": "West George Street"
+    }
+  },
+  {
+    "name": "arbr_p",
+    "type": "gsp",
+    "capacity_kW": 25855,
+    "centroid": {
+      "lat": 56.567,
+      "lng": -2.668
+    },
+    "metadata": {
+      "gsp_id": 10,
+      "full_name": "Arbroath"
+    }
+  },
+  {
+    "name": "ayrr",
+    "type": "gsp",
+    "capacity_kW": 4019.999,
+    "centroid": {
+      "lat": 55.433,
+      "lng": -4.625
+    },
+    "metadata": {
+      "gsp_id": 14,
+      "full_name": "Ayr"
+    }
+  },
+  {
+    "name": "wfie",
+    "type": "gsp",
+    "capacity_kW": 4075,
+    "centroid": {
+      "lat": 56.13,
+      "lng": -3.311
+    },
+    "metadata": {
+      "gsp_id": 303,
+      "full_name": "Westfield"
+    }
+  },
+  {
+    "name": "cafa|east|glle|keoo|tong1",
+    "type": "gsp",
+    "capacity_kW": 5157,
+    "centroid": {
+      "lat": 54.961,
+      "lng": -3.98
+    },
+    "metadata": {
+      "gsp_id": 51,
+      "full_name": "Tongland"
+    }
+  },
+  {
+    "name": "berb_p|caif_p|dall_p|glef_p|keit_p",
+    "type": "gsp",
+    "capacity_kW": 16714,
+    "centroid": {
+      "lat": 57.48,
+      "lng": -2.922
+    },
+    "metadata": {
+      "gsp_id": 21,
+      "full_name": "Keith"
+    }
+  },
+  {
+    "name": "wohi_p",
+    "type": "gsp",
+    "capacity_kW": 3576,
+    "centroid": {
+      "lat": 57.151,
+      "lng": -2.206
+    },
+    "metadata": {
+      "gsp_id": 313,
+      "full_name": "Woodhill"
+    }
+  },
+  {
+    "name": "coua_p",
+    "type": "gsp",
+    "capacity_kW": 8817,
+    "centroid": {
+      "lat": 56.661,
+      "lng": -3.449
+    },
+    "metadata": {
+      "gsp_id": 73,
+      "full_name": "Coupar Angus"
+    }
+  },
+  {
+    "name": "drcr",
+    "type": "gsp",
+    "capacity_kW": 1565,
+    "centroid": {
+      "lat": 55.911,
+      "lng": -3.565
+    },
+    "metadata": {
+      "gsp_id": 90,
+      "full_name": "Drumcross"
+    }
+  },
+  {
+    "name": "four_1",
+    "type": "gsp",
+    "capacity_kW": 4743,
+    "centroid": {
+      "lat": 55.023,
+      "lng": -2.236
+    },
+    "metadata": {
+      "gsp_id": 124,
+      "full_name": "Fourstones"
+    }
+  },
+  {
+    "name": "grmo",
+    "type": "gsp",
+    "capacity_kW": 6355,
+    "centroid": {
+      "lat": 55.98,
+      "lng": -3.659
+    },
+    "metadata": {
+      "gsp_id": 137,
+      "full_name": "Grangemouth"
+    }
+  },
+  {
+    "name": "faug_p",
+    "type": "gsp",
+    "capacity_kW": 998,
+    "centroid": {
+      "lat": 57.146,
+      "lng": -4.656
+    },
+    "metadata": {
+      "gsp_id": 115,
+      "full_name": "Fort Augustus"
+    }
+  },
+  {
+    "name": "hele",
+    "type": "gsp",
+    "capacity_kW": 3532,
+    "centroid": {
+      "lat": 56.031,
+      "lng": -4.764
+    },
+    "metadata": {
+      "gsp_id": 147,
+      "full_name": "Helensburgh"
+    }
+  },
+  {
+    "name": "john",
+    "type": "gsp",
+    "capacity_kW": 6316,
+    "centroid": {
+      "lat": 55.85,
+      "lng": -4.627
+    },
+    "metadata": {
+      "gsp_id": 159,
+      "full_name": "Johnstone"
+    }
+  },
+  {
+    "name": "lynd_p",
+    "type": "gsp",
+    "capacity_kW": 2977,
+    "centroid": {
+      "lat": 56.492,
+      "lng": -3.008
+    },
+    "metadata": {
+      "gsp_id": 193,
+      "full_name": "Lyndhurst"
+    }
+  },
+  {
+    "name": "macd_p",
+    "type": "gsp",
+    "capacity_kW": 4473,
+    "centroid": {
+      "lat": 57.648,
+      "lng": -2.517
+    },
+    "metadata": {
+      "gsp_id": 195,
+      "full_name": "Macduff"
+    }
+  },
+  {
+    "name": "nets",
+    "type": "gsp",
+    "capacity_kW": 4046,
+    "centroid": {
+      "lat": 54.939,
+      "lng": -4.48
+    },
+    "metadata": {
+      "gsp_id": 208,
+      "full_name": "Newton Stewart"
+    }
+  },
+  {
+    "name": "pehg_p",
+    "type": "gsp",
+    "capacity_kW": 3698,
+    "centroid": {
+      "lat": 57.517,
+      "lng": -1.864
+    },
+    "metadata": {
+      "gsp_id": 224,
+      "full_name": "Peterhead Grange"
+    }
+  },
+  {
+    "name": "pers_p",
+    "type": "gsp",
+    "capacity_kW": 5138,
+    "centroid": {
+      "lat": 57.192,
+      "lng": -2.134
+    },
+    "metadata": {
+      "gsp_id": 232,
+      "full_name": "Persley"
+    }
+  },
+  {
+    "name": "sanx",
+    "type": "gsp",
+    "capacity_kW": 1493,
+    "centroid": {
+      "lat": 55.846,
+      "lng": -4.269
+    },
+    "metadata": {
+      "gsp_id": 255,
+      "full_name": "St Andrews Cross"
+    }
+  },
+  {
+    "name": "stha",
+    "type": "gsp",
+    "capacity_kW": 4554,
+    "centroid": {
+      "lat": 55.761,
+      "lng": -4.061
+    },
+    "metadata": {
+      "gsp_id": 277,
+      "full_name": "Strathaven"
+    }
+  },
+  {
+    "name": "stle",
+    "type": "gsp",
+    "capacity_kW": 7079,
+    "centroid": {
+      "lat": 56.084,
+      "lng": -4.473
+    },
+    "metadata": {
+      "gsp_id": 279,
+      "full_name": "Strathleven"
+    }
+  },
+  {
+    "name": "bumu_p",
+    "type": "gsp",
+    "capacity_kW": 8146,
+    "centroid": {
+      "lat": 56.445,
+      "lng": -3.69
+    },
+    "metadata": {
+      "gsp_id": 46,
+      "full_name": "Burghmuir"
+    }
+  },
+  {
+    "name": "caad_p",
+    "type": "gsp",
+    "capacity_kW": 5470,
+    "centroid": {
+      "lat": 55.553,
+      "lng": -5.467
+    },
+    "metadata": {
+      "gsp_id": 50,
+      "full_name": "Carradale"
+    }
+  },
+  {
+    "name": "drum",
+    "type": "gsp",
+    "capacity_kW": 3790,
+    "centroid": {
+      "lat": 55.962,
+      "lng": -4.37
+    },
+    "metadata": {
+      "gsp_id": 91,
+      "full_name": "Drumchapel"
+    }
+  },
+  {
+    "name": "elgi_p",
+    "type": "gsp",
+    "capacity_kW": 10376,
+    "centroid": {
+      "lat": 57.645,
+      "lng": -3.284
+    },
+    "metadata": {
+      "gsp_id": 108,
+      "full_name": "Elgin"
+    }
+  },
+  {
+    "name": "gllu",
+    "type": "gsp",
+    "capacity_kW": 4887,
+    "centroid": {
+      "lat": 54.907,
+      "lng": -4.94
+    },
+    "metadata": {
+      "gsp_id": 130,
+      "full_name": "Glenluce"
+    }
+  },
+  {
+    "name": "gova",
+    "type": "gsp",
+    "capacity_kW": 1275,
+    "centroid": {
+      "lat": 55.854,
+      "lng": -4.317
+    },
+    "metadata": {
+      "gsp_id": 134,
+      "full_name": "Govan"
+    }
+  },
+  {
+    "name": "kilt",
+    "type": "gsp",
+    "capacity_kW": 8035,
+    "centroid": {
+      "lat": 55.661,
+      "lng": -4.516
+    },
+    "metadata": {
+      "gsp_id": 171,
+      "full_name": "Kilmarnock Town"
+    }
+  },
+  {
+    "name": "kilw",
+    "type": "gsp",
+    "capacity_kW": 11732,
+    "centroid": {
+      "lat": 55.613,
+      "lng": -4.653
+    },
+    "metadata": {
+      "gsp_id": 172,
+      "full_name": "Kilwinning"
+    }
+  },
+  {
+    "name": "ling",
+    "type": "gsp",
+    "capacity_kW": 11257,
+    "centroid": {
+      "lat": 55.851,
+      "lng": -3.474
+    },
+    "metadata": {
+      "gsp_id": 184,
+      "full_name": "Livingston East"
+    }
+  },
+  {
+    "name": "pais",
+    "type": "gsp",
+    "capacity_kW": 2544,
+    "centroid": {
+      "lat": 55.846,
+      "lng": -4.423
+    },
+    "metadata": {
+      "gsp_id": 222,
+      "full_name": "Paisley"
+    }
+  },
+  {
+    "name": "redm_p",
+    "type": "gsp",
+    "capacity_kW": 5455,
+    "centroid": {
+      "lat": 57.057,
+      "lng": -2.164
+    },
+    "metadata": {
+      "gsp_id": 248,
+      "full_name": "Redmoss"
+    }
+  },
+  {
+    "name": "sloy_p",
+    "type": "gsp",
+    "capacity_kW": 288,
+    "centroid": {
+      "lat": 56.243,
+      "lng": -4.682
+    },
+    "metadata": {
+      "gsp_id": 268,
+      "full_name": "Sloy"
+    }
+  },
+  {
+    "name": "sten_1",
+    "type": "gsp",
+    "capacity_kW": 24070,
+    "centroid": {
+      "lat": 54.974,
+      "lng": -1.712
+    },
+    "metadata": {
+      "gsp_id": 275,
+      "full_name": "Stella North"
+    }
+  },
+  {
+    "name": "chas",
+    "type": "gsp",
+    "capacity_kW": 2748,
+    "centroid": {
+      "lat": 55.849,
+      "lng": -4.264
+    },
+    "metadata": {
+      "gsp_id": 63,
+      "full_name": "Charlotte Street"
+    }
+  },
+  {
+    "name": "broa_p",
+    "type": "gsp",
+    "capacity_kW": 2023,
+    "centroid": {
+      "lat": 57.285,
+      "lng": -5.688
+    },
+    "metadata": {
+      "gsp_id": 42,
+      "full_name": "Broadford"
+    }
+  },
+  {
+    "name": "chte_1",
+    "type": "gsp",
+    "capacity_kW": 438218,
+    "centroid": {
+      "lat": 53.179,
+      "lng": -1.316
+    },
+    "metadata": {
+      "gsp_id": 66,
+      "full_name": "Chesterfield"
+    }
+  },
+  {
+    "name": "clym",
+    "type": "gsp",
+    "capacity_kW": 6531,
+    "centroid": {
+      "lat": 55.816,
+      "lng": -4.142
+    },
+    "metadata": {
+      "gsp_id": 69,
+      "full_name": "Clyde’s Mill"
+    }
+  },
+  {
+    "name": "cove_1",
+    "type": "gsp",
+    "capacity_kW": 276809,
+    "centroid": {
+      "lat": 52.407,
+      "lng": -1.274
+    },
+    "metadata": {
+      "gsp_id": 74,
+      "full_name": "Coventry"
+    }
+  },
+  {
+    "name": "amem_1",
+    "type": "gsp",
+    "capacity_kW": 136275,
+    "centroid": {
+      "lat": 51.743,
+      "lng": -0.864
+    },
+    "metadata": {
+      "gsp_id": 9,
+      "full_name": "Amersham Main"
+    }
+  },
+  {
+    "name": "kils",
+    "type": "gsp",
+    "capacity_kW": 23187,
+    "centroid": {
+      "lat": 55.572,
+      "lng": -4.477
+    },
+    "metadata": {
+      "gsp_id": 170,
+      "full_name": "Kilmarnock South"
+    }
+  },
+  {
+    "name": "milh_1",
+    "type": "gsp",
+    "capacity_kW": 13510,
+    "centroid": {
+      "lat": 51.602,
+      "lng": -0.22
+    },
+    "metadata": {
+      "gsp_id": 201,
+      "full_name": "Mill Hill"
+    }
+  },
+  {
+    "name": "near",
+    "type": "gsp",
+    "capacity_kW": 12093,
+    "centroid": {
+      "lat": 55.811,
+      "lng": -3.785
+    },
+    "metadata": {
+      "gsp_id": 205,
+      "full_name": "Newarthill"
+    }
+  },
+  {
+    "name": "nece_1",
+    "type": "gsp",
+    "capacity_kW": 21680,
+    "centroid": {
+      "lat": 52.49,
+      "lng": -1.839
+    },
+    "metadata": {
+      "gsp_id": 206,
+      "full_name": "Nechells"
+    }
+  },
+  {
+    "name": "quoi_p",
+    "type": "gsp",
+    "capacity_kW": 10,
+    "centroid": {
+      "lat": 57.07,
+      "lng": -5.248
+    },
+    "metadata": {
+      "gsp_id": 239,
+      "full_name": "Quoich"
+    }
+  },
+  {
+    "name": "nort_1",
+    "type": "gsp",
+    "capacity_kW": 224586,
+    "centroid": {
+      "lat": 54.369,
+      "lng": -1.673
+    },
+    "metadata": {
+      "gsp_id": 215,
+      "full_name": "Norton"
+    }
+  },
+  {
+    "name": "sbar",
+    "type": "gsp",
+    "capacity_kW": 79571,
+    "centroid": {
+      "lat": 52.954,
+      "lng": -1.077
+    },
+    "metadata": {
+      "gsp_id": 256,
+      "full_name": "Stoke Bardolph"
+    }
+  },
+  {
+    "name": "shrw_1",
+    "type": "gsp",
+    "capacity_kW": 82867,
+    "centroid": {
+      "lat": 52.665,
+      "lng": -2.828
+    },
+    "metadata": {
+      "gsp_id": 264,
+      "full_name": "Shrewsbury"
+    }
+  },
+  {
+    "name": "stal_1",
+    "type": "gsp",
+    "capacity_kW": 43494,
+    "centroid": {
+      "lat": 53.425,
+      "lng": -1.968
+    },
+    "metadata": {
+      "gsp_id": 273,
+      "full_name": "Stalybridge"
+    }
+  },
+  {
+    "name": "rats_1",
+    "type": "gsp",
+    "capacity_kW": 139072,
+    "centroid": {
+      "lat": 52.807,
+      "lng": -1.101
+    },
+    "metadata": {
+      "gsp_id": 243,
+      "full_name": "Ratcliffe"
+    }
+  },
+  {
+    "name": "cowl_1",
+    "type": "gsp",
+    "capacity_kW": 453434,
+    "centroid": {
+      "lat": 51.746,
+      "lng": -1.294
+    },
+    "metadata": {
+      "gsp_id": 324,
+      "full_name": "Cowley"
+    }
+  },
+  {
+    "name": "sund_1",
+    "type": "gsp",
+    "capacity_kW": 219581,
+    "centroid": {
+      "lat": 51.948,
+      "lng": -0.589
+    },
+    "metadata": {
+      "gsp_id": 280,
+      "full_name": "Sundon"
+    }
+  },
+  {
+    "name": "alst_3|uskm_1",
+    "type": "gsp",
+    "capacity_kW": 189040,
+    "centroid": {
+      "lat": 51.652,
+      "lng": -2.89
+    },
+    "metadata": {
+      "gsp_id": 7,
+      "full_name": "Uskmouth"
+    }
+  },
+  {
+    "name": "ferra2",
+    "type": "gsp",
+    "capacity_kW": 30630,
+    "centroid": {
+      "lat": 53.664,
+      "lng": -1.303
+    },
+    "metadata": {
+      "gsp_id": 118,
+      "full_name": "Ferrybridge (Zone 1)"
+    }
+  },
+  {
+    "name": "fett_p|kint_p|roti3",
+    "type": "gsp",
+    "capacity_kW": 21832,
+    "centroid": {
+      "lat": 57.205,
+      "lng": -2.449
+    },
+    "metadata": {
+      "gsp_id": 120,
+      "full_name": "Kintore"
+    }
+  },
+  {
+    "name": "uppb_1|uppb_3",
+    "type": "gsp",
+    "capacity_kW": 88442,
+    "centroid": {
+      "lat": 51.648,
+      "lng": -3.358
+    },
+    "metadata": {
+      "gsp_id": 295,
+      "full_name": "Upper Boat"
+    }
+  },
+  {
+    "name": "armo_p|harg_p",
+    "type": "gsp",
+    "capacity_kW": 1008.999,
+    "centroid": {
+      "lat": 57.535,
+      "lng": -7.224
+    },
+    "metadata": {
+      "gsp_id": 12,
+      "full_name": "Ardmore"
+    }
+  },
+  {
+    "name": "shin_p",
+    "type": "gsp",
+    "capacity_kW": 516,
+    "centroid": {
+      "lat": 57.886,
+      "lng": -4.506
+    },
+    "metadata": {
+      "gsp_id": 262,
+      "full_name": "Shin"
+    }
+  },
+  {
+    "name": "spen_1",
+    "type": "gsp",
+    "capacity_kW": 170214,
+    "centroid": {
+      "lat": 54.648,
+      "lng": -1.863
+    },
+    "metadata": {
+      "gsp_id": 271,
+      "full_name": "Spennymoor"
+    }
+  },
+  {
+    "name": "stay_1",
+    "type": "gsp",
+    "capacity_kW": 410325,
+    "centroid": {
+      "lat": 53.156,
+      "lng": -0.843
+    },
+    "metadata": {
+      "gsp_id": 274,
+      "full_name": "Staythorpe"
+    }
+  },
+  {
+    "name": "carr_1",
+    "type": "gsp",
+    "capacity_kW": 19860.66,
+    "centroid": {
+      "lat": 53.427,
+      "lng": -2.369
+    },
+    "metadata": {
+      "gsp_id": 56,
+      "full_name": "Carrington"
+    }
+  },
+  {
+    "name": "bred_1",
+    "type": "gsp",
+    "capacity_kW": 31106,
+    "centroid": {
+      "lat": 53.392,
+      "lng": -2.126
+    },
+    "metadata": {
+      "gsp_id": 37,
+      "full_name": "Bredbury"
+    }
+  },
+  {
+    "name": "brim_1",
+    "type": "gsp",
+    "capacity_kW": 39103,
+    "centroid": {
+      "lat": 51.664,
+      "lng": -0.063
+    },
+    "metadata": {
+      "gsp_id": 40,
+      "full_name": "Brimsdown"
+    }
+  },
+  {
+    "name": "brle_1|flee_1",
+    "type": "gsp",
+    "capacity_kW": 461094,
+    "centroid": {
+      "lat": 51.271,
+      "lng": -1.049
+    },
+    "metadata": {
+      "gsp_id": 41,
+      "full_name": "Bramley"
+    }
+  },
+  {
+    "name": "drak_1",
+    "type": "gsp",
+    "capacity_kW": 149878,
+    "centroid": {
+      "lat": 52.79,
+      "lng": -1.609
+    },
+    "metadata": {
+      "gsp_id": 88,
+      "full_name": "Drakelow"
+    }
+  },
+  {
+    "name": "dugr_p",
+    "type": "gsp",
+    "capacity_kW": 1384,
+    "centroid": {
+      "lat": 57.43,
+      "lng": -6.389
+    },
+    "metadata": {
+      "gsp_id": 94,
+      "full_name": "Dunvegan"
+    }
+  },
+  {
+    "name": "grub_p",
+    "type": "gsp",
+    "capacity_kW": 1935,
+    "centroid": {
+      "lat": 57.802,
+      "lng": -5.218
+    },
+    "metadata": {
+      "gsp_id": 138,
+      "full_name": "Grudie Bridge"
+    }
+  },
+  {
+    "name": "mity_1",
+    "type": "gsp",
+    "capacity_kW": 526231,
+    "centroid": {
+      "lat": 51.676,
+      "lng": -1.796
+    },
+    "metadata": {
+      "gsp_id": 202,
+      "full_name": "Minety"
+    }
+  },
+  {
+    "name": "penn_1",
+    "type": "gsp",
+    "capacity_kW": 60111,
+    "centroid": {
+      "lat": 52.524,
+      "lng": -2.191
+    },
+    "metadata": {
+      "gsp_id": 229,
+      "full_name": "Penn"
+    }
+  },
+  {
+    "name": "rass_1",
+    "type": "gsp",
+    "capacity_kW": 110678,
+    "centroid": {
+      "lat": 52.037,
+      "lng": -3.313
+    },
+    "metadata": {
+      "gsp_id": 242,
+      "full_name": "Rassau"
+    }
+  },
+  {
+    "name": "seab1|safo_1",
+    "type": "gsp",
+    "capacity_kW": 229841,
+    "centroid": {
+      "lat": 51.319,
+      "lng": -2.679
+    },
+    "metadata": {
+      "gsp_id": 257,
+      "full_name": "Seabank"
+    }
+  },
+  {
+    "name": "swan_1",
+    "type": "gsp",
+    "capacity_kW": 460394,
+    "centroid": {
+      "lat": 52.033,
+      "lng": -4.074
+    },
+    "metadata": {
+      "gsp_id": 281,
+      "full_name": "Swansea North"
+    }
+  },
+  {
+    "name": "abha1",
+    "type": "gsp",
+    "capacity_kW": 226038,
+    "centroid": {
+      "lat": 50.44,
+      "lng": -3.764
+    },
+    "metadata": {
+      "gsp_id": 1,
+      "full_name": "Abham"
+    }
+  },
+  {
+    "name": "tayn_p",
+    "type": "gsp",
+    "capacity_kW": 5717,
+    "centroid": {
+      "lat": 56.426,
+      "lng": -5.7
+    },
+    "metadata": {
+      "gsp_id": 284,
+      "full_name": "Taynuilt"
+    }
+  },
+  {
+    "name": "thom_6",
+    "type": "gsp",
+    "capacity_kW": 78618,
+    "centroid": {
+      "lat": 53.547,
+      "lng": -1.124
+    },
+    "metadata": {
+      "gsp_id": 287,
+      "full_name": "Thorpe Marsh"
+    }
+  },
+  {
+    "name": "thso_p",
+    "type": "gsp",
+    "capacity_kW": 5238,
+    "centroid": {
+      "lat": 58.877,
+      "lng": -3.124
+    },
+    "metadata": {
+      "gsp_id": 288,
+      "full_name": "Thurso"
+    }
+  },
+  {
+    "name": "traw_1",
+    "type": "gsp",
+    "capacity_kW": 41378,
+    "centroid": {
+      "lat": 52.872,
+      "lng": -3.905
+    },
+    "metadata": {
+      "gsp_id": 292,
+      "full_name": "Trawsfynydd"
+    }
+  },
+  {
+    "name": "barkr_a",
+    "type": "gsp",
+    "capacity_kW": 3591,
+    "centroid": {
+      "lat": 51.602,
+      "lng": 0.152
+    },
+    "metadata": {
+      "gsp_id": 320,
+      "full_name": "Barking A"
+    }
+  },
+  {
+    "name": "wisd_1",
+    "type": "gsp",
+    "capacity_kW": 11451,
+    "centroid": {
+      "lat": 51.531,
+      "lng": -0.247
+    },
+    "metadata": {
+      "gsp_id": 341,
+      "full_name": "Wimbledon South"
+    }
+  },
+  {
+    "name": "bush_1",
+    "type": "gsp",
+    "capacity_kW": 55123,
+    "centroid": {
+      "lat": 52.743,
+      "lng": -2.129
+    },
+    "metadata": {
+      "gsp_id": 48,
+      "full_name": "Bushbury"
+    }
+  },
+  {
+    "name": "coat",
+    "type": "gsp",
+    "capacity_kW": 7306,
+    "centroid": {
+      "lat": 55.862,
+      "lng": -4.018
+    },
+    "metadata": {
+      "gsp_id": 70,
+      "full_name": "Coatbridge"
+    }
+  },
+  {
+    "name": "croo",
+    "type": "gsp",
+    "capacity_kW": 5431,
+    "centroid": {
+      "lat": 55.784,
+      "lng": -4.43
+    },
+    "metadata": {
+      "gsp_id": 79,
+      "full_name": "Crookston"
+    }
+  },
+  {
+    "name": "dalm3",
+    "type": "gsp",
+    "capacity_kW": 2540,
+    "centroid": {
+      "lat": 55.843,
+      "lng": -4.204
+    },
+    "metadata": {
+      "gsp_id": 83,
+      "full_name": "Dalmarnock"
+    }
+  },
+  {
+    "name": "tong",
+    "type": "gsp",
+    "capacity_kW": 1654,
+    "centroid": {
+      "lat": 54.841,
+      "lng": -4.055
+    },
+    "metadata": {
+      "gsp_id": 337,
+      "full_name": "Tongland"
+    }
+  },
+  {
+    "name": "elde",
+    "type": "gsp",
+    "capacity_kW": 2613,
+    "centroid": {
+      "lat": 55.83,
+      "lng": -4.454
+    },
+    "metadata": {
+      "gsp_id": 107,
+      "full_name": "Elderslie"
+    }
+  },
+  {
+    "name": "finn",
+    "type": "gsp",
+    "capacity_kW": 65,
+    "centroid": {
+      "lat": 55.872,
+      "lng": -4.283
+    },
+    "metadata": {
+      "gsp_id": 123,
+      "full_name": "Finnieston"
+    }
+  },
+  {
+    "name": "giff",
+    "type": "gsp",
+    "capacity_kW": 5917,
+    "centroid": {
+      "lat": 55.741,
+      "lng": -4.305
+    },
+    "metadata": {
+      "gsp_id": 129,
+      "full_name": "Giffnock"
+    }
+  },
+  {
+    "name": "kaim",
+    "type": "gsp",
+    "capacity_kW": 22790,
+    "centroid": {
+      "lat": 55.73,
+      "lng": -3.239
+    },
+    "metadata": {
+      "gsp_id": 161,
+      "full_name": "Kaimes"
+    }
+  },
+  {
+    "name": "land1",
+    "type": "gsp",
+    "capacity_kW": 156129,
+    "centroid": {
+      "lat": 50.482,
+      "lng": -4.301
+    },
+    "metadata": {
+      "gsp_id": 181,
+      "full_name": "Landulph"
+    }
+  },
+  {
+    "name": "nurs_1",
+    "type": "gsp",
+    "capacity_kW": 165288,
+    "centroid": {
+      "lat": 51.008,
+      "lng": -1.461
+    },
+    "metadata": {
+      "gsp_id": 216,
+      "full_name": "Nursling"
+    }
+  },
+  {
+    "name": "ockh_1",
+    "type": "gsp",
+    "capacity_kW": 5873,
+    "centroid": {
+      "lat": 52.538,
+      "lng": -2.024
+    },
+    "metadata": {
+      "gsp_id": 217,
+      "full_name": "Ocker Hill"
+    }
+  },
+  {
+    "name": "oldb_1",
+    "type": "gsp",
+    "capacity_kW": 9978,
+    "centroid": {
+      "lat": 52.495,
+      "lng": -2.033
+    },
+    "metadata": {
+      "gsp_id": 219,
+      "full_name": "Oldbury"
+    }
+  },
+  {
+    "name": "poob",
+    "type": "gsp",
+    "capacity_kW": 10145,
+    "centroid": {
+      "lat": 55.862,
+      "lng": -3.06
+    },
+    "metadata": {
+      "gsp_id": 234,
+      "full_name": "Portobello"
+    }
+  },
+  {
+    "name": "pora_p",
+    "type": "gsp",
+    "capacity_kW": 3926,
+    "centroid": {
+      "lat": 55.92,
+      "lng": -5.829
+    },
+    "metadata": {
+      "gsp_id": 236,
+      "full_name": "Port Ann"
+    }
+  },
+  {
+    "name": "ryeh_1",
+    "type": "gsp",
+    "capacity_kW": 36750,
+    "centroid": {
+      "lat": 51.774,
+      "lng": 0.052
+    },
+    "metadata": {
+      "gsp_id": 251,
+      "full_name": "Rye House"
+    }
+  },
+  {
+    "name": "sman_1",
+    "type": "gsp",
+    "capacity_kW": 23933,
+    "centroid": {
+      "lat": 53.35,
+      "lng": -2.251
+    },
+    "metadata": {
+      "gsp_id": 269,
+      "full_name": "South Manchester"
+    }
+  },
+  {
+    "name": "wbur_1",
+    "type": "gsp",
+    "capacity_kW": 162013,
+    "centroid": {
+      "lat": 53.229,
+      "lng": -0.526
+    },
+    "metadata": {
+      "gsp_id": 302,
+      "full_name": "West Burton"
+    }
+  },
+  {
+    "name": "taun1",
+    "type": "gsp",
+    "capacity_kW": 95436,
+    "centroid": {
+      "lat": 51.078,
+      "lng": -3.395
+    },
+    "metadata": {
+      "gsp_id": 283,
+      "full_name": "Taunton"
+    }
+  },
+  {
+    "name": "thur_6",
+    "type": "gsp",
+    "capacity_kW": 29952,
+    "centroid": {
+      "lat": 53.406,
+      "lng": -1.199
+    },
+    "metadata": {
+      "gsp_id": 289,
+      "full_name": "Thurcroft"
+    }
+  },
+  {
+    "name": "wymom_1",
+    "type": "gsp",
+    "capacity_kW": 72983,
+    "centroid": {
+      "lat": 51.972,
+      "lng": -0.142
+    },
+    "metadata": {
+      "gsp_id": 317,
+      "full_name": "Wymondley"
+    }
+  },
+  {
+    "name": "hark_1|rrig",
+    "type": "gsp",
+    "capacity_kW": 106464,
+    "centroid": {
+      "lat": 54.729,
+      "lng": -3.004
+    },
+    "metadata": {
+      "gsp_id": 328,
+      "full_name": "Harker and Robin Rigg"
+    }
+  },
+  {
+    "name": "beau_p|orri_p",
+    "type": "gsp",
+    "capacity_kW": 7985,
+    "centroid": {
+      "lat": 57.515,
+      "lng": -4.617
+    },
+    "metadata": {
+      "gsp_id": 18,
+      "full_name": "Beauly"
+    }
+  },
+  {
+    "name": "bisw_1",
+    "type": "gsp",
+    "capacity_kW": 388524,
+    "centroid": {
+      "lat": 52.218,
+      "lng": -2.656
+    },
+    "metadata": {
+      "gsp_id": 26,
+      "full_name": "Bishops Wood"
+    }
+  },
+  {
+    "name": "blyth132",
+    "type": "gsp",
+    "capacity_kW": 18063,
+    "centroid": {
+      "lat": 55.421,
+      "lng": -1.883
+    },
+    "metadata": {
+      "gsp_id": 28,
+      "full_name": "Blyth (Zone 2)"
+    }
+  },
+  {
+    "name": "blytb1",
+    "type": "gsp",
+    "capacity_kW": 35215,
+    "centroid": {
+      "lat": 55.13,
+      "lng": -1.717
+    },
+    "metadata": {
+      "gsp_id": 27,
+      "full_name": "Blyth (Zone 1)"
+    }
+  },
+  {
+    "name": "boag_p",
+    "type": "gsp",
+    "capacity_kW": 4396,
+    "centroid": {
+      "lat": 57.159,
+      "lng": -3.909
+    },
+    "metadata": {
+      "gsp_id": 29,
+      "full_name": "Boat of Garten"
+    }
+  },
+  {
+    "name": "braw_1",
+    "type": "gsp",
+    "capacity_kW": 53881,
+    "centroid": {
+      "lat": 53.966,
+      "lng": -1.95
+    },
+    "metadata": {
+      "gsp_id": 36,
+      "full_name": "Bradford West"
+    }
+  },
+  {
+    "name": "brwa1",
+    "type": "gsp",
+    "capacity_kW": 214943,
+    "centroid": {
+      "lat": 51.104,
+      "lng": -2.873
+    },
+    "metadata": {
+      "gsp_id": 45,
+      "full_name": "Bridgewater"
+    }
+  },
+  {
+    "name": "sfeg_p",
+    "type": "gsp",
+    "capacity_kW": 806,
+    "centroid": {
+      "lat": 57.577,
+      "lng": -1.856
+    },
+    "metadata": {
+      "gsp_id": 259,
+      "full_name": "St Fergus Gas Terminal"
+    }
+  },
+  {
+    "name": "sfil_p",
+    "type": "gsp",
+    "capacity_kW": 493,
+    "centroid": {
+      "lat": 56.362,
+      "lng": -4.052
+    },
+    "metadata": {
+      "gsp_id": 260,
+      "full_name": "St Fillans"
+    }
+  },
+  {
+    "name": "bain",
+    "type": "gsp",
+    "capacity_kW": 1991,
+    "centroid": {
+      "lat": 56.042,
+      "lng": -3.754
+    },
+    "metadata": {
+      "gsp_id": 16,
+      "full_name": "Bainsford"
+    }
+  },
+  {
+    "name": "bedd_1",
+    "type": "gsp",
+    "capacity_kW": 42380,
+    "centroid": {
+      "lat": 51.332,
+      "lng": -0.077
+    },
+    "metadata": {
+      "gsp_id": 20,
+      "full_name": "Beddington (Zone 2)"
+    }
+  },
+  {
+    "name": "bror_p",
+    "type": "gsp",
+    "capacity_kW": 2012,
+    "centroid": {
+      "lat": 58.087,
+      "lng": -3.908
+    },
+    "metadata": {
+      "gsp_id": 43,
+      "full_name": "Brora"
+    }
+  },
+  {
+    "name": "wiow_p",
+    "type": "gsp",
+    "capacity_kW": 1217,
+    "centroid": {
+      "lat": 57.16,
+      "lng": -2.104
+    },
+    "metadata": {
+      "gsp_id": 311,
+      "full_name": "Willowdale"
+    }
+  },
+  {
+    "name": "camb_01",
+    "type": "gsp",
+    "capacity_kW": 6483,
+    "centroid": {
+      "lat": 53.664,
+      "lng": -0.854
+    },
+    "metadata": {
+      "gsp_id": 52,
+      "full_name": "Camblesforth"
+    }
+  },
+  {
+    "name": "care_1",
+    "type": "gsp",
+    "capacity_kW": 37045,
+    "centroid": {
+      "lat": 51.522,
+      "lng": -3.145
+    },
+    "metadata": {
+      "gsp_id": 55,
+      "full_name": "Cardiff East"
+    }
+  },
+  {
+    "name": "cass_p",
+    "type": "gsp",
+    "capacity_kW": 231,
+    "centroid": {
+      "lat": 58.378,
+      "lng": -4.853
+    },
+    "metadata": {
+      "gsp_id": 57,
+      "full_name": "Cassley"
+    }
+  },
+  {
+    "name": "caty",
+    "type": "gsp",
+    "capacity_kW": 1876,
+    "centroid": {
+      "lat": 55.846,
+      "lng": -4.176
+    },
+    "metadata": {
+      "gsp_id": 58,
+      "full_name": "Carntyne"
+    }
+  },
+  {
+    "name": "ardk_p|clac_p",
+    "type": "gsp",
+    "capacity_kW": 558,
+    "centroid": {
+      "lat": 56.228,
+      "lng": -4.96
+    },
+    "metadata": {
+      "gsp_id": 11,
+      "full_name": "Clachan"
+    }
+  },
+  {
+    "name": "cock",
+    "type": "gsp",
+    "capacity_kW": 12814,
+    "centroid": {
+      "lat": 55.912,
+      "lng": -2.842
+    },
+    "metadata": {
+      "gsp_id": 71,
+      "full_name": "Cockenzie"
+    }
+  },
+  {
+    "name": "devm",
+    "type": "gsp",
+    "capacity_kW": 2748,
+    "centroid": {
+      "lat": 55.936,
+      "lng": -4.715
+    },
+    "metadata": {
+      "gsp_id": 84,
+      "full_name": "Devol Moor"
+    }
+  },
+  {
+    "name": "devo",
+    "type": "gsp",
+    "capacity_kW": 16114,
+    "centroid": {
+      "lat": 56.14,
+      "lng": -3.726
+    },
+    "metadata": {
+      "gsp_id": 85,
+      "full_name": "Devonside"
+    }
+  },
+  {
+    "name": "eerh",
+    "type": "gsp",
+    "capacity_kW": 11497,
+    "centroid": {
+      "lat": 55.916,
+      "lng": -4.124
+    },
+    "metadata": {
+      "gsp_id": 104,
+      "full_name": "Easterhouse"
+    }
+  },
+  {
+    "name": "elst_1",
+    "type": "gsp",
+    "capacity_kW": 46444,
+    "centroid": {
+      "lat": 51.707,
+      "lng": -0.345
+    },
+    "metadata": {
+      "gsp_id": 110,
+      "full_name": "Elstree"
+    }
+  },
+  {
+    "name": "fidf_1",
+    "type": "gsp",
+    "capacity_kW": 53697.34,
+    "centroid": {
+      "lat": 53.286,
+      "lng": -2.476
+    },
+    "metadata": {
+      "gsp_id": 122,
+      "full_name": "Fiddlers Ferry"
+    }
+  },
+  {
+    "name": "gorg",
+    "type": "gsp",
+    "capacity_kW": 418,
+    "centroid": {
+      "lat": 55.935,
+      "lng": -3.225
+    },
+    "metadata": {
+      "gsp_id": 133,
+      "full_name": "Gorgie"
+    }
+  },
+  {
+    "name": "indq1",
+    "type": "gsp",
+    "capacity_kW": 410648,
+    "centroid": {
+      "lat": 50.317,
+      "lng": -5.061
+    },
+    "metadata": {
+      "gsp_id": 152,
+      "full_name": "Indian Queens"
+    }
+  },
+  {
+    "name": "ironb1",
+    "type": "gsp",
+    "capacity_kW": 119496,
+    "centroid": {
+      "lat": 52.605,
+      "lng": -2.541
+    },
+    "metadata": {
+      "gsp_id": 156,
+      "full_name": "Ironbridge"
+    }
+  },
+  {
+    "name": "lack_6",
+    "type": "gsp",
+    "capacity_kW": 25782,
+    "centroid": {
+      "lat": 54.517,
+      "lng": -0.985
+    },
+    "metadata": {
+      "gsp_id": 178,
+      "full_name": "Lackenby"
+    }
+  },
+  {
+    "name": "loud_h",
+    "type": "gsp",
+    "capacity_kW": 8344,
+    "centroid": {
+      "lat": 51.608,
+      "lng": -0.724
+    },
+    "metadata": {
+      "gsp_id": 190,
+      "full_name": "Loudwater"
+    }
+  },
+  {
+    "name": "maga_6",
+    "type": "gsp",
+    "capacity_kW": 4546,
+    "centroid": {
+      "lat": 51.622,
+      "lng": -3.621
+    },
+    "metadata": {
+      "gsp_id": 196,
+      "full_name": "Margam"
+    }
+  },
+  {
+    "name": "rave|wish",
+    "type": "gsp",
+    "capacity_kW": 10991,
+    "centroid": {
+      "lat": 55.739,
+      "lng": -3.962
+    },
+    "metadata": {
+      "gsp_id": 244,
+      "full_name": "Ravenscraig"
+    }
+  },
+  {
+    "name": "alne_p",
+    "type": "gsp",
+    "capacity_kW": 5439,
+    "centroid": {
+      "lat": 57.756,
+      "lng": -4.178
+    },
+    "metadata": {
+      "gsp_id": 6,
+      "full_name": "Alness"
+    }
+  },
+  {
+    "name": "tarl_p",
+    "type": "gsp",
+    "capacity_kW": 10868,
+    "centroid": {
+      "lat": 57.102,
+      "lng": -3.088
+    },
+    "metadata": {
+      "gsp_id": 282,
+      "full_name": "Tarland"
+    }
+  },
+  {
+    "name": "mayb",
+    "type": "gsp",
+    "capacity_kW": 3416,
+    "centroid": {
+      "lat": 55.21,
+      "lng": -4.712
+    },
+    "metadata": {
+      "gsp_id": 198,
+      "full_name": "Maybole"
+    }
+  },
+  {
+    "name": "capea1",
+    "type": "gsp",
+    "capacity_kW": 35022,
+    "centroid": {
+      "lat": 53.215,
+      "lng": -2.863
+    },
+    "metadata": {
+      "gsp_id": 54,
+      "full_name": "Capenhurst"
+    }
+  },
+  {
+    "name": "clay_p",
+    "type": "gsp",
+    "capacity_kW": 582,
+    "centroid": {
+      "lat": 57.141,
+      "lng": -2.086
+    },
+    "metadata": {
+      "gsp_id": 68,
+      "full_name": "Clayhills"
+    }
+  },
+  {
+    "name": "doun_p",
+    "type": "gsp",
+    "capacity_kW": 566,
+    "centroid": {
+      "lat": 58.391,
+      "lng": -4.141
+    },
+    "metadata": {
+      "gsp_id": 87,
+      "full_name": "Dounreay"
+    }
+  },
+  {
+    "name": "eali_6",
+    "type": "gsp",
+    "capacity_kW": 14189,
+    "centroid": {
+      "lat": 51.496,
+      "lng": -0.316
+    },
+    "metadata": {
+      "gsp_id": 100,
+      "full_name": "Ealing"
+    }
+  },
+  {
+    "name": "fidd_p",
+    "type": "gsp",
+    "capacity_kW": 6988,
+    "centroid": {
+      "lat": 56.895,
+      "lng": -2.418
+    },
+    "metadata": {
+      "gsp_id": 121,
+      "full_name": "Fiddes"
+    }
+  },
+  {
+    "name": "luna_p",
+    "type": "gsp",
+    "capacity_kW": 24397,
+    "centroid": {
+      "lat": 56.721,
+      "lng": -2.985
+    },
+    "metadata": {
+      "gsp_id": 192,
+      "full_name": "Lunanhead"
+    }
+  },
+  {
+    "name": "rann_p",
+    "type": "gsp",
+    "capacity_kW": 187,
+    "centroid": {
+      "lat": 56.62,
+      "lng": -4.688
+    },
+    "metadata": {
+      "gsp_id": 241,
+      "full_name": "Rannoch"
+    }
+  },
+  {
+    "name": "saco",
+    "type": "gsp",
+    "capacity_kW": 27302,
+    "centroid": {
+      "lat": 55.742,
+      "lng": -4.778
+    },
+    "metadata": {
+      "gsp_id": 252,
+      "full_name": "Saltcoats"
+    }
+  },
+  {
+    "name": "salt_1",
+    "type": "gsp",
+    "capacity_kW": 13499,
+    "centroid": {
+      "lat": 53.7,
+      "lng": -0.066
+    },
+    "metadata": {
+      "gsp_id": 254,
+      "full_name": "Saltend North"
+    }
+  },
+  {
+    "name": "tumb_p",
+    "type": "gsp",
+    "capacity_kW": 3493,
+    "centroid": {
+      "lat": 56.726,
+      "lng": -3.951
+    },
+    "metadata": {
+      "gsp_id": 293,
+      "full_name": "Tummel Bridge"
+    }
+  },
+  {
+    "name": "shec_3",
+    "type": "gsp",
+    "capacity_kW": 2721,
+    "centroid": {
+      "lat": 53.366,
+      "lng": -1.446
+    },
+    "metadata": {
+      "gsp_id": 261,
+      "full_name": "Sheffield City"
+    }
+  },
+  {
+    "name": "pehs_p",
+    "type": "gsp",
+    "capacity_kW": 400,
+    "centroid": {
+      "lat": 57.474,
+      "lng": -1.832
+    },
+    "metadata": {
+      "gsp_id": 333,
+      "full_name": "Peterhead"
+    }
+  },
+  {
+    "name": "actl_2|cbnk_h|gree_h|peri_h|wesa_h",
+    "type": "gsp",
+    "capacity_kW": 5299,
+    "centroid": {
+      "lat": 51.533,
+      "lng": -0.316
+    },
+    "metadata": {
+      "gsp_id": 4,
+      "full_name": "Willesden (Zone 1)"
+    }
+  },
+  {
+    "name": "actl_c",
+    "type": "gsp",
+    "capacity_kW": 2019,
+    "centroid": {
+      "lat": 51.54,
+      "lng": -0.211
+    },
+    "metadata": {
+      "gsp_id": 318,
+      "full_name": "Acton Lane"
+    }
+  },
+  {
+    "name": "cell_1",
+    "type": "gsp",
+    "capacity_kW": 186728,
+    "centroid": {
+      "lat": 53.009,
+      "lng": -2.263
+    },
+    "metadata": {
+      "gsp_id": 60,
+      "full_name": "Cellarhead"
+    }
+  },
+  {
+    "name": "chic_1",
+    "type": "gsp",
+    "capacity_kW": 57334,
+    "centroid": {
+      "lat": 50.722,
+      "lng": -2.492
+    },
+    "metadata": {
+      "gsp_id": 64,
+      "full_name": "Chickerell"
+    }
+  },
+  {
+    "name": "chsi_1",
+    "type": "gsp",
+    "capacity_kW": 31216,
+    "centroid": {
+      "lat": 51.378,
+      "lng": -0.332
+    },
+    "metadata": {
+      "gsp_id": 65,
+      "full_name": "Chessington"
+    }
+  },
+  {
+    "name": "creb_1",
+    "type": "gsp",
+    "capacity_kW": 244999,
+    "centroid": {
+      "lat": 53.932,
+      "lng": -0.494
+    },
+    "metadata": {
+      "gsp_id": 78,
+      "full_name": "Creyke Beck"
+    }
+  },
+  {
+    "name": "drax_1",
+    "type": "gsp",
+    "capacity_kW": 10492,
+    "centroid": {
+      "lat": 53.778,
+      "lng": -1.001
+    },
+    "metadata": {
+      "gsp_id": 89,
+      "full_name": "Drax"
+    }
+  },
+  {
+    "name": "frod_1",
+    "type": "gsp",
+    "capacity_kW": 12706,
+    "centroid": {
+      "lat": 53.298,
+      "lng": -2.688
+    },
+    "metadata": {
+      "gsp_id": 126,
+      "full_name": "Frodsham"
+    }
+  },
+  {
+    "name": "ecla_1",
+    "type": "gsp",
+    "capacity_kW": 214134,
+    "centroid": {
+      "lat": 52.048,
+      "lng": -1.019
+    },
+    "metadata": {
+      "gsp_id": 103,
+      "full_name": "East Claydon"
+    }
+  },
+  {
+    "name": "ende_1",
+    "type": "gsp",
+    "capacity_kW": 216614,
+    "centroid": {
+      "lat": 52.657,
+      "lng": -1.24
+    },
+    "metadata": {
+      "gsp_id": 111,
+      "full_name": "Enderby"
+    }
+  },
+  {
+    "name": "ferrb_m",
+    "type": "gsp",
+    "capacity_kW": 59867,
+    "centroid": {
+      "lat": 53.828,
+      "lng": -1.328
+    },
+    "metadata": {
+      "gsp_id": 119,
+      "full_name": "Ferrybridge (Zone 2)"
+    }
+  },
+  {
+    "name": "gren_1",
+    "type": "gsp",
+    "capacity_kW": 397073,
+    "centroid": {
+      "lat": 52.461,
+      "lng": -0.764
+    },
+    "metadata": {
+      "gsp_id": 135,
+      "full_name": "Grendon"
+    }
+  },
+  {
+    "name": "griw_1",
+    "type": "gsp",
+    "capacity_kW": 99993,
+    "centroid": {
+      "lat": 53.585,
+      "lng": -0.209
+    },
+    "metadata": {
+      "gsp_id": 136,
+      "full_name": "Grimsby West"
+    }
+  },
+  {
+    "name": "newx_6",
+    "type": "gsp",
+    "capacity_kW": 19745,
+    "centroid": {
+      "lat": 51.477,
+      "lng": -0.066
+    },
+    "metadata": {
+      "gsp_id": 209,
+      "full_name": "New Cross"
+    }
+  },
+  {
+    "name": "impk_1",
+    "type": "gsp",
+    "capacity_kW": 0.001,
+    "centroid": {
+      "lat": 51.556,
+      "lng": -3.037
+    },
+    "metadata": {
+      "gsp_id": 151,
+      "full_name": "Imperial Park"
+    }
+  },
+  {
+    "name": "abth_1",
+    "type": "gsp",
+    "capacity_kW": 104672,
+    "centroid": {
+      "lat": 51.438,
+      "lng": -3.352
+    },
+    "metadata": {
+      "gsp_id": 3,
+      "full_name": "Aberthaw"
+    }
+  },
+  {
+    "name": "jord_3",
+    "type": "gsp",
+    "capacity_kW": 8105,
+    "centroid": {
+      "lat": 53.323,
+      "lng": -1.519
+    },
+    "metadata": {
+      "gsp_id": 160,
+      "full_name": "Jordanthorpe"
+    }
+  },
+  {
+    "name": "temp_3",
+    "type": "gsp",
+    "capacity_kW": 664,
+    "centroid": {
+      "lat": 53.413,
+      "lng": -1.335
+    },
+    "metadata": {
+      "gsp_id": 286,
+      "full_name": "Templeborough"
+    }
+  },
+  {
+    "name": "wiba_3",
+    "type": "gsp",
+    "capacity_kW": 2362,
+    "centroid": {
+      "lat": 53.432,
+      "lng": -1.409
+    },
+    "metadata": {
+      "gsp_id": 307,
+      "full_name": "Wincobank"
+    }
+  },
+  {
+    "name": "wien_1",
+    "type": "gsp",
+    "capacity_kW": 7305,
+    "centroid": {
+      "lat": 52.584,
+      "lng": -2.055
+    },
+    "metadata": {
+      "gsp_id": 308,
+      "full_name": "Willenhall"
+    }
+  },
+  {
+    "name": "wmel_1",
+    "type": "gsp",
+    "capacity_kW": 51610,
+    "centroid": {
+      "lat": 53.502,
+      "lng": -1.596
+    },
+    "metadata": {
+      "gsp_id": 312,
+      "full_name": "West Melton"
+    }
+  },
+  {
+    "name": "kino_1",
+    "type": "gsp",
+    "capacity_kW": 42902,
+    "centroid": {
+      "lat": 51.379,
+      "lng": 0.468
+    },
+    "metadata": {
+      "gsp_id": 174,
+      "full_name": "Kingsnorth"
+    }
+  },
+  {
+    "name": "lega_1",
+    "type": "gsp",
+    "capacity_kW": 228005,
+    "centroid": {
+      "lat": 52.776,
+      "lng": -3.156
+    },
+    "metadata": {
+      "gsp_id": 182,
+      "full_name": "Legacy"
+    }
+  },
+  {
+    "name": "litt_j",
+    "type": "gsp",
+    "capacity_kW": 265,
+    "centroid": {
+      "lat": 51.429,
+      "lng": 0.2
+    },
+    "metadata": {
+      "gsp_id": 188,
+      "full_name": "Littlebrook (Zone 2)"
+    }
+  },
+  {
+    "name": "love_1",
+    "type": "gsp",
+    "capacity_kW": 285734,
+    "centroid": {
+      "lat": 50.869,
+      "lng": -0.853
+    },
+    "metadata": {
+      "gsp_id": 191,
+      "full_name": "Lovedean"
+    }
+  },
+  {
+    "name": "mann_1",
+    "type": "gsp",
+    "capacity_kW": 555653,
+    "centroid": {
+      "lat": 50.9,
+      "lng": -1.988
+    },
+    "metadata": {
+      "gsp_id": 197,
+      "full_name": "Mannington"
+    }
+  },
+  {
+    "name": "melk_1",
+    "type": "gsp",
+    "capacity_kW": 654363,
+    "centroid": {
+      "lat": 51.344,
+      "lng": -2.011
+    },
+    "metadata": {
+      "gsp_id": 199,
+      "full_name": "Melksham"
+    }
+  },
+  {
+    "name": "norm_1|sall1",
+    "type": "gsp",
+    "capacity_kW": 440719,
+    "centroid": {
+      "lat": 52.67,
+      "lng": 1.316
+    },
+    "metadata": {
+      "gsp_id": 214,
+      "full_name": "Norwich Main"
+    }
+  },
+  {
+    "name": "osba_1",
+    "type": "gsp",
+    "capacity_kW": 52523,
+    "centroid": {
+      "lat": 54.215,
+      "lng": -0.813
+    },
+    "metadata": {
+      "gsp_id": 220,
+      "full_name": "Osbaldwick"
+    }
+  },
+  {
+    "name": "pemb_1",
+    "type": "gsp",
+    "capacity_kW": 219507,
+    "centroid": {
+      "lat": 51.824,
+      "lng": -4.945
+    },
+    "metadata": {
+      "gsp_id": 227,
+      "full_name": "Pembroke"
+    }
+  },
+  {
+    "name": "pene_1",
+    "type": "gsp",
+    "capacity_kW": 72118,
+    "centroid": {
+      "lat": 53.8,
+      "lng": -2.63
+    },
+    "metadata": {
+      "gsp_id": 228,
+      "full_name": "Penwortham"
+    }
+  },
+  {
+    "name": "rayl_1",
+    "type": "gsp",
+    "capacity_kW": 480949,
+    "centroid": {
+      "lat": 51.713,
+      "lng": 0.729
+    },
+    "metadata": {
+      "gsp_id": 245,
+      "full_name": "Rayleigh"
+    }
+  },
+  {
+    "name": "rebr_3",
+    "type": "gsp",
+    "capacity_kW": 6946,
+    "centroid": {
+      "lat": 51.564,
+      "lng": 0.073
+    },
+    "metadata": {
+      "gsp_id": 246,
+      "full_name": "Redbridge"
+    }
+  },
+  {
+    "name": "roch_1",
+    "type": "gsp",
+    "capacity_kW": 26087,
+    "centroid": {
+      "lat": 53.689,
+      "lng": -2.17
+    },
+    "metadata": {
+      "gsp_id": 249,
+      "full_name": "Rochdale"
+    }
+  },
+  {
+    "name": "rugeb1",
+    "type": "gsp",
+    "capacity_kW": 89490,
+    "centroid": {
+      "lat": 52.721,
+      "lng": -1.897
+    },
+    "metadata": {
+      "gsp_id": 250,
+      "full_name": "Rugeley"
+    }
+  },
+  {
+    "name": "sell_1",
+    "type": "gsp",
+    "capacity_kW": 106062,
+    "centroid": {
+      "lat": 51.116,
+      "lng": 0.925
+    },
+    "metadata": {
+      "gsp_id": 258,
+      "full_name": "Sellindge"
+    }
+  },
+  {
+    "name": "sklgb1",
+    "type": "gsp",
+    "capacity_kW": 58707,
+    "centroid": {
+      "lat": 53.753,
+      "lng": -1.608
+    },
+    "metadata": {
+      "gsp_id": 267,
+      "full_name": "Skelton Grange"
+    }
+  },
+  {
+    "name": "wylf_1",
+    "type": "gsp",
+    "capacity_kW": 121736,
+    "centroid": {
+      "lat": 53.29,
+      "lng": -4.382
+    },
+    "metadata": {
+      "gsp_id": 316,
+      "full_name": "Wylfa"
+    }
+  },
+  {
+    "name": "axmi_h",
+    "type": "gsp",
+    "capacity_kW": 146617,
+    "centroid": {
+      "lat": 50.943,
+      "lng": -2.511
+    },
+    "metadata": {
+      "gsp_id": 319,
+      "full_name": "Axminster"
+    }
+  },
+  {
+    "name": "cantn1",
+    "type": "gsp",
+    "capacity_kW": 135475,
+    "centroid": {
+      "lat": 51.268,
+      "lng": 0.961
+    },
+    "metadata": {
+      "gsp_id": 323,
+      "full_name": "Cantebury"
+    }
+  },
+  {
+    "name": "hutt_1",
+    "type": "gsp",
+    "capacity_kW": 61688,
+    "centroid": {
+      "lat": 54.476,
+      "lng": -2.642
+    },
+    "metadata": {
+      "gsp_id": 329,
+      "full_name": "Hutton"
+    }
+  },
+  {
+    "name": "kear_1",
+    "type": "gsp",
+    "capacity_kW": 54586,
+    "centroid": {
+      "lat": 53.577,
+      "lng": -2.43
+    },
+    "metadata": {
+      "gsp_id": 331,
+      "full_name": "Kearsley 1"
+    }
+  },
+  {
+    "name": "rich_j|rich1",
+    "type": "gsp",
+    "capacity_kW": 66786,
+    "centroid": {
+      "lat": 51.298,
+      "lng": 1.339
+    },
+    "metadata": {
+      "gsp_id": 334,
+      "full_name": "Richborough"
+    }
+  },
+  {
+    "name": "besw_1",
+    "type": "gsp",
+    "capacity_kW": 288294,
+    "centroid": {
+      "lat": 52.284,
+      "lng": -1.53
+    },
+    "metadata": {
+      "gsp_id": 23,
+      "full_name": "Berkswell"
+    }
+  },
+  {
+    "name": "bicf_1",
+    "type": "gsp",
+    "capacity_kW": 295170,
+    "centroid": {
+      "lat": 53.077,
+      "lng": -0.222
+    },
+    "metadata": {
+      "gsp_id": 24,
+      "full_name": "Bicker Fen"
+    }
+  },
+  {
+    "name": "birk_1",
+    "type": "gsp",
+    "capacity_kW": 27428,
+    "centroid": {
+      "lat": 53.355,
+      "lng": -3.069
+    },
+    "metadata": {
+      "gsp_id": 25,
+      "full_name": "Birkenhead"
+    }
+  },
+  {
+    "name": "botw_1",
+    "type": "gsp",
+    "capacity_kW": 69252,
+    "centroid": {
+      "lat": 50.933,
+      "lng": -1.24
+    },
+    "metadata": {
+      "gsp_id": 32,
+      "full_name": "Botley Wood"
+    }
+  },
+  {
+    "name": "brai_1",
+    "type": "gsp",
+    "capacity_kW": 80911,
+    "centroid": {
+      "lat": 51.865,
+      "lng": 0.56
+    },
+    "metadata": {
+      "gsp_id": 34,
+      "full_name": "Braintree"
+    }
+  },
+  {
+    "name": "kitw_1",
+    "type": "gsp",
+    "capacity_kW": 31713,
+    "centroid": {
+      "lat": 52.415,
+      "lng": -1.973
+    },
+    "metadata": {
+      "gsp_id": 176,
+      "full_name": "Kitwell"
+    }
+  },
+  {
+    "name": "lisd_1",
+    "type": "gsp",
+    "capacity_kW": 22428,
+    "centroid": {
+      "lat": 53.376,
+      "lng": -2.915
+    },
+    "metadata": {
+      "gsp_id": 186,
+      "full_name": "Lister Drive"
+    }
+  },
+  {
+    "name": "ella_1",
+    "type": "gsp",
+    "capacity_kW": 42053,
+    "centroid": {
+      "lat": 53.658,
+      "lng": -1.866
+    },
+    "metadata": {
+      "gsp_id": 109,
+      "full_name": "Elland"
+    }
+  },
+  {
+    "name": "fawl_1",
+    "type": "gsp",
+    "capacity_kW": 104296,
+    "centroid": {
+      "lat": 50.713,
+      "lng": -1.333
+    },
+    "metadata": {
+      "gsp_id": 116,
+      "full_name": "Fawley"
+    }
+  },
+  {
+    "name": "feck_6",
+    "type": "gsp",
+    "capacity_kW": 410207,
+    "centroid": {
+      "lat": 52.087,
+      "lng": -1.834
+    },
+    "metadata": {
+      "gsp_id": 117,
+      "full_name": "Feckenham"
+    }
+  },
+  {
+    "name": "hamhc1",
+    "type": "gsp",
+    "capacity_kW": 158651,
+    "centroid": {
+      "lat": 52.528,
+      "lng": -1.687
+    },
+    "metadata": {
+      "gsp_id": 142,
+      "full_name": "Hams Hall"
+    }
+  },
+  {
+    "name": "heys_1|heys1|ormo",
+    "type": "gsp",
+    "capacity_kW": 31721,
+    "centroid": {
+      "lat": 54.039,
+      "lng": -2.748
+    },
+    "metadata": {
+      "gsp_id": 148,
+      "full_name": "Heysham"
+    }
+  },
+  {
+    "name": "iroa1",
+    "type": "gsp",
+    "capacity_kW": 286179,
+    "centroid": {
+      "lat": 51.61,
+      "lng": -2.377
+    },
+    "metadata": {
+      "gsp_id": 155,
+      "full_name": "Iron Acton"
+    }
+  },
+  {
+    "name": "iver_1|iver_6",
+    "type": "gsp",
+    "capacity_kW": 34881,
+    "centroid": {
+      "lat": 51.543,
+      "lng": -0.566
+    },
+    "metadata": {
+      "gsp_id": 158,
+      "full_name": "Iver"
+    }
+  },
+  {
+    "name": "kead_1",
+    "type": "gsp",
+    "capacity_kW": 240191,
+    "centroid": {
+      "lat": 53.46,
+      "lng": -0.381
+    },
+    "metadata": {
+      "gsp_id": 162,
+      "full_name": "Keadby"
+    }
+  },
+  {
+    "name": "kiby_1",
+    "type": "gsp",
+    "capacity_kW": 35718,
+    "centroid": {
+      "lat": 53.539,
+      "lng": -2.976
+    },
+    "metadata": {
+      "gsp_id": 165,
+      "full_name": "Kirkby (Zone 1)"
+    }
+  },
+  {
+    "name": "lale1sg003",
+    "type": "gsp",
+    "capacity_kW": 24161,
+    "centroid": {
+      "lat": 51.432,
+      "lng": -0.503
+    },
+    "metadata": {
+      "gsp_id": 180,
+      "full_name": "Laleham"
+    }
+  },
+  {
+    "name": "padib1",
+    "type": "gsp",
+    "capacity_kW": 37460,
+    "centroid": {
+      "lat": 53.934,
+      "lng": -2.322
+    },
+    "metadata": {
+      "gsp_id": 221,
+      "full_name": "Padiham"
+    }
+  },
+  {
+    "name": "penw_1|stah_1|wabo",
+    "type": "gsp",
+    "capacity_kW": 102596,
+    "centroid": {
+      "lat": 53.765,
+      "lng": -2.814
+    },
+    "metadata": {
+      "gsp_id": 231,
+      "full_name": "Penwortham"
+    }
+  },
+  {
+    "name": "popp_3",
+    "type": "gsp",
+    "capacity_kW": 6833,
+    "centroid": {
+      "lat": 53.993,
+      "lng": -1.194
+    },
+    "metadata": {
+      "gsp_id": 235,
+      "full_name": "Poppleton"
+    }
+  },
+  {
+    "name": "neep_3",
+    "type": "gsp",
+    "capacity_kW": 8758,
+    "centroid": {
+      "lat": 53.415,
+      "lng": -1.591
+    },
+    "metadata": {
+      "gsp_id": 207,
+      "full_name": "Neepsend"
+    }
+  },
+  {
+    "name": "salh_1",
+    "type": "gsp",
+    "capacity_kW": 1564,
+    "centroid": {
+      "lat": 54.629,
+      "lng": -1.208
+    },
+    "metadata": {
+      "gsp_id": 253,
+      "full_name": "Saltholme"
+    }
+  },
+  {
+    "name": "rain_1",
+    "type": "gsp",
+    "capacity_kW": 48136,
+    "centroid": {
+      "lat": 53.435,
+      "lng": -2.711
+    },
+    "metadata": {
+      "gsp_id": 240,
+      "full_name": "Rainhill"
+    }
+  },
+  {
+    "name": "alve1",
+    "type": "gsp",
+    "capacity_kW": 445485,
+    "centroid": {
+      "lat": 50.894,
+      "lng": -4.111
+    },
+    "metadata": {
+      "gsp_id": 8,
+      "full_name": "Alverdiscott"
+    }
+  },
+  {
+    "name": "exet1",
+    "type": "gsp",
+    "capacity_kW": 222768,
+    "centroid": {
+      "lat": 50.816,
+      "lng": -3.459
+    },
+    "metadata": {
+      "gsp_id": 113,
+      "full_name": "Exeter"
+    }
+  },
+  {
+    "name": "tott_1",
+    "type": "gsp",
+    "capacity_kW": 16645,
+    "centroid": {
+      "lat": 51.629,
+      "lng": -0.101
+    },
+    "metadata": {
+      "gsp_id": 291,
+      "full_name": "Tottenham"
+    }
+  },
+  {
+    "name": "kirkb1",
+    "type": "gsp",
+    "capacity_kW": 22079,
+    "centroid": {
+      "lat": 53.789,
+      "lng": -1.592
+    },
+    "metadata": {
+      "gsp_id": 175,
+      "full_name": "Kirkstall"
+    }
+  },
+  {
+    "name": "walh_1",
+    "type": "gsp",
+    "capacity_kW": 122554,
+    "centroid": {
+      "lat": 51.863,
+      "lng": -2.304
+    },
+    "metadata": {
+      "gsp_id": 296,
+      "full_name": "Walham"
+    }
+  },
+  {
+    "name": "walp_1",
+    "type": "gsp",
+    "capacity_kW": 345101,
+    "centroid": {
+      "lat": 52.661,
+      "lng": 0.407
+    },
+    "metadata": {
+      "gsp_id": 297,
+      "full_name": "Walpole (Zone 1)"
+    }
+  },
+  {
+    "name": "walp_b",
+    "type": "gsp",
+    "capacity_kW": 218867,
+    "centroid": {
+      "lat": 52.828,
+      "lng": -0.15
+    },
+    "metadata": {
+      "gsp_id": 298,
+      "full_name": "Walpole (Zone 2)"
+    }
+  },
+  {
+    "name": "warl_1",
+    "type": "gsp",
+    "capacity_kW": 147837,
+    "centroid": {
+      "lat": 51.598,
+      "lng": 0.301
+    },
+    "metadata": {
+      "gsp_id": 299,
+      "full_name": "Warley"
+    }
+  },
+  {
+    "name": "watfs_1",
+    "type": "gsp",
+    "capacity_kW": 31579,
+    "centroid": {
+      "lat": 51.691,
+      "lng": -0.55
+    },
+    "metadata": {
+      "gsp_id": 300,
+      "full_name": "Watford South"
+    }
+  },
+  {
+    "name": "knar",
+    "type": "gsp",
+    "capacity_kW": 72241,
+    "centroid": {
+      "lat": 54.137,
+      "lng": -1.457
+    },
+    "metadata": {
+      "gsp_id": 177,
+      "full_name": "Knaresborough"
+    }
+  },
+  {
+    "name": "whga_1",
+    "type": "gsp",
+    "capacity_kW": 26075,
+    "centroid": {
+      "lat": 53.544,
+      "lng": -2.151
+    },
+    "metadata": {
+      "gsp_id": 305,
+      "full_name": "Whitegate"
+    }
+  },
+  {
+    "name": "will_1",
+    "type": "gsp",
+    "capacity_kW": 124787,
+    "centroid": {
+      "lat": 53.017,
+      "lng": -1.595
+    },
+    "metadata": {
+      "gsp_id": 309,
+      "full_name": "Willington"
+    }
+  },
+  {
+    "name": "wwey_1",
+    "type": "gsp",
+    "capacity_kW": 58008,
+    "centroid": {
+      "lat": 51.281,
+      "lng": -0.451
+    },
+    "metadata": {
+      "gsp_id": 315,
+      "full_name": "West Weybridge"
+    }
+  },
+  {
+    "name": "axmi1",
+    "type": "gsp",
+    "capacity_kW": 121127,
+    "centroid": {
+      "lat": 50.821,
+      "lng": -2.876
+    },
+    "metadata": {
+      "gsp_id": 13,
+      "full_name": "Axminster"
+    }
+  },
+  {
+    "name": "beddt1",
+    "type": "gsp",
+    "capacity_kW": 10703,
+    "centroid": {
+      "lat": 51.424,
+      "lng": -0.028
+    },
+    "metadata": {
+      "gsp_id": 19,
+      "full_name": "Beddington (Zone 1)"
+    }
+  },
+  {
+    "name": "harm_6",
+    "type": "gsp",
+    "capacity_kW": 141782,
+    "centroid": {
+      "lat": 54.686,
+      "lng": -1.313
+    },
+    "metadata": {
+      "gsp_id": 144,
+      "full_name": "Hart Moor"
+    }
+  },
+  {
+    "name": "macc_3",
+    "type": "gsp",
+    "capacity_kW": 11862,
+    "centroid": {
+      "lat": 53.248,
+      "lng": -2.112
+    },
+    "metadata": {
+      "gsp_id": 194,
+      "full_name": "Macclesfield"
+    }
+  },
+  {
+    "name": "pits_3",
+    "type": "gsp",
+    "capacity_kW": 5441,
+    "centroid": {
+      "lat": 53.417,
+      "lng": -1.448
+    },
+    "metadata": {
+      "gsp_id": 233,
+      "full_name": "Pitsmoor"
+    }
+  },
+  {
+    "name": "ecla_h",
+    "type": "gsp",
+    "capacity_kW": 13858,
+    "centroid": {
+      "lat": 51.939,
+      "lng": -1.167
+    },
+    "metadata": {
+      "gsp_id": 325,
+      "full_name": "East Claydon 2"
+    }
+  },
+  {
+    "name": "isli_1",
+    "type": "gsp",
+    "capacity_kW": 4741,
+    "centroid": {
+      "lat": 51.557,
+      "lng": -0.126
+    },
+    "metadata": {
+      "gsp_id": 330,
+      "full_name": "Islington"
+    }
+  },
+  {
+    "name": "burm_1",
+    "type": "gsp",
+    "capacity_kW": 342832,
+    "centroid": {
+      "lat": 52.251,
+      "lng": 0.235
+    },
+    "metadata": {
+      "gsp_id": 47,
+      "full_name": "Burwell Main"
+    }
+  },
+  {
+    "name": "bust_1",
+    "type": "gsp",
+    "capacity_kW": 25375,
+    "centroid": {
+      "lat": 52.563,
+      "lng": -1.93
+    },
+    "metadata": {
+      "gsp_id": 49,
+      "full_name": "Bustleholme"
+    }
+  },
+  {
+    "name": "conqa1|sasa",
+    "type": "gsp",
+    "capacity_kW": 142560,
+    "centroid": {
+      "lat": 53.187,
+      "lng": -3.29
+    },
+    "metadata": {
+      "gsp_id": 72,
+      "full_name": "Connahs Quay"
+    }
+  },
+  {
+    "name": "kiby_g|wasf_1",
+    "type": "gsp",
+    "capacity_kW": 19560,
+    "centroid": {
+      "lat": 53.564,
+      "lng": -2.804
+    },
+    "metadata": {
+      "gsp_id": 166,
+      "full_name": "Kirkby (Zone 2)"
+    }
+  },
+  {
+    "name": "norl_3",
+    "type": "gsp",
+    "capacity_kW": 7973,
+    "centroid": {
+      "lat": 53.362,
+      "lng": -1.525
+    },
+    "metadata": {
+      "gsp_id": 213,
+      "full_name": "Norton Lees"
+    }
+  },
+  {
+    "name": "pent_1",
+    "type": "gsp",
+    "capacity_kW": 49693,
+    "centroid": {
+      "lat": 53.147,
+      "lng": -3.889
+    },
+    "metadata": {
+      "gsp_id": 230,
+      "full_name": "Pentir"
+    }
+  },
+  {
+    "name": "pyle_1",
+    "type": "gsp",
+    "capacity_kW": 45850,
+    "centroid": {
+      "lat": 51.505,
+      "lng": -3.631
+    },
+    "metadata": {
+      "gsp_id": 238,
+      "full_name": "Pyle"
+    }
+  },
+  {
+    "name": "kear_3",
+    "type": "gsp",
+    "capacity_kW": 21204,
+    "centroid": {
+      "lat": 53.531,
+      "lng": -2.363
+    },
+    "metadata": {
+      "gsp_id": 332,
+      "full_name": "Kearsley 3"
+    }
+  },
+  {
+    "name": "actl_2|cbnk_h|gree_h|peri_h|powe_h|wesa_h",
+    "type": "gsp",
+    "capacity_kW": 5299,
+    "centroid": {
+      "lat": 51.533,
+      "lng": -0.316
+    },
+    "metadata": {
+      "gsp_id": 350,
+      "full_name": "Willesden (Zone 1)"
+    }
+  },
+  {
+    "name": "carr_1|fidf_1",
+    "type": "gsp",
+    "capacity_kW": 73558,
+    "centroid": {
+      "lat": 53.312,
+      "lng": -2.46
+    },
+    "metadata": {
+      "gsp_id": 351,
+      "full_name": "Carrington & Fiddlers Ferry"
+    }
+  },
+  {
+    "name": "brle_1",
+    "type": "gsp",
+    "capacity_kW": 102546,
+    "centroid": {
+      "lat": 51.406,
+      "lng": -1.247
+    },
+    "metadata": {
+      "gsp_id": 343,
+      "full_name": "Bramley"
+    }
+  },
+  {
+    "name": "safo_1",
+    "type": "gsp",
+    "capacity_kW": 110776,
+    "centroid": {
+      "lat": 51.329,
+      "lng": -2.803
+    },
+    "metadata": {
+      "gsp_id": 347,
+      "full_name": "Sandford"
+    }
+  },
+  {
+    "name": "easo_1",
+    "type": "gsp",
+    "capacity_kW": 282948,
+    "centroid": {
+      "lat": 52.29,
+      "lng": -0.214
+    },
+    "metadata": {
+      "gsp_id": 101,
+      "full_name": "Eaton Socon"
+    }
+  }
+]

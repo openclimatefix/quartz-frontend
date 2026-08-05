@@ -1,0 +1,159 @@
+[
+  {
+    "country": "GB",
+    "name": "Great Britain",
+    "capacity_kW": 21904641,
+    "centroid": {
+      "lat": 54.142,
+      "lng": -2.738
+    },
+    "region_types": [
+      {
+        "type": "national",
+        "label": "National",
+        "level": 0,
+        "default_model": "blend_adjust",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "blend_adjust",
+            "label": "Blend (Trend Adjusted)"
+          },
+          {
+            "name": "pvnet_ecmwf",
+            "label": "PVNet Intraday (ECMWF)"
+          },
+          {
+            "name": "pvnet_ecmwf_adjust",
+            "label": "PVNet Intraday (ECMWF, Trend Adjusted)"
+          },
+          {
+            "name": "pvnet_sat",
+            "label": "PVNet Intraday (Satellite)"
+          },
+          {
+            "name": "pvnet_sat_adjust",
+            "label": "PVNet Intraday (Satellite, Trend Adjusted)"
+          },
+          {
+            "name": "pvnet_ukv",
+            "label": "PVNet Intraday (Met Office)"
+          },
+          {
+            "name": "pvnet_ukv_adjust",
+            "label": "PVNet Intraday (Met Office, Trend Adjusted)"
+          },
+          {
+            "name": "pvnet_intraday",
+            "label": "PVNet Intraday"
+          },
+          {
+            "name": "pvnet_intraday_adjust",
+            "label": "PVNet Intraday (Trend Adjusted)"
+          },
+          {
+            "name": "pvnet_day_ahead",
+            "label": "PVNet Day Ahead"
+          },
+          {
+            "name": "pvnet_day_ahead_adjust",
+            "label": "PVNet Day Ahead (Trend Adjusted)"
+          }
+        ]
+      },
+      {
+        "type": "gsp",
+        "label": "Grid Supply Point",
+        "level": 10,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "pvnet_intraday",
+            "label": "PVNet Intraday"
+          },
+          {
+            "name": "pvnet_day_ahead",
+            "label": "PVNet Day Ahead"
+          }
+        ]
+      }
+    ],
+    "generation_sources": [
+      {
+        "source": "solar",
+        "name": "pvlive_in_day",
+        "label": "PV Live Estimated"
+      },
+      {
+        "source": "solar",
+        "name": "pvlive_day_after",
+        "label": "PV Live Updated"
+      }
+    ]
+  },
+  {
+    "country": "NL",
+    "name": "Nederland",
+    "capacity_kW": 25098183.853,
+    "centroid": {
+      "lat": 52.13,
+      "lng": 5.29
+    },
+    "region_types": [
+      {
+        "type": "national",
+        "label": "National",
+        "level": 0,
+        "default_model": "blend_adjust",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "blend_adjust",
+            "label": "Blend (Trend Adjusted)"
+          },
+          {
+            "name": "ecmwf_mo_sat_uncurtailed",
+            "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed"
+          },
+          {
+            "name": "ecmwf_mo_sat_uncurtailed_adjust",
+            "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed (Trend Adjusted)"
+          }
+        ]
+      },
+      {
+        "type": "province",
+        "label": "Province",
+        "level": 10,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_mo_sat_uncurtailed",
+            "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed"
+          }
+        ]
+      }
+    ],
+    "generation_sources": [
+      {
+        "source": "solar",
+        "name": "ned_nl",
+        "label": "NED NL Initial"
+      }
+    ]
+  }
+]

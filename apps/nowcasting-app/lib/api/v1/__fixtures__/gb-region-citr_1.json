@@ -1,0 +1,13 @@
+{
+  "name": "citr_1",
+  "type": "gsp",
+  "capacity_kW": 3982,
+  "centroid": {
+    "lat": 51.52,
+    "lng": -0.096
+  },
+  "metadata": {
+    "gsp_id": 67,
+    "full_name": "City Road"
+  }
+}

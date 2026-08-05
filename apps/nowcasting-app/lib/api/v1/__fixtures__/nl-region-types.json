@@ -1,0 +1,42 @@
+[
+  {
+    "type": "national",
+    "label": "National",
+    "level": 0,
+    "default_model": "nl_blend_adjust",
+    "forecast_models": [
+      {
+        "name": "blend",
+        "label": "Blend"
+      },
+      {
+        "name": "blend_adjust",
+        "label": "Blend (Trend Adjusted)"
+      },
+      {
+        "name": "ecmwf_mo_sat_uncurtailed",
+        "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed"
+      },
+      {
+        "name": "ecmwf_mo_sat_uncurtailed_adjust",
+        "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed (Trend Adjusted)"
+      }
+    ]
+  },
+  {
+    "type": "province",
+    "label": "Province",
+    "level": 10,
+    "default_model": "nl_blend",
+    "forecast_models": [
+      {
+        "name": "blend",
+        "label": "Blend"
+      },
+      {
+        "name": "ecmwf_mo_sat_uncurtailed",
+        "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed"
+      }
+    ]
+  }
+]

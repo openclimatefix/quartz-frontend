@@ -1,0 +1,78 @@
+[
+  {
+    "type": "national",
+    "label": "National",
+    "level": 0,
+    "default_model": "blend_adjust",
+    "forecast_models": [
+      {
+        "name": "blend",
+        "label": "Blend"
+      },
+      {
+        "name": "blend_adjust",
+        "label": "Blend (Trend Adjusted)"
+      },
+      {
+        "name": "pvnet_ecmwf",
+        "label": "PVNet Intraday (ECMWF)"
+      },
+      {
+        "name": "pvnet_ecmwf_adjust",
+        "label": "PVNet Intraday (ECMWF, Trend Adjusted)"
+      },
+      {
+        "name": "pvnet_sat",
+        "label": "PVNet Intraday (Satellite)"
+      },
+      {
+        "name": "pvnet_sat_adjust",
+        "label": "PVNet Intraday (Satellite, Trend Adjusted)"
+      },
+      {
+        "name": "pvnet_ukv",
+        "label": "PVNet Intraday (Met Office)"
+      },
+      {
+        "name": "pvnet_ukv_adjust",
+        "label": "PVNet Intraday (Met Office, Trend Adjusted)"
+      },
+      {
+        "name": "pvnet_intraday",
+        "label": "PVNet Intraday"
+      },
+      {
+        "name": "pvnet_intraday_adjust",
+        "label": "PVNet Intraday (Trend Adjusted)"
+      },
+      {
+        "name": "pvnet_day_ahead",
+        "label": "PVNet Day Ahead"
+      },
+      {
+        "name": "pvnet_day_ahead_adjust",
+        "label": "PVNet Day Ahead (Trend Adjusted)"
+      }
+    ]
+  },
+  {
+    "type": "gsp",
+    "label": "Grid Supply Point",
+    "level": 10,
+    "default_model": "blend",
+    "forecast_models": [
+      {
+        "name": "blend",
+        "label": "Blend"
+      },
+      {
+        "name": "pvnet_intraday",
+        "label": "PVNet Intraday"
+      },
+      {
+        "name": "pvnet_day_ahead",
+        "label": "PVNet Day Ahead"
+      }
+    ]
+  }
+]
