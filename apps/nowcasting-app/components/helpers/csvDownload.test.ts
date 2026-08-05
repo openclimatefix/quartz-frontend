@@ -671,3 +671,104 @@ describe("end to end: buildCsvRows into generateCsv", () => {
     ]);
   });
 });
+
+describe("RFC 4180 escaping", () => {
+  // Every cell is a number or an ISO datetime today, so nothing here changes the current export.
+  // Phase 3 puts country and region labels into this file, and one label with a comma in it would
+  // silently shift every column after it on that row — hence the escaping, and hence these tests
+  // using labels far nastier than anything expected.
+  const row = (overrides: Partial<CSVRow> = {}): CSVRow => ({
+    startDateTime: "2025-01-15T11:30:00.000+00:00",
+    endDateTime: "2025-01-15T12:00:00.000+00:00",
+    settlementPeriod: 24,
+    solarGenerationPvliveInitial: 1000,
+    solarGenerationPvliveUpdated: 1100,
+    delta: 200,
+    solarForecast: 900,
+    nForecast: 950,
+    pLevelValues: { 10: 400, 90: 600 },
+    ...overrides
+  });
+
+  // Not `rowsOf`: an escaped cell may legitimately contain a newline, so the record cannot be
+  // recovered by splitting on "\n". Everything after the header line is the single cell.
+  const oneCell = (value: string) => {
+    const csv = generateCsv([row({ startDateTime: value })], ["startDateTime"], 4, []);
+    return csv.slice(csv.indexOf("\n") + 1);
+  };
+
+  test.each([
+    ["Kingston upon Hull, Yorkshire", '"Kingston upon Hull, Yorkshire"'],
+    ['He said "hi"', '"He said ""hi"""'],
+    ['"', '""""'],
+    ["a\nb", '"a\nb"'],
+    ["a\r\nb", '"a\r\nb"'],
+    ['Noord-Holland, "NL"\r\n', '"Noord-Holland, ""NL""\r\n"'],
+    [",", '","'],
+    ["Zuid-Holland", "Zuid-Holland"], // nothing to escape, so nothing added
+    ["2025-01-15T11:30:00.000+00:00", "2025-01-15T11:30:00.000+00:00"]
+  ])("cell %p renders as %p", (value, expected) => {
+    expect(oneCell(value)).toBe(expected);
+  });
+
+  test("an escaped cell keeps the row parseable: the separator count is unchanged", () => {
+    const csv = generateCsv(
+      [row({ startDateTime: "a,b,c" })],
+      ["startDateTime", "settlementPeriod"],
+      4,
+      []
+    );
+    // Two columns means exactly one *separating* comma outside the quotes.
+    expect(rowsOf(csv)[1]).toBe('"a,b,c",24');
+  });
+
+  test("headers go through the same escaping as cells", () => {
+    // Not reachable today — the only interpolated header comes from a number — but Phase 3's
+    // country and region labels land in headers as well as cells.
+    const csv = generateCsv([row()], ["nForecast"], "4, or so" as unknown as number, []);
+    expect(rowsOf(csv)[0]).toBe('"4, or so-hour forecast (MW)"');
+  });
+
+  test("null and numeric cells are untouched", () => {
+    const csv = generateCsv([row({ nForecast: null, delta: 0 })], ["nForecast", "delta"], 4, []);
+    expect(rowsOf(csv)[1]).toBe(",0");
+  });
+});
+
+describe("buildCsvRows — timezone parameterisation", () => {
+  // The zone the export renders datetimes in, and counts settlement periods from, is an argument
+  // now; Europe/London remains the default so today's export is byte-identical.
+  const at = (timestamp: string, timezone?: string) =>
+    buildCsvRows(
+      combined({
+        nationalForecastData: [{ targetTime: timestamp, expectedPowerGenerationMegawatts: 1 }]
+      }),
+      [],
+      timezone
+    )[0];
+
+  test("defaults to Europe/London", () => {
+    expect(at("2025-06-15T12:00:00+00:00")).toMatchObject({
+      startDateTime: "2025-06-15T12:30:00.000+01:00",
+      endDateTime: "2025-06-15T13:00:00.000+01:00",
+      settlementPeriod: 26
+    });
+  });
+
+  test("renders and numbers periods in Europe/Amsterdam when asked", () => {
+    expect(at("2025-01-15T12:00:00+00:00", "Europe/Amsterdam")).toMatchObject({
+      startDateTime: "2025-01-15T12:30:00.000+01:00",
+      endDateTime: "2025-01-15T13:00:00.000+01:00",
+      settlementPeriod: 26
+    });
+  });
+
+  test("a large offset rolls the date and restarts the period count", () => {
+    // Pacific/Auckland is +13 in January, so 12:00 UTC is 01:00 the next day — period 2, not 25.
+    expect(at("2025-01-15T12:00:00+00:00", "Pacific/Auckland")).toMatchObject({
+      startDateTime: "2025-01-16T00:30:00.000+13:00",
+      endDateTime: "2025-01-16T01:00:00.000+13:00",
+      settlementPeriod: 2
+    });
+  });
+});

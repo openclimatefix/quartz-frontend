@@ -42,10 +42,14 @@ const getColumnConfig = (
   }
 });
 
-const createEmptyRow = (timestamp: string): CSVRow => {
-  const end = DateTime.fromISO(timestamp).setZone("Europe/London");
+// Phase 3: the zone the export renders its datetimes in, and counts settlement periods from,
+// comes from the country registry. Defaulted so existing call sites are unchanged.
+export const DEFAULT_CSV_TIMEZONE = "Europe/London";
+
+const createEmptyRow = (timestamp: string, timezone: string): CSVRow => {
+  const end = DateTime.fromISO(timestamp).setZone(timezone);
   const start = end.minus({ minutes: 30 });
-  const settlementPeriod = getSettlementPeriodForDate(start);
+  const settlementPeriod = getSettlementPeriodForDate(start, timezone);
 
   return {
     startDateTime: start.toISO() || "",
@@ -60,9 +64,9 @@ const createEmptyRow = (timestamp: string): CSVRow => {
   };
 };
 
-const getOrCreateRow = (map: Map<string, CSVRow>, ts: string): CSVRow => {
+const getOrCreateRow = (map: Map<string, CSVRow>, ts: string, timezone: string): CSVRow => {
   if (!map.has(ts)) {
-    map.set(ts, createEmptyRow(ts));
+    map.set(ts, createEmptyRow(ts, timezone));
   }
   return map.get(ts)!;
 };
@@ -73,7 +77,8 @@ const getOrCreateRow = (map: Map<string, CSVRow>, ts: string): CSVRow => {
  */
 export const buildCsvRows = (
   combinedData: CombinedData | null,
-  pLevels: [number, number][]
+  pLevels: [number, number][],
+  timezone: string = DEFAULT_CSV_TIMEZONE
 ): CSVRow[] => {
   if (!combinedData) return [];
 
@@ -81,7 +86,7 @@ export const buildCsvRows = (
 
   // PV initial
   combinedData.pvRealDayInData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc);
+    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc, timezone);
     // B8: nullish check, not truthiness — a genuine 0 kW reading (every overnight
     // settlement period) must export as 0, not as a blank cell.
     row.solarGenerationPvliveInitial =
@@ -90,7 +95,7 @@ export const buildCsvRows = (
 
   // PV updated
   combinedData.pvRealDayAfterData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc);
+    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc, timezone);
     // B8: as above.
     row.solarGenerationPvliveUpdated =
       entry.solarGenerationKw != null ? entry.solarGenerationKw / 1000 : null;
@@ -104,7 +109,7 @@ export const buildCsvRows = (
 
   // Forecast
   combinedData.nationalForecastData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.targetTime);
+    const row = getOrCreateRow(dataByTimestamp, entry.targetTime, timezone);
     // `?? null` keeps a legitimate 0 MW forecast and normalises a missing value to null.
     row.solarForecast = entry.expectedPowerGenerationMegawatts ?? null;
     const plevelValues = entry.plevels as Record<string, number | undefined> | undefined;
@@ -115,7 +120,7 @@ export const buildCsvRows = (
 
   // N forecast
   combinedData.nationalNHourData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.targetTime);
+    const row = getOrCreateRow(dataByTimestamp, entry.targetTime, timezone);
     row.nForecast = entry.expectedPowerGenerationMegawatts ?? null;
   });
 
@@ -131,11 +136,12 @@ export const downloadNationalCsv = (
   combinedData: CombinedData | null,
   selectedColumns: CSVColumn[],
   nHourForecast: number,
-  pLevels: [number, number][]
+  pLevels: [number, number][],
+  timezone: string = DEFAULT_CSV_TIMEZONE
 ) => {
   if (!combinedData) return;
 
-  const csvRows = buildCsvRows(combinedData, pLevels);
+  const csvRows = buildCsvRows(combinedData, pLevels, timezone);
   const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels);
 
   // download
@@ -175,7 +181,24 @@ export function generateCsv(
       : [row[COLUMN_CONFIG[col].key] ?? ""];
 
   const headers = selectedColumns.flatMap(getHeaders);
-  const lines = rows.map((row) => selectedColumns.flatMap((col) => getValues(row, col)).join(","));
+  const lines = rows.map((row) =>
+    joinCsvRow(selectedColumns.flatMap((col) => getValues(row, col)))
+  );
 
-  return [headers.join(","), ...lines].join("\n");
+  return [joinCsvRow(headers), ...lines].join("\n");
 }
+
+/**
+ * RFC 4180 escaping, applied at the single point where cells are joined: a cell containing a
+ * comma, a double quote, CR or LF is wrapped in quotes and its own quotes are doubled. Every cell
+ * is a number or an ISO datetime today, so nothing changes — but Phase 3 puts country and region
+ * labels into this file, and one label with a comma in it would silently shift every column after
+ * it on that row.
+ */
+const escapeCsvCell = (cell: number | string | null): string => {
+  const value = cell === null ? "" : String(cell);
+  return /["\r\n,]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+};
+
+const joinCsvRow = (cells: (number | string | null)[]): string =>
+  cells.map(escapeCsvCell).join(",");
