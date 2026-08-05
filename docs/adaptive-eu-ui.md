@@ -133,6 +133,77 @@ Each is marked `// CHARACTERISATION` in the tests, with a note on which phase in
 - `fourHourData` merges *after* the settlement/seasonal loop, so a timestamp only the N-hour series
   knows about gets neither.
 
+**Phase 2 complete** (uncommitted). 15 suites / **683 tests** (from 571), typecheck clean, 0 lint
+errors, production build succeeds. New: `lib/api/v1/` (generated `schema.d.ts`, `client.ts`,
+`queries.ts`, 23 recorded fixtures + a contract test), `lib/domain/` (`types.ts`, `time.ts`,
+`normalise.ts`), `lib/api/auth/token.ts`.
+
+- **The shared cached token (C2) is adopted app-wide, not just by the v1 client.** One module
+  serves the v1 client, `axiosFetcherAuth` and `satelliteLayer`, whose private 60s cache is
+  deleted. TTL stays 60s: short enough that a stale token can never be served, long enough to
+  collapse the burst. The `trial_expired` / `access_denied` redirects moved with it unchanged;
+  satellite now inherits them, where before it threw a generic error.
+- **Typed errors** are `ApiV1Error { status, body }` plus `isNonRetryableApiV1Error()`, replacing
+  `error.toString().includes("403")`.
+- **`types/quartz-api.d.ts` is not retired yet**, contrary to the original Phase 2 plan. Six files
+  still import it and all six are rewritten in Phase 4; deleting it now would mean editing files
+  that are about to be deleted. It goes when its last consumer does.
+- **`openapi-fetch` resolves `globalThis.fetch` once at client-creation time**, not per call, so a
+  module-level client captures the pre-MSW fetch and tests hit the real network. Fixed by passing a
+  closure that re-resolves `fetch` at call time.
+- **The chart merge-key bug is fixed at the boundary, as planned.** `lib/domain/time.ts`
+  canonicalises every instant to `YYYY-MM-DDTHH:mm:ssZ`. This turned out to be load-bearing rather
+  than precautionary: v1 emits `Z` where v0 emits `+00:00` (see below). It truncates sub-second
+  precision, which is only visible on `cache_updated_utc` (microseconds on the wire) and immaterial
+  to how that field is used.
+- **The bundle is now 11.7 MB first-load**, against the 11.3 MB recorded at Phase 0. None of it is
+  Phase 2: the v1 client is absent from the built bundle because no page imports it yet, and only
+  the token module is pulled in. The +0.4 MB needs attribution during Phase 5.
+
+### What the live API turned out to do (v1 probing, 2026-08-05)
+
+Recorded verbatim in `lib/api/v1/__fixtures__/`, with the full write-up in its README and a contract
+test that fails if any of it drifts. Facts 1–8 below were all reconfirmed. What is new:
+
+- **`period` rejects `region_type=national` with a 400** — "only sub-national region types are
+  pre-warmed". The national chart therefore *cannot* use the period matrix and must go through
+  `/regions/{region}/forecast`. Undocumented in the spec; the error body helpfully names the right
+  endpoint. Not a limitation in practice: `period` has no `model` parameter, and national is exactly
+  where multi-model comparison lives, so `period` could not serve the national chart in any case —
+  and with one region there is no request storm for it to collapse.
+- **`period` and `snapshot` are cache-backed and return a retryable 503 when cold** ("cache is being
+  populated, please retry in 60 seconds"), with the forecast and generation caches warming
+  independently. Undocumented. These are the endpoints the whole migration leans on, so cold-cache
+  has to be a handled, retried state — distinct from the 403 that must *not* retry.
+- **There are two error shapes, not one.** 400s return `{"detail": string}`; 422s return
+  `HTTPValidationError`'s `{"detail": ValidationError[]}`. A client assuming one shape crashes on
+  the other.
+- **Timestamps are uniformly `Z`-spelled**, with no `+00:00` anywhere in any fixture. The chart
+  merge-key defect is therefore live under v1, not latent.
+- **`plevels_kW` has no fixed key set and no p50 at any level**: GB national has 6
+  (`p2,p10,p25,p75,p90,p98`), NL province 2 (`p10,p90`), GB gsp none at all. Chart bounds must be
+  driven off what the payload carries.
+- **The newest generation slot publishes region by region and can be read mid-fill.** A snapshot
+  caught the 15:00 slot with 127 of 336 regions; the same request 11 minutes later returned all 336,
+  and every earlier slot is complete. Not a coverage gap — the cache writes per region as values
+  arrive and never blanks or zero-fills. But the regions still to publish are **absent from the
+  payload**, not present with `null`, so Phase 4 must render "not published yet" differently from
+  "no data", and neither as a zero. Both states are kept as fixtures.
+- `metadata.gsp_id` is a JSON float (`67.0`), and `horizon_minutes` is absent rather than null on
+  the national forecast.
+
+### The spec enumerates live countries; the frontend deliberately does not
+
+`v1-api.json` types `country` as `enum: ["GB","NL"]` (and `source` as `["solar"]`, `region_type` as
+`["gsp","national","province"]`), so `openapi-typescript` generates `country: "GB" | "NL"` into every
+path. Taken literally that would make Phase 6 fail to compile until the backend regenerated its spec
+— the opposite of "add a registry entry and nothing else".
+
+This is correct on both sides: the API is strict about what exists *now* and changes as its own
+config does; the frontend must not be tightly coupled to that. `queries.ts` therefore applies a
+`Widen<T>` type that relaxes string literals to `string` while preserving shape, so a typo in a
+param *name* still fails compilation but runtime values are not pinned to today's live countries.
+
 ---
 
 ## Decisions
@@ -380,9 +451,10 @@ Each phase is independently shippable and leaves the app working.
 
 **Phase 1 — Characterisation tests (before touching data code).** *Complete — see Status.*
 
-**Phase 2 — v1 client foundation.**
+**Phase 2 — v1 client foundation.** *Complete — see Status.*
 - Generate `lib/api/v1/schema.d.ts` from `v1-api.json` via the already-installed
-  `openapi-typescript`; retire `types/quartz-api.d.ts` (C1).
+  `openapi-typescript` (`yarn gen:api`); retire `types/quartz-api.d.ts` (C1) — *deferred to Phase 4,
+  where its last consumer is rewritten*.
 - Build `lib/api/v1/client.ts`: `openapi-fetch` plus a **shared cached token** (C2 — every call
   currently makes an extra `/api/get_token` round trip; `satelliteLayer.ts` has its own 60s cache
   that this replaces). Typed errors replace `error.toString().includes("403")`.
@@ -465,6 +537,27 @@ moves, no data-layer changes. See *Naming, structure and in-flight work* for why
 
 ## Open items
 
+- **Cold-cache 503s on `period`/`snapshot`: silent retry with backoff, no "warming" UI state.**
+  Confirmed with the API owner — a cold cache only happens post-deploy and only briefly. The cache
+  is in-memory today with a move to Redis or similar intended, which would shorten the window
+  further. Retryable, unlike 403.
+- **Both error shapes must be handled** — `{"detail": string}` on 400s and `HTTPValidationError` on
+  422s. `ApiV1Error` carries the raw body; whatever reads it has to branch.
+- **`period` takes no `model` parameter, but `snapshot` does.** So the map can select a forecast
+  model while a regional *time series* is pinned to the region type's default. **Considered and
+  deferred, by agreement with the API owner:** a `model` param on `period` is wanted eventually, but
+  only once there is a real need for it and it can be supported well — pre-warming a cache per model
+  multiplies its size by the model count, which is the part that needs doing properly rather than
+  quickly. Recorded here so it is not rediscovered as a surprise. Phase 4 should confirm whether any
+  view actually offers per-region model selection today; the working assumption is that model
+  comparison is national-only.
+
+  (This is also why national correctly uses `/regions/{region}/forecast` rather than `period` —
+  national is where model comparison lives, `period` could not serve it, and one region is no
+  request storm to collapse. Pre-warming national would gain nothing.)
+- The mid-publish snapshot behaviour is intended: the cache writes per region/step as values arrive.
+  The UI consequence stands — a partial newest slot is a permanent characteristic to render, not a
+  fault to report.
 - Exact shape of the Auth0 country claim once added — the intersect logic is one small function, so
   this can be adjusted late.
 - The 7 v1 regions with no polygon: refresh the boundary file or add an alias map (Phase 5).
