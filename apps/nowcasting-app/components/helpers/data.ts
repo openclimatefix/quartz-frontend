@@ -7,7 +7,7 @@ import {
   MapFeatureObject
 } from "../types";
 import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
-import gspShapeData from "../../data/GSP_regions_4326_20250109.json";
+import gspShapeData from "../../data/GSP_regions_4326_20260209.json";
 import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 import nationalShapeData from "../../data/national_gsp_shape.json";
 import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";

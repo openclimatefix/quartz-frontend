@@ -1,18 +1,10 @@
 import { components } from "@/src/types/schema";
 
 export type CombinedData = {
-  solarGenerationData:
-    | components["schemas"]["GetHistoricGenerationResponse"]
-    | undefined;
-  windGenerationData:
-    | components["schemas"]["GetHistoricGenerationResponse"]
-    | undefined;
-  solarForecastData:
-    | components["schemas"]["GetForecastGenerationResponse"]
-    | undefined;
-  windForecastData:
-    | components["schemas"]["GetForecastGenerationResponse"]
-    | undefined;
+  solarGenerationData: components["schemas"]["GetHistoricGenerationResponse"] | undefined;
+  windGenerationData: components["schemas"]["GetHistoricGenerationResponse"] | undefined;
+  solarForecastData: components["schemas"]["GetForecastGenerationResponse"] | undefined;
+  windForecastData: components["schemas"]["GetForecastGenerationResponse"] | undefined;
 };
 export type ChartDatum = {
   timestamp: number;

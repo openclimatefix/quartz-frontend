@@ -24,6 +24,18 @@ export const getZoomYMax = (filteredPreppedData: ChartData[]) => {
   }
 };
 
+// plevel_2/plevel_98 etc. are individually optional in the payload, so drop any selected pair
+// this forecast doesn't have both bounds for, rather than letting a missing value turn into NaN
+// further down.
+export const getAvailablePLevels = (
+  plevelValues: Record<string, number | undefined>,
+  pLevels: [number, number][]
+): [number, number][] =>
+  pLevels.filter(
+    ([lo, hi]) =>
+      plevelValues[`plevel_${lo}`] !== undefined && plevelValues[`plevel_${hi}`] !== undefined
+  );
+
 // Function not "in use" but useful for regenerating yMax levels as a constant array for the chart
 export const generateYMaxTickArray = () => {
   // Generate yMax levels

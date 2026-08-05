@@ -51,7 +51,8 @@ export default wrapApiHandlerWithSentry(
             redirect_uri: redirectUri,
             audience: process.env.NEXT_PUBLIC_AUTH0_API_AUDIENCE || "https://api.nowcasting.io/", // Production fallback
             scope: "openid profile email offline_access",
-            useRefreshTokens: true
+            useRefreshTokens: true,
+            ...(req.query.prompt === "login" && { prompt: "login" })
           },
           returnTo: returnTo
         });
@@ -62,7 +63,7 @@ export default wrapApiHandlerWithSentry(
 
     async logout(req: NextApiRequest, res: NextApiResponse) {
       setUser(null);
-      const returnTo = req.query.redirectToLogin ? "/api/auth/login" : "/logout";
+      const returnTo = req.query.redirectToLogin ? "/api/auth/login?prompt=login" : "/logout";
       await handleLogout(req, res, {
         returnTo
       });

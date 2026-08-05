@@ -3,7 +3,8 @@ export enum CookieStorageKeys {
   "DASHBOARD_MODE" = "dashboardMode",
   "N_HOUR_VIEW" = "NHourView",
   "VISIBLE_LINES" = "visibleLines",
-  "CONSTRAINTS" = "constraints"
+  "CONSTRAINTS" = "constraints",
+  "P_LEVELS" = "pLevels"
 }
 
 export const getSettingFromCookieStorage = <T>(key: string): null | T => {

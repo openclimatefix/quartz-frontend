@@ -37,6 +37,8 @@ const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const seasonal = "#ffdfd1";
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+// Target combined opacity for overlapping p-level bands, independent of band count.
+const P_LEVEL_BAND_COMBINED_OPACITY = 0.4;
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
 export type SeasonalQuantile = `P${string}`;
 export type SeasonalPValue = { [K in SeasonalQuantile]?: number };
@@ -47,6 +49,12 @@ export type SeasonalScalars = {
 export type SeasonalBound = {
   [K in `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`]?: number[];
 };
+
+// Key for a single p-level band's [min, max] range in ChartData, e.g. "PROBABILISTIC_RANGE_10_90".
+export type PLevelRangeKey = `PROBABILISTIC_RANGE_${number}_${number}`;
+export type PLevelBounds = { [K in PLevelRangeKey]?: number[] };
+export const getPLevelRangeKey = (lower: number, upper: number): PLevelRangeKey =>
+  `PROBABILISTIC_RANGE_${lower}_${upper}`;
 
 export type ChartDataBase = {
   formattedDate: string; // "2022-05-16T15:00",
@@ -69,22 +77,19 @@ export type ChartDataBase = {
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
 
-  PROBABILISTIC_RANGE?: Array<number>;
+  // PROBABILISTIC_UPPER_BOUND is used by getZoomYMax to fit the bands
   PROBABILISTIC_UPPER_BOUND?: number;
-  PROBABILISTIC_LOWER_BOUND?: number;
 
   SEASONAL_MEAN?: number | undefined;
   SEASONAL_BOUNDS?: string[][] | undefined;
 };
-export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound;
+export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound & PLevelBounds;
 
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Live Actual",
-  PROBABILISTIC_UPPER_BOUND: "OCF P90",
   FORECAST: "Current",
   PAST_FORECAST: "Current",
-  PROBABILISTIC_LOWER_BOUND: "OCF P10",
   INTRADAY_ECMWF_ONLY: "ECMWF-only",
   PAST_INTRADAY_ECMWF_ONLY: "ECMWF-only",
   MET_OFFICE_ONLY: "Met Office-only",
@@ -113,8 +118,6 @@ const toolTipColors: Record<string, string> = {
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
-  PROBABILISTIC_UPPER_BOUND: yellow,
-  PROBABILISTIC_LOWER_BOUND: yellow,
   SEASONAL_P90: seasonal,
   SEASONAL_MEAN: seasonal,
   SEASONAL_P10: seasonal
@@ -206,6 +209,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [pLevels] = useGlobalState("pLevels");
 
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -263,6 +267,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
   //reset zoom state
   function handleZoomOut() {
+    setGlobalZoomArea({ x1: "", x2: "" });
     setGlobalIsZoomed(false);
     setFilteredPreppedData(preppedData);
   }
@@ -598,19 +603,23 @@ const RemixLine: React.FC<RemixLineProps> = ({
               </>
             )}
 
-            <Area
-              type="monotone"
-              dataKey="PROBABILISTIC_RANGE"
-              dot={false}
-              xAxisId={"x-axis"}
-              yAxisId={"y-axis"}
-              stroke={yellow}
-              fill={yellow}
-              fillOpacity={0.4}
-              strokeWidth={0}
-              hide={!visibleLines.includes("FORECAST")}
-              isAnimationActive={false}
-            />
+            {pLevels.map(([lower, upper]) => (
+              <Area
+                key={`${lower}-${upper}`}
+                type="monotone"
+                dataKey={getPLevelRangeKey(lower, upper)}
+                dot={false}
+                xAxisId={"x-axis"}
+                yAxisId={"y-axis"}
+                stroke={yellow}
+                fill={yellow}
+                // Lowers each band's opacity as more bands are added, so overlapping bands always look like P_LEVEL_BAND_COMBINED_OPACITY, not darker.
+                fillOpacity={1 - Math.pow(1 - P_LEVEL_BAND_COMBINED_OPACITY, 1 / pLevels.length)}
+                strokeWidth={0}
+                hide={!visibleLines.includes("FORECAST")}
+                isAnimationActive={false}
+              />
+            ))}
 
             <Line
               type="monotone"
@@ -805,6 +814,31 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   formattedDate = dateToLondonDateTimeString(date);
                 }
 
+                // Show the p-levels in the tooltip higher ones above the current and lower below
+                const pLevelRows = pLevels
+                  .flatMap(([lower, upper]) => {
+                    // this forecast may not have data for a selected pair (e.g. missing plevels) - skip it
+                    const range = data[getPLevelRangeKey(lower, upper)];
+                    if (!range) return [];
+                    const [min, max] = range;
+                    return [
+                      [lower, min],
+                      [upper, max]
+                    ];
+                  })
+                  .filter(([, value]) => Math.round(value * 100) >= 0)
+                  .sort(([a], [b]) => b - a);
+                const pLevelRow = ([level, value]: number[]) => (
+                  <li key={level} className="font-sans text-2xs" style={{ color: yellow }}>
+                    <div className="flex justify-between">
+                      <div>{`OCF P${level}`}:</div>
+                      <div className="ml-4">{prettyPrintYNumberWithCommas(String(value), 1)}</div>
+                    </div>
+                  </li>
+                );
+                const upperRows = pLevelRows.filter(([level]) => level > 50).map(pLevelRow);
+                const lowerRows = pLevelRows.filter(([level]) => level < 50).map(pLevelRow);
+
                 return (
                   <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
                     <ul className="">
@@ -820,7 +854,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             (data[key] !== undefined &&
                               visibleLines.includes(key.replace("PAST_", ""))) ||
                             key === "DELTA" ||
-                            key.includes("PROBABILISTIC") ||
                             (key.includes("SEASONAL") && visibleLines.includes("SEASONAL_BOUNDS"))
                         )
                         .map(([key, name]) => {
@@ -842,18 +875,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             (!showNHourView || !visibleLines.some((key) => key.includes("N_HOUR")))
                           )
                             return null;
-                          if (key.includes("PROBABILISTIC") && Math.round(value * 100) < 0)
-                            return null;
+                          const isForecast = ["FORECAST", "PAST_FORECAST"].includes(key);
                           let textClass = "font-normal text-xs";
-                          if (["FORECAST", "PAST_FORECAST"].includes(key))
-                            textClass = "font-semibold";
-                          if (
-                            ["PROBABILISTIC_UPPER_BOUND", "PROBABILISTIC_LOWER_BOUND"].includes(
-                              key
-                            ) ||
-                            key.includes("SEASONAL_P")
-                          )
-                            textClass = "text-2xs";
+                          if (isForecast) textClass = "font-semibold";
+                          if (key.includes("SEASONAL_P")) textClass = "text-2xs";
                           const pvLiveTextClass =
                             data["GENERATION_UPDATED"] >= 0 &&
                             data["GENERATION"] >= 0 &&
@@ -882,17 +907,24 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           }
 
                           return (
-                            <li className={`font-sans`} key={`item-${key}`} style={{ color }}>
-                              <div
-                                className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
-                              >
-                                <div>{title}:</div>
-                                <div className={`font-sans ml-4`}>
-                                  {(showNHourView || key !== "DELTA") && sign}
-                                  {computedValue}{" "}
+                            // the forecast is the p50, wrap it with the higher p-levels above and lower below
+                            <React.Fragment key={`item-${key}`}>
+                              {isForecast && upperRows}
+
+                              <li className="font-sans" style={{ color }}>
+                                <div
+                                  className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
+                                >
+                                  <div>{title}:</div>
+                                  <div className={`font-sans ml-4`}>
+                                    {(showNHourView || key !== "DELTA") && sign}
+                                    {computedValue}{" "}
+                                  </div>
                                 </div>
-                              </div>
-                            </li>
+                              </li>
+
+                              {isForecast && lowerRows}
+                            </React.Fragment>
                           );
                         })}
                     </ul>

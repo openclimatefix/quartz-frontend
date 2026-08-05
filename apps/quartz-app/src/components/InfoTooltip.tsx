@@ -11,7 +11,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   tip,
   position,
   className,
-  fullWidth = false,
+  fullWidth = false
 }) => {
   let containerPositionClass = "";
   let tipPositionClass = "";
@@ -35,9 +35,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   }
   return (
     <div
-      className={`relative flex flex-col group z-20 ${
-        fullWidth ? "w-full" : "w-max items-center"
-      } 
+      className={`relative flex flex-col group z-20 ${fullWidth ? "w-full" : "w-max items-center"} 
       ${className || ""}`}
     >
       {position !== "top" && children}
