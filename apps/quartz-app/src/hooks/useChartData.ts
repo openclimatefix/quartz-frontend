@@ -1,20 +1,6 @@
 import { ChartDatum, CombinedData } from "@/src/types/data";
 import { convertDatestampToEpoch, getEpochNowInTimezone } from "@/src/helpers/datetime";
-
-// Missing values are written as null, which Recharts renders as a real break in
-// the line (connectNulls defaults to false). Any number — including 0 — is a data
-// point it will draw and join to its neighbours, so a missing reading written as
-// 0 bridges the gap instead of showing one.
-//
-// Hence `!= null` rather than a truthy check: 0 is a legitimate reading (solar
-// overnight) and must stay 0, while only genuinely absent values become null.
-// A truthy check conflates the two and turns real zeros into gaps.
-//
-// Note the raw arithmetic this replaces was wrong in both directions: `null /
-// 1000` is 0 in JS (a fake reading that bridges the gap) and `undefined / 1000`
-// is NaN.
-const toMW = (powerKW: number | null | undefined): number | null =>
-  powerKW != null ? powerKW / 1000 : null;
+import { KWtoMW as toMW } from "@/src/helpers/formatHelpers";
 
 export const useChartData = (combinedData: CombinedData) => {
   let formattedChartData: ChartDatum[] = [];

@@ -5,7 +5,7 @@ import { useUserMenu } from "@/src/hooks/useUserMenu";
 import useGlobalState from "../helpers/globalState";
 import { DownloadIcon } from "@/src/components/icons/icons";
 import { DateTime } from "luxon";
-import { KWtoMW } from "@/src/helpers/dataFormats";
+import { KWtoMW } from "@/src/helpers/formatHelpers";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import * as Sentry from "@sentry/nextjs";
 
@@ -53,15 +53,13 @@ const Header: React.FC<HeaderProps> = () => {
           if (!value.Time) continue;
           const existingEntry = combinedDataByTimestampMap.get(value.Time);
           if (existingEntry) {
-            existingEntry[type as keyof typeof combinedData] = value.PowerKW
-              ? KWtoMW(value.PowerKW, 2)
-              : null;
+            existingEntry[type as keyof typeof combinedData] = KWtoMW(value.PowerKW, 2);
             combinedDataByTimestampMap.set(value.Time, existingEntry);
           } else {
             combinedDataByTimestampMap.set(value.Time, {
               time: value.Time,
               ...csvProperties,
-              [type]: value.PowerKW ? KWtoMW(value.PowerKW, 2) : null
+              [type]: KWtoMW(value.PowerKW, 2)
             });
           }
         }
