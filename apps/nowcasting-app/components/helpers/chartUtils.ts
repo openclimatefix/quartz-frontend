@@ -154,6 +154,13 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
  *
  * Use this for indexing UTC-bucketed data. Use `getSettlementPeriodForDate` for anything a user
  * reads as a settlement period.
+ *
+ * Phase 3 deliberately left this UTC while parameterising every user-facing helper by the
+ * country's timezone. That asymmetry looks like an inconsistency and is not: day labels and
+ * per-day grouping bucket in the country's zone because a "day" is what a user reads, whereas
+ * `data/national_metrics.json` is a UTC-bucketed array and this is a positional index into it.
+ * Converting it to local time would shift every seasonal line by two slots throughout BST. See
+ * "B9: what the audit got wrong" in docs/adaptive-eu-ui.md.
  */
 export const getUtcHalfHourIndex = (date: DateTime): number => {
   const utcDate = date.toUTC();
@@ -172,12 +179,14 @@ export const getUtcHalfHourIndex = (date: DateTime): number => {
  * rather than `set({ hour: 0, ... })` also makes the clock-change days come out right: 46 periods
  * on the short day in March, 50 on the long day in October.
  *
- * Phase 3: the timezone becomes country-dependent and will come from the country registry rather
- * than being hardcoded to Europe/London here. Not parameterised yet — that is Phase 3 scope.
+ * Phase 3: the zone is now an argument, defaulting to Europe/London so existing call sites are
+ * unchanged; the country registry supplies it once call sites are wired up. The concept itself is
+ * GB-specific — another country's half-hour numbering is its own — so the default is the
+ * definition rather than a convenience.
  */
-export const getSettlementPeriodForDate = (date: DateTime) => {
-  const londonDate = date.setZone("Europe/London");
-  const midnightBefore = londonDate.startOf("day");
-  const interval = londonDate.diff(midnightBefore, "minutes").minutes;
+export const getSettlementPeriodForDate = (date: DateTime, timezone: string = "Europe/London") => {
+  const zonedDate = date.setZone(timezone);
+  const midnightBefore = zonedDate.startOf("day");
+  const interval = zonedDate.diff(midnightBefore, "minutes").minutes;
   return Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed;
 };

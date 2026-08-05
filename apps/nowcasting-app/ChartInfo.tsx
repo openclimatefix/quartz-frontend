@@ -1,13 +1,20 @@
 import React from "react";
 import useGlobalState from "./components/helpers/globalState";
-import { formatISODateStringHumanNumbersOnly } from "./components/helpers/utils";
+import { DEFAULT_TIMEZONE, formatISODateStringHumanNumbersOnly } from "./components/helpers/utils";
 
-export const ChartInfo: React.FC = () => {
+// Phase 3: only the timezone name is parameterised, defaulting to GB. The rest of this copy is
+// GB-specific in substance — settlement periods and PV_Live are not concepts every country has —
+// but rewording it is Phase 7's job, not a mechanical change to make here.
+type ChartInfoProps = {
+  timezone?: string;
+};
+
+export const ChartInfo: React.FC<ChartInfoProps> = ({ timezone = DEFAULT_TIMEZONE }) => {
   const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   return (
     <div className="text-left p-1 text-sm mb-1 cursor-default">
       <ul className="list-none space-y-2">
-        <li>All datetimes are in Europe/London timezone.</li>
+        <li>All datetimes are in {timezone} timezone.</li>
         <li>
           Following{" "}
           <span className="underline font-bold">

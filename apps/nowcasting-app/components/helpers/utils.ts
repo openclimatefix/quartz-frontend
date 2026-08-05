@@ -1,4 +1,5 @@
 import axios from "axios";
+import { DateTime } from "luxon";
 import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import {
   Bucket,
@@ -221,120 +222,182 @@ export const formatISODateString = (date: string) => {
   return dateid;
 };
 
-export const formatISODateAsLondonTime = (date: Date) => {
-  const date_london_time_str = date
-    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
-    .slice(0, 5);
+/**
+ * Rendering a UTC instant for a human needs a zone, and a country's zone is not GB's, so every
+ * helper below takes one — plus a locale wherever it formats day/month names or date order.
+ *
+ * The defaults keep today's GB output for call sites not yet wired to the country registry; a
+ * later Phase 3 agent passes `country.timezone` / `country.locale` explicitly, after which the
+ * defaults can go. Luxon (F5) replaces the `new Date()` + `toLocaleString` arithmetic these used
+ * to do, so the zone is an argument rather than whatever zone the viewer's browser happens to
+ * be in.
+ */
+export const DEFAULT_TIMEZONE = "Europe/London";
+export const DEFAULT_LOCALE = "en-GB";
 
-  return date_london_time_str;
+const TIME_ONLY: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
+const LONG_DATE: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric"
 };
-export const convertISODateStringToLondonTime = (date: string) => {
+const NUMERIC_DATE: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric"
+};
+
+// The `new Date()` implementations these replace rendered an unparseable input as "Invalid Date"
+// through `toLocaleString` and then sliced the result, and callers put that straight on screen.
+// Reproduced verbatim so the Luxon migration changes no output. Phase 7 owns what a user should
+// actually see here.
+const INVALID_TIME = "Inval";
+const INVALID_HUMAN = "Invalid Date, Inval";
+const INVALID_HUMAN_NUMERIC = "Invalid Date Inval";
+const INVALID_DATE_ONLY = "Invalid Date ";
+
+/**
+ * `new Date(string)` semantics, which these helpers had before Luxon: a string carrying an offset
+ * is that instant, a date-only string is UTC midnight, and a zone-less date*time* is the viewer's
+ * local time. That last case is a latent viewer-dependency rather than something to preserve
+ * forever — Phase 4 removes it by passing canonical UTC instants from `lib/domain/time.ts` — but
+ * changing it here would be a behaviour change invisible to a UTC-pinned test process.
+ */
+const parseISOInViewerZone = (date: string): DateTime =>
+  DateTime.fromISO(date, { zone: date.includes("T") ? "system" : "utc" });
+
+const formatTime = (dt: DateTime) => dt.toLocaleString(TIME_ONLY);
+
+export const formatDateAsZonedTime = (
+  date: Date,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = DateTime.fromJSDate(date, { zone: timezone }).setLocale(locale);
+  if (!dt.isValid) return INVALID_TIME;
+  return formatTime(dt);
+};
+
+export const formatISODateStringAsZonedTime = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
   if (!date || date === ":00.000Z") return "00:00";
-  // Changes the ISO date string to Europe London time, and return time only
-  const d = new Date(date);
-  if (typeof d !== "object" || isNaN(d.getTime())) {
+  const dt = parseISOInViewerZone(date).setZone(timezone).setLocale(locale);
+  if (!dt.isValid) {
     throw new Error(`Invalid date: ${date}`);
   }
-  return formatISODateAsLondonTime(d);
+  return formatTime(dt);
 };
 
-export const convertToLocaleDateString = (date: string) => {
-  const localeDatetime = new Date(date);
-  if (isNaN(localeDatetime.getTime())) {
+/**
+ * Shifts the instant by the target zone's offset and then serialises it with a "Z" that is a lie
+ * everywhere except UTC, so downstream `new Date()` parsing reads the *wall clock* back. Kept as
+ * is because several chart call sites depend on exactly that; the timezone defaults to the
+ * viewer's zone, which is what it used before, and must not default to Europe/London or every
+ * existing call site would shift.
+ */
+export const convertToLocaleDateString = (date: string, timezone: string = "system") => {
+  const dt = parseISOInViewerZone(date).setZone(timezone);
+  if (!dt.isValid) {
     throw new Error(`Invalid date: ${date}`);
   }
-  localeDatetime.setMinutes(localeDatetime.getMinutes() - localeDatetime.getTimezoneOffset());
-  return localeDatetime.toISOString();
+  return `${dt.toISO({ includeOffset: false })}Z`;
 };
 
-export const formatISODateStringHuman = (date: string) => {
-  // Change date to nice human readable format.
-  // Note that this converts the string to Europe London Time
-  // timezone and seconds are removed
+export const formatISODateStringHuman = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => dateToZonedDateTimeString(parseISOInViewerZone(date).toJSDate(), timezone, locale);
 
-  const d = new Date(date);
-
-  return dateToLondonDateTimeString(d);
+export const dateToZonedDateTimeString = (
+  date: Date,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = DateTime.fromJSDate(date, { zone: timezone }).setLocale(locale);
+  if (!dt.isValid) return INVALID_HUMAN;
+  return `${dt.toLocaleString(LONG_DATE)}, ${formatTime(dt)}`;
 };
 
-export const dateToLondonDateTimeString = (date: Date) => {
-  const date_london = date.toLocaleString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Europe/London"
-  });
-  const date_london_time = date
-    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
-    .slice(0, 5);
-
-  return `${date_london}, ${date_london_time}`;
+// Note the trailing space, which callers concatenate onto.
+export const dateToZonedDateOnlyString = (
+  date: Date,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = DateTime.fromJSDate(date, { zone: timezone }).setLocale(locale);
+  if (!dt.isValid) return INVALID_DATE_ONLY;
+  return `${dt.toLocaleString(NUMERIC_DATE)} `;
 };
 
-export const dateToLondonDateTimeOnlyString = (date: Date) => {
-  const date_london = date.toLocaleString("en-GB", {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-    timeZone: "Europe/London"
-  });
-  return date_london + " ";
+export const formatISODateStringHumanNumbersOnly = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = parseISOInViewerZone(date).setZone(timezone).setLocale(locale);
+  if (!dt.isValid) return INVALID_HUMAN_NUMERIC;
+  return `${dt.toLocaleString(NUMERIC_DATE)} ${formatTime(dt)}`;
 };
 
-export const formatISODateStringHumanNumbersOnly = (date: string) => {
-  // Change date to nice human readable format.
-  // Note that this converts the string to Europe London Time
-  // timezone and seconds are removed
-
-  const d = new Date(date);
-
-  const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
-  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
-
-  // further formatting could be done to make it yyyy/mm/dd HH:MM
-  return `${date_london} ${date_london_time}`;
+/**
+ * Phase 3 fix: this used to format in the *viewer's* zone with no `timeZone` option, unlike every
+ * neighbouring helper, and to test "is it today?" via `toDateString()` in that same zone. A
+ * late-evening UTC instant therefore labelled the previous day for a UK viewer. Both now use the
+ * passed zone, which is also the zone any per-day grouping buckets in — see the note on
+ * `getUtcHalfHourIndex` in chartUtils.ts for why the seasonal norms deliberately do not.
+ */
+export const prettyPrintDayLabelWithDate = (
+  d: string | number,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = (typeof d === "number" ? DateTime.fromMillis(d) : parseISOInViewerZone(d))
+    .setZone(timezone)
+    .setLocale(locale);
+  // The epoch is treated as "no value", not as 1 January 1970.
+  if (!dt.isValid || dt.toMillis() === 0) return "Invalid date";
+  if (dt.hasSame(DateTime.now().setZone(timezone), "day")) return "Today";
+  return `${dt.toLocaleString({ weekday: "short" })} ${dt.toLocaleString({ day: "numeric" })}`;
 };
 
-export const prettyPrintDayLabelWithDate = (d: string | number) => {
-  const parsedDate = new Date(d);
-  // check if date is valid
-  if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date";
-  // if date is today, return "Today"
-  if (parsedDate.toDateString() === new Date().toDateString()) return "Today";
-  // otherwise return day of the week and short date
-  return `${parsedDate.toLocaleDateString("en-GB", {
-    weekday: "short"
-  })} ${parsedDate.toLocaleDateString("en-GB", { day: "numeric" })}`;
-};
-
-export function prettyPrintChartAxisLabelDate(x: string | number) {
-  // Check if x is a number, if so then it might be a UNIX timestamp
+/**
+ * Chart tick formatter, so it must never throw: anything it cannot read comes back as a marker
+ * string. It previously appended "+00:00" to any string longer than 16 characters, which threw on
+ * every `Z`-suffixed timestamp — the exact spelling v1 emits. It now parses whatever zone the
+ * string carries and falls back to UTC for the zone-less 16-character ticks the chart feeds it.
+ */
+export function prettyPrintChartAxisLabelDate(
+  x: string | number,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) {
   if (typeof x === "number") {
-    if (!Number.isNaN(x)) {
-      if (!x) return "Invalid date 1";
-      const parsedDate = new Date(x);
-      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 2";
-      return convertISODateStringToLondonTime(parsedDate.toISOString());
-    }
-  } else {
-    // x is a string, check if it is a valid ISO date string
-    if (x.includes("T")) {
-      // check if it is a valid ISO date string
-      const parsedDate = new Date(x);
-      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 3";
-
-      if (x.includes("+")) {
-        return convertISODateStringToLondonTime(x);
-      } else if (x.length > 16) {
-        return convertISODateStringToLondonTime(x + "+00:00");
-      } else {
-        return convertISODateStringToLondonTime(x + ":00+00:00");
-      }
-    }
+    if (Number.isNaN(x)) return `Invalid datetime input: ${typeof x} – ${x}`;
+    if (!x) return "Invalid date 1";
+    const dt = DateTime.fromMillis(x).setZone(timezone).setLocale(locale);
+    if (!dt.isValid) return "Invalid date 2";
+    return formatTime(dt);
   }
-  return `Invalid datetime input: ${typeof x} – ${x}`;
+  if (!x.includes("T")) return `Invalid datetime input: ${typeof x} – ${x}`;
+  const dt = DateTime.fromISO(x, { zone: "utc", setZone: true })
+    .setZone(timezone)
+    .setLocale(locale);
+  if (!dt.isValid || dt.toMillis() === 0) return "Invalid date 3";
+  return formatTime(dt);
 }
+
+/**
+ * Phase 3 aliases under the old GB-specific names, so call sites owned by other agents keep
+ * compiling. Deleted in Phase 4, when those call sites are rewritten to pass the country's zone.
+ */
+export const formatISODateAsLondonTime = formatDateAsZonedTime;
+export const convertISODateStringToLondonTime = formatISODateStringAsZonedTime;
+export const dateToLondonDateTimeString = dateToZonedDateTimeString;
 
 export const MWtoGW = (MW: number) => {
   return (MW / 1000).toFixed(1);
@@ -352,15 +415,15 @@ export const addMinutesToISODate = (date: string, munites: number) => {
   return d.toISOString();
 };
 
-export const getRounded4HoursAgoString = () => {
-  const fourHoursAgo = new Date();
-  fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
-  if (fourHoursAgo.getMinutes() < 30) {
-    fourHoursAgo.setMinutes(0);
-  } else {
-    fourHoursAgo.setMinutes(30);
-  }
-  return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
+// Rounds down to the half hour *in the display zone*, where it used to round in the viewer's zone
+// and then render the result elsewhere. The two only differ for a zone whose offset is not a whole
+// number of hours, and rounding in the zone the label is read in is the answer that makes sense.
+export const getRounded4HoursAgoString = (
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const fourHoursAgo = DateTime.now().setZone(timezone).setLocale(locale).minus({ hours: 4 });
+  return formatTime(fourHoursAgo.set({ minute: fourHoursAgo.minute < 30 ? 0 : 30 }));
 };
 
 export const getRoundedPv = (pv: number, round: boolean = true, roundingFactor: number = 100) => {

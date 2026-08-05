@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "@jest/globals";
 import { Settings } from "luxon";
 import {
-  convertISODateStringToLondonTime,
+  formatISODateStringAsZonedTime,
   getOpacityValueFromPVNormalized,
   prettyPrintChartAxisLabelDate
 } from "./utils";
@@ -25,26 +25,26 @@ describe("check getOpacityValueFromPVNormalized with valid values", () => {
   });
 });
 
-describe("check convertISODateStringToLondonTime", () => {
-  test("check convertISODateStringToLondonTime with valid date strings", () => {
-    expect(convertISODateStringToLondonTime("2021-01-01T03:00:00.000Z")).toBe("03:00");
-    expect(convertISODateStringToLondonTime("2021-01-01T03:21:00.000Z")).toBe("03:21");
-    expect(convertISODateStringToLondonTime("2021-01-01T03:50:11Z")).toBe("03:50");
+describe("check formatISODateStringAsZonedTime", () => {
+  test("check formatISODateStringAsZonedTime with valid date strings", () => {
+    expect(formatISODateStringAsZonedTime("2021-01-01T03:00:00.000Z")).toBe("03:00");
+    expect(formatISODateStringAsZonedTime("2021-01-01T03:21:00.000Z")).toBe("03:21");
+    expect(formatISODateStringAsZonedTime("2021-01-01T03:50:11Z")).toBe("03:50");
   });
 
   it("should handle an empty date string", () => {
-    const londonTime = convertISODateStringToLondonTime("");
+    const londonTime = formatISODateStringAsZonedTime("");
     expect(londonTime).toBe("00:00");
   });
 
   it('should handle the edge case date string ":00.000Z"', () => {
-    const londonTime = convertISODateStringToLondonTime(":00.000Z");
+    const londonTime = formatISODateStringAsZonedTime(":00.000Z");
     expect(londonTime).toBe("00:00");
   });
 
   it("should throw an error for an invalid date string", () => {
     const invalidDateFunc = () => {
-      convertISODateStringToLondonTime("invalid-date");
+      formatISODateStringAsZonedTime("invalid-date");
     };
     // expect(invalidDateFunc).toBe("03:00");
     expect(invalidDateFunc).toThrow(new Error("Invalid date: invalid-date"));
@@ -53,14 +53,12 @@ describe("check convertISODateStringToLondonTime", () => {
 
 describe("prettyPrintChartAxisLabelDate", () => {
   it("should handle a valid UNIX timestamp", () => {
-    const convertISODateStringToLondonTimeSpy = jest.spyOn(
-      utils,
-      "convertISODateStringToLondonTime"
-    );
-    convertISODateStringToLondonTimeSpy.mockImplementation((date) => date);
+    // This used to spy on the time formatter and assert the ISO string handed to it, i.e. the
+    // delegation rather than the output. Phase 3 formats the instant directly with Luxon, so
+    // there is no longer an internal call to intercept; asserting the rendered tick is what the
+    // chart actually depends on anyway.
     const result = prettyPrintChartAxisLabelDate(1634045699000); // October 12, 2021 14:34
-    expect(result).toBe("2021-10-12T13:34:59.000Z");
-    convertISODateStringToLondonTimeSpy.mockRestore();
+    expect(result).toBe("14:34");
   });
 
   it("should handle an empty value", () => {
@@ -333,7 +331,7 @@ describe("formatISODateString", () => {
   });
 });
 
-describe("formatISODateAsLondonTime", () => {
+describe("formatDateAsZonedTime", () => {
   test.each([
     [GMT_NOON, "12:00"],
     [BST_NOON, "13:00"],
@@ -350,11 +348,11 @@ describe("formatISODateAsLondonTime", () => {
     [AUTUMN_26_FIRST_0130, "01:30"],
     [AUTUMN_26_SECOND_0130, "01:30"]
   ])("%s -> %s", (iso, expected) => {
-    expect(utils.formatISODateAsLondonTime(new Date(iso))).toBe(expected);
+    expect(utils.formatDateAsZonedTime(new Date(iso))).toBe(expected);
   });
 });
 
-describe("convertISODateStringToLondonTime", () => {
+describe("formatISODateStringAsZonedTime", () => {
   // The existing suite above covers the happy path and the empty/invalid cases; these are the
   // DST and boundary cases it was missing.
   test.each([
@@ -371,11 +369,11 @@ describe("convertISODateStringToLondonTime", () => {
     [SPRING_26_AFTER, "02:00"],
     [AUTUMN_26_SECOND_0130, "01:30"]
   ])("%s -> %s", (iso, expected) => {
-    expect(utils.convertISODateStringToLondonTime(iso)).toBe(expected);
+    expect(utils.formatISODateStringAsZonedTime(iso)).toBe(expected);
   });
 
   test("throws on a date-shaped string that Date cannot parse", () => {
-    expect(() => utils.convertISODateStringToLondonTime("2025-13-45T99:99:99Z")).toThrow(
+    expect(() => utils.formatISODateStringAsZonedTime("2025-13-45T99:99:99Z")).toThrow(
       "Invalid date: 2025-13-45T99:99:99Z"
     );
   });
@@ -434,7 +432,7 @@ describe("formatISODateStringHuman", () => {
   );
 });
 
-describe("dateToLondonDateTimeString", () => {
+describe("dateToZonedDateTimeString", () => {
   test.each([
     [GMT_NOON, "Wednesday, 15 January 2025, 12:00"],
     [BST_NOON, "Tuesday, 15 July 2025, 13:00"],
@@ -444,11 +442,11 @@ describe("dateToLondonDateTimeString", () => {
     [SPRING_25_AFTER, "Sunday, 30 March 2025, 02:00"],
     [AUTUMN_25_SECOND_0130, "Sunday, 26 October 2025, 01:30"]
   ])("%s -> %s", (iso, expected) => {
-    expect(utils.dateToLondonDateTimeString(new Date(iso))).toBe(expected);
+    expect(utils.dateToZonedDateTimeString(new Date(iso))).toBe(expected);
   });
 });
 
-describe("dateToLondonDateTimeOnlyString", () => {
+describe("dateToZonedDateOnlyString", () => {
   // Note the trailing space, which callers concatenate onto.
   test.each([
     [GMT_NOON, "15/01/2025 "],
@@ -460,7 +458,7 @@ describe("dateToLondonDateTimeOnlyString", () => {
     [SPRING_25_AFTER, "30/03/2025 "],
     [AUTUMN_25_SECOND_0130, "26/10/2025 "]
   ])("%s -> %s", (iso, expected) => {
-    expect(utils.dateToLondonDateTimeOnlyString(new Date(iso))).toBe(expected);
+    expect(utils.dateToZonedDateOnlyString(new Date(iso))).toBe(expected);
   });
 });
 
@@ -491,15 +489,16 @@ describe("formatISODateStringHumanNumbersOnly", () => {
 });
 
 describe("prettyPrintDayLabelWithDate — DST and boundary cases", () => {
-  // Viewer-zone dependent: unlike its neighbours this one formats in the *process* zone, with no
-  // `timeZone: "Europe/London"`. Under the UTC-pinned test process that shows up on the BST
-  // midnight fixture, where London is already on the 15th but the label says "Mon 14".
+  // Phase 3 fixed this. It used to format in the *process* zone with no `timeZone` option, unlike
+  // every neighbouring helper, so the BST midnight fixture — 23:00 UTC on the 14th, already the
+  // 15th in London — labelled "Mon 14". It now labels in the zone it is given, so the pinned
+  // wrong answer below is inverted to the right one.
   test.each([
     [GMT_NOON, "Wed 15"],
     [BST_NOON, "Tue 15"],
     [GMT_MIDNIGHT, "Wed 15"],
     [GMT_2330, "Wed 15"],
-    [BST_MIDNIGHT, "Mon 14"], // London: Tuesday the 15th. This is the bug, pinned.
+    [BST_MIDNIGHT, "Tue 15"], // London has already ticked over to the 15th. Was "Mon 14" (B-fix).
     [BST_2330, "Tue 15"],
     [SPRING_25_BEFORE, "Sun 30"],
     [SPRING_25_AFTER, "Sun 30"],
@@ -537,19 +536,17 @@ describe("prettyPrintChartAxisLabelDate — DST and boundary cases", () => {
   });
 
   test.each([
-    ["2025-01-15T12:00:00.000Z", "Invalid date: 2025-01-15T12:00:00.000Z+00:00"],
-    ["2025-07-15T12:00:00.000Z", "Invalid date: 2025-07-15T12:00:00.000Z+00:00"],
-    ["2025-07-15T12:00:00Z", "Invalid date: 2025-07-15T12:00:00Z+00:00"]
-  ])(
-    "THROWS on a Z-suffixed ISO string (%s) — the >16-char branch appends '+00:00' to a string that already carries a zone",
-    (input, message) => {
-      // Pinned, not endorsed. Nothing in the app currently reaches this branch (ticks arrive as
-      // the 16-char form), but it is an uncaught throw inside a chart tick formatter and one
-      // caller passing a raw API timestamp would blank the chart. Flagged for a decision rather
-      // than fixed here — the fix belongs with whoever owns the axis.
-      expect(() => utils.prettyPrintChartAxisLabelDate(input)).toThrow(message);
-    }
-  );
+    ["2025-01-15T12:00:00.000Z", "12:00"],
+    ["2025-07-15T12:00:00.000Z", "13:00"],
+    ["2025-07-15T12:00:00Z", "13:00"],
+    ["2025-07-14T23:00:00Z", "00:00"]
+  ])("reads a Z-suffixed ISO string (%s -> %s) instead of throwing", (input, expected) => {
+    // Was pinned as throwing: the >16-character branch appended "+00:00" to a string that
+    // already carried a zone. Scheduled for Phase 4, brought forward because Phase 3 rewrites
+    // this function on Luxon anyway and v1 spells every timestamp with a Z — so the throw is
+    // live rather than latent, inside a chart tick formatter that must never throw.
+    expect(utils.prettyPrintChartAxisLabelDate(input)).toBe(expected);
+  });
 
   test("returns a sentinel rather than throwing for a parseable-shaped but invalid string", () => {
     expect(utils.prettyPrintChartAxisLabelDate("2025-13-45T99:99:99Z")).toBe("Invalid date 3");
@@ -618,11 +615,12 @@ describe("getRounded4HoursAgoString", () => {
   });
 });
 
-describe("Luxon's default zone does not reach these helpers", () => {
-  // Every helper above uses the native `Date`, so `Settings.defaultZone` — the obvious lever,
-  // and the one the Luxon-based helpers in data.ts respond to — has no effect at all here.
-  // Pinned because Phase 3 will want one consistent way to set the zone, and this documents
-  // that "set Settings.defaultZone" is not it until these are migrated to Luxon (F5).
+describe("the passed timezone wins over Luxon's ambient default", () => {
+  // These are Luxon-based now (F5), so `Settings.defaultZone` is a real lever — and it must not
+  // be the one that decides what a user sees. Every helper takes its zone as an argument, so an
+  // ambient default cannot move the output. `convertToLocaleDateString` is the exception by
+  // design: it defaults to the *viewer's* zone, and pins to "system" rather than to the Luxon
+  // default so that lever cannot reach it either.
   afterEach(() => {
     Settings.defaultZone = "system";
   });
@@ -633,8 +631,110 @@ describe("Luxon's default zone does not reach these helpers", () => {
       const before = utils.getTimeFromDate(new Date(BST_NOON));
       Settings.defaultZone = zone;
       expect(utils.getTimeFromDate(new Date(BST_NOON))).toBe(before);
-      expect(utils.prettyPrintDayLabelWithDate(BST_MIDNIGHT)).toBe("Mon 14");
+      // Was "Mon 14" — see the Phase 3 fix note on prettyPrintDayLabelWithDate above.
+      expect(utils.prettyPrintDayLabelWithDate(BST_MIDNIGHT)).toBe("Tue 15");
+      expect(utils.formatISODateStringAsZonedTime(BST_NOON)).toBe("13:00");
+      expect(utils.formatISODateStringHuman(BST_NOON)).toBe("Tuesday, 15 July 2025, 13:00");
+      expect(utils.prettyPrintChartAxisLabelDate("2025-07-15T12:00")).toBe("13:00");
       expect(utils.convertToLocaleDateString(BST_NOON)).toBe(BST_NOON);
     }
   );
+});
+
+describe("non-GB timezones and locales", () => {
+  // The point of the parameterisation: a country's zone is an argument, not a hidden global.
+  // Europe/Amsterdam is the real second country (NL); Pacific/Auckland is here because a +12/+13
+  // offset rolls the date over, so a helper that quietly ignored its zone argument could not
+  // still produce these answers.
+  const AMS = "Europe/Amsterdam";
+  const NZ = "Pacific/Auckland";
+
+  test.each([
+    [GMT_NOON, AMS, "13:00"], // CET, UTC+1
+    [BST_NOON, AMS, "14:00"], // CEST, UTC+2
+    [GMT_NOON, NZ, "01:00"], // NZDT, UTC+13 — next day
+    [BST_NOON, NZ, "00:00"] // NZST, UTC+12 — next day
+  ])("formatISODateStringAsZonedTime(%s, %s) -> %s", (iso, zone, expected) => {
+    expect(utils.formatISODateStringAsZonedTime(iso, zone)).toBe(expected);
+  });
+
+  test.each([
+    [GMT_NOON, AMS, "15/01/2025 13:00"],
+    [BST_NOON, AMS, "15/07/2025 14:00"],
+    [GMT_NOON, NZ, "16/01/2025 01:00"], // the +13 offset rolls the date
+    [GMT_2330, NZ, "16/01/2025 12:30"]
+  ])("formatISODateStringHumanNumbersOnly(%s, %s) -> %s", (iso, zone, expected) => {
+    expect(utils.formatISODateStringHumanNumbersOnly(iso, zone)).toBe(expected);
+  });
+
+  test.each([
+    [GMT_NOON, AMS, "Wed 15"],
+    [GMT_NOON, NZ, "Thu 16"], // 01:00 on the 16th in Auckland
+    [GMT_2330, "Europe/London", "Wed 15"],
+    [GMT_2330, NZ, "Thu 16"]
+  ])("prettyPrintDayLabelWithDate(%s, %s) -> %s", (iso, zone, expected) => {
+    expect(utils.prettyPrintDayLabelWithDate(iso, zone)).toBe(expected);
+  });
+
+  test("day labels bucket in the passed zone, on both sides of that zone's DST change", () => {
+    // The Netherlands changes clocks on the same instant as the UK, an hour further on. 23:00 UTC
+    // is already the next day in Amsterdam in winter; in summer 22:00 UTC is.
+    expect(utils.prettyPrintDayLabelWithDate("2025-01-15T23:30:00.000Z", AMS)).toBe("Thu 16");
+    expect(utils.prettyPrintDayLabelWithDate("2025-01-15T22:30:00.000Z", AMS)).toBe("Wed 15");
+    expect(utils.prettyPrintDayLabelWithDate("2025-07-15T22:30:00.000Z", AMS)).toBe("Wed 16");
+    expect(utils.prettyPrintDayLabelWithDate("2025-07-15T21:30:00.000Z", AMS)).toBe("Tue 15");
+  });
+
+  test.each([
+    // Amsterdam's clock change is the same instant as London's, an hour later on the clock.
+    ["2025-03-30T00:59:00.000Z", AMS, "01:59"],
+    ["2025-03-30T01:00:00.000Z", AMS, "03:00"], // spring forward, 02:00 does not exist
+    ["2025-10-26T00:30:00.000Z", AMS, "02:30"], // ambiguous hour, first (CEST) pass
+    ["2025-10-26T01:30:00.000Z", AMS, "02:30"] // ...and second (CET) pass
+  ])("DST boundaries render in the passed zone: %s in %s -> %s", (iso, zone, expected) => {
+    expect(utils.formatISODateStringAsZonedTime(iso, zone)).toBe(expected);
+  });
+
+  test("locale drives day and month names, not the zone", () => {
+    expect(utils.formatISODateStringHuman(GMT_NOON, AMS, "nl-NL")).toBe(
+      "woensdag 15 januari 2025, 13:00"
+    );
+    expect(utils.prettyPrintDayLabelWithDate(GMT_NOON, AMS, "nl-NL")).toBe("wo 15");
+  });
+
+  test("dateToZonedDateTimeString and dateToZonedDateOnlyString take the same arguments", () => {
+    expect(utils.dateToZonedDateTimeString(new Date(GMT_NOON), AMS)).toBe(
+      "Wednesday, 15 January 2025, 13:00"
+    );
+    expect(utils.dateToZonedDateOnlyString(new Date(GMT_2330), NZ)).toBe("16/01/2025 ");
+  });
+
+  test("convertToLocaleDateString can be told a zone rather than reading the viewer's", () => {
+    expect(utils.convertToLocaleDateString(GMT_NOON, AMS)).toBe("2025-01-15T13:00:00.000Z");
+    expect(utils.convertToLocaleDateString(GMT_NOON, NZ)).toBe("2025-01-16T01:00:00.000Z");
+  });
+
+  test("prettyPrintChartAxisLabelDate renders ticks in the passed zone", () => {
+    expect(utils.prettyPrintChartAxisLabelDate("2025-01-15T12:00", AMS)).toBe("13:00");
+    expect(utils.prettyPrintChartAxisLabelDate("2025-01-15T12:00:00Z", NZ)).toBe("01:00");
+    expect(utils.prettyPrintChartAxisLabelDate(new Date(GMT_NOON).getTime(), AMS)).toBe("13:00");
+  });
+
+  test("getRounded4HoursAgoString rounds and renders in the passed zone", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2025-01-15T12:20:00.000Z").getTime());
+    expect(utils.getRounded4HoursAgoString(AMS)).toBe("09:00");
+    expect(utils.getRounded4HoursAgoString(NZ)).toBe("21:00");
+    jest.useRealTimers();
+  });
+});
+
+describe("the legacy London-named exports still resolve", () => {
+  // Kept only so call sites owned by other agents keep compiling; Phase 4 deletes them once those
+  // call sites pass the country's zone explicitly.
+  test("each alias is the renamed function", () => {
+    expect(utils.formatISODateAsLondonTime).toBe(utils.formatDateAsZonedTime);
+    expect(utils.convertISODateStringToLondonTime).toBe(utils.formatISODateStringAsZonedTime);
+    expect(utils.dateToLondonDateTimeString).toBe(utils.dateToZonedDateTimeString);
+  });
 });

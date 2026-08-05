@@ -378,3 +378,33 @@ describe("the two helpers must not be used interchangeably", () => {
     }
   );
 });
+
+describe("getSettlementPeriodForDate — timezone parameterisation", () => {
+  // Phase 3: the zone is an argument, defaulting to Europe/London so every existing call site is
+  // unchanged. `getUtcHalfHourIndex` deliberately stays UTC — see the note on it in chartUtils.ts.
+  const utc = (iso: string) => DateTime.fromISO(iso, { zone: "utc" });
+
+  test("the default is Europe/London", () => {
+    expect(getSettlementPeriodForDate(utc("2025-07-15T12:00:00Z"))).toBe(
+      getSettlementPeriodForDate(utc("2025-07-15T12:00:00Z"), "Europe/London")
+    );
+    expect(getSettlementPeriodForDate(utc("2025-07-15T12:00:00Z"))).toBe(27); // 13:00 BST
+  });
+
+  test.each([
+    ["2025-01-15T12:00:00Z", "Europe/Amsterdam", 27], // 13:00 CET
+    ["2025-07-15T12:00:00Z", "Europe/Amsterdam", 29], // 14:00 CEST
+    ["2025-01-15T12:00:00Z", "Pacific/Auckland", 3], // 01:00 the next day, +13
+    ["2025-01-15T12:00:00Z", "UTC", 25]
+  ])("%s in %s -> period %i", (iso, zone, expected) => {
+    expect(getSettlementPeriodForDate(utc(iso), zone)).toBe(expected);
+  });
+
+  test("the passed zone's own clock-change day still runs 46 and 50 periods", () => {
+    // Amsterdam changes at 02:00 local, one hour after London, on the same instant.
+    const lastOf = (dayStartUtc: string, zone: string, hours: number) =>
+      getSettlementPeriodForDate(utc(dayStartUtc).plus({ hours }), zone);
+    expect(lastOf("2025-03-29T23:00:00Z", "Europe/Amsterdam", 22.5)).toBe(46);
+    expect(lastOf("2025-10-25T22:00:00Z", "Europe/Amsterdam", 24.5)).toBe(50);
+  });
+});

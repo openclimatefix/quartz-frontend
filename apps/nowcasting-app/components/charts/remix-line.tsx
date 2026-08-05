@@ -408,10 +408,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }}
           >
             <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
+            {/* The tick formatters are wrapped rather than passed by reference because recharts
+                calls them with (value, index), and index would land in the timezone argument
+                these helpers now take. Phase 3 will pass the country's zone here instead. */}
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis"}
-              tickFormatter={prettyPrintChartAxisLabelDate}
+              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x)}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
@@ -424,7 +427,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               className="select-none"
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
-              tickFormatter={prettyPrintChartAxisLabelDate}
+              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x)}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
@@ -439,7 +442,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis-3"}
-              tickFormatter={prettyPrintDayLabelWithDate}
+              tickFormatter={(x) => prettyPrintDayLabelWithDate(x)}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
