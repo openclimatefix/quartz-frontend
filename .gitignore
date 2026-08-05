@@ -4,3 +4,7 @@ build/**
 dist/**
 .next/**
 .env
+# Parked clutter: dead spikes, stale artefacts and one-off outputs moved out of the
+# app and repo roots so TypeScript, jest, next and eslint stop seeing them. Nothing
+# here is referenced by the app. Safe to delete once nobody misses it.
+.attic/
