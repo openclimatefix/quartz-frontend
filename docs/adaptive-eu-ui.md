@@ -65,6 +65,74 @@ Deliberately left alone: `clover.xml` (the only tracked clutter candidate, so it
 commit), and the large unreferenced GeoJSON in `data/` (`zone-geojson-test.json` 61MB,
 `gsp_regions_20220314.json` 21MB), which is Phase 5 work.
 
+**Phase 1 complete** (uncommitted). 9 suites / **571 tests** (from 101), typecheck clean, 0 lint
+errors, production build succeeds. New: `csvDownload.test.ts` (61), `data.geo.test.ts` (50),
+`utils.delta.test.ts` (63), `use-format-chart-data.test.tsx` (53), plus ~255 added across the three
+existing helper suites.
+
+Bug fixes landed with the tests, as planned:
+
+- **B8** — zeros in the CSV. `entry.solarGenerationKw ? … : null` treated a genuine 0 kW reading as
+  missing, blanking every overnight row. Now a nullish check. The same pass found the forecast
+  columns propagating `undefined` where the type says `number | null`; normalised to `null`, which
+  also fixes delta silently dropping out when either side was 0.
+- **B2** — the forecast window helpers. The round-*up* added `hour % 6` (14:00 → 16:00, not a
+  boundary at all); it is now a true ceiling and idempotent on boundaries. Both helpers now do their
+  arithmetic in UTC, so a viewer in LA gets the same window as one in London — previously they
+  differed by hours.
+- **B9 — the audit's diagnosis was wrong, and the prescribed fix would have caused a regression.**
+  See below.
+
+`downloadNationalCsv` was split into a pure `buildCsvRows` + `generateCsv` and a thin DOM wrapper,
+with its public signature unchanged, because none of it was testable otherwise.
+
+### B9: what the audit got wrong
+
+The audit called the chart path's settlement period "off by two all summer" and prescribed making
+`getSettlementPeriodForDate` convert to `Europe/London`. Applied literally, that would have shifted
+every seasonal-mean and seasonal-bound line on the national chart by two slots throughout BST — a
+visible regression, introduced as a bug fix.
+
+The reason: `data/national_metrics.json` is bucketed by **UTC** time-of-day, so its 48-element
+arrays are indexed by UTC half-hour slot, not by settlement period. Its generator
+(`client-private/seasonal-norm/main.py`) groups on `datetime_gmt` with no timezone conversion, and
+the data agrees — the midpoint of the daylight window, which is fixed by solar geometry rather than
+by cloud, sits at 12:30 in December (when UK local time *is* UTC) and 12:15–12:30 in June. Local-time
+bucketing would put June an hour later. The June sunrise edge confirms it independently: first
+generation at slot 04:30 is just after sunrise read as UTC, and before sunrise read as BST.
+
+So `getSettlementPeriodForDate(date.toUTC())` minus one was *already* the correct UTC slot index, and
+the chart was right. Its other use, `chartMap[key].SETTLEMENT_PERIOD`, is written and never read
+anywhere in the app — which also answers the audit's open question: there was no user-visible
+settlement-period bug, only a latent one.
+
+Resolved by separating the two concepts rather than converting in place: `getUtcHalfHourIndex` for
+indexing UTC-bucketed data, `getSettlementPeriodForDate` for the GB settlement period a user reads
+(now correctly London-based, with 46/50-period clock-change days handled, for its one real consumer,
+the CSV). A test pins that the two agree in GMT and differ by exactly 2 in BST.
+
+### Notable behaviours pinned but deliberately not fixed
+
+Each is marked `// CHARACTERISATION` in the tests, with a note on which phase inverts it.
+
+- **B6 staleness** is pinned by asserting the memo returns the *same array instance* when only an
+  omitted dependency changes. A control test shows a real dependency changing drags the ignored one
+  along, which is why the bug is intermittent rather than reliably broken. That block failing is how
+  Phase 4 will know the fix landed.
+- **B5** — `aggregateTruthData` (in `use-get-gsp-data.ts`, not `helpers/data.ts` as the audit says)
+  reverses the SWR-cached array in place; the test proves the caller's array is mutated.
+- **The chart merge key is a raw datetime string, not a parsed instant.** `…10:00:00Z` and
+  `…10:00:00+00:00` produce two half-populated rows sharing one `formattedDate`. Latent today
+  because every producer emits `+00:00` — but the v1 client is exactly what would start emitting
+  `Z`. **Fix in Phase 2 as part of `normalise.ts`**, not Phase 4: canonicalising the instant at the
+  boundary is where this belongs anyway.
+- Missing readings: `null / 1000 === 0` plots a hard zero, and `undefined` yields `NaN` that
+  propagates into `getZoomYMax` and the DNO/zone rollups, where one missing member GSP blanks a whole
+  region. `getDeltaBucket` and `getDelta` both return a zero-ish answer for "no data", making it
+  indistinguishable from "exactly on forecast".
+- `fourHourData` merges *after* the settlement/seasonal loop, so a timestamp only the N-hour series
+  knows about gets neither.
+
 ---
 
 ## Decisions
@@ -160,6 +228,27 @@ hooks/data/                SWR hooks over queries + normalise; take explicit Sco
 hooks/derived/             Delta, client-side groupings, chart formatting  [unit-tested]
 ```
 
+### Time discipline
+
+**Everything stays UTC until it is shown to a user.** The wire is UTC (`times_utc`), the canonical
+model keeps UTC ISO strings, and every chart map, cache key and comparison works in UTC. Conversion
+to a zone happens at the render boundary, using the timezone from the country registry.
+
+Stating it explicitly matters because "keep it UTC" alone does not decide two cases, and leaving
+them implicit is what produced B9:
+
+1. **Domain concepts defined in local time.** A GB settlement period *is* half-hours from
+   `Europe/London` midnight — that is its definition, not a formatting choice. It is still consistent
+   with the rule: a user-facing label derived at the boundary from a UTC instant. The bug was
+   conflating it with a positional index into a UTC-bucketed dataset. The two are now separate
+   functions (`getSettlementPeriodForDate` vs `getUtcHalfHourIndex`) precisely so the boundary is
+   visible in the type of question being asked.
+2. **Day bucketing.** A "day" is inherently local, so anything keyed by day has to choose a zone.
+   `national_metrics.json` is keyed by month/day derived from UTC, so its "21 June" is 00:00–00:00
+   UTC rather than local midnight to local midnight. Immaterial for GB and DE; a real choice, not a
+   default. **Phase 3 decision** — it only becomes visible at a larger offset, and the same question
+   applies to axis day labels and any per-day CSV grouping.
+
 **Canonical internal model.** v1 speaks kW and returns columnar matrices (`times_utc[]` +
 `regions[].power_kW[]`). Normalise **once at the boundary** to MW keyed by region name — MW is what
 `MAX_NATIONAL_GENERATION_MW`, `Y_MAX_TICKS`, the CSV export and every chart already assume. Nothing
@@ -245,17 +334,51 @@ D2 (O(n×m) map joins) with them.
 
 ---
 
+## Naming, structure and in-flight work
+
+Component filenames, titles and most of the existing logic are explicitly **not** load-bearing —
+there is no attachment to them, and tidying them up is in scope for this epic.
+
+**The rule: rename when you are already rewriting the file, not before.** A standalone rename pass
+would collide with everything in flight, and produce a diff where genuine behaviour changes are
+buried in move noise. Each phase renames what it touches, and the characterisation tests are what
+make that safe — they are written against behaviour, so a rename that breaks something fails loudly.
+
+The one category worth being eager about is **names that encode GB-specific concepts**, because
+Phase 3 and 4 otherwise cement them into the generic layer where they are actively misleading:
+`gsp` in anything not GB-specific (region types come from the manifest), `pvlive` in shared code
+(NL's observer is `ned_nl`), and `remix`/`RemixLine` for what is simply the main chart. Rename these
+as their phase reaches them, and do not introduce new ones.
+
+Also in scope as their phase reaches them: the `data.ts` / `utils.ts` grab-bags split along the
+architecture boundaries above; `globalState.tsx` and `constant.ts` reshaped by the Phase 3 state
+split; the dead `SETTLEMENT_PERIOD` chart key dropped.
+
+**The rebrand / reskin is Phase 7 — the last phase of this epic.** It is a restyle: colours, copy,
+assets and branding, with components staying where they are. Running it last is the right order,
+because it then applies to the decomposed components Phase 4 leaves behind rather than to the
+~800-line `index.tsx` that is about to be deleted, and there is no window where a styling diff and a
+file-move diff have to be reviewed on top of each other.
+
+The consequence for earlier phases: **do not guess at product-facing strings**. The
+`Quartz_National_` CSV filename, page titles and `ChartInfo.tsx` copy all get revisited in Phase 7,
+so where an earlier phase has to touch one, keep it mechanical — parameterise or move it, do not
+reword it.
+
+**Interim work folds into this branch.** Where a smaller change lands elsewhere that this epic
+supersedes, bring it onto `epic/adaptive-eu-ui` rather than merging it separately and rebasing the
+epic over it — the epic rewrites the same code, so a separate merge just creates a conflict to
+resolve twice. The `feat/NL-toggle` branch is the model: harvested for `data/netherlands.json`, the
+v1 learnings and the legend / measuring-unit / chart-gap fixes, with its duplicated `NL*` components
+dropped rather than merged.
+
 ## Implementation phases
 
 Each phase is independently shippable and leaves the app working.
 
 **Phase 0 — Groundwork (no behaviour change).** *Complete — see Status.*
 
-**Phase 1 — Characterisation tests (before touching data code).**
-Pin current behaviour with realistic fixtures from `data/dummy-res/` and
-`data/updatedDummyApiResponses/`, in priority order: date/slot helpers (fixing B2's broken round-up
-and B9's timezone drift in the same PR), `use-format-chart-data`, delta calculation, geo
-aggregation, CSV export (fixing B8's dropped zeros). These are the tests the migration runs against.
+**Phase 1 — Characterisation tests (before touching data code).** *Complete — see Status.*
 
 **Phase 2 — v1 client foundation.**
 - Generate `lib/api/v1/schema.d.ts` from `v1-api.json` via the already-installed
@@ -297,6 +420,10 @@ absorbing D4's eight copy-pasted `<Line>` blocks and B5's prop-mutating sorts.
 Should reduce to: add the `DE` registry entry, drop in `public/geo/de/*`, add `DE_ROLE_ID`. Any code
 change required here counts as a bug in the abstraction and is fixed there instead.
 
+**Phase 7 — Rebrand / reskin.**
+Colours, copy, assets and branding, applied to the decomposed components Phase 4 produces. No file
+moves, no data-layer changes. See *Naming, structure and in-flight work* for why it goes last.
+
 ---
 
 ## Test strategy
@@ -335,6 +462,26 @@ change required here counts as a bug in the abstraction and is fixed there inste
 - Exact shape of the Auth0 country claim once added — the intersect logic is one small function, so
   this can be adjusted late.
 - The 7 v1 regions with no polygon: refresh the boundary file or add an alias map (Phase 5).
+- **The DNO groupings are not a partition.** 15 GSP ids each appear in two DNO groupings
+  (26, 40, 60, 103, 135, 142, 155, 180, 199, 240, 279, 281, 322, 328, 341), so the DNO view
+  double-counts their generation and DNO totals sum above national. The NG-zone groupings are clean
+  (19 groups, 317 ids, no duplicates). The three files also disagree on which GSPs exist: DNO has 31
+  ids the others lack, they have 14 DNO lacks. Needs a decision when the files are regenerated
+  name-keyed in Phase 5 — is a GSP feeding two licence areas legitimate (in which case the rollup
+  needs an apportionment rule) or is it a data error?
+- **CSV output has no escaping** — every cell is joined raw on commas. Safe today (numbers and ISO
+  datetimes only), but Phase 3 puts country and region labels into that file, and one label
+  containing a comma or quote silently corrupts it. Fix before those labels land.
+- Day-bucketing timezone for seasonal norms and axis day labels — see Time discipline (Phase 3).
+- `generateGeoJsonForecastData` logs the aggregation level to the console on every call
+  (`data.ts:237/250/260/272`), i.e. on every map render. Debug logging left in a hot path; delete it
+  when Phase 4 rewrites the function.
+- `prettyPrintDayLabelWithDate` formats in the viewer's zone with no `timeZone` option, unlike every
+  neighbouring helper, so a late-evening UTC timestamp labels the wrong day for a UK viewer.
+  Pinned by test; fix as part of the Phase 3 timezone parameterisation.
+- `prettyPrintChartAxisLabelDate` throws on any Z-suffixed ISO string (it appends `+00:00` to a
+  string that already carries a zone). Unreachable today — ticks arrive in the 16-char form — but it
+  is an uncaught throw inside a chart tick formatter. Phase 4.
 - Status API base URL and response shape.
 - Satellite v1 path.
 - Sites on v1 — the Phase 5 isolation is what makes the swap cheap when it lands.
