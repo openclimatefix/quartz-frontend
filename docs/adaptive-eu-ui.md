@@ -192,6 +192,74 @@ test that fails if any of it drifts. Facts 1–8 below were all reconfirmed. Wha
 - `metadata.gsp_id` is a JSON float (`67.0`), and `horizon_minutes` is absent rather than null on
   the national forecast.
 
+**Phase 3 part-complete.** 18 suites / **784 tests** (from 683), typecheck clean, 0 lint errors,
+production build succeeds at 11.6 MB first-load. New: `config/countries.ts`, `hooks/data/`,
+`lib/api/auth/entitlement.ts`. The country registry, the country hooks and the timezone/CSV work
+landed; **the global state split, the country toggle and the call-site wiring did not** — see
+*Phase 3 remainder* below. What landed is independently shippable and leaves the app working: every
+date helper still defaults to GB, so behaviour is unchanged for a GB user.
+
+- **The two Phase 3 open questions are now decided.** *Day bucketing:* user-facing day labels and
+  per-day grouping bucket in the country's registry timezone; `national_metrics.json` stays
+  **UTC-indexed** via `getUtcHalfHourIndex`, with the asymmetry commented at the boundary. It reads
+  as an inconsistency and is not — see B9. *Auth0 country claim:* agreed as an array of uppercase
+  ISO codes, always present, `[]` meaning "no country role" (distinct from the claim being absent,
+  which means the Action has not shipped). The reader accepts both a namespaced
+  (`https://quartz.solar/countries`) and a plain (`countries`) key, because the existing
+  `trial_ends_at` claim is set **un-namespaced** and works — so this tenant does not enforce the
+  namespacing rule, and the Action author's choice is not load-bearing. One key gets deleted once
+  the Action lands.
+- **Dev mode is all-entitled**, as a separate named predicate. `readCountryClaim` stays honest so
+  nothing can mistake a fabricated claim for a real one — local dev serves `FAKE_TOKEN` with no
+  claims, which would otherwise render every country disabled.
+- **A country in the manifest with no registry entry stays discoverable**, flagged rather than
+  dropped or defaulted to GB. `/countries` returns all countries by design, so this is a legal
+  state, not an error.
+- **`hooks/` and `config/` were completely unlinted.** `.eslintignore`'s `**/data/*` — written for
+  the GeoJSON directory — also matched `hooks/data/*`, and `next lint` only walks
+  `pages/components/lib/src/app` by default. The entire Phase 3/4 data layer was exempt. Pattern
+  anchored to `/data/*` and `eslint.dirs` added.
+- **`prettyPrintChartAxisLabelDate`'s throw on `Z`-suffixed strings was fixed early**, against the
+  plan's Phase 4 placement: v1 emits `Z` uniformly, so an uncaught throw inside a chart tick
+  formatter is live rather than unreachable, and the function was being rewritten on Luxon anyway.
+- **`remix-line.tsx`'s tick formatters were a real break, not a type error.** recharts calls
+  `tickFormatter(value, index)`, so the index would have landed in the new trailing `timezone`
+  argument at runtime. Wrapped in arrows. Worth remembering wherever a helper grows an optional
+  trailing parameter and is passed as a callback by reference.
+- **`convertToLocaleDateString` defaults to the *viewer's* zone, not `Europe/London`**, unlike its
+  neighbours. Defaulting it to GB would have shifted every existing call site, so it was left alone —
+  the wiring work must pass the country zone explicitly there.
+
+Helpers renamed away from GB-specific names (aliases kept where call sites were out of scope,
+marked for Phase 4 deletion): `formatISODateAsLondonTime → formatDateAsZonedTime`,
+`convertISODateStringToLondonTime → formatISODateStringAsZonedTime`,
+`dateToLondonDateTimeString → dateToZonedDateTimeString`,
+`dateToLondonDateTimeOnlyString → dateToZonedDateOnlyString`. All take
+`(…, timezone = "Europe/London", locale = "en-GB")`.
+
+### Phase 3 remainder
+
+Not started, or started and reverted. The reverted work is preserved as a patch and two draft files
+(`countryState.ts`, `aggregationLevels.ts`) rather than lost, but it was mid-edit — it had converted
+`GlobalStateType`'s declarations to `Record<string, …>` without updating the initial values or the
+~100 consumer sites, so it is a starting point, not a base to build on.
+
+- Split global state: cross-country keys flat, country-dependent keys (`clickedGspId`, viewport,
+  aggregation level, region selection) keyed by country code. Switching country must preserve each
+  country's viewport and selection, which is the point of keying rather than resetting.
+- Per-country map defaults from `config/countries.ts`, replacing the hardcoded GB `lng`/`lat`/`zoom`
+  in `globalState.tsx`. The registry already carries `level`/`minZoom`/`maxZoom` per region type so
+  `AGGREGATION_LEVELS` and `NationalAggregation` can become a country-derived
+  `{ regionType, level, label, minZoom, maxZoom }` list. GB must derive its existing four levels
+  unchanged — that equivalence is the safety property to assert.
+- Country toggle in the menu, current country persisted by cookie, validated on read the way
+  `getValidatedPLevels` already validates p-levels.
+- Wire the date-helper call sites to the registry timezone via the current country.
+
+Note that at the end of Phase 3 the toggle switches country state, cookie and map defaults while the
+charts still fetch GB v0 — the pipeline swap is Phase 4. NL will look like "the map moved" and
+little else. That is the phase boundary working, not a defect.
+
 ### The spec enumerates live countries; the frontend deliberately does not
 
 `v1-api.json` types `country` as `enum: ["GB","NL"]` (and `source` as `["solar"]`, `region_type` as
@@ -460,15 +528,19 @@ Each phase is independently shippable and leaves the app working.
   that this replaces). Typed errors replace `error.toString().includes("403")`.
 - `queries.ts` and `normalise.ts` as pure functions, fully unit-tested against the spec.
 
-**Phase 3 — Country configuration.**
+**Phase 3 — Country configuration.** *Part-complete — see Status, and Phase 3 remainder for what
+is outstanding.*
 - `config/countries.ts` registry plus `useCountries()` (manifest ∩ entitlement),
-  `useCurrentCountry()`, `useEntitledCountries()`.
+  `useCurrentCountry()`, `useEntitledCountries()`. — *done*
 - Country toggle in the menu, adapting `country-toggle.tsx` from the NL branch: driven by
   `useCountries()`, with unentitled countries shown but disabled. Current country persists via
   cookie alongside the existing `visibleLines`/`pLevels` settings in `cookieStorage.ts`.
+  — *outstanding*
 - Parameterise date/locale helpers in `components/helpers/utils.ts` and `csvDownload.ts` by timezone
-  from the registry; standardise on Luxon (F5). Update `ChartInfo.tsx` copy.
+  from the registry; standardise on Luxon (F5). Update `ChartInfo.tsx` copy. — *helpers done; the
+  call sites still pass the GB defaults, so wiring them to the registry is outstanding*
 - Per-country map defaults replace the hardcoded GB `lng`/`lat`/`zoom` in `globalState.tsx`.
+  — *outstanding*
 - Split global state: cross-country keys (`selectedISOTime`, `view`, `visibleLines`, `activeUnit`,
   `pLevels`) stay flat; country-dependent keys (`clickedGspId`, viewport, aggregation level, region
   selection) become keyed by country code.
@@ -568,19 +640,19 @@ moves, no data-layer changes. See *Naming, structure and in-flight work* for why
   ids the others lack, they have 14 DNO lacks. Needs a decision when the files are regenerated
   name-keyed in Phase 5 — is a GSP feeding two licence areas legitimate (in which case the rollup
   needs an apportionment rule) or is it a data error?
-- **CSV output has no escaping** — every cell is joined raw on commas. Safe today (numbers and ISO
-  datetimes only), but Phase 3 puts country and region labels into that file, and one label
-  containing a comma or quote silently corrupts it. Fix before those labels land.
-- Day-bucketing timezone for seasonal norms and axis day labels — see Time discipline (Phase 3).
+- ~~**CSV output has no escaping.**~~ **Resolved in Phase 3** — RFC 4180 escaping applied at the
+  single point where cells and headers are joined, ahead of the country/region labels that make it
+  matter.
+- ~~Day-bucketing timezone for seasonal norms and axis day labels.~~ **Decided in Phase 3** — local
+  for user-facing labels, UTC for the seasonal norms. See Status.
 - `generateGeoJsonForecastData` logs the aggregation level to the console on every call
   (`data.ts:237/250/260/272`), i.e. on every map render. Debug logging left in a hot path; delete it
   when Phase 4 rewrites the function.
-- `prettyPrintDayLabelWithDate` formats in the viewer's zone with no `timeZone` option, unlike every
-  neighbouring helper, so a late-evening UTC timestamp labels the wrong day for a UK viewer.
-  Pinned by test; fix as part of the Phase 3 timezone parameterisation.
-- `prettyPrintChartAxisLabelDate` throws on any Z-suffixed ISO string (it appends `+00:00` to a
-  string that already carries a zone). Unreachable today — ticks arrive in the 16-char form — but it
-  is an uncaught throw inside a chart tick formatter. Phase 4.
+- ~~`prettyPrintDayLabelWithDate` formats in the viewer's zone.~~ **Fixed in Phase 3**; the
+  characterisation test was inverted to assert the corrected label.
+- ~~`prettyPrintChartAxisLabelDate` throws on any Z-suffixed ISO string.~~ **Fixed in Phase 3**,
+  earlier than its Phase 4 placement: v1 emits `Z` uniformly, so the throw is live rather than
+  unreachable.
 - Status API base URL and response shape.
 - Satellite v1 path.
 - Sites on v1 — the Phase 5 isolation is what makes the swap cheap when it lands.
