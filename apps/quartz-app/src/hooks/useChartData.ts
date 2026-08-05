@@ -1,5 +1,6 @@
 import { ChartDatum, CombinedData } from "@/src/types/data";
 import { convertDatestampToEpoch, getEpochNowInTimezone } from "@/src/helpers/datetime";
+import { KWtoMW as toMW } from "@/src/helpers/formatHelpers";
 
 export const useChartData = (combinedData: CombinedData) => {
   let formattedChartData: ChartDatum[] = [];
@@ -15,19 +16,19 @@ export const useChartData = (combinedData: CombinedData) => {
       // so that the area chart doesn't have a gap
       const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
-        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : null;
+        existingData[key] = toMW(value.PowerKW);
         if (isNowEntry) {
-          existingData["wind_forecast_future"] = value.PowerKW ? value.PowerKW / 1000 : null;
+          existingData["wind_forecast_future"] = toMW(value.PowerKW);
         }
       } else {
         const newEntry = {
           timestamp,
-          [key]: value.PowerKW / 1000,
+          [key]: toMW(value.PowerKW),
           solar_generation: null,
           wind_generation: null
         };
         if (isNowEntry) {
-          newEntry["wind_forecast_future"] = value.PowerKW / 1000;
+          newEntry["wind_forecast_future"] = toMW(value.PowerKW);
         }
         formattedChartData?.push(newEntry);
       }
@@ -44,19 +45,19 @@ export const useChartData = (combinedData: CombinedData) => {
       // so that the area chart doesn't have a gap
       const isNowEntry = timestamp === getEpochNowInTimezone();
       if (existingData) {
-        existingData[key] = value.PowerKW ? value.PowerKW / 1000 : 0;
+        existingData[key] = toMW(value.PowerKW);
         if (isNowEntry) {
-          existingData["solar_forecast_future"] = value.PowerKW ? value.PowerKW / 1000 : null;
+          existingData["solar_forecast_future"] = toMW(value.PowerKW);
         }
       } else {
         const newEntry = {
           timestamp,
-          [key]: value.PowerKW / 1000,
+          [key]: toMW(value.PowerKW),
           solar_generation: null,
           wind_generation: null
         };
         if (isNowEntry) {
-          newEntry["solar_forecast_future"] = value.PowerKW / 1000;
+          newEntry["solar_forecast_future"] = toMW(value.PowerKW);
         }
         formattedChartData?.push(newEntry);
       }
@@ -75,7 +76,7 @@ export const useChartData = (combinedData: CombinedData) => {
           existingData.wind_forecast_future ||
           existingData.wind_forecast_past)
       ) {
-        existingData.solar_generation = value.PowerKW / 1000;
+        existingData.solar_generation = toMW(value.PowerKW);
       }
     }
   }
@@ -92,7 +93,7 @@ export const useChartData = (combinedData: CombinedData) => {
           existingData.wind_forecast_future ||
           existingData.wind_forecast_past)
       ) {
-        existingData.wind_generation = value.PowerKW / 1000;
+        existingData.wind_generation = toMW(value.PowerKW);
       }
     }
   }
