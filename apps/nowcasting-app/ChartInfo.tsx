@@ -19,6 +19,10 @@ export const ChartInfo: React.FC = () => {
           For example, 17:00 refers to solar generation between 16:30 to 17:00.
         </li>
         <li>The Y axis units are in MW for the National and GSP charts.</li>
+        <li>
+          Satellite image shown is from the middle of the settlement period (15 min earlier) to
+          match the forecast window.
+        </li>
         <br />
         <li>
           To learn more, please see our{" "}

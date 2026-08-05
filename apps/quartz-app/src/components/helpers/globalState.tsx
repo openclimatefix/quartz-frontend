@@ -7,6 +7,7 @@ import { components } from "@/src/types/schema";
 export type GlobalStateType = {
   visibleLines: string[];
   combinedData: CombinedData;
+  isLoading: boolean;
   forecastHorizon: components["schemas"]["ForecastHorizon"];
   forecastHorizonMinutes: number;
 };
@@ -39,6 +40,7 @@ export const {
 > = createGlobalState<GlobalStateType>({
   visibleLines: ["Solar", "Wind"],
   combinedData: {} as CombinedData,
+  isLoading: true,
   forecastHorizon: "latest",
   forecastHorizonMinutes: 90
 });
