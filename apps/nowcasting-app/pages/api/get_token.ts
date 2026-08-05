@@ -1,6 +1,8 @@
 import { getAccessToken, getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { NextApiRequest, NextApiResponse } from "next";
 
+import { readCountryClaim } from "../../lib/api/auth/entitlement";
+
 export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
   ? async function token(req: NextApiRequest, res: NextApiResponse) {
       if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
@@ -24,7 +26,10 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
         if (trialEndsAt && new Date(trialEndsAt) < new Date()) {
           return res.status(403).json({ error: "trial_expired", email: session?.user?.email });
         }
-        res.status(200).json(accessToken);
+        // Surfaced alongside the token so a client that only ever talks to this endpoint
+        // still learns its entitlement. Read defensively via readCountryClaim: the claim
+        // is not live on the tenant yet, so this is `[]` today and must stay non-fatal.
+        res.status(200).json({ ...accessToken, countries: readCountryClaim(session?.user) });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
           return res.status(403).json({ error: "access_denied", message: error.message });

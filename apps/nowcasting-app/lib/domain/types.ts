@@ -11,6 +11,8 @@
 // Region identity is `regionName: string` throughout. `gspId: number` does not exist
 // here by design: a numeric GSP id means nothing outside GB, a region name is portable.
 
+import type { CountryConfig } from "../../config/countries";
+
 /** An ISO-8601 instant in UTC, canonicalised to `YYYY-MM-DDTHH:mm:ssZ`. */
 export type UtcInstant = string;
 
@@ -136,6 +138,24 @@ export type CountryCapability = {
   centroid: { lat: number; lng: number } | null;
   regionTypes: RegionTypeCapability[];
   generationSources: GenerationSourceCapability[];
+};
+
+/**
+ * A country as the app sees it: the manifest's dynamic half, joined to the static registry
+ * entry and to entitlement.
+ *
+ * `config` is optional and `configured` exists because `/countries` returns every country
+ * the API serves, not just the ones this build knows about. A country with no registry
+ * entry is still listed — discoverable and flagged — rather than dropped, so a backend that
+ * adds a country ahead of the frontend degrades to "visible but not configurable".
+ */
+export type CountryListing = CountryCapability & {
+  /** Static registry entry, or `undefined` when this build has none for `code`. */
+  config?: CountryConfig;
+  /** `true` when a registry entry exists — i.e. the country can actually be rendered. */
+  configured: boolean;
+  /** Intersection with the Auth0 country claim. Always `true` in dev mode. */
+  entitled: boolean;
 };
 
 /** A region as the API describes it — `GET /regions`. */
