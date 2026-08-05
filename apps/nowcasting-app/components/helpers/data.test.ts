@@ -510,165 +510,136 @@ describe("getOldestTimestampFromForecastValues", () => {
   });
 });
 
-//////////////////////////////////
-// getEarliestForecastTimestamp //
-//////////////////////////////////
-import { getEarliestForecastTimestamp } from "./data";
+////////////////////////////////////////////////////////////
+// getEarliestForecastTimestamp / getFurthestForecastTimestamp //
+////////////////////////////////////////////////////////////
+import { getEarliestForecastTimestamp, getFurthestForecastTimestamp } from "./data";
 import { ForecastData } from "../types";
-import { DateTime, Settings } from "luxon";
+import { Settings } from "luxon";
+import { afterEach, beforeEach, it } from "@jest/globals";
 
-describe("getEarliestForecastTimestamp", () => {
-  beforeAll(() => {
+/**
+ * B2. These tests previously pinned the *broken* behaviour; they now assert the corrected one.
+ * Two things changed:
+ *
+ * 1. `getFurthestForecastTimestamp` rounded up by adding `hour % 6`, which is not a round-up at
+ *    all — 14:00 became 16:00, which is not one of the 6-hour boundaries the API serves. It now
+ *    adds `(6 - hour % 6) % 6`, i.e. a true ceiling: 14:00 -> 18:00, and a value already on a
+ *    boundary stays put rather than jumping a whole interval.
+ * 2. Both helpers rounded in the *viewer's* local timezone and only then converted to UTC, so a
+ *    viewer in Los Angeles or Sydney requested a different window from a viewer in the UK for the
+ *    same instant (worst around the boundaries, and across the viewer's own DST changes, where
+ *    calendar-day arithmetic in local time shifts the instant by an hour). Rounding now happens
+ *    in UTC, which is the only zone the API knows about, so every viewer gets the same window.
+ *
+ * The old expectations that changed, for the record (frozen now = 2025-12-07T14:45:00Z, UTC
+ * viewer): furthest was "2025-12-08T16:00:00.000Z", now "2025-12-08T18:00:00.000Z". Earliest was
+ * already right for a UTC viewer; it was only wrong off-zone, e.g. an LA viewer at
+ * 2025-11-03T12:00:00Z got "2025-11-01T07:00:00.000Z" where a UK viewer got
+ * "2025-11-01T12:00:00.000Z".
+ */
+describe("forecast window helpers (B2)", () => {
+  beforeEach(() => {
     jest.useFakeTimers();
-    Settings.defaultZone = "utc"; // Enforce UTC for all DateTime operations during tests
+    Settings.defaultZone = "utc";
   });
-  afterAll(() => {
+  afterEach(() => {
     jest.useRealTimers();
-    Settings.defaultZone = "system"; // Reset to system defaults after tests
-  });
-
-  describe("General Behaviour", () => {
-    it("calculates two days prior, rounded to the nearest 6-hour interval in UTC+0", () => {
-      jest.setSystemTime(new Date("2025-12-07T14:45:00Z").getTime());
-
-      const result = getEarliestForecastTimestamp();
-
-      // Two days back from 14:45 UTC == 2025-12-05 14:45 UTC
-      // Nearest 6-hour tick = 2025-12-05 12:00 UTC
-      expect(result).toBe("2025-12-05T12:00:00.000Z");
-    });
-
-    it("correctly rounds down 2 days back for local timezone (e.g. UTC+2)", () => {
-      jest
-        .spyOn(DateTime, "now")
-        .mockReturnValue(
-          DateTime.fromISO("2025-12-07T14:45:00+02:00", { setZone: true }) as DateTime
-        );
-
-      const result = getEarliestForecastTimestamp();
-
-      // Local time UTC+2 => 2025-12-05 14:45 (local) => 12:00 local rounded 6 hr tick => 10:00 UTC
-      expect(result).toBe("2025-12-05T10:00:00.000Z");
-    });
-  });
-
-  it("returns a 6-hour aligned UTC timestamp", () => {
-    // Mock the current time to a specific UTC date.
-    jest.spyOn(DateTime, "now").mockReturnValue(
-      DateTime.fromISO("2025-12-07T14:45:00.000Z").toUTC() as DateTime<true> // Mock current time in UTC
-    );
-
-    const result = getEarliestForecastTimestamp();
-
-    // Two days before 2025-12-07T14:45:00Z is 2025-12-05T14:45:00Z
-    // Rounded down to the nearest 6-hour boundary --> 2025-12-05T12:00:00Z
-    expect(result).toBe("2025-12-05T12:00:00.000Z");
-  });
-
-  it("returns correctly rounded 6-hour boundary for a time just before midnight UTC", () => {
-    jest
-      .spyOn(DateTime, "now")
-      .mockReturnValue(DateTime.fromISO("2025-12-07T23:59:59.000Z").toUTC() as DateTime<true>);
-
-    const result = getEarliestForecastTimestamp();
-    // Two days before is 2025-12-05T23:59:59Z --> Rounded down: 2025-12-05T18:00:00Z
-    expect(result).toBe("2025-12-05T18:00:00.000Z");
-  });
-
-  it("handles time zones with positive offset correctly", () => {
-    // Mock the current time in a timezone with +05:30 offset (e.g., India Standard Time).
-    jest.spyOn(DateTime, "now").mockReturnValue(
-      DateTime.fromISO("2025-12-07T14:45:00+05:30", { setZone: true }) as DateTime<true> // Mock current time in IST
-    );
-
-    const result = getEarliestForecastTimestamp();
-    // Two days before in local time: 2025-12-05T14:45:00+05:30
-    // Rounded down: 2025-12-05T12:00:00Z
-    // Converted to UTC: 2025-12-05T06:30:00Z
-    expect(result).toBe("2025-12-05T06:30:00.000Z");
-  });
-
-  it("handles time zones with negative offset correctly", () => {
-    // Mock the current time in a timezone with -05:00 offset (e.g., Eastern Standard Time).
-    jest.spyOn(DateTime, "now").mockReturnValue(
-      DateTime.fromISO("2025-12-07T14:45:00-05:00", { setZone: true }) as DateTime<true> // Mock current time in EST
-    );
-
-    const result = getEarliestForecastTimestamp();
-    // Two days before in local time: 2025-12-05T14:45:00-05:00
-    // Rounded down: 2025-12-05T12:00:00Z
-    // Converted to UTC: 2025-12-05T17:00:00Z
-    expect(result).toBe("2025-12-05T17:00:00.000Z");
-  });
-
-  it("handles Daylight Saving Time transitions (spring forward)", () => {
-    // Mock the current time to just after a spring-forward DST change to BST.
-    jest
-      .spyOn(DateTime, "now")
-      .mockReturnValue(
-        DateTime.fromISO("2025-03-30T03:30:00+01:00", { setZone: true }) as DateTime<true>
-      );
-
-    const result = getEarliestForecastTimestamp();
-    // Two days before in local time: 2025-03-28T03:30:00+02:00
-    // Rounded down: 2025-03-28T00:00:00Z
-    // Converted to UTC: 2025-03-27T22:00:00Z
-    expect(result).toBe("2025-03-27T23:00:00.000Z");
-  });
-
-  it("handles Daylight Saving Time transitions (fall back)", () => {
-    // Mock the current time to just after a fall-back DST change back to GMT.
-    jest
-      .spyOn(DateTime, "now")
-      .mockReturnValue(
-        DateTime.fromISO("2025-10-26T02:30:00+00:00", { setZone: true }) as DateTime<true>
-      );
-
-    const result = getEarliestForecastTimestamp();
-    // Two days before in local time: 2025-10-24T01:30:00+02:00
-    // Rounded down: 2025-10-24T00:00:00Z
-    // Converted to UTC: 2025-10-23T22:00:00Z
-    expect(result).toBe("2025-10-24T00:00:00.000Z");
-  });
-
-  describe("Handle before and after noon in BST", () => {
-    it("handles before noon in BST", () => {
-      // Mock the current time to just before noon in BST.
-      jest.spyOn(DateTime, "now").mockReturnValue(
-        DateTime.fromISO("2025-06-01T11:59:59+01:00", { setZone: true }) as DateTime<true> // Mock BST
-      );
-
-      const result = getEarliestForecastTimestamp();
-      // Two days before in local time: 2025-05-30T11:30:00+01:00
-      // Rounded down: 2025-05-30T06:00:00Z
-      expect(result).toBe("2025-05-30T05:00:00.000Z");
-    });
-
-    it("handles after noon in BST", () => {
-      // Mock the current time to just after noon in BST.
-      jest.spyOn(DateTime, "now").mockReturnValue(
-        DateTime.fromISO("2025-06-01T12:00:00+01:00", { setZone: true }) as DateTime<true> // Mock BST
-      );
-
-      const result = getEarliestForecastTimestamp();
-      // Two days before in local time: 2025-05-30T12:30:00+01:00
-      // Rounded down: 2025-05-30T06:00:00Z
-      expect(result).toBe("2025-05-30T11:00:00.000Z");
-    });
-  });
-
-  it("returns correctly aligned UTC values with no timezone (system default)", () => {
-    // Restore default zone to simulate system timezone behavior.
     Settings.defaultZone = "system";
+    jest.restoreAllMocks();
+  });
 
-    // Mock the current time in the system default zone.
-    jest.spyOn(DateTime, "now").mockReturnValue(
-      DateTime.fromISO("2025-12-07T14:45:00") as DateTime<true> // Mock without explicit UTC or timezone
+  const freeze = (iso: string) => jest.setSystemTime(new Date(iso).getTime());
+
+  describe("getEarliestForecastTimestamp — two days back, rounded DOWN to a 6-hour UTC boundary", () => {
+    it.each([
+      // [frozen now, expected]
+      ["2025-12-07T14:45:00Z", "2025-12-05T12:00:00.000Z"],
+      ["2025-12-07T05:59:59Z", "2025-12-05T00:00:00.000Z"],
+      ["2025-12-07T23:59:59Z", "2025-12-05T18:00:00.000Z"],
+      ["2025-12-07T11:59:59.999Z", "2025-12-05T06:00:00.000Z"],
+      // BST, where the old local-zone rounding drifted for UK viewers too
+      ["2025-07-15T14:45:00Z", "2025-07-13T12:00:00.000Z"],
+      ["2025-07-15T00:30:00Z", "2025-07-13T00:00:00.000Z"],
+      // spanning the UK DST boundaries
+      ["2025-03-30T02:30:00Z", "2025-03-28T00:00:00.000Z"],
+      ["2025-10-26T01:30:00Z", "2025-10-24T00:00:00.000Z"],
+      ["2026-03-29T02:30:00Z", "2026-03-27T00:00:00.000Z"],
+      ["2026-10-25T01:30:00Z", "2026-10-23T00:00:00.000Z"]
+    ])("now = %s -> %s", (now, expected) => {
+      freeze(now);
+      expect(getEarliestForecastTimestamp()).toBe(expected);
+    });
+
+    it.each(["00:00", "06:00", "12:00", "18:00"])(
+      "is idempotent on the boundary hour %s (does not jump back a full interval)",
+      (hhmm) => {
+        freeze(`2025-12-07T${hhmm}:00Z`);
+        expect(getEarliestForecastTimestamp()).toBe(`2025-12-05T${hhmm}:00.000Z`);
+      }
+    );
+  });
+
+  describe("getFurthestForecastTimestamp — one day forward, rounded UP to a 6-hour UTC boundary", () => {
+    it.each([
+      // [frozen now, expected]
+      ["2025-12-07T14:45:00Z", "2025-12-08T18:00:00.000Z"], // was "…T16:00:00.000Z" — not a boundary
+      ["2025-12-07T14:00:00Z", "2025-12-08T18:00:00.000Z"], // the 14:00 -> 18:00 case from the bug report
+      ["2025-12-07T00:00:01Z", "2025-12-08T06:00:00.000Z"],
+      ["2025-12-07T18:00:01Z", "2025-12-09T00:00:00.000Z"],
+      ["2025-12-07T23:30:00Z", "2025-12-09T00:00:00.000Z"],
+      ["2025-07-15T14:45:00Z", "2025-07-16T18:00:00.000Z"],
+      ["2025-03-30T02:30:00Z", "2025-03-31T06:00:00.000Z"],
+      ["2025-10-26T01:30:00Z", "2025-10-27T06:00:00.000Z"]
+    ])("now = %s -> %s", (now, expected) => {
+      freeze(now);
+      expect(getFurthestForecastTimestamp()).toBe(expected);
+    });
+
+    it.each(["00:00", "06:00", "12:00", "18:00"])(
+      "is idempotent on the boundary hour %s (does not jump forward a full interval)",
+      (hhmm) => {
+        freeze(`2025-12-07T${hhmm}:00Z`);
+        expect(getFurthestForecastTimestamp()).toBe(`2025-12-08T${hhmm}:00.000Z`);
+      }
     );
 
-    const result = getEarliestForecastTimestamp();
+    it("always returns a real 6-hour boundary, whatever the minute", () => {
+      for (let hour = 0; hour < 24; hour++) {
+        for (const minute of [0, 1, 29, 30, 45, 59]) {
+          freeze(
+            `2025-12-07T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00Z`
+          );
+          const result = getFurthestForecastTimestamp();
+          expect(result).toMatch(/T(00|06|12|18):00:00\.000Z$/);
+        }
+      }
+    });
+  });
 
-    // The result depends on the system timezone but must align to a 6-hour boundary.
-    console.log(result); // Log for visual validation in non-UTC systems.
+  describe("the viewer's timezone must not change the UTC window", () => {
+    const zones = [
+      "utc",
+      "Europe/London",
+      "America/Los_Angeles",
+      "Australia/Sydney",
+      "Asia/Kolkata"
+    ];
+
+    it.each(zones)("a viewer in %s gets the same window as a UK viewer (BST)", (zone) => {
+      Settings.defaultZone = zone;
+      freeze("2025-07-15T14:45:00Z");
+      expect(getEarliestForecastTimestamp()).toBe("2025-07-13T12:00:00.000Z");
+      expect(getFurthestForecastTimestamp()).toBe("2025-07-16T18:00:00.000Z");
+    });
+
+    it.each(zones)("a viewer in %s gets the same window across their own DST change", (zone) => {
+      // US DST ended 2025-11-02, UK's 2025-10-26: calendar-day arithmetic in local time used to
+      // shift the instant by an hour here, so viewers disagreed.
+      Settings.defaultZone = zone;
+      freeze("2025-11-03T12:00:00Z");
+      expect(getEarliestForecastTimestamp()).toBe("2025-11-01T12:00:00.000Z");
+      expect(getFurthestForecastTimestamp()).toBe("2025-11-04T12:00:00.000Z");
+    });
   });
 });

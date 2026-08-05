@@ -435,15 +435,33 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
 };
 
 /**
+ * Rounds a DateTime down to the 6-hour boundary at or before it (00:00, 06:00, 12:00, 18:00 UTC).
+ * Idempotent on a boundary.
+ */
+const floorToSixHoursUtc = (dt: DateTime<true>): DateTime<true> => {
+  const utc = dt.toUTC();
+  return utc.startOf("hour").minus({ hours: utc.hour % 6 }) as DateTime<true>;
+};
+
+/**
+ * Rounds a DateTime up to the 6-hour boundary at or after it. Idempotent on a boundary.
+ */
+const ceilToSixHoursUtc = (dt: DateTime<true>): DateTime<true> => {
+  const utc = dt.toUTC();
+  const floored = floorToSixHoursUtc(utc);
+  return (+floored === +utc ? floored : floored.plus({ hours: 6 })) as DateTime<true>;
+};
+
+/**
  * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
  *
- * This function determines the timestamp two days prior to the current time, rounds it down
- * to the nearest 6-hour interval (e.g., 00:00, 06:00, 12:00, 18:00) in local time, and finally
- * converts the result back to UTC as an ISO-8601 string.
+ * Two days prior to now, rounded *down* to the nearest 6-hour interval (00:00, 06:00, 12:00,
+ * 18:00) in UTC, returned as an ISO-8601 UTC string.
  *
- * Key Features:
- * - Handles time zones correctly by rounding in the user's local timezone first.
- * - Ensures accurate rounding during Daylight Saving Time (DST) changes.
+ * B2: this used to round in the *viewer's* local timezone before converting to UTC, so a viewer
+ * in Los Angeles or Sydney asked the API for a different window than a viewer in the UK for the
+ * same instant. The API works entirely in UTC, so the rounding does too now, and every viewer
+ * gets the same window.
  *
  * @returns {string} The earliest forecast timestamp in UTC as an ISO-8601 string.
  *
@@ -452,45 +470,21 @@ export const getOldestTimestampFromForecastValues = (forecastValues: ForecastDat
  * const result = getEarliestForecastTimestamp();
  * console.log(result); // Output: "2025-12-05T12:00:00.000Z"
  */
-
 export const getEarliestForecastTimestamp = (): string => {
-  // Get the current time in the user's local timezone
-  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
-  // so they might see slightly different data around the rounding times.
-  const now = DateTime.now(); // Defaults to the user's system timezone
-
-  // Two days ago in local time
-  const twoDaysAgoLocal = now.minus({ days: 2 });
-
-  // Round down to the nearest 6-hour interval in the user's local timezone
-  const roundedDownLocal = twoDaysAgoLocal.startOf("hour").minus({
-    hours: twoDaysAgoLocal.hour % 6 // Rounds down to the last multiple of 6
-  });
-
-  // Convert the rounded timestamp back to UTC
-  const roundedDownUtc = roundedDownLocal.toUTC();
-
-  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
+  return floorToSixHoursUtc(DateTime.now().toUTC().minus({ days: 2 })).toISO();
 };
 
+/**
+ * One day from now, rounded *up* to the nearest 6-hour interval in UTC.
+ *
+ * B2: two bugs here. The round-up added `hour % 6` rather than `(6 - hour % 6) % 6`, so 14:00
+ * became 16:00 — not a 6-hour boundary at all — and the window ended before the data the caller
+ * wanted. And, as above, it rounded in the viewer's local timezone against a UTC API.
+ *
+ * @returns {string} The furthest forecast timestamp in UTC as an ISO-8601 string.
+ */
 export const getFurthestForecastTimestamp = (): string => {
-  // Get the current time in the user's local timezone
-  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
-  // so they might see slightly different data around the rounding times.
-  const now = DateTime.now(); // Defaults to the user's system timezone
-
-  // One day from now in local time
-  const twoDaysFromNowLocal = now.plus({ days: 1 });
-
-  // Round up to the nearest 6-hour interval in the user's local timezone
-  const roundedDownLocal = twoDaysFromNowLocal.startOf("hour").plus({
-    hours: twoDaysFromNowLocal.hour % 6 // Rounds up to the last multiple of 6
-  });
-
-  // Convert the rounded timestamp back to UTC
-  const roundedDownUtc = roundedDownLocal.toUTC();
-
-  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
+  return ceilToSixHoursUtc(DateTime.now().toUTC().plus({ days: 1 })).toISO();
 };
 
 const MILLISECONDS_PER_MINUTE = 1000 * 60;
