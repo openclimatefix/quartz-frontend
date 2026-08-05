@@ -12,7 +12,8 @@
     "pre-commit": "pre-commit run",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cypress": "cypress run --browser chrome"
+    "test:cypress": "cypress run --browser chrome",
+    "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
@@ -67,6 +68,8 @@
     "@types/mapbox-gl": "^2.7.2",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "autoprefixer": "^10.4.7",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
