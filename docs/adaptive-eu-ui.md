@@ -454,6 +454,12 @@ moves, no data-layer changes. See *Naming, structure and in-flight work* for why
    `period`/`snapshot` replacing the per-GSP request storm.
 5. Bundle analysis: GB boundaries no longer in the JS bundle (baseline to beat: 11.3 MB first-load).
 6. Dry-run Phase 6 with a stub `DE` entry and confirm the app renders it without code changes.
+7. **Region rollups must reconcile.** Sum the GSP-level values, the DNO-level values and the
+   zone-level values for the same timestamp and confirm all three equal the national figure. They do
+   **not** today: 15 GSP ids appear in two DNO groupings each, so the DNO view double-counts. This is
+   the check that proves the Phase 5 regeneration actually fixed it, and it should stay in the suite
+   afterwards as a permanent invariant — a grouping file that stops being a partition is exactly the
+   kind of thing that goes unnoticed until someone reconciles totals by hand.
 
 ---
 
