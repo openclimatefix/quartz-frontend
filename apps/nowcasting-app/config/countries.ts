@@ -70,6 +70,65 @@ export type OverlayConfig = {
   label?: string;
 };
 
+/**
+ * One forecast line on the national chart.
+ *
+ * `key` is the `ChartData` key the series is written under, which is also the `dataKey` the
+ * `<Line>`s in `remix-line.tsx` and the legend items in `ChartLegend.tsx` bind to. `model` is
+ * the v1 model name, or `null` to send no `model` parameter at all and let the API apply the
+ * region type's default (see "No hook defaults model from the manifest" in the contract).
+ *
+ * This is a **curated** list, deliberately not derived from the manifest: GB's national region
+ * type offers 12 models and the chart shows six chosen ones, in a chosen order, with chosen
+ * colours. Deriving it would put every model on the chart.
+ */
+export type ForecastSeriesConfig = {
+  /** `ChartData` key, e.g. `"FORECAST"`, `"SAT_ONLY"`. */
+  key: string;
+  /** v1 model name without the `_adjust` suffix, or `null` for the region type's default. */
+  model: string | null;
+  /** Human label — the legend and tooltip text for this line. */
+  label: string;
+  /**
+   * Legend presentation. Omitted for a series that is fetched and charted but has no legend
+   * entry of its own — which is the case today for the two PVNet comparison series, exactly
+   * as it was before this migration.
+   *
+   * The primary series (the first entry) also omits it: its legend entry is fixed, because it
+   * is rendered twice at different breakpoints with different copy.
+   */
+  legend?: {
+    /** Tailwind text colour, matching this line's stroke in `remix-line.tsx`. */
+    iconClasses: string;
+    /** Weather inputs ticked in the legend tooltip. */
+    tooltipInputs: ForecastInput[];
+  };
+};
+
+/** The weather inputs a forecast model can consume. Mirrors `DataInput` in the legend tooltip. */
+export type ForecastInput = "ECMWF" | "MET_OFFICE" | "SAT";
+
+/**
+ * Appended to every `ForecastSeriesConfig.model` below. **This is the one-line swap.**
+ *
+ * v0 asked for trend adjustment with `trend_adjuster_on=true` alongside a plain model name.
+ * v1 has no such parameter: it currently exposes the adjusted variants as separate models
+ * (`blend_adjust`, `pvnet_ukv_adjust`, …). Brad's instruction is to run on the NON-adjusted
+ * models for now, because the API is about to change again — an `adjust` boolean like v0's,
+ * plus simplified model names — and amend once that settles.
+ *
+ * **Consequence, expected and agreed:** production is trend-adjusted and this is not, so the
+ * national chart's values will not match production. That is not a regression to chase.
+ *
+ * To move the whole chart onto the adjusted models today, set this to `"_adjust"`. When the
+ * `adjust` boolean lands, delete this and add the flag to the forecast window instead.
+ */
+export const NATIONAL_FORECAST_MODEL_SUFFIX = "";
+
+/** The model name to send for a series, i.e. `series.model` plus the suffix above. */
+export const forecastSeriesModel = (series: ForecastSeriesConfig): string | undefined =>
+  series.model === null ? undefined : `${series.model}${NATIONAL_FORECAST_MODEL_SUFFIX}`;
+
 export type CountryConfig = {
   /** ISO code as the API spells it, uppercase. Matches `CountryCapability.code`. */
   code: string;
@@ -82,6 +141,17 @@ export type CountryConfig = {
   geo: Record<string, GeoLayerConfig>;
   /** Keyed by the synthetic region type name. Empty for countries with no groupings. */
   derivedRegionTypes: Record<string, DerivedRegionTypeConfig>;
+  /**
+   * The forecast lines the national chart draws, in the order they are fetched and merged.
+   *
+   * The first entry is the primary series: it writes `FORECAST`/`PAST_FORECAST` and is the
+   * one the p-level bands, the header numbers and the staleness indicator are taken from.
+   * Everything after it is a comparison model.
+   *
+   * The observed-generation lines are NOT here — they come from `useGenerationSources(scope)`
+   * at runtime, because observers are a manifest fact (GB has two, NL has one).
+   */
+  nationalChartSeries: ForecastSeriesConfig[];
   overlays: OverlayConfig[];
   /** Seasonal norm dataset, or `null` where one has not been produced. */
   seasonalNorms: string | null;
@@ -140,6 +210,42 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         maxZoom: 7
       }
     },
+    // The six lines the GB chart drew under v0, in the same order, with the v1 model names.
+    //
+    //   v0 (+ trend_adjuster_on=true)        v1
+    //   blend                             -> blend
+    //   pvnet_intraday_ecmwf_only         -> pvnet_ecmwf
+    //   pvnet_day_ahead                   -> pvnet_day_ahead
+    //   pvnet_intraday                    -> pvnet_intraday
+    //   pvnet_intraday_met_office_only    -> pvnet_ukv     (UNCONFIRMED inference: the
+    //       manifest labels `pvnet_ukv` "PVNet Intraday (Met Office)" and UKV is the Met
+    //       Office's model, but no one has confirmed it is the same series v0 served.)
+    //   pvnet_intraday_sat_only           -> pvnet_sat
+    //
+    // See NATIONAL_FORECAST_MODEL_SUFFIX above for the `_adjust` situation.
+    nationalChartSeries: [
+      { key: "FORECAST", model: "blend", label: "Current" },
+      {
+        key: "INTRADAY_ECMWF_ONLY",
+        model: "pvnet_ecmwf",
+        label: "ECMWF-only",
+        legend: { iconClasses: "text-ocf-teal-500", tooltipInputs: ["ECMWF"] }
+      },
+      { key: "PVNET_DAY_AHEAD", model: "pvnet_day_ahead", label: "PVNet Day Ahead" },
+      { key: "PVNET_INTRADAY", model: "pvnet_intraday", label: "PVNet Intraday" },
+      {
+        key: "MET_OFFICE_ONLY",
+        model: "pvnet_ukv",
+        label: "Met Office-only",
+        legend: { iconClasses: "text-metOffice", tooltipInputs: ["MET_OFFICE"] }
+      },
+      {
+        key: "SAT_ONLY",
+        model: "pvnet_sat",
+        label: "Satellite-only",
+        legend: { iconClasses: "text-ocf-yellow-200", tooltipInputs: ["SAT"] }
+      }
+    ],
     overlays: [{ id: "constraints", url: "/geo/gb/ng-constraints.json", label: "Constraints" }],
     seasonalNorms: "/data/gb/national-metrics.json",
     auth0Role: "GB_ROLE_ID"
@@ -174,6 +280,11 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // No client-side groupings: the API's province level is the only sub-national one NL
     // has, and `ned_nl` is its single generation observer.
     derivedRegionTypes: {},
+    // NL national offers `blend` and `ecmwf_mo_sat_uncurtailed` (each with an `_adjust`
+    // twin). Only the blend is charted: the second is the blend's single input, so drawing
+    // both would be a comparison of a series against itself. Nobody has asked for the NL
+    // comparison lines GB has; add them here when they do.
+    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "Current" }],
     overlays: [],
     seasonalNorms: null,
     auth0Role: "NL_ROLE_ID"

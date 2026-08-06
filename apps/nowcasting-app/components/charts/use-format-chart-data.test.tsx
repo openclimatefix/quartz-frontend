@@ -692,6 +692,145 @@ describe("delta mode", () => {
   });
 });
 
+describe("the canonical (v1) inputs", () => {
+  /*
+   * The national chart now passes canonical `TimeSeries` values and a config-driven list of
+   * (key, series) pairs instead of the six named v0 props. The v0 props above are still
+   * accepted because the GSP and delta views have not migrated yet, so both dialects are
+   * exercised. What matters here is that the series list is data, not code: an arbitrary key
+   * produces that key, and the number of generation series is a country fact.
+   */
+  const ts = (points: [string, number | null][], plevelsMw?: Record<string, number>) =>
+    ({
+      regionName: "Great Britain",
+      capacityMw: 21504.629,
+      values: points.map(([timeUtc, powerMw]) => ({
+        timeUtc,
+        powerMw,
+        ...(plevelsMw ? { plevelsMw } : {})
+      }))
+    } as any);
+
+  // v1 emits "Z" where v0 emitted "+00:00", and the merge key is the raw string, so every
+  // canonical fixture here uses the "Z" spelling the data layer actually produces.
+  const BEFORE_Z = "2025-07-01T10:00:00Z";
+  const AFTER_Z = "2025-07-01T11:00:00Z";
+
+  const canonical = (overrides: Partial<Props> = {}): Props => ({
+    forecastSeries: ts([[AFTER_Z, 100]]),
+    generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_Z, 5]]) }],
+    timeTrigger: "tick",
+    ...overrides
+  });
+
+  test("the primary series writes FORECAST with the same past/future rule", () => {
+    const data = run(canonical({ forecastSeries: ts([[BEFORE_Z, 10]]), generationSeries: [] }));
+    expect(at(data, "2025-07-01T10:00").PAST_FORECAST).toBe(10);
+    expect(at(data, "2025-07-01T10:00").FORECAST).toBeUndefined();
+  });
+
+  // Everything from the data layer is already MW — the kW conversion happened once at the
+  // normalise boundary. A second division here would be the classic double-conversion bug.
+  test("generation values are used as MW, not divided again", () => {
+    const data = run(canonical());
+    expect(at(data, "2025-07-01T10:00").GENERATION).toBe(5);
+  });
+
+  // The keys are config, not code: whatever the country's series list names, the row carries.
+  test("model series write whatever key the config names", () => {
+    const data = run(
+      canonical({
+        modelSeries: [
+          { key: "SAT_ONLY", series: ts([[AFTER_Z, 7]]) },
+          { key: "SOME_FUTURE_MODEL", series: ts([[AFTER_Z, 8]]) }
+        ]
+      })
+    );
+    expect(at(data, "2025-07-01T11:00")).toMatchObject({
+      FORECAST: 100,
+      SAT_ONLY: 7,
+      SOME_FUTURE_MODEL: 8
+    });
+  });
+
+  test("a model series that has not loaded yet contributes nothing but does not block", () => {
+    const data = run(canonical({ modelSeries: [{ key: "SAT_ONLY", series: undefined }] }));
+    expect(at(data, "2025-07-01T11:00").FORECAST).toBe(100);
+    expect(Object.keys(at(data, "2025-07-01T11:00")).some((k) => k.includes("SAT_ONLY"))).toBe(
+      false
+    );
+  });
+
+  // The guard is now "every generation series this country HAS", not "both pvlive regimes".
+  // A single-observer country must render on one series rather than waiting for a second
+  // that does not exist.
+  test("one generation series is enough for a single-observer country", () => {
+    expect(run(canonical())).not.toEqual([]);
+  });
+
+  test("a two-observer country waits for both", () => {
+    const oneLoaded = canonical({
+      generationSeries: [
+        { key: "GENERATION", series: ts([[BEFORE_Z, 5]]) },
+        { key: "GENERATION_UPDATED", series: undefined }
+      ]
+    });
+    expect(run(oneLoaded)).toEqual([]);
+
+    const bothLoaded = canonical({
+      generationSeries: [
+        { key: "GENERATION", series: ts([[BEFORE_Z, 5]]) },
+        { key: "GENERATION_UPDATED", series: ts([[BEFORE_Z, 6]]) }
+      ]
+    });
+    expect(at(run(bothLoaded), "2025-07-01T10:00")).toMatchObject({
+      GENERATION: 5,
+      GENERATION_UPDATED: 6
+    });
+  });
+
+  test("the primary forecast still gates everything", () => {
+    expect(run(canonical({ forecastSeries: undefined }))).toEqual([]);
+  });
+
+  // The canonical model distinguishes "no reading" from a genuine zero. v0 turned `null` into
+  // a hard 0 (pinned above, in the kW-to-MW block); the canonical path drops the point so the
+  // line breaks instead.
+  test("a null reading is dropped rather than plotted as zero", () => {
+    const data = run(
+      canonical({
+        generationSeries: [
+          {
+            key: "GENERATION",
+            series: ts([
+              [BEFORE_Z, null],
+              [AFTER_Z, 3]
+            ])
+          }
+        ]
+      })
+    );
+    expect(data.some((d) => d.formattedDate === "2025-07-01T10:00")).toBe(false);
+    expect(at(data, "2025-07-01T11:00").GENERATION).toBe(3);
+  });
+
+  // Canonical p-levels are keyed by the bare level ("10"), not v0's "plevel_10".
+  test("p-levels come off the primary series with the canonical key shape", () => {
+    act(() => setGlobalState("pLevels", [[10, 90]]));
+    const datum = at(
+      run(canonical({ forecastSeries: ts([[AFTER_Z, 100]], { "10": 5, "90": 15 }) })),
+      "2025-07-01T11:00"
+    );
+    expect(datum[getPLevelRangeKey(10, 90)]).toEqual([5, 15]);
+    expect(datum.PROBABILISTIC_UPPER_BOUND).toBe(15);
+  });
+
+  test("the N-hour series is passed as a TimeSeries too", () => {
+    const data = run(canonical({ nHourSeries: ts([[AFTER_Z, 42]]) }));
+    expect(at(data, "2025-07-01T11:00").N_HOUR_FORECAST).toBe(42);
+  });
+});
+
 describe("B6: the useMemo dependency array omits four inputs", () => {
   /*
    * Known bug, deliberately NOT fixed here (Phase 4 owns it). `nationalMetOfficeOnly`,

@@ -8,6 +8,9 @@ import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 import LegendTooltip from "../LegendTooltop";
 import { NationalAggregation } from "../map/types";
 import LegendTooltipContent from "./LegendTooltipContent";
+import { useCurrentCountry, useGenerationSources } from "../../hooks/data";
+import { getCountryConfig } from "../../config/countries";
+import { GENERATION_CHART_KEYS } from "./pv-remix-chart";
 
 type ChartLegendProps = {
   className?: string;
@@ -18,6 +21,25 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
+
+  // The comparison-model entries are the country's own chart series, minus the primary one
+  // (which has its own two breakpoint-specific entries below) and minus any series with no
+  // legend presentation. GB yields ECMWF/Met Office/Satellite, exactly as before; NL yields
+  // none, because NL charts one line.
+  const currentCountry = useCurrentCountry();
+  const modelLegendItems = (getCountryConfig(currentCountry)?.nationalChartSeries ?? [])
+    .slice(1)
+    .filter((series) => !!series.legend);
+
+  // Observed-generation entries come from the manifest, one per observer the country has —
+  // never a hardcoded pair. GB has two, NL has one, and the second entry simply is not
+  // rendered there rather than sitting permanently empty.
+  const generationSources = useGenerationSources(
+    currentCountry ? { country: currentCountry, source: "solar" } : null
+  );
+  const generationLegendItems = (generationSources.data ?? [])
+    .slice(0, GENERATION_CHART_KEYS.length)
+    .map((source, index) => ({ dataKey: GENERATION_CHART_KEYS[index], label: source.label }));
 
   const legendItemContainerClasses = `flex flex-initial overflow-y-visible  ${
     showNHourView ? "flex-col @sm:gap-0" : "flex-col @md:gap-0"
@@ -75,12 +97,6 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   const ocfNHrForecastTooltipContent = (
     <LegendTooltipContent inputs={["ECMWF", "MET_OFFICE", "SAT"]} extraText={nHrTipText} />
   );
-
-  const ocfMetOfficeForecastTooltipContent = <LegendTooltipContent inputs={["MET_OFFICE"]} />;
-
-  const ocfEcmwfForecastTooltipContent = <LegendTooltipContent inputs={["ECMWF"]} />;
-
-  const ocfSatForecastTooltipContent = <LegendTooltipContent inputs={["SAT"]} />;
 
   return (
     <div className="@container flex flex-initial">
@@ -159,56 +175,34 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
                 />
               </LegendTooltip>
             )}
-            <LegendTooltip
-              tip={ocfEcmwfForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-teal-500"}
-                symbolStyle={"both"}
-                label={`ECMWF-only`}
-                dataKey={`INTRADAY_ECMWF_ONLY`}
-              />
-            </LegendTooltip>
-            <LegendTooltip
-              tip={ocfMetOfficeForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-metOffice"}
-                symbolStyle={"both"}
-                label={`Met Office-only`}
-                dataKey={`MET_OFFICE_ONLY`}
-              />
-            </LegendTooltip>
-            <LegendTooltip
-              tip={ocfSatForecastTooltipContent}
-              position={"top"}
-              className="relative w-full whitespace-pre-wrap"
-            >
-              <LegendItem
-                iconClasses={"text-ocf-yellow-200"}
-                symbolStyle={"both"}
-                label={`Satellite-only`}
-                dataKey={`SAT_ONLY`}
-              />
-            </LegendTooltip>
+            {modelLegendItems.map((series) => (
+              <LegendTooltip
+                key={`legend-${series.key}`}
+                tip={<LegendTooltipContent inputs={series.legend!.tooltipInputs} />}
+                position={"top"}
+                className="relative w-full whitespace-pre-wrap"
+              >
+                <LegendItem
+                  iconClasses={series.legend!.iconClasses}
+                  symbolStyle={"both"}
+                  label={series.label}
+                  dataKey={series.key}
+                />
+              </LegendTooltip>
+            ))}
           </div>
         </div>
         <div className={legendItemContainerClasses}>
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            symbolStyle={"dashed"}
-            label={"PV live initial"}
-            dataKey={`GENERATION`}
-          />
-          <LegendItem
-            iconClasses={"text-ocf-black"}
-            label={"PV live updated"}
-            dataKey={`GENERATION_UPDATED`}
-          />
+          {generationLegendItems.map((item, index) => (
+            <LegendItem
+              key={`legend-${item.dataKey}`}
+              iconClasses={"text-ocf-black"}
+              // The first observer is the dashed "estimate" line; anything after it is solid.
+              symbolStyle={index === 0 ? "dashed" : undefined}
+              label={item.label}
+              dataKey={item.dataKey}
+            />
+          ))}
           <LegendTooltip
             tip={seasonalMeanTooltipContent}
             position={"top"}

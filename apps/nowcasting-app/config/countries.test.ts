@@ -2,7 +2,9 @@ import { describe, expect, test } from "@jest/globals";
 
 import {
   COUNTRY_CONFIG,
+  NATIONAL_FORECAST_MODEL_SUFFIX,
   configuredCountryCodes,
+  forecastSeriesModel,
   getCountryConfig,
   type CountryConfig
 } from "./countries";
@@ -58,6 +60,22 @@ describe("COUNTRY_CONFIG", () => {
     }
 
     expect(config.auth0Role.length).toBeGreaterThan(0);
+
+    // Every country charts at least one forecast line, and the first is the primary series —
+    // the one the p-levels, the header numbers and the staleness indicator come from. It must
+    // be the FORECAST key, because that is what remix-line's past/future pair binds to.
+    expect(config.nationalChartSeries.length).toBeGreaterThan(0);
+    expect(config.nationalChartSeries[0].key).toBe("FORECAST");
+    // A duplicate key would have the later series silently overwrite the earlier one in the
+    // merged chart row.
+    const keys = config.nationalChartSeries.map((series) => series.key);
+    expect(new Set(keys).size).toBe(keys.length);
+    for (const series of config.nationalChartSeries) {
+      expect(series.label.length).toBeGreaterThan(0);
+      // Non-adjusted models only, for now. `_adjust` is applied centrally by the suffix, so a
+      // model name carrying it here would double up.
+      expect(series.model).not.toMatch(/_adjust$/);
+    }
   });
 
   test("GB carries the map view previously hardcoded in globalState", () => {
@@ -91,6 +109,54 @@ describe("COUNTRY_CONFIG", () => {
     expect(COUNTRY_CONFIG.GB.derivedRegionTypes.dno.minZoom).toBe(5);
     expect(COUNTRY_CONFIG.GB.derivedRegionTypes.dno.maxZoom).toBe(7);
     expect(COUNTRY_CONFIG.GB.geo.gsp.minZoom).toBe(7);
+  });
+});
+
+describe("the national chart's series list", () => {
+  // The v0 -> v1 model mapping, pinned. Every one of these existed as a hardcoded fetch in
+  // pages/index.tsx; if a name drifts, the line silently disappears rather than erroring,
+  // because an unknown model is the API's problem and the chart just draws nothing.
+  test("GB charts the same six models v0 did, under the v1 names", () => {
+    expect(COUNTRY_CONFIG.GB.nationalChartSeries.map((s) => [s.key, s.model])).toEqual([
+      ["FORECAST", "blend"],
+      ["INTRADAY_ECMWF_ONLY", "pvnet_ecmwf"],
+      ["PVNET_DAY_AHEAD", "pvnet_day_ahead"],
+      ["PVNET_INTRADAY", "pvnet_intraday"],
+      ["MET_OFFICE_ONLY", "pvnet_ukv"],
+      ["SAT_ONLY", "pvnet_sat"]
+    ]);
+  });
+
+  // The point of the whole exercise: the two-line-plus-five-comparisons chart is a GB fact.
+  test("NL charts one line, not GB's six", () => {
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(1);
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries[0]).toMatchObject({
+      key: "FORECAST",
+      model: "blend"
+    });
+  });
+
+  // Only the series that had a legend entry before have one now; the two PVNet comparison
+  // series are fetched and charted but unlabelled, exactly as they were.
+  test("GB gives ECMWF, Met Office and Satellite legend entries and the PVNet pair none", () => {
+    const withLegend = COUNTRY_CONFIG.GB.nationalChartSeries
+      .filter((s) => !!s.legend)
+      .map((s) => s.key);
+    expect(withLegend).toEqual(["INTRADAY_ECMWF_ONLY", "MET_OFFICE_ONLY", "SAT_ONLY"]);
+  });
+
+  // The `_adjust` swap has to stay a one-line edit, so it must go through this one function.
+  describe("forecastSeriesModel", () => {
+    test("appends the suffix, which is empty today", () => {
+      expect(NATIONAL_FORECAST_MODEL_SUFFIX).toBe("");
+      expect(forecastSeriesModel({ key: "FORECAST", model: "blend", label: "x" })).toBe("blend");
+    });
+
+    // `null` means "send no model parameter", which is not the same as sending an empty one:
+    // the API applies the region type's default server-side and the cache key stays stable.
+    test("a null model sends no model parameter at all", () => {
+      expect(forecastSeriesModel({ key: "FORECAST", model: null, label: "x" })).toBeUndefined();
+    });
   });
 });
 

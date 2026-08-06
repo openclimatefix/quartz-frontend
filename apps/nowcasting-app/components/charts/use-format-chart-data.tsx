@@ -14,16 +14,76 @@ import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
 import { getAvailablePLevels, getUtcHalfHourIndex } from "../helpers/chartUtils";
+import type { TimeSeries } from "../../lib/domain/types";
 
 const NATIONAL_CAPACITY = 21504.629;
+
+/**
+ * One series' points in the shape this hook works in: MW, keyed by the raw instant string.
+ *
+ * Both input dialects collapse into this — the v1 canonical `TimeSeries` the national chart
+ * now passes, and the v0 `ForecastData`/`PvRealData` arrays the GSP and delta views still
+ * pass. Those views belong to a later migration step and are not this agent's to change, so
+ * the v0 props stay accepted and adapted rather than removed.
+ */
+type SeriesPoint = {
+  timeUtc: string;
+  powerMw: number;
+  /** Keyed `plevel_10`, `plevel_90`, … as `getAvailablePLevels` expects. */
+  plevels?: Record<string, number | undefined>;
+};
+
+/** A series and the `ChartData` key it writes. `points: undefined` means "not loaded yet". */
+export type ChartSeriesInput = {
+  key: string;
+  series?: TimeSeries;
+};
+
+type ResolvedSeries = { key: string; points?: SeriesPoint[] };
+
+/**
+ * Canonical -> internal. Points with `powerMw: null` are DROPPED rather than written as 0:
+ * the canonical model distinguishes "no reading" from a genuine zero, and collapsing them is
+ * the bug class B8 belongs to. (The v0 adapters below preserve v0's `null / 1000 === 0`
+ * behaviour instead, because the tests that pin the GSP and delta views depend on it.)
+ */
+const fromTimeSeries = (series?: TimeSeries): SeriesPoint[] | undefined =>
+  series?.values.reduce<SeriesPoint[]>((points, value) => {
+    if (value.powerMw === null) return points;
+    points.push({
+      timeUtc: value.timeUtc,
+      powerMw: value.powerMw,
+      plevels: value.plevelsMw
+        ? Object.fromEntries(
+            Object.entries(value.plevelsMw).map(([level, mw]) => [
+              `plevel_${level}`,
+              mw === null ? undefined : mw
+            ])
+          )
+        : undefined
+    });
+    return points;
+  }, []);
+
+const fromV0Forecast = (data?: ForecastData): SeriesPoint[] | undefined =>
+  data?.map((fc) => ({
+    timeUtc: fc.targetTime,
+    powerMw: fc.expectedPowerGenerationMegawatts,
+    plevels: fc.plevels as Record<string, number | undefined> | undefined
+  }));
+
+const fromV0PvReal = (data?: PvRealData): SeriesPoint[] | undefined =>
+  data?.map((pv) => ({
+    timeUtc: pv.datetimeUtc,
+    // Preserved exactly, NaN and all: `null / 1000` is 0 and `undefined / 1000` is NaN, and
+    // both are pinned by the characterisation tests.
+    powerMw: (pv.solarGenerationKw as number) / 1000
+  }));
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
   timeNow: string,
-  fr?: {
-    targetTime: string;
-    expectedPowerGenerationMegawatts: number;
-  },
+  fr?: SeriesPoint,
   forecast_horizon?: number,
   forecast_key: string = "FORECAST"
 ) => {
@@ -32,18 +92,18 @@ const getForecastChartData = (
   const futureKey = forecast_horizon ? `N_HOUR_${forecast_key}` : forecast_key;
   const pastKey = forecast_horizon ? `N_HOUR_PAST_${forecast_key}` : `PAST_${forecast_key}`;
 
-  if (new Date(fr.targetTime).getTime() > new Date(timeNow + ":00.000Z").getTime())
+  if (new Date(fr.timeUtc).getTime() > new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: fr.expectedPowerGenerationMegawatts
+      [futureKey]: fr.powerMw
     };
-  else if (new Date(fr.targetTime).getTime() === new Date(timeNow + ":00.000Z").getTime())
+  else if (new Date(fr.timeUtc).getTime() === new Date(timeNow + ":00.000Z").getTime())
     return {
-      [futureKey]: fr.expectedPowerGenerationMegawatts,
-      [pastKey]: fr.expectedPowerGenerationMegawatts
+      [futureKey]: fr.powerMw,
+      [pastKey]: fr.powerMw
     };
   else
     return {
-      [pastKey]: fr.expectedPowerGenerationMegawatts
+      [pastKey]: fr.powerMw
     };
 };
 const getDelta: (datum: ChartData) => number = (datum) => {
@@ -101,20 +161,48 @@ const useFormatChartData = ({
   probabilisticRangeData,
   pvRealDayAfterData,
   pvRealDayInData,
+  forecastSeries,
+  modelSeries,
+  nHourSeries,
+  generationSeries,
   timeTrigger,
   delta = false,
   gsp = false
 }: {
+  /** @deprecated v0 shape. The GSP and delta views still pass these; the national chart does not. */
   forecastData?: ForecastData;
+  /** @deprecated v0 shape — superseded by `modelSeries`. */
   nationalIntradayECMWFOnlyData?: ForecastData;
+  /** @deprecated v0 shape — superseded by `modelSeries`. */
   nationalMetOfficeOnly?: ForecastData;
+  /** @deprecated v0 shape — superseded by `modelSeries`. */
   nationalSatOnly?: ForecastData;
+  /** @deprecated v0 shape — superseded by `modelSeries`. */
   nationalPvnetDayAhead?: ForecastData;
+  /** @deprecated v0 shape — superseded by `modelSeries`. */
   nationalPvnetIntraday?: ForecastData;
+  /** @deprecated v0 shape — superseded by `nHourSeries`. */
   fourHourData?: ForecastData;
+  /**
+   * @deprecated Never read: the p-levels have always been taken off the primary forecast
+   * series itself. Kept only because the v0 callers still pass it.
+   */
   probabilisticRangeData?: ForecastData;
+  /** @deprecated v0 shape — superseded by `generationSeries`. */
   pvRealDayAfterData?: PvRealData;
+  /** @deprecated v0 shape — superseded by `generationSeries`. */
   pvRealDayInData?: PvRealData;
+  /** The primary forecast: writes `FORECAST`/`PAST_FORECAST` and supplies the p-levels. */
+  forecastSeries?: TimeSeries;
+  /** Comparison models, from the country's `nationalChartSeries` minus its primary entry. */
+  modelSeries?: ChartSeriesInput[];
+  /** The N-hour lead-time forecast. */
+  nHourSeries?: TimeSeries;
+  /**
+   * Observed generation, one entry per observer the country actually has. GB has two
+   * (`GENERATION`, `GENERATION_UPDATED`); NL has one. Never assume a pair.
+   */
+  generationSeries?: ChartSeriesInput[];
   timeTrigger?: string;
   delta?: boolean;
   gsp?: boolean;
@@ -123,7 +211,37 @@ const useFormatChartData = ({
   const [pLevels] = useGlobalState("pLevels");
 
   const data = useMemo(() => {
-    if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
+    // Whichever dialect the caller speaks, reduced to one list of (key, points) pairs.
+    //
+    // The v0 order — day-after truth, then day-in truth — is preserved because the row order
+    // of the output follows first-write order and is pinned by the characterisation tests.
+    const generation: ResolvedSeries[] = generationSeries
+      ? generationSeries.map(({ key, series }) => ({ key, points: fromTimeSeries(series) }))
+      : [
+          { key: "GENERATION_UPDATED", points: fromV0PvReal(pvRealDayAfterData) },
+          { key: "GENERATION", points: fromV0PvReal(pvRealDayInData) }
+        ];
+    const primaryPoints = forecastSeries
+      ? fromTimeSeries(forecastSeries)
+      : fromV0Forecast(forecastData);
+    const models: ResolvedSeries[] = modelSeries
+      ? modelSeries.map(({ key, series }) => ({ key, points: fromTimeSeries(series) }))
+      : [
+          { key: "INTRADAY_ECMWF_ONLY", points: fromV0Forecast(nationalIntradayECMWFOnlyData) },
+          { key: "PVNET_DAY_AHEAD", points: fromV0Forecast(nationalPvnetDayAhead) },
+          { key: "PVNET_INTRADAY", points: fromV0Forecast(nationalPvnetIntraday) },
+          { key: "MET_OFFICE_ONLY", points: fromV0Forecast(nationalMetOfficeOnly) },
+          { key: "SAT_ONLY", points: fromV0Forecast(nationalSatOnly) }
+        ];
+    const nHourPoints = nHourSeries ? fromTimeSeries(nHourSeries) : fromV0Forecast(fourHourData);
+
+    // The guard, generalised: the primary forecast, every generation series the country has,
+    // and a time trigger. Under v0 that was literally "forecast + both pvlive regimes"; the
+    // count of generation series is now a country fact, so a single-observer country waits
+    // for one series rather than forever for a second that does not exist.
+    const generationReady = generation.every((series) => !!series.points);
+
+    if (primaryPoints && generationReady && timeTrigger) {
       const timeNow = formatISODateString(get30MinNow());
       const chartMap: Record<string, ChartData> = {};
 
@@ -147,37 +265,28 @@ const useFormatChartData = ({
         }
       };
 
-      pvRealDayAfterData.forEach((pva) =>
-        addDataToMap(
-          pva,
-          (db) => db.datetimeUtc,
-          (db) => ({
-            GENERATION_UPDATED: db.solarGenerationKw / 1000
-          })
-        )
-      );
-      pvRealDayInData.forEach((pvIn) =>
-        addDataToMap(
-          pvIn,
-          (db) => db.datetimeUtc,
-          (db) => ({
-            GENERATION: db.solarGenerationKw / 1000
-          })
-        )
-      );
-      forecastData.forEach((fc) => {
+      for (const { key, points } of generation) {
+        points?.forEach((point) =>
+          addDataToMap(
+            point,
+            (db: SeriesPoint) => db.timeUtc,
+            (db: SeriesPoint) => ({ [key]: db.powerMw })
+          )
+        );
+      }
+      primaryPoints.forEach((fc) => {
         addDataToMap(
           fc,
-          (db) => db.targetTime,
-          (db) => getForecastChartData(timeNow, db)
+          (db: SeriesPoint) => db.timeUtc,
+          (db: SeriesPoint) => getForecastChartData(timeNow, db)
         );
         if (fc.plevels && pLevels.length) {
-          const plevelValues = fc.plevels as Record<string, number | undefined>;
+          const plevelValues = fc.plevels;
           const availablePLevels = getAvailablePLevels(plevelValues, pLevels);
           if (availablePLevels.length) {
             addDataToMap(
               fc,
-              (db) => db.targetTime,
+              (db: SeriesPoint) => db.timeUtc,
               () =>
                 Object.fromEntries([
                   // widest selected upper bound, so the chart's y-axis zoom fits every band
@@ -198,20 +307,13 @@ const useFormatChartData = ({
         }
       });
 
-      const models: [ForecastData | undefined, string][] = [
-        [nationalIntradayECMWFOnlyData, "INTRADAY_ECMWF_ONLY"],
-        [nationalPvnetDayAhead, "PVNET_DAY_AHEAD"],
-        [nationalPvnetIntraday, "PVNET_INTRADAY"],
-        [nationalMetOfficeOnly, "MET_OFFICE_ONLY"],
-        [nationalSatOnly, "SAT_ONLY"]
-      ];
-      for (const [model, key] of models) {
-        if (model) {
-          model.forEach((fc) => {
+      for (const { key, points } of models) {
+        if (points) {
+          points.forEach((fc) => {
             addDataToMap(
               fc,
-              (db) => db.targetTime,
-              (db) => getForecastChartData(timeNow, db, undefined, key)
+              (db: SeriesPoint) => db.timeUtc,
+              (db: SeriesPoint) => getForecastChartData(timeNow, db, undefined, key)
             );
           });
         }
@@ -252,12 +354,12 @@ const useFormatChartData = ({
         }
       }
 
-      if (fourHourData) {
-        fourHourData.forEach((fc) =>
+      if (nHourPoints) {
+        nHourPoints.forEach((fc) =>
           addDataToMap(
             fc,
-            (db) => db.targetTime,
-            (db) => getForecastChartData(timeNow, db, nHourForecast * 60)
+            (db: SeriesPoint) => db.timeUtc,
+            (db: SeriesPoint) => getForecastChartData(timeNow, db, nHourForecast * 60)
           )
         );
       }
@@ -275,11 +377,20 @@ const useFormatChartData = ({
     }
     return [];
     // timeTrigger is used to trigger chart calculation when time changes
+    // B6 lives here: `nationalMetOfficeOnly`, `nationalSatOnly`, `delta` and `gsp` are read
+    // above but deliberately still absent below, because the characterisation tests pin the
+    // stale behaviour and fixing it is a separate, triaged change. The canonical inputs added
+    // for the national chart ARE listed — they are new, so there is no pinned staleness to
+    // preserve, and omitting them would have made the new path silently stale from birth.
   }, [
     forecastData,
     fourHourData,
     pvRealDayInData,
     pvRealDayAfterData,
+    forecastSeries,
+    modelSeries,
+    nHourSeries,
+    generationSeries,
     timeTrigger,
     nHourForecast,
     nationalIntradayECMWFOnlyData,
