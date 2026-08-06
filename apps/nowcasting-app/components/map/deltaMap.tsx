@@ -1,166 +1,76 @@
-import { SWRResponse } from "swr";
+import React, { Dispatch, SetStateAction, useMemo, useRef } from "react";
+import mapboxgl from "mapbox-gl";
 
-import React, { Dispatch, SetStateAction, useMemo } from "react";
-import mapboxgl, { Expression } from "mapbox-gl";
-
-import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
-import { ActiveUnit, SelectedData } from "./types";
-import { DELTA_BUCKET, VIEWS } from "../../constant";
-import gspShapeData from "../../data/gsp_regions_20220314.json";
-import useGlobalState, { useCountryState } from "../helpers/globalState";
-import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
+import { FailedStateMap, LoadStateMap, Map } from "./";
+import { ActiveUnit, NationalAggregation } from "./types";
+import { VIEWS } from "../../constant";
+import useGlobalState from "../helpers/globalState";
+import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
-import {
-  AllGspRealData,
-  CombinedData,
-  CombinedErrors,
-  FcAllResData,
-  ForecastValue,
-  GspAllForecastData,
-  GspDeltaValue,
-  NationalNHourData,
-  PvRealData
-} from "../types";
-import { theme } from "../../tailwind.config";
-import ColorGuideBar from "./color-guide-bar";
-import { FeatureCollection } from "geojson";
+import { CombinedData, CombinedErrors } from "../types";
 import DeltaColorGuideBar from "./delta-color-guide-bar";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
-import { generateGeoJsonForecastData } from "../helpers/data";
-import { components } from "../../types/quartz-api";
+import { FeatureCollection } from "geojson";
 import dynamic from "next/dynamic";
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+import useMapRegionValues from "./use-map-region-values";
+import { PV_SOURCE_ID, applyFeatureStates, deltaFillColorExpression } from "./feature-state";
+import type { MapFeatureState } from "../helpers/data";
+
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type DeltaMapProps = {
   className?: string;
+  /**
+   * Accepted but no longer read — the delta is now computed from the v1 forecast and
+   * generation period responses inside `useMapRegionValues`, which is also where the
+   * "future slot has no delta" rule lives. `pages/index.tsx`'s `gspDeltas` memo is dead
+   * weight for this view once its other consumers migrate.
+   */
   combinedData: CombinedData;
   combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
-const DeltaMap: React.FC<DeltaMapProps> = ({
-  className,
-  combinedData,
-  combinedErrors,
-  activeUnit
-}) => {
+/** The delta view is GSP-level only; `pages/index.tsx` forces the aggregation on view change. */
+const DELTA_AGGREGATION = NationalAggregation.GSP;
+
+const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { timezone, locale } = useCountryFormatting();
-  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
 
-  const latestForecastValue = 0;
-  const isNormalized = activeUnit === ActiveUnit.percentage;
-  const { gspDeltas } = combinedData;
+  const { featureStates, geometry, isLoading, error } = useMapRegionValues(
+    DELTA_AGGREGATION,
+    selectedISOTime
+  );
 
-  const forecastLoading = false;
-  const initForecastData =
-    combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
-  const forecastError = combinedErrors?.allGspForecastError;
+  const fillColor = useMemo(() => deltaFillColorExpression(), []);
 
-  const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData, gspDeltas);
-  }, [initForecastData, selectedISOTime, combinedData, gspDeltas]);
-
-  const updateMapData = (map: mapboxgl.Map) => {
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
-    if (!source) {
-      const { forecastGeoJson } = generateGeoJsonForecastData(
-        initForecastData,
-        selectedISOTime,
-        combinedData,
-        gspDeltas,
-        nationalAggregationLevel
-      );
-
-      map.addSource("latestPV", {
-        type: "geojson",
-        data: forecastGeoJson
-      });
-    }
-    if (generatedGeoJsonForecastData && source) {
-      source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-      map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));
-    }
-  };
-
-  const getFillColor = (selectedData: string): Expression => [
-    "let",
-    "bucket",
-    ["get", selectedData],
-    [
-      "case",
-      ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG4],
-      ["to-color", theme.extend.colors["ocf-delta"][100]],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG4],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG3]
-      ],
-      ["to-color", theme.extend.colors["ocf-delta"][200]],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG3],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG2]
-      ],
-      ["to-color", theme.extend.colors["ocf-delta"][300]],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG2],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG1]
-      ],
-      ["to-color", theme.extend.colors["ocf-delta"][400]],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.NEG1],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS1]
-      ],
-      ["to-color", "transparent"],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS1],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS2]
-      ],
-      ["to-color", theme.extend.colors["ocf-delta"][600]],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS2],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS3]
-      ],
-      ["to-color", theme.extend.colors["ocf-delta"][700]],
-      [
-        "all",
-        [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS3],
-        ["<", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS4]
-      ],
-      ["to-color", theme.extend.colors["ocf-delta"][800]],
-      [">=", ["to-number", ["var", "bucket"]], DELTA_BUCKET.POS4],
-      ["to-color", theme.extend.colors["ocf-delta"][900]],
-      // Default fill color
-      ["to-color", "transparent"]
-    ]
-  ];
+  const appliedGeometryRef = useRef<FeatureCollection | null>(null);
+  const appliedStatesRef = useRef<Map<string | number, MapFeatureState> | null>(null);
+  const statesRef = useRef(featureStates);
+  statesRef.current = featureStates;
+  const appliedPaintRef = useRef<unknown>(null);
 
   const addOrUpdateFCData = (map: mapboxgl.Map) => {
-    const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    const source = map.getSource(PV_SOURCE_ID) as unknown as mapboxgl.GeoJSONSource;
     if (!source) {
-      const { forecastGeoJson } = generateGeoJsonForecastData(
-        initForecastData,
-        selectedISOTime,
-        combinedData,
-        gspDeltas,
-        nationalAggregationLevel
-      );
-      map.addSource("latestPV", {
+      map.addSource(PV_SOURCE_ID, {
         type: "geojson",
-        data: forecastGeoJson,
+        data: geometry,
         promoteId: "id"
       });
-    } else {
-      if (generatedGeoJsonForecastData && source) {
-        source?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-        map.setPaintProperty("latestPV-forecast", "fill-color", getFillColor("delta"));
+      appliedGeometryRef.current = geometry;
+      appliedStatesRef.current = null;
+    } else if (appliedGeometryRef.current !== geometry) {
+      source.setData(geometry);
+      appliedGeometryRef.current = geometry;
+      appliedStatesRef.current = null;
+    }
+
+    if (appliedStatesRef.current !== statesRef.current) {
+      if (applyFeatureStates(map, statesRef.current)) {
+        appliedStatesRef.current = statesRef.current;
       }
     }
 
@@ -169,13 +79,74 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       map.addLayer({
         id: "latestPV-forecast",
         type: "fill",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         layout: { visibility: "visible" },
         paint: {
-          "fill-color": getFillColor("delta"),
+          "fill-color": fillColor,
           "fill-opacity": 0.7
         }
       });
+      appliedPaintRef.current = fillColor;
+
+      map.on("sourcedata", (e) => {
+        if (e.sourceId !== PV_SOURCE_ID || !e.isSourceLoaded) return;
+        if (appliedStatesRef.current === statesRef.current) return;
+        if (applyFeatureStates(map, statesRef.current)) {
+          appliedStatesRef.current = statesRef.current;
+        }
+      });
+
+      // Create a popup, but don't add it to the map yet.
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        anchor: "bottom-right",
+        maxWidth: "none"
+      });
+
+      map.on("mousemove", "latestPV-forecast", (e) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = "pointer";
+
+        const feature = e.features?.[0];
+        if (!feature) return;
+        const state = (feature.state ?? {}) as Partial<MapFeatureState>;
+
+        // No delta is a different statement from a delta of zero: a future slot, or a region
+        // whose forecast or generation has not published, has nothing to compare.
+        const deltaSection = !state.hasDelta
+          ? `<span class="text-mapbox-black-300">no delta yet</span>`
+          : `<span class="font-bold">${
+              (state.delta ?? 0) > 0
+                ? `<span class="up-arrow"></span>`
+                : `<span class="down-arrow"></span>`
+            }</span>
+              <span class="mr-1 ${
+                (state.delta ?? 0) > 0 ? "text-ocf-delta-900" : "text-ocf-delta-100"
+              }">${(state.delta ?? 0).toFixed(1)}</span><small class="text-xs">MW</small>`;
+
+        const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          <div class="flex justify-between mb-1">
+            <div class="text-xs">${feature.properties?.GSPs || ""}</div>
+          </div>
+          <div class="flex justify-between text-base">
+            <div class="text-ocf-yellow">${state.label || ""}</div>
+            <div class="">${deltaSection}</div>
+          </div>
+        </div>`;
+
+        popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
+      });
+
+      map.on("mouseleave", "latestPV-forecast", () => {
+        map.getCanvas().style.cursor = "";
+        popup.remove();
+      });
+    } else if (appliedPaintRef.current !== fillColor) {
+      // The `Map` wrapper re-invokes this on every render; the delta ramp only ever changes
+      // if the bucket thresholds do, so guard it rather than re-validating the style each tick.
+      map.setPaintProperty("latestPV-forecast", "fill-color", fillColor);
+      appliedPaintRef.current = fillColor;
     }
 
     const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
@@ -183,7 +154,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       map.addLayer({
         id: "latestPV-forecast-borders",
         type: "line",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         paint: {
           "line-color": "#ffffff",
           "line-width": 0.6,
@@ -197,7 +168,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
       map.addLayer({
         id: "latestPV-forecast-select-borders",
         type: "line",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         paint: {
           "line-color": "#ffffff",
           "line-width": 2,
@@ -206,58 +177,13 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         filter: ["in", "id", ""]
       });
     }
-    // Create a popup, but don't add it to the map yet.
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      anchor: "bottom-right",
-      maxWidth: "none"
-    });
-
-    map.on("mousemove", "latestPV-forecast", (e) => {
-      // Change the cursor style as a UI indicator.
-      map.getCanvas().style.cursor = "pointer";
-
-      // Copy coordinates array.
-      const properties = e.features?.[0].properties;
-
-      const positiveDelta = properties?.delta > 0;
-      const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
-          <div class="flex justify-between mb-1">
-            <div class="text-xs">${properties?.GSPs}</div>
-            <div class="text-xs">#${properties?.id}</div>
-          </div>
-          <div class="flex justify-between text-base">
-            <div class="text-ocf-yellow">${properties?.gspDisplayName}</div>
-            <div class="">
-              <span class="font-bold">${
-                positiveDelta
-                  ? `<span class="up-arrow"></span>`
-                  : `<span class="down-arrow"></span>`
-              }</span>
-              <span class="mr-1 ${
-                positiveDelta ? "text-ocf-delta-900" : "text-ocf-delta-100"
-              }">${properties?.delta.toFixed(1)}</span><small class="text-xs">MW</small>
-            </div>
-          </div>
-        </div>`;
-
-      // Populate the popup and set its coordinates
-      // based on the feature found.
-      popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
-    });
-
-    map.on("mouseleave", "latestPV-forecast", () => {
-      map.getCanvas().style.cursor = "";
-      popup.remove();
-    });
   };
 
   return (
     <div className={`delta-map relative h-full w-full ${className}`}>
-      {forecastError ? (
+      {error && !featureStates.size ? (
         <FailedStateMap error="Failed to load" />
-      ) : forecastLoading ? (
+      ) : isLoading && !featureStates.size ? (
         <LoadStateMap>
           <ButtonGroup
             rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
@@ -269,7 +195,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
             safelyUpdateMapData(map.current, addOrUpdateFCData)
           }
           updateData={{
-            newData: !!initForecastData,
+            newData: true,
             updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateFCData)
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (

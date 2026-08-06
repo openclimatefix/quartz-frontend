@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { ActiveUnit, NationalAggregation } from "./types";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
+import { NO_DATA_COLOR, NO_DATA_OPACITY } from "./feature-state";
 
 type ColorGuideBarProps = { unit: ActiveUnit };
 
@@ -89,6 +90,19 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
             )}
           </div>
         ))}
+        {/*
+          The map draws three different things and the legend has to name them. A region that
+          reported nothing is grey; a region that has not published this slot yet is left
+          unfilled (border only); a region generating 0 MW is a real value and gets the first
+          band above, which is why that band is 3% opacity rather than invisible.
+        */}
+        <div
+          className="whitespace-nowrap border-l border-ocf-black-600 px-3 py-[1px] text-white dash:px-4 dash:py-[2px]"
+          style={{ backgroundColor: NO_DATA_COLOR, opacity: NO_DATA_OPACITY + 0.4 }}
+          title="Reported no value for this time. Regions still to publish are left unfilled."
+        >
+          no data
+        </div>
       </div>
     </div>
   );

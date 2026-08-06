@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl, { Expression, LngLatLike } from "mapbox-gl";
+import mapboxgl, { LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
-import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
-import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
+import { ActiveUnit, NationalAggregation } from "./types";
+import { VIEWS } from "../../constant";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
@@ -16,22 +16,32 @@ import {
   safelyUpdateMapData,
   setActiveUnitOnMap
 } from "../helpers/mapUtils";
-import { components } from "../../types/quartz-api";
-import { generateGeoJsonForecastData } from "../helpers/data";
 import boundariesData from "../../data/ng_constraint_boundaries.json";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
 import { FeatureCollection } from "geojson";
 import * as turf from "@turf/turf";
+import useMapRegionValues from "./use-map-region-values";
+import {
+  PV_SOURCE_ID,
+  applyFeatureStates,
+  fillColorExpression,
+  fillOpacityExpression
+} from "./feature-state";
+import type { MapFeatureState } from "../helpers/data";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type PvLatestMapProps = {
   className?: string;
+  /**
+   * Still accepted so `pages/index.tsx` does not have to change in this step, and no longer
+   * read: the map's values now come from the v1 data layer via `useMapRegionValues`.
+   * `CombinedData` dissolves key by key as each view migrates.
+   */
   combinedData: CombinedData;
   combinedLoading: CombinedLoading;
   combinedValidating: CombinedValidating;
@@ -40,24 +50,12 @@ type PvLatestMapProps = {
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
-const PvLatestMap: React.FC<PvLatestMapProps> = ({
-  className,
-  combinedData,
-  combinedLoading,
-  combinedValidating,
-  combinedErrors,
-  activeUnit,
-  setActiveUnit
-}) => {
+const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { timezone, locale } = useCountryFormatting();
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
-  const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
-  const [mapDataLoading, setMapDataLoading] = useState(true);
-  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
-  const [showMap, setShowMap] = useState(true);
 
   const showConstraintsRef = useRef(showConstraints);
   useEffect(() => {
@@ -66,23 +64,21 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
-    switch (activeUnit) {
-      case ActiveUnit.MW:
-        return SelectedData.expectedPowerGenerationMegawattsRounded;
-      case ActiveUnit.percentage:
-        return SelectedData.expectedPowerGenerationNormalizedRounded;
-      case ActiveUnit.capacity:
-        return SelectedData.installedCapacityMw;
-    }
-  };
-  const [selectedDataName, setSelectedDataName] = useState(
-    getSelectedDataFromActiveUnit(activeUnit)
+  const { featureStates, geometry, nationalCapacityMw, isLoading, error } = useMapRegionValues(
+    nationalAggregationLevel,
+    selectedISOTime
   );
 
+  // The last geometry and value set actually pushed to Mapbox. Geometry is handed to
+  // `setData` only when its identity changes — i.e. when the aggregation level or the region
+  // list moves, never when a value does. Values go out through `setFeatureState`.
+  const appliedGeometryRef = useRef<FeatureCollection | null>(null);
+  const appliedStatesRef = useRef<Map<string | number, MapFeatureState> | null>(null);
+  const statesRef = useRef(featureStates);
+  statesRef.current = featureStates;
+  const appliedPaintRef = useRef<unknown>(null);
+
   useEffect(() => {
-    setMapDataLoading(true);
-    setSelectedDataName(getSelectedDataFromActiveUnit(activeUnit));
     // Add unit to map container so that it can be accessed by popup in the map event listeners
     const map: HTMLDivElement | null = document.querySelector(`#Map-${VIEWS.FORECAST}`);
     if (map) {
@@ -90,41 +86,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
   }, [activeUnit]);
 
-  const latestForecastValue = 0;
-  const isNormalized = activeUnit === ActiveUnit.percentage;
-
-  const forecastLoading = false;
-  const initForecastData =
-    combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
-  const forecastError = combinedErrors?.allGspForecastError;
-
-  // Show loading spinner when selectedISOTime changes
-  useEffect(() => {
-    if (!combinedData?.allGspForecastData) return;
-
-    setMapDataLoading(true);
-  }, [selectedISOTime]);
-
-  // Update map data when forecast data is loaded
-  useEffect(() => {
-    if (!initForecastData) return;
-
-    setShouldUpdateMap(true);
-  }, [
-    initForecastData,
-    combinedData,
-    combinedLoading,
-    combinedValidating,
-    selectedISOTime,
-    nationalAggregationLevel
-  ]);
-
-  // Hide loading spinner if there is an error to prevent infinite loading
-  useEffect(() => {
-    if (combinedErrors.allGspForecastError) {
-      setMapDataLoading(false);
-    }
-  }, [combinedErrors.allGspForecastError]);
+  const nationalCapacityRef = useRef(nationalCapacityMw);
+  nationalCapacityRef.current = nationalCapacityMw;
 
   // Toggle constraints visibility on map
   useEffect(() => {
@@ -142,39 +105,14 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         }
       });
     }
-  }, [showConstraints, mapRef]);
+  }, [showConstraints]);
 
-  const maxPower =
-    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
-
-  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the opacity will be 0
-    0,
-    0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : maxPower,
-    1
-  ];
-
-  const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(
-      initForecastData,
-      selectedISOTime,
-      combinedData,
-      undefined,
-      nationalAggregationLevel
-    );
-  }, [
-    combinedData.allGspForecastData,
-    combinedLoading.allGspForecastLoading,
-    combinedValidating.allGspForecastValidating,
-    selectedISOTime,
-    combinedData.allGspSystemData,
-    nationalAggregationLevel
-  ]);
+  const isGrouped = nationalAggregationLevel !== NationalAggregation.GSP;
+  const fillOpacity = useMemo(
+    () => fillOpacityExpression(activeUnit, isGrouped),
+    [activeUnit, isGrouped]
+  );
+  const fillColor = useMemo(() => fillColorExpression(activeUnit), [activeUnit]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -186,61 +124,47 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     });
   }, []);
 
-  const nationalCapacityMW = useMemo(() => {
-    if (!combinedData.allGspSystemData) return 0;
-
-    let totalCapacityMW = 0;
-    combinedData.allGspSystemData.forEach((gsp) => {
-      // Skip the national capacity
-      if (gsp.gspId === 0) return;
-
-      totalCapacityMW += gsp.installedCapacityMw || 0;
-    });
-    return totalCapacityMW;
-  }, [combinedData.allGspSystemData]);
-
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
-    const geoJsonHasData =
-      generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
-      typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
-        ?.expectedPowerGenerationMegawatts === "number";
-    if (!geoJsonHasData) {
-      console.log("geoJsonForecastData empty, trying again...");
-      setShouldUpdateMap(true);
-      return;
-    }
-    setShouldUpdateMap(false);
-
     //////////////////////////
     // FORECAST DATA LAYERS //
     //////////////////////////
-    const forecastSource = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    const forecastSource = map.getSource(PV_SOURCE_ID) as unknown as mapboxgl.GeoJSONSource;
 
     if (!forecastSource) {
-      const { forecastGeoJson } = generatedGeoJsonForecastData;
-      map.addSource("latestPV", {
+      map.addSource(PV_SOURCE_ID, {
         type: "geojson",
-        data: forecastGeoJson,
+        data: geometry,
         promoteId: "id"
       });
-    } else {
-      forecastSource.setData(generatedGeoJsonForecastData.forecastGeoJson);
+      appliedGeometryRef.current = geometry;
+      appliedStatesRef.current = null;
+    } else if (appliedGeometryRef.current !== geometry) {
+      // Geometry genuinely changed (aggregation level, or the region list arrived). This is
+      // the only path that re-parses boundaries; a scrub tick never reaches it.
+      forecastSource.setData(geometry);
+      appliedGeometryRef.current = geometry;
+      appliedStatesRef.current = null;
     }
-    console.log("latestPV source set");
+
+    if (appliedStatesRef.current !== statesRef.current) {
+      if (applyFeatureStates(map, statesRef.current)) {
+        appliedStatesRef.current = statesRef.current;
+      }
+    }
 
     const pvForecastLayer = map.getLayer("latestPV-forecast");
     if (!pvForecastLayer) {
       map.addLayer({
         id: "latestPV-forecast",
         type: "fill",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         layout: { visibility: "visible" },
         paint: {
-          "fill-color": yellow,
-          "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
+          "fill-color": fillColor,
+          "fill-opacity": fillOpacity
         }
       });
-      console.log("pvForecastLayer added");
+      appliedPaintRef.current = fillOpacity;
 
       // Also add map event listeners but only the first time
       const popupFunction = throttle(
@@ -253,48 +177,48 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           map.getCanvas().style.cursor = "pointer";
           const currentActiveUnit = getActiveUnitFromMap(map);
 
-          const properties = e.features?.[0].properties;
-          if (!properties) return;
+          const feature = e.features?.[0];
+          if (!feature) return;
+          const properties = feature.properties;
+          const state = (feature.state ?? {}) as Partial<MapFeatureState>;
+          const capacity = state.capacity ?? 0;
+
+          // "not published yet", "reported nothing" and "zero" are three different answers
+          // and the popup says which one it is rather than printing 0 for all three.
+          const forecastText =
+            state.dataState === "value"
+              ? (state.power ?? 0).toFixed(0)
+              : state.dataState === "no-data"
+              ? "no data"
+              : "awaiting";
+          const forecastPercentText =
+            state.dataState === "value" ? ((state.normalized ?? 0) * 100).toFixed(0) : forecastText;
+          const actualText = state.actual === null || state.actual === undefined ? "-" : "";
+
           let actualValue = "";
           let forecastValue = "";
           let unit = "";
           if (currentActiveUnit === ActiveUnit.MW) {
-            // Map in MW mode
-            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
-              ? properties?.[SelectedData.actualPowerGenerationMegawatts].toFixed(0)
-              : "-";
-            forecastValue =
-              properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(0) || 0;
+            actualValue = actualText || (state.actual as number).toFixed(0);
+            forecastValue = forecastText;
             unit = "MW";
           } else if (currentActiveUnit === ActiveUnit.percentage) {
-            // Map in % mode
-            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
-              ? (
-                  Number(
-                    properties?.[SelectedData.actualPowerGenerationMegawatts] /
-                      properties?.[SelectedData.installedCapacityMw] || 0
-                  ) * 100
-                ).toFixed(0)
-              : "-";
-            forecastValue =
-              (
-                Number(properties?.[SelectedData.expectedPowerGenerationNormalized] || 0) * 100
-              ).toFixed(0) || "-";
+            actualValue =
+              actualText ||
+              (capacity > 0 ? (((state.actual as number) / capacity) * 100).toFixed(0) : "-");
+            forecastValue = forecastPercentText;
             unit = "%";
           } else if (currentActiveUnit === ActiveUnit.capacity) {
-            // Map in Capacity mode
+            const nationalCapacity = nationalCapacityRef.current;
             actualValue =
-              (
-                (Number(properties?.[SelectedData.installedCapacityMw] || 0) / nationalCapacityMW) *
-                100
-              ).toFixed(1) || "-";
+              nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : "-";
             forecastValue = "-";
             unit = "MW";
           }
 
           let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
               <div>
-                <span class="">${actualValue}</span>  /  
+                <span class="">${actualValue}</span>  /
                 <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">${unit}</span>
               </div>`;
           if (currentActiveUnit === ActiveUnit.capacity) {
@@ -304,19 +228,16 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
           const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between gap-3 items-center mb-1">
-          <!-- TODO – remove gsp_id when done testing zones -->
-            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.id} ${
-            properties?.GSPs || ""
-          }</div>
+            <div class="text-sm font-semibold">${state.label || ""}</div>
+            <div class="text-xs text-mapbox-black-300">${properties?.GSPs || ""}</div>
           </div>
           <div class="flex justify-between items-center">
-            
+
             <div class="flex flex-col text-xs">
               <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
-              <div><span>${
-                properties?.[SelectedData.installedCapacityMw]
-              }</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
+              <div><span>${capacity.toFixed(
+                0
+              )}</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
             </div>
             <div class="flex flex-col text-xs items-end">
               ${actualAndForecastSection}
@@ -338,40 +259,31 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         popup.remove();
       });
 
-      map.on("data", (e) => {
-        if (e.dataType === "source" && e.sourceId === "latestPV" && e.isSourceLoaded) {
-          setMapDataLoading(false);
-        }
-      });
-
+      // A GeoJSON source drops feature state set before it has finished loading, so re-apply
+      // once it reports loaded. Without this the very first paint after a geometry swap is
+      // unstyled and stays that way until the next value change.
       map.on("sourcedata", (e) => {
-        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
-          setMapDataLoading(false);
+        if (e.sourceId !== PV_SOURCE_ID || !e.isSourceLoaded) return;
+        if (appliedStatesRef.current === statesRef.current) return;
+        if (applyFeatureStates(map, statesRef.current)) {
+          appliedStatesRef.current = statesRef.current;
         }
       });
-    } else {
-      if (generatedGeoJsonForecastData && forecastSource) {
-        const currentActiveUnit = getActiveUnitFromMap(map);
-        const isNormalized = currentActiveUnit === ActiveUnit.percentage;
-        forecastSource?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-        map.setPaintProperty(
-          "latestPV-forecast",
-          "fill-opacity",
-          getFillOpacity(selectedDataName, isNormalized)
-        );
-        console.log("pvForecastLayer updated", generatedGeoJsonForecastData.forecastGeoJson);
-      } else {
-        console.log("pvForecastLayer not updated");
-      }
+    } else if (appliedPaintRef.current !== fillOpacity) {
+      // Only when the unit or the aggregation band changed. The `Map` wrapper re-invokes this
+      // on every render, so an unguarded pair of `setPaintProperty` calls would re-validate
+      // the style on every scrub tick for no reason.
+      map.setPaintProperty("latestPV-forecast", "fill-color", fillColor);
+      map.setPaintProperty("latestPV-forecast", "fill-opacity", fillOpacity);
+      appliedPaintRef.current = fillOpacity;
     }
-    console.log("pvForecastLayer set");
 
     const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
     if (!pvForecastBordersLayer) {
       map.addLayer({
         id: "latestPV-forecast-borders",
         type: "line",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         paint: {
           "line-color": "#ffffff",
           "line-width": 0.6,
@@ -385,11 +297,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       map.addLayer({
         id: "latestPV-forecast-select-borders",
         type: "line",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         paint: {
           "line-color": "#ffffff",
           "line-width": 2,
-          // "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
           "line-opacity": 1
         },
         filter: ["in", "id", ""]
@@ -480,32 +391,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     }
   };
 
-  // if mapDataLoading has been true for 3 seconds, set it to false
-  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    if (mapDataLoadingTimeout) {
-      clearTimeout(mapDataLoadingTimeout);
-    }
-    if (mapDataLoading) {
-      setMapDataLoadingTimeout(
-        setTimeout(() => {
-          setMapDataLoading(false);
-        }, 3000)
-      );
-    }
-    return () => {
-      if (mapDataLoadingTimeout) {
-        clearTimeout(mapDataLoadingTimeout);
-      }
-    };
-  }, [mapDataLoading]);
-
-  // Debounce the spinner so it only shows for data loads, not the brief
-  // mapDataLoading rerender that happens when flipping between already-cached
-  // timesteps. If loading resolves within the threshold (cached re-render),
-  // the spinner never appears.
-  const isLoading =
-    !combinedData.allGspForecastData || combinedLoading.allGspForecastLoading || mapDataLoading;
+  // Debounce the spinner so it only shows for data loads, not the brief rerender that happens
+  // when flipping between already-cached timesteps. Scrubbing no longer refetches at all, so
+  // in practice this only fires on the first load and on a window roll-over.
   const [showSpinner, setShowSpinner] = useState(false);
   useEffect(() => {
     if (!isLoading) {
@@ -515,6 +403,14 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     const t = setTimeout(() => setShowSpinner(true), 700);
     return () => clearTimeout(t);
   }, [isLoading]);
+
+  if (error && !featureStates.size) {
+    return (
+      <div className={`pv-map relative h-full w-full ${className}`}>
+        <FailedStateMap error="Failed to load" />
+      </div>
+    );
+  }
 
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>
@@ -531,7 +427,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
               safelyUpdateMapData(map.current, addOrUpdateMapData);
             }}
             updateData={{
-              newData: shouldUpdateMap,
+              newData: true,
               updateMapData: (map) => {
                 mapRef.current = map;
                 safelyUpdateMapData(map, addOrUpdateMapData);
@@ -545,7 +441,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
                 <MeasuringUnit
                   activeUnit={activeUnit}
                   setActiveUnit={setActiveUnit}
-                  isLoading={!initForecastData}
+                  isLoading={isLoading}
                 />
               </>
             )}
