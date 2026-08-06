@@ -3,23 +3,35 @@ import useFormatChartData from "../use-format-chart-data";
 import {
   formatISODateString,
   formatISODateStringAsZonedTime,
-  getRoundedTickBoundary,
-  KWtoMW
+  getRoundedTickBoundary
 } from "../../helpers/utils";
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderGSP from "./forecast-header-gsp";
-import useGetGspData from "./use-get-gsp-data";
+import { useGspAggregateData, useGspRegionData } from "./use-gsp-region-data";
 import useGlobalState, {
   useCountryState,
   get30MinNow,
   getNext30MinSlot
 } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
-import { ForecastValue } from "../../types";
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import { NationalAggregation } from "../../map/types";
 import { getTicks } from "../../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../../constant";
+import { groupGspIds } from "../../helpers/data";
+import type { TimeSeries } from "../../../lib/domain/types";
+
+/**
+ * The latest point that actually carries a reading. Mirrors `forecast-header/index.tsx`'s
+ * `latestReading` (not imported: that file is owned by another track, and this is six lines).
+ */
+const latestReading = (series?: TimeSeries) => {
+  if (!series) return undefined;
+  for (let i = series.values.length - 1; i >= 0; i -= 1) {
+    if (typeof series.values[i].powerMw === "number") return series.values[i];
+  }
+  return undefined;
+};
 
 const GspPvRemixChart: FC<{
   selectedRegions: string[];
@@ -42,101 +54,112 @@ const GspPvRemixChart: FC<{
 }) => {
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const { timezone, locale } = useCountryFormatting();
-  let {
-    errors,
-    loading,
-    pvRealDataAfter,
-    pvRealDataIn,
-    gspLocationInfo,
-    gspForecastDataOneGSP,
-    gspNHourData
-  } = useGetGspData(selectedRegions);
-  // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
-  const gspInstalledCapacity =
-    gspLocationInfo?.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0) || 0;
-  const gspName = gspLocationInfo?.[0]?.regionName;
-  const chartData = useFormatChartData({
-    forecastData: gspForecastDataOneGSP,
-    fourHourData: gspNHourData,
-    pvRealDayInData: pvRealDataIn,
-    pvRealDayAfterData: pvRealDataAfter,
-    timeTrigger: selectedTime,
-    delta: deltaView,
-    gsp: true
+  const [show4hView] = useGlobalState("showNHourView");
+  const [nHourForecast] = useGlobalState("nHourForecast");
+
+  // v1 covers every selection. Exactly one selected GSP takes the cheap per-region path
+  // (`useGspRegionData`); a multi-select (shift-click) or a DNO/NG-zone/national grouping
+  // takes the roll-up path (`useGspAggregateData`), which sums `forecasts/period` /
+  // `generation/period` across the group's GSP ids at every timestamp with
+  // `rollUpRegionSeries`. The two never overlap and never double-fetch: each hook disables
+  // itself (a `null` scope) whenever the other one is the active path.
+  const isSingleGsp =
+    nationalAggregationLevel === NationalAggregation.GSP && selectedRegions.length === 1;
+  const gspId = isSingleGsp ? Number(selectedRegions[0]) : undefined;
+  const nMinuteForecast = nHourForecast * 60;
+  const gspRegionData = useGspRegionData(gspId, isSingleGsp, {
+    show: !!(isSingleGsp && show4hView),
+    horizonMinutes: nMinuteForecast
   });
+
+  // Resolves the active *group* selection to a flat GSP id list, whatever aggregation level it
+  // came from: a raw multi-select is already ids, DNO/zone/national resolve via the grouping
+  // file's own key (the same key the map's boundary features carry as their id, so this needs
+  // no separate lookup table). `null` when a group selection isn't the active path.
+  const { gspIds, groupName } = useMemo(() => {
+    if (isSingleGsp) return { gspIds: null, groupName: null };
+    if (nationalAggregationLevel === NationalAggregation.GSP) {
+      return selectedRegions.length > 0
+        ? { gspIds: selectedRegions.map(Number), groupName: `${selectedRegions.length} GSPs` }
+        : { gspIds: null, groupName: null };
+    }
+    const name = selectedRegions[0];
+    if (!name) return { gspIds: null, groupName: null };
+    const ids = groupGspIds(nationalAggregationLevel, name);
+    return ids ? { gspIds: ids, groupName: name } : { gspIds: null, groupName: null };
+  }, [isSingleGsp, nationalAggregationLevel, selectedRegions]);
+
+  const gspAggregateData = useGspAggregateData(gspIds, groupName);
+
   const now30min = formatISODateString(get30MinNow());
-  const dataMissing =
-    !gspForecastDataOneGSP ||
-    !pvRealDataIn ||
-    !pvRealDataAfter ||
-    loading.gspForecastSelectedGSPsLoading ||
-    loading.pvRealInDayLoading ||
-    loading.pvRealDayAfterLoading ||
-    errors.length;
-  const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =
-    gspForecastDataOneGSP?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
-    ({} as any);
-  const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
 
-  const fourHourForecastAtSelectedTime: ForecastValue =
-    gspNHourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
-    ({} as ForecastValue);
+  // The active series, whichever of the two paths is live. Both hooks always run (rules of
+  // hooks), so this is just picking which result feeds the chart and the header math below.
+  const activeForecast = isSingleGsp ? gspRegionData.forecast : gspAggregateData.forecast;
+  const activeGenerationSeries = isSingleGsp
+    ? gspRegionData.generationSeries
+    : gspAggregateData.generationSeries;
+  const activePrimaryGeneration = isSingleGsp
+    ? gspRegionData.primaryGeneration
+    : gspAggregateData.primaryGeneration;
+  const gspInstalledCapacity = isSingleGsp
+    ? gspRegionData.region?.capacityMw || 0
+    : gspAggregateData.capacityMw || 0;
+  const dataMissing = isSingleGsp
+    ? gspRegionData.isLoading || gspRegionData.hasError
+    : gspAggregateData.isLoading || gspAggregateData.hasError;
 
-  //
+  let title: string;
+  let selectedGSPNames: string[] = [];
+  if (isSingleGsp) {
+    title = gspRegionData.region?.label || String(selectedRegions[0]);
+  } else if (nationalAggregationLevel === NationalAggregation.GSP && selectedRegions.length > 1) {
+    title = `${selectedRegions.length} ${String(nationalAggregationLevel)}s selected`;
+    // Per-member display names for the tooltip, resolved inside `useGspAggregateData` from the
+    // `useRegions` data it already holds — no extra request. Labels ("City Road"), never the
+    // raw region names (`citr_1`).
+    selectedGSPNames = gspAggregateData.memberLabels;
+  } else if (nationalAggregationLevel === NationalAggregation.national) {
+    title = "National GSP Sum";
+  } else {
+    title = groupName || String(selectedRegions[0] ?? "");
+  }
 
-  // get the latest Actual pv value in GW
-  const latestPvActualInMW = KWtoMW(
-    pvRealDataIn?.[pvRealDataIn.length - 1]?.solarGenerationKw || 0
-  );
-
-  // get pv time
-  const latestPvActualDatetime = pvRealDataIn?.[pvRealDataIn.length - 1]?.datetimeUtc || timeNow;
-
-  // Use the same time for the Forecast historic
+  const latestGeneration = latestReading(activePrimaryGeneration);
+  const latestPvActualDatetime = latestGeneration?.timeUtc ?? timeNow;
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime);
-
-  // Get the next OCF forecast following the latest PV actual datetime
   const followingPvForecastDatetime = getNext30MinSlot(new Date(latestPvActualDatetime));
   const followingPvForecastDateString = formatISODateString(
     followingPvForecastDatetime.toISOString()
   );
+  const forecastAt = (formattedDate: string) =>
+    activeForecast?.values.find((v) => formatISODateString(v.timeUtc) === formattedDate)?.powerMw ??
+    0;
 
-  // Get the next OCF forecast for the last PV value time
-  const correspondingLatestPvForecast = gspForecastDataOneGSP?.find(
-    (fc) => formatISODateString(fc.targetTime) === pvForecastDatetime
+  const pvTimeOnly = formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale);
+  const pvValueMw = latestGeneration?.powerMw ?? 0;
+  const forecastPvMw = forecastAt(pvForecastDatetime);
+  const forecastNextTimeOnly = formatISODateStringAsZonedTime(
+    followingPvForecastDatetime.toISOString(),
+    timezone,
+    locale
   );
-  const correspondingLatestPvForecastInMW =
-    correspondingLatestPvForecast?.expectedPowerGenerationMegawatts || 0;
-  // Get the next OCF forecast
-  const followingPvForecastInMW =
-    gspForecastDataOneGSP?.find(
-      (fc) => formatISODateString(fc.targetTime) === followingPvForecastDateString
-    )?.expectedPowerGenerationMegawatts || 0;
+  const forecastNextPvMw = forecastAt(followingPvForecastDateString);
+  const forecastAtSelectedTimeMw = forecastAt(now30min);
+  const deltaValue = dataMissing ? "---" : (pvValueMw - forecastPvMw).toFixed(1);
 
-  const deltaValue = dataMissing
-    ? "---"
-    : (Number(latestPvActualInMW) - Number(correspondingLatestPvForecastInMW)).toFixed(1);
-
-  //
+  const chartData = useFormatChartData({
+    forecastSeries: activeForecast,
+    nHourSeries: isSingleGsp && show4hView ? gspRegionData.nHour : undefined,
+    generationSeries: activeGenerationSeries,
+    timeTrigger: selectedTime,
+    delta: deltaView,
+    gsp: true
+  });
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInstalledCapacity || 100;
   yMax = getRoundedTickBoundary(yMax, Y_MAX_TICKS);
-
-  let title =
-    nationalAggregationLevel === NationalAggregation.GSP
-      ? gspName || ""
-      : String(selectedRegions[0]);
-  let selectedGSPNames =
-    selectedRegions.length > 1 ? gspLocationInfo?.map((gsp) => gsp.regionName) || [] : [];
-
-  if (selectedRegions.length > 1) {
-    title = `${selectedRegions.length} ${String(nationalAggregationLevel)}s selected`;
-  }
-
-  if (nationalAggregationLevel === NationalAggregation.national) {
-    title = "National GSP Sum";
-  }
 
   // If multiple GSPs are selected, hide the N-hour data, if any
   let filteredLines = visibleLines;
@@ -150,22 +173,18 @@ const GspPvRemixChart: FC<{
         <ForecastHeaderGSP
           onClose={close}
           title={title}
-          mwpercent={Math.round(pvPercentage)}
-          pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale)}
-          pvValue={Number(latestPvActualInMW)?.toFixed(1)}
-          forecastPV={correspondingLatestPvForecastInMW?.toFixed(1)}
-          forecastNextTimeOnly={formatISODateStringAsZonedTime(
-            followingPvForecastDatetime.toISOString(),
-            timezone,
-            locale
-          )}
-          forecastNextPV={followingPvForecastInMW?.toFixed(1)}
+          mwpercent={Math.round((forecastAtSelectedTimeMw / (gspInstalledCapacity || 1)) * 100)}
+          pvTimeOnly={pvTimeOnly}
+          pvValue={pvValueMw.toFixed(1)}
+          forecastPV={forecastPvMw.toFixed(1)}
+          forecastNextTimeOnly={forecastNextTimeOnly}
+          forecastNextPV={forecastNextPvMw.toFixed(1)}
           deltaValue={deltaValue.toString()}
           deltaView={deltaView}
           titleTooltipText={selectedGSPNames}
         >
           <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-ocf-yellow-500">
-            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+            {Math.round(forecastAtSelectedTimeMw)}
           </span>
 
           <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-white">
