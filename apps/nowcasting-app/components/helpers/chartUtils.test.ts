@@ -1,4 +1,5 @@
-import { getTicks } from "./chartUtils";
+import { getAvailablePLevels, getTicks, getZoomYMax } from "./chartUtils";
+import { ChartData } from "../charts/remix-line";
 import { describe, expect, it } from "@jest/globals";
 
 describe("getTicks", () => {
@@ -127,5 +128,63 @@ describe("getTicks", () => {
   it("should handle zero and negative yMax", () => {
     expect(getTicks(0, [])).toEqual([]);
     expect(getTicks(-10, [])).toEqual([]);
+  });
+});
+
+const chartData = (data: Partial<ChartData>[]): ChartData[] =>
+  data.map((d, i) => ({ formattedDate: `2024-01-01T00:${i}0`, ...d }));
+
+describe("getZoomYMax", () => {
+  it("should use generation/forecast max when there is no probabilistic bound", () => {
+    const data = chartData([{ GENERATION: 5 }, { GENERATION_UPDATED: 10 }, { FORECAST: 7 }]);
+    expect(getZoomYMax(data)).toBe(10);
+  });
+
+  it("should use the highest probabilistic upper bound when present", () => {
+    const data = chartData([
+      { PROBABILISTIC_UPPER_BOUND: 12, GENERATION: 1 },
+      { PROBABILISTIC_UPPER_BOUND: 20, GENERATION: 2 }
+    ]);
+    expect(getZoomYMax(data)).toBe(20);
+  });
+
+  it("should fall back to GENERATION for a NaN probabilistic bound without breaking the max", () => {
+    const data = chartData([
+      { PROBABILISTIC_UPPER_BOUND: NaN, GENERATION: 2 },
+      { PROBABILISTIC_UPPER_BOUND: 50, GENERATION: 3 },
+      { PROBABILISTIC_UPPER_BOUND: 30, GENERATION: 4 }
+    ]);
+    expect(getZoomYMax(data)).toBe(50);
+  });
+
+  it("should fall back to the generation/forecast branch when every probabilistic bound is NaN", () => {
+    const data = chartData([{ PROBABILISTIC_UPPER_BOUND: NaN, GENERATION: 7, FORECAST: 3 }]);
+    expect(getZoomYMax(data)).toBe(7);
+  });
+});
+
+describe("getAvailablePLevels", () => {
+  const pLevels: [number, number][] = [
+    [2, 98],
+    [10, 90]
+  ];
+
+  it("should keep a pair when both bounds are in the payload", () => {
+    const plevelValues = { plevel_2: 1, plevel_98: 9, plevel_10: 2, plevel_90: 8 };
+    expect(getAvailablePLevels(plevelValues, pLevels)).toEqual(pLevels);
+  });
+
+  it("should drop a pair when its upper bound is missing (e.g. p2 present, p98 not)", () => {
+    const plevelValues = { plevel_2: 1, plevel_10: 2, plevel_90: 8 };
+    expect(getAvailablePLevels(plevelValues, pLevels)).toEqual([[10, 90]]);
+  });
+
+  it("should drop a pair when its lower bound is missing", () => {
+    const plevelValues = { plevel_98: 9, plevel_10: 2, plevel_90: 8 };
+    expect(getAvailablePLevels(plevelValues, pLevels)).toEqual([[10, 90]]);
+  });
+
+  it("should return an empty array when no pair has both bounds present", () => {
+    expect(getAvailablePLevels({}, pLevels)).toEqual([]);
   });
 });

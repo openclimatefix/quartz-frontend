@@ -6,7 +6,7 @@ module.exports = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
     fontWeight: {
@@ -20,7 +20,7 @@ module.exports = {
       bold: "700",
       extrabold: "800",
       "extra-bold": "800",
-      black: "900",
+      black: "900"
     },
     container: {
       center: true,
@@ -29,8 +29,8 @@ module.exports = {
         sm: "2rem",
         lg: "4rem",
         xl: "5rem",
-        "2xl": "6rem",
-      },
+        "2xl": "6rem"
+      }
     },
     screens: {
       sm: "640px",
@@ -48,21 +48,20 @@ module.exports = {
       "2xl": "1536px",
       // => @media (min-width: 1536px) { ... }
       "3xl": "1750px",
-      "4xl": "1900px",
+      "4xl": "1900px"
     },
     extend: {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))"
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
         mono: ["ui-monospace", ...defaultTheme.fontFamily.mono],
-        serif: ["Source Code Pro", ...defaultTheme.fontFamily.serif],
+        serif: ["Source Code Pro", ...defaultTheme.fontFamily.serif]
       },
       fontSize: {
-        "2xs": "0.625rem",
+        "2xs": "0.625rem"
       },
       colors: {
         amber: {
@@ -76,7 +75,7 @@ module.exports = {
           600: "#FFC11B",
           700: "#E2A400",
           800: "#AA7B00",
-          900: "#725300",
+          900: "#725300"
         },
         "ocf-yellow": {
           DEFAULT: "#FFD053",
@@ -89,7 +88,7 @@ module.exports = {
           600: "#FFC11B",
           700: "#E2A400",
           800: "#AA7B00",
-          900: "#725300",
+          900: "#725300"
         },
         "ocf-dusty-orange": {
           DEFAULT: "#FFAC5F",
@@ -102,7 +101,7 @@ module.exports = {
           600: "#FF8F27",
           700: "#EE7200",
           800: "#B65700",
-          900: "#7E3C00",
+          900: "#7E3C00"
         },
         // DEFAULT is the brand colour, others are guesstimated shades
         "ocf-orange": {
@@ -116,7 +115,7 @@ module.exports = {
           600: "#FF9736",
           700: "#e67c19",
           800: "#e67802",
-          900: "#7d4500",
+          900: "#7d4500"
         },
         "ocf-grey": {
           DEFAULT: "#E4E4E4",
@@ -129,7 +128,7 @@ module.exports = {
           600: "#595959",
           700: "#444444",
           800: "#2C2C2C",
-          900: "#191A1A",
+          900: "#191A1A"
         },
         "mapbox-black": {
           DEFAULT: "#191a1a",
@@ -138,7 +137,7 @@ module.exports = {
           500: "#6C6C6C",
           600: "#545454",
           700: "#343332",
-          900: "#191a1a",
+          900: "#191a1a"
         },
         "ocf-black": {
           DEFAULT: "#14120E",
@@ -151,7 +150,7 @@ module.exports = {
           600: "#000000",
           700: "#000000",
           800: "#000000",
-          900: "#000000",
+          900: "#000000"
         },
         "ocf-blue": {
           DEFAULT: "#48B0DF",
@@ -164,7 +163,7 @@ module.exports = {
           600: "#2497CB",
           700: "#1B749C",
           800: "#13506C",
-          900: "#0B2D3C",
+          900: "#0B2D3C"
         },
         "ocf-green": {
           DEFAULT: "#63BCAF",
@@ -177,7 +176,7 @@ module.exports = {
           600: "#45A294",
           700: "#357A70",
           800: "#24534C",
-          900: "#132C28",
+          900: "#132C28"
         },
         "ocf-teal": {
           DEFAULT: "#7BCDF3",
@@ -190,7 +189,7 @@ module.exports = {
           600: "#4BAFA0",
           700: "#3A887C",
           800: "#296158",
-          900: "#183934",
+          900: "#183934"
         },
         "ocf-delta": {
           DEFAULT: "#6C6C6C",
@@ -203,28 +202,28 @@ module.exports = {
           700: "#9F973A",
           800: "#FCED4F",
           900: "#F19F38",
-          950: "#595959",
+          950: "#595959"
         },
         "ocf-sites": {
           DEFAULT: "#6C6C6C",
-          100: "#444444",
+          100: "#444444"
         },
         "quartz-green": {
-          DEFAULT: "#49CD8D",
+          DEFAULT: "#49CD8D"
         },
         "quartz-mint-green": {
-          DEFAULT: "#B5F5AA",
+          DEFAULT: "#B5F5AA"
         },
         "quartz-blue": {
           DEFAULT: "#53D6FF",
-          100: "#c7dcf2",
+          100: "#c7dcf2"
         },
         "quartz-yellow": {
           DEFAULT: "#FFD053",
-          100: "#ffddb1",
-        },
-      },
-    },
+          100: "#ffddb1"
+        }
+      }
+    }
   },
-  plugins: [],
+  plugins: []
 };

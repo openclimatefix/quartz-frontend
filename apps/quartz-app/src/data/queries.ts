@@ -9,7 +9,7 @@ export const GET_GENERATION = "/{source}/{region}/generation";
 export const GET_FORECAST = "/{source}/{region}/forecast";
 
 const sharedQueryParams = {
-  ui: "",
+  ui: ""
 };
 
 export const getRegionsQuery = (
@@ -20,19 +20,19 @@ export const getRegionsQuery = (
     const { data, error } = await client.GET(GET_REGIONS, {
       params: {
         path: {
-          source,
+          source
         },
         // @ts-ignore
         query: {
-          ...sharedQueryParams,
-        },
+          ...sharedQueryParams
+        }
       },
       // Add bearer token to headers
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`
       },
       // body - isn’t used for GET, but needed for other request types
-      signal, // allows React Query to cancel request
+      signal // allows React Query to cancel request
     });
     console.log("regionsData", data);
     if (data) return data;
@@ -51,18 +51,18 @@ export const getGenerationQuery = (
       params: {
         path: {
           source,
-          region,
+          region
         },
         query: {
           ...sharedQueryParams,
-          resample_minutes: 15,
-        },
+          resample_minutes: 15
+        }
       },
       // Add bearer token to headers
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`
       },
-      signal,
+      signal
     });
     console.log("data2", data);
     if (data) return data;
@@ -83,20 +83,19 @@ export const getForecastQuery = (
       params: {
         path: {
           source,
-          region,
+          region
         },
         query: {
           ...sharedQueryParams,
           forecast_horizon,
-          forecast_horizon_minutes:
-            forecast_horizon === "horizon" ? forecast_horizon_minutes : null,
-        },
+          forecast_horizon_minutes: forecast_horizon === "horizon" ? forecast_horizon_minutes : null
+        }
       },
       // Add bearer token to headers
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`
       },
-      signal,
+      signal
     });
     console.log("data3", data);
     if (data) return data;

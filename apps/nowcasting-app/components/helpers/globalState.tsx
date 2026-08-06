@@ -1,5 +1,11 @@
 import { createGlobalState } from "react-hooks-global-state";
-import { AGGREGATION_LEVELS, getDeltaBucketKeys, SORT_BY, VIEWS } from "../../constant";
+import {
+  AGGREGATION_LEVELS,
+  getDeltaBucketKeys,
+  P_LEVEL_OPTIONS,
+  SORT_BY,
+  VIEWS
+} from "../../constant";
 import {
   CookieStorageKeys,
   getArraySettingFromCookieStorage,
@@ -8,6 +14,7 @@ import {
 import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
 import { ActiveUnit, NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
+import type { ChannelSelection } from "./satelliteLayer";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -82,6 +89,22 @@ export type GlobalStateType = {
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
   nationalAggregationLevel: NationalAggregation;
+  pLevels: [number, number][];
+  showCloudLayer: boolean;
+  activeChannel: ChannelSelection;
+  showPvLayer: boolean;
+};
+
+const DEFAULT_P_LEVELS: [number, number][] = [[10, 90]];
+
+// Drop any stored p-level pair that's no longer in P_LEVEL_OPTIONS, so a stale cookie from
+// before the available p-levels changed can't select a pair the rest of the app doesn't know about.
+const getValidatedPLevels = (): [number, number][] => {
+  const stored = getArraySettingFromCookieStorage<[number, number]>(CookieStorageKeys.P_LEVELS);
+  const validStored = stored?.filter(([lower, upper]) =>
+    P_LEVEL_OPTIONS.some(([l, u]) => l === lower && u === upper)
+  );
+  return validStored?.length ? validStored : DEFAULT_P_LEVELS;
 };
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
@@ -130,7 +153,11 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
       message: "Loading data"
     },
     nHourForecast: 4,
-    nationalAggregationLevel: NationalAggregation.GSP
+    nationalAggregationLevel: NationalAggregation.GSP,
+    pLevels: getValidatedPLevels(),
+    showCloudLayer: false,
+    activeChannel: "COMPOSITE_VISIBLE",
+    showPvLayer: true
   });
 
 export default useGlobalState;

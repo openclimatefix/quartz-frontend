@@ -5,6 +5,7 @@ import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import {
   ChartData,
   ChartDataBase,
+  getPLevelRangeKey,
   SeasonalBound,
   SeasonalPValue,
   SeasonalQuantile
@@ -12,7 +13,7 @@ import {
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
-import { getSettlementPeriodForDate } from "../helpers/chartUtils";
+import { getAvailablePLevels, getSettlementPeriodForDate } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -51,6 +52,8 @@ const getDelta: (datum: ChartData) => number = (datum) => {
       return Number(datum.GENERATION_UPDATED) - Number(datum.PAST_FORECAST);
     } else if (datum.GENERATION !== undefined) {
       return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
+    } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
+      return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
     }
   } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
     return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
@@ -117,6 +120,7 @@ const useFormatChartData = ({
   gsp?: boolean;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [pLevels] = useGlobalState("pLevels");
 
   const data = useMemo(() => {
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
@@ -167,35 +171,30 @@ const useFormatChartData = ({
           (db) => db.targetTime,
           (db) => getForecastChartData(timeNow, db)
         );
-        if (fc.plevels) {
-          addDataToMap(
-            fc,
-            (db) => db.targetTime,
-            //add an array here for the probabilistic area in the chart
-            (db) => ({
-              PROBABILISTIC_RANGE: [db.plevels.plevel_10, db.plevels.plevel_90]
-            })
-          );
-        }
-        if (fc.plevels?.plevel_10) {
-          addDataToMap(
-            fc,
-            (db) => db.targetTime,
-            // probabilistic lower bound for the tooltip to use
-            (db) => ({
-              PROBABILISTIC_LOWER_BOUND: db.plevels.plevel_10
-            })
-          );
-        }
-        if (fc.plevels?.plevel_90) {
-          addDataToMap(
-            fc,
-            (db) => db.targetTime,
-            (db) => ({
-              // probabilistic upper bound for the tooltip to use
-              PROBABILISTIC_UPPER_BOUND: db.plevels.plevel_90
-            })
-          );
+        if (fc.plevels && pLevels.length) {
+          const plevelValues = fc.plevels as Record<string, number | undefined>;
+          const availablePLevels = getAvailablePLevels(plevelValues, pLevels);
+          if (availablePLevels.length) {
+            addDataToMap(
+              fc,
+              (db) => db.targetTime,
+              () =>
+                Object.fromEntries([
+                  // widest selected upper bound, so the chart's y-axis zoom fits every band
+                  [
+                    "PROBABILISTIC_UPPER_BOUND",
+                    Math.max(
+                      ...availablePLevels.map(([, hi]) => plevelValues[`plevel_${hi}`] as number)
+                    )
+                  ],
+                  // one [min, max] range per selected pair, for the shaded bands
+                  ...availablePLevels.map(([lo, hi]) => [
+                    getPLevelRangeKey(lo, hi),
+                    [plevelValues[`plevel_${lo}`], plevelValues[`plevel_${hi}`]]
+                  ])
+                ])
+            );
+          }
         }
       });
 
@@ -282,7 +281,8 @@ const useFormatChartData = ({
     nationalIntradayECMWFOnlyData,
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
-    probabilisticRangeData
+    probabilisticRangeData,
+    pLevels
   ]);
 
   return data;

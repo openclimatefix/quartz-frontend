@@ -16,6 +16,7 @@ import { CombinedData } from "../../types";
 import { VIEWS } from "../../../constant";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
+import { SettingsModal } from "./settingsModal";
 const { version } = pkg;
 
 interface IProfileDropDown {
@@ -30,10 +31,12 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [pLevels] = useGlobalState("pLevels");
   const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
-    downloadNationalCsv(combinedData, selectedColumns, nHourForecast);
+    downloadNationalCsv(combinedData, selectedColumns, nHourForecast, pLevels);
   };
 
   const toggleDashboardMode = () => {
@@ -149,6 +152,26 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                     className="ml-1 text-sm  font-medium text-ocf-black-600"
                   >
                     {`Constraint Boundaries`}
+                  </button>
+                </div>
+              )}
+            </Menu.Item>
+
+            <div className="w-full border-t border-gray-300" />
+            <Menu.Item>
+              {({ active }) => (
+                <div
+                  className={classNames(
+                    active ? "bg-gray-100" : "",
+                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                  )}
+                >
+                  <button
+                    id={"UserMenu-SettingsBtn"}
+                    onClick={() => setShowSettingsModal(true)}
+                    className="ml-1 text-sm font-medium text-ocf-black-600"
+                  >
+                    {`Settings`}
                   </button>
                 </div>
               )}
@@ -276,6 +299,8 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
         nHourForecast={nHourForecast}
         view={view}
       />
+
+      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
     </>
   );
 };

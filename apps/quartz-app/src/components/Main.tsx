@@ -6,32 +6,33 @@ import useGlobalState from "@/src/components/helpers/globalState";
 import {
   useGetForecastedGenerationForRegionQuery,
   useGetGenerationForRegionQuery,
-  useGetRegionsQuery,
+  useGetRegionsQuery
 } from "@/src/hooks/queries";
 import { CombinedData } from "@/src/types/data";
 import { useEffect, useMemo } from "react";
 
 export const Main = () => {
   const [combinedData, setCombinedData] = useGlobalState("combinedData");
+  const [, setIsLoading] = useGlobalState("isLoading");
   const [forecastHorizon] = useGlobalState("forecastHorizon");
   const [forecastHorizonMinutes] = useGlobalState("forecastHorizonMinutes");
 
   const {
     data: solarRegionsData,
     isLoading: solarRegionsLoading,
-    error: solarRegionsError,
+    error: solarRegionsError
   } = useGetRegionsQuery("solar");
 
   const {
     data: windRegionsData,
     isLoading: windRegionsLoading,
-    error: windRegionsError,
+    error: windRegionsError
   } = useGetRegionsQuery("wind");
 
   const {
     data: solarGenerationData,
     isLoading: solarGenerationLoading,
-    error: solarGenerationError,
+    error: solarGenerationError
   } = useGetGenerationForRegionQuery(
     "solar",
     solarRegionsData?.regions[0] || "",
@@ -40,7 +41,7 @@ export const Main = () => {
   const {
     data: windGenerationData,
     isLoading: windGenerationLoading,
-    error: windGenerationError,
+    error: windGenerationError
   } = useGetGenerationForRegionQuery(
     "wind",
     windRegionsData?.regions[0] || "",
@@ -51,7 +52,7 @@ export const Main = () => {
   const {
     data: solarForecastData,
     isLoading: solarForecastLoading,
-    error: solarForecastError,
+    error: solarForecastError
   } = useGetForecastedGenerationForRegionQuery(
     "solar",
     solarRegionsData?.regions[0] || "",
@@ -62,7 +63,7 @@ export const Main = () => {
   const {
     data: windForecastData,
     isLoading: windForecastLoading,
-    error: windForecastError,
+    error: windForecastError
   } = useGetForecastedGenerationForRegionQuery(
     "wind",
     windRegionsData?.regions[0] || "",
@@ -76,14 +77,9 @@ export const Main = () => {
       solarGenerationData,
       windGenerationData,
       solarForecastData,
-      windForecastData,
+      windForecastData
     };
-  }, [
-    solarGenerationData,
-    windGenerationData,
-    solarForecastData,
-    windForecastData,
-  ]);
+  }, [solarGenerationData, windGenerationData, solarForecastData, windForecastData]);
 
   useEffect(() => {
     console.log("combinedData updated", latestCombinedData);
@@ -105,8 +101,12 @@ export const Main = () => {
     solarGenerationLoading,
     windGenerationLoading,
     solarRegionsLoading,
-    windRegionsLoading,
+    windRegionsLoading
   ]);
+
+  useEffect(() => {
+    setIsLoading(isLoading);
+  }, [setIsLoading, isLoading]);
 
   if (
     solarRegionsError ||

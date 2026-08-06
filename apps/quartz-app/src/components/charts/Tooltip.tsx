@@ -1,9 +1,5 @@
 import { FC, ReactNode } from "react";
-import {
-  NameType,
-  Payload,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
+import { NameType, Payload, ValueType } from "recharts/types/component/DefaultTooltipContent";
 import {
   ACTUAL_COLOR,
   ACTUAL_SOLAR_COLOR,
@@ -11,20 +7,13 @@ import {
   COMBINED_COLOR,
   SOLAR_COLOR,
   TOOLTIP_DISPLAY_NAMES,
-  WIND_COLOR,
+  WIND_COLOR
 } from "@/src/constants";
 import { formatEpochToDateTime, isNow, isPast } from "@/src/helpers/datetime";
-import {
-  PowerIcon24,
-  SolarIcon24,
-  WindIcon24,
-} from "@/src/components/icons/icons";
+import { PowerIcon24, SolarIcon24, WindIcon24 } from "@/src/components/icons/icons";
 import { ITooltipRow } from "@/src/types/ui";
 
-const TooltipHeader: FC<{ title: string; icon: ReactNode }> = ({
-  title,
-  icon,
-}) => {
+const TooltipHeader: FC<{ title: string; icon: ReactNode }> = ({ title, icon }) => {
   return (
     <div className="text-lg flex justify-between items-center mt-2 mb-1">
       <span className="flex-initial">{title}</span>
@@ -63,12 +52,8 @@ const getCombinedRowValue: (
   }
   if (isNow(timestamp) && name === "combined_forecast_future") {
     value = 0;
-    value += Number(
-      payload?.find((item) => item.dataKey === "wind_forecast_past")?.value
-    );
-    value += Number(
-      payload?.find((item) => item.dataKey === "solar_forecast_past")?.value
-    );
+    value += Number(payload?.find((item) => item.dataKey === "wind_forecast_past")?.value);
+    value += Number(payload?.find((item) => item.dataKey === "solar_forecast_past")?.value);
   }
   if (value === 0) {
     return "–";
@@ -109,13 +94,12 @@ const TooltipRow: FC<TooltipRowProps> = ({
   generationType,
   dataType,
   timestamp,
-  payload,
+  payload
 }) => {
   const rowData = payload?.find((item) => item.dataKey === name);
   if (!rowData && generationType !== "combined") return null;
   if (!timestamp) return null;
-  if (!isNow(timestamp) && isPast(timestamp) && name.includes("future"))
-    return null;
+  if (!isNow(timestamp) && isPast(timestamp) && name.includes("future")) return null;
   if (!isPast(timestamp) && name.includes("past")) return null;
 
   const prettyName = TOOLTIP_DISPLAY_NAMES[name];
@@ -138,7 +122,7 @@ const TooltipRow: FC<TooltipRowProps> = ({
     payload,
     dataType,
     generationType,
-    timestamp,
+    timestamp
   });
 
   return (
@@ -154,12 +138,8 @@ export const TooltipContent: FC<{
   label?: number;
   visibleLines?: string[];
 }> = ({ payload, label, visibleLines }) => {
-  const showCombined =
-    visibleLines?.includes("Solar") && visibleLines.includes("Wind");
-  const getPayloadValue = (
-    name: string,
-    payload: Payload<ValueType, NameType>[] | undefined
-  ) => {
+  const showCombined = visibleLines?.includes("Solar") && visibleLines.includes("Wind");
+  const getPayloadValue = (name: string, payload: Payload<ValueType, NameType>[] | undefined) => {
     const rowData = payload?.find((item) => item.dataKey === name);
     if (!rowData?.value) return;
 
@@ -170,35 +150,35 @@ export const TooltipContent: FC<{
     {
       dataType: "generation",
       name: "solar_generation",
-      value: getPayloadValue("solar_generation", payload),
+      value: getPayloadValue("solar_generation", payload)
     } as const,
     {
       dataType: "forecast",
       name: "solar_forecast_past",
-      value: getPayloadValue("solar_forecast_past", payload),
+      value: getPayloadValue("solar_forecast_past", payload)
     } as const,
     {
       dataType: "forecast",
       name: "solar_forecast_future",
-      value: getPayloadValue("solar_forecast_future", payload),
-    } as const,
+      value: getPayloadValue("solar_forecast_future", payload)
+    } as const
   ].sort((a, b) => Number(b.value) - Number(a.value));
   const windRows: ITooltipRow[] = [
     {
       dataType: "generation",
       name: "wind_generation",
-      value: getPayloadValue("wind_generation", payload),
+      value: getPayloadValue("wind_generation", payload)
     } as const,
     {
       dataType: "forecast",
       name: "wind_forecast_past",
-      value: getPayloadValue("wind_forecast_past", payload),
+      value: getPayloadValue("wind_forecast_past", payload)
     } as const,
     {
       dataType: "forecast",
       name: "wind_forecast_future",
-      value: getPayloadValue("wind_forecast_future", payload),
-    } as const,
+      value: getPayloadValue("wind_forecast_future", payload)
+    } as const
   ].sort((a, b) => Number(b.value) - Number(a.value));
   const combinedRows: ITooltipRow[] = [
     {
@@ -208,9 +188,9 @@ export const TooltipContent: FC<{
         getCombinedRowValue({
           name: "combined_generation",
           payload,
-          timestamp: label,
+          timestamp: label
         })
-      ),
+      )
     } as const,
     {
       dataType: "forecast",
@@ -219,9 +199,9 @@ export const TooltipContent: FC<{
         getCombinedRowValue({
           name: "combined_forecast_past",
           payload,
-          timestamp: label,
+          timestamp: label
         })
-      ),
+      )
     } as const,
     {
       dataType: "forecast",
@@ -230,10 +210,10 @@ export const TooltipContent: FC<{
         getCombinedRowValue({
           name: "combined_forecast_future",
           payload,
-          timestamp: label,
+          timestamp: label
         })
-      ),
-    } as const,
+      )
+    } as const
   ].sort((a, b) => Number(b.value) - Number(a.value));
 
   return (

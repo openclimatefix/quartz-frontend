@@ -406,11 +406,20 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
   try {
     const response = await fetch("/api/get_token");
     if (!response.ok) {
-      // Ensure SWR sees an error if token retrieval fails
-      const text = await response.text().catch(() => "");
-      throw new Error(
-        `Failed to get access token (${response.status}): ${text || response.statusText}`
-      );
+      const body = await response.json().catch((parseErr) => {
+        Sentry.captureException(parseErr, { tags: { error: "get_token_parse_failure" } });
+        return {};
+      });
+      if (body.error === "trial_expired") {
+        Router.push(`/expired${body.email ? `?email=${encodeURIComponent(body.email)}` : ""}`);
+        throw new Error("trial_expired");
+      }
+      if (body.error === "access_denied") {
+        Router.push(`/auth/denied?error_description=${encodeURIComponent(body.message)}`);
+        throw new Error("access_denied");
+      }
+      const text = body.message || response.statusText;
+      throw new Error(`Failed to get access token (${response.status}): ${text}`);
     }
     const { accessToken } = await response.json();
 

@@ -32,7 +32,7 @@ Sentry.init({
         // Add a tag to all ErrorEvents
         event.tags = {
           ...event.tags,
-          error_event: "true",
+          error_event: "true"
         };
       }
     }
@@ -53,7 +53,7 @@ Sentry.init({
     Sentry.replayIntegration({
       // Additional Replay configuration goes in here, for example:
       maskAllText: true,
-      blockAllMedia: true,
-    }),
-  ],
+      blockAllMedia: true
+    })
+  ]
 });
