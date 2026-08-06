@@ -65,9 +65,106 @@ All six outstanding items are closed:
    `model_name` in `pages/index.tsx` is on the national forecast endpoint; no regional view offers
    a picker) and pinned by a test. Recorded in the contract.
 
-### Not started — the view migration
+### In flight — the view migration
 
-The fan-out below is untouched. This is the bulk of the phase.
+Baseline before any of it: `npx tsc --noEmit` exit 0, `npx jest` 24 suites / 858 tests green.
+
+Running as four waves, sequenced on file ownership and data dependencies:
+
+- **Wave 1 (parallel).** Track A = the map value pipeline (`components/map/*`,
+  `helpers/data.ts`). Track B = the national chart (`pv-remix-chart.tsx`,
+  `use-format-chart-data.tsx`, `forecast-header/*`, `config/countries.ts`).
+- **Wave 2 (parallel, after wave 1).** Track C = delta (`delta-view/*` and the delta computation
+  leaving `pages/index.tsx`) — depends on A's snapshot join. Track D = the regional drill-down
+  (`gsp-pv-remix-chart/*`) — depends on B's formatting seam.
+- **Wave 3.** Track E = CSV (`csvDownloadModal.tsx`, `helpers/csvDownload.ts`) and the
+  `combinedData` prop removal, which takes the last of the object with it.
+- **Wave 4, by hand.** `pages/index.tsx` decomposition into per-view containers, deleting the v0
+  fetches each track orphaned, and retiring `types/quartz-api.d.ts` once its last consumer is gone.
+
+### Wave 4 — the remaining work, verified against the tree
+
+Waves 1–3 are **done and verified**: `npx tsc --noEmit` exit 0, `npx jest` **31 suites / 943 tests**
+green (baseline was 24/858). Per-track detail in `phase4-track-{a,b,c,d,e,f}-notes.md`. The GSP
+multi-select tooltip regression Track E flagged is **already fixed** (`memberLabels` on
+`useGspAggregateData`, resolved from the `useRegions` data it already holds — no extra request).
+
+Everything below is one file at a time, no agents needed:
+
+1. **Delete the orphaned v0 fetches in `pages/index.tsx`.** All confirmed to have no remaining
+   consumer: `useGetGspForecast` and its call (the per-scrub-tick refetch, `pages/index.tsx:62`);
+   the five comparison-model national forecasts (`nationalIntradayECMWFOnlyData`,
+   `nationalMetOfficeOnly`, `nationalSatOnly`, `nationalPvnetDayAhead`, `nationalPvnetIntraday`);
+   and `allGspSystemData` (`/system/GB/gsp/`) once `currentYields` goes with the delta computation.
+   Until this lands the national forecast is genuinely double-fetched.
+2. **Delete the v0 dialect in `use-format-chart-data.tsx`** — every `@deprecated` prop and both
+   `fromV0*` adapters. **Verified safe:** all three call sites (`pv-remix-chart.tsx`,
+   `delta-view/delta-view-chart.tsx`, `gsp-pv-remix-chart/index.tsx`) pass only v1 props; grep for
+   the deprecated names returns nothing at any caller.
+3. **Move the two `export enum`s out of `components/types.d.ts`** into a real `.ts` module. They
+   are values, and under ts-jest a value exported from a `.d.ts` is `undefined` at runtime — which
+   is why several suites carry a `jest.mock` workaround and `hooks/data/use-loading-state.ts`
+   duplicates the label list. Deleting those workarounds is the proof it worked.
+4. **Decompose `pages/index.tsx`** (~818 lines) into per-view containers, dissolving what is left
+   of `CombinedData`/`CombinedLoading`/`CombinedValidating`/`CombinedErrors` (D1's
+   rebuilt-every-render objects). `Header` keeps an unread `combinedData` prop purely because
+   `pages/index.tsx` still passes it — both sides go together.
+5. **Retire `types/quartz-api.d.ts`** (C1). Remaining importers: `components/types.d.ts`,
+   `components/helpers/data.ts`, `components/helpers/data.test.ts`,
+   `components/helpers/data.geo.test.ts`, `pages/index.tsx`.
+6. **Leave the sites/satellite paths alone** — `SITES_API_PREFIX`, `sitesMap.tsx`,
+   `solar-site-view/*` and `satelliteLayer.ts` are Phase 5, still on v0 by design.
+
+## MUST REVISIT BEFORE PHASE 4 CLOSES
+
+**The DNO double-count is now baked into a second place, deliberately.** Wave 3 builds a
+time-series rollup (summing `RegionSeries` across grouping members per timestamp) so the GSP
+chart's DNO/zone/multi-select paths leave v0. Brad's decision, knowingly: **it reproduces today's
+double-count exactly** — 15 GSP ids appear in two DNO groupings each, so DNO totals sum above
+national. Correct behaviour preserved, wrong numbers preserved with it.
+
+**Where the discrepancy comes from — Brad's read, and it fits the measured numbers.** The excess
+decomposes as 15 duplicated ids + 31 DNO-only ids − 14 ids present nationally but in no DNO
+grouping. GB has had at least two GSP updates that added new GSPs and retired old ones, while the
+bundled grouping files stayed a fixed snapshot. So the 31 are retired GSPs still in the file and
+the 14 are new GSPs it never gained. **That explains the two set-membership problems but not the
+15 duplicates** — staleness cannot put one GSP in two groupings at once, so that remains a live
+question.
+
+**Preferred fix: get it from v1 and delete the grouping files entirely.** Checked against the
+spec — v1 GSP metadata currently carries only `full_name` and `gsp_id`, and the spec never mentions
+DNO, licence area or grouping, so this is not available today. The contract's sparse
+`RegionTypeCapability.level` (0 national, 10 gsp) was deliberately left open for it. Two asks for
+the API owner, in order:
+
+1. **Add the DNO and NG zone to each GSP region's metadata.** Groupings then derive from the same
+   payload as the GSP list, so additions and retirements cannot drift — the whole staleness class
+   dies at source and the bundled files are deleted rather than regenerated. The rollup stays
+   client-side and simply reads live ids.
+2. **Eventually, DNO and zone as first-class region types with their own `level`**, so `period` and
+   `snapshot` serve them directly.
+
+**The schema depends on the apportionment answer, so ask both together:** if a GSP can legitimately
+feed two licence areas the field must be `dnos: []`, not `dno: string`; if it cannot, the 15
+duplicates are simply a data error.
+
+He does **not** yet have the final answer on apportionment or on where the double-count originates
+(is a GSP feeding two licence areas legitimate, or a data error?). So this is pinned, not fixed,
+and must be revisited at the end of the phase. The reconciliation test wave 3 adds is the tripwire:
+NG zones reconcile to national, DNO deliberately does not, and the assertion says so out loud. When
+Phase 5 regenerates the groupings name-keyed, that test flips from documenting a bug to proving the
+fix.
+
+**Gap found by Track C, must close before the v0 dialect can be deleted.** The delta view has two
+charts, and only one was in scope. `DeltaChart`'s *top* `RemixLine` — national forecast vs actual —
+still reads `useFormatChartData` through v0 props; Track C migrated the GSP list/bucket UI beneath
+it. So `use-format-chart-data.tsx`'s `@deprecated` v0 dialect has a live consumer even after
+Tracks C and D are done. Migrating that top chart is a prerequisite for the wave-4 cleanup, not an
+optional tidy — deleting the dialect first would break the delta view.
+
+No track edits `pages/index.tsx`. Each stops *reading* the props it no longer needs and leaves them
+in the signature — `CombinedData` dissolves in wave 4, per the decision below. Views double-fetch
+(v0 props + v1 hooks) mid-phase; that is intended and ends in wave 4.
 
 ## Decisions taken this session
 
@@ -90,6 +187,45 @@ The fan-out below is untouched. This is the bulk of the phase.
   the *value* pipeline, the same seam as the data swap, and orthogonal to Phase 5's *geometry*
   pipeline (where boundaries load from). Deferring it means tearing out `setData` from the same
   files twice.
+
+## Decisions taken in the migration session (2026-08-06)
+
+- **Model names: use the non-`_adjust` variants, provisionally.** v1 has no `trend_adjuster_on`
+  param (0 hits in `v1-api.json`); it currently exposes `_adjust` model variants instead. The API
+  is about to change again — an `adjust` boolean like v0's, plus simplified model names — so Brad's
+  call is to wire the plain names now and amend once that settles. Mapping used:
+  `blend`→`blend`, `pvnet_intraday_ecmwf_only`→`pvnet_ecmwf`, `pvnet_day_ahead`→`pvnet_day_ahead`,
+  `pvnet_intraday`→`pvnet_intraday`, `pvnet_intraday_met_office_only`→`pvnet_ukv`,
+  `pvnet_intraday_sat_only`→`pvnet_sat`. The last one is an **unconfirmed inference**.
+  **Consequence: the national chart will not match production**, because prod is trend-adjusted and
+  these are not. Agreed, not a regression.
+- **Chart series are a curated per-country list in `config/countries.ts`** — not hardcoded fetches,
+  and not yet derived from the manifest. GB keeps today's six lines. This absorbs D4's copy-pasted
+  `<Line>` blocks without also changing what is on screen in the same pass, and keeps the model swap
+  above to a one-line edit.
+- **`met_office_only → pvnet_ukv` is confirmed, not an inference.** The manifest labels
+  `pvnet_ukv` as "PVNet Intraday (Met Office)". All six v0 models map cleanly.
+- **Legend labels come from the manifest, and the copy change is accepted as-is.** GB now reads
+  "PV Live Estimated"/"PV Live Updated" instead of "PV live initial"/"PV live updated", and the
+  comparison models read their full manifest names ("PVNet Intraday (ECMWF)" for "ECMWF-only").
+  No per-country display override was added: hardcoding GB's copy would have labelled NL's
+  `ned_nl` with GB wording, and the same incoming API change that brings the `adjust` boolean also
+  shortens the model names, so the long labels are expected to shrink at the source. Revisit only
+  if the legend crowds at real width.
+- **The delta map's three collapsed states get separated now.** Today `!currentYield.yield` forces
+  `delta = 0`, so a future time, a genuine overnight zero and a region absent from the payload all
+  render identically as "on target". Audit B8's bug class; the map rewrite is the cheap moment.
+  Fixed rather than pinned, by Brad's decision — so it is a visible change to eyeball against prod.
+
+### Geometry stays where it is during Phase 4
+
+`public/geo/` **does not exist yet** — the registry's `geo` URLs in `config/countries.ts` point at
+files Phase 5 creates. Geometry keeps loading from the bundled `data/*.json` imports. Phase 4 is the
+*value* pipeline; Phase 5 is the *geometry* pipeline.
+
+Interim join: bundled GeoJSON features are keyed by numeric GSP id, v1 keys by region name
+(`citr_1`). `useRegions(gspScope)` returns `Region.metadata.gsp_id`, which bridges the two. Isolate
+it in one commented function — Phase 5 deletes it when the boundaries are regenerated name-keyed.
 
 ### Why the map is slow today — measured from the code, for whoever does that step
 
