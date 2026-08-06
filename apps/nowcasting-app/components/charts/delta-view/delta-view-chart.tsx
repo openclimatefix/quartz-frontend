@@ -22,10 +22,22 @@ import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
+import useGspDeltas from "./use-gsp-deltas";
 import useTimeNow from "../../hooks/use-time-now";
 import { ChartLegend } from "../ChartLegend";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
 import { getTicks } from "../../helpers/chartUtils";
+import {
+  NATIONAL_REGION_TYPE,
+  useCurrentCountry,
+  useGenerationSources,
+  useLoadingState,
+  useNationalForecast,
+  useNationalGeneration
+} from "../../../hooks/data";
+import type { Scope } from "../../../lib/domain/types";
+import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
+import { GENERATION_CHART_KEYS } from "../pv-remix-chart";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
@@ -255,41 +267,85 @@ const GspDeltaColumn: FC<{
 type DeltaChartProps = {
   date?: string;
   className?: string;
-  combinedData: CombinedData;
-  combinedErrors: CombinedErrors;
+  // Deliberately no longer read: the top chart fetches what it needs itself now, per Track B's
+  // pattern. The props stay in the signature — optional — because `pages/index.tsx` still
+  // passes them and is out of this step's ownership. `combinedData.gspDeltas` and the errors
+  // below are similarly untouched by this component; `useGspDeltas` already replaced them.
+  combinedData?: CombinedData;
+  combinedErrors?: CombinedErrors;
 };
-const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErrors }) => {
+const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [loadingState] = useGlobalState("loadingState");
+  const [showNHourView] = useGlobalState("showNHourView");
+  const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const selectedTimeHalfHourSlot = get30MinSlot(new Date(convertToLocaleDateString(selectedTime)));
-  const hasGspPvInitialForSelectedTime = combinedData.pvRealDayInData?.find(
-    (d) =>
-      d.datetimeUtc.slice(0, 16) ===
-      `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}`
+
+  const { gspDeltas, scope: gspScope, window: gspWindow } = useGspDeltas(selectedTime);
+
+  const currentCountry = useCurrentCountry();
+  const countryConfig = getCountryConfig(currentCountry);
+  // The country's primary national series, per Track B's convention: first entry writes
+  // FORECAST/PAST_FORECAST and is the model the staleness indicator reports on.
+  const primarySeries = countryConfig?.nationalChartSeries?.[0];
+
+  const scope: Scope | null = currentCountry
+    ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+    : null;
+
+  const forecast = useNationalForecast(scope, {
+    model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
+  });
+
+  // Observers come from the manifest, never a hardcoded pair — see pv-remix-chart.tsx.
+  const generationSources = useGenerationSources(scope);
+  const observers = useMemo(
+    () => (generationSources.data ?? []).map((source) => source.name),
+    [generationSources.data]
   );
 
-  const {
-    nationalForecastData,
-    pvRealDayInData,
-    pvRealDayAfterData,
-    nationalNHourData,
-    allGspForecastData,
-    allGspRealData,
-    gspDeltas
-  } = combinedData;
-  const {
-    nationalForecastError,
-    pvRealDayInError,
-    pvRealDayAfterError,
-    nationalNHourError,
-    allGspForecastError
-  } = combinedErrors;
+  const generation0 = useNationalGeneration(observers[0] === undefined ? null : scope, {
+    observer: observers[0]
+  });
+  const generation1 = useNationalGeneration(observers[1] === undefined ? null : scope, {
+    observer: observers[1]
+  });
+  const generationResults = [generation0, generation1];
+  const generationSeries = useMemo(
+    () =>
+      observers.slice(0, GENERATION_CHART_KEYS.length).map((_, index) => ({
+        key: GENERATION_CHART_KEYS[index],
+        series: generationResults[index].data
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [observers, generation0.data, generation1.data]
+  );
+
+  const nHourHorizonMinutes = showNHourView ? nHourForecast * 60 : undefined;
+  const nHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
+    horizonMinutes: nHourHorizonMinutes
+  });
+
+  // Same scope/window `useGspDeltas` fetched with, so this costs no extra request — the
+  // contract's "pass it the same scope, window, model and observers" rule.
+  const loadingState = useLoadingState({
+    scope,
+    regionScope: gspScope,
+    periodWindow: gspWindow,
+    model: primarySeries ? forecastSeriesModel(primarySeries) : undefined,
+    observers,
+    nHourHorizonMinutes
+  });
+
+  const hasGspPvInitialForSelectedTime = generation0.data?.values.some(
+    (v) =>
+      v.timeUtc.slice(0, 16) === `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}`
+  );
 
   // const chartLimits = useMemo(
   //   () =>
@@ -302,10 +358,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   // useHotKeyControlChart(chartLimits);
 
   const chartData = useFormatChartData({
-    forecastData: nationalForecastData,
-    fourHourData: nationalNHourData,
-    pvRealDayInData,
-    pvRealDayAfterData,
+    forecastSeries: forecast.data,
+    nHourSeries: nHour.data,
+    generationSeries,
     timeTrigger: selectedTime,
     delta: true
   });
@@ -330,9 +385,13 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   //   }
   // }, [view]);
 
-  const hasError = Object.entries(combinedErrors).some(([, value]) => value !== null);
+  const hasError = [forecast, ...generationResults, nHour].some((result) => !!result.error);
+  // The single-observer generalisation from Track B: a country with one observer waits for
+  // one series, not forever for a second that does not exist.
+  const waitingForData =
+    !forecast.data || generationSeries.some((series) => series.series === undefined);
 
-  if (!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData)
+  if (waitingForData)
     return (
       <div className={`h-full flex ${className}`}>
         <Spinner></Spinner>
@@ -354,11 +413,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
       <div className={`flex flex-col flex-1 ${className || ""}`}>
         <div className="flex flex-1 flex-col relative">
           <ForecastHeader
-            pvForecastData={nationalForecastData}
-            pvLiveData={pvRealDayInData}
+            forecastSeries={forecast.data}
+            generationSeries={generation0.data}
             deltaView={true}
           ></ForecastHeader>
-          {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
+          {waitingForData && !hasError && (
             <div
               className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
             >
