@@ -1,7 +1,7 @@
-import { CombinedData } from "../types";
 import { DateTime } from "luxon";
 import { CSVColumn } from "../layout/header/csvDownloadModal";
 import { getSettlementPeriodForDate } from "./chartUtils";
+import type { TimeSeries } from "../../lib/domain/types";
 
 export interface CSVRow {
   startDateTime: string;
@@ -72,33 +72,44 @@ const getOrCreateRow = (map: Map<string, CSVRow>, ts: string, timezone: string):
 };
 
 /**
- * Pure row-building half of the national CSV export: fans the various series in
- * `combinedData` out into one row per timestamp, merged on the timestamp string.
+ * The v1 series the national CSV is built from — the same canonical `TimeSeries` shape the
+ * national chart and the delta view's top chart fetch, not `CombinedData`.
+ *
+ * `generationInitial`/`generationUpdated` are the country's first and second observer, in
+ * manifest order — GB's `pvlive_in_day`/`pvlive_day_after`, matching `GENERATION_CHART_KEYS`
+ * in `pv-remix-chart.tsx`. A single-observer country (NL) leaves `generationUpdated`
+ * undefined, and its column comes back empty rather than waiting forever.
+ */
+export type NationalCsvSeries = {
+  forecast?: TimeSeries;
+  generationInitial?: TimeSeries;
+  generationUpdated?: TimeSeries;
+  nHour?: TimeSeries;
+};
+
+/**
+ * Pure row-building half of the national CSV export: fans the configured series out into one
+ * row per timestamp, merged on the timestamp string.
  */
 export const buildCsvRows = (
-  combinedData: CombinedData | null,
+  series: NationalCsvSeries,
   pLevels: [number, number][],
   timezone: string = DEFAULT_CSV_TIMEZONE
 ): CSVRow[] => {
-  if (!combinedData) return [];
-
   const dataByTimestamp = new Map<string, CSVRow>();
 
   // PV initial
-  combinedData.pvRealDayInData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc, timezone);
-    // B8: nullish check, not truthiness — a genuine 0 kW reading (every overnight
-    // settlement period) must export as 0, not as a blank cell.
-    row.solarGenerationPvliveInitial =
-      entry.solarGenerationKw != null ? entry.solarGenerationKw / 1000 : null;
+  series.generationInitial?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    // absent ≠ null ≠ zero: `powerMw` is already `number | null` MW off the v1 boundary, so a
+    // genuine 0 MW overnight reading is preserved exactly, not coerced to a blank cell.
+    row.solarGenerationPvliveInitial = point.powerMw;
   });
 
   // PV updated
-  combinedData.pvRealDayAfterData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc, timezone);
-    // B8: as above.
-    row.solarGenerationPvliveUpdated =
-      entry.solarGenerationKw != null ? entry.solarGenerationKw / 1000 : null;
+  series.generationUpdated?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    row.solarGenerationPvliveUpdated = point.powerMw;
   });
 
   const updateRowDelta = (row: CSVRow) => {
@@ -108,20 +119,18 @@ export const buildCsvRows = (
   };
 
   // Forecast
-  combinedData.nationalForecastData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.targetTime, timezone);
-    // `?? null` keeps a legitimate 0 MW forecast and normalises a missing value to null.
-    row.solarForecast = entry.expectedPowerGenerationMegawatts ?? null;
-    const plevelValues = entry.plevels as Record<string, number | undefined> | undefined;
+  series.forecast?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    row.solarForecast = point.powerMw;
     pLevels.flat().forEach((level) => {
-      row.pLevelValues[level] = plevelValues?.[`plevel_${level}`] ?? null;
+      row.pLevelValues[level] = point.plevelsMw?.[String(level)] ?? null;
     });
   });
 
   // N forecast
-  combinedData.nationalNHourData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.targetTime, timezone);
-    row.nForecast = entry.expectedPowerGenerationMegawatts ?? null;
+  series.nHour?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    row.nForecast = point.powerMw;
   });
 
   dataByTimestamp.forEach((row) => updateRowDelta(row));
@@ -133,15 +142,16 @@ export const buildCsvRows = (
 };
 
 export const downloadNationalCsv = (
-  combinedData: CombinedData | null,
+  series: NationalCsvSeries,
   selectedColumns: CSVColumn[],
   nHourForecast: number,
   pLevels: [number, number][],
   timezone: string = DEFAULT_CSV_TIMEZONE
 ) => {
-  if (!combinedData) return;
+  if (!series.forecast && !series.generationInitial && !series.generationUpdated && !series.nHour)
+    return;
 
-  const csvRows = buildCsvRows(combinedData, pLevels, timezone);
+  const csvRows = buildCsvRows(series, pLevels, timezone);
   const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels);
 
   // download

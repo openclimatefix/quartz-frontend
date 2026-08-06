@@ -1,25 +1,22 @@
 import { describe, expect, test } from "@jest/globals";
-import { buildCsvRows, CSVRow, generateCsv, getNHourForecastLabel } from "./csvDownload";
+import {
+  buildCsvRows,
+  CSVRow,
+  generateCsv,
+  getNHourForecastLabel,
+  NationalCsvSeries
+} from "./csvDownload";
 import { CSVColumn } from "../layout/header/csvDownloadModal";
+import type { TimeSeries, TimeSeriesPoint } from "../../lib/domain/types";
 
-// `CombinedData` carries a dozen unrelated series that the CSV export never reads. The
-// fixtures below only populate the four it does, so they are cast through the parameter
-// type of the function under test rather than spelled out in full.
-type Combined = Parameters<typeof buildCsvRows>[0];
-
-type PvEntry = { datetimeUtc: string; solarGenerationKw: number | null };
-type ForecastEntry = {
-  targetTime: string;
-  expectedPowerGenerationMegawatts: number | null;
-  plevels?: Record<string, number>;
-};
-
-const combined = (parts: {
-  pvRealDayInData?: PvEntry[];
-  pvRealDayAfterData?: ForecastEntry[] | PvEntry[];
-  nationalForecastData?: ForecastEntry[];
-  nationalNHourData?: ForecastEntry[];
-}): Combined => parts as unknown as Combined;
+// The CSV now reads the same canonical `TimeSeries` the national chart and the delta view's
+// top chart fetch — not `CombinedData`. `values` is all `buildCsvRows` reads, so the fixtures
+// below leave `regionName`/`capacityMw`/`forecast` at harmless placeholders.
+const series = (values: TimeSeriesPoint[]): TimeSeries => ({
+  regionName: "national",
+  capacityMw: null,
+  values
+});
 
 const ALL_COLUMNS: CSVColumn[] = [
   "startDateTime",
@@ -38,45 +35,50 @@ const cellsOf = (csv: string, lineIndex: number) => rowsOf(csv)[lineIndex].split
 
 describe("buildCsvRows — empty and missing input", () => {
   test.each([
-    ["null combinedData", null],
-    ["empty combinedData", combined({})],
-    ["all series empty arrays", combined({ pvRealDayInData: [], nationalForecastData: [] })]
+    ["empty series", {} as NationalCsvSeries],
+    [
+      "all series empty arrays",
+      { generationInitial: series([]), forecast: series([]) } as NationalCsvSeries
+    ]
   ])("%s produces no rows", (_label, input) => {
-    expect(buildCsvRows(input as Combined, [[10, 90]])).toEqual([]);
+    expect(buildCsvRows(input, [[10, 90]])).toEqual([]);
   });
 });
 
-describe("buildCsvRows — kW to MW conversion", () => {
+describe("buildCsvRows — generation values are MW, not re-converted", () => {
+  // The CSV assumes MW throughout: `normalise.ts` converts kW -> MW once at the v1 boundary,
+  // so a value read off `TimeSeriesPoint.powerMw` must pass straight through unchanged. A
+  // second `/ 1000` here — the v0 shape this replaces — would silently corrupt every export.
   test.each([
-    ["pvRealDayInData", "solarGenerationPvliveInitial" as const],
-    ["pvRealDayAfterData", "solarGenerationPvliveUpdated" as const]
-  ])("%s converts kW to MW by dividing by 1000", (series, field) => {
+    ["generationInitial", "solarGenerationPvliveInitial" as const],
+    ["generationUpdated", "solarGenerationPvliveUpdated" as const]
+  ])("%s values pass straight through as MW", (key, field) => {
     const rows = buildCsvRows(
-      combined({
-        [series]: [
-          { datetimeUtc: "2025-01-15T12:00:00+00:00", solarGenerationKw: 6_490_000 },
-          { datetimeUtc: "2025-01-15T12:30:00+00:00", solarGenerationKw: 1_234 }
-        ]
-      } as any),
+      {
+        [key]: series([
+          { timeUtc: "2025-01-15T12:00:00Z", powerMw: 6490 },
+          { timeUtc: "2025-01-15T12:30:00Z", powerMw: 1.234 }
+        ])
+      } as NationalCsvSeries,
       []
     );
     expect(rows.map((r) => r[field])).toEqual([6490, 1.234]);
   });
 
-  // B8: a genuine 0 kW reading is data, not a gap. The old truthiness check turned every
+  // B8: a genuine 0 MW reading is data, not a gap. The old truthiness check turned every
   // overnight settlement period into an empty cell.
   test.each([
-    ["pvRealDayInData", "solarGenerationPvliveInitial" as const],
-    ["pvRealDayAfterData", "solarGenerationPvliveUpdated" as const]
-  ])("B8: %s keeps a 0 kW reading as 0 MW, and null as null", (series, field) => {
+    ["generationInitial", "solarGenerationPvliveInitial" as const],
+    ["generationUpdated", "solarGenerationPvliveUpdated" as const]
+  ])("B8: %s keeps a 0 MW reading as 0, and null as null", (key, field) => {
     const rows = buildCsvRows(
-      combined({
-        [series]: [
-          { datetimeUtc: "2025-01-15T00:00:00+00:00", solarGenerationKw: 0 },
-          { datetimeUtc: "2025-01-15T00:30:00+00:00", solarGenerationKw: null },
-          { datetimeUtc: "2025-01-15T01:00:00+00:00", solarGenerationKw: 0 }
-        ]
-      } as any),
+      {
+        [key]: series([
+          { timeUtc: "2025-01-15T00:00:00Z", powerMw: 0 },
+          { timeUtc: "2025-01-15T00:30:00Z", powerMw: null },
+          { timeUtc: "2025-01-15T01:00:00Z", powerMw: 0 }
+        ])
+      } as NationalCsvSeries,
       []
     );
     expect(rows.map((r) => r[field])).toEqual([0, null, 0]);
@@ -86,22 +88,16 @@ describe("buildCsvRows — kW to MW conversion", () => {
 describe("buildCsvRows — forecast values", () => {
   test("a 0 MW forecast survives as 0, a missing one becomes null", () => {
     const rows = buildCsvRows(
-      combined({
-        nationalForecastData: [
-          { targetTime: "2025-01-15T00:00:00+00:00", expectedPowerGenerationMegawatts: 0 },
-          {
-            targetTime: "2025-01-15T00:30:00+00:00",
-            expectedPowerGenerationMegawatts: null
-          }
-        ],
-        nationalNHourData: [
-          { targetTime: "2025-01-15T00:00:00+00:00", expectedPowerGenerationMegawatts: 0 },
-          {
-            targetTime: "2025-01-15T00:30:00+00:00",
-            expectedPowerGenerationMegawatts: null
-          }
-        ]
-      }),
+      {
+        forecast: series([
+          { timeUtc: "2025-01-15T00:00:00Z", powerMw: 0 },
+          { timeUtc: "2025-01-15T00:30:00Z", powerMw: null }
+        ]),
+        nHour: series([
+          { timeUtc: "2025-01-15T00:00:00Z", powerMw: 0 },
+          { timeUtc: "2025-01-15T00:30:00Z", powerMw: null }
+        ])
+      },
       []
     );
     expect(rows.map((r) => r.solarForecast)).toEqual([0, null]);
@@ -110,51 +106,43 @@ describe("buildCsvRows — forecast values", () => {
 });
 
 describe("buildCsvRows — delta", () => {
-  const at = "2025-01-15T12:00:00+00:00";
+  const at = "2025-01-15T12:00:00Z";
   const build = (opts: {
-    initialKw?: number | null;
-    updatedKw?: number | null;
+    initialMw?: number | null;
+    updatedMw?: number | null;
     forecastMw?: number | null;
   }) =>
     buildCsvRows(
-      combined({
-        ...(opts.initialKw !== undefined
-          ? { pvRealDayInData: [{ datetimeUtc: at, solarGenerationKw: opts.initialKw }] }
+      {
+        ...(opts.initialMw !== undefined
+          ? { generationInitial: series([{ timeUtc: at, powerMw: opts.initialMw }]) }
           : {}),
-        ...(opts.updatedKw !== undefined
-          ? { pvRealDayAfterData: [{ datetimeUtc: at, solarGenerationKw: opts.updatedKw }] }
+        ...(opts.updatedMw !== undefined
+          ? { generationUpdated: series([{ timeUtc: at, powerMw: opts.updatedMw }]) }
           : {}),
         ...(opts.forecastMw !== undefined
-          ? {
-              nationalForecastData: [
-                { targetTime: at, expectedPowerGenerationMegawatts: opts.forecastMw }
-              ]
-            }
+          ? { forecast: series([{ timeUtc: at, powerMw: opts.forecastMw }]) }
           : {})
-      }),
+      },
       []
     )[0];
 
   test.each([
-    [
-      "updated wins over initial",
-      { initialKw: 1_000_000, updatedKw: 3_000_000, forecastMw: 500 },
-      2500
-    ],
-    ["initial used when updated absent", { initialKw: 1_000_000, forecastMw: 500 }, 500],
+    ["updated wins over initial", { initialMw: 1000, updatedMw: 3000, forecastMw: 500 }, 2500],
+    ["initial used when updated absent", { initialMw: 1000, forecastMw: 500 }, 500],
     [
       "initial used when updated is null",
-      { initialKw: 1_000_000, updatedKw: null, forecastMw: 500 },
+      { initialMw: 1000, updatedMw: null, forecastMw: 500 },
       500
     ],
-    ["negative delta", { updatedKw: 1_000_000, forecastMw: 1500 }, -500],
+    ["negative delta", { updatedMw: 1000, forecastMw: 1500 }, -500],
     // B8: a 0 MW actual is a real reading, so the delta is -forecast, not null.
-    ["B8: zero actual still yields a delta", { updatedKw: 0, forecastMw: 400 }, -400],
-    ["zero forecast yields a delta", { updatedKw: 1_000_000, forecastMw: 0 }, 1000],
+    ["B8: zero actual still yields a delta", { updatedMw: 0, forecastMw: 400 }, -400],
+    ["zero forecast yields a delta", { updatedMw: 1000, forecastMw: 0 }, 1000],
     ["no actual at all", { forecastMw: 500 }, null],
-    ["both actuals null", { initialKw: null, updatedKw: null, forecastMw: 500 }, null],
-    ["no forecast", { updatedKw: 1_000_000 }, null],
-    ["null forecast", { updatedKw: 1_000_000, forecastMw: null }, null]
+    ["both actuals null", { initialMw: null, updatedMw: null, forecastMw: 500 }, null],
+    ["no forecast", { updatedMw: 1000 }, null],
+    ["null forecast", { updatedMw: 1000, forecastMw: null }, null]
   ])("%s", (_label, opts, expected) => {
     expect(build(opts).delta).toBe(expected);
   });
@@ -167,21 +155,21 @@ describe("buildCsvRows — start/end datetimes and settlement period", () => {
   test.each([
     [
       "GMT midwinter",
-      "2025-01-15T12:00:00+00:00",
+      "2025-01-15T12:00:00Z",
       "2025-01-15T11:30:00.000+00:00",
       "2025-01-15T12:00:00.000+00:00",
       24
     ],
     [
       "BST midsummer",
-      "2025-06-15T12:00:00+00:00",
+      "2025-06-15T12:00:00Z",
       "2025-06-15T12:30:00.000+01:00",
       "2025-06-15T13:00:00.000+01:00",
       26
     ],
     [
       "BST first period of the day",
-      "2025-06-15T00:00:00+00:00",
+      "2025-06-15T00:00:00Z",
       "2025-06-15T00:30:00.000+01:00",
       "2025-06-15T01:00:00.000+01:00",
       2
@@ -189,21 +177,21 @@ describe("buildCsvRows — start/end datetimes and settlement period", () => {
     // 2025 spring forward: 01:00 GMT becomes 02:00 BST.
     [
       "2025 spring forward, before the jump",
-      "2025-03-30T00:30:00+00:00",
+      "2025-03-30T00:30:00Z",
       "2025-03-30T00:00:00.000+00:00",
       "2025-03-30T00:30:00.000+00:00",
       1
     ],
     [
       "2025 spring forward, across the jump",
-      "2025-03-30T01:00:00+00:00",
+      "2025-03-30T01:00:00Z",
       "2025-03-30T00:30:00.000+00:00",
       "2025-03-30T02:00:00.000+01:00",
       2
     ],
     [
       "2025 spring forward, after the jump",
-      "2025-03-30T02:00:00+00:00",
+      "2025-03-30T02:00:00Z",
       "2025-03-30T02:30:00.000+01:00",
       "2025-03-30T03:00:00.000+01:00",
       4
@@ -211,21 +199,21 @@ describe("buildCsvRows — start/end datetimes and settlement period", () => {
     // 2025 fall back: 02:00 BST becomes 01:00 GMT, so 01:00-02:00 wall clock happens twice.
     [
       "2025 fall back, first pass",
-      "2025-10-26T00:30:00+00:00",
+      "2025-10-26T00:30:00Z",
       "2025-10-26T01:00:00.000+01:00",
       "2025-10-26T01:30:00.000+01:00",
       3
     ],
     [
       "2025 fall back, across the repeat",
-      "2025-10-26T01:00:00+00:00",
+      "2025-10-26T01:00:00Z",
       "2025-10-26T01:30:00.000+01:00",
       "2025-10-26T01:00:00.000+00:00",
       4
     ],
     [
       "2025 fall back, second pass",
-      "2025-10-26T01:30:00+00:00",
+      "2025-10-26T01:30:00Z",
       "2025-10-26T01:00:00.000+00:00",
       "2025-10-26T01:30:00.000+00:00",
       5
@@ -233,39 +221,34 @@ describe("buildCsvRows — start/end datetimes and settlement period", () => {
     // 2026 boundaries.
     [
       "2026 spring forward, across the jump",
-      "2026-03-29T01:00:00+00:00",
+      "2026-03-29T01:00:00Z",
       "2026-03-29T00:30:00.000+00:00",
       "2026-03-29T02:00:00.000+01:00",
       2
     ],
     [
       "2026 spring forward, after the jump",
-      "2026-03-29T02:00:00+00:00",
+      "2026-03-29T02:00:00Z",
       "2026-03-29T02:30:00.000+01:00",
       "2026-03-29T03:00:00.000+01:00",
       4
     ],
     [
       "2026 fall back, across the repeat",
-      "2026-10-25T01:00:00+00:00",
+      "2026-10-25T01:00:00Z",
       "2026-10-25T01:30:00.000+01:00",
       "2026-10-25T01:00:00.000+00:00",
       4
     ],
     [
       "2026 fall back, second pass",
-      "2026-10-25T01:30:00+00:00",
+      "2026-10-25T01:30:00Z",
       "2026-10-25T01:00:00.000+00:00",
       "2026-10-25T01:30:00.000+00:00",
       5
     ]
   ])("%s", (_label, timestamp, expectedStart, expectedEnd, expectedSp) => {
-    const [row] = buildCsvRows(
-      combined({
-        nationalForecastData: [{ targetTime: timestamp, expectedPowerGenerationMegawatts: 1 }]
-      }),
-      []
-    );
+    const [row] = buildCsvRows({ forecast: series([{ timeUtc: timestamp, powerMw: 1 }]) }, []);
     expect(row.startDateTime).toBe(expectedStart);
     expect(row.endDateTime).toBe(expectedEnd);
     expect(row.settlementPeriod).toBe(expectedSp);
@@ -277,12 +260,9 @@ describe("buildCsvRows — start/end datetimes and settlement period", () => {
       const hh = String(Math.floor(minutes / 60) % 24).padStart(2, "0");
       const mm = String(minutes % 60).padStart(2, "0");
       const date = minutes >= 1440 ? "2025-01-16" : "2025-01-15";
-      return {
-        targetTime: `${date}T${hh}:${mm}:00+00:00`,
-        expectedPowerGenerationMegawatts: 0
-      };
+      return { timeUtc: `${date}T${hh}:${mm}:00Z`, powerMw: 0 };
     });
-    const rows = buildCsvRows(combined({ nationalForecastData: day }), []);
+    const rows = buildCsvRows({ forecast: series(day) }, []);
     expect(rows.map((r) => r.settlementPeriod)).toEqual(
       Array.from({ length: 48 }, (_, i) => i + 1)
     );
@@ -292,20 +272,12 @@ describe("buildCsvRows — start/end datetimes and settlement period", () => {
 describe("buildCsvRows — merging series on timestamp", () => {
   test("a timestamp present in one series only still produces a full row", () => {
     const rows = buildCsvRows(
-      combined({
-        pvRealDayInData: [
-          { datetimeUtc: "2025-01-15T00:00:00+00:00", solarGenerationKw: 1_000_000 }
-        ],
-        pvRealDayAfterData: [
-          { datetimeUtc: "2025-01-15T00:30:00+00:00", solarGenerationKw: 2_000_000 }
-        ],
-        nationalForecastData: [
-          { targetTime: "2025-01-15T01:00:00+00:00", expectedPowerGenerationMegawatts: 300 }
-        ],
-        nationalNHourData: [
-          { targetTime: "2025-01-15T01:30:00+00:00", expectedPowerGenerationMegawatts: 400 }
-        ]
-      }),
+      {
+        generationInitial: series([{ timeUtc: "2025-01-15T00:00:00Z", powerMw: 1000 }]),
+        generationUpdated: series([{ timeUtc: "2025-01-15T00:30:00Z", powerMw: 2000 }]),
+        forecast: series([{ timeUtc: "2025-01-15T01:00:00Z", powerMw: 300 }]),
+        nHour: series([{ timeUtc: "2025-01-15T01:30:00Z", powerMw: 400 }])
+      },
       []
     );
     expect(rows).toHaveLength(4);
@@ -325,14 +297,14 @@ describe("buildCsvRows — merging series on timestamp", () => {
   });
 
   test("series sharing a timestamp collapse into a single row", () => {
-    const at = "2025-01-15T12:00:00+00:00";
+    const at = "2025-01-15T12:00:00Z";
     const rows = buildCsvRows(
-      combined({
-        pvRealDayInData: [{ datetimeUtc: at, solarGenerationKw: 1_000_000 }],
-        pvRealDayAfterData: [{ datetimeUtc: at, solarGenerationKw: 1_100_000 }],
-        nationalForecastData: [{ targetTime: at, expectedPowerGenerationMegawatts: 900 }],
-        nationalNHourData: [{ targetTime: at, expectedPowerGenerationMegawatts: 950 }]
-      }),
+      {
+        generationInitial: series([{ timeUtc: at, powerMw: 1000 }]),
+        generationUpdated: series([{ timeUtc: at, powerMw: 1100 }]),
+        forecast: series([{ timeUtc: at, powerMw: 900 }]),
+        nHour: series([{ timeUtc: at, powerMw: 950 }])
+      },
       []
     );
     expect(rows).toHaveLength(1);
@@ -347,15 +319,13 @@ describe("buildCsvRows — merging series on timestamp", () => {
 
   test("rows are sorted by timestamp string, whatever order the series arrive in", () => {
     const rows = buildCsvRows(
-      combined({
-        nationalForecastData: [
-          { targetTime: "2025-01-15T13:00:00+00:00", expectedPowerGenerationMegawatts: 3 },
-          { targetTime: "2025-01-15T11:00:00+00:00", expectedPowerGenerationMegawatts: 1 }
-        ],
-        nationalNHourData: [
-          { targetTime: "2025-01-15T12:00:00+00:00", expectedPowerGenerationMegawatts: 2 }
-        ]
-      }),
+      {
+        forecast: series([
+          { timeUtc: "2025-01-15T13:00:00Z", powerMw: 3 },
+          { timeUtc: "2025-01-15T11:00:00Z", powerMw: 1 }
+        ]),
+        nHour: series([{ timeUtc: "2025-01-15T12:00:00Z", powerMw: 2 }])
+      },
       []
     );
     expect(rows.map((r) => r.endDateTime)).toEqual([
@@ -367,47 +337,36 @@ describe("buildCsvRows — merging series on timestamp", () => {
 });
 
 describe("buildCsvRows — pLevels", () => {
-  const forecast = (plevels?: Record<string, number>) =>
-    combined({
-      nationalForecastData: [
-        {
-          targetTime: "2025-01-15T12:00:00+00:00",
-          expectedPowerGenerationMegawatts: 500,
-          plevels
-        }
-      ]
-    });
+  // v1's `plevelsMw` is keyed by the raw level ("10", "90"), not v0's `plevel_10` prefix.
+  const forecast = (plevelsMw?: Record<string, number | null>) => ({
+    forecast: series([{ timeUtc: "2025-01-15T12:00:00Z", powerMw: 500, plevelsMw }])
+  });
 
   test("only the selected bands are collected", () => {
-    const [row] = buildCsvRows(
-      forecast({ plevel_10: 400, plevel_25: 450, plevel_75: 550, plevel_90: 600 }),
-      [[10, 90]]
-    );
+    const [row] = buildCsvRows(forecast({ "10": 400, "25": 450, "75": 550, "90": 600 }), [
+      [10, 90]
+    ]);
     expect(row.pLevelValues).toEqual({ 10: 400, 90: 600 });
   });
 
   test("a band absent from the payload becomes null, not undefined", () => {
-    const [row] = buildCsvRows(forecast({ plevel_10: 400 }), [[10, 90]]);
+    const [row] = buildCsvRows(forecast({ "10": 400 }), [[10, 90]]);
     expect(row.pLevelValues).toEqual({ 10: 400, 90: null });
   });
 
-  test("a missing plevels object leaves every selected band null", () => {
+  test("a missing plevelsMw object leaves every selected band null", () => {
     const [row] = buildCsvRows(forecast(undefined), [[10, 90]]);
     expect(row.pLevelValues).toEqual({ 10: null, 90: null });
   });
 
   test("a 0 MW band value is kept", () => {
-    const [row] = buildCsvRows(forecast({ plevel_10: 0 }), [[10, 90]]);
+    const [row] = buildCsvRows(forecast({ "10": 0 }), [[10, 90]]);
     expect(row.pLevelValues[10]).toBe(0);
   });
 
   test("rows built from non-forecast series carry no pLevel values", () => {
     const [row] = buildCsvRows(
-      combined({
-        pvRealDayInData: [
-          { datetimeUtc: "2025-01-15T12:00:00+00:00", solarGenerationKw: 1_000_000 }
-        ]
-      }),
+      { generationInitial: series([{ timeUtc: "2025-01-15T12:00:00Z", powerMw: 1000 }]) },
       [[10, 90]]
     );
     expect(row.pLevelValues).toEqual({});
@@ -590,23 +549,25 @@ describe("generateCsv", () => {
 });
 
 describe("end to end: buildCsvRows into generateCsv", () => {
-  // B8: an overnight run of genuine 0 kW readings must export as 0s across the board.
+  // B8: an overnight run of genuine 0 MW readings must export as 0s across the board.
   test("B8: an overnight run of zeros exports as 0, not blanks", () => {
     const overnight = ["00:00", "00:30", "01:00", "01:30"].map((hhmm) => ({
-      datetimeUtc: `2025-01-15T${hhmm}:00+00:00`,
-      solarGenerationKw: 0
+      timeUtc: `2025-01-15T${hhmm}:00Z`,
+      powerMw: 0
     }));
     const csv = generateCsv(
       buildCsvRows(
-        combined({
-          pvRealDayInData: overnight,
-          pvRealDayAfterData: overnight,
-          nationalForecastData: overnight.map((e) => ({
-            targetTime: e.datetimeUtc,
-            expectedPowerGenerationMegawatts: 0,
-            plevels: { plevel_10: 0, plevel_90: 0 }
-          }))
-        }),
+        {
+          generationInitial: series(overnight),
+          generationUpdated: series(overnight),
+          forecast: series(
+            overnight.map((e) => ({
+              timeUtc: e.timeUtc,
+              powerMw: 0,
+              plevelsMw: { "10": 0, "90": 0 }
+            }))
+          )
+        },
         [[10, 90]]
       ),
       [
@@ -634,30 +595,22 @@ describe("end to end: buildCsvRows into generateCsv", () => {
   test("a realistic mixed day round-trips through both halves", () => {
     const csv = generateCsv(
       buildCsvRows(
-        combined({
-          pvRealDayInData: [
-            { datetimeUtc: "2025-06-15T11:30:00+00:00", solarGenerationKw: 6_490_000 },
-            { datetimeUtc: "2025-06-15T12:00:00+00:00", solarGenerationKw: 6_760_000 }
-          ],
-          pvRealDayAfterData: [
-            { datetimeUtc: "2025-06-15T11:30:00+00:00", solarGenerationKw: 6_500_000 }
-          ],
-          nationalForecastData: [
+        {
+          generationInitial: series([
+            { timeUtc: "2025-06-15T11:30:00Z", powerMw: 6490 },
+            { timeUtc: "2025-06-15T12:00:00Z", powerMw: 6760 }
+          ]),
+          generationUpdated: series([{ timeUtc: "2025-06-15T11:30:00Z", powerMw: 6500 }]),
+          forecast: series([
             {
-              targetTime: "2025-06-15T11:30:00+00:00",
-              expectedPowerGenerationMegawatts: 6400,
-              plevels: { plevel_10: 6000, plevel_90: 6800 }
+              timeUtc: "2025-06-15T11:30:00Z",
+              powerMw: 6400,
+              plevelsMw: { "10": 6000, "90": 6800 }
             },
-            {
-              targetTime: "2025-06-15T12:00:00+00:00",
-              expectedPowerGenerationMegawatts: 6700,
-              plevels: { plevel_10: 6300 }
-            }
-          ],
-          nationalNHourData: [
-            { targetTime: "2025-06-15T12:00:00+00:00", expectedPowerGenerationMegawatts: 6650 }
-          ]
-        }),
+            { timeUtc: "2025-06-15T12:00:00Z", powerMw: 6700, plevelsMw: { "10": 6300 } }
+          ]),
+          nHour: series([{ timeUtc: "2025-06-15T12:00:00Z", powerMw: 6650 }])
+        },
         [[10, 90]]
       ),
       ALL_COLUMNS,
@@ -739,16 +692,10 @@ describe("buildCsvRows — timezone parameterisation", () => {
   // The zone the export renders datetimes in, and counts settlement periods from, is an argument
   // now; Europe/London remains the default so today's export is byte-identical.
   const at = (timestamp: string, timezone?: string) =>
-    buildCsvRows(
-      combined({
-        nationalForecastData: [{ targetTime: timestamp, expectedPowerGenerationMegawatts: 1 }]
-      }),
-      [],
-      timezone
-    )[0];
+    buildCsvRows({ forecast: series([{ timeUtc: timestamp, powerMw: 1 }]) }, [], timezone)[0];
 
   test("defaults to Europe/London", () => {
-    expect(at("2025-06-15T12:00:00+00:00")).toMatchObject({
+    expect(at("2025-06-15T12:00:00Z")).toMatchObject({
       startDateTime: "2025-06-15T12:30:00.000+01:00",
       endDateTime: "2025-06-15T13:00:00.000+01:00",
       settlementPeriod: 26
@@ -756,7 +703,7 @@ describe("buildCsvRows — timezone parameterisation", () => {
   });
 
   test("renders and numbers periods in Europe/Amsterdam when asked", () => {
-    expect(at("2025-01-15T12:00:00+00:00", "Europe/Amsterdam")).toMatchObject({
+    expect(at("2025-01-15T12:00:00Z", "Europe/Amsterdam")).toMatchObject({
       startDateTime: "2025-01-15T12:30:00.000+01:00",
       endDateTime: "2025-01-15T13:00:00.000+01:00",
       settlementPeriod: 26
@@ -765,7 +712,7 @@ describe("buildCsvRows — timezone parameterisation", () => {
 
   test("a large offset rolls the date and restarts the period count", () => {
     // Pacific/Auckland is +13 in January, so 12:00 UTC is 01:00 the next day — period 2, not 25.
-    expect(at("2025-01-15T12:00:00+00:00", "Pacific/Auckland")).toMatchObject({
+    expect(at("2025-01-15T12:00:00Z", "Pacific/Auckland")).toMatchObject({
       startDateTime: "2025-01-16T00:30:00.000+13:00",
       endDateTime: "2025-01-16T01:00:00.000+13:00",
       settlementPeriod: 2

@@ -90,7 +90,9 @@ const Header: React.FC<HeaderProps> = ({
   view,
   setView,
   isLoggedIn = true,
-  combinedData = null,
+  // `combinedData` is deliberately unread: `pages/index.tsx` still passes it and is out of
+  // this step's ownership, but `Header` was always a pure pass-through to `ProfileDropDown`,
+  // which now fetches its own CSV data via the v1 hooks. See docs/phase4-track-f-notes.md.
   children
 }) => {
   return (
@@ -153,7 +155,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2">
         {isLoggedIn && <CountryToggle />}
         <div className="py-1">
-          {isLoggedIn && <ProfileDropDown view={view} combinedData={combinedData} />}
+          {isLoggedIn && <ProfileDropDown view={view} />}
           {children}
         </div>
       </div>

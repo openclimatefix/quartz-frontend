@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import pkg from "../../../package.json";
@@ -13,19 +13,26 @@ import {
   getBooleanSettingFromCookieStorage,
   setBooleanSettingInLocalStorage
 } from "../../helpers/cookieStorage";
-import { CombinedData } from "../../types";
 import { VIEWS } from "../../../constant";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
 import { SettingsModal } from "./settingsModal";
+import {
+  NATIONAL_REGION_TYPE,
+  useCurrentCountry,
+  useGenerationSources,
+  useNationalForecast,
+  useNationalGeneration
+} from "../../../hooks/data";
+import type { Scope } from "../../../lib/domain/types";
+import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
 const { version } = pkg;
 
 interface IProfileDropDown {
   view: VIEWS;
-  combinedData?: CombinedData | null;
 }
 
-const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
+const ProfileDropDown = ({ view }: IProfileDropDown) => {
   const { user } = useUser();
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
@@ -35,12 +42,59 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pLevels] = useGlobalState("pLevels");
   const { timezone } = useCountryFormatting();
-  const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
+  const canDownloadCsv = view !== VIEWS.SOLAR_SITES;
+
+  // The CSV's own fetches, per the data-layer contract's "call the hooks you need where you
+  // need them" — this is the last consumer of `CombinedData`'s national fields, so the prop
+  // deletes itself here rather than being threaded down from `Header`.
+  const currentCountry = useCurrentCountry();
+  const countryConfig = getCountryConfig(currentCountry);
+  // Same convention as the national chart and the delta view's top chart: the country's first
+  // configured series is the primary one the CSV's "Current Forecast" column reflects.
+  const primarySeries = countryConfig?.nationalChartSeries?.[0];
+  const nationalScope: Scope | null = currentCountry
+    ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+    : null;
+
+  const forecast = useNationalForecast(nationalScope, {
+    model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
+  });
+
+  const generationSources = useGenerationSources(nationalScope);
+  const observers = useMemo(
+    () => (generationSources.data ?? []).map((source) => source.name),
+    [generationSources.data]
+  );
+  const generationInitial = useNationalGeneration(
+    observers[0] === undefined ? null : nationalScope,
+    { observer: observers[0] }
+  );
+  const generationUpdated = useNationalGeneration(
+    observers[1] === undefined ? null : nationalScope,
+    { observer: observers[1] }
+  );
+
+  // Matches v0: the N-hour series is only fetched — and so only ever populates the CSV's
+  // N-hour column — while the N-hour view is switched on.
+  const nHour = useNationalForecast(showNHourView ? nationalScope : null, {
+    horizonMinutes: nHourForecast * 60
+  });
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
     // The CSV's datetimes and settlement periods are read as wall-clock time in the country
     // the data is for, not in whatever zone the person downloading it happens to sit in.
-    downloadNationalCsv(combinedData, selectedColumns, nHourForecast, pLevels, timezone);
+    downloadNationalCsv(
+      {
+        forecast: forecast.data,
+        generationInitial: generationInitial.data,
+        generationUpdated: generationUpdated.data,
+        nHour: nHour.data
+      },
+      selectedColumns,
+      nHourForecast,
+      pLevels,
+      timezone
+    );
   };
 
   const toggleDashboardMode = () => {
