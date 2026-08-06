@@ -192,12 +192,11 @@ test that fails if any of it drifts. Facts 1–8 below were all reconfirmed. Wha
 - `metadata.gsp_id` is a JSON float (`67.0`), and `horizon_minutes` is absent rather than null on
   the national forecast.
 
-**Phase 3 part-complete.** 18 suites / **784 tests** (from 683), typecheck clean, 0 lint errors,
-production build succeeds at 11.6 MB first-load. New: `config/countries.ts`, `hooks/data/`,
-`lib/api/auth/entitlement.ts`. The country registry, the country hooks and the timezone/CSV work
-landed; **the global state split, the country toggle and the call-site wiring did not** — see
-*Phase 3 remainder* below. What landed is independently shippable and leaves the app working: every
-date helper still defaults to GB, so behaviour is unchanged for a GB user.
+**Phase 3 complete** (committed). 22 suites / **827 tests** (from 683), typecheck clean, 0 lint
+errors, production build succeeds at 11.6 MB first-load — unchanged, so the country layer costs
+nothing in bundle terms. New: `config/countries.ts`, `hooks/data/`, `lib/api/auth/entitlement.ts`,
+`components/helpers/countryState.ts`, `aggregationLevels.ts`,
+`components/layout/header/country-toggle.tsx`.
 
 - **The two Phase 3 open questions are now decided.** *Day bucketing:* user-facing day labels and
   per-day grouping bucket in the country's registry timezone; `national_metrics.json` stays
@@ -237,28 +236,61 @@ marked for Phase 4 deletion): `formatISODateAsLondonTime → formatDateAsZonedTi
 `dateToLondonDateTimeOnlyString → dateToZonedDateOnlyString`. All take
 `(…, timezone = "Europe/London", locale = "en-GB")`.
 
-### Phase 3 remainder
+### The state split
 
-Not started, or started and reverted. The reverted work is preserved as a patch and two draft files
-(`countryState.ts`, `aggregationLevels.ts`) rather than lost, but it was mid-edit — it had converted
-`GlobalStateType`'s declarations to `Record<string, …>` without updating the initial values or the
-~100 consumer sites, so it is a starting point, not a base to build on.
+- **Country-dependent keys are keyed per key, not per country.** Each of the nine (`clickedGspId`,
+  the map region selections, `lng`/`lat`/`zoom`, `aggregationLevel`, `nationalAggregationLevel`)
+  became its own `Record<code, value>` rather than nesting a slice per country, because
+  `react-hooks-global-state` subscribes per key — a nested slice would re-render every consumer on
+  any country-state write. `useCountryState(key)` returns the same tuple as `useGlobalState`, so the
+  32 call sites changed in name only.
+- **Nothing is cleared on switch**, so returning to a country restores its viewport and selection.
+  That is the point of keying rather than resetting, and it is tested. `map.tsx` needs an explicit
+  `jumpTo` because mapbox owns its camera, read through a ref so panning does not re-trigger it.
+- **The GB aggregation enums are shimmed, not deleted.** `deriveAggregationLevels()` is the source
+  of truth, table-tested for GB and NL with GB's four existing levels asserted equivalent to the
+  enums. `AGGREGATION_LEVELS` and `NationalAggregation` remain as GB-derived shims: ~100 consumers
+  that Phase 4 rewrites anyway, so deleting now would bury the real change in churn. Both are
+  commented with Phase 4 as their deletion point. `AGGREGATION_LEVELS.SITE` has no derived
+  counterpart by design — sites are points from the sites API, not a region layer.
+- `DEFAULT_COUNTRY_CODE` is deliberately duplicated in `countryState.ts` rather than imported from
+  `use-countries.ts`, which would pull SWR and Auth0 into every component that touches state. A test
+  pins the two equal.
 
-- Split global state: cross-country keys flat, country-dependent keys (`clickedGspId`, viewport,
-  aggregation level, region selection) keyed by country code. Switching country must preserve each
-  country's viewport and selection, which is the point of keying rather than resetting.
-- Per-country map defaults from `config/countries.ts`, replacing the hardcoded GB `lng`/`lat`/`zoom`
-  in `globalState.tsx`. The registry already carries `level`/`minZoom`/`maxZoom` per region type so
-  `AGGREGATION_LEVELS` and `NationalAggregation` can become a country-derived
-  `{ regionType, level, label, minZoom, maxZoom }` list. GB must derive its existing four levels
-  unchanged — that equivalence is the safety property to assert.
-- Country toggle in the menu, current country persisted by cookie, validated on read the way
-  `getValidatedPLevels` already validates p-levels.
-- Wire the date-helper call sites to the registry timezone via the current country.
+### `convertToLocaleDateString` is left on its default, deliberately
 
-Note that at the end of Phase 3 the toggle switches country state, cookie and map defaults while the
-charts still fetch GB v0 — the pipeline swap is Phase 4. NL will look like "the map moved" and
-little else. That is the phase boundary working, not a defect.
+All three call sites keep the viewer's zone rather than the country's, against the pattern
+everywhere else. Its output is never displayed: it is shifted, stamped with a false `Z`, then
+re-parsed to epoch millis and matched against chart keys that are plain UTC epochs — so the shift
+has to be **zero** for the match to work, and the honest value is `"UTC"`.
+
+Consequences, which differ per call site and are why this is documented rather than blanket-fixed:
+
+- `delta-view-chart.tsx` is **unaffected**: its input is a naive string, so the parse-in-viewer-zone
+  and the re-stamp cancel to identity in any zone.
+- `remix-line.tsx` and `solar-site-chart.tsx` append `"Z"`, making the input an absolute instant, so
+  the shift is real and they are **already wrong for any non-UTC viewer** — including a UK viewer in
+  BST. Jest pins `TZ=UTC`, which is exactly why no test caught it.
+- Not reachable in production: `localeTimeOfInterest` is used only in the
+  `view === VIEWS.SOLAR_SITES` branch, and the sites view is `disabled={isProduction}`.
+
+Fix it with the Phase 4/5 sites work, where the sites chart is rewritten and a non-UTC viewer can be
+tested properly.
+
+### What Phase 3 leaves for later
+
+- The three legacy `*London*` aliases in `utils.ts` now have **zero consumers** outside their own
+  alias test. Phase 4 deletes them.
+- The dead `SETTLEMENT_PERIOD` chart key is still written, now with a country zone, which is
+  meaningless off GB. It is written and never read; drop it in Phase 4.
+- The header now mounts `useCountries()`, so there is one `/countries` request per hour on load
+  where previously nothing imported the hook.
+- `ChartInfo.tsx` copy is GB-specific in substance, not just in formatting. Parameterised, not
+  reworded — Phase 7 owns copy.
+
+Note that Phase 3 leaves the toggle switching country state, cookie and map defaults while the
+charts still fetch GB v0 — the pipeline swap is Phase 4. NL looks like "the map moved" and little
+else. That is the phase boundary working, not a defect.
 
 ### The spec enumerates live countries; the frontend deliberately does not
 
@@ -528,19 +560,15 @@ Each phase is independently shippable and leaves the app working.
   that this replaces). Typed errors replace `error.toString().includes("403")`.
 - `queries.ts` and `normalise.ts` as pure functions, fully unit-tested against the spec.
 
-**Phase 3 — Country configuration.** *Part-complete — see Status, and Phase 3 remainder for what
-is outstanding.*
+**Phase 3 — Country configuration.** *Complete — see Status.*
 - `config/countries.ts` registry plus `useCountries()` (manifest ∩ entitlement),
-  `useCurrentCountry()`, `useEntitledCountries()`. — *done*
+  `useCurrentCountry()`, `useEntitledCountries()`.
 - Country toggle in the menu, adapting `country-toggle.tsx` from the NL branch: driven by
   `useCountries()`, with unentitled countries shown but disabled. Current country persists via
   cookie alongside the existing `visibleLines`/`pLevels` settings in `cookieStorage.ts`.
-  — *outstanding*
 - Parameterise date/locale helpers in `components/helpers/utils.ts` and `csvDownload.ts` by timezone
-  from the registry; standardise on Luxon (F5). Update `ChartInfo.tsx` copy. — *helpers done; the
-  call sites still pass the GB defaults, so wiring them to the registry is outstanding*
+  from the registry; standardise on Luxon (F5). Update `ChartInfo.tsx` copy.
 - Per-country map defaults replace the hardcoded GB `lng`/`lat`/`zoom` in `globalState.tsx`.
-  — *outstanding*
 - Split global state: cross-country keys (`selectedISOTime`, `view`, `visibleLines`, `activeUnit`,
   `pLevels`) stay flat; country-dependent keys (`clickedGspId`, viewport, aggregation level, region
   selection) become keyed by country code.
