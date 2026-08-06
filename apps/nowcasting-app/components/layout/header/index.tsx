@@ -1,4 +1,4 @@
-import { classNames, isProduction } from "../../helpers/utils";
+import { classNames } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
 import { OCFlogo } from "../../icons/logo";
@@ -139,7 +139,6 @@ const Header: React.FC<HeaderProps> = ({
               currentView={view}
               setViewFunc={setView}
               text={getViewTitle(VIEWS.SOLAR_SITES)}
-              disabled={isProduction}
             />
             <HeaderLink
               url="/"

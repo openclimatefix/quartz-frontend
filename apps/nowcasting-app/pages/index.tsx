@@ -34,8 +34,7 @@ import {
   formatISODateString,
   getDeltaBucket,
   computeLoadingState,
-  getSitesLoadingState,
-  isProduction
+  getSitesLoadingState
 } from "../components/helpers/utils";
 import { ActiveUnit, NationalAggregation } from "../components/map/types";
 import DeltaMap from "../components/map/deltaMap";
@@ -733,16 +732,14 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
-          {!isProduction && (
-            <SitesMap
-              className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-              sitesData={sitesData}
-              aggregatedSitesData={aggregatedSitesData}
-              sitesErrors={sitesCombinedErrors}
-              activeUnit={activeUnit}
-              setActiveUnit={setActiveUnit}
-            />
-          )}
+          <SitesMap
+            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+            sitesData={sitesData}
+            aggregatedSitesData={aggregatedSitesData}
+            sitesErrors={sitesCombinedErrors}
+            activeUnit={activeUnit}
+            setActiveUnit={setActiveUnit}
+          />
           <DeltaMap
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
             combinedData={combinedData}
@@ -761,13 +758,11 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             combinedErrors={combinedErrors}
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
           />
-          {!isProduction && (
-            <SolarSiteChart
-              combinedSitesData={sitesData}
-              aggregatedSitesData={aggregatedSitesData}
-              className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-            />
-          )}
+          <SolarSiteChart
+            combinedSitesData={sitesData}
+            aggregatedSitesData={aggregatedSitesData}
+            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
+          />
           <DeltaViewChart
             combinedData={combinedData}
             combinedErrors={combinedErrors}

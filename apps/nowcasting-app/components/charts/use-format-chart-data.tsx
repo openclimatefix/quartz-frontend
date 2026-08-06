@@ -13,12 +13,7 @@ import {
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
-import {
-  getAvailablePLevels,
-  getSettlementPeriodForDate,
-  getUtcHalfHourIndex
-} from "../helpers/chartUtils";
-import { useCountryFormatting } from "../../hooks/data/use-country-format";
+import { getAvailablePLevels, getUtcHalfHourIndex } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -126,7 +121,6 @@ const useFormatChartData = ({
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
-  const { timezone } = useCountryFormatting();
 
   const data = useMemo(() => {
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
@@ -223,19 +217,15 @@ const useFormatChartData = ({
         }
       }
 
-      // Add settlement period and seasonal norm data
+      // Add seasonal norm data
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key).toUTC();
-        // Two different questions, and they disagree by two slots throughout BST:
-        // - the seasonal-norm arrays in national_metrics.json are bucketed by UTC time-of-day
-        //   (the generator groups on `datetime_gmt`), so they are indexed by the UTC half-hour slot;
-        // - SETTLEMENT_PERIOD is the GB settlement period, counted from Europe/London midnight.
-        // These used to be the same call, which made the settlement period wrong all summer (B9).
-        // Only the settlement period takes the country's zone. `getUtcHalfHourIndex` must not:
-        // it indexes the UTC-bucketed seasonal-norm arrays, and localising it would shift every
-        // seasonal line by two slots throughout BST — the regression the B9 write-up describes.
+        // The seasonal-norm arrays in national_metrics.json are bucketed by UTC time-of-day (the
+        // generator groups on `datetime_gmt`), so they are indexed by the UTC half-hour slot —
+        // NOT by the GB settlement period, which is counted from Europe/London midnight and runs
+        // two slots ahead throughout BST. These used to be the same call (B9). `getUtcHalfHourIndex`
+        // must stay UTC: localising it would shift every seasonal line by two slots all summer.
         const utcSlotIndex = getUtcHalfHourIndex(date);
-        chartMap[key].SETTLEMENT_PERIOD = getSettlementPeriodForDate(date, timezone);
         if (!gsp) {
           const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
 
@@ -296,8 +286,7 @@ const useFormatChartData = ({
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
     probabilisticRangeData,
-    pLevels,
-    timezone
+    pLevels
   ]);
 
   return data;

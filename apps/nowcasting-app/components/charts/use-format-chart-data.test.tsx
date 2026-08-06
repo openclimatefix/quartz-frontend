@@ -21,6 +21,7 @@ import useFormatChartData from "./use-format-chart-data";
 import { setGlobalState } from "../helpers/globalState";
 import { ChartData, getPLevelRangeKey } from "./remix-line";
 import nationalMetrics from "../../data/national_metrics.json";
+import { getSettlementPeriodForDate, getUtcHalfHourIndex } from "../helpers/chartUtils";
 
 // Duplicated from the hook on purpose: if the module's constant changes, these tests should fail
 // rather than silently follow it.
@@ -191,19 +192,18 @@ describe("the N-hour series", () => {
 
   // fourHourData is merged AFTER the settlement-period / seasonal loop has already run over the
   // map's keys, so a timestamp that only the N-hour series knows about never gets them.
-  // CHARACTERISATION: current behaviour is wrong — every row should carry SETTLEMENT_PERIOD and,
-  // for national, the seasonal norms, regardless of which series introduced the timestamp.
-  test("a timestamp only present in fourHourData gets no SETTLEMENT_PERIOD and no seasonal norms", () => {
+  // CHARACTERISATION: current behaviour is wrong — for national, every row should carry the
+  // seasonal norms regardless of which series introduced the timestamp.
+  test("a timestamp only present in fourHourData gets no seasonal norms", () => {
     const data = run(
       baseProps({
         forecastData: [fc(AFTER_BST, 100)],
         fourHourData: [fc(AFTER_BST, 90), fc("2025-07-01T12:00:00+00:00", 80)]
       })
     );
-    expect(at(data, "2025-07-01T11:00").SETTLEMENT_PERIOD).toBe(25); // 12:00 London
+    expect(at(data, "2025-07-01T11:00").SEASONAL_MEAN).toBeDefined();
     const orphan = at(data, "2025-07-01T12:00");
     expect(orphan.N_HOUR_FORECAST).toBe(80);
-    expect(orphan.SETTLEMENT_PERIOD).toBeUndefined();
     expect(orphan.SEASONAL_MEAN).toBeUndefined();
   });
 });
@@ -464,34 +464,47 @@ describe("p-levels", () => {
 });
 
 describe("settlement period vs UTC half-hour slot", () => {
-  // The regression guard for B9. SETTLEMENT_PERIOD is counted from Europe/London midnight, the
-  // seasonal norms are indexed by the UTC half-hour slot, and throughout BST the two answers are
-  // two apart. If these ever collapse back into one call, this test fails.
+  // The regression guard for B9. The GB settlement period is counted from Europe/London midnight;
+  // the seasonal norms are indexed by the UTC half-hour slot; throughout BST the two answers are
+  // two apart. The chart row no longer carries a settlement period (it was written and never read),
+  // so this asserts against `getSettlementPeriodForDate` directly, and separately checks that the
+  // hook still picks the seasonal norms off the UTC slot. If these ever collapse back into one
+  // call — in chartUtils or in the hook — this fails.
+  const utcInstant = (iso: string) => DateTime.fromISO(iso, { zone: "utc" }) as DateTime;
+
   test("in BST the settlement period is two slots ahead of the UTC half-hour index", () => {
-    const utcSlotIndex = 21; // 10:30 UTC
+    const instant = utcInstant(BOUNDARY_BST); // 10:30 UTC == 11:30 London
+    const utcSlotIndex = getUtcHalfHourIndex(instant);
+    const settlementPeriod = getSettlementPeriodForDate(instant);
+    expect(utcSlotIndex).toBe(21);
+    expect(settlementPeriod).toBe(24);
+    expect(settlementPeriod - (utcSlotIndex + 1)).toBe(2);
+
+    // and the hook takes the seasonal value from the UTC slot, not from the settlement period
     const datum = at(run(baseProps({ forecastData: [fc(BOUNDARY_BST, 100)] })), "2025-07-01T10:30");
-    expect(datum.SETTLEMENT_PERIOD).toBe(24); // 11:30 London
-    expect(datum.SETTLEMENT_PERIOD - (utcSlotIndex + 1)).toBe(2);
-    // and the seasonal value is the UTC slot's, not the settlement period's
     expect(datum.SEASONAL_MEAN).toBeCloseTo(
       nationalMetrics.data["7"]["1"].mean[utcSlotIndex] * NATIONAL_CAPACITY,
       6
     );
     expect(datum.SEASONAL_MEAN).not.toBeCloseTo(
-      nationalMetrics.data["7"]["1"].mean[datum.SETTLEMENT_PERIOD - 1] * NATIONAL_CAPACITY,
+      nationalMetrics.data["7"]["1"].mean[settlementPeriod - 1] * NATIONAL_CAPACITY,
       6
     );
   });
 
   test("in GMT the two agree (settlement period is the UTC slot index plus one)", () => {
     freeze("2025-01-15T10:12:00.000Z");
-    const utcSlotIndex = 21;
+    const instant = utcInstant("2025-01-15T10:30:00+00:00");
+    const utcSlotIndex = getUtcHalfHourIndex(instant);
+    const settlementPeriod = getSettlementPeriodForDate(instant);
+    expect(utcSlotIndex).toBe(21);
+    expect(settlementPeriod).toBe(22);
+    expect(settlementPeriod - (utcSlotIndex + 1)).toBe(0);
+
     const datum = at(
       run(baseProps({ forecastData: [fc("2025-01-15T10:30:00+00:00", 100)] })),
       "2025-01-15T10:30"
     );
-    expect(datum.SETTLEMENT_PERIOD).toBe(22);
-    expect(datum.SETTLEMENT_PERIOD - (utcSlotIndex + 1)).toBe(0);
     expect(datum.SEASONAL_MEAN).toBeCloseTo(
       nationalMetrics.data["1"]["15"].mean[utcSlotIndex] * NATIONAL_CAPACITY,
       6
@@ -499,27 +512,22 @@ describe("settlement period vs UTC half-hour slot", () => {
   });
 
   test("settlement periods run 1-48 from London midnight", () => {
-    const data = run(
-      baseProps({
-        forecastData: [
-          fc("2025-01-15T00:00:00+00:00", 1),
-          fc("2025-01-15T00:30:00+00:00", 1),
-          fc("2025-01-15T23:30:00+00:00", 1)
-        ]
-      })
-    );
-    expect(data.map((d) => d.SETTLEMENT_PERIOD)).toEqual([1, 2, 48]);
+    expect(
+      ["2025-01-15T00:00:00+00:00", "2025-01-15T00:30:00+00:00", "2025-01-15T23:30:00+00:00"].map(
+        (iso) => getSettlementPeriodForDate(utcInstant(iso))
+      )
+    ).toEqual([1, 2, 48]);
   });
 });
 
 describe("seasonal norms", () => {
   // National only: the norms are a national-capacity-scaled dataset with no GSP equivalent.
-  test("gsp: true skips all seasonal keys but still writes SETTLEMENT_PERIOD", () => {
+  test("gsp: true skips all seasonal keys", () => {
     const datum = at(
       run(baseProps({ forecastData: [fc(BOUNDARY_BST, 100)], gsp: true })),
       "2025-07-01T10:30"
     );
-    expect(datum.SETTLEMENT_PERIOD).toBe(24);
+    expect(datum.FORECAST).toBe(100);
     expect(Object.keys(datum).some((k) => k.startsWith("SEASONAL"))).toBe(false);
   });
 

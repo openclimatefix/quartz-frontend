@@ -59,7 +59,6 @@ export const getPLevelRangeKey = (lower: number, upper: number): PLevelRangeKey 
 
 export type ChartDataBase = {
   formattedDate: string; // "2022-05-16T15:00",
-  SETTLEMENT_PERIOD?: number | undefined;
 
   GENERATION_UPDATED?: number;
   GENERATION?: number;

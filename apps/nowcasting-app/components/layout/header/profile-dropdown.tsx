@@ -2,7 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import pkg from "../../../package.json";
-import { classNames, isProduction } from "../../helpers/utils";
+import { classNames } from "../../helpers/utils";
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import Link from "next/link";
 import Tooltip from "../../tooltip";

@@ -22,8 +22,6 @@ import * as Sentry from "@sentry/nextjs";
 import { ChartData } from "../charts/remix-line";
 import { getAccessToken } from "../../lib/api/auth/token";
 
-export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
-
 export const enableNHourView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
 
 export const allForecastsAccessor = (d: any) => d.forecastValues;
@@ -398,14 +396,6 @@ export function prettyPrintChartAxisLabelDate(
   if (!dt.isValid || dt.toMillis() === 0) return "Invalid date 3";
   return formatTime(dt);
 }
-
-/**
- * Phase 3 aliases under the old GB-specific names, so call sites owned by other agents keep
- * compiling. Deleted in Phase 4, when those call sites are rewritten to pass the country's zone.
- */
-export const formatISODateAsLondonTime = formatDateAsZonedTime;
-export const convertISODateStringToLondonTime = formatISODateStringAsZonedTime;
-export const dateToLondonDateTimeString = dateToZonedDateTimeString;
 
 export const MWtoGW = (MW: number) => {
   return (MW / 1000).toFixed(1);

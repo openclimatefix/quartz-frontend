@@ -735,13 +735,3 @@ describe("non-GB timezones and locales", () => {
     jest.useRealTimers();
   });
 });
-
-describe("the legacy London-named exports still resolve", () => {
-  // Kept only so call sites owned by other agents keep compiling; Phase 4 deletes them once those
-  // call sites pass the country's zone explicitly.
-  test("each alias is the renamed function", () => {
-    expect(utils.formatISODateAsLondonTime).toBe(utils.formatDateAsZonedTime);
-    expect(utils.convertISODateStringToLondonTime).toBe(utils.formatISODateStringAsZonedTime);
-    expect(utils.dateToLondonDateTimeString).toBe(utils.dateToZonedDateTimeString);
-  });
-});
