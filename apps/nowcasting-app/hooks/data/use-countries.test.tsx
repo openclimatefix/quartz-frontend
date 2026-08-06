@@ -14,7 +14,7 @@ import {
   test
 } from "@jest/globals";
 import React from "react";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { SWRConfig } from "swr";
@@ -30,7 +30,10 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
   useUser: () => ({ user: mockUser, isLoading: false, error: undefined })
 }));
 
+import Cookies from "js-cookie";
 import countriesFixture from "../../lib/api/v1/__fixtures__/countries.json";
+import { CookieStorageKeys } from "../../components/helpers/cookieStorage";
+import { setCurrentCountry, setGlobalState } from "../../components/helpers/globalState";
 import { COUNTRY_CLAIM_KEY } from "../../lib/api/auth/entitlement";
 import { resetTokenCache } from "../../lib/api/auth/token";
 import { useCountries, useCurrentCountry, useEntitledCountries } from "./use-countries";
@@ -215,10 +218,30 @@ describe("useEntitledCountries", () => {
 });
 
 describe("useCurrentCountry", () => {
-  // Deliberately a constant until the Phase 3 state split lands. Pinned so the swap to
-  // cookie-backed global state is a visible, single-file change.
-  test("falls back to GB", () => {
+  afterEach(() => {
+    // The store is module-global and leaks between tests. `act` because a hook rendered by
+    // a still-mounted test is subscribed to it.
+    act(() => setGlobalState("currentCountry", "GB"));
+    Cookies.remove(CookieStorageKeys.COUNTRY);
+  });
+
+  test("defaults to GB", () => {
     const { result } = renderHook(() => useCurrentCountry());
     expect(result.current).toBe("GB");
+  });
+
+  // The point of the hook: every consumer reads the live value, so the toggle switching
+  // country re-renders the charts, headline figures and CSV without any of them knowing
+  // where the country came from.
+  test("reflects a country change", () => {
+    const { result } = renderHook(() => useCurrentCountry());
+    act(() => setCurrentCountry("NL"));
+    expect(result.current).toBe("NL");
+  });
+
+  test("reflects the normalisation setCurrentCountry applies", () => {
+    const { result } = renderHook(() => useCurrentCountry());
+    act(() => setCurrentCountry("nl"));
+    expect(result.current).toBe("NL");
   });
 });

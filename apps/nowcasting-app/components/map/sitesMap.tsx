@@ -19,6 +19,7 @@ import {
   getRoundedPv,
   getRoundedPvPercent
 } from "../helpers/utils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import {
   AggregatedSitesCombinedData,
   AggregatedSitesDataGroupMap,
@@ -52,6 +53,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const { timezone, locale } = useCountryFormatting();
   const [currentAggregationLevel, setAggregationLevel] = useCountryState("aggregationLevel");
   const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const [autoZoom] = useGlobalState("autoZoom");
@@ -534,7 +536,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
         <FailedStateMap error="Failed to load" />
       ) : forecastLoading ? (
         <LoadStateMap>
-          <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+          <ButtonGroup
+            rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+          />
         </LoadStateMap>
       ) : (
         <MapComponent
@@ -547,7 +551,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
-              <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+              <ButtonGroup
+                rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+              />
               <Slider aggregation={currentAggregationLevel} setAggregation={setAggregationLevel} />
               {/* <ShowSiteCount /> */}
             </>

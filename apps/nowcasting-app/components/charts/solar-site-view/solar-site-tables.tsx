@@ -21,7 +21,6 @@ import useGlobalState, { useCountryState } from "../../helpers/globalState";
 import useFormatChartDataSites from "../use-format-chart-data-sites";
 import { SORT_BY } from "../../../constant";
 import { Dispatch, SetStateAction } from "react";
-import { convertISODateStringToLondonTime } from "../../helpers/utils";
 import { ChartData } from "../remix-line";
 import { formatISODateString } from "../../helpers/utils";
 

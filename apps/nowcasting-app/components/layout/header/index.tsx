@@ -1,5 +1,6 @@
 import { classNames, isProduction } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
+import CountryToggle from "./country-toggle";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 import { Menu } from "@headlessui/react";
@@ -151,6 +152,7 @@ const Header: React.FC<HeaderProps> = ({
         )}
       </div>
       <div className="flex items-center gap-2">
+        {isLoggedIn && <CountryToggle />}
         <div className="py-1">
           {isLoggedIn && <ProfileDropDown view={view} combinedData={combinedData} />}
           {children}

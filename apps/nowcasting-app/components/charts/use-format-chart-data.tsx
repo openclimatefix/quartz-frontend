@@ -18,6 +18,7 @@ import {
   getSettlementPeriodForDate,
   getUtcHalfHourIndex
 } from "../helpers/chartUtils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -125,6 +126,7 @@ const useFormatChartData = ({
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
+  const { timezone } = useCountryFormatting();
 
   const data = useMemo(() => {
     if (forecastData && pvRealDayAfterData && pvRealDayInData && timeTrigger) {
@@ -229,8 +231,11 @@ const useFormatChartData = ({
         //   (the generator groups on `datetime_gmt`), so they are indexed by the UTC half-hour slot;
         // - SETTLEMENT_PERIOD is the GB settlement period, counted from Europe/London midnight.
         // These used to be the same call, which made the settlement period wrong all summer (B9).
+        // Only the settlement period takes the country's zone. `getUtcHalfHourIndex` must not:
+        // it indexes the UTC-bucketed seasonal-norm arrays, and localising it would shift every
+        // seasonal line by two slots throughout BST — the regression the B9 write-up describes.
         const utcSlotIndex = getUtcHalfHourIndex(date);
-        chartMap[key].SETTLEMENT_PERIOD = getSettlementPeriodForDate(date);
+        chartMap[key].SETTLEMENT_PERIOD = getSettlementPeriodForDate(date, timezone);
         if (!gsp) {
           const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
 
@@ -291,7 +296,8 @@ const useFormatChartData = ({
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
     probabilisticRangeData,
-    pLevels
+    pLevels,
+    timezone
   ]);
 
   return data;

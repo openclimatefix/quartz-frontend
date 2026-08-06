@@ -5,6 +5,7 @@ import { ChartInfo } from "../../ChartInfo";
 import { InfoIcon } from "../icons/icons";
 import Tooltip, { TooltipPosition } from "../tooltip";
 import { VIEWS } from "../../constant";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 
 type SideLayoutProps = {
   children: ReactNode;
@@ -21,6 +22,7 @@ const SideLayout: FC<SideLayoutProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [view] = useGlobalState("view");
+  const { timezone } = useCountryFormatting();
   // const closedWidth = dashboardModeActive ? "50%" : "44%";
   const closedWidth = "50%";
   const [isMobile, setIsMobile] = useState(false);
@@ -55,7 +57,7 @@ const SideLayout: FC<SideLayoutProps> = ({
           <Tooltip
             tip={
               <div className="w-64 rounded-md">
-                <ChartInfo />
+                <ChartInfo timezone={timezone} />
               </div>
             }
             position={position}

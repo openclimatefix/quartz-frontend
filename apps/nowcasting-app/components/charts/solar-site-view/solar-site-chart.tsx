@@ -3,11 +3,12 @@ import RemixLine from "../remix-line";
 import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
 import useGlobalState, { useCountryState, get30MinNow } from "../../helpers/globalState";
 import {
-  convertISODateStringToLondonTime,
   convertToLocaleDateString,
   formatISODateString,
+  formatISODateStringAsZonedTime,
   getRoundedTickBoundary
 } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
@@ -54,6 +55,7 @@ const SolarSiteChart: FC<{
   });
 
   const [view] = useGlobalState("view");
+  const { timezone, locale } = useCountryFormatting();
   useEffect(() => {
     const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
       .getTime()
@@ -181,7 +183,11 @@ const SolarSiteChart: FC<{
   const nationalPVActual = allSitesYield[0]?.actualPV || 0;
   const nationalPVExpected = allSitesYield[0]?.expectedPV || 0;
   const allSitesSelectedTime = formatISODateString(selectedTime);
-  const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
+  const allSitesChartDateTime = formatISODateStringAsZonedTime(
+    allSitesSelectedTime + ":00.000Z",
+    timezone,
+    locale
+  );
   const forecastEndTime =
     combinedSitesData.sitesPvForecastData?.[0]?.forecast_values?.[
       combinedSitesData.sitesPvForecastData[0]?.forecast_values?.length - 1
@@ -393,7 +399,7 @@ const SolarSiteChart: FC<{
           <Tooltip
             tip={
               <div className="w-64 rounded-md">
-                <ChartInfo />
+                <ChartInfo timezone={timezone} />
               </div>
             }
             position="top"

@@ -9,6 +9,7 @@ import { DELTA_BUCKET, VIEWS } from "../../constant";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import {
   AllGspRealData,
   CombinedData,
@@ -46,6 +47,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
   activeUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const { timezone, locale } = useCountryFormatting();
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
 
   const latestForecastValue = 0;
@@ -257,7 +259,9 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
         <FailedStateMap error="Failed to load" />
       ) : forecastLoading ? (
         <LoadStateMap>
-          <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+          <ButtonGroup
+            rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+          />
         </LoadStateMap>
       ) : (
         <Map
@@ -270,7 +274,9 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
             <>
-              <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+              <ButtonGroup
+                rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+              />
             </>
           )}
           title={VIEWS.DELTA}

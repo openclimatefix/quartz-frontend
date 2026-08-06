@@ -4,13 +4,13 @@ import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
 import {
-  convertISODateStringToLondonTime,
-  dateToLondonDateTimeString,
-  formatISODateAsLondonTime,
+  formatDateAsZonedTime,
   formatISODateString,
+  formatISODateStringAsZonedTime,
   KWtoGW,
   MWtoGW
 } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderUI from "./ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 
@@ -26,6 +26,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   deltaView
 }) => {
   const timeNow = useTimeNow();
+  const { timezone, locale } = useCountryFormatting();
 
   // get the latest Actual pv value in GW
   const selectedPvActualInGW = pvLiveData?.length
@@ -66,8 +67,8 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
         forecastNextPV={nextPvForecastInGW}
         actualPV={selectedPvActualInGW}
         forecastPV={selectedPvForecastInGW}
-        pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
-        forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
+        pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
+        forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
         <PlayButton
@@ -83,8 +84,8 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastNextPV={nextPvForecastInGW}
       actualPV={selectedPvActualInGW}
       forecastPV={selectedPvForecastInGW}
-      pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
-      forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
+      pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
+      forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
     >
       <PlayButton
         startTime={get30MinNow()}

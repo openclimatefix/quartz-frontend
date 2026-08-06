@@ -15,12 +15,13 @@ import {
 } from "recharts";
 import {
   convertToLocaleDateString,
-  dateToLondonDateTimeString,
+  dateToZonedDateTimeString,
   formatISODateStringHumanNumbersOnly,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate,
   prettyPrintDayLabelWithDate
 } from "../helpers/utils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState, getNext30MinSlot } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
@@ -200,6 +201,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [view] = useGlobalState("view");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
+  // Deliberately NOT given the country's zone, unlike the display helpers below.
+  //
+  // This value is not shown to anyone: it is turned into epoch millis and matched against the
+  // solar-sites chart's `formattedDate` keys, which `use-format-chart-data-sites.tsx` builds
+  // as plain UTC epochs. `convertToLocaleDateString` stamps a false "Z" so the subsequent
+  // `new Date()` reads the *wall clock* back, meaning this only lines up when the shift is
+  // zero. Passing Europe/London would move the reference line an hour off its own data every
+  // BST afternoon; the honest fix is "UTC", i.e. no shift at all, which is a behaviour change
+  // for a non-UTC viewer and belongs with the Phase 4/5 sites work rather than here.
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const defaultZoom = { x1: "", x2: "" };
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
@@ -210,6 +220,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [pLevels] = useGlobalState("pLevels");
+  const { timezone, locale } = useCountryFormatting();
 
   function prettyPrintYNumberWithCommas(
     x: string | number,
@@ -410,11 +421,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
             {/* The tick formatters are wrapped rather than passed by reference because recharts
                 calls them with (value, index), and index would land in the timezone argument
-                these helpers now take. Phase 3 will pass the country's zone here instead. */}
+                these helpers take. The wrapper is what makes passing the country's zone here
+                safe — a bare `tickFormatter={prettyPrintChartAxisLabelDate}` would silently
+                format ticks in whatever zone the tick's array index named. */}
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis"}
-              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x)}
+              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
@@ -427,7 +440,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               className="select-none"
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
-              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x)}
+              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
@@ -442,7 +455,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis-3"}
-              tickFormatter={(x) => prettyPrintDayLabelWithDate(x)}
+              tickFormatter={(x) => prettyPrintDayLabelWithDate(x, timezone, locale)}
               scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
@@ -559,7 +572,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               label={
                 <CustomizedLabel
                   className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
-                  value={prettyPrintChartAxisLabelDate(timeOfInterest)}
+                  value={prettyPrintChartAxisLabelDate(timeOfInterest, timezone, locale)}
                   solidLine={true}
                 ></CustomizedLabel>
               }
@@ -814,7 +827,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 let formattedDate = data?.formattedDate + ":00+00:00";
                 if (view === VIEWS.SOLAR_SITES) {
                   const date = new Date(Number(data?.formattedDate));
-                  formattedDate = dateToLondonDateTimeString(date);
+                  formattedDate = dateToZonedDateTimeString(date, timezone, locale);
                 }
 
                 // Show the p-levels in the tooltip higher ones above the current and lower below
@@ -847,7 +860,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     <ul className="">
                       <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
                         <div className="pr-3">
-                          {formatISODateStringHumanNumbersOnly(formattedDate)}
+                          {formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale)}
                         </div>
                         <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
                       </li>

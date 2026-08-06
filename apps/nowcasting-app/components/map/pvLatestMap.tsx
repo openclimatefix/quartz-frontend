@@ -6,6 +6,7 @@ import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
@@ -49,6 +50,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+  const { timezone, locale } = useCountryFormatting();
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
   const [mapDataLoading, setMapDataLoading] = useState(true);
@@ -537,7 +539,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
             }}
             controlOverlay={(map: { current?: mapboxgl.Map }) => (
               <>
-                <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+                <ButtonGroup
+                  rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+                />
                 <MeasuringUnit
                   activeUnit={activeUnit}
                   setActiveUnit={setActiveUnit}

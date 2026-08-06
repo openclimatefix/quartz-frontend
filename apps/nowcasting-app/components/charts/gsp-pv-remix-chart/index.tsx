@@ -1,11 +1,12 @@
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
 import {
-  convertISODateStringToLondonTime,
   formatISODateString,
+  formatISODateStringAsZonedTime,
   getRoundedTickBoundary,
   KWtoMW
 } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
 import useGlobalState, {
@@ -40,6 +41,7 @@ const GspPvRemixChart: FC<{
   deltaView = false
 }) => {
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
+  const { timezone, locale } = useCountryFormatting();
   let {
     errors,
     loading,
@@ -149,11 +151,13 @@ const GspPvRemixChart: FC<{
           onClose={close}
           title={title}
           mwpercent={Math.round(pvPercentage)}
-          pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime)}
+          pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale)}
           pvValue={Number(latestPvActualInMW)?.toFixed(1)}
           forecastPV={correspondingLatestPvForecastInMW?.toFixed(1)}
-          forecastNextTimeOnly={convertISODateStringToLondonTime(
-            followingPvForecastDatetime.toISOString()
+          forecastNextTimeOnly={formatISODateStringAsZonedTime(
+            followingPvForecastDatetime.toISOString(),
+            timezone,
+            locale
           )}
           forecastNextPV={followingPvForecastInMW?.toFixed(1)}
           deltaValue={deltaValue.toString()}

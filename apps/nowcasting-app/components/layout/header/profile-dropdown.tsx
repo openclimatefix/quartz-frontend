@@ -2,7 +2,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import pkg from "../../../package.json";
-import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from "../../helpers/utils";
+import { classNames, isProduction } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
@@ -33,10 +34,13 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pLevels] = useGlobalState("pLevels");
+  const { timezone } = useCountryFormatting();
   const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
-    downloadNationalCsv(combinedData, selectedColumns, nHourForecast, pLevels);
+    // The CSV's datetimes and settlement periods are read as wall-clock time in the country
+    // the data is for, not in whatever zone the person downloading it happens to sit in.
+    downloadNationalCsv(combinedData, selectedColumns, nHourForecast, pLevels, timezone);
   };
 
   const toggleDashboardMode = () => {

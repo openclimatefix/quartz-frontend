@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import useSWR, { type SWRConfiguration } from "swr";
 
 import { getCountryConfig } from "../../config/countries";
+import useGlobalState from "../../components/helpers/globalState";
 import { readCountryClaim, isEntitled } from "../../lib/api/auth/entitlement";
 import { ApiV1Error, apiV1Client, isNonRetryableApiV1Error } from "../../lib/api/v1/client";
 import * as queries from "../../lib/api/v1/queries";
@@ -23,7 +24,14 @@ const RETRY_BASE_MS = 1000;
 const RETRY_CAP_MS = 30_000;
 const MAX_RETRIES = 4;
 
-/** Fallback until `useCurrentCountry` is wired to global state — see below. */
+/**
+ * The country assumed before a cookie or the toggle says otherwise.
+ *
+ * Duplicated in `components/helpers/countryState.ts` (which cannot import this module
+ * without dragging SWR, Auth0 and the v1 client into every component that touches state).
+ * `countryState.test.ts` pins the two equal so they cannot drift; Phase 4 moves the
+ * constant into `config/countries.ts`, which both can import for free.
+ */
 export const DEFAULT_COUNTRY_CODE = "GB";
 
 const countriesDescriptor = queries.countries();
@@ -118,9 +126,12 @@ export const useEntitledCountries = (): UseCountriesResult => {
 /**
  * The country charts, headline figures and CSV default to.
  *
- * Deliberately a constant for now. Phase 3's state split gives this a cookie-backed value
- * in global state; when that lands, this function body is the only thing that changes —
- * every consumer already reads through it, so nothing else in the app has to move. Keep it
- * that way: do not read the current country from global state anywhere but here.
+ * Now backed by global state, which is seeded from the `country` cookie and written by the
+ * header's country toggle through `setCurrentCountry`. The signature is unchanged from when
+ * this returned a constant, which is what made the swap a one-line edit — and the reason to
+ * keep it that way: do not read `currentCountry` from global state anywhere but here.
+ *
+ * The value is always a valid code: `getValidatedCountry` falls the cookie back to
+ * `DEFAULT_COUNTRY_CODE` on load, and `setCurrentCountry` normalises whatever it is given.
  */
-export const useCurrentCountry = (): string => DEFAULT_COUNTRY_CODE;
+export const useCurrentCountry = (): string => useGlobalState("currentCountry")[0];
