@@ -710,6 +710,13 @@ moves, no data-layer changes. See *Naming, structure and in-flight work* for why
 - ~~`prettyPrintChartAxisLabelDate` throws on any Z-suffixed ISO string.~~ **Fixed in Phase 3**,
   earlier than its Phase 4 placement: v1 emits `Z` uniformly, so the throw is live rather than
   unreachable.
+- **Delete `isProduction` and its dead import.** `NEXT_PUBLIC_IS_PRODUCTION` is set in no env file
+  and no CI or deploy config, so the flag is permanently `false` and gates nothing — the sites view
+  it nominally hides is live. Its only usages are `header/index.tsx:142` and
+  `pages/index.tsx:736,764`, plus an unused import in `profile-dropdown.tsx`. Confirmed with the
+  owner that nothing is being held back, and that real gating would use Vercel feature flags rather
+  than a bare env var. Remove the flag, the three usages and the dead import; no rush, but do not
+  build anything on it in the meantime.
 - Status API base URL and response shape.
 - Satellite v1 path.
 - Sites on v1 — the Phase 5 isolation is what makes the swap cheap when it lands.
