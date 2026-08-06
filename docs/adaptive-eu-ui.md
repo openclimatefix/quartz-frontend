@@ -271,11 +271,30 @@ Consequences, which differ per call site and are why this is documented rather t
 - `remix-line.tsx` and `solar-site-chart.tsx` append `"Z"`, making the input an absolute instant, so
   the shift is real and they are **already wrong for any non-UTC viewer** — including a UK viewer in
   BST. Jest pins `TZ=UTC`, which is exactly why no test caught it.
-- Not reachable in production: `localeTimeOfInterest` is used only in the
-  `view === VIEWS.SOLAR_SITES` branch, and the sites view is `disabled={isProduction}`.
 
-Fix it with the Phase 4/5 sites work, where the sites chart is rewritten and a non-UTC viewer can be
-tested properly.
+Two consequences, both confined to the sites view:
+
+1. `remix-line.tsx:563` draws the "time of interest" reference line an hour right of the point it
+   marks, throughout BST. Cosmetic, but it is the line the chart is read against.
+2. `solar-site-chart.tsx:60` uses the same shifted value as a **lookup key** against
+   `chartData.formattedDate`. Under the shift the lookup always misses, so the effect falls through
+   to `setSelectedISOTime(get30MinNow())` — silently discarding the user's selected time and
+   snapping it to now every time the sites view mounts. A behaviour bug, not an offset.
+
+Both are correct in GMT and wrong in BST, so this fails seasonally: fine all winter, broken from the
+March clock change.
+
+**The `isProduction` gate is not sound.** An earlier draft of this note claimed the paths were
+unreachable in production because the sites view is gated on `isProduction`
+(`header/index.tsx:142` greys the nav link, `pages/index.tsx:736,764` skip the subtree). But
+`isProduction` is `process.env.NEXT_PUBLIC_IS_PRODUCTION === "true"`, and that variable is set in no
+env file and no CI or deploy config in this repo — the sole occurrence is commented out in
+`.env.local`. Unless the hosting platform injects it, `isProduction` is `false` and the sites view is
+live. **Needs confirming on the deploy side**, and the flag deserves an explicit default either way.
+
+The fix is small — pass `"UTC"` explicitly at the two call sites, making the conversion the identity
+it is already relied upon to be. It is held for the Phase 4/5 sites work only because it needs a test
+at an explicit non-UTC zone to be meaningful; `TZ=UTC` in jest hides the whole class.
 
 ### What Phase 3 leaves for later
 

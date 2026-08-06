@@ -207,9 +207,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // solar-sites chart's `formattedDate` keys, which `use-format-chart-data-sites.tsx` builds
   // as plain UTC epochs. `convertToLocaleDateString` stamps a false "Z" so the subsequent
   // `new Date()` reads the *wall clock* back, meaning this only lines up when the shift is
-  // zero. Passing Europe/London would move the reference line an hour off its own data every
-  // BST afternoon; the honest fix is "UTC", i.e. no shift at all, which is a behaviour change
-  // for a non-UTC viewer and belongs with the Phase 4/5 sites work rather than here.
+  // zero. The honest value is "UTC", i.e. no shift at all.
+  //
+  // As written this is already wrong for any non-UTC viewer, including a UK one in BST: the
+  // reference line lands an hour right of the point it marks, and the sibling lookup in
+  // solar-site-chart.tsx misses outright and resets the user's selected time to now. Correct
+  // in GMT, so it fails seasonally from the March clock change. Not fixed here only because
+  // jest pins TZ=UTC, so it needs a test at an explicit non-UTC zone to be meaningful — that
+  // lands with the Phase 4/5 sites work. Do NOT assume the isProduction gate hides this;
+  // NEXT_PUBLIC_IS_PRODUCTION is set in no env file or deploy config in this repo.
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const defaultZoom = { x1: "", x2: "" };
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
