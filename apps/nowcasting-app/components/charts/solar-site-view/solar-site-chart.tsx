@@ -57,7 +57,13 @@ const SolarSiteChart: FC<{
   const [view] = useGlobalState("view");
   const { timezone, locale } = useCountryFormatting();
   useEffect(() => {
-    const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
+    // "UTC" is load-bearing: this value is a lookup key against `chartData.formattedDate`,
+    // which is a plain UTC epoch, so the conversion has to be a no-op. Unlike the sibling
+    // call in remix-line.tsx, the result keeps its "Z" and so parses as an absolute instant —
+    // there is no local re-parse to cancel a viewer-zone shift. On the default it missed by
+    // the viewer's offset, and the miss falls through to `setSelectedISOTime(get30MinNow())`,
+    // silently discarding the user's selected time on every mount for any non-UTC viewer.
+    const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z", "UTC"))
       .getTime()
       .toString();
     if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {

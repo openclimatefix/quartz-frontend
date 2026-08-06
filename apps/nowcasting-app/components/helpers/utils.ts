@@ -1,5 +1,5 @@
 import axios from "axios";
-import { DateTime } from "luxon";
+import { DateTime, Settings } from "luxon";
 import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import {
   Bucket,
@@ -264,8 +264,13 @@ const INVALID_DATE_ONLY = "Invalid Date ";
  * forever — Phase 4 removes it by passing canonical UTC instants from `lib/domain/time.ts` — but
  * changing it here would be a behaviour change invisible to a UTC-pinned test process.
  */
+// The zone is left unspecified rather than named as "system" so that it resolves through
+// Luxon's `Settings.defaultZone`, which *is* the system zone unless a test overrides it.
+// Behaviour is identical in the browser; the difference is that the viewer's zone becomes
+// injectable, and jest pins TZ=UTC — the one zone in which every viewer-zone bug in this
+// file is invisible. See utils.viewerZone.test.ts.
 const parseISOInViewerZone = (date: string): DateTime =>
-  DateTime.fromISO(date, { zone: date.includes("T") ? "system" : "utc" });
+  DateTime.fromISO(date, date.includes("T") ? undefined : { zone: "utc" });
 
 const formatTime = (dt: DateTime) => dt.toLocaleString(TIME_ONLY);
 
@@ -299,8 +304,11 @@ export const formatISODateStringAsZonedTime = (
  * viewer's zone, which is what it used before, and must not default to Europe/London or every
  * existing call site would shift.
  */
-export const convertToLocaleDateString = (date: string, timezone: string = "system") => {
-  const dt = parseISOInViewerZone(date).setZone(timezone);
+export const convertToLocaleDateString = (date: string, timezone?: string) => {
+  // Defaulting through `Settings.defaultZone` rather than the literal "system" keeps the
+  // viewer's zone injectable for tests; it *is* the system zone in the browser. See
+  // parseISOInViewerZone above and utils.viewerZone.test.ts.
+  const dt = parseISOInViewerZone(date).setZone(timezone ?? Settings.defaultZone);
   if (!dt.isValid) {
     throw new Error(`Invalid date: ${date}`);
   }

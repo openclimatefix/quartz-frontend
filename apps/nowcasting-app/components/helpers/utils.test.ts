@@ -618,9 +618,14 @@ describe("getRounded4HoursAgoString", () => {
 describe("the passed timezone wins over Luxon's ambient default", () => {
   // These are Luxon-based now (F5), so `Settings.defaultZone` is a real lever — and it must not
   // be the one that decides what a user sees. Every helper takes its zone as an argument, so an
-  // ambient default cannot move the output. `convertToLocaleDateString` is the exception by
-  // design: it defaults to the *viewer's* zone, and pins to "system" rather than to the Luxon
-  // default so that lever cannot reach it either.
+  // ambient default cannot move the output.
+  //
+  // `convertToLocaleDateString` is the deliberate exception: its default is the *viewer's* zone,
+  // which is ambient by definition, so it resolves through `Settings.defaultZone`. That is not a
+  // hole in the property above — nothing sets `defaultZone` in the browser, where it is the
+  // system zone — it is what makes the viewer's zone injectable. Without it the whole class of
+  // viewer-zone bugs is untestable, because jest pins TZ=UTC and a viewer-zone shift is exactly
+  // zero at UTC. That is how the solar-site-chart reset survived; see utils.viewerZone.test.ts.
   afterEach(() => {
     Settings.defaultZone = "system";
   });
@@ -636,7 +641,9 @@ describe("the passed timezone wins over Luxon's ambient default", () => {
       expect(utils.formatISODateStringAsZonedTime(BST_NOON)).toBe("13:00");
       expect(utils.formatISODateStringHuman(BST_NOON)).toBe("Tuesday, 15 July 2025, 13:00");
       expect(utils.prettyPrintChartAxisLabelDate("2025-07-15T12:00")).toBe("13:00");
-      expect(utils.convertToLocaleDateString(BST_NOON)).toBe(BST_NOON);
+      // The exception, and an explicit zone still overrides the ambient one.
+      expect(utils.convertToLocaleDateString(BST_NOON)).not.toBe(BST_NOON);
+      expect(utils.convertToLocaleDateString(BST_NOON, "UTC")).toBe(BST_NOON);
     }
   );
 });

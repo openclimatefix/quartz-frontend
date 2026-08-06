@@ -257,44 +257,54 @@ marked for Phase 4 deletion): `formatISODateAsLondonTime → formatDateAsZonedTi
   `use-countries.ts`, which would pull SWR and Auth0 into every component that touches state. A test
   pins the two equal.
 
-### `convertToLocaleDateString` is left on its default, deliberately
+### The `convertToLocaleDateString` viewer-zone bug
 
-All three call sites keep the viewer's zone rather than the country's, against the pattern
-everywhere else. Its output is never displayed: it is shifted, stamped with a false `Z`, then
-re-parsed to epoch millis and matched against chart keys that are plain UTC epochs — so the shift
-has to be **zero** for the match to work, and the honest value is `"UTC"`.
+`convertToLocaleDateString` shifts an instant into the viewer's zone and serialises it with a `"Z"`
+that is a lie everywhere except UTC. Its output is never displayed — it is re-parsed to epoch millis
+and matched against chart keys that are plain UTC epochs — so the round trip only works when
+something cancels the shift. Whether anything does depends on a `.slice()`, which is why the three
+call sites behave differently and why an early reading of this ("all three want `"UTC"`") was wrong.
+Measured, not reasoned:
 
-Consequences, which differ per call site and are why this is documented rather than blanket-fixed:
+| call site | on its default | given `"UTC"` |
+|---|---|---|
+| `remix-line.tsx:563` | **correct in every zone** | breaks (−1h BST, +7h LA) |
+| `solar-site-chart.tsx:60` | **broken** (+1h BST, −7h LA) | correct |
+| `delta-view-chart.tsx:270` | correct in every zone | breaks |
 
-- `delta-view-chart.tsx` is **unaffected**: its input is a naive string, so the parse-in-viewer-zone
-  and the re-stamp cancel to identity in any zone.
-- `remix-line.tsx` and `solar-site-chart.tsx` append `"Z"`, making the input an absolute instant, so
-  the shift is real and they are **already wrong for any non-UTC viewer** — including a UK viewer in
-  BST. Jest pins `TZ=UTC`, which is exactly why no test caught it.
+`remix-line` applies `.slice(0, 16)`, stripping the `"Z"`, so `new Date()` re-reads the value as
+*local* and the two shifts cancel exactly; `delta-view` starts from a naive string and cancels the
+same way. `solar-site-chart` keeps its `"Z"`, so the value parses as an absolute instant with nothing
+to cancel the shift.
 
-Two consequences, both confined to the sites view:
+**The real defect was in `solar-site-chart.tsx`, and it was not cosmetic.** The value is a lookup key
+against `chartData.formattedDate`; under the shift the lookup always missed, falling through to
+`setSelectedISOTime(get30MinNow())` — silently discarding the user's selected time on every mount of
+the sites view, for every non-UTC viewer. Correct in GMT and wrong in BST, so it failed seasonally:
+fine all winter, broken from the March clock change. **Fixed** by passing `"UTC"` there, with the
+other two left alone and commented, because passing them a zone would break them.
 
-1. `remix-line.tsx:563` draws the "time of interest" reference line an hour right of the point it
-   marks, throughout BST. Cosmetic, but it is the line the chart is read against.
-2. `solar-site-chart.tsx:60` uses the same shifted value as a **lookup key** against
-   `chartData.formattedDate`. Under the shift the lookup always misses, so the effect falls through
-   to `setSelectedISOTime(get30MinNow())` — silently discarding the user's selected time and
-   snapping it to now every time the sites view mounts. A behaviour bug, not an offset.
+**Do not rely on the `isProduction` gate to bound this or anything else.** The sites view is gated on
+`isProduction` (`header/index.tsx:142` greys the nav link, `pages/index.tsx:736,764` skip the
+subtree), but `isProduction` is `process.env.NEXT_PUBLIC_IS_PRODUCTION === "true"` and that variable
+is set in **no env file and no CI or deploy config in this repo** — the sole occurrence is commented
+out in `.env.local`. It is `false` unless the hosting platform injects it. Those three usages are its
+only ones, plus a dead import in `profile-dropdown.tsx`. If gating is wanted, it should be a real
+feature flag; otherwise the flag and its dead import should go.
 
-Both are correct in GMT and wrong in BST, so this fails seasonally: fine all winter, broken from the
-March clock change.
+**Why it went unnoticed, and what now stops a recurrence.** Jest pins `TZ=UTC`, the one zone in which
+a viewer-zone shift is exactly zero — so the entire bug class was invisible to the suite. Node caches
+its zone at startup and cannot be moved in-process (see `jest.globalSetup.ts`), so the viewer's zone
+is now resolved through Luxon's `Settings.defaultZone` instead of the literal `"system"`. Identical
+in the browser, where nothing sets it; injectable in a test. `utils.viewerZone.test.ts` uses that to
+pin the fixed round trip across three zones **and to assert the bug** for the un-fixed form, so
+dropping the `"UTC"` fails loudly. It also guards the harness itself, so the suite cannot start
+passing vacuously if `defaultZone` stops being honoured.
 
-**The `isProduction` gate is not sound.** An earlier draft of this note claimed the paths were
-unreachable in production because the sites view is gated on `isProduction`
-(`header/index.tsx:142` greys the nav link, `pages/index.tsx:736,764` skip the subtree). But
-`isProduction` is `process.env.NEXT_PUBLIC_IS_PRODUCTION === "true"`, and that variable is set in no
-env file and no CI or deploy config in this repo — the sole occurrence is commented out in
-`.env.local`. Unless the hosting platform injects it, `isProduction` is `false` and the sites view is
-live. **Needs confirming on the deploy side**, and the flag deserves an explicit default either way.
-
-The fix is small — pass `"UTC"` explicitly at the two call sites, making the conversion the identity
-it is already relied upon to be. It is held for the Phase 4/5 sites work only because it needs a test
-at an explicit non-UTC zone to be meaningful; `TZ=UTC` in jest hides the whole class.
+The other two call sites cannot be reproduced in-process — their cancellation needs Node's zone and
+Luxon's to agree, which they do in a browser and do not under an injected zone. Covering them would
+need a second jest process under a non-UTC `TZ`, which is not worth the config surgery for two call
+sites that are already correct; they carry comments instead.
 
 ### What Phase 3 leaves for later
 

@@ -205,17 +205,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
   //
   // This value is not shown to anyone: it is turned into epoch millis and matched against the
   // solar-sites chart's `formattedDate` keys, which `use-format-chart-data-sites.tsx` builds
-  // as plain UTC epochs. `convertToLocaleDateString` stamps a false "Z" so the subsequent
-  // `new Date()` reads the *wall clock* back, meaning this only lines up when the shift is
-  // zero. The honest value is "UTC", i.e. no shift at all.
+  // as plain UTC epochs. This is correct in every viewer zone, but only by cancellation, so
+  // do not "tidy" it: the conversion shifts the instant into the viewer's zone and stamps a
+  // false "Z", then `.slice(0, 16)` strips that "Z" again, so `new Date()` re-reads the value
+  // as *local* — and the two shifts cancel exactly.
   //
-  // As written this is already wrong for any non-UTC viewer, including a UK one in BST: the
-  // reference line lands an hour right of the point it marks, and the sibling lookup in
-  // solar-site-chart.tsx misses outright and resets the user's selected time to now. Correct
-  // in GMT, so it fails seasonally from the March clock change. Not fixed here only because
-  // jest pins TZ=UTC, so it needs a test at an explicit non-UTC zone to be meaningful — that
-  // lands with the Phase 4/5 sites work. Do NOT assume the isProduction gate hides this;
-  // NEXT_PUBLIC_IS_PRODUCTION is set in no env file or deploy config in this repo.
+  // Passing a zone here breaks it (Europe/London is an hour out in BST, America/Los_Angeles
+  // seven). The sibling call in solar-site-chart.tsx looks identical but keeps its "Z", so it
+  // parses as absolute with nothing to cancel the shift, and genuinely does need "UTC".
+  // utils.viewerZone.test.ts pins all three shapes across zones; jest's TZ=UTC hides the
+  // whole class otherwise.
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const defaultZoom = { x1: "", x2: "" };
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
