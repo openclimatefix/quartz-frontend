@@ -292,7 +292,18 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
+  // `/regions/{region}/forecast` defaults to **now → +48h** and `/generation` to the **last
+  // 24h**; neither matches this chart, which plots two days back. Without an explicit window
+  // the top chart has no past forecast at all. Reusing `useGspDeltas`'s window rather than
+  // recomputing guarantees the two agree — and that `useLoadingState` below hits the same
+  // SWR keys, so the indicator still costs no extra request.
+  const nationalWindow = useMemo(
+    () => ({ start: gspWindow.start, end: gspWindow.end }),
+    [gspWindow.start, gspWindow.end]
+  );
+
   const forecast = useNationalForecast(scope, {
+    ...nationalWindow,
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
   });
 
@@ -304,9 +315,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   );
 
   const generation0 = useNationalGeneration(observers[0] === undefined ? null : scope, {
+    ...nationalWindow,
     observer: observers[0]
   });
   const generation1 = useNationalGeneration(observers[1] === undefined ? null : scope, {
+    ...nationalWindow,
     observer: observers[1]
   });
   const generationResults = [generation0, generation1];
@@ -322,6 +335,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   const nHourHorizonMinutes = showNHourView ? nHourForecast * 60 : undefined;
   const nHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
+    ...nationalWindow,
     horizonMinutes: nHourHorizonMinutes
   });
 
@@ -333,7 +347,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     periodWindow: gspWindow,
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined,
     observers,
-    nHourHorizonMinutes
+    nHourHorizonMinutes,
+    nationalWindow
   });
 
   const hasGspPvInitialForSelectedTime = generation0.data?.values.some(

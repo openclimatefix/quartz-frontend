@@ -186,6 +186,47 @@ describe("the forecast series are driven by the country's config, not by the com
     }
   });
 
+  /**
+   * The API defaults `/regions/{region}/forecast` to **now → +48 hours** and
+   * `/regions/{region}/generation` to the **last 24 hours**. The chart plots two days back, so
+   * a request with no window has no past forecast in it at all — which is exactly what shipped
+   * and had to be fixed. Nothing else in the suite would have caught it: every fixture answers
+   * regardless of the query string, so the chart still rendered, just with the left half empty.
+   */
+  test("every national request pins an explicit window, so the past is not cut off", async () => {
+    const view = renderChart();
+    await settled(view, 8);
+
+    const forecasts = seen("/GB/solar/regions/national/forecast");
+    const generation = seen("/GB/solar/regions/national/generation");
+    expect(forecasts.length).toBeGreaterThan(0);
+    expect(generation.length).toBeGreaterThan(0);
+
+    for (const { url } of [...forecasts, ...generation]) {
+      const start = url.searchParams.get("start_utc");
+      const end = url.searchParams.get("end_utc");
+      expect(start).toBeTruthy();
+      expect(end).toBeTruthy();
+      // Two days back, floored to a 6-hour boundary — the past the chart draws.
+      expect(new Date(start as string).getTime()).toBeLessThan(Date.now());
+      expect(new Date(end as string).getTime()).toBeGreaterThan(Date.now());
+    }
+  });
+
+  // The window has to be byte-identical across every national call, including the ones
+  // `useLoadingState` repeats: a differing window is a different SWR key, which silently turns
+  // the indicator's free cache hits back into real requests.
+  test("all national requests share one window", async () => {
+    const view = renderChart();
+    await settled(view, 8);
+
+    const windows = [
+      ...seen("/GB/solar/regions/national/forecast"),
+      ...seen("/GB/solar/regions/national/generation")
+    ].map(({ url }) => `${url.searchParams.get("start_utc")}|${url.searchParams.get("end_utc")}`);
+    expect(new Set(windows).size).toBe(1);
+  });
+
   test("the N-hour series is only fetched when the N-hour view is on", async () => {
     const view = renderChart();
     await settled(view, 8);

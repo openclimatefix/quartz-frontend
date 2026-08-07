@@ -26,6 +26,7 @@ import {
 } from "../../../hooks/data";
 import type { Scope } from "../../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
+import { getEarliestForecastTimestamp, getFurthestForecastTimestamp } from "../../helpers/data";
 const { version } = pkg;
 
 interface IProfileDropDown {
@@ -56,7 +57,17 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
     ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
+  // Without an explicit window the API defaults the forecast to **now → +48h** and generation
+  // to the **last 24h**, so the CSV would export no past forecast at all. Same window the
+  // national chart pins, so these are the same SWR keys the chart has already warmed — the
+  // CSV costs no extra request.
+  const nationalWindow = useMemo(
+    () => ({ start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() }),
+    []
+  );
+
   const forecast = useNationalForecast(nationalScope, {
+    ...nationalWindow,
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
   });
 
@@ -67,16 +78,17 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
   );
   const generationInitial = useNationalGeneration(
     observers[0] === undefined ? null : nationalScope,
-    { observer: observers[0] }
+    { ...nationalWindow, observer: observers[0] }
   );
   const generationUpdated = useNationalGeneration(
     observers[1] === undefined ? null : nationalScope,
-    { observer: observers[1] }
+    { ...nationalWindow, observer: observers[1] }
   );
 
   // Matches v0: the N-hour series is only fetched — and so only ever populates the CSV's
   // N-hour column — while the N-hour view is switched on.
   const nHour = useNationalForecast(showNHourView ? nationalScope : null, {
+    ...nationalWindow,
     horizonMinutes: nHourForecast * 60
   });
 

@@ -23,6 +23,7 @@ import {
 } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
+import { getEarliestForecastTimestamp, getFurthestForecastTimestamp } from "../helpers/data";
 
 /**
  * The `ChartData` keys the observed-generation lines are written under, in manifest observer
@@ -68,20 +69,30 @@ const PvRemixChart: FC<{
     ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
+  // `/regions/{region}/forecast` defaults its window to **now → +48h**, and
+  // `/regions/{region}/generation` to the **last 24h**. Neither default matches the chart,
+  // which plots two days back: without an explicit window the forecast lines simply have no
+  // past. Same window the sub-national views pin, and both ends are floored/ceiled to a
+  // 6-hour boundary so the SWR key is stable across scrub ticks.
+  const nationalWindow = useMemo(
+    () => ({ start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() }),
+    []
+  );
+
   // A slot with no configured series is disabled; a configured one asks for its model, or for
   // no `model` parameter at all when the country wants the region type's default.
   const slotScope = (index: number) => (seriesConfig[index] ? scope : null);
   const slotModel = (index: number) =>
     seriesConfig[index] ? forecastSeriesModel(seriesConfig[index]) : undefined;
 
-  const forecast0 = useNationalForecast(slotScope(0), { model: slotModel(0) });
-  const forecast1 = useNationalForecast(slotScope(1), { model: slotModel(1) });
-  const forecast2 = useNationalForecast(slotScope(2), { model: slotModel(2) });
-  const forecast3 = useNationalForecast(slotScope(3), { model: slotModel(3) });
-  const forecast4 = useNationalForecast(slotScope(4), { model: slotModel(4) });
-  const forecast5 = useNationalForecast(slotScope(5), { model: slotModel(5) });
-  const forecast6 = useNationalForecast(slotScope(6), { model: slotModel(6) });
-  const forecast7 = useNationalForecast(slotScope(7), { model: slotModel(7) });
+  const forecast0 = useNationalForecast(slotScope(0), { ...nationalWindow, model: slotModel(0) });
+  const forecast1 = useNationalForecast(slotScope(1), { ...nationalWindow, model: slotModel(1) });
+  const forecast2 = useNationalForecast(slotScope(2), { ...nationalWindow, model: slotModel(2) });
+  const forecast3 = useNationalForecast(slotScope(3), { ...nationalWindow, model: slotModel(3) });
+  const forecast4 = useNationalForecast(slotScope(4), { ...nationalWindow, model: slotModel(4) });
+  const forecast5 = useNationalForecast(slotScope(5), { ...nationalWindow, model: slotModel(5) });
+  const forecast6 = useNationalForecast(slotScope(6), { ...nationalWindow, model: slotModel(6) });
+  const forecast7 = useNationalForecast(slotScope(7), { ...nationalWindow, model: slotModel(7) });
   const forecastResults = [
     forecast0,
     forecast1,
@@ -103,15 +114,18 @@ const PvRemixChart: FC<{
   );
 
   const generation0 = useNationalGeneration(observers[0] === undefined ? null : scope, {
+    ...nationalWindow,
     observer: observers[0]
   });
   const generation1 = useNationalGeneration(observers[1] === undefined ? null : scope, {
+    ...nationalWindow,
     observer: observers[1]
   });
   const generationResults = [generation0, generation1];
 
   const nHourHorizonMinutes = showNHourView ? nHourForecast * 60 : undefined;
   const nHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
+    ...nationalWindow,
     horizonMinutes: nHourHorizonMinutes
   });
 
@@ -122,7 +136,8 @@ const PvRemixChart: FC<{
     scope: slotScope(0),
     model: slotModel(0),
     observers,
-    nHourHorizonMinutes
+    nHourHorizonMinutes,
+    nationalWindow
   });
 
   const forecastSeries = forecast0.data;
