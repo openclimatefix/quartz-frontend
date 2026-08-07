@@ -7,6 +7,9 @@ import {
 import allGspForecastHistoricalDataCompact from "../../data/updatedDummyApiResponses/allGspForecastHistoricCompact.json";
 import allGspActualHistoricCompact from "../../data/updatedDummyApiResponses/allGspActualHistoricCompact.json";
 import { components } from "../../types/quartz-api";
+import { FeatureCollection } from "geojson";
+import gspShapeData from "../../data/GSP_regions_4326_20260209.json";
+import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
 
 /////////////////////////////////////////////////////////
 // filterCompactHistoricData & filterCompactFutureData //
@@ -671,4 +674,24 @@ describe("getEarliestForecastTimestamp", () => {
     // The result depends on the system timezone but must align to a 6-hour boundary.
     console.log(result); // Log for visual validation in non-UTC systems.
   });
+});
+
+///////////////////////////////
+// Precomputed region areas  //
+///////////////////////////////
+describe("check shape areas are precomputed", () => {
+  const shapeFiles: [string, FeatureCollection][] = [
+    ["GSP", gspShapeData as FeatureCollection],
+    ["DNO", dnoShapeData as FeatureCollection]
+  ];
+
+  test.each(shapeFiles)(
+    "every %s region has an areaKm2, else run `yarn shape-areas`",
+    (_name, shapeData) => {
+      const missingAreas = shapeData.features.filter(
+        (feature) => !(Number(feature.properties?.areaKm2) > 0)
+      );
+      expect(missingAreas).toHaveLength(0);
+    }
+  );
 });

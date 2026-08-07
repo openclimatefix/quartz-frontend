@@ -36,6 +36,15 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
           { value: "350-450", opacity: 80, textColor: "black" },
           { value: "450+", opacity: 100, textColor: "black" }
         ];
+      } else if (unit === ActiveUnit.capacityDensity) {
+        return [
+          { value: "0-0.1", opacity: 3, textColor: "ocf-gray-300" },
+          { value: "0.1-0.2", opacity: 20, textColor: "ocf-gray-300" },
+          { value: "0.2-0.35", opacity: 40, textColor: "ocf-gray-300" },
+          { value: "0.35-0.5", opacity: 60, textColor: "black" },
+          { value: "0.5-0.7", opacity: 80, textColor: "black" },
+          { value: "0.7+", opacity: 100, textColor: "black" }
+        ];
       }
     } else if (
       [NationalAggregation.zone, NationalAggregation.DNO].includes(nationalAggregationLevel)
@@ -58,12 +67,24 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
           { value: "3.5k-4.5k", opacity: 80, textColor: "black" },
           { value: "4.5k+", opacity: 100, textColor: "black" }
         ];
+      } else if (unit === ActiveUnit.capacityDensity) {
+        return [
+          { value: "0-0.02", opacity: 3, textColor: "ocf-gray-300" },
+          { value: "0.02-0.04", opacity: 20, textColor: "ocf-gray-300" },
+          { value: "0.04-0.07", opacity: 40, textColor: "ocf-gray-300" },
+          { value: "0.07-0.1", opacity: 60, textColor: "black" },
+          { value: "0.1-0.14", opacity: 80, textColor: "black" },
+          { value: "0.14+", opacity: 100, textColor: "black" }
+        ];
       }
     }
   }, [unit, nationalAggregationLevel]);
   let unitText = unit === ActiveUnit.MW ? "MW" : "%";
   if (unit === ActiveUnit.capacity) {
     unitText = "MW";
+  }
+  if (unit === ActiveUnit.capacityDensity) {
+    unitText = "MW/km²";
   }
   return (
     <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">

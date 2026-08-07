@@ -68,6 +68,9 @@ const setFeatureObjectProps = (
       false,
       roundingFactor
     ),
+    [SelectedData.capacityMwPerKm2]: existingProperties?.areaKm2
+      ? (gspSystemInfo?.installedCapacityMw || 0) / existingProperties.areaKm2
+      : 0,
     gspDisplayName: gspSystemInfo?.regionName || ""
   };
 };

@@ -13,7 +13,8 @@
       "properties": {
         "ID": 10,
         "Name": "_A",
-        "LongName": "UKPN (East)"
+        "LongName": "UKPN (East)",
+        "areaKm2": 20429.463
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -14246,7 +14247,8 @@
       "properties": {
         "ID": 11,
         "Name": "_B",
-        "LongName": "NGED (East Midlands)"
+        "LongName": "NGED (East Midlands)",
+        "areaKm2": 16242.635
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -38721,7 +38723,8 @@
       "properties": {
         "ID": 12,
         "Name": "_C",
-        "LongName": "UKPN (London)"
+        "LongName": "UKPN (London)",
+        "areaKm2": 684.062
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -43330,7 +43333,8 @@
       "properties": {
         "ID": 13,
         "Name": "_D",
-        "LongName": "SPEN (SP MANWEB)"
+        "LongName": "SPEN (SP MANWEB)",
+        "areaKm2": 12667.888
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -57831,7 +57835,8 @@
       "properties": {
         "ID": 14,
         "Name": "_E",
-        "LongName": "NGED (Midlands)"
+        "LongName": "NGED (Midlands)",
+        "areaKm2": 13319.144
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -85424,7 +85429,8 @@
       "properties": {
         "ID": 15,
         "Name": "_F",
-        "LongName": "NPG (Northern Electric)"
+        "LongName": "NPG (Northern Electric)",
+        "areaKm2": 14405.353
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -96225,7 +96231,8 @@
       "properties": {
         "ID": 16,
         "Name": "_G",
-        "LongName": "ENWL"
+        "LongName": "ENWL",
+        "areaKm2": 12527.642
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -106710,7 +106717,8 @@
       "properties": {
         "ID": 17,
         "Name": "_P",
-        "LongName": "SSE"
+        "LongName": "SSE",
+        "areaKm2": 64023.807
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -163363,7 +163371,8 @@
       "properties": {
         "ID": 19,
         "Name": "_J",
-        "LongName": "UKPN (South)"
+        "LongName": "UKPN (South)",
+        "areaKm2": 8210.327
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -171992,7 +172001,8 @@
       "properties": {
         "ID": 21,
         "Name": "_K",
-        "LongName": "NGED (South Wales)"
+        "LongName": "NGED (South Wales)",
+        "areaKm2": 12117.742
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -183113,7 +183123,8 @@
       "properties": {
         "ID": 22,
         "Name": "_L",
-        "LongName": "NGED (South West)"
+        "LongName": "NGED (South West)",
+        "areaKm2": 15090.835
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -196138,7 +196149,8 @@
       "properties": {
         "ID": 23,
         "Name": "_M",
-        "LongName": "NPG (Yorkshire Electric)"
+        "LongName": "NPG (Yorkshire Electric)",
+        "areaKm2": 10706.942
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -210123,7 +210135,8 @@
       "properties": {
         "ID": 18,
         "Name": "_N",
-        "LongName": "SPEN (SP Distribution)"
+        "LongName": "SPEN (SP Distribution)",
+        "areaKm2": 22389.467
       },
       "geometry": {
         "type": "MultiPolygon",
@@ -224068,7 +224081,8 @@
       "properties": {
         "ID": 20,
         "Name": "_H",
-        "LongName": "SSE (Southern)"
+        "LongName": "SSE (Southern)",
+        "areaKm2": 17182.429
       },
       "geometry": {
         "type": "MultiPolygon",

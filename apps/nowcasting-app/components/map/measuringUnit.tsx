@@ -90,6 +90,14 @@ const MeasuringUnit = ({
             text={"Capacity"}
             value={ActiveUnit.capacity}
           />
+          <MapUIButton<ActiveUnit>
+            id={"UnitButtonCapacityDensity"}
+            active={activeUnit === ActiveUnit.capacityDensity}
+            isLoading={isLoading}
+            onToggle={onToggleUnit}
+            text={"MW/km²"}
+            value={ActiveUnit.capacityDensity}
+          />
         </div>
       </div>
       <div className="flex justify-end mr-0 mt-3">
