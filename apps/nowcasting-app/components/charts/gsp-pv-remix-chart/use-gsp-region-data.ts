@@ -10,12 +10,7 @@ import {
 } from "../../../hooks/data";
 import type { Region, RegionSeries, Scope, TimeSeries } from "../../../lib/domain/types";
 import type { ChartSeriesInput } from "../use-format-chart-data";
-import {
-  buildRegionBridge,
-  getEarliestForecastTimestamp,
-  getFurthestForecastTimestamp,
-  rollUpRegionSeries
-} from "../../helpers/data";
+import { buildRegionBridge, rollUpRegionSeries } from "../../helpers/data";
 
 const GSP_REGION_TYPE = "gsp";
 const SOURCE = "solar";
@@ -158,8 +153,8 @@ export type GspAggregateData = {
  * Unlike `useGspRegionData`, this fetches every GSP of the region type over the shared window
  * (`forecasts/period` / `generation/period`, the same primitive `useMapRegionValues` uses) and
  * sums client-side, because there is no v1 endpoint that aggregates a chart's worth of a time
- * series server-side. The window is `getEarliestForecastTimestamp` … `getFurthestForecastTimestamp`,
- * both floored/ceiled to a 6-hour boundary, so the request does not refire as the user scrubs.
+ * series server-side. No window is sent, so the request carries no timestamp and does not
+ * refire as the user scrubs; the API defaults to 2 days either side, floored to 6 hours.
  *
  * `gspIds` is the flat list of numeric GSP ids to sum — the caller resolves it, whether from a
  * multi-select's raw ids or from `groupGspIds(aggregation, groupName)`. `null`/empty disables
@@ -180,9 +175,17 @@ export const useGspAggregateData = (
   const regionsScope: Scope | null =
     enabled && country ? { country, source: SOURCE, regionType: GSP_REGION_TYPE } : null;
 
-  // Recomputed per render but constant within a 6-hour boundary, so the SWR key — not this
-  // object identity — is what stays stable while the user scrubs.
-  const window = { start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() };
+  // No window at all, deliberately. `/forecasts/period` and `/generation/period` both default
+  // to **2 days before → 2 days after now, floored to 6 hours**, and are "served entirely from
+  // a pre-warmed cache (one key per region)" — so the default window is the window that is
+  // actually warmed, and asking for our own risks missing it as well as truncating.
+  //
+  // The forecast horizon is a per-country fact (GB publishes 36h ahead, NL 48h), so ANY end we
+  // pin is wrong for somebody. Take whatever the API has. The old
+  // `{ start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() }` computed a
+  // start identical to the default and an end of now +1 day — clipping 6–12h off GB's horizon
+  // and 18–24h off NL's. Inherited from v0 with no rationale; see docs/phase4-track-g-notes.md.
+  const window = {};
 
   const regionsResult = useRegions(regionsScope);
   const bridge = useMemo(() => buildRegionBridge(regionsResult.data), [regionsResult.data]);

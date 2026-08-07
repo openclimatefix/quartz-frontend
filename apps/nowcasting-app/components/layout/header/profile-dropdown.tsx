@@ -26,7 +26,7 @@ import {
 } from "../../../hooks/data";
 import type { Scope } from "../../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
-import { getEarliestForecastTimestamp, getFurthestForecastTimestamp } from "../../helpers/data";
+import { getEarliestForecastTimestamp } from "../../helpers/data";
 const { version } = pkg;
 
 interface IProfileDropDown {
@@ -57,14 +57,10 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
     ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
-  // Without an explicit window the API defaults the forecast to **now → +48h** and generation
-  // to the **last 24h**, so the CSV would export no past forecast at all. Same window the
-  // national chart pins, so these are the same SWR keys the chart has already warmed — the
-  // CSV costs no extra request.
-  const nationalWindow = useMemo(
-    () => ({ start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() }),
-    []
-  );
+  // Start only — see the note in `pv-remix-chart.tsx`. Pinning `end` here would clip the
+  // CSV's forward horizon to ~26h instead of the API's +48h. Same window the national chart
+  // pins, so these are the same SWR keys the chart has already warmed.
+  const nationalWindow = useMemo(() => ({ start: getEarliestForecastTimestamp() }), []);
 
   const forecast = useNationalForecast(nationalScope, {
     ...nationalWindow,

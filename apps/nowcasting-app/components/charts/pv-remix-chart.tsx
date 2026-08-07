@@ -23,7 +23,7 @@ import {
 } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
-import { getEarliestForecastTimestamp, getFurthestForecastTimestamp } from "../helpers/data";
+import { getEarliestForecastTimestamp } from "../helpers/data";
 
 /**
  * The `ChartData` keys the observed-generation lines are written under, in manifest observer
@@ -69,15 +69,14 @@ const PvRemixChart: FC<{
     ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
-  // `/regions/{region}/forecast` defaults its window to **now → +48h**, and
-  // `/regions/{region}/generation` to the **last 24h**. Neither default matches the chart,
-  // which plots two days back: without an explicit window the forecast lines simply have no
-  // past. Same window the sub-national views pin, and both ends are floored/ceiled to a
-  // 6-hour boundary so the SWR key is stable across scrub ticks.
-  const nationalWindow = useMemo(
-    () => ({ start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() }),
-    []
-  );
+  // Only `start` is pinned. `/regions/{region}/forecast` defaults its window to **now → +48h**
+  // and `/generation` to the **last 24h**, so without a start the chart has no past at all.
+  // The END is deliberately left to the API: its default is +48h for the forecast and "now"
+  // for generation, both of which are what the chart wants. Pinning it to
+  // `getFurthestForecastTimestamp()` (now +1 day, i.e. +24–30h) is what the sub-national views
+  // do, and doing the same here silently CLIPPED the forward horizon from 48h to ~26h.
+  // Floored to a 6-hour boundary, so the SWR key is stable across scrub ticks.
+  const nationalWindow = useMemo(() => ({ start: getEarliestForecastTimestamp() }), []);
 
   // A slot with no configured series is disabled; a configured one asks for its model, or for
   // no `model` parameter at all when the country wants the region type's default.

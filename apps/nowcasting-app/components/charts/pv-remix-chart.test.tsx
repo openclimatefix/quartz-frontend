@@ -189,11 +189,17 @@ describe("the forecast series are driven by the country's config, not by the com
   /**
    * The API defaults `/regions/{region}/forecast` to **now → +48 hours** and
    * `/regions/{region}/generation` to the **last 24 hours**. The chart plots two days back, so
-   * a request with no window has no past forecast in it at all — which is exactly what shipped
-   * and had to be fixed. Nothing else in the suite would have caught it: every fixture answers
-   * regardless of the query string, so the chart still rendered, just with the left half empty.
+   * a request with no `start_utc` has no past forecast in it at all — which is what shipped
+   * first and had to be fixed. Nothing else in the suite would have caught it: every fixture
+   * answers regardless of the query string, so the chart rendered, just with the left half
+   * empty.
+   *
+   * `end_utc` must stay ABSENT, which is the second half of the same bug. The first fix pinned
+   * it to `getFurthestForecastTimestamp()` — now +1 day — which bought the past back by
+   * clipping the forward horizon from the API's 48 hours to about 26. Leaving it off lets the
+   * documented default supply the full horizon.
    */
-  test("every national request pins an explicit window, so the past is not cut off", async () => {
+  test("every national request pins a start, so the past is not cut off", async () => {
     const view = renderChart();
     await settled(view, 8);
 
@@ -204,12 +210,21 @@ describe("the forecast series are driven by the country's config, not by the com
 
     for (const { url } of [...forecasts, ...generation]) {
       const start = url.searchParams.get("start_utc");
-      const end = url.searchParams.get("end_utc");
       expect(start).toBeTruthy();
-      expect(end).toBeTruthy();
       // Two days back, floored to a 6-hour boundary — the past the chart draws.
       expect(new Date(start as string).getTime()).toBeLessThan(Date.now());
-      expect(new Date(end as string).getTime()).toBeGreaterThan(Date.now());
+    }
+  });
+
+  test("no national request pins an end, so the forward horizon is not clipped", async () => {
+    const view = renderChart();
+    await settled(view, 8);
+
+    for (const { url } of [
+      ...seen("/GB/solar/regions/national/forecast"),
+      ...seen("/GB/solar/regions/national/generation")
+    ]) {
+      expect(url.searchParams.get("end_utc")).toBeNull();
     }
   });
 

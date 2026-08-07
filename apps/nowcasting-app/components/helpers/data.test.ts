@@ -1,5 +1,5 @@
 /**
- * `getEarliestForecastTimestamp` / `getFurthestForecastTimestamp` — the API request window.
+ * `getEarliestForecastTimestamp` — the start of the API request window.
  *
  * These are all that remain of this file. Everything else it covered was the v0 compact-payload
  * plumbing (`filterCompactHistoricData`, `filterCompactFutureData`,
@@ -8,7 +8,7 @@
  * went with it in Phase 4 wave 4.
  */
 import { describe, expect, jest } from "@jest/globals";
-import { getEarliestForecastTimestamp, getFurthestForecastTimestamp } from "./data";
+import { getEarliestForecastTimestamp } from "./data";
 import { Settings } from "luxon";
 import { afterEach, beforeEach, it } from "@jest/globals";
 
@@ -16,10 +16,9 @@ import { afterEach, beforeEach, it } from "@jest/globals";
  * B2. These tests previously pinned the *broken* behaviour; they now assert the corrected one.
  * Two things changed:
  *
- * 1. `getFurthestForecastTimestamp` rounded up by adding `hour % 6`, which is not a round-up at
- *    all — 14:00 became 16:00, which is not one of the 6-hour boundaries the API serves. It now
- *    adds `(6 - hour % 6) % 6`, i.e. a true ceiling: 14:00 -> 18:00, and a value already on a
- *    boundary stays put rather than jumping a whole interval.
+ * 1. `getFurthestForecastTimestamp` had a broken round-up. It no longer exists at all: nothing
+ *    pins the END of a forecast window any more, because the horizon is a per-country fact (GB
+ *    36h, NL 48h) and any constant truncates somebody. See the note in `data.ts`.
  * 2. Both helpers rounded in the *viewer's* local timezone and only then converted to UTC, so a
  *    viewer in Los Angeles or Sydney requested a different window from a viewer in the UK for the
  *    same instant (worst around the boundaries, and across the viewer's own DST changes, where
@@ -74,43 +73,6 @@ describe("forecast window helpers (B2)", () => {
     );
   });
 
-  describe("getFurthestForecastTimestamp — one day forward, rounded UP to a 6-hour UTC boundary", () => {
-    it.each([
-      // [frozen now, expected]
-      ["2025-12-07T14:45:00Z", "2025-12-08T18:00:00.000Z"], // was "…T16:00:00.000Z" — not a boundary
-      ["2025-12-07T14:00:00Z", "2025-12-08T18:00:00.000Z"], // the 14:00 -> 18:00 case from the bug report
-      ["2025-12-07T00:00:01Z", "2025-12-08T06:00:00.000Z"],
-      ["2025-12-07T18:00:01Z", "2025-12-09T00:00:00.000Z"],
-      ["2025-12-07T23:30:00Z", "2025-12-09T00:00:00.000Z"],
-      ["2025-07-15T14:45:00Z", "2025-07-16T18:00:00.000Z"],
-      ["2025-03-30T02:30:00Z", "2025-03-31T06:00:00.000Z"],
-      ["2025-10-26T01:30:00Z", "2025-10-27T06:00:00.000Z"]
-    ])("now = %s -> %s", (now, expected) => {
-      freeze(now);
-      expect(getFurthestForecastTimestamp()).toBe(expected);
-    });
-
-    it.each(["00:00", "06:00", "12:00", "18:00"])(
-      "is idempotent on the boundary hour %s (does not jump forward a full interval)",
-      (hhmm) => {
-        freeze(`2025-12-07T${hhmm}:00Z`);
-        expect(getFurthestForecastTimestamp()).toBe(`2025-12-08T${hhmm}:00.000Z`);
-      }
-    );
-
-    it("always returns a real 6-hour boundary, whatever the minute", () => {
-      for (let hour = 0; hour < 24; hour++) {
-        for (const minute of [0, 1, 29, 30, 45, 59]) {
-          freeze(
-            `2025-12-07T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00Z`
-          );
-          const result = getFurthestForecastTimestamp();
-          expect(result).toMatch(/T(00|06|12|18):00:00\.000Z$/);
-        }
-      }
-    });
-  });
-
   describe("the viewer's timezone must not change the UTC window", () => {
     const zones = [
       "utc",
@@ -124,7 +86,6 @@ describe("forecast window helpers (B2)", () => {
       Settings.defaultZone = zone;
       freeze("2025-07-15T14:45:00Z");
       expect(getEarliestForecastTimestamp()).toBe("2025-07-13T12:00:00.000Z");
-      expect(getFurthestForecastTimestamp()).toBe("2025-07-16T18:00:00.000Z");
     });
 
     it.each(zones)("a viewer in %s gets the same window across their own DST change", (zone) => {
@@ -133,7 +94,6 @@ describe("forecast window helpers (B2)", () => {
       Settings.defaultZone = zone;
       freeze("2025-11-03T12:00:00Z");
       expect(getEarliestForecastTimestamp()).toBe("2025-11-01T12:00:00.000Z");
-      expect(getFurthestForecastTimestamp()).toBe("2025-11-04T12:00:00.000Z");
     });
   });
 });

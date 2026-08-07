@@ -13,6 +13,7 @@ import {
   convertToLocaleDateString,
   formatISODateString
 } from "../../helpers/utils";
+import { getEarliestForecastTimestamp } from "../../helpers/data";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
@@ -292,15 +293,12 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
-  // `/regions/{region}/forecast` defaults to **now → +48h** and `/generation` to the **last
-  // 24h**; neither matches this chart, which plots two days back. Without an explicit window
-  // the top chart has no past forecast at all. Reusing `useGspDeltas`'s window rather than
-  // recomputing guarantees the two agree — and that `useLoadingState` below hits the same
-  // SWR keys, so the indicator still costs no extra request.
-  const nationalWindow = useMemo(
-    () => ({ start: gspWindow.start, end: gspWindow.end }),
-    [gspWindow.start, gspWindow.end]
-  );
+  // Start only — see the note in `pv-remix-chart.tsx`. `/regions/{region}/forecast` starts at
+  // NOW by default, so without this the top chart has no past; the end is left to the API
+  // because the forecast horizon is a per-country fact (GB 36h, NL 48h) and any end we pin
+  // truncates one of them. Not taken from `gspWindow`, which is now empty: the `period`
+  // endpoints default to the window they are pre-warmed on and are asked for nothing.
+  const nationalWindow = useMemo(() => ({ start: getEarliestForecastTimestamp() }), []);
 
   const forecast = useNationalForecast(scope, {
     ...nationalWindow,

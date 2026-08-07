@@ -138,7 +138,18 @@ describe("useMapRegionValues", () => {
     expect(countRequests("/GB/solar/forecasts/period")).toBe(1);
   });
 
-  test("the window it asks for is a range, not a single instant", async () => {
+  /**
+   * The v0 bug this replaced was `useGetGspForecast(selectedTime)`, which set
+   * `start == end == targetTime` and refetched on every tick of the scrubber. The guard is now
+   * stronger than "it is a range": the request carries **no window at all**, so there is no
+   * timestamp in the SWR key that a scrub could move.
+   *
+   * `end_utc` must stay absent for a second reason. The forecast horizon is a per-country fact
+   * — GB publishes 36h ahead, NL 48 — so any end we pin truncates somebody. The previous
+   * `getFurthestForecastTimestamp()` (now +1 day) truncated everybody, and the `period`
+   * endpoints' own defaults are both wider and the window their cache is pre-warmed on.
+   */
+  test("it asks for no window, so no scrub tick can reach the network", async () => {
     const view = renderMap(FIRST);
     await waitFor(() => {
       view.rerender({ targetTime: FIRST });
@@ -148,9 +159,8 @@ describe("useMapRegionValues", () => {
 
     const query = lastQuery("/GB/solar/forecasts/period")!;
     expect(query.get("region_type")).toBe("gsp");
-    expect(query.get("start_utc")).toBeTruthy();
-    expect(query.get("end_utc")).toBeTruthy();
-    expect(query.get("start_utc")).not.toBe(query.get("end_utc"));
+    expect(query.get("start_utc")).toBeNull();
+    expect(query.get("end_utc")).toBeNull();
     // `period` 400s on region_type=national, so the map must never route through it.
     expect(query.get("region_type")).not.toBe("national");
   });

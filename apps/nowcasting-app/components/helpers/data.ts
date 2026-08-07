@@ -50,15 +50,6 @@ const floorToSixHoursUtc = (dt: DateTime<true>): DateTime<true> => {
 };
 
 /**
- * Rounds a DateTime up to the 6-hour boundary at or after it. Idempotent on a boundary.
- */
-const ceilToSixHoursUtc = (dt: DateTime<true>): DateTime<true> => {
-  const utc = dt.toUTC();
-  const floored = floorToSixHoursUtc(utc);
-  return (+floored === +utc ? floored : floored.plus({ hours: 6 })) as DateTime<true>;
-};
-
-/**
  * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
  *
  * Two days prior to now, rounded *down* to the nearest 6-hour interval (00:00, 06:00, 12:00,
@@ -80,18 +71,18 @@ export const getEarliestForecastTimestamp = (): string => {
   return floorToSixHoursUtc(DateTime.now().toUTC().minus({ days: 2 })).toISO();
 };
 
-/**
- * One day from now, rounded *up* to the nearest 6-hour interval in UTC.
+/*
+ * `getFurthestForecastTimestamp` used to live here — now +1 day, ceiled to a 6-hour boundary.
+ * Deleted in Phase 4 wave 4 along with `ceilToSixHoursUtc`, its only caller.
  *
- * B2: two bugs here. The round-up added `hour % 6` rather than `(6 - hour % 6) % 6`, so 14:00
- * became 16:00 — not a 6-hour boundary at all — and the window ended before the data the caller
- * wanted. And, as above, it rounded in the viewer's local timezone against a UTC API.
- *
- * @returns {string} The furthest forecast timestamp in UTC as an ISO-8601 string.
+ * Nothing should pin the END of a forecast window. The horizon is a per-country fact — GB
+ * publishes 36 hours ahead, NL 48 — so a single constant truncates somebody, and this one
+ * truncated everybody: `+1 day` was inherited verbatim from v0, where the variable was even
+ * named `twoDaysFromNowLocal` while adding one day. B2 fixed its broken round-up and its
+ * local-timezone rounding but left the horizon alone, so it shipped clipping 6–12h off GB and
+ * 18–24h off NL. Take whatever the API has: omit `end_utc` and let the documented default
+ * (+48h on `/regions/{region}/forecast`, +2 days on the `period` endpoints) apply.
  */
-export const getFurthestForecastTimestamp = (): string => {
-  return ceilToSixHoursUtc(DateTime.now().toUTC().plus({ days: 1 })).toISO();
-};
 
 // =========================================================================================
 // The v1 value pipeline

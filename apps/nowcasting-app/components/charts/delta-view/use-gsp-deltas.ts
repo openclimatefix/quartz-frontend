@@ -9,12 +9,7 @@ import {
 import type { Scope } from "../../../lib/domain/types";
 import type { PeriodWindow } from "../../../lib/api/v1/queries";
 import useGlobalState from "../../helpers/globalState";
-import {
-  buildRegionBridge,
-  buildRegionValues,
-  getEarliestForecastTimestamp,
-  getFurthestForecastTimestamp
-} from "../../helpers/data";
+import { buildRegionBridge, buildRegionValues } from "../../helpers/data";
 import { DELTA_BUCKET } from "../../../constant";
 import { GspDeltaValue } from "../../types";
 
@@ -61,9 +56,17 @@ export const useGspDeltas = (targetTime: string): GspDeltasResult => {
     [country]
   );
 
-  // Same window as `useMapRegionValues`: floored/ceiled to a 6-hour UTC boundary, so the SWR
-  // key — and therefore the request — is shared with the delta map, not duplicated.
-  const window = { start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() };
+  // No window at all, deliberately. `/forecasts/period` and `/generation/period` both default
+  // to **2 days before → 2 days after now, floored to 6 hours**, and are "served entirely from
+  // a pre-warmed cache (one key per region)" — so the default window is the window that is
+  // actually warmed, and asking for our own risks missing it as well as truncating.
+  //
+  // The forecast horizon is a per-country fact (GB publishes 36h ahead, NL 48h), so ANY end we
+  // pin is wrong for somebody. Take whatever the API has. The old
+  // `{ start: getEarliestForecastTimestamp(), end: getFurthestForecastTimestamp() }` computed a
+  // start identical to the default and an end of now +1 day — clipping 6–12h off GB's horizon
+  // and 18–24h off NL's. Inherited from v0 with no rationale; see docs/phase4-track-g-notes.md.
+  const window = {};
 
   const regions = useRegions(scope);
   const forecast = useForecastPeriod(scope, window);
