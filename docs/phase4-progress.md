@@ -118,6 +118,34 @@ arrangement is an artefact of organic feature growth and has not been rationalis
 time; he thinks there is an easy refactor that serves current needs much better. That
 conversation is where real per-view containers belong.
 
+## Deferred to Phase 5: the aggregation hierarchy is still GB-shaped
+
+Found while reviewing NL (2026-08-06): the delta view reports NL's region type as `gsp`.
+Confirmed hardcoded, in three constants — `DELTA_REGION_TYPE` (`use-gsp-deltas.ts`),
+`MAP_REGION_TYPE` (`use-map-region-values.ts`) and `GSP_REGION_TYPE`
+(`use-gsp-region-data.ts`) — plus the `NationalAggregation` enum itself (GSP / Zone / DNO /
+National), which has no member for NL's `province`. `pages/index.tsx` also forces
+`NationalAggregation.GSP` on entering the delta view.
+
+`components/helpers/aggregationLevels.ts` already derives the correct per-country list from the
+registry plus the manifest, and is tested — but it has **zero production consumers**. Its own
+header comment and `countryState.ts:94-96` both say Phase 4 would rewrite the enum's consumers;
+that did not happen in waves 1–4, which migrated the *data* to v1 while leaving the hierarchy
+GB-shaped.
+
+**Brad's call: leave it, and do it in Phase 5.** The reason is the same one that pulled Mapbox
+feature-state *into* Phase 4 — don't touch the same files twice. The registry's `geo` config is
+keyed by region type, and `buildMapGeometry` still hardcodes the bundled GB shape files, so
+"which region types does this country have" and "where do this country's boundaries come from"
+are one piece of work. Splitting them means rewriting `use-map-region-values`, `use-gsp-deltas`,
+`use-gsp-region-data`, `use-update-map-state-on-click`, `color-guide-bar`, `measuringUnit`,
+`ChartLegend` and `gsp-pv-remix-chart` now, and touching most of them again in Phase 5.
+
+**Not user-visible in the meantime**, which is what makes deferring safe: NL is not entitled on
+the Auth0 tenant, so nobody can select it. If NL is ever entitled before Phase 5 lands, it needs
+a guard restricting it to the national view — the delta and regional views would otherwise send
+`region_type=gsp` for a country that has no GSPs.
+
 ## MUST REVISIT BEFORE PHASE 4 CLOSES
 
 **The DNO double-count is now baked into a second place, deliberately.** Wave 3 builds a
