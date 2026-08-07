@@ -9,7 +9,6 @@ import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { CombinedData, CombinedErrors } from "../types";
 import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
@@ -46,11 +45,6 @@ export const GENERATION_CHART_KEYS = ["GENERATION", "GENERATION_UPDATED"] as con
 const MAX_FORECAST_SERIES = 8;
 
 const PvRemixChart: FC<{
-  // `combinedData` and `combinedErrors` are still passed by `pages/index.tsx` and are
-  // deliberately no longer read: the chart fetches what it needs itself now. The props stay
-  // in the signature until index.tsx is decomposed, which is a separate step.
-  combinedData?: CombinedData;
-  combinedErrors?: CombinedErrors;
   date?: string;
   className?: string;
 }> = ({ className }) => {

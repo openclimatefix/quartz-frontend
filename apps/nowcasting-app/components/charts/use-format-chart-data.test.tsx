@@ -1,6 +1,7 @@
 /**
  * Characterisation tests for `useFormatChartData` — the hook that assembles the national/GSP
- * chart dataset out of six forecast series, two truth series, p-levels and seasonal norms.
+ * chart dataset out of the canonical (v1) forecast, model, N-hour and generation series, plus
+ * p-levels and seasonal norms.
  *
  * These pin CURRENT behaviour, bugs included, because Phase 4 rewrites the pipeline onto the v1
  * data layer and the only safe definition of "the same chart" is "the same numbers out". Where a
@@ -30,9 +31,9 @@ const NATIONAL_CAPACITY = 21504.629;
 // Frozen "now". 10:12Z rounds up to the 10:30 slot, so the past/future boundary is 10:30:00Z.
 // 1 July is BST, which is what makes the settlement-period assertions load-bearing.
 const NOW_BST = "2025-07-01T10:12:00.000Z";
-const BOUNDARY_BST = "2025-07-01T10:30:00+00:00";
-const BEFORE_BST = "2025-07-01T10:00:00+00:00";
-const AFTER_BST = "2025-07-01T11:00:00+00:00";
+const BOUNDARY_BST = "2025-07-01T10:30:00Z";
+const BEFORE_BST = "2025-07-01T10:00:00Z";
+const AFTER_BST = "2025-07-01T11:00:00Z";
 
 const freeze = (iso: string) => {
   const fixed = DateTime.fromISO(iso, { zone: "utc" }).toMillis();
@@ -46,20 +47,27 @@ const render = (props: Props) =>
 
 const run = (props: Props): ChartData[] => render(props).result.current;
 
-// The three arguments the guard requires, in their most boring possible form.
+// A canonical TimeSeries, built from [timeUtc, powerMw] pairs and (optionally) plevels keyed the
+// wire way ("10", "90", …).
+const ts = (points: [string, number | null][], plevelsMw?: Record<string, number>) =>
+  ({
+    regionName: "Great Britain",
+    capacityMw: NATIONAL_CAPACITY,
+    values: points.map(([timeUtc, powerMw]) => ({
+      timeUtc,
+      powerMw,
+      ...(plevelsMw ? { plevelsMw } : {})
+    }))
+  } as any);
+
+// The three arguments the guard requires, in their most boring possible form: a primary
+// forecast, one generation series, and a time trigger.
 const baseProps = (overrides: Partial<Props> = {}): Props => ({
-  forecastData: [],
-  pvRealDayAfterData: [],
-  pvRealDayInData: [],
+  forecastSeries: ts([]),
+  generationSeries: [{ key: "GENERATION", series: ts([]) }],
   timeTrigger: "tick",
   ...overrides
 });
-
-const fc = (targetTime: string, mw: number, plevels?: Record<string, number>) =>
-  ({ targetTime, expectedPowerGenerationMegawatts: mw, ...(plevels ? { plevels } : {}) } as any);
-
-const pv = (datetimeUtc: string, kw: number | null | undefined) =>
-  ({ datetimeUtc, solarGenerationKw: kw } as any);
 
 const at = (data: ChartData[], formattedDate: string): Record<string, any> => {
   const found = data.filter((d) => d.formattedDate === formattedDate);
@@ -79,36 +87,38 @@ afterEach(() => {
 });
 
 describe("the guard", () => {
-  test("returns [] unless forecastData, both truth series and timeTrigger are all present", () => {
+  test("returns [] unless forecastSeries, every generationSeries entry and timeTrigger are all present", () => {
     expect(run(baseProps())).toEqual([]);
-    for (const missing of [
-      "forecastData",
-      "pvRealDayAfterData",
-      "pvRealDayInData",
-      "timeTrigger"
-    ] as const) {
-      const props = baseProps({ forecastData: [fc(AFTER_BST, 100)] });
-      delete (props as any)[missing];
-      expect(run(props)).toEqual([]);
-    }
+
+    expect(run(baseProps({ forecastSeries: undefined }))).toEqual([]);
+    expect(run(baseProps({ timeTrigger: undefined }))).toEqual([]);
+    expect(
+      run(baseProps({ generationSeries: [{ key: "GENERATION", series: undefined }] }))
+    ).toEqual([]);
   });
 
-  // Empty arrays are truthy, so "no data yet" and "data, but none of it" are the same input here
-  // and the guard lets the empty case through to produce an empty chart.
-  test("empty-but-present arrays pass the guard and produce an empty dataset", () => {
+  // Empty arrays/series are truthy, so "no data yet" and "data, but none of it" are the same
+  // input here and the guard lets the empty case through to produce an empty chart.
+  test("empty-but-present series pass the guard and produce an empty dataset", () => {
     expect(run(baseProps())).toEqual([]);
   });
 });
 
 describe("past/future forecast split", () => {
   test("a targetTime after now is FORECAST only", () => {
-    const datum = at(run(baseProps({ forecastData: [fc(AFTER_BST, 123)] })), "2025-07-01T11:00");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[AFTER_BST, 123]]) })),
+      "2025-07-01T11:00"
+    );
     expect(datum.FORECAST).toBe(123);
     expect(datum.PAST_FORECAST).toBeUndefined();
   });
 
   test("a targetTime before now is PAST_FORECAST only", () => {
-    const datum = at(run(baseProps({ forecastData: [fc(BEFORE_BST, 77)] })), "2025-07-01T10:00");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[BEFORE_BST, 77]]) })),
+      "2025-07-01T10:00"
+    );
     expect(datum.PAST_FORECAST).toBe(77);
     expect(datum.FORECAST).toBeUndefined();
   });
@@ -117,7 +127,10 @@ describe("past/future forecast split", () => {
   // on the chart instead of leaving a one-slot gap. This is the case that breaks whenever the
   // rounding of "now" changes, so it is pinned hard.
   test("a targetTime EXACTLY equal to now is written to both FORECAST and PAST_FORECAST", () => {
-    const datum = at(run(baseProps({ forecastData: [fc(BOUNDARY_BST, 55)] })), "2025-07-01T10:30");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 55]]) })),
+      "2025-07-01T10:30"
+    );
     expect(datum.FORECAST).toBe(55);
     expect(datum.PAST_FORECAST).toBe(55);
     expect(datum.FORECAST).toBe(datum.PAST_FORECAST);
@@ -128,7 +141,10 @@ describe("past/future forecast split", () => {
   test("the boundary is the rounded-up 30-minute slot, not the raw clock", () => {
     const data = run(
       baseProps({
-        forecastData: [fc("2025-07-01T10:15:00+00:00", 1), fc("2025-07-01T10:29:00+00:00", 2)]
+        forecastSeries: ts([
+          ["2025-07-01T10:15:00Z", 1],
+          ["2025-07-01T10:29:00Z", 2]
+        ])
       })
     );
     expect(at(data, "2025-07-01T10:15").PAST_FORECAST).toBe(1);
@@ -139,7 +155,7 @@ describe("past/future forecast split", () => {
 
   test("equality is instant-based, so a different ISO spelling of the boundary still splits both ways", () => {
     const datum = at(
-      run(baseProps({ forecastData: [fc("2025-07-01T11:30:00+01:00", 9)] })),
+      run(baseProps({ forecastSeries: ts([["2025-07-01T11:30:00+01:00", 9]]) })),
       "2025-07-01T11:30"
     );
     expect(datum.FORECAST).toBe(9);
@@ -148,10 +164,14 @@ describe("past/future forecast split", () => {
 });
 
 describe("the N-hour series", () => {
-  test("fourHourData produces N_HOUR_FORECAST / N_HOUR_PAST_FORECAST, both at the boundary", () => {
+  test("nHourSeries produces N_HOUR_FORECAST / N_HOUR_PAST_FORECAST, both at the boundary", () => {
     const data = run(
       baseProps({
-        fourHourData: [fc(BEFORE_BST, 10), fc(BOUNDARY_BST, 20), fc(AFTER_BST, 30)]
+        nHourSeries: ts([
+          [BEFORE_BST, 10],
+          [BOUNDARY_BST, 20],
+          [AFTER_BST, 30]
+        ])
       })
     );
     expect(at(data, "2025-07-01T10:00")).toMatchObject({ N_HOUR_PAST_FORECAST: 10 });
@@ -167,8 +187,8 @@ describe("the N-hour series", () => {
   // `nHourForecast` only decides the KEY PREFIX via a truthiness check on `forecast_horizon`;
   // it never filters or shifts anything, so the numbers are identical for 1h and 8h.
   test("the nHourForecast global state does not change the values, only that the N_HOUR keys are used", () => {
-    const fourHourData = [fc(AFTER_BST, 42)];
-    const view = render(baseProps({ fourHourData }));
+    const nHourSeries = ts([[AFTER_BST, 42]]);
+    const view = render(baseProps({ nHourSeries }));
     expect(at(view.result.current, "2025-07-01T11:00").N_HOUR_FORECAST).toBe(42);
 
     act(() => setGlobalState("nHourForecast", 8));
@@ -183,22 +203,30 @@ describe("the N-hour series", () => {
   test("nHourForecast of 0 makes the N-hour series overwrite FORECAST", () => {
     act(() => setGlobalState("nHourForecast", 0));
     const datum = at(
-      run(baseProps({ forecastData: [fc(AFTER_BST, 100)], fourHourData: [fc(AFTER_BST, 5)] })),
+      run(
+        baseProps({
+          forecastSeries: ts([[AFTER_BST, 100]]),
+          nHourSeries: ts([[AFTER_BST, 5]])
+        })
+      ),
       "2025-07-01T11:00"
     );
     expect(datum.FORECAST).toBe(5);
     expect(datum.N_HOUR_FORECAST).toBeUndefined();
   });
 
-  // fourHourData is merged AFTER the settlement-period / seasonal loop has already run over the
+  // nHourSeries is merged AFTER the settlement-period / seasonal loop has already run over the
   // map's keys, so a timestamp that only the N-hour series knows about never gets them.
   // CHARACTERISATION: current behaviour is wrong — for national, every row should carry the
   // seasonal norms regardless of which series introduced the timestamp.
-  test("a timestamp only present in fourHourData gets no seasonal norms", () => {
+  test("a timestamp only present in nHourSeries gets no seasonal norms", () => {
     const data = run(
       baseProps({
-        forecastData: [fc(AFTER_BST, 100)],
-        fourHourData: [fc(AFTER_BST, 90), fc("2025-07-01T12:00:00+00:00", 80)]
+        forecastSeries: ts([[AFTER_BST, 100]]),
+        nHourSeries: ts([
+          [AFTER_BST, 90],
+          ["2025-07-01T12:00:00Z", 80]
+        ])
       })
     );
     expect(at(data, "2025-07-01T11:00").SEASONAL_MEAN).toBeDefined();
@@ -212,9 +240,20 @@ describe("the merge", () => {
   test("timestamps present in only some series merge into one row per timestamp", () => {
     const data = run(
       baseProps({
-        pvRealDayAfterData: [pv(BEFORE_BST, 1000)],
-        pvRealDayInData: [pv(BEFORE_BST, 2000), pv("2025-07-01T09:30:00+00:00", 3000)],
-        forecastData: [fc(BEFORE_BST, 50), fc(AFTER_BST, 60)]
+        generationSeries: [
+          { key: "GENERATION_UPDATED", series: ts([[BEFORE_BST, 1]]) },
+          {
+            key: "GENERATION",
+            series: ts([
+              [BEFORE_BST, 2],
+              ["2025-07-01T09:30:00Z", 3]
+            ])
+          }
+        ],
+        forecastSeries: ts([
+          [BEFORE_BST, 50],
+          [AFTER_BST, 60]
+        ])
       })
     );
     expect(data).toHaveLength(3);
@@ -227,13 +266,15 @@ describe("the merge", () => {
     expect(at(data, "2025-07-01T11:00")).toMatchObject({ FORECAST: 60 });
   });
 
-  test("row order follows first-write order: day-after truth, day-in truth, forecast, models", () => {
+  test("row order follows first-write order: generationSeries in order, then forecast, then models", () => {
     const data = run(
       baseProps({
-        pvRealDayAfterData: [pv("2025-07-01T09:00:00+00:00", 1000)],
-        pvRealDayInData: [pv("2025-07-01T08:00:00+00:00", 1000)],
-        forecastData: [fc("2025-07-01T07:00:00+00:00", 1)],
-        nationalSatOnly: [fc("2025-07-01T06:00:00+00:00", 1)]
+        generationSeries: [
+          { key: "GENERATION_UPDATED", series: ts([["2025-07-01T09:00:00Z", 1000]]) },
+          { key: "GENERATION", series: ts([["2025-07-01T08:00:00Z", 1000]]) }
+        ],
+        forecastSeries: ts([["2025-07-01T07:00:00Z", 1]]),
+        modelSeries: [{ key: "SAT_ONLY", series: ts([["2025-07-01T06:00:00Z", 1]]) }]
       })
     );
     expect(data.map((d) => d.formattedDate)).toEqual([
@@ -247,8 +288,8 @@ describe("the merge", () => {
   test("formattedDate is set by the first writer and never overwritten", () => {
     const data = run(
       baseProps({
-        pvRealDayAfterData: [pv(BEFORE_BST, 1000)],
-        forecastData: [fc(BEFORE_BST, 50)]
+        generationSeries: [{ key: "GENERATION_UPDATED", series: ts([[BEFORE_BST, 1000]]) }],
+        forecastSeries: ts([[BEFORE_BST, 50]])
       })
     );
     expect(data).toHaveLength(1);
@@ -256,95 +297,69 @@ describe("the merge", () => {
   });
 
   // The merge key is the RAW datetime string, not a normalised instant. Every current producer
-  // emits "+00:00", so this does not bite today — but it is exactly the assumption a v1 client
-  // that emits "Z" (or seconds-less timestamps) would break, and the failure mode is silent:
+  // emits "Z", so this does not bite today — but it is exactly the assumption a producer that
+  // emits "+00:00" (or seconds-less timestamps) would break, and the failure mode is silent:
   // two rows, same formattedDate, each holding half the series.
   // CHARACTERISATION: current behaviour is wrong — the map should be keyed on the parsed instant
   // (or a normalised ISO string), so equivalent spellings merge.
   test("two spellings of the same instant do NOT merge, and produce duplicate formattedDates", () => {
     const data = run(
       baseProps({
-        pvRealDayAfterData: [pv("2025-07-01T10:00:00Z", 1000)],
-        forecastData: [fc("2025-07-01T10:00:00+00:00", 50)]
+        generationSeries: [
+          { key: "GENERATION_UPDATED", series: ts([["2025-07-01T10:00:00+00:00", 1000]]) }
+        ],
+        forecastSeries: ts([["2025-07-01T10:00:00Z", 50]])
       })
     );
     expect(data).toHaveLength(2);
     expect(data.map((d) => d.formattedDate)).toEqual(["2025-07-01T10:00", "2025-07-01T10:00"]);
-    expect(data[0].GENERATION_UPDATED).toBe(1);
+    expect(data[0].GENERATION_UPDATED).toBe(1000);
     expect(data[0].PAST_FORECAST).toBeUndefined();
     expect(data[1].PAST_FORECAST).toBe(50);
   });
 
-  test("a later series wins a key collision on the same timestamp", () => {
+  test("a later point wins a key collision on the same timestamp", () => {
     // Both truth series write different keys, so collisions only happen within a series or
     // between the plain forecast and an N-hour series sharing a key (see the 0-hour case above).
     const data = run(
       baseProps({
-        pvRealDayInData: [pv(BEFORE_BST, 1000), pv(BEFORE_BST, 4000)]
+        generationSeries: [
+          {
+            key: "GENERATION",
+            series: ts([
+              [BEFORE_BST, 1000],
+              [BEFORE_BST, 4000]
+            ])
+          }
+        ]
       })
     );
     expect(data).toHaveLength(1);
-    expect(data[0].GENERATION).toBe(4);
+    expect(data[0].GENERATION).toBe(4000);
   });
 });
 
-describe("kW to MW conversion", () => {
-  test("GENERATION and GENERATION_UPDATED are divided by 1000", () => {
+describe("model series write whatever key the config names", () => {
+  test.each([
+    "INTRADAY_ECMWF_ONLY",
+    "PVNET_DAY_AHEAD",
+    "PVNET_INTRADAY",
+    "MET_OFFICE_ONLY",
+    "SAT_ONLY"
+  ])("%s produces %s / PAST_%s with the same boundary rule", (key) => {
     const data = run(
       baseProps({
-        pvRealDayAfterData: [pv(BEFORE_BST, 12345)],
-        pvRealDayInData: [pv(BEFORE_BST, 1_000_000)]
+        modelSeries: [
+          {
+            key,
+            series: ts([
+              [BEFORE_BST, 1],
+              [BOUNDARY_BST, 2],
+              [AFTER_BST, 3]
+            ])
+          }
+        ]
       })
-    );
-    expect(at(data, "2025-07-01T10:00")).toMatchObject({
-      GENERATION_UPDATED: 12.345,
-      GENERATION: 1000
-    });
-  });
-
-  test("a genuine zero survives as 0, not as absent", () => {
-    const data = run(baseProps({ pvRealDayInData: [pv(BEFORE_BST, 0)] }));
-    const datum = at(data, "2025-07-01T10:00");
-    expect(datum.GENERATION).toBe(0);
-    expect("GENERATION" in datum).toBe(true);
-  });
-
-  // CHARACTERISATION: current behaviour is wrong — `null / 1000` is 0, so a night-time gap or a
-  // failed reading is plotted as a hard zero indistinguishable from a real zero. It should be
-  // left undefined so the line breaks. (B8 is the same class of bug in the CSV export.)
-  test("a null reading becomes 0 rather than being dropped", () => {
-    const datum = at(
-      run(baseProps({ pvRealDayInData: [pv(BEFORE_BST, null)] })),
-      "2025-07-01T10:00"
-    );
-    expect(datum.GENERATION).toBe(0);
-  });
-
-  // CHARACTERISATION: current behaviour is wrong — an absent `solarGenerationKw` yields NaN,
-  // which recharts renders as a gap but which also poisons getZoomYMax and any downstream sum.
-  test("a missing reading becomes NaN", () => {
-    const datum = at(
-      run(baseProps({ pvRealDayInData: [pv(BEFORE_BST, undefined)] })),
-      "2025-07-01T10:00"
-    );
-    expect(Number.isNaN(datum.GENERATION)).toBe(true);
-  });
-});
-
-describe("the five extra model series", () => {
-  const models: [keyof Props, string][] = [
-    ["nationalIntradayECMWFOnlyData", "INTRADAY_ECMWF_ONLY"],
-    ["nationalPvnetDayAhead", "PVNET_DAY_AHEAD"],
-    ["nationalPvnetIntraday", "PVNET_INTRADAY"],
-    ["nationalMetOfficeOnly", "MET_OFFICE_ONLY"],
-    ["nationalSatOnly", "SAT_ONLY"]
-  ];
-
-  test.each(models)("%s produces %s / PAST_%s with the same boundary rule", (prop, key) => {
-    const data = run(
-      baseProps({
-        [prop]: [fc(BEFORE_BST, 1), fc(BOUNDARY_BST, 2), fc(AFTER_BST, 3)]
-      } as Partial<Props>)
     );
     expect(at(data, "2025-07-01T10:00")[`PAST_${key}`]).toBe(1);
     expect(at(data, "2025-07-01T10:00")[key]).toBeUndefined();
@@ -354,23 +369,25 @@ describe("the five extra model series", () => {
     expect(at(data, "2025-07-01T11:00")[`PAST_${key}`]).toBeUndefined();
   });
 
-  test("all five models merge onto the same timestamp as the main forecast and the truth series", () => {
-    const series = [fc(AFTER_BST, 7)];
+  test("all model series merge onto the same timestamp as the main forecast and the truth series", () => {
+    const series = ts([[AFTER_BST, 7]]);
     const data = run(
       baseProps({
-        forecastData: [fc(AFTER_BST, 100)],
-        pvRealDayInData: [pv(AFTER_BST, 5000)],
-        nationalIntradayECMWFOnlyData: series,
-        nationalPvnetDayAhead: series,
-        nationalPvnetIntraday: series,
-        nationalMetOfficeOnly: series,
-        nationalSatOnly: series
+        forecastSeries: ts([[AFTER_BST, 100]]),
+        generationSeries: [{ key: "GENERATION", series: ts([[AFTER_BST, 5000]]) }],
+        modelSeries: [
+          { key: "INTRADAY_ECMWF_ONLY", series },
+          { key: "PVNET_DAY_AHEAD", series },
+          { key: "PVNET_INTRADAY", series },
+          { key: "MET_OFFICE_ONLY", series },
+          { key: "SAT_ONLY", series }
+        ]
       })
     );
     expect(data).toHaveLength(1);
     expect(data[0]).toMatchObject({
       FORECAST: 100,
-      GENERATION: 5,
+      GENERATION: 5000,
       INTRADAY_ECMWF_ONLY: 7,
       PVNET_DAY_AHEAD: 7,
       PVNET_INTRADAY: 7,
@@ -379,20 +396,26 @@ describe("the five extra model series", () => {
     });
   });
 
-  test("an undefined model series contributes nothing at all", () => {
-    const data = run(baseProps({ forecastData: [fc(AFTER_BST, 100)], nationalSatOnly: undefined }));
+  test("a model series that has not loaded yet contributes nothing at all, and does not block", () => {
+    const data = run(
+      baseProps({
+        forecastSeries: ts([[AFTER_BST, 100]]),
+        modelSeries: [{ key: "SAT_ONLY", series: undefined }]
+      })
+    );
+    expect(at(data, "2025-07-01T11:00").FORECAST).toBe(100);
     expect(Object.keys(data[0]).some((k) => k.includes("SAT_ONLY"))).toBe(false);
   });
 });
 
 describe("p-levels", () => {
   const plevels = {
-    plevel_2: 2,
-    plevel_10: 5,
-    plevel_25: 8,
-    plevel_75: 12,
-    plevel_90: 15,
-    plevel_98: 20
+    "2": 2,
+    "10": 5,
+    "25": 8,
+    "75": 12,
+    "90": 15,
+    "98": 20
   };
 
   test("one range key per selected pair, and PROBABILISTIC_UPPER_BOUND is the widest upper bound", () => {
@@ -403,7 +426,7 @@ describe("p-levels", () => {
       ])
     );
     const datum = at(
-      run(baseProps({ forecastData: [fc(AFTER_BST, 100, plevels)] })),
+      run(baseProps({ forecastSeries: ts([[AFTER_BST, 100]], plevels) })),
       "2025-07-01T11:00"
     );
     expect(datum[getPLevelRangeKey(10, 90)]).toEqual([5, 15]);
@@ -419,9 +442,9 @@ describe("p-levels", () => {
         [2, 98]
       ])
     );
-    const partial = { plevel_2: 2, plevel_10: 5, plevel_90: 15 }; // no plevel_98
+    const partial = { "2": 2, "10": 5, "90": 15 }; // no plevel 98
     const datum = at(
-      run(baseProps({ forecastData: [fc(AFTER_BST, 100, partial)] })),
+      run(baseProps({ forecastSeries: ts([[AFTER_BST, 100]], partial) })),
       "2025-07-01T11:00"
     );
     expect(datum[getPLevelRangeKey(2, 98)]).toBeUndefined();
@@ -432,7 +455,7 @@ describe("p-levels", () => {
   test("if no selected pair is available, no probabilistic keys are written at all", () => {
     act(() => setGlobalState("pLevels", [[2, 98]]));
     const datum = at(
-      run(baseProps({ forecastData: [fc(AFTER_BST, 100, { plevel_10: 5, plevel_90: 15 })] })),
+      run(baseProps({ forecastSeries: ts([[AFTER_BST, 100]], { "10": 5, "90": 15 }) })),
       "2025-07-01T11:00"
     );
     expect(datum.PROBABILISTIC_UPPER_BOUND).toBeUndefined();
@@ -442,7 +465,7 @@ describe("p-levels", () => {
   test("an empty pLevels selection writes nothing, even when the payload has plevels", () => {
     act(() => setGlobalState("pLevels", []));
     const datum = at(
-      run(baseProps({ forecastData: [fc(AFTER_BST, 100, plevels)] })),
+      run(baseProps({ forecastSeries: ts([[AFTER_BST, 100]], plevels) })),
       "2025-07-01T11:00"
     );
     expect(datum.PROBABILISTIC_UPPER_BOUND).toBeUndefined();
@@ -450,13 +473,16 @@ describe("p-levels", () => {
   });
 
   test("a forecast with no plevels object writes nothing", () => {
-    const datum = at(run(baseProps({ forecastData: [fc(AFTER_BST, 100)] })), "2025-07-01T11:00");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[AFTER_BST, 100]]) })),
+      "2025-07-01T11:00"
+    );
     expect(Object.keys(datum).some((k) => k.startsWith("PROBABILISTIC"))).toBe(false);
   });
 
   test("p-levels are written for past forecasts too", () => {
     const datum = at(
-      run(baseProps({ forecastData: [fc(BEFORE_BST, 100, plevels)] })),
+      run(baseProps({ forecastSeries: ts([[BEFORE_BST, 100]], plevels) })),
       "2025-07-01T10:00"
     );
     expect(datum[getPLevelRangeKey(10, 90)]).toEqual([5, 15]);
@@ -481,7 +507,10 @@ describe("settlement period vs UTC half-hour slot", () => {
     expect(settlementPeriod - (utcSlotIndex + 1)).toBe(2);
 
     // and the hook takes the seasonal value from the UTC slot, not from the settlement period
-    const datum = at(run(baseProps({ forecastData: [fc(BOUNDARY_BST, 100)] })), "2025-07-01T10:30");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]) })),
+      "2025-07-01T10:30"
+    );
     expect(datum.SEASONAL_MEAN).toBeCloseTo(
       nationalMetrics.data["7"]["1"].mean[utcSlotIndex] * NATIONAL_CAPACITY,
       6
@@ -494,7 +523,7 @@ describe("settlement period vs UTC half-hour slot", () => {
 
   test("in GMT the two agree (settlement period is the UTC slot index plus one)", () => {
     freeze("2025-01-15T10:12:00.000Z");
-    const instant = utcInstant("2025-01-15T10:30:00+00:00");
+    const instant = utcInstant("2025-01-15T10:30:00Z");
     const utcSlotIndex = getUtcHalfHourIndex(instant);
     const settlementPeriod = getSettlementPeriodForDate(instant);
     expect(utcSlotIndex).toBe(21);
@@ -502,7 +531,7 @@ describe("settlement period vs UTC half-hour slot", () => {
     expect(settlementPeriod - (utcSlotIndex + 1)).toBe(0);
 
     const datum = at(
-      run(baseProps({ forecastData: [fc("2025-01-15T10:30:00+00:00", 100)] })),
+      run(baseProps({ forecastSeries: ts([["2025-01-15T10:30:00Z", 100]]) })),
       "2025-01-15T10:30"
     );
     expect(datum.SEASONAL_MEAN).toBeCloseTo(
@@ -513,8 +542,8 @@ describe("settlement period vs UTC half-hour slot", () => {
 
   test("settlement periods run 1-48 from London midnight", () => {
     expect(
-      ["2025-01-15T00:00:00+00:00", "2025-01-15T00:30:00+00:00", "2025-01-15T23:30:00+00:00"].map(
-        (iso) => getSettlementPeriodForDate(utcInstant(iso))
+      ["2025-01-15T00:00:00Z", "2025-01-15T00:30:00Z", "2025-01-15T23:30:00Z"].map((iso) =>
+        getSettlementPeriodForDate(utcInstant(iso))
       )
     ).toEqual([1, 2, 48]);
   });
@@ -524,7 +553,7 @@ describe("seasonal norms", () => {
   // National only: the norms are a national-capacity-scaled dataset with no GSP equivalent.
   test("gsp: true skips all seasonal keys", () => {
     const datum = at(
-      run(baseProps({ forecastData: [fc(BOUNDARY_BST, 100)], gsp: true })),
+      run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]), gsp: true })),
       "2025-07-01T10:30"
     );
     expect(datum.FORECAST).toBe(100);
@@ -535,7 +564,10 @@ describe("seasonal norms", () => {
     const slot = 21;
     const metrics = nationalMetrics.data["7"]["1"];
     const [p10, p90] = metrics.pLevels;
-    const datum = at(run(baseProps({ forecastData: [fc(BOUNDARY_BST, 100)] })), "2025-07-01T10:30");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]) })),
+      "2025-07-01T10:30"
+    );
     expect(datum.SEASONAL_BOUNDS).toEqual([["P10", "P90"]]);
     expect(datum.SEASONAL_MEAN).toBeCloseTo(metrics.mean[slot] * NATIONAL_CAPACITY, 6);
     expect(datum.SEASONAL_P10).toBeCloseTo(p10[slot] * NATIONAL_CAPACITY, 6);
@@ -552,7 +584,7 @@ describe("seasonal norms", () => {
   test("a GMT date reads the January arrays", () => {
     freeze("2025-01-15T10:12:00.000Z");
     const datum = at(
-      run(baseProps({ forecastData: [fc("2025-01-15T10:30:00+00:00", 100)] })),
+      run(baseProps({ forecastSeries: ts([["2025-01-15T10:30:00Z", 100]]) })),
       "2025-01-15T10:30"
     );
     expect(datum.SEASONAL_MEAN).toBeCloseTo(0.1202 * NATIONAL_CAPACITY, 6);
@@ -563,14 +595,17 @@ describe("seasonal norms", () => {
   test("the seasonal lookup is by the row's own date, not by today", () => {
     // "now" is 1 July; the row is 15 January, and must read January's norms.
     const datum = at(
-      run(baseProps({ forecastData: [fc("2025-01-15T10:30:00+00:00", 100)] })),
+      run(baseProps({ forecastSeries: ts([["2025-01-15T10:30:00Z", 100]]) })),
       "2025-01-15T10:30"
     );
     expect(datum.SEASONAL_MEAN).toBeCloseTo(0.1202 * NATIONAL_CAPACITY, 6);
   });
 
   test("norms are scaled by the national capacity constant, so the ratio is the raw fraction", () => {
-    const datum = at(run(baseProps({ forecastData: [fc(BOUNDARY_BST, 100)] })), "2025-07-01T10:30");
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]) })),
+      "2025-07-01T10:30"
+    );
     expect(datum.SEASONAL_MEAN / NATIONAL_CAPACITY).toBeCloseTo(0.4283, 9);
   });
 });
@@ -580,8 +615,8 @@ describe("delta mode", () => {
     const datum = at(
       run(
         baseProps({
-          forecastData: [fc(BEFORE_BST, 70)],
-          pvRealDayInData: [pv(BEFORE_BST, 100_000)]
+          forecastSeries: ts([[BEFORE_BST, 70]]),
+          generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 100]]) }]
         })
       ),
       "2025-07-01T10:00"
@@ -595,9 +630,11 @@ describe("delta mode", () => {
       run(
         baseProps({
           delta: true,
-          forecastData: [fc(BEFORE_BST, 70)],
-          pvRealDayAfterData: [pv(BEFORE_BST, 100_000)],
-          pvRealDayInData: [pv(BEFORE_BST, 200_000)]
+          forecastSeries: ts([[BEFORE_BST, 70]]),
+          generationSeries: [
+            { key: "GENERATION_UPDATED", series: ts([[BEFORE_BST, 100]]) },
+            { key: "GENERATION", series: ts([[BEFORE_BST, 200]]) }
+          ]
         })
       ),
       "2025-07-01T10:00"
@@ -611,8 +648,8 @@ describe("delta mode", () => {
       run(
         baseProps({
           delta: true,
-          forecastData: [fc(BEFORE_BST, 70)],
-          pvRealDayInData: [pv(BEFORE_BST, 40_000)]
+          forecastSeries: ts([[BEFORE_BST, 70]]),
+          generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 40]]) }]
         })
       ),
       "2025-07-01T10:00"
@@ -627,8 +664,9 @@ describe("delta mode", () => {
       run(
         baseProps({
           delta: true,
-          forecastData: [fc(BOUNDARY_BST, 100)],
-          fourHourData: [fc(BOUNDARY_BST, 60)]
+          generationSeries: [{ key: "GENERATION", series: ts([]) }],
+          forecastSeries: ts([[BOUNDARY_BST, 100]]),
+          nHourSeries: ts([[BOUNDARY_BST, 60]])
         })
       ),
       "2025-07-01T10:30"
@@ -641,8 +679,9 @@ describe("delta mode", () => {
       run(
         baseProps({
           delta: true,
-          forecastData: [fc(AFTER_BST, 100)],
-          fourHourData: [fc(AFTER_BST, 130)]
+          generationSeries: [{ key: "GENERATION", series: ts([]) }],
+          forecastSeries: ts([[AFTER_BST, 100]]),
+          nHourSeries: ts([[AFTER_BST, 130]])
         })
       ),
       "2025-07-01T11:00"
@@ -656,7 +695,13 @@ describe("delta mode", () => {
   // for "no comparison possible" so the delta map/chart can omit the row.
   test("no comparable data yields DELTA 0, indistinguishable from a genuine zero delta", () => {
     const noData = at(
-      run(baseProps({ delta: true, forecastData: [fc(AFTER_BST, 100)] })),
+      run(
+        baseProps({
+          delta: true,
+          generationSeries: [{ key: "GENERATION", series: ts([]) }],
+          forecastSeries: ts([[AFTER_BST, 100]])
+        })
+      ),
       "2025-07-01T11:00"
     );
     expect(noData.DELTA).toBe(0);
@@ -666,8 +711,8 @@ describe("delta mode", () => {
       run(
         baseProps({
           delta: true,
-          forecastData: [fc(BEFORE_BST, 50)],
-          pvRealDayInData: [pv(BEFORE_BST, 50_000)]
+          forecastSeries: ts([[BEFORE_BST, 50]]),
+          generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 50]]) }]
         })
       ),
       "2025-07-01T10:00"
@@ -685,7 +730,8 @@ describe("delta mode", () => {
     const data = run(
       baseProps({
         delta: true,
-        pvRealDayInData: [pv(BEFORE_BST, 10_000)]
+        forecastSeries: ts([]),
+        generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 10]]) }]
       })
     );
     expect(data[0].DELTA).toBe(0);
@@ -694,37 +740,21 @@ describe("delta mode", () => {
 
 describe("the canonical (v1) inputs", () => {
   /*
-   * The national chart now passes canonical `TimeSeries` values and a config-driven list of
-   * (key, series) pairs instead of the six named v0 props. The v0 props above are still
-   * accepted because the GSP and delta views have not migrated yet, so both dialects are
-   * exercised. What matters here is that the series list is data, not code: an arbitrary key
-   * produces that key, and the number of generation series is a country fact.
+   * The national, GSP and delta views all now pass canonical `TimeSeries` values and a
+   * config-driven list of (key, series) pairs. What matters here is that the series list is
+   * data, not code: an arbitrary key produces that key, and the number of generation series is
+   * a country fact.
    */
-  const ts = (points: [string, number | null][], plevelsMw?: Record<string, number>) =>
-    ({
-      regionName: "Great Britain",
-      capacityMw: 21504.629,
-      values: points.map(([timeUtc, powerMw]) => ({
-        timeUtc,
-        powerMw,
-        ...(plevelsMw ? { plevelsMw } : {})
-      }))
-    } as any);
-
-  // v1 emits "Z" where v0 emitted "+00:00", and the merge key is the raw string, so every
-  // canonical fixture here uses the "Z" spelling the data layer actually produces.
-  const BEFORE_Z = "2025-07-01T10:00:00Z";
-  const AFTER_Z = "2025-07-01T11:00:00Z";
 
   const canonical = (overrides: Partial<Props> = {}): Props => ({
-    forecastSeries: ts([[AFTER_Z, 100]]),
-    generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_Z, 5]]) }],
+    forecastSeries: ts([[AFTER_BST, 100]]),
+    generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 5]]) }],
     timeTrigger: "tick",
     ...overrides
   });
 
   test("the primary series writes FORECAST with the same past/future rule", () => {
-    const data = run(canonical({ forecastSeries: ts([[BEFORE_Z, 10]]), generationSeries: [] }));
+    const data = run(canonical({ forecastSeries: ts([[BEFORE_BST, 10]]), generationSeries: [] }));
     expect(at(data, "2025-07-01T10:00").PAST_FORECAST).toBe(10);
     expect(at(data, "2025-07-01T10:00").FORECAST).toBeUndefined();
   });
@@ -741,8 +771,8 @@ describe("the canonical (v1) inputs", () => {
     const data = run(
       canonical({
         modelSeries: [
-          { key: "SAT_ONLY", series: ts([[AFTER_Z, 7]]) },
-          { key: "SOME_FUTURE_MODEL", series: ts([[AFTER_Z, 8]]) }
+          { key: "SAT_ONLY", series: ts([[AFTER_BST, 7]]) },
+          { key: "SOME_FUTURE_MODEL", series: ts([[AFTER_BST, 8]]) }
         ]
       })
     );
@@ -771,7 +801,7 @@ describe("the canonical (v1) inputs", () => {
   test("a two-observer country waits for both", () => {
     const oneLoaded = canonical({
       generationSeries: [
-        { key: "GENERATION", series: ts([[BEFORE_Z, 5]]) },
+        { key: "GENERATION", series: ts([[BEFORE_BST, 5]]) },
         { key: "GENERATION_UPDATED", series: undefined }
       ]
     });
@@ -779,8 +809,8 @@ describe("the canonical (v1) inputs", () => {
 
     const bothLoaded = canonical({
       generationSeries: [
-        { key: "GENERATION", series: ts([[BEFORE_Z, 5]]) },
-        { key: "GENERATION_UPDATED", series: ts([[BEFORE_Z, 6]]) }
+        { key: "GENERATION", series: ts([[BEFORE_BST, 5]]) },
+        { key: "GENERATION_UPDATED", series: ts([[BEFORE_BST, 6]]) }
       ]
     });
     expect(at(run(bothLoaded), "2025-07-01T10:00")).toMatchObject({
@@ -793,9 +823,8 @@ describe("the canonical (v1) inputs", () => {
     expect(run(canonical({ forecastSeries: undefined }))).toEqual([]);
   });
 
-  // The canonical model distinguishes "no reading" from a genuine zero. v0 turned `null` into
-  // a hard 0 (pinned above, in the kW-to-MW block); the canonical path drops the point so the
-  // line breaks instead.
+  // The canonical model distinguishes "no reading" from a genuine zero: a null point is dropped
+  // so the line breaks, rather than being written as a hard 0.
   test("a null reading is dropped rather than plotted as zero", () => {
     const data = run(
       canonical({
@@ -803,8 +832,8 @@ describe("the canonical (v1) inputs", () => {
           {
             key: "GENERATION",
             series: ts([
-              [BEFORE_Z, null],
-              [AFTER_Z, 3]
+              [BEFORE_BST, null],
+              [AFTER_BST, 3]
             ])
           }
         ]
@@ -818,7 +847,7 @@ describe("the canonical (v1) inputs", () => {
   test("p-levels come off the primary series with the canonical key shape", () => {
     act(() => setGlobalState("pLevels", [[10, 90]]));
     const datum = at(
-      run(canonical({ forecastSeries: ts([[AFTER_Z, 100]], { "10": 5, "90": 15 }) })),
+      run(canonical({ forecastSeries: ts([[AFTER_BST, 100]], { "10": 5, "90": 15 }) })),
       "2025-07-01T11:00"
     );
     expect(datum[getPLevelRangeKey(10, 90)]).toEqual([5, 15]);
@@ -826,45 +855,45 @@ describe("the canonical (v1) inputs", () => {
   });
 
   test("the N-hour series is passed as a TimeSeries too", () => {
-    const data = run(canonical({ nHourSeries: ts([[AFTER_Z, 42]]) }));
+    const data = run(canonical({ nHourSeries: ts([[AFTER_BST, 42]]) }));
     expect(at(data, "2025-07-01T11:00").N_HOUR_FORECAST).toBe(42);
+  });
+
+  // A genuine zero is not a null point: it must survive as 0, not be dropped or coerced away.
+  test("a genuine zero survives as 0, not as absent", () => {
+    const data = run(
+      canonical({ generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 0]]) }] })
+    );
+    const datum = at(data, "2025-07-01T10:00");
+    expect(datum.GENERATION).toBe(0);
+    expect("GENERATION" in datum).toBe(true);
   });
 });
 
-describe("B6: the useMemo dependency array omits four inputs", () => {
+describe("B6: the useMemo dependency array omits delta and gsp", () => {
   /*
-   * Known bug, deliberately NOT fixed here (Phase 4 owns it). `nationalMetOfficeOnly`,
-   * `nationalSatOnly`, `delta` and `gsp` are read inside the memo but missing from its deps, so
-   * changing any of them alone leaves the previously computed dataset on screen. The tests below
-   * assert the STALE result on purpose.
+   * Known bug, deliberately NOT fixed here (Phase 4 owns it). `delta` and `gsp` are read inside
+   * the memo but missing from its deps, so changing either alone leaves the previously computed
+   * dataset on screen. The tests below assert the STALE result on purpose.
    *
    * WHEN B6 IS FIXED: invert every `toBe(false)` / `toBeUndefined()` in this block to the fresh
    * value. That is the intended failure — this block failing means the fix landed, not that
    * something regressed.
    */
-  const stableForecast = [fc(AFTER_BST, 100)];
-  const stableDayAfter = [pv(AFTER_BST, 1000)];
-  const stableDayIn = [pv(AFTER_BST, 2000)];
+  // Hoisted so their object identity is stable across rerenders: the whole point of this block
+  // is to prove the memo does NOT re-run when only `delta`/`gsp` change, and a fresh `ts(...)`
+  // call on every `stableProps()` invocation would give every prop a new identity regardless,
+  // masking the bug instead of pinning it.
+  const stableForecastSeries = ts([[AFTER_BST, 100]]);
+  const stableGenerationSeries = [
+    { key: "GENERATION_UPDATED", series: ts([[AFTER_BST, 1000]]) },
+    { key: "GENERATION", series: ts([[AFTER_BST, 2000]]) }
+  ];
   const stableProps = (overrides: Partial<Props> = {}): Props => ({
-    forecastData: stableForecast,
-    pvRealDayAfterData: stableDayAfter,
-    pvRealDayInData: stableDayIn,
+    forecastSeries: stableForecastSeries,
+    generationSeries: stableGenerationSeries,
     timeTrigger: "tick",
     ...overrides
-  });
-
-  test("adding nationalSatOnly does not update the output (stale)", () => {
-    const view = render(stableProps());
-    const before = view.result.current;
-    view.rerender(stableProps({ nationalSatOnly: [fc(AFTER_BST, 42)] }));
-    expect(view.result.current).toBe(before); // same array instance: the memo never re-ran
-    expect(view.result.current[0].SAT_ONLY).toBeUndefined();
-  });
-
-  test("adding nationalMetOfficeOnly does not update the output (stale)", () => {
-    const view = render(stableProps());
-    view.rerender(stableProps({ nationalMetOfficeOnly: [fc(AFTER_BST, 42)] }));
-    expect((view.result.current[0] as Record<string, any>).MET_OFFICE_ONLY).toBeUndefined();
   });
 
   test("turning delta on does not update the output (stale)", () => {
@@ -880,19 +909,19 @@ describe("B6: the useMemo dependency array omits four inputs", () => {
     expect(view.result.current[0].SEASONAL_MEAN).toBeDefined();
   });
 
-  test("a dep that IS in the array (forecastData) does force a recompute, proving the harness works", () => {
+  test("a dep that IS in the array (forecastSeries) does force a recompute, proving the harness works", () => {
     const view = render(stableProps());
     const before = view.result.current;
     view.rerender(
       stableProps({
-        forecastData: [fc(AFTER_BST, 999)],
-        nationalSatOnly: [fc(AFTER_BST, 42)]
+        forecastSeries: ts([[AFTER_BST, 999]]),
+        delta: true
       })
     );
     expect(view.result.current).not.toBe(before);
     expect(view.result.current[0].FORECAST).toBe(999);
-    // and the previously-ignored prop is picked up as a side effect of the recompute, which is
-    // what makes B6 intermittent rather than reliably broken.
-    expect((view.result.current[0] as Record<string, any>).SAT_ONLY).toBe(42);
+    // and the previously-ignored `delta` is picked up as a side effect of the recompute, which
+    // is what makes B6 intermittent rather than reliably broken.
+    expect(view.result.current[0].DELTA).toBeDefined();
   });
 });

@@ -1,11 +1,10 @@
 import {
-  NationalEndpointLabel,
   NationalEndpointStates,
   LoadingState,
-  SitesEndpointLabel,
   SitesEndpointStates,
   EndpointState
 } from "../types.d";
+import { NationalEndpointLabel, SitesEndpointLabel } from "../endpoint-labels";
 import {
   CheckInlineSmall,
   ClockInlineSmall,

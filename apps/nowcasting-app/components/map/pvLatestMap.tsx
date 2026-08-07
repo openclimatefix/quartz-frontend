@@ -7,7 +7,6 @@ import { VIEWS } from "../../constant";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
-import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import {
@@ -37,15 +36,6 @@ const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr
 
 type PvLatestMapProps = {
   className?: string;
-  /**
-   * Still accepted so `pages/index.tsx` does not have to change in this step, and no longer
-   * read: the map's values now come from the v1 data layer via `useMapRegionValues`.
-   * `CombinedData` dissolves key by key as each view migrates.
-   */
-  combinedData: CombinedData;
-  combinedLoading: CombinedLoading;
-  combinedValidating: CombinedValidating;
-  combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };

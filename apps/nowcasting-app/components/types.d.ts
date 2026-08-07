@@ -1,5 +1,10 @@
 import { DELTA_BUCKET } from "../constant";
-import { components } from "../types/quartz-api";
+import type { NationalEndpointKeysType, SitesEndpointKeysType } from "./endpoint-labels";
+
+// `NationalEndpointLabel` and `SitesEndpointLabel` used to be declared here as `export enum`.
+// They are values, and a value exported from a `.d.ts` is `undefined` at runtime — see
+// `./endpoint-labels.ts`, which now owns them.
+export type { NationalEndpointKeysType, SitesEndpointKeysType } from "./endpoint-labels";
 
 export type LoadingState<T> = {
   initialLoadComplete: boolean;
@@ -7,22 +12,6 @@ export type LoadingState<T> = {
   message: string;
   endpointStates?: T;
 };
-export enum NationalEndpointLabel {
-  nationalForecast = "National Forecast",
-  pvRealDayIn = "PV Live Estimate",
-  pvRealDayAfter = "PV Live Updated",
-  nationalNHour = "N-hour forecast",
-  allGspForecast = "All GSP Forecast",
-  allGspReal = "All GSP PV Live"
-}
-export type NationalEndpointKeysType = keyof typeof NationalEndpointLabel;
-
-export enum SitesEndpointLabel {
-  allSites = "All Sites",
-  sitePvForecast = "Site PV Forecast",
-  sitePvActual = "Site PV Actual"
-}
-export type SitesEndpointKeysType = keyof typeof SitesEndpointLabel;
 export type NationalEndpointStates = {
   type: "national";
 } & {
@@ -65,7 +54,7 @@ export type FcAllResData = {
     };
   }[];
 };
-type ForecastValue = {
+export type ForecastValue = {
   targetTime: string;
   expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized?: number | null;
@@ -78,121 +67,34 @@ type ForecastValue = {
     plevel_98?: number;
   };
 };
-type ElexonForecastValue = {
-  timestamp: string;
-  expected_power_generation_megawatts: number;
-};
+export type ForecastData = ForecastValue[];
 
-type ForecastData = ForecastValue[];
-
-type PvRealData = {
+export type PvRealData = {
   datetimeUtc: string;
   solarGenerationKw: number;
 }[];
-type NationalNHourData = ForecastValue[];
-type AllGspRealData = GspRealData[];
-type CombinedData = {
-  nationalForecastData: ForecastData | undefined;
-  nationalIntradayECMWFOnlyData?: ForecastData | undefined;
-  nationalPvnetDayAhead?: ForecastData | undefined;
-  nationalPvnetIntraday?: ForecastData | undefined;
-  nationalMetOfficeOnly?: ForecastData | undefined;
-  nationalSatOnly?: ForecastData | undefined;
-  pvRealDayInData: PvRealData | undefined;
-  pvRealDayAfterData: PvRealData | undefined;
-  nationalNHourData: NationalNHourData | undefined;
-  allGspSystemData: components["schemas"]["Location"][] | undefined;
-  // TODO: slight mashup of custom and generated types atm,
-  //  ideally should be able to use just the generated for API typings
-  allGspForecastData:
-    | GspAllForecastData
-    | components["schemas"]["OneDatetimeManyForecastValues"][]
-    | undefined;
-  allGspRealData: AllGspRealData | components["schemas"]["GSPYieldGroupByDatetime"][] | undefined;
-  gspDeltas: Map<string, GspDeltaValue> | undefined;
-};
-type CombinedLoading = {
-  nationalForecastLoading: boolean;
-  pvRealDayInLoading: boolean;
-  pvRealDayAfterLoading: boolean;
-  nationalNHourLoading: boolean;
-  allGspSystemLoading: boolean;
-  allGspForecastLoading: boolean;
-  allGspRealLoading: boolean;
-};
-type CombinedValidating = {
-  nationalForecastValidating: boolean;
-  pvRealDayInValidating: boolean;
-  pvRealDayAfterValidating: boolean;
-  nationalNHourValidating: boolean;
-  allGspSystemValidating: boolean;
-  allGspForecastValidating: boolean;
-  allGspRealValidating: boolean;
-};
-type CombinedErrors = {
-  nationalForecastError: any;
-  pvRealDayInError: any;
-  pvRealDayAfterError: any;
-  nationalNHourError: any;
-  allGspSystemError: any;
-  allGspForecastError: any;
-  allGspRealError: any;
-};
-type SitesCombinedLoading = {
+// `CombinedData`, `CombinedLoading`, `CombinedValidating` and `CombinedErrors` used to sit
+// here: four parallel god-objects assembled in `pages/index.tsx` and threaded through every
+// view. They dissolved key by key as each view moved onto `hooks/data/*` and are gone as of
+// Phase 4 wave 4, along with `AllGspRealData`/`GspAllForecastData`/`NationalNHourData` and this
+// file's dependency on `types/quartz-api`. The sites equivalents below survive: sites are
+// Phase 5 and still on v0.
+export type SitesCombinedLoading = {
   allSitesLoading: boolean;
   sitePvForecastLoading: boolean;
   sitePvActualLoading: boolean;
 };
-type SitesCombinedValidating = {
+export type SitesCombinedValidating = {
   allSitesValidating: boolean;
   sitePvForecastValidating: boolean;
   sitePvActualValidating: boolean;
 };
-type SitesCombinedErrors = {
+export type SitesCombinedErrors = {
   allSitesError: any;
   sitesPvForecastError: any;
   sitesPvActualError: any;
 };
-type GspEntity = {
-  label: string;
-  gspId: number;
-  gspName: string;
-  gspGroup: string;
-  regionName: string;
-  installedCapacityMw: number;
-  rmMode: boolean;
-};
-type GspEntities = GspEntity[];
-
-type GspRealData = GspEntity & {
-  gspYields: [
-    {
-      datetimeUtc: string;
-      solarGenerationKw: number;
-      regime: string;
-      gsp: GspEntity;
-    }
-  ];
-};
-type GspAllForecastData = {
-  forecasts: {
-    location: GspEntity;
-    model: {
-      name: string;
-      version: string;
-    };
-    forecastCreationTime: string;
-    historic: boolean;
-    forecastValues: ForecastValue[];
-    inputDataLastUpdated: {
-      gsp: string;
-      nwp: string;
-      pv: string;
-      satellite: string;
-    };
-  }[];
-};
-type GspDeltaValue = {
+export type GspDeltaValue = {
   gspId: number;
   gspRegion: string;
   gspInstalledCapacity: number;

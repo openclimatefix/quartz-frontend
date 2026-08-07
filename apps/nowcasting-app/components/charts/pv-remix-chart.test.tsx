@@ -40,27 +40,6 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
   __esModule: true,
   useUser: () => ({ user: null, isLoading: false, error: undefined })
 }));
-// `NationalEndpointLabel` is an `export enum` inside `components/types.d.ts`. Next's compiler
-// emits a real object for it, but TypeScript treats a `.d.ts` as ambient, so under ts-jest
-// there is nothing to read at runtime and `DataLoadingChartStatus` dies on `key in undefined`.
-// Supplying the enum's values here keeps the REAL status component under test rather than
-// stubbing it out. Fixing `types.d.ts` is out of this agent's file ownership.
-jest.mock("../types.d", () => ({
-  __esModule: true,
-  NationalEndpointLabel: {
-    nationalForecast: "National Forecast",
-    pvRealDayIn: "PV Live Estimate",
-    pvRealDayAfter: "PV Live Updated",
-    nationalNHour: "N-hour forecast",
-    allGspForecast: "All GSP Forecast",
-    allGspReal: "All GSP PV Live"
-  },
-  SitesEndpointLabel: {
-    allSites: "All Sites",
-    sitePvForecast: "Site PV Forecast",
-    sitePvActual: "Site PV Actual"
-  }
-}));
 // Mapbox never loads in jsdom and the GSP drill-down chart is not what is under test here.
 jest.mock("./gsp-pv-remix-chart", () => ({
   __esModule: true,

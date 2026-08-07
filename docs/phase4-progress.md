@@ -82,38 +82,41 @@ Running as four waves, sequenced on file ownership and data dependencies:
 - **Wave 4, by hand.** `pages/index.tsx` decomposition into per-view containers, deleting the v0
   fetches each track orphaned, and retiring `types/quartz-api.d.ts` once its last consumer is gone.
 
-### Wave 4 — the remaining work, verified against the tree
+### Wave 4 — done
 
-Waves 1–3 are **done and verified**: `npx tsc --noEmit` exit 0, `npx jest` **31 suites / 943 tests**
-green (baseline was 24/858). Per-track detail in `phase4-track-{a,b,c,d,e,f}-notes.md`. The GSP
-multi-select tooltip regression Track E flagged is **already fixed** (`memberLabels` on
-`useGspAggregateData`, resolved from the `useRegions` data it already holds — no extra request).
+Waves 1–3 were done and verified at 31 suites / 943 tests. **Wave 4 is now done too:**
+`npx tsc --noEmit` exit 0, `npx jest` **30 suites / 879 tests** green. Detail in
+`phase4-track-g-notes.md`.
 
-Everything below is one file at a time, no agents needed:
+The test count falls because three characterisation suites went with the code they characterised
+— `data.geo.test.ts` (43 cases on `generateGeoJsonForecastData`) deleted whole, `data.test.ts`
+reduced from 23 cases to its 7 B2 window-helper cases, and `use-format-chart-data.test.tsx`'s
+four kW→MW cases retired with the v0 adapter that did the dividing. No behaviour lost coverage:
+everything else in that last suite was ported onto the canonical dialect test for test.
 
-1. **Delete the orphaned v0 fetches in `pages/index.tsx`.** All confirmed to have no remaining
-   consumer: `useGetGspForecast` and its call (the per-scrub-tick refetch, `pages/index.tsx:62`);
-   the five comparison-model national forecasts (`nationalIntradayECMWFOnlyData`,
-   `nationalMetOfficeOnly`, `nationalSatOnly`, `nationalPvnetDayAhead`, `nationalPvnetIntraday`);
-   and `allGspSystemData` (`/system/GB/gsp/`) once `currentYields` goes with the delta computation.
-   Until this lands the national forecast is genuinely double-fetched.
-2. **Delete the v0 dialect in `use-format-chart-data.tsx`** — every `@deprecated` prop and both
-   `fromV0*` adapters. **Verified safe:** all three call sites (`pv-remix-chart.tsx`,
-   `delta-view/delta-view-chart.tsx`, `gsp-pv-remix-chart/index.tsx`) pass only v1 props; grep for
-   the deprecated names returns nothing at any caller.
-3. **Move the two `export enum`s out of `components/types.d.ts`** into a real `.ts` module. They
-   are values, and under ts-jest a value exported from a `.d.ts` is `undefined` at runtime — which
-   is why several suites carry a `jest.mock` workaround and `hooks/data/use-loading-state.ts`
-   duplicates the label list. Deleting those workarounds is the proof it worked.
-4. **Decompose `pages/index.tsx`** (~818 lines) into per-view containers, dissolving what is left
-   of `CombinedData`/`CombinedLoading`/`CombinedValidating`/`CombinedErrors` (D1's
-   rebuilt-every-render objects). `Header` keeps an unread `combinedData` prop purely because
-   `pages/index.tsx` still passes it — both sides go together.
-5. **Retire `types/quartz-api.d.ts`** (C1). Remaining importers: `components/types.d.ts`,
-   `components/helpers/data.ts`, `components/helpers/data.test.ts`,
-   `components/helpers/data.geo.test.ts`, `pages/index.tsx`.
-6. **Leave the sites/satellite paths alone** — `SITES_API_PREFIX`, `sitesMap.tsx`,
-   `solar-site-view/*` and `satelliteLayer.ts` are Phase 5, still on v0 by design.
+All six planned items landed:
+
+1. **Orphaned v0 fetches deleted from `pages/index.tsx`** — 818 → 169 lines. The national
+   forecast is no longer double-fetched, and the per-scrub-tick `useGetGspForecast` is gone.
+2. **The v0 dialect deleted from `use-format-chart-data.tsx`** — both `fromV0*` adapters and all
+   ten `@deprecated` props. Track F had already moved the delta view's top chart, which was the
+   prerequisite.
+3. **The two `export enum`s moved** out of `components/types.d.ts` into
+   `components/endpoint-labels.ts`. Both workarounds they forced — the `jest.mock("../types.d")`
+   block and `use-loading-state.ts`'s duplicated label list — are deleted, which is the proof.
+4. **`CombinedData`/`CombinedLoading`/`CombinedValidating`/`CombinedErrors` dissolved**, along
+   with `computeLoadingState` and the `loadingState` global, which had no readers left.
+5. **`types/quartz-api.d.ts` retired**, and the v0 value pipeline deleted from `helpers/data.ts`.
+6. **Sites left alone**, as planned — now quarantined in `components/hooks/useSitesViewData.ts`.
+
+**Deviation from the plan, deliberate:** "per-view containers" is not achievable as written. All
+three maps stay mounted inside `#map-container` while the charts live in `SideLayout`, so a
+per-view component would have to render into both halves at once. Extracted per *concern*
+instead (`useSitesViewData`, `useMapChrome`, `DeprecatedDomainNotice`). **Brad wants a proper
+layout/screen-real-estate rationalisation discussed at the end of this phase** — the current
+arrangement is an artefact of organic feature growth and has not been rationalised in a long
+time; he thinks there is an easy refactor that serves current needs much better. That
+conversation is where real per-view containers belong.
 
 ## MUST REVISIT BEFORE PHASE 4 CLOSES
 

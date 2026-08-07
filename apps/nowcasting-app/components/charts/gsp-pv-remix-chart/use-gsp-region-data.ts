@@ -226,7 +226,8 @@ export const useGspAggregateData = (
   );
 
   const memberLabels = useMemo(
-    () => (enabled && gspIds ? gspIds.map((id) => bridge.byGspId.get(id)?.label ?? String(id)) : []),
+    () =>
+      enabled && gspIds ? gspIds.map((id) => bridge.byGspId.get(id)?.label ?? String(id)) : [],
     [enabled, gspIds, bridge]
   );
 

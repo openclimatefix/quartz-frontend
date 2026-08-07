@@ -1,124 +1,54 @@
 import { useUser } from "@auth0/nextjs-auth0/client";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
-import Layout from "../components/layout/layout";
-import { PvLatestMap } from "../components/map";
-import SideLayout from "../components/side-layout";
-import PvRemixChart from "../components/charts/pv-remix-chart";
-import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Cookies from "cookies";
-import Header from "../components/layout/header";
-import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, VIEWS } from "../constant";
-import useGlobalState, { useCountryState, get30MinNow } from "../components/helpers/globalState";
-import {
-  AllGspRealData,
-  AllSites,
-  CombinedData,
-  CombinedErrors,
-  CombinedLoading,
-  CombinedSitesData,
-  CombinedValidating,
-  ElexonForecastValue,
-  ForecastData,
-  GspAllForecastData,
-  NationalNHourData,
-  PvRealData,
-  SitePvActual,
-  SitePvForecast,
-  SitesPvActual,
-  SitesPvForecast
-} from "../components/types";
-import { components } from "../types/quartz-api";
-import {
-  formatISODateString,
-  getDeltaBucket,
-  computeLoadingState,
-  getSitesLoadingState
-} from "../components/helpers/utils";
-import { ActiveUnit, NationalAggregation } from "../components/map/types";
-import DeltaMap from "../components/map/deltaMap";
 import * as Sentry from "@sentry/nextjs";
-import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
+
+import Layout from "../components/layout/layout";
+import Header from "../components/layout/header";
+import DeprecatedDomainNotice from "../components/layout/deprecated-domain-notice";
+import SideLayout from "../components/side-layout";
+import { PvLatestMap } from "../components/map";
+import DeltaMap from "../components/map/deltaMap";
 import SitesMap from "../components/map/sitesMap";
-import { useAggregateSitesDataForTimestamp } from "../components/hooks/useAggregateSitesDataForTimestamp";
+import PvRemixChart from "../components/charts/pv-remix-chart";
+import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
+import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
+import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
+import { useMapChrome } from "../components/hooks/use-map-chrome";
+import { useSitesViewData } from "../components/hooks/useSitesViewData";
+import useGlobalState, { useCountryState } from "../components/helpers/globalState";
+import { VIEWS } from "../constant";
+import { NationalAggregation } from "../components/map/types";
 import {
   CookieStorageKeys,
   setArraySettingInCookieStorage
 } from "../components/helpers/cookieStorage";
-import { useLoadDataFromApi } from "../components/hooks/useLoadDataFromApi";
-import {
-  filterCompactFutureData,
-  filterCompactHistoricData,
-  calculateHistoricDataStartFromCompactValuesIntervalInMinutes,
-  getOldestTimestampFromCompactForecastValues,
-  getOldestTimestampFromForecastValues,
-  calculateHistoricDataStartFromForecastValuesIntervalInMinutes,
-  getEarliestForecastTimestamp,
-  getFurthestForecastTimestamp
-} from "../components/helpers/data";
-import { DateTime } from "luxon";
 
-const useGetGspForecast = (selectedTime: string) => {
-  const selectedDatetime = DateTime.fromISO(selectedTime);
-  const targetTime = `${String(selectedDatetime.toISO()).slice(0, 19)}+00:00`;
-  const {
-    data: allGspForecastData,
-    isLoading: allGspForecastFutureLoading,
-    isValidating: allGspForecastFutureValidating,
-    error: allGspForecastFutureError
-  } = useLoadDataFromApi<
-    // TODO: see if we can fully integrate API paths/params into type safe functions
-    // paths["/v0/solar/GB/gsp/forecast/all/"]["get"]["responses"]["200"]["content"]["application/json"]
-    components["schemas"]["OneDatetimeManyForecastValues"][]
-  >(
-    `${API_PREFIX}/solar/GB/gsp/forecast/all/?compact=true&start_datetime_utc=${encodeURIComponent(
-      targetTime
-    )}&end_datetime_utc=${encodeURIComponent(targetTime)}`
-  );
-  return {
-    allGspForecastData,
-    allGspForecastFutureLoading,
-    allGspForecastFutureValidating,
-    allGspForecastFutureError
-  };
-};
+/**
+ * The dashboard shell.
+ *
+ * Since Phase 4 this page fetches nothing for the national and regional views — each view owns
+ * its own queries through `hooks/data/*`, so what is left here is genuinely page-level: which
+ * view is showing, the layout that puts maps on one side and charts on the other, and the
+ * cross-view chrome (Sentry identity, cookie-persisted settings, Mapbox resize/recentre).
+ *
+ * The one exception is Solar Sites, still on v0 by design and quarantined in
+ * `useSitesViewData` — its map and its chart sit in different halves of the layout, so the data
+ * has to be held one level above both of them.
+ */
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
   const [view, setView] = useGlobalState("view");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
-  const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const selectedTime = String(DateTime.fromISO(selectedISOTime).toUTC().toISO()).slice(0, 16);
-  const [timeNow] = useGlobalState("timeNow");
   const { user, isLoading, error } = useUser();
-  const [maps] = useGlobalState("maps");
-  const [lat] = useCountryState("lat");
-  const [lng] = useCountryState("lng");
-  const [zoom] = useCountryState("zoom");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
-  const [, setLoadingState] = useGlobalState("loadingState");
-  const [nHourForecast] = useGlobalState("nHourForecast");
   const [nationalAggregationLevel, setNationalAggregationLevel] = useCountryState(
     "nationalAggregationLevel"
   );
   const [, setClickedGspId] = useCountryState("clickedGspId");
-
-  const [actualsLastFetch30MinISO, setActualsLastFetch30MinISO] = useState(get30MinNow(-30));
-  const [actualsHistoricBackwardIntervalMinutes, setActualsHistoricBackwardIntervalMinutes] =
-    useState(0);
-  const [allGspActualFuture, setAllGspActualFuture] =
-    useState<components["schemas"]["GSPYieldGroupByDatetime"][]>();
-  const [allGspActualHistory, setAllGspActualHistory] =
-    useState<components["schemas"]["GSPYieldGroupByDatetime"][]>();
-
-  const [isOldNowcastingDomain, setIsOldNowcastingDomain] = useState(false);
-
-  useEffect(() => {
-    setIsOldNowcastingDomain(window.location.host.includes("nowcasting.io"));
-  }, []);
 
   // Local state used to set initial state on server side render, then updated by global state
   const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
@@ -141,6 +71,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     if (view === VIEWS.DELTA) {
       setNationalAggregationLevel(NationalAggregation.GSP);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);
 
   const currentView = (v: VIEWS) => v === view;
@@ -158,554 +89,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   }, [user, isLoading, error]);
 
-  useEffect(() => {
-    maps.forEach((map) => {
-      if (map.getCanvas()?.style.width === "400px") {
-        console.log("-- -- -- resizing map");
-        map.resize();
-      }
-    });
-  }, [view, maps]);
+  useMapChrome(view, combinedDashboardModeActive);
 
-  useEffect(() => {
-    maps.forEach((map) => {
-      console.log("-- -- -- resizing map");
-      map.resize();
-    });
-  }, [combinedDashboardModeActive]);
-
-  useEffect(() => {
-    maps.forEach((map, index) => {
-      if (map.getContainer().dataset.title === view) return;
-
-      if (map.getCenter().lat !== lat || map.getCenter().lng !== lng) {
-        map.setCenter([lng, lat]);
-      }
-      if (map.getZoom() !== zoom) {
-        map.setZoom(zoom);
-      }
-    });
-  }, [lat, lng, zoom]);
-
-  const {
-    data: nationalForecastData,
-    isLoading: nationalForecastLoading,
-    isValidating: nationalForecastValidating,
-    error: nationalForecastError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?historic=false&only_forecast_values=true&model_name=blend&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  const {
-    data: nationalIntradayECMWFOnlyData,
-    isLoading: nationalIntradayECMWFOnlyLoading,
-    isValidating: nationalIntradayECMWFOnlyValidating,
-    error: nationalIntradayECMWFOnlyError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_ecmwf_only&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  if (nationalIntradayECMWFOnlyError) {
-    Sentry.captureMessage(
-      `ECMWF forecast data load error: ${JSON.stringify(nationalIntradayECMWFOnlyError)}`
-    );
-  }
-  const {
-    data: nationalPvnetDayAhead,
-    isLoading: nationalPvnetDayAheadLoading,
-    isValidating: nationalPvnetDayAheadValidating,
-    error: nationalPvnetDayAheadError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_day_ahead&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  if (nationalPvnetDayAheadError) {
-    Sentry.captureMessage(
-      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetDayAheadError)}`
-    );
-  }
-  const {
-    data: nationalPvnetIntraday,
-    isLoading: nationalPvnetIntradayLoading,
-    isValidating: nationalPvnetIntradayValidating,
-    error: nationalPvnetIntradayError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0 // Only load this once at beginning
-    }
-  );
-  if (nationalPvnetIntradayError) {
-    Sentry.captureMessage(
-      `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
-    );
-  }
-  const {
-    data: nationalMetOfficeOnly,
-    isLoading: nationalMetOfficeOnlyLoading,
-    isValidating: nationalMetOfficeOnlyValidating,
-    error: nationalMetOfficeOnlyError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_met_office_only&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0
-    }
-  );
-  if (nationalMetOfficeOnlyError) {
-    Sentry.captureMessage(
-      `Met Office forecast data load error: ${JSON.stringify(nationalMetOfficeOnlyError)}`
-    );
-  }
-  const {
-    data: nationalSatOnly,
-    isLoading: nationalSatOnlyLoading,
-    isValidating: nationalSatOnlyValidating,
-    error: nationalSatOnlyError
-  } = useLoadDataFromApi<ForecastData>(
-    `${API_PREFIX}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_sat_only&trend_adjuster_on=true`,
-    {
-      keepPreviousData: true,
-      refreshInterval: 0
-    }
-  );
-  if (nationalSatOnlyError) {
-    Sentry.captureMessage(
-      `Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`
-    );
-  }
-
-  const {
-    data: pvRealDayInData,
-    isLoading: pvRealDayInLoading,
-    isValidating: pvRealDayInValidating,
-    error: pvRealDayInError
-  } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=in-day`);
-  const {
-    data: pvRealDayAfterData,
-    isLoading: pvRealDayAfterLoading,
-    isValidating: pvRealDayAfterValidating,
-    error: pvRealDayAfterError
-  } = useLoadDataFromApi<PvRealData>(`${API_PREFIX}/solar/GB/national/pvlive?regime=day-after`);
-  const nMinuteForecast = nHourForecast * 60;
-  const {
-    data: nationalNHourData,
-    isLoading: nationalNHourLoading,
-    isValidating: nationalNHourValidating,
-    error: nationalNHourError
-  } = useLoadDataFromApi<NationalNHourData>(
-    showNHourView
-      ? `${API_PREFIX}/solar/GB/national/forecast?forecast_horizon_minutes=${nMinuteForecast}&historic=true&only_forecast_values=true`
-      : null
-  );
-  const {
-    data: allGspSystemData,
-    isLoading: allGspSystemLoading,
-    isValidating: allGspSystemValidating,
-    error: allGspSystemError
-  } = useLoadDataFromApi<components["schemas"]["Location"][]>(`${API_PREFIX}/system/GB/gsp/`);
-
-  //////////////////////////////////////
-  // ALL GSP FORECAST DATA
-  //////////////////////////////////////
-  // Load future all GSP forecast data (every 5 minutes)
-  const {
-    allGspForecastData,
-    allGspForecastFutureLoading,
-    allGspForecastFutureValidating,
-    allGspForecastFutureError
-  } = useGetGspForecast(selectedTime);
-
-  const allGspForecastLoading = useMemo(() => {
-    return allGspForecastFutureLoading;
-  }, [allGspForecastFutureLoading]);
-  const allGspForecastValidating = useMemo(() => {
-    return allGspForecastFutureValidating;
-  }, [allGspForecastFutureValidating]);
-  const allGspForecastError = useMemo(() => {
-    return allGspForecastFutureError;
-  }, [allGspForecastFutureError]);
-
-  //////////////////////////////////////
-  // ALL GSP REAL DATA
-  //////////////////////////////////////
-
-  // Load all new GSP real data (every 5 minutes)
-  const {
-    data: allGspActualFutureData,
-    isLoading: allGspActualFutureLoading,
-    isValidating: allGspActualFutureValidating,
-    error: allGspActualFutureError
-  } = useLoadDataFromApi<
-    components["schemas"]["GSPYieldGroupByDatetime"][]
-    // paths["/v0/solar/GB/gsp/pvlive/all"]["get"]["responses"]["200"]["content"]["application/json"]
-  >(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?regime=in-day&compact=true&compact=true&start_datetime_utc=${encodeURIComponent(
-      `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`
-    )}`,
-    {
-      onSuccess: (data) => {
-        const forecastHistoricStart = get30MinNow(actualsHistoricBackwardIntervalMinutes);
-        const prev30MinFromNowISO = `${get30MinNow(-30)}:00+00:00`;
-        setActualsLastFetch30MinISO(prev30MinFromNowISO);
-        setAllGspActualHistory(
-          allGspActualHistory
-            ? filterCompactHistoricData<components["schemas"]["GSPYieldGroupByDatetime"]>(
-                [...allGspActualHistory, ...data],
-                forecastHistoricStart,
-                prev30MinFromNowISO
-              )
-            : filterCompactHistoricData<components["schemas"]["GSPYieldGroupByDatetime"]>(
-                data,
-                forecastHistoricStart,
-                prev30MinFromNowISO
-              )
-        );
-        setAllGspActualFuture(
-          filterCompactFutureData<components["schemas"]["GSPYieldGroupByDatetime"]>(
-            data,
-            prev30MinFromNowISO
-          )
-        );
-      }
-    }
-  );
-
-  // Load historic all GSP real data (once, at page load)
-  const {
-    data: allGspActualHistoricData,
-    isLoading: allGspActualHistoricLoading,
-    isValidating: allGspActualHistoricValidating,
-    error: allGspActualHistoricError
-  } = useLoadDataFromApi<components["schemas"]["GSPYieldGroupByDatetime"][]>(
-    `${API_PREFIX}/solar/GB/gsp/pvlive/all?compact=true&end_datetime_utc=${encodeURIComponent(
-      `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`
-    )}`,
-    {
-      refreshInterval: 0, // Only load this once at beginning
-      onSuccess: (data) => {
-        if (!data) return;
-
-        const oldestTimestamp =
-          getOldestTimestampFromCompactForecastValues<
-            components["schemas"]["GSPYieldGroupByDatetime"]
-          >(data);
-        const historicBackwardIntervalMinutes =
-          calculateHistoricDataStartFromCompactValuesIntervalInMinutes<
-            components["schemas"]["GSPYieldGroupByDatetime"]
-          >(data);
-        const prev30MinNowISO = `${get30MinNow(-30)}:00+00:00`;
-        setActualsLastFetch30MinISO(prev30MinNowISO);
-        setActualsHistoricBackwardIntervalMinutes(historicBackwardIntervalMinutes);
-        setAllGspActualHistory(
-          filterCompactHistoricData<components["schemas"]["GSPYieldGroupByDatetime"]>(
-            data,
-            oldestTimestamp,
-            prev30MinNowISO
-          )
-        );
-      }
-    }
-  );
-
-  // Combine historic and future real data & fetch states
-  const allGspRealData = useMemo(() => {
-    return allGspActualHistory && allGspActualFuture
-      ? [...allGspActualHistory, ...allGspActualFuture]
-      : [];
-  }, [allGspActualHistory, allGspActualFuture]);
-  const allGspRealLoading = useMemo(() => {
-    return allGspActualHistoricLoading || allGspActualFutureLoading;
-  }, [allGspActualHistoricLoading, allGspActualFutureLoading]);
-  const allGspActualValidating = useMemo(() => {
-    return allGspActualHistoricValidating || allGspActualFutureValidating;
-  }, [allGspActualHistoricValidating, allGspActualFutureValidating]);
-  const allGspActualError = useMemo(() => {
-    return allGspActualHistoricError || allGspActualFutureError;
-  }, [allGspActualHistoricError, allGspActualFutureError]);
-
-  //////////////////////////////////////
-
-  const currentYieldSet = useMemo(
-    () =>
-      allGspRealData?.find((datum) => {
-        return datum.datetimeUtc.slice(0, 16) === `${selectedTime}`;
-      }),
-    [allGspRealData, selectedTime]
-  );
-  const currentYields = useMemo(
-    () =>
-      currentYieldSet
-        ? Object.entries(currentYieldSet.generationKwByGspId).map(([key, val]) => {
-            const gspLocationInfo = allGspSystemData?.find((gsp) => gsp.gspId === Number(key));
-            return {
-              gspId: key,
-              gspRegion: gspLocationInfo?.regionName || "No name",
-              gspCapacity: gspLocationInfo?.installedCapacityMw || 0,
-              yield: val
-            };
-          })
-        : [],
-    [currentYieldSet, allGspSystemData]
-  );
-  const gspDeltas = useMemo(() => {
-    console.log("about to calc deltas");
-    if (allGspForecastLoading || allGspRealLoading) return new Map();
-
-    let tempGspDeltas = new Map();
-    const currentForecasts = allGspForecastData?.find((forecast) => {
-      return forecast.datetimeUtc.slice(0, 16) === `${selectedTime}`;
-    });
-    for (let i = 0; i < currentYields.length; i++) {
-      const currentYield = currentYields[i];
-      const currentForecastMw = currentForecasts?.forecastValues[currentYield.gspId];
-      const isFutureOrNoYield = `${selectedTime}:00.000Z` >= timeNow || !currentYield.yield;
-      const delta = isFutureOrNoYield
-        ? 0
-        : Number(currentYield.yield) / 1000 - (currentForecastMw || 0);
-      const deltaNormalized = isFutureOrNoYield
-        ? 0
-        : (Number(currentYield.yield) / 1000 - (currentForecastMw || 0)) /
-            currentYield.gspCapacity || 0;
-      const deltaBucket = getDeltaBucket(delta);
-      tempGspDeltas.set(currentYield.gspId, {
-        gspId: currentYield.gspId,
-        gspRegion: currentYield.gspRegion,
-        gspCapacity: currentYield.gspCapacity,
-        currentYield: Number(currentYield.yield) / 1000,
-        forecast: currentForecastMw || 0,
-        delta,
-        deltaPercentage: (Number(currentYield.yield) / 1000 / (currentForecastMw || 0)) * 100,
-        deltaNormalized,
-        deltaBucket: deltaBucket,
-        deltaBucketKey: DELTA_BUCKET[deltaBucket]
-      });
-    }
-    // console.log("gspDeltas calculated");
-    // console.log(
-    //   "gspDeltas",
-    //   Array.from(tempGspDeltas)
-    //     .filter((gspDelta) => gspDelta[1].delta > 0)
-    //     .map((gspDelta, index) => {
-    //       const delta = gspDelta[1].delta;
-    //       return delta;
-    //     })
-    // );
-    return tempGspDeltas;
-  }, [
-    allGspForecastData,
-    currentYields,
-    selectedTime,
-    allGspRealLoading,
-    allGspForecastLoading,
-    timeNow
-  ]);
-
-  const combinedData: CombinedData = {
-    nationalForecastData,
-    nationalIntradayECMWFOnlyData,
-    nationalMetOfficeOnly,
-    nationalSatOnly,
-    nationalPvnetDayAhead,
-    nationalPvnetIntraday,
-    pvRealDayInData,
-    pvRealDayAfterData,
-    nationalNHourData,
-    allGspSystemData,
-    allGspForecastData,
-    allGspRealData,
-    gspDeltas
-  };
-  const combinedLoading: CombinedLoading = useMemo(
-    () => ({
-      nationalForecastLoading,
-      pvRealDayInLoading,
-      pvRealDayAfterLoading,
-      nationalNHourLoading: nationalNHourLoading,
-      allGspSystemLoading,
-      allGspForecastLoading,
-      allGspRealLoading
-    }),
-    [
-      nationalForecastLoading,
-      pvRealDayInLoading,
-      pvRealDayAfterLoading,
-      nationalNHourLoading,
-      allGspSystemLoading,
-      allGspForecastLoading,
-      allGspRealLoading
-    ]
-  );
-  const combinedValidating: CombinedValidating = useMemo(
-    () => ({
-      nationalForecastValidating,
-      pvRealDayInValidating,
-      pvRealDayAfterValidating,
-      nationalNHourValidating,
-      allGspSystemValidating,
-      allGspForecastValidating,
-      allGspRealValidating: allGspActualValidating
-    }),
-    [
-      nationalForecastValidating,
-      pvRealDayInValidating,
-      pvRealDayAfterValidating,
-      nationalNHourValidating,
-      allGspSystemValidating,
-      allGspForecastValidating,
-      allGspActualValidating
-    ]
-  );
-  const combinedErrors: CombinedErrors = {
-    nationalForecastError,
-    pvRealDayInError,
-    pvRealDayAfterError,
-    nationalNHourError,
-    allGspSystemError,
-    allGspForecastError,
-    allGspRealError: allGspActualError
-  };
-
-  const sitesViewSelected = currentView(VIEWS.SOLAR_SITES);
-
-  // Sites API data
-  const {
-    data: allSitesData,
-    isLoading: allSitesLoading,
-    isValidating: allSitesValidating,
-    error: allSitesError
-  } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites`, {
-    isPaused: () => {
-      console.log("Sites API data paused?", !sitesViewSelected);
-      return false;
-    }
-  });
-  const slicedSitesData = useMemo(
-    () => allSitesData?.site_list.slice(0, 100) || [],
-    [allSitesData]
-  );
-
-  // Remove NL sites
-  slicedSitesData.forEach((site, index) => {
-    if (site.client_site_name.startsWith("nl_")) {
-      slicedSitesData.splice(index, 1);
-    }
-  });
-
-  const siteUuids = slicedSitesData.map((site) => site.site_uuid);
-  const siteUuidsString = siteUuids?.join(",") || "";
-  const {
-    data: sitePvForecastData,
-    isLoading: sitePvForecastLoading,
-    isValidating: sitePvForecastValidating,
-    error: sitePvForecastError
-  } = useLoadDataFromApi<SitesPvForecast>(
-    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
-    {
-      // isPaused: () => {
-      //   console.log(
-      //     "Sites Forecast API data paused",
-      //     !siteUuidsString?.length || !sitesViewSelected
-      //   );
-      //   return !siteUuidsString?.length;
-      //   // return !siteUuidsString?.length || !sitesViewSelected;
-      // }
-    }
-  );
-
-  const {
-    data: sitesPvActualData,
-    isLoading: sitePvActualLoading,
-    isValidating: sitePvActualValidating,
-    error: sitePvActualError
-  } = useLoadDataFromApi<SitesPvActual>(
-    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
-    {
-      // isPaused: () => {
-      //   console.log(
-      //     "Sites Actual API data paused",
-      //     !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES)
-      //   );
-      //   return !siteUuidsString?.length;
-      //   // return !siteUuidsString?.length || !currentView(VIEWS.SOLAR_SITES);
-      // }
-    }
-  );
-
-  const sitesData: CombinedSitesData = {
-    allSitesData: slicedSitesData,
-    sitesPvForecastData: useMemo(
-      () => sitePvForecastData?.filter((d): d is SitePvForecast => !!d) || [],
-      [sitePvForecastData]
-    ),
-    sitesPvActualData: useMemo(
-      () => sitesPvActualData?.filter((d): d is SitePvActual => !!d) || [],
-      [sitesPvActualData]
-    )
-  };
-
-  const sitesCombinedLoading = useMemo(
-    () => ({
-      allSitesLoading,
-      sitePvForecastLoading,
-      sitePvActualLoading
-    }),
-    [allSitesLoading, sitePvForecastLoading, sitePvActualLoading]
-  );
-
-  const sitesCombinedValidating = useMemo(
-    () => ({
-      allSitesValidating,
-      sitePvForecastValidating,
-      sitePvActualValidating
-    }),
-    [allSitesValidating, sitePvForecastValidating, sitePvActualValidating]
-  );
-
-  const sitesCombinedErrors = {
-    allSitesError,
-    sitesPvForecastError: sitePvForecastError,
-    sitesPvActualError: sitePvActualError
-  };
-
-  const aggregatedSitesData = useAggregateSitesDataForTimestamp(sitesData, selectedISOTime);
-
-  const combinedErrorsLength = Object.values(combinedErrors).filter((e) => !!e).length;
-  // Watch and update loading state
-  useEffect(() => {
-    setLoadingState(
-      computeLoadingState(combinedLoading, combinedValidating, combinedErrors, combinedData)
-    );
-  }, [combinedLoading, combinedValidating, combinedErrorsLength, setLoadingState]);
-
-  const sitesCombinedErrorsLength = Object.values(sitesCombinedErrors).filter((e) => !!e).length;
-
-  // Watch and update sites loading state
-  useEffect(() => {
-    setSitesLoadingState(
-      getSitesLoadingState(
-        sitesCombinedLoading,
-        sitesCombinedValidating,
-        sitesCombinedErrors,
-        sitesData
-      )
-    );
-  }, [
-    sitesCombinedLoading,
-    sitesCombinedValidating,
-    sitesCombinedErrorsLength,
-    setSitesLoadingState
-  ]);
+  const { sitesData, sitesErrors, aggregatedSitesData } = useSitesViewData(selectedISOTime);
 
   // const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
   const closedWidth = "50%";
@@ -717,7 +103,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           combinedDashboardModeActive ? " @container dashboard-mode" : ""
         }`}
       >
-        <Header view={view} setView={setView} combinedData={combinedData} />
+        <Header view={view} setView={setView} />
         <div
           id="map-container"
           className={`relative float-right h-full`}
@@ -725,10 +111,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         >
           <PvLatestMap
             className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
-            combinedData={combinedData}
-            combinedLoading={combinedLoading}
-            combinedValidating={combinedValidating}
-            combinedErrors={combinedErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
@@ -736,14 +118,12 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
             sitesData={sitesData}
             aggregatedSitesData={aggregatedSitesData}
-            sitesErrors={sitesCombinedErrors}
+            sitesErrors={sitesErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
           <DeltaMap
             className={currentView(VIEWS.DELTA) ? "" : "hidden"}
-            combinedData={combinedData}
-            combinedErrors={combinedErrors}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
           />
@@ -753,44 +133,15 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           bottomPadding={!currentView(VIEWS.SOLAR_SITES)}
           dashboardModeActive={combinedDashboardModeActive}
         >
-          <PvRemixChart
-            combinedData={combinedData}
-            combinedErrors={combinedErrors}
-            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
-          />
+          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
           <SolarSiteChart
             combinedSitesData={sitesData}
             aggregatedSitesData={aggregatedSitesData}
             className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
           />
-          <DeltaViewChart
-            combinedData={combinedData}
-            combinedErrors={combinedErrors}
-            className={currentView(VIEWS.DELTA) ? "" : "hidden"}
-          />
+          <DeltaViewChart className={currentView(VIEWS.DELTA) ? "" : "hidden"} />
         </SideLayout>
-        {isOldNowcastingDomain && (
-          // Tailwind popup with deprecated domain message
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-mapbox-black bg-opacity-75">
-            <div className="flex flex-col items-center justify-center">
-              <div className="flex flex-col items-center text-xs text-ocf-gray-500 px-8 py-12 bg-mapbox-black rounded-md">
-                <h3 className="text-xl mb-4 font-bold">We have moved.</h3>
-                <div className="text-lg mr-1 mb-6">nowcasting.io has now become Quartz Solar.</div>
-                <div className="text-lg mr-1 mb-6">
-                  This URL is deprecated, please move over to the new Quartz domain.
-                </div>
-                <div>
-                  <a
-                    className="text-lg uppercase btn hover:bd-ocf-yellow-500"
-                    href="https://app.quartz.solar"
-                  >
-                    Go to Quartz.solar
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <DeprecatedDomainNotice />
       </div>
     </Layout>
   );

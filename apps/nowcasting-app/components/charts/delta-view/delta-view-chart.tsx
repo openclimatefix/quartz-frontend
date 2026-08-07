@@ -17,7 +17,7 @@ import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
-import { CombinedData, CombinedErrors, NationalEndpointStates, GspDeltaValue } from "../../types";
+import { NationalEndpointStates, GspDeltaValue } from "../../types";
 import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
@@ -267,12 +267,6 @@ const GspDeltaColumn: FC<{
 type DeltaChartProps = {
   date?: string;
   className?: string;
-  // Deliberately no longer read: the top chart fetches what it needs itself now, per Track B's
-  // pattern. The props stay in the signature — optional — because `pages/index.tsx` still
-  // passes them and is out of this step's ownership. `combinedData.gspDeltas` and the errors
-  // below are similarly untouched by this component; `useGspDeltas` already replaced them.
-  combinedData?: CombinedData;
-  combinedErrors?: CombinedErrors;
 };
 const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");

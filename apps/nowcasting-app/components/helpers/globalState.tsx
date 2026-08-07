@@ -8,7 +8,7 @@ import {
   getSettingFromCookieStorage,
   setSettingInCookieStorage
 } from "./cookieStorage";
-import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
+import { LoadingState, SitesEndpointStates } from "../types";
 import { ActiveUnit } from "../map/types";
 import { DateTime } from "luxon";
 import type { ChannelSelection } from "./satelliteLayer";
@@ -93,7 +93,6 @@ export type FlatGlobalStateType = {
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
-  loadingState: LoadingState<NationalEndpointStates>;
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
   pLevels: [number, number][];
@@ -155,11 +154,6 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showNHourView: getBooleanSettingFromCookieStorage(CookieStorageKeys.N_HOUR_VIEW, true),
     showConstraints: getBooleanSettingFromCookieStorage(CookieStorageKeys.CONSTRAINTS),
     dashboardMode: getBooleanSettingFromCookieStorage(CookieStorageKeys.DASHBOARD_MODE),
-    loadingState: {
-      initialLoadComplete: false,
-      showMessage: false,
-      message: "Loading data"
-    },
     sitesLoadingState: {
       initialLoadComplete: false,
       showMessage: false,

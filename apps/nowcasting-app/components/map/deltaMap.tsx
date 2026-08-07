@@ -7,7 +7,6 @@ import { VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
-import { CombinedData, CombinedErrors } from "../types";
 import DeltaColorGuideBar from "./delta-color-guide-bar";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { FeatureCollection } from "geojson";
@@ -20,14 +19,6 @@ const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr
 
 type DeltaMapProps = {
   className?: string;
-  /**
-   * Accepted but no longer read — the delta is now computed from the v1 forecast and
-   * generation period responses inside `useMapRegionValues`, which is also where the
-   * "future slot has no delta" rule lives. `pages/index.tsx`'s `gspDeltas` memo is dead
-   * weight for this view once its other consumers migrate.
-   */
-  combinedData: CombinedData;
-  combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };

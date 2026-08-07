@@ -6,6 +6,7 @@ import type {
   NationalEndpointKeysType,
   NationalEndpointStates
 } from "../../components/types.d";
+import { NationalEndpointLabel } from "../../components/endpoint-labels";
 import type { ForecastWindow, PeriodWindow } from "../../lib/api/v1/queries";
 import type { RegionSeries, Scope, TimeSeries } from "../../lib/domain/types";
 import type { DataResult } from "./query";
@@ -18,8 +19,8 @@ import { useNationalGeneration } from "./use-generation";
  * The global "is anything stale" indicator — the one legitimately cross-cutting concern.
  *
  * It is cross-cutting because it reports on every request the dashboard makes at once, which
- * is precisely why it must not be fed by drilled props: `computeLoadingState` today takes
- * four parallel god-objects (`CombinedLoading`, `CombinedValidating`, `CombinedErrors`,
+ * is precisely why it must not be fed by drilled props: the `computeLoadingState` it replaced
+ * took four parallel god-objects (`CombinedLoading`, `CombinedValidating`, `CombinedErrors`,
  * `CombinedData`) assembled in `pages/index.tsx` and passed down. This hook calls the same
  * small hooks the views call instead. SWR dedupes on the cache key, so calling them again
  * costs nothing — no request, no second copy of the data — provided the arguments produce the
@@ -27,23 +28,19 @@ import { useNationalGeneration } from "./use-generation";
  * scope, window, model and observers the views are using.**
  *
  * The output is byte-for-byte the shape `computeLoadingState` produced, so
- * `DataLoadingChartStatus` renders unchanged.
+ * `DataLoadingChartStatus` renders unchanged. Both it and the dead `loadingState` global it
+ * used to be written into were deleted in Phase 4 wave 4; this hook is the only source now.
  */
 
-/** Mirrors `NationalEndpointLabel` in `components/types.d.ts`.
+/**
+ * The row labels the status message is built from.
  *
- * Not imported from there because it is an `export enum` inside a `.d.ts`: TypeScript treats
- * the file as ambient, so under ts-jest there is no emitted object to read at runtime. The
- * renderer looks its own labels up from the enum; these are only used to build the status
- * message string, and `types.d.ts` is out of this agent's scope to fix. */
-const ENDPOINT_LABEL: Record<NationalEndpointKeysType, string> = {
-  nationalForecast: "National Forecast",
-  pvRealDayIn: "PV Live Estimate",
-  pvRealDayAfter: "PV Live Updated",
-  nationalNHour: "N-hour forecast",
-  allGspForecast: "All GSP Forecast",
-  allGspReal: "All GSP PV Live"
-};
+ * These come from `components/endpoint-labels.ts` — a real module, not `types.d.ts`. They used
+ * to be duplicated here because the enum was declared in a `.d.ts`, which TypeScript treats as
+ * ambient and ts-jest therefore leaves `undefined` at runtime. Phase 4 wave 4 moved the enum;
+ * the copy is gone.
+ */
+const ENDPOINT_LABEL: Record<NationalEndpointKeysType, string> = NationalEndpointLabel;
 
 /**
  * What the dashboard is asking for. Arguments, not data — the hook fetches nothing new.

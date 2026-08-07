@@ -7,7 +7,6 @@ import { Menu } from "@headlessui/react";
 import { getViewTitle, VIEWS } from "../../../constant";
 import { Dispatch, ReactNode, SetStateAction } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
-import { CombinedData } from "../../types";
 
 type HeaderLinkProps = {
   url: string;
@@ -82,19 +81,10 @@ type HeaderProps = {
   view: VIEWS;
   setView: Dispatch<SetStateAction<VIEWS>>;
   isLoggedIn?: boolean;
-  combinedData?: CombinedData | null;
   children?: ReactNode;
 };
 
-const Header: React.FC<HeaderProps> = ({
-  view,
-  setView,
-  isLoggedIn = true,
-  // `combinedData` is deliberately unread: `pages/index.tsx` still passes it and is out of
-  // this step's ownership, but `Header` was always a pure pass-through to `ProfileDropDown`,
-  // which now fetches its own CSV data via the v1 hooks. See docs/phase4-track-f-notes.md.
-  children
-}) => {
+const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true, children }) => {
   return (
     <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
