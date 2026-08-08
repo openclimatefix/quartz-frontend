@@ -11,16 +11,18 @@ interface CSVRow {
   solarGenerationPvliveUpdated: number | null;
   delta: number | null;
   solarForecast: number | null;
-  solarForecastP10: number | null;
-  solarForecastP90: number | null;
   nForecast: number | null;
+  pLevelValues: Record<number, number | null>;
 }
 
 export const getNHourForecastLabel = (nHourForecast: number) => `${nHourForecast}-hour forecast`;
 
 const getColumnConfig = (
   nHourForecast: number
-): Record<CSVColumn, { key: keyof CSVRow; header: string }> => ({
+): Record<
+  Exclude<CSVColumn, "pLevels">,
+  { key: keyof Omit<CSVRow, "pLevelValues">; header: string }
+> => ({
   startDateTime: { key: "startDateTime", header: "Start DateTime" },
   endDateTime: { key: "endDateTime", header: "End DateTime" },
   settlementPeriod: { key: "settlementPeriod", header: "Settlement Period" },
@@ -34,8 +36,6 @@ const getColumnConfig = (
   },
   delta: { key: "delta", header: "Delta (MW)" },
   solarForecast: { key: "solarForecast", header: "Solar Forecast (MW)" },
-  solarForecastP10: { key: "solarForecastP10", header: "Solar Forecast P10 (MW)" },
-  solarForecastP90: { key: "solarForecastP90", header: "Solar Forecast P90 (MW)" },
   nForecast: {
     key: "nForecast",
     header: `${getNHourForecastLabel(nHourForecast)} (MW)`
@@ -43,8 +43,8 @@ const getColumnConfig = (
 });
 
 const createEmptyRow = (timestamp: string): CSVRow => {
-  const start = DateTime.fromISO(timestamp);
-  const end = start.plus({ minutes: 30 });
+  const end = DateTime.fromISO(timestamp).setZone("Europe/London");
+  const start = end.minus({ minutes: 30 });
   const settlementPeriod = getSettlementPeriodForDate(start);
 
   return {
@@ -55,9 +55,8 @@ const createEmptyRow = (timestamp: string): CSVRow => {
     solarGenerationPvliveUpdated: null,
     delta: null,
     solarForecast: null,
-    solarForecastP10: null,
-    solarForecastP90: null,
-    nForecast: null
+    nForecast: null,
+    pLevelValues: {}
   };
 };
 
@@ -71,7 +70,8 @@ const getOrCreateRow = (map: Map<string, CSVRow>, ts: string): CSVRow => {
 export const downloadNationalCsv = (
   combinedData: CombinedData | null,
   selectedColumns: CSVColumn[],
-  nHourForecast: number
+  nHourForecast: number,
+  pLevels: [number, number][]
 ) => {
   if (!combinedData) return;
 
@@ -103,8 +103,10 @@ export const downloadNationalCsv = (
   combinedData.nationalForecastData?.forEach((entry) => {
     const row = getOrCreateRow(dataByTimestamp, entry.targetTime);
     row.solarForecast = entry.expectedPowerGenerationMegawatts;
-    row.solarForecastP10 = entry.plevels?.plevel_10 ?? null;
-    row.solarForecastP90 = entry.plevels?.plevel_90 ?? null;
+    const plevelValues = entry.plevels as Record<string, number | undefined> | undefined;
+    pLevels.flat().forEach((level) => {
+      row.pLevelValues[level] = plevelValues?.[`plevel_${level}`] ?? null;
+    });
   });
 
   // N forecast
@@ -120,7 +122,7 @@ export const downloadNationalCsv = (
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, row]) => row);
 
-  const csv = generateCsv(csvRows, selectedColumns, nHourForecast);
+  const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels);
 
   // download
   const blob = new Blob([csv], { type: "text/csv" });
@@ -129,8 +131,8 @@ export const downloadNationalCsv = (
   const a = document.createElement("a");
   a.href = url;
 
-  const now = DateTime.now().toUTC().toFormat("yyyy-MM-dd_HH-mm");
-  a.download = `Quartz-National-${now}.csv`;
+  const now = DateTime.now().toLocal().toFormat("yyyy-MM-dd_HH-mm-ssZZZ");
+  a.download = `Quartz_National_${now}.csv`;
 
   document.body.appendChild(a);
   a.click();
@@ -138,18 +140,28 @@ export const downloadNationalCsv = (
   URL.revokeObjectURL(url);
 };
 
-function generateCsv(rows: CSVRow[], selectedColumns: CSVColumn[], nHourForecast: number): string {
+function generateCsv(
+  rows: CSVRow[],
+  selectedColumns: CSVColumn[],
+  nHourForecast: number,
+  pLevels: [number, number][]
+): string {
   const COLUMN_CONFIG = getColumnConfig(nHourForecast);
-  const headers = selectedColumns.map((col) => COLUMN_CONFIG[col].header);
+  const pLevelLevels = pLevels.flat();
 
-  const lines = rows.map((row) =>
-    selectedColumns
-      .map((col) => {
-        const value = row[COLUMN_CONFIG[col].key];
-        return value ?? "";
-      })
-      .join(",")
-  );
+  // "pLevels" is a single selectable column that expands to one header/value per selected band
+  const getHeaders = (col: CSVColumn): string[] =>
+    col === "pLevels"
+      ? pLevelLevels.map((level) => `Solar Forecast P${level} (MW)`)
+      : [COLUMN_CONFIG[col].header];
+
+  const getValues = (row: CSVRow, col: CSVColumn): (number | string | null)[] =>
+    col === "pLevels"
+      ? pLevelLevels.map((level) => row.pLevelValues[level] ?? "")
+      : [row[COLUMN_CONFIG[col].key] ?? ""];
+
+  const headers = selectedColumns.flatMap(getHeaders);
+  const lines = rows.map((row) => selectedColumns.flatMap((col) => getValues(row, col)).join(","));
 
   return [headers.join(","), ...lines].join("\n");
 }

@@ -11,10 +11,9 @@ export type CSVColumn =
   | "solarGenerationPvliveInitial"
   | "solarGenerationPvliveUpdated"
   | "solarForecast"
-  | "solarForecastP10"
-  | "solarForecastP90"
   | "nForecast"
-  | "delta";
+  | "delta"
+  | "pLevels";
 
 const FIXED_COLUMNS: CSVColumn[] = ["startDateTime", "endDateTime"];
 
@@ -23,8 +22,7 @@ const SELECTABLE_COLUMNS: { id: CSVColumn; label: string }[] = [
   { id: "solarGenerationPvliveInitial", label: "PVLive Initial" },
   { id: "solarGenerationPvliveUpdated", label: "PVLive Updated" },
   { id: "solarForecast", label: "Current Forecast" },
-  { id: "solarForecastP10", label: "Forecast P10" },
-  { id: "solarForecastP90", label: "Forecast P90" },
+  { id: "pLevels", label: "Forecast P-levels" },
   { id: "nForecast", label: "N Forecast" },
   { id: "delta", label: "Delta" }
 ];

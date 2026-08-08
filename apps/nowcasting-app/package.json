@@ -1,6 +1,6 @@
 {
   "name": "@openclimatefix/nowcasting-app",
-  "version": "0.7.1",
+  "version": "0.7.4",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
@@ -34,6 +34,7 @@
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "geotiff": "^3.0.5",
     "husky": ">=6",
     "js-cookie": "^3.0.5",
     "lint-staged": ">=10",

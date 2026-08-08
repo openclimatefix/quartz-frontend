@@ -8,22 +8,17 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis,
+  YAxis
 } from "recharts";
 // @ts-ignore
 import { theme } from "@/tailwind.config";
 import { ChangeEvent, FC, useEffect } from "react";
-import {
-  ACTUAL_SOLAR_COLOR,
-  ACTUAL_WIND_COLOR,
-  SOLAR_COLOR,
-  WIND_COLOR,
-} from "@/src/constants";
+import { ACTUAL_SOLAR_COLOR, ACTUAL_WIND_COLOR, SOLAR_COLOR, WIND_COLOR } from "@/src/constants";
 import {
   formatEpochToHumanDayName,
   formatEpochToPrettyTime,
   getEpochNowInTimezone,
-  prettyPrintNowTime,
+  prettyPrintNowTime
 } from "@/src/helpers/datetime";
 import { TooltipContent } from "@/src/components/charts/Tooltip";
 import { CombinedData } from "@/src/types/data";
@@ -46,10 +41,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
 
   // Create array of ticks for the x-axis
   const now = DateTime.now();
-  const offsets = [
-    -42, -36, -30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60,
-    66,
-  ];
+  const offsets = [-42, -36, -30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66];
   const ticks = offsets.map((o) => {
     return now.set({ hour: o, minute: 0, second: 0 }).toMillis();
   });
@@ -96,13 +88,11 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            top: 0,
+            top: 0
           }}
         >
           {isLoading && (
-            <div
-              className={`absolute flex pb-7 items-center justify-center inset-0 z-30`}
-            >
+            <div className={`absolute flex pb-7 items-center justify-center inset-0 z-30`}>
               <Spinner className="w-10 h-10 fill-ocf-yellow text-ocf-grey-700" />
             </div>
           )}
@@ -114,7 +104,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
               <CartesianGrid
                 verticalFill={[
                   theme.extend.colors["ocf-grey"]["900"],
-                  theme.extend.colors["ocf-grey"]["800"],
+                  theme.extend.colors["ocf-grey"]["800"]
                 ]}
                 fillOpacity={0.5}
               />
@@ -127,8 +117,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
                   formattedChartData?.length
                     ? [
                         formattedChartData[0]?.timestamp,
-                        formattedChartData[formattedChartData.length - 1]
-                          .timestamp,
+                        formattedChartData[formattedChartData.length - 1].timestamp
                       ]
                     : ["auto", "auto"]
                 }
@@ -146,8 +135,7 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
                   formattedChartData?.length
                     ? [
                         formattedChartData[0]?.timestamp,
-                        formattedChartData[formattedChartData.length - 1]
-                          .timestamp,
+                        formattedChartData[formattedChartData.length - 1].timestamp
                       ]
                     : ["auto", "auto"]
                 }
@@ -167,15 +155,13 @@ const Charts: FC<ChartsProps> = ({ combinedData, isLoading }) => {
                   style: { fontSize: "12px" },
                   offset: 0,
                   dx: -26,
-                  dy: 0,
+                  dy: 0
                 }}
               />
               <Tooltip
                 cursor={{ stroke: "#EEEEEE", strokeDasharray: 5 }}
                 filterNull={false}
-                content={(props) => (
-                  <TooltipContent {...props} visibleLines={visibleLines} />
-                )}
+                content={(props) => <TooltipContent {...props} visibleLines={visibleLines} />}
               />
               <Area
                 type="monotone"

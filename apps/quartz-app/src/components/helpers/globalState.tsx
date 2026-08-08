@@ -7,6 +7,7 @@ import { components } from "@/src/types/schema";
 export type GlobalStateType = {
   visibleLines: string[];
   combinedData: CombinedData;
+  isLoading: boolean;
   forecastHorizon: components["schemas"]["ForecastHorizon"];
   forecastHorizonMinutes: number;
 };
@@ -14,7 +15,7 @@ export type GlobalStateType = {
 export const {
   useGlobalState,
   getGlobalState,
-  setGlobalState,
+  setGlobalState
 }: Pick<
   {
     useGlobalStateProvider: () => void;
@@ -35,15 +36,13 @@ export const {
     setState: (nextGlobalState: GlobalStateType) => void;
     dispatch: (action: never) => never;
   },
-  | "useGlobalStateProvider"
-  | "useGlobalState"
-  | "getGlobalState"
-  | "setGlobalState"
+  "useGlobalStateProvider" | "useGlobalState" | "getGlobalState" | "setGlobalState"
 > = createGlobalState<GlobalStateType>({
   visibleLines: ["Solar", "Wind"],
   combinedData: {} as CombinedData,
+  isLoading: true,
   forecastHorizon: "latest",
-  forecastHorizonMinutes: 90,
+  forecastHorizonMinutes: 90
 });
 
 export default useGlobalState;
