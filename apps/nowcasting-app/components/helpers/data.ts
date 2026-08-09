@@ -1,10 +1,12 @@
 import { FeatureCollection } from "geojson";
-import { NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
 import { getDeltaBucket } from "./utils";
 import { DELTA_BUCKET } from "../../constant";
 import { regionSnapshotState } from "../../hooks/data";
 import type { RegionSnapshotState } from "../../hooks/data";
+import type { AggregationLevel } from "./aggregationLevels";
+import type { GeoJoinTransform } from "../../config/countries";
+import { geoAliasesFor, isLegacyRegion } from "../../config/geo-aliases";
 import type {
   Region,
   RegionSeries,
@@ -16,29 +18,19 @@ import type {
   UtcInstant
 } from "../../lib/domain/types";
 
-/**
- * Boundary geometry, loaded on first use rather than at module load.
+/*
+ * The `memoise`/`require` block that used to sit here is GONE (Phase 5, Track D).
  *
- * These seven files are ~36MB of GeoJSON between them. Importing them at the top of the
- * module made every consumer — including the pure value-join unit tests, which touch no
- * geometry at all — pay the parse. `require` inside a memoised getter keeps webpack's
- * static analysis (the path is still a literal) while deferring the parse to the first
- * caller that actually renders a map at that aggregation level.
+ * It lazily `require`d seven `data/*.json` files — ~36 MB of GeoJSON — and, because the
+ * paths were static literals, webpack put every byte of them in the client bundle whether
+ * or not a map ever rendered. That was the single largest line item in the 11.6 MB First
+ * Load JS on `/` and in the 4.83 MB floor paid by pages that draw no map at all.
  *
- * Phase 5 replaces these bundled files with fetches from `public/geo/{country}/`, at which
- * point this whole block goes away. It is deliberately the only place they are named.
+ * Everything below is now **pure**: geometry arrives as an argument. `lib/geo/assets.ts`
+ * fetches it from `public/geo/{country}/` and `hooks/data/use-map-geometry.ts` decides
+ * which URLs a level needs. Nothing in this file loads anything, and no `data/*.json`
+ * path is named here any more — deliberately, so the bundle cannot regress by accident.
  */
-const memoise = <T>(load: () => T): (() => T) => {
-  let value: T | undefined;
-  return () => (value ??= load());
-};
-const gspShapeData = memoise(() => require("../../data/GSP_regions_4326_20250109.json"));
-const dnoShapeData = memoise(() => require("../../data/dno_regions_lat_long_converted.json"));
-const nationalShapeData = memoise(() => require("../../data/national_gsp_shape.json"));
-const ngZones = memoise(() => require("../../data/ng_zones.json"));
-const ngGSPZoneGroupings = memoise(() => require("../../data/ng_gsp_zone_groupings.json"));
-const dnoGspGroupings = memoise(() => require("../../data/dno_gsp_groupings.json"));
-const nationalGspZone = memoise(() => require("../../data/national_gsp_zone.json"));
 
 /**
  * Rounds a DateTime down to the 6-hour boundary at or before it (00:00, 06:00, 12:00, 18:00 UTC).
@@ -202,27 +194,32 @@ export const regionSeriesSnapshotAt = (
 
 /**
  * ------------------------------------------------------------------------------------
- * THE INTERIM NUMERIC-ID BRIDGE — the one place a numeric GSP id meets a region name.
+ * THE NUMERIC-ID BRIDGE — the one place a numeric GSP id meets a region name.
  * ------------------------------------------------------------------------------------
  *
- * v1 keys every region by name (`citr_1`); the bundled GB boundary files key by the
- * uppercase GSP code in `properties.GSPs`, and the DNO / NG-zone grouping files key by
- * *numeric* `gsp_id`. `Region.metadata.gsp_id` is the only thing that reconciles them.
+ * v1 keys every region by name (`citr_1`); GB's boundary file keys by the uppercase GSP
+ * code in `properties.GSPs`. `Region.metadata.gsp_id` reconciles those to the numeric id
+ * the rest of the app still speaks.
  *
- * Two distinct joins come out of it and they are not interchangeable:
- *  - `byGspCode`  — `lowercase(properties.GSPs) === Region.name`. Matches 345 of the 349
- *    bundled features whole-string (the four misses are `Off_NETS` placeholders with no
- *    region behind them), so no pipe-splitting and no fuzzy matching. This is what
- *    `config/countries.ts` describes as `joinTransform: "lowercase"`.
- *  - `byGspId`    — for the grouping files only, which Phase 5 regenerates by name.
+ * **Phase 5 checked whether this could go, and it cannot.** The contract's condition was
+ * "survives only if something other than the groupings still needs the id". Two things do:
  *
- * A numeric GSP id means nothing outside GB, which is why it exists here and nowhere in
- * `lib/domain`. Phase 5 replaces this function with name-keyed geometry and deletes it.
+ *  - `use-update-map-state-on-click.ts` coerces the clicked feature's `properties.id` with
+ *    `Number()` whenever the region type is `gsp`, and `gsp-pv-remix-chart` passes the
+ *    resulting selection to `useGspAggregateData` as `number[]`. A name-keyed GSP feature
+ *    id would silently become `NaN` there — no type error, no runtime throw, just an empty
+ *    chart. So GSP-level Mapbox feature ids stay numeric.
+ *  - `components/charts/delta-view/use-gsp-deltas.ts` publishes `gspId` on every
+ *    `GspDeltaValue`.
+ *
+ * What DID go is `byGspCode`: the geometry join no longer goes through the bridge. It is
+ * now a name join driven by the registry's `joinProperty`/`joinTransform` plus
+ * `config/geo-aliases.ts`, which is what makes it work for a country that has no such
+ * thing as a GSP. The remaining fields are id translation and nothing else.
  */
 export type RegionBridge = {
   byName: Map<string, Region>;
   byGspId: Map<number, Region>;
-  byGspCode: (gspCode: unknown) => Region | undefined;
   gspIdFor: (regionName: string) => number | undefined;
 };
 
@@ -237,13 +234,23 @@ export const buildRegionBridge = (regions: Region[] | undefined): RegionBridge =
   return {
     byName,
     byGspId,
-    byGspCode: (gspCode) =>
-      typeof gspCode === "string" ? byName.get(gspCode.toLowerCase()) : undefined,
     gspIdFor: (regionName) => {
       const gspId = byName.get(regionName)?.metadata?.gsp_id;
       return typeof gspId === "number" ? gspId : undefined;
     }
   };
+};
+
+/**
+ * The Mapbox feature id a region is drawn under.
+ *
+ * The numeric `gsp_id` where the region has one, the region name where it does not (NL's
+ * provinces, and any future country the API does not assign numeric ids to). See
+ * `RegionBridge` above for who depends on the GSP case staying numeric.
+ */
+const featureIdFor = (region: Region): string | number => {
+  const gspId = region.metadata?.gsp_id;
+  return typeof gspId === "number" ? gspId : region.name;
 };
 
 const EMPTY_VALUE: MapFeatureState = {
@@ -338,8 +345,7 @@ export const buildRegionValues = ({
  */
 export const rollUpRegionValues = (
   values: Map<string, MapRegionValue>,
-  groupings: Record<string, number[]>,
-  bridge: RegionBridge
+  groupings: Record<string, string[]>
 ): Map<string, MapRegionValue> => {
   const rolled = new Map<string, MapRegionValue>();
   for (const groupName of Object.keys(groupings)) {
@@ -351,9 +357,8 @@ export const rollUpRegionValues = (
     let reportedNothing = 0;
     let hasDelta = false;
 
-    for (const gspId of groupings[groupName]) {
-      const region = bridge.byGspId.get(gspId);
-      const value = region && values.get(region.name);
+    for (const regionName of groupings[groupName]) {
+      const value = values.get(regionName);
       if (!value) continue;
       capacity += value.capacity;
       if (value.dataState === "value") {
@@ -389,25 +394,25 @@ export const rollUpRegionValues = (
   return rolled;
 };
 
-/** The grouping file and feature id property backing each client-side aggregation level. */
-const AGGREGATION_GROUPINGS: Partial<
-  Record<NationalAggregation, { groupings: () => Record<string, number[]>; idProperty: string }>
-> = {
-  [NationalAggregation.zone]: { groupings: ngGSPZoneGroupings, idProperty: "id" },
-  [NationalAggregation.DNO]: { groupings: dnoGspGroupings, idProperty: "LongName" },
-  [NationalAggregation.national]: { groupings: nationalGspZone, idProperty: "id" }
-};
-
 /**
- * The numeric GSP ids behind one named group at a client-side aggregation level (a DNO, an NG
- * zone, or the single national grouping) — `undefined` for `NationalAggregation.GSP` (no
- * grouping file backs it; a GSP multi-select is a bare id list the caller already has) or an
- * unrecognised group name.
+ * The v1 region names behind one named group of a client-side aggregation level (a DNO, an
+ * NG zone) — `undefined` for an unrecognised group name, or when the grouping file for the
+ * level has not been fetched yet.
+ *
+ * Replaces `groupGspIds`, which resolved a `NationalAggregation` member against a table of
+ * `require`d grouping files. Both halves of that are gone: the level is now an
+ * `AggregationLevel` the caller already holds, and the grouping file is fetched by
+ * `useMapGeometry`, so it arrives as an argument rather than being looked up. The values are
+ * v1 region names (`"citr_1"`), not numeric gsp_ids — `scripts/build-geo-assets.mjs` re-keyed
+ * the shipped assets in Phase 5, which is what removed the `RegionBridge` hop.
+ *
+ * `undefined` and `[]` are different: the first means "no such group / not loaded", the
+ * second means "a group with no members", and only the first should disable a caller.
  */
-export const groupGspIds = (
-  aggregation: NationalAggregation,
+export const groupRegionNames = (
+  groupings: Record<string, string[]> | undefined,
   groupName: string
-): number[] | undefined => AGGREGATION_GROUPINGS[aggregation]?.groupings()[groupName];
+): string[] | undefined => groupings?.[groupName];
 
 /**
  * Time-series equivalent of `rollUpRegionValues`: sums a `RegionSeries` across a grouping's
@@ -426,24 +431,25 @@ export const groupGspIds = (
  * regardless of which of the two it was, the same collapse the v0 dialect it replaces made.
  *
  * **The DNO groupings are not a partition — this function does NOT fix that, on purpose.**
- * 15 GSP ids appear in two DNO groupings each (see `rollUpRegionValues`'s comment, verbatim),
- * so a DNO-level series double-counts those ids' power at every timestamp it is used for. Do
- * not deduplicate, do not apportion: Phase 5 owns the fix once the groupings are regenerated
- * name-keyed, and `data.reconciliation.test.ts` is the tripwire that will flip from documenting
- * this bug to proving the fix.
+ * 15 GSPs appear in two DNO groupings each (see `rollUpRegionValues`'s comment, verbatim), so
+ * a DNO-level series double-counts their power at every timestamp it is used for. Phase 5
+ * regenerated the grouping assets name-keyed and **deliberately reproduced the duplication**:
+ * the question put to the API owner — whether a GSP feeding two licence areas is legitimately
+ * counted in both, or whether its capacity should be apportioned — is still unanswered, so
+ * there is no basis for choosing a number. Do not deduplicate, do not apportion.
+ * `data.reconciliation.test.ts` keeps documenting the excess and must not be flipped to an
+ * equality assertion until that answer arrives.
  */
 export const rollUpRegionSeries = (
   series: RegionSeries | undefined,
-  gspIds: number[],
-  bridge: RegionBridge,
+  regionNames: string[],
   groupName: string
 ): TimeSeries | undefined => {
   if (!series) return undefined;
 
   const members: RegionSeriesValues[] = [];
-  for (const gspId of gspIds) {
-    const region = bridge.byGspId.get(gspId);
-    const values = region && series.regions[region.name];
+  for (const regionName of regionNames) {
+    const values = series.regions[regionName];
     if (values) members.push(values);
   }
 
@@ -475,30 +481,66 @@ export const rollUpRegionSeries = (
 /**
  * Region values keyed by **Mapbox feature id** for the given aggregation level.
  *
- * At GSP level the feature id is the numeric `gsp_id` (see `buildRegionBridge` for why, and
- * `use-update-map-state-on-click.ts` for who depends on it being numeric). Above it, the id
- * is the grouping name, which is already what the boundary files carry.
+ * A derived level (GB's DNO / NG zone) keys by the grouping name, which is what the
+ * derived level's own polygons carry in their join property. A non-derived level keys by
+ * `featureIdFor` — the numeric `gsp_id` where there is one, the region name otherwise.
+ *
+ * **A `LEGACY_REGIONS` region never gets a feature state.** It has no polygon in the
+ * definitive boundary file by definition, so a state keyed on it could only ever land on
+ * somebody else's ground; skipping it here means `applyFeatureStates` cannot paint one by
+ * accident if a future asset rebuild introduces a colliding key. Groupings exclude them
+ * already (`scripts/build-geo-assets.mjs` reports them as "regions in no group"), so the
+ * derived path needs no equivalent filter.
  */
 export const buildMapFeatureStates = (
-  aggregation: NationalAggregation,
-  inputs: RegionValueInputs
+  level: AggregationLevel | undefined,
+  inputs: RegionValueInputs,
+  options: { groupings?: Record<string, string[]>; country?: string | null } = {}
 ): Map<string | number, MapFeatureState> => {
-  const bridge = buildRegionBridge(inputs.regions);
   const byRegionName = buildRegionValues(inputs);
 
-  const grouping = AGGREGATION_GROUPINGS[aggregation];
-  if (grouping) {
-    const rolled = rollUpRegionValues(byRegionName, grouping.groupings(), bridge);
-    return new Map(rolled);
+  if (level?.derived) {
+    // No grouping file yet means no rollup is computable — an empty map, not a map of
+    // zeroes. The map draws its polygons unstyled until the asset lands.
+    return new Map<string | number, MapFeatureState>(
+      rollUpRegionValues(byRegionName, options.groupings ?? {})
+    );
   }
 
   const byFeatureId = new Map<string | number, MapFeatureState>();
-  byRegionName.forEach((value, regionName) => {
-    const gspId = bridge.gspIdFor(regionName);
-    if (gspId === undefined) return;
-    byFeatureId.set(gspId, value);
-  });
+  for (const region of inputs.regions ?? []) {
+    if (isLegacyRegion(options.country, region.name)) continue;
+    const value = byRegionName.get(region.name);
+    if (!value) continue;
+    byFeatureId.set(featureIdFor(region), value);
+  }
   return byFeatureId;
+};
+
+/** The registry's join transform, applied to the GeoJSON feature's key. */
+const applyJoinTransform = (value: string, transform: GeoJoinTransform | undefined): string =>
+  transform === "lowercase"
+    ? value.toLowerCase()
+    : transform === "uppercase"
+    ? value.toUpperCase()
+    : value;
+
+export type MapGeometryInputs = {
+  level: AggregationLevel;
+  /** The fetched boundary file for this level. Never loaded here — see the note at the top. */
+  shapes: FeatureCollection;
+  /** Name-keyed grouping file. Derived levels only; ignored otherwise. */
+  groupings?: Record<string, string[]>;
+  regions: Region[] | undefined;
+  /** GeoJSON property carrying the region key, from the registry's `GeoLayerConfig`. */
+  joinProperty: string;
+  joinTransform?: GeoJoinTransform;
+  /**
+   * Country code, for the alias and legacy tables. Not in the contract's signature; added
+   * because `geoAliasesFor`/`isLegacyRegion` are country-keyed and there is nothing else in
+   * these arguments that identifies the country.
+   */
+  country?: string | null;
 };
 
 /**
@@ -506,40 +548,60 @@ export const buildMapFeatureStates = (
  * on it**. Built once and handed to `setData` once; from then on only feature state moves.
  *
  * `properties.id` is what the source's `promoteId: "id"` promotes to the feature id, so it
- * has to agree with `buildMapFeatureStates` exactly. The four `Off_NETS` placeholder
- * features have no region behind them and get distinct negative ids — the v0 code gave all
- * four the same id (1000), which feature state cannot tolerate.
+ * has to agree with `buildMapFeatureStates` exactly.
+ *
+ * **The region -> feature mapping is not 1:1 in either direction, and this must not assume
+ * it is.**
+ *  - One region can draw several features. GB's 362 GSP polygons carry only 335 distinct
+ *    keys because a multi-part GSP is legitimately several polygons; and `geoAliasesFor`
+ *    can return two feature keys for one region where the API and the boundary file spell
+ *    a real region differently. Both cases resolve the same way — several features share
+ *    one Mapbox id, and one `setFeatureState` paints all of them.
+ *  - Several features have no region at all. `off_nets(unassigned)` (five features, a
+ *    placeholder for unassigned network), `grem_p` and `seab1` are the current GB set. They
+ *    get **distinct negative ids** so feature state can never collide: the v0 code gave
+ *    every unmatched feature the same id (1000), which feature state cannot tolerate.
+ *  - A `LEGACY_REGIONS` region draws nothing. It is left out of the join index entirely
+ *    rather than being allowed to match: the API serves it only for backward compatibility,
+ *    the NESO file does not model it, and drawing it would paint the same ground twice.
  */
-export const buildMapGeometry = (
-  aggregation: NationalAggregation,
-  regions: Region[] | undefined
-): FeatureCollection => {
-  const grouping = AGGREGATION_GROUPINGS[aggregation];
-  if (grouping) {
-    const shapes = (
-      aggregation === NationalAggregation.zone
-        ? ngZones()
-        : aggregation === NationalAggregation.DNO
-        ? dnoShapeData()
-        : nationalShapeData()
-    ) as FeatureCollection;
+export const buildMapGeometry = ({
+  level,
+  shapes,
+  groupings,
+  regions,
+  joinProperty,
+  joinTransform,
+  country
+}: MapGeometryInputs): FeatureCollection => {
+  if (level.derived) {
+    // A derived level's polygons ARE its groups: the join property already holds the
+    // grouping name (`"UKPN (East)"`, `"NE Scotland"`), so the id is read straight off the
+    // feature. `groupings` is not consulted here — it decides the *values*, not the shapes,
+    // and a group with no polygon simply has nowhere to draw.
     return {
       type: "FeatureCollection",
       features: shapes.features.map((feature) => {
-        const zoneId = feature.properties?.[grouping.idProperty];
-        return { ...feature, id: zoneId, properties: { ...feature.properties, id: zoneId } };
+        const id = feature.properties?.[joinProperty];
+        return { ...feature, id, properties: { ...feature.properties, id } };
       })
     };
   }
 
-  const bridge = buildRegionBridge(regions);
+  const byFeatureKey = new Map<string, Region>();
+  for (const region of regions ?? []) {
+    if (isLegacyRegion(country, region.name)) continue;
+    for (const key of geoAliasesFor(country, region.name)) byFeatureKey.set(key, region);
+  }
+
   let unmatched = 0;
   return {
     type: "FeatureCollection",
-    features: (gspShapeData() as FeatureCollection).features.map((feature) => {
-      const region = bridge.byGspCode(feature.properties?.GSPs);
-      const gspId = region && bridge.gspIdFor(region.name);
-      const id = gspId ?? --unmatched;
+    features: shapes.features.map((feature) => {
+      const raw = feature.properties?.[joinProperty];
+      const key = typeof raw === "string" ? applyJoinTransform(raw, joinTransform) : undefined;
+      const region = key === undefined ? undefined : byFeatureKey.get(key);
+      const id = region ? featureIdFor(region) : --unmatched;
       return {
         ...feature,
         id,

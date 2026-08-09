@@ -2,11 +2,13 @@ import React, { Dispatch, SetStateAction, useMemo, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map } from "./";
-import { ActiveUnit, NationalAggregation } from "./types";
+import { ActiveUnit } from "./types";
 import { VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
+import { useAggregationLevels } from "../../hooks/data";
+import { defaultLevelOf } from "../helpers/aggregationLevels";
 import DeltaColorGuideBar from "./delta-color-guide-bar";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { FeatureCollection } from "geojson";
@@ -23,17 +25,27 @@ type DeltaMapProps = {
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
-/** The delta view is GSP-level only; `pages/index.tsx` forces the aggregation on view change. */
-const DELTA_AGGREGATION = NationalAggregation.GSP;
+/**
+ * The source is created with this before any boundary file has arrived — unconditionally,
+ * never once geometry exists. See the same constant in `pvLatestMap.tsx` for why: layer
+ * order is creation order, and a late source puts the delta fill underneath the satellite
+ * raster layers instead of over them.
+ */
+const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
 const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { timezone, locale } = useCountryFormatting();
 
-  const { featureStates, geometry, isLoading, error } = useMapRegionValues(
-    DELTA_AGGREGATION,
-    selectedISOTime
-  );
+  // The delta view is single-region-level only. Rather than reading the user's stored level
+  // (which `pages/index.tsx` forces to the finest one on entering this view anyway), take
+  // the country's finest non-derived level directly — GB's `gsp`, NL's `province`. That is
+  // the same rule `defaultLevelOf` encodes for the initial state, so the two cannot drift,
+  // and it removes this file's dependence on `pages/index.tsx` doing the forcing.
+  const levels = useAggregationLevels();
+  const level = useMemo(() => defaultLevelOf(levels), [levels]);
+
+  const { featureStates, geometry, isLoading, error } = useMapRegionValues(level, selectedISOTime);
 
   const fillColor = useMemo(() => deltaFillColorExpression(), []);
 
@@ -42,23 +54,31 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   const statesRef = useRef(featureStates);
   statesRef.current = featureStates;
   const appliedPaintRef = useRef<unknown>(null);
+  // See `pvLatestMap.tsx`: forces one feature-state re-apply after each geometry load, since
+  // `isSourceLoaded` can still report the previous data for a tick after `setData`.
+  const pendingGeometryReloadRef = useRef(false);
 
   const addOrUpdateFCData = (map: mapboxgl.Map) => {
     const source = map.getSource(PV_SOURCE_ID) as unknown as mapboxgl.GeoJSONSource;
+    const data = geometry ?? EMPTY_GEOMETRY;
     if (!source) {
       map.addSource(PV_SOURCE_ID, {
         type: "geojson",
-        data: geometry,
+        data,
         promoteId: "id"
       });
-      appliedGeometryRef.current = geometry;
+      appliedGeometryRef.current = data;
       appliedStatesRef.current = null;
-    } else if (appliedGeometryRef.current !== geometry) {
-      source.setData(geometry);
-      appliedGeometryRef.current = geometry;
+      pendingGeometryReloadRef.current = true;
+    } else if (appliedGeometryRef.current !== data) {
+      source.setData(data);
+      appliedGeometryRef.current = data;
       appliedStatesRef.current = null;
+      pendingGeometryReloadRef.current = true;
     }
 
+    // Values that arrived while the boundary file was still in flight were applied to an
+    // empty source and dropped; clearing `appliedStatesRef` above is what re-applies them.
     if (appliedStatesRef.current !== statesRef.current) {
       if (applyFeatureStates(map, statesRef.current)) {
         appliedStatesRef.current = statesRef.current;
@@ -81,6 +101,10 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
 
       map.on("sourcedata", (e) => {
         if (e.sourceId !== PV_SOURCE_ID || !e.isSourceLoaded) return;
+        if (pendingGeometryReloadRef.current) {
+          pendingGeometryReloadRef.current = false;
+          appliedStatesRef.current = null;
+        }
         if (appliedStatesRef.current === statesRef.current) return;
         if (applyFeatureStates(map, statesRef.current)) {
           appliedStatesRef.current = statesRef.current;

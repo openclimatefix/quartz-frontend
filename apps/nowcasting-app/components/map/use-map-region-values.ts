@@ -6,10 +6,13 @@ import {
   useGenerationPeriod,
   useRegions
 } from "../../hooks/data";
+import { useMapGeometry } from "../../hooks/data/use-map-geometry";
+import { getCountryConfig } from "../../config/countries";
+import { isLegacyRegion } from "../../config/geo-aliases";
+import type { AggregationLevel } from "../helpers/aggregationLevels";
 import type { Scope } from "../../lib/domain/types";
 import useGlobalState from "../helpers/globalState";
-import { buildMapFeatureStates, buildMapGeometry, type MapFeatureState } from "../helpers/data";
-import { NationalAggregation } from "./types";
+import { buildMapFeatureStates, type MapFeatureState } from "../helpers/data";
 
 /**
  * The map's value pipeline, in one hook.
@@ -29,36 +32,84 @@ import { NationalAggregation } from "./types";
  * 3. **It does not flatten the three snapshot states.** See `MapFeatureState.dataState`.
  *
  * Every hook it calls is keyed, so the forecast map and the delta map calling this at the
- * same time is one set of requests, not two.
+ * same time is one set of requests, not two — and since Phase 5 that is true of the boundary
+ * assets too, which are cached per URL in `lib/geo/assets.ts`.
  */
 export type MapRegionValues = {
   featureStates: Map<string | number, MapFeatureState>;
-  geometry: GeoJSON.FeatureCollection;
+  /**
+   * `undefined` until the boundary file for this level has been fetched. Phase 5 made this
+   * asynchronous; consumers add their Mapbox source once with an empty `FeatureCollection`
+   * and `setData` when this arrives. See `pvLatestMap.tsx`.
+   */
+  geometry: GeoJSON.FeatureCollection | undefined;
   /** `{ published, expected, isPartial }` — a partial newest slot is normal, not a fault. */
   coverage: { published: number; expected: number; isPartial: boolean };
   /**
-   * Total installed capacity in MW. Summed over the API's regions, which *are* a partition —
-   * unlike GB's DNO groupings, where 15 GSP ids appear twice (see `rollUpRegionValues`).
+   * Total installed capacity in MW, summed over the regions that are actually real.
+   *
+   * **The API's regions are not a partition**, and an earlier version of this comment
+   * claimed they were. The v1 API serves "all" regions, which includes merged and legacy
+   * spellings of the same physical GSP kept for backward compatibility of client scripts.
+   * Summing all 338 double-counts six of them: 22,588 MW against a national 21,905 MW,
+   * 683 MW (3.1 %) over.
+   *
+   * The definitive GSP set is the NESO boundary file (Brad's call), so this sum excludes
+   * the regions `LEGACY_REGIONS` names, exactly as the geometry and the feature-state join
+   * already did — one rule about what is real, applied in all three places. The remaining
+   * 332 give **21,783 MW**, 122 MW (0.56 %) *under* national.
+   *
+   * That residual is a coverage gap, not a double-count, and is deliberately left: it is
+   * GSPs the boundary file models which the API does not publish separately (Seabank, and
+   * `grem_p`). Closing it needs data, not arithmetic — do not "fix" it by scaling here.
    */
   nationalCapacityMw: number;
   isLoading: boolean;
   error: unknown;
 };
 
-/** The map is sub-national by definition; `period` 400s on `region_type=national`. */
-const MAP_REGION_TYPE = "gsp";
 const SOURCE = "solar";
 
+/**
+ * The region type whose values feed a level.
+ *
+ * A derived level rolls up its `source` region type (GB's DNO groups GSPs). A non-derived
+ * level is served by the API directly, so it is its own source — which is what makes NL work
+ * without a guard: `province` asks for provinces, where the old hardcoded `"gsp"` asked for
+ * something NL does not have.
+ *
+ * `national` returns `null`, disabling every fetch. Not a branch on region-type identity for
+ * presentation purposes — it is a hard API constraint: `forecasts/period` and
+ * `generation/period` 400 on `region_type=national`. The old `NationalAggregation.national`
+ * level drew the national outline from a `national_gsp_zone.json` grouping that summed every
+ * GSP; Phase 5 ships no such grouping and `measuringUnit.tsx` does not offer the level, so
+ * there is nothing to preserve. If the national map level is ever wanted back it needs a
+ * values path of its own (a synthetic all-regions group, or the snapshot endpoints).
+ */
+const valueRegionTypeFor = (
+  level: AggregationLevel | undefined,
+  country: string | null
+): string | null => {
+  if (!level) return null;
+  const regionType = level.derived
+    ? getCountryConfig(country)?.derivedRegionTypes[level.regionType]?.source
+    : level.regionType;
+  if (!regionType || regionType === "national") return null;
+  return regionType;
+};
+
 export const useMapRegionValues = (
-  aggregation: NationalAggregation,
+  level: AggregationLevel | undefined,
   targetTime: string
 ): MapRegionValues => {
   const country = useCurrentCountry();
   const [timeNow] = useGlobalState("timeNow");
 
-  const scope: Scope = useMemo(
-    () => ({ country, source: SOURCE, regionType: MAP_REGION_TYPE }),
-    [country]
+  const regionType = valueRegionTypeFor(level, country);
+
+  const scope: Scope | null = useMemo(
+    () => (country && regionType ? { country, source: SOURCE, regionType } : null),
+    [country, regionType]
   );
 
   // No window at all, deliberately. `/forecasts/period` and `/generation/period` both default
@@ -77,21 +128,35 @@ export const useMapRegionValues = (
   const forecast = useForecastPeriod(scope, window);
   const generation = useGenerationPeriod(scope, window);
 
-  const geometry = useMemo(
-    () => buildMapGeometry(aggregation, regions.data),
-    [aggregation, regions.data]
-  );
+  // Geometry (and, for a derived level, its grouping file) is fetched rather than bundled
+  // since Phase 5. `groupings` comes back on the same object because the two must agree:
+  // rolling values up with one level's groupings onto another level's polygons is exactly
+  // the out-of-order failure `useMapGeometry` guards against.
+  const geo = useMapGeometry(level, regions.data);
 
   const featureStates = useMemo(
     () =>
-      buildMapFeatureStates(aggregation, {
-        regions: regions.data,
-        forecast: forecast.data,
-        generation: generation.data,
-        targetTime,
-        timeNow
-      }),
-    [aggregation, regions.data, forecast.data, generation.data, targetTime, timeNow]
+      buildMapFeatureStates(
+        level,
+        {
+          regions: regions.data,
+          forecast: forecast.data,
+          generation: generation.data,
+          targetTime,
+          timeNow
+        },
+        { groupings: geo.groupings, country }
+      ),
+    [
+      level,
+      regions.data,
+      forecast.data,
+      generation.data,
+      targetTime,
+      timeNow,
+      geo.groupings,
+      country
+    ]
   );
 
   const coverage = useMemo(() => {
@@ -101,17 +166,20 @@ export const useMapRegionValues = (
   }, [regions.data, forecast.data]);
 
   const nationalCapacityMw = useMemo(
-    () => (regions.data ?? []).reduce((total, region) => total + (region.capacityMw ?? 0), 0),
-    [regions.data]
+    () =>
+      (regions.data ?? [])
+        .filter((region) => !isLegacyRegion(country, region.name))
+        .reduce((total, region) => total + (region.capacityMw ?? 0), 0),
+    [regions.data, country]
   );
 
   return {
     featureStates,
-    geometry,
+    geometry: geo.geometry,
     coverage,
     nationalCapacityMw,
-    isLoading: regions.isLoading || forecast.isLoading || generation.isLoading,
-    error: forecast.error ?? generation.error ?? regions.error
+    isLoading: regions.isLoading || forecast.isLoading || generation.isLoading || geo.isLoading,
+    error: forecast.error ?? generation.error ?? regions.error ?? geo.error
   };
 };
 

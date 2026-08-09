@@ -2,11 +2,14 @@ import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState }
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
-import { ActiveUnit, NationalAggregation } from "./types";
+import { ActiveUnit } from "./types";
 import { VIEWS } from "../../constant";
-import useGlobalState, { useCountryState } from "../helpers/globalState";
+import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
+import { useCurrentAggregationLevel, useCurrentCountry } from "../../hooks/data";
+import { getCountryConfig } from "../../config/countries";
+import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
 import ColorGuideBar from "./color-guide-bar";
 import {
@@ -15,7 +18,6 @@ import {
   safelyUpdateMapData,
   setActiveUnitOnMap
 } from "../helpers/mapUtils";
-import boundariesData from "../../data/ng_constraint_boundaries.json";
 import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
@@ -32,6 +34,22 @@ import type { MapFeatureState } from "../helpers/data";
 
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 
+/**
+ * What the PV source is created with, before any boundary file has arrived.
+ *
+ * Geometry became asynchronous in Phase 5, and the source is added **unconditionally** with
+ * this rather than being created once geometry exists. That is not defensiveness: layer
+ * order in Mapbox is creation order, and `map.tsx` inserts the satellite raster layers
+ * *beneath* whichever of the PV layers already exists (`getSatelliteBeforeId`). A source
+ * created conditionally means the PV layers are created late, after the satellite layers,
+ * and the yellow forecast fill ends up under the clouds instead of over them — intermittent,
+ * dependent on network timing, and invisible until someone turns clouds on.
+ *
+ * Module-level so the identity is stable: `appliedGeometryRef` compares by identity to
+ * decide whether `setData` is needed.
+ */
+const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features: [] };
+
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type PvLatestMapProps = {
@@ -43,7 +61,8 @@ type PvLatestMapProps = {
 const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { timezone, locale } = useCountryFormatting();
-  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
+  const level = useCurrentAggregationLevel();
+  const country = useCurrentCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
 
@@ -55,9 +74,35 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
   const { featureStates, geometry, nationalCapacityMw, isLoading, error } = useMapRegionValues(
-    nationalAggregationLevel,
+    level,
     selectedISOTime
   );
+
+  // The network constraint overlay. Fetched rather than imported since Phase 5 — it was
+  // 430 KB of GeoJSON in the bundle of every page that imports this module, for a layer that
+  // is off by default. The URL is the registry's, so a country with no constraints file
+  // simply never fetches one.
+  const constraintsUrl = getCountryConfig(country)?.overlays.find(
+    (overlay) => overlay.id === "constraints"
+  )?.url;
+  const [boundariesData, setBoundariesData] = useState<FeatureCollection | undefined>(undefined);
+  useEffect(() => {
+    if (!constraintsUrl) {
+      setBoundariesData(undefined);
+      return;
+    }
+    let cancelled = false;
+    loadGeoAsset<FeatureCollection>(constraintsUrl)
+      .then((data) => {
+        if (!cancelled) setBoundariesData(data);
+      })
+      // A missing overlay must not take the map down with it: the constraints layer is
+      // decoration over the forecast, and the forecast is the page.
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [constraintsUrl]);
 
   // The last geometry and value set actually pushed to Mapbox. Geometry is handed to
   // `setData` only when its identity changes — i.e. when the aggregation level or the region
@@ -67,6 +112,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   const statesRef = useRef(featureStates);
   statesRef.current = featureStates;
   const appliedPaintRef = useRef<unknown>(null);
+  // Set on every `addSource`/`setData`, cleared by the first `sourcedata` that reports the
+  // source loaded. `setData` is asynchronous and `isSourceLoaded` can still be true for the
+  // *previous* data for a tick, so an apply made immediately after it can succeed against
+  // geometry that is about to be replaced — and Mapbox drops the state when the new data
+  // lands. This forces exactly one re-apply per geometry load. Re-applying is idempotent.
+  const pendingGeometryReloadRef = useRef(false);
+  const constraintHandlersRef = useRef(false);
 
   useEffect(() => {
     // Add unit to map container so that it can be accessed by popup in the map event listeners
@@ -97,7 +149,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     }
   }, [showConstraints]);
 
-  const isGrouped = nationalAggregationLevel !== NationalAggregation.GSP;
+  // The ten-times MW bands belong to the client-side rollups (GB's DNO / NG zone), which is
+  // a branch on the level's *kind*, not on its name — NL's `province` is an API-served level
+  // and reads on the GSP-scale bands, as it should.
+  const isGrouped = level?.derived ?? false;
   const fillOpacity = useMemo(
     () => fillOpacityExpression(activeUnit, isGrouped),
     [activeUnit, isGrouped]
@@ -120,22 +175,35 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     //////////////////////////
     const forecastSource = map.getSource(PV_SOURCE_ID) as unknown as mapboxgl.GeoJSONSource;
 
+    // Undefined geometry is the pre-arrival state, not an absence of data. It draws as an
+    // empty collection so the source and its three layers exist from the first frame.
+    const data = geometry ?? EMPTY_GEOMETRY;
+
     if (!forecastSource) {
       map.addSource(PV_SOURCE_ID, {
         type: "geojson",
-        data: geometry,
+        data,
         promoteId: "id"
       });
-      appliedGeometryRef.current = geometry;
+      appliedGeometryRef.current = data;
       appliedStatesRef.current = null;
-    } else if (appliedGeometryRef.current !== geometry) {
-      // Geometry genuinely changed (aggregation level, or the region list arrived). This is
-      // the only path that re-parses boundaries; a scrub tick never reaches it.
-      forecastSource.setData(geometry);
-      appliedGeometryRef.current = geometry;
+      pendingGeometryReloadRef.current = true;
+    } else if (appliedGeometryRef.current !== data) {
+      // Geometry genuinely changed (the boundary file landed, the aggregation level moved, or
+      // the region list arrived). This is the only path that re-parses boundaries; a scrub
+      // tick never reaches it.
+      forecastSource.setData(data);
+      appliedGeometryRef.current = data;
       appliedStatesRef.current = null;
+      pendingGeometryReloadRef.current = true;
     }
 
+    // Feature state is (re)applied whenever EITHER side moved — values or geometry. Clearing
+    // `appliedStatesRef` above is what makes the geometry side count: a value set that
+    // arrived while the boundary file was still in flight was applied to an empty source and
+    // silently dropped by Mapbox, and this is what puts it back. `applyFeatureStates`
+    // returning false (source not loaded yet) leaves the ref alone so the `sourcedata`
+    // handler below retries.
     if (appliedStatesRef.current !== statesRef.current) {
       if (applyFeatureStates(map, statesRef.current)) {
         appliedStatesRef.current = statesRef.current;
@@ -251,9 +319,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
       // A GeoJSON source drops feature state set before it has finished loading, so re-apply
       // once it reports loaded. Without this the very first paint after a geometry swap is
-      // unstyled and stays that way until the next value change.
+      // unstyled and stays that way until the next value change — which, now that the
+      // boundary file arrives over the network well after the values do, is the normal case
+      // rather than a corner one.
       map.on("sourcedata", (e) => {
         if (e.sourceId !== PV_SOURCE_ID || !e.isSourceLoaded) return;
+        if (pendingGeometryReloadRef.current) {
+          pendingGeometryReloadRef.current = false;
+          appliedStatesRef.current = null;
+        }
         if (appliedStatesRef.current === statesRef.current) return;
         if (applyFeatureStates(map, statesRef.current)) {
           appliedStatesRef.current = statesRef.current;
@@ -346,38 +420,46 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
       map.setLayoutProperty(
         "boundary-data-labels",
         "visibility",
-        showConstraints ? "visible" : "none"
+        showConstraintsRef.current ? "visible" : "none"
       );
 
-      map.on(
-        "mousemove",
-        "boundary-data",
-        throttle((e) => {
-          const bbox = getBoundingBoxFromPoint(e.point);
-          const features = map.queryRenderedFeatures(bbox, {
-            layers: ["boundary-data"]
-          });
-          if (features && features.length > 0) {
-            const feature = features[0];
-            const coordinates = (
-              "coordinates" in feature.geometry ? feature.geometry.coordinates[0] : [0, 0]
-            ) as LngLatLike;
-            const nearestPoint =
-              coordinates && feature.geometry.type === "LineString"
-                ? turf.nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
-                : null;
-            popup
-              .setLngLat((nearestPoint?.geometry.coordinates as LngLatLike) || [0, 50])
-              .setHTML(feature.properties?.id)
-              .addTo(map);
-          } else {
-            popup.remove();
-          }
-        }, 32)
-      );
-      map.on("mouseleave", "boundary-data", () => {
-        popup.remove();
-      });
+      // Registered once. `Map` re-invokes this whole function on every render, so an
+      // unguarded `map.on` accumulated a listener per render — harmless-looking, and it
+      // meant every mousemove ran the throttled `queryRenderedFeatures` N times. Now that
+      // the overlay arrives asynchronously the block is reached later but no more often, so
+      // the guard is what keeps it at one.
+      if (!constraintHandlersRef.current) {
+        constraintHandlersRef.current = true;
+        map.on(
+          "mousemove",
+          "boundary-data",
+          throttle((e) => {
+            const bbox = getBoundingBoxFromPoint(e.point);
+            const features = map.queryRenderedFeatures(bbox, {
+              layers: ["boundary-data"]
+            });
+            if (features && features.length > 0) {
+              const feature = features[0];
+              const coordinates = (
+                "coordinates" in feature.geometry ? feature.geometry.coordinates[0] : [0, 0]
+              ) as LngLatLike;
+              const nearestPoint =
+                coordinates && feature.geometry.type === "LineString"
+                  ? turf.nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
+                  : null;
+              popup
+                .setLngLat((nearestPoint?.geometry.coordinates as LngLatLike) || [0, 50])
+                .setHTML(feature.properties?.id)
+                .addTo(map);
+            } else {
+              popup.remove();
+            }
+          }, 32)
+        );
+        map.on("mouseleave", "boundary-data", () => {
+          popup.remove();
+        });
+      }
     }
   };
 

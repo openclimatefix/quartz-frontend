@@ -138,7 +138,7 @@ export type GspAggregateData = {
   /**
    * Display labels for the group's members, in the order given, for the header tooltip.
    * Resolved from the `useRegions` data this hook already holds, so it costs no extra
-   * request. An id with no matching region falls back to the id itself rather than being
+   * request. A name with no matching region falls back to the name itself rather than being
    * dropped, so the tooltip's length always matches the selection's.
    */
   memberLabels: string[];
@@ -147,8 +147,39 @@ export type GspAggregateData = {
 };
 
 /**
- * v1 data for a *group* of GSPs — a multi-select (shift-click), or one DNO / NG-zone /
- * national selection — summed at every timestamp with `rollUpRegionSeries`.
+ * Resolve Mapbox GSP feature ids to v1 region names.
+ *
+ * The map's feature id at GSP level is the numeric `gsp_id` — `use-update-map-state-on-click.ts`
+ * coerces clicks with `Number()` and stores them as strings — while every v1 payload is keyed
+ * by region name (`"citr_1"`). This is the one hop between the two, and it lives here because
+ * the region list it needs is already fetched by the hook below; SWR's key dedupes the two
+ * calls into a single request.
+ *
+ * `null` in, `null` out, and `null` while the region list is still loading: an empty or
+ * unresolvable selection must disable the caller, not produce a group whose rollup is a
+ * series of zeroes.
+ */
+export const useGspRegionNames = (gspIds: string[] | null): string[] | null => {
+  const country = useCurrentCountry();
+  const scope: Scope | null =
+    country && gspIds && gspIds.length > 0
+      ? { country, source: SOURCE, regionType: GSP_REGION_TYPE }
+      : null;
+  const regionsResult = useRegions(scope);
+
+  return useMemo(() => {
+    if (!gspIds || gspIds.length === 0) return null;
+    const bridge = buildRegionBridge(regionsResult.data);
+    const names = gspIds
+      .map((id) => bridge.byGspId.get(Number(id))?.name)
+      .filter((name): name is string => name !== undefined);
+    return names.length > 0 ? names : null;
+  }, [gspIds, regionsResult.data]);
+};
+
+/**
+ * v1 data for a *group* of regions — a multi-select (shift-click), or one DNO / NG-zone
+ * selection — summed at every timestamp with `rollUpRegionSeries`.
  *
  * Unlike `useGspRegionData`, this fetches every GSP of the region type over the shared window
  * (`forecasts/period` / `generation/period`, the same primitive `useMapRegionValues` uses) and
@@ -156,21 +187,23 @@ export type GspAggregateData = {
  * series server-side. No window is sent, so the request carries no timestamp and does not
  * refire as the user scrubs; the API defaults to 2 days either side, floored to 6 hours.
  *
- * `gspIds` is the flat list of numeric GSP ids to sum — the caller resolves it, whether from a
- * multi-select's raw ids or from `groupGspIds(aggregation, groupName)`. `null`/empty disables
- * every hook's *scope* (never the call itself — see `useGspRegionData`'s note on rules of
- * hooks). `groupName` becomes the rolled-up series' `regionName`; it is not displayed
- * (the caller titles the chart itself).
+ * `regionNames` is the flat list of v1 region names to sum — the caller resolves it, whether
+ * from a multi-select (via `useGspRegionNames`) or from `groupRegionNames(groupings, name)`.
+ * Phase 5 re-keyed the shipped grouping assets by name, so no numeric id reaches this hook
+ * any more and the `RegionBridge` hop it used to make is gone. `null`/empty disables every
+ * hook's *scope* (never the call itself — see `useGspRegionData`'s note on rules of hooks).
+ * `groupName` becomes the rolled-up series' `regionName`; it is not displayed (the caller
+ * titles the chart itself).
  *
- * **Reproduces the DNO double-count exactly** when `gspIds` came from a DNO grouping — see
- * `rollUpRegionSeries`'s doc comment in `helpers/data.ts`. Not this hook's job to fix.
+ * **Reproduces the DNO double-count exactly** when `regionNames` came from a DNO grouping —
+ * see `rollUpRegionSeries`'s doc comment in `helpers/data.ts`. Not this hook's job to fix.
  */
 export const useGspAggregateData = (
-  gspIds: number[] | null,
+  regionNames: string[] | null,
   groupName: string | null
 ): GspAggregateData => {
   const country = useCurrentCountry();
-  const enabled = !!country && !!gspIds && gspIds.length > 0 && !!groupName;
+  const enabled = !!country && !!regionNames && regionNames.length > 0 && !!groupName;
 
   const regionsScope: Scope | null =
     enabled && country ? { country, source: SOURCE, regionType: GSP_REGION_TYPE } : null;
@@ -188,7 +221,6 @@ export const useGspAggregateData = (
   const window = {};
 
   const regionsResult = useRegions(regionsScope);
-  const bridge = useMemo(() => buildRegionBridge(regionsResult.data), [regionsResult.data]);
 
   const forecastPeriod = useForecastPeriod(regionsScope, window);
 
@@ -208,14 +240,14 @@ export const useGspAggregateData = (
   const generationResults = [generation0, generation1];
 
   const rollUp = (series: RegionSeries | undefined) =>
-    enabled && gspIds && groupName
-      ? rollUpRegionSeries(series, gspIds, bridge, groupName)
+    enabled && regionNames && groupName
+      ? rollUpRegionSeries(series, regionNames, groupName)
       : undefined;
 
   const forecast = useMemo(
     () => rollUp(forecastPeriod.data),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [enabled, gspIds, groupName, forecastPeriod.data, bridge]
+    [enabled, regionNames, groupName, forecastPeriod.data]
   );
 
   const generationSeries: ChartSeriesInput[] = useMemo(
@@ -225,14 +257,17 @@ export const useGspAggregateData = (
         series: rollUp(generationResults[index].data)
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [enabled, gspIds, groupName, observers, generation0.data, generation1.data, bridge]
+    [enabled, regionNames, groupName, observers, generation0.data, generation1.data]
   );
 
-  const memberLabels = useMemo(
-    () =>
-      enabled && gspIds ? gspIds.map((id) => bridge.byGspId.get(id)?.label ?? String(id)) : [],
-    [enabled, gspIds, bridge]
-  );
+  // Labels ("City Road"), never the raw region names. A name with no region behind it falls
+  // back to the name itself rather than being dropped, so the tooltip's length always matches
+  // the selection's.
+  const memberLabels = useMemo(() => {
+    if (!enabled || !regionNames) return [];
+    const bridge = buildRegionBridge(regionsResult.data);
+    return regionNames.map((name) => bridge.byName.get(name)?.label ?? name);
+  }, [enabled, regionNames, regionsResult.data]);
 
   const isLoading =
     enabled &&

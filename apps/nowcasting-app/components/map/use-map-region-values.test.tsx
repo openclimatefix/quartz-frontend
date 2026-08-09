@@ -34,23 +34,44 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
   useUser: () => ({ user: null, isLoading: false, error: undefined })
 }));
 
-// The map hook builds boundary geometry, which is 10MB of GeoJSON this suite has no use for.
-// The join it stands in for is covered by `map-value-join.test.ts`.
-jest.mock("../helpers/data", () => {
-  const actual = jest.requireActual<typeof import("../helpers/data")>("../helpers/data");
+// Geometry is fetched from `public/geo/` since Phase 5 and there is no server here to serve
+// it — nor any reason to parse 9 MB of GB boundaries for a suite about the value pipeline.
+// `useMapGeometry` is stubbed out entirely; its own behaviour, including the out-of-order
+// guard, is covered by `hooks/data/use-map-geometry.test.tsx`, and the value join by
+// `map-value-join.test.ts`.
+jest.mock("../../hooks/data/use-map-geometry", () => {
+  // A single frozen object, because the identity of `geometry` is load-bearing: the map
+  // components call `setData` only when it changes, and a stub that returned a fresh literal
+  // per render would make the "no `setData` on a scrub tick" test vacuously pass.
+  const geometry = { type: "FeatureCollection", features: [] };
   return {
     __esModule: true,
-    ...actual,
-    buildMapGeometry: jest.fn(() => ({ type: "FeatureCollection", features: [] }))
+    useMapGeometry: () => ({
+      geometry,
+      groupings: undefined,
+      isLoading: false,
+      error: undefined
+    })
   };
 });
 
 import gbGspForecastPeriod from "../../lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json";
 import gbGspGenerationPeriod from "../../lib/api/v1/__fixtures__/gb-gsp-generation-period.json";
 import gbRegionsGsp from "../../lib/api/v1/__fixtures__/gb-regions-gsp.json";
+import { isLegacyRegion } from "../../config/geo-aliases";
 import { resetTokenCache } from "../../lib/api/auth/token";
-import { NationalAggregation } from "./types";
+import type { AggregationLevel } from "../helpers/aggregationLevels";
 import { useMapRegionValues } from "./use-map-region-values";
+
+/** GB's finest non-derived level, as `deriveAggregationLevels` produces it. */
+const GSP_LEVEL: AggregationLevel = {
+  regionType: "gsp",
+  level: 10,
+  label: "Grid Supply Point",
+  minZoom: 7,
+  maxZoom: 8.5,
+  derived: false
+};
 
 const V1 = "https://api.quartz.solar/v1";
 
@@ -92,8 +113,7 @@ const THIRD = gbGspForecastPeriod.times_utc[22];
 
 const renderMap = (initialTime: string) =>
   renderHook(
-    ({ targetTime }: { targetTime: string }) =>
-      useMapRegionValues(NationalAggregation.GSP, targetTime),
+    ({ targetTime }: { targetTime: string }) => useMapRegionValues(GSP_LEVEL, targetTime),
     { wrapper, initialProps: { targetTime: initialTime } }
   );
 
@@ -184,7 +204,14 @@ describe("useMapRegionValues", () => {
     expect(view.result.current.featureStates).not.toBe(states);
   });
 
-  test("national capacity comes from the region list, which is a real partition", async () => {
+  // The region list is NOT a partition: six of GB's 338 regions are legacy spellings the API
+  // keeps for backward compatibility of client scripts, and summing all of them lands 683 MW
+  // (3.1 %) over national. The NESO boundary file is the definitive GSP set, so the sum
+  // excludes them — the same rule the geometry and feature-state join apply.
+  //
+  // Asserting against the naive total is what makes this test discriminating: an equality
+  // against a literal would still pass if the filter were dropped and the fixture changed.
+  test("national capacity excludes the API's legacy backward-compatibility regions", async () => {
     const view = renderMap(FIRST);
     await waitFor(() => {
       view.rerender({ targetTime: FIRST });
@@ -192,7 +219,19 @@ describe("useMapRegionValues", () => {
       expect(view.result.current.featureStates.size).toBeGreaterThan(0);
     });
 
-    expect(view.result.current.nationalCapacityMw).toBeGreaterThan(0);
+    // The fixture publishes kW, which `normalise` converts to MW — hence the /1000 here.
+    const all = gbRegionsGsp;
+    const sumMw = (rows: typeof all) =>
+      rows.reduce((total, region) => total + (region.capacity_kW ?? 0) / 1000, 0);
+    const legacy = all.filter((region) => isLegacyRegion("GB", region.name));
+    const real = all.filter((region) => !isLegacyRegion("GB", region.name));
+
+    // The fixture must actually contain legacy regions, or this asserts nothing.
+    expect(legacy).toHaveLength(6);
+    expect(view.result.current.nationalCapacityMw).toBeCloseTo(sumMw(real), 3);
+    // The gap is the legacy regions' own capacity — the 683 MW over-count, to the MW.
+    expect(sumMw(all) - view.result.current.nationalCapacityMw).toBeCloseTo(sumMw(legacy), 3);
+    // All 338 are still fetched and still expected to publish values; only the sum narrows.
     expect(view.result.current.coverage.expected).toBe(338);
   });
 });

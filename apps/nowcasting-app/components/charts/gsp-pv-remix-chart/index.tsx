@@ -7,7 +7,10 @@ import {
 } from "../../helpers/utils";
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderGSP from "./forecast-header-gsp";
-import { useGspAggregateData, useGspRegionData } from "./use-gsp-region-data";
+import { useGspAggregateData, useGspRegionData, useGspRegionNames } from "./use-gsp-region-data";
+import { useCurrentAggregationLevel } from "../../../hooks/data";
+import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
+import { groupRegionNames } from "../../helpers/data";
 import useGlobalState, {
   useCountryState,
   get30MinNow,
@@ -15,10 +18,8 @@ import useGlobalState, {
 } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import React, { FC, useMemo } from "react";
-import { NationalAggregation } from "../../map/types";
 import { getTicks } from "../../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../../constant";
-import { groupGspIds } from "../../helpers/data";
 import type { TimeSeries } from "../../../lib/domain/types";
 
 /**
@@ -63,8 +64,10 @@ const GspPvRemixChart: FC<{
   // `generation/period` across the group's GSP ids at every timestamp with
   // `rollUpRegionSeries`. The two never overlap and never double-fetch: each hook disables
   // itself (a `null` scope) whenever the other one is the active path.
-  const isSingleGsp =
-    nationalAggregationLevel === NationalAggregation.GSP && selectedRegions.length === 1;
+  // `nationalAggregationLevel` is a region type name now, not the enum (Phase 5 seam 1). This
+  // component is GB's GSP-specific chart — `useGspRegionData` below hardcodes the `"gsp"`
+  // region type — so the check is a genuine identity match, not a stand-in for `derived`.
+  const isSingleGsp = nationalAggregationLevel === "gsp" && selectedRegions.length === 1;
   const gspId = isSingleGsp ? Number(selectedRegions[0]) : undefined;
   const nMinuteForecast = nHourForecast * 60;
   const gspRegionData = useGspRegionData(gspId, isSingleGsp, {
@@ -72,24 +75,52 @@ const GspPvRemixChart: FC<{
     horizonMinutes: nMinuteForecast
   });
 
-  // Resolves the active *group* selection to a flat GSP id list, whatever aggregation level it
-  // came from: a raw multi-select is already ids, DNO/zone/national resolve via the grouping
-  // file's own key (the same key the map's boundary features carry as their id, so this needs
-  // no separate lookup table). `null` when a group selection isn't the active path.
-  const { gspIds, groupName } = useMemo(() => {
-    if (isSingleGsp) return { gspIds: null, groupName: null };
-    if (nationalAggregationLevel === NationalAggregation.GSP) {
-      return selectedRegions.length > 0
-        ? { gspIds: selectedRegions.map(Number), groupName: `${selectedRegions.length} GSPs` }
-        : { gspIds: null, groupName: null };
-    }
-    const name = selectedRegions[0];
-    if (!name) return { gspIds: null, groupName: null };
-    const ids = groupGspIds(nationalAggregationLevel, name);
-    return ids ? { gspIds: ids, groupName: name } : { gspIds: null, groupName: null };
-  }, [isSingleGsp, nationalAggregationLevel, selectedRegions]);
+  // Resolves the active *group* selection to a flat list of v1 region names, whatever level
+  // it came from. `null` when a group selection isn't the active path.
+  //
+  // **The branch is on `level.derived`, not on the level's name.** A derived level (GB's DNO
+  // and NG zone) selects a *group*, and its Mapbox feature id is that group's key in the
+  // grouping file — so one lookup resolves it. A non-derived level selects regions directly,
+  // and at GSP level its feature ids are numeric, so they go through `useGspRegionNames`.
+  //
+  // That distinction is the fix for the regression this path carried through Phase 5. The old
+  // code looked the level up in a table keyed by `NationalAggregation`'s capitalised values
+  // ("DNO", "Zone"); when Track B changed the stored level to the registry's lowercase region
+  // type name ("dno", "zone") every lookup missed, `groupGspIds` returned `undefined`, and the
+  // grouped chart silently drew nothing — no error, no type error, just an empty panel. There
+  // is now no name-keyed table left to mismatch: `useLevelGroupings` resolves the URL from
+  // `config/countries.ts` using the level's own `regionType`, and the group name comes from
+  // the asset itself.
+  const level = useCurrentAggregationLevel();
+  const groupings = useLevelGroupings(level);
 
-  const gspAggregateData = useGspAggregateData(gspIds, groupName);
+  const isGroupSelection = !isSingleGsp && !!level?.derived;
+  const groupName = isGroupSelection ? selectedRegions[0] ?? null : null;
+  const groupRegions = useMemo(
+    () => (groupName ? groupRegionNames(groupings.data, groupName) ?? null : null),
+    [groupings.data, groupName]
+  );
+
+  // A multi-select at a non-derived level: the feature ids are the map's, numeric at GSP
+  // level, so they need translating to region names before anything can be summed.
+  const multiSelectIds = useMemo(
+    () => (!isSingleGsp && !level?.derived && selectedRegions.length > 0 ? selectedRegions : null),
+    [isSingleGsp, level?.derived, selectedRegions]
+  );
+  const multiSelectNames = useGspRegionNames(multiSelectIds);
+
+  const selection = useMemo(
+    () =>
+      isGroupSelection
+        ? { regionNames: groupRegions, groupName }
+        : {
+            regionNames: multiSelectNames,
+            groupName: multiSelectNames ? `${selectedRegions.length} GSPs` : null
+          },
+    [isGroupSelection, groupRegions, groupName, multiSelectNames, selectedRegions.length]
+  );
+
+  const gspAggregateData = useGspAggregateData(selection.regionNames, selection.groupName);
 
   const now30min = formatISODateString(get30MinNow());
 
@@ -113,13 +144,16 @@ const GspPvRemixChart: FC<{
   let selectedGSPNames: string[] = [];
   if (isSingleGsp) {
     title = gspRegionData.region?.label || String(selectedRegions[0]);
-  } else if (nationalAggregationLevel === NationalAggregation.GSP && selectedRegions.length > 1) {
-    title = `${selectedRegions.length} ${String(nationalAggregationLevel)}s selected`;
+  } else if (nationalAggregationLevel === "gsp" && selectedRegions.length > 1) {
+    // Was `${nationalAggregationLevel}s selected` off the enum's "GSP" value ("GSPs
+    // selected"); the region-type name is lowercase now, so this is hardcoded to keep the
+    // same visible copy rather than silently becoming "gsps selected".
+    title = `${selectedRegions.length} GSPs selected`;
     // Per-member display names for the tooltip, resolved inside `useGspAggregateData` from the
     // `useRegions` data it already holds — no extra request. Labels ("City Road"), never the
     // raw region names (`citr_1`).
     selectedGSPNames = gspAggregateData.memberLabels;
-  } else if (nationalAggregationLevel === NationalAggregation.national) {
+  } else if (nationalAggregationLevel === "national") {
     title = "National GSP Sum";
   } else {
     title = groupName || String(selectedRegions[0] ?? "");

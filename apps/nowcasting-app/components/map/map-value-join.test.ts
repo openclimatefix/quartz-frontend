@@ -1,15 +1,17 @@
 /**
  * The map's value join, tested as pure functions.
  *
- * Nothing here touches geometry (the boundary files are lazily required, so this suite never
- * parses 36MB of GeoJSON) and nothing here touches the network. What it pins is the part the
+ * Nothing here touches geometry and nothing here touches the network — and since Phase 5 that
+ * is a property of the module rather than of this suite: `components/helpers/data.ts` no
+ * longer loads anything at all, so importing it costs nothing. What this pins is the part the
  * old pipeline got wrong:
  *
  *  - the join is a key lookup into `RegionSeries.regions`, not a `.find()` per region;
  *  - `unpublished`, `no-data` and `value` stay three different answers, and a genuine 0 is a
  *    value (audit B8's bug class);
  *  - a rollup over GB's DNO groupings double-counts, because those groupings are not a
- *    partition — pinned deliberately, since Phase 5 owns the fix.
+ *    partition — pinned deliberately, and Phase 5 reproduced it rather than fixing it while
+ *    the question sits with the API owner.
  */
 import { describe, expect, jest, test } from "@jest/globals";
 
@@ -34,7 +36,8 @@ import {
   timeIndexOf,
   utcMinuteKey
 } from "../helpers/data";
-import { ActiveUnit, NationalAggregation } from "./types";
+import { ActiveUnit } from "./types";
+import type { AggregationLevel } from "../helpers/aggregationLevels";
 import { theme } from "../../tailwind.config";
 import {
   NO_DATA_COLOR,
@@ -45,6 +48,17 @@ import {
 } from "./feature-state";
 
 const TIMES = ["2026-08-04T00:00:00Z", "2026-08-04T00:30:00Z", "2026-08-04T01:00:00Z"];
+
+/** A stand-in for the levels `deriveAggregationLevels` produces. Only `derived` is read here. */
+const aggregationLevel = (regionType: string, derived = false): AggregationLevel => ({
+  regionType,
+  level: derived ? 5 : 10,
+  label: regionType,
+  minZoom: 0,
+  maxZoom: 14,
+  derived
+});
+const GSP_LEVEL = aggregationLevel("gsp");
 
 const region = (name: string, over: Partial<Region> = {}): Region => ({
   name,
@@ -178,20 +192,20 @@ describe("buildRegionValues", () => {
   });
 });
 
-describe("buildRegionBridge — the interim numeric-id bridge", () => {
+/**
+ * The bridge survived Phase 5, narrowed to id translation alone.
+ *
+ * `byGspCode` is gone: the geometry join is no longer a hardcoded case fold on
+ * `properties.GSPs` but a name join driven by the registry's `joinProperty`/`joinTransform`,
+ * which is what lets a country without GSPs draw at all. What is left is the numeric id,
+ * which two things outside the groupings still need — see the doc comment on `RegionBridge`.
+ */
+describe("buildRegionBridge — the numeric-id bridge", () => {
   const regions = [
     region("citr_1", { metadata: { gsp_id: 67, full_name: "City Road" } }),
     region("chap", { metadata: { gsp_id: 5 } }),
     region("nogspid", { metadata: {} })
   ];
-
-  test("the GeoJSON join is a case fold on properties.GSPs", () => {
-    const bridge = buildRegionBridge(regions);
-    expect(bridge.byGspCode("CITR_1")?.name).toBe("citr_1");
-    expect(bridge.byGspCode("CHAP")?.name).toBe("chap");
-    expect(bridge.byGspCode("Off_NETS(unassigned)")).toBeUndefined();
-    expect(bridge.byGspCode(undefined)).toBeUndefined();
-  });
 
   test("gsp_id maps both ways, and a region without one is simply absent", () => {
     const bridge = buildRegionBridge(regions);
@@ -204,7 +218,7 @@ describe("buildRegionBridge — the interim numeric-id bridge", () => {
     const bridge = buildRegionBridge(normaliseRegions(gbRegionsGsp as never));
     expect(bridge.byName.size).toBe(338);
     expect(bridge.byGspId.size).toBe(338);
-    expect(bridge.byGspCode("CITR_1")?.label).toBe("City Road");
+    expect(bridge.byName.get("citr_1")?.label).toBe("City Road");
   });
 });
 
@@ -214,7 +228,6 @@ describe("rollUpRegionValues", () => {
     region("b", { metadata: { gsp_id: 2 }, capacityMw: 200 }),
     region("c", { metadata: { gsp_id: 3 }, capacityMw: 300 })
   ];
-  const bridge = buildRegionBridge(regions);
   const values = buildRegionValues({
     regions,
     forecast: series({ a: [10, 10, 10], b: [20, 20, 20], c: [null, null, null] }),
@@ -224,44 +237,45 @@ describe("rollUpRegionValues", () => {
   });
 
   test("a grouping sums power and capacity over its members", () => {
-    const rolled = rollUpRegionValues(values, { North: [1, 2] }, bridge);
+    const rolled = rollUpRegionValues(values, { North: ["a", "b"] });
     expect(rolled.get("North")!.power).toBe(30);
     expect(rolled.get("North")!.capacity).toBe(300);
     expect(rolled.get("North")!.normalized).toBeCloseTo(0.1, 6);
   });
 
   test("a partly-published grouping is still a value, not a hole", () => {
-    const rolled = rollUpRegionValues(values, { Mixed: [1, 3] }, bridge);
+    const rolled = rollUpRegionValues(values, { Mixed: ["a", "c"] });
     expect(rolled.get("Mixed")!.dataState).toBe("value");
     expect(rolled.get("Mixed")!.power).toBe(10);
   });
 
   test("a grouping whose members all reported nothing is no-data", () => {
-    const rolled = rollUpRegionValues(values, { Empty: [3] }, bridge);
+    const rolled = rollUpRegionValues(values, { Empty: ["c"] });
     expect(rolled.get("Empty")!.dataState).toBe("no-data");
   });
 
   test("a grouping with no known members at all is unpublished", () => {
-    const rolled = rollUpRegionValues(values, { Unknown: [999] }, bridge);
+    const rolled = rollUpRegionValues(values, { Unknown: ["nosuchregion"] });
     expect(rolled.get("Unknown")!.dataState).toBe("unpublished");
   });
 
-  // CHARACTERISATION: GB's DNO groupings are not a partition — 15 GSP ids appear in two
+  // CHARACTERISATION: GB's DNO groupings are not a partition — 15 GSPs appear in two
   // groupings each — so a GSP counted twice within one grouping (or across two) is summed
-  // twice, in both power and capacity. Phase 5 regenerates the grouping files; until then
-  // this is visible rather than silently de-duplicated, because de-duplicating here would
-  // change published DNO numbers without anyone deciding to.
+  // twice, in both power and capacity. Phase 5 regenerated the grouping files name-keyed and
+  // reproduced the duplication exactly: the API owner has not answered whether a GSP feeding
+  // two licence areas should be counted in both or apportioned, so there is no number to
+  // choose. De-duplicating here would change published DNO figures without anyone deciding to.
   test("a GSP listed twice in a grouping is counted twice", () => {
-    const rolled = rollUpRegionValues(values, { Double: [1, 1] }, bridge);
+    const rolled = rollUpRegionValues(values, { Double: ["a", "a"] });
     expect(rolled.get("Double")!.power).toBe(20);
     expect(rolled.get("Double")!.capacity).toBe(200);
   });
 
   test("deltas roll up too, and a group with no computable member has none", () => {
-    const rolled = rollUpRegionValues(values, { North: [1, 2] }, bridge);
+    const rolled = rollUpRegionValues(values, { North: ["a", "b"] });
     expect(rolled.get("North")!.hasDelta).toBe(true);
     expect(rolled.get("North")!.delta).toBe(-20);
-    expect(rollUpRegionValues(values, { Empty: [3] }, bridge).get("Empty")!.hasDelta).toBe(false);
+    expect(rollUpRegionValues(values, { Empty: ["c"] }).get("Empty")!.hasDelta).toBe(false);
   });
 });
 
@@ -270,7 +284,7 @@ describe("buildMapFeatureStates against the recorded GB fixtures", () => {
   const forecast = normaliseForecastMatrix(gbGspForecastPeriod as never);
 
   test("GSP level keys feature state by the numeric gsp id the geometry promotes", () => {
-    const states = buildMapFeatureStates(NationalAggregation.GSP, {
+    const states = buildMapFeatureStates(GSP_LEVEL, {
       regions,
       forecast,
       generation: undefined,
@@ -290,7 +304,7 @@ describe("buildMapFeatureStates against the recorded GB fixtures", () => {
   // distinction exists for: the 5 that published a genuine overnight 0 must read as values,
   // and the 333 that are simply not in the payload must read as unpublished — not as zeros.
   test("an overnight zero is a value; a region absent from the payload is not", () => {
-    const states = buildMapFeatureStates(NationalAggregation.GSP, {
+    const states = buildMapFeatureStates(GSP_LEVEL, {
       regions,
       forecast,
       generation: undefined,
@@ -306,7 +320,7 @@ describe("buildMapFeatureStates against the recorded GB fixtures", () => {
   });
 
   test("with no generation loaded there is no delta anywhere", () => {
-    const states = buildMapFeatureStates(NationalAggregation.GSP, {
+    const states = buildMapFeatureStates(GSP_LEVEL, {
       regions,
       forecast,
       generation: undefined,

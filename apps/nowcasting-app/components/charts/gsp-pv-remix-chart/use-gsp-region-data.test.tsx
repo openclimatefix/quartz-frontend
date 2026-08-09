@@ -46,7 +46,12 @@ import gbNationalGenerationDayAfter from "../../../lib/api/v1/__fixtures__/gb-na
 import { resetTokenCache } from "../../../lib/api/auth/token";
 import { setCurrentCountry } from "../../helpers/globalState";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
-import { useGspRegionData } from "./use-gsp-region-data";
+import gbGspForecastPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json";
+import gbGspGenerationPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-generation-period.json";
+import gbGenerationSources from "../../../lib/api/v1/__fixtures__/gb-generation-sources.json";
+import dnoGroupings from "../../../public/geo/gb/dno-groupings.json";
+import { groupRegionNames } from "../../helpers/data";
+import { useGspAggregateData, useGspRegionData, useGspRegionNames } from "./use-gsp-region-data";
 
 const V1 = "https://api.quartz.solar/v1";
 
@@ -71,6 +76,9 @@ const server = setupServer(
   json("/countries", countriesFixture),
   json("/GB/solar/regions", gbRegionsGsp),
   json("/GB/solar/regions/citr_1/forecast", gbNationalForecast),
+  json("/GB/solar/forecasts/period", gbGspForecastPeriod),
+  json("/GB/solar/generation/period", gbGspGenerationPeriod),
+  json("/GB/solar/generation/sources", gbGenerationSources),
   http.get(`${V1}/GB/solar/regions/citr_1/generation`, ({ request }) => {
     record(request);
     const observer = new URL(request.url).searchParams.get("observer");
@@ -206,5 +214,80 @@ describe("enabled with a resolvable GSP", () => {
         .find((r) => r.url.searchParams.has("horizon_minutes"))
         ?.url.searchParams.get("horizon_minutes")
     ).toBe("240");
+  });
+});
+
+/**
+ * THE GROUPED ROLLUP — the path that broke twice in Phase 5 with nothing to catch it.
+ *
+ * First when Track B moved the stored aggregation level from `NationalAggregation`'s
+ * capitalised values ("DNO") to the registry's lowercase region-type names ("dno"): the
+ * lookup table in `data.ts` was still keyed by the enum, every lookup missed, `groupGspIds`
+ * returned `undefined`, and the DNO chart drew an empty panel. No error, no type error.
+ * Then again when the call site was stubbed to `null` while this seam moved underneath it.
+ *
+ * Both failures present identically — a blank chart — which is why this asserts the thing a
+ * human would have to notice: a real DNO group name produces a series carrying real numbers.
+ */
+describe("useGspAggregateData — a DNO group name rolls up to a real series", () => {
+  const DNO_GROUPINGS = dnoGroupings as Record<string, string[]>;
+  const GROUP = "UKPN (London)";
+
+  test("resolves the shipped grouping to members and sums them at every timestamp", async () => {
+    // Exactly what `index.tsx` does: the level is derived, so the selected feature id IS the
+    // group's key in the grouping file. UKPN (London) is the group four of the recorded
+    // fixture's five published regions fall in — the assertions below need members that
+    // actually carry numbers, which is the whole point.
+    const members = groupRegionNames(DNO_GROUPINGS, GROUP)!;
+    expect(members.length).toBeGreaterThan(0);
+    expect(members).toContain("citr_1");
+
+    const { result, rerender } = renderHook(() => useGspAggregateData(members, GROUP), {
+      wrapper
+    });
+    await waitFor(() => {
+      rerender();
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.forecast).toBeDefined();
+    expect(result.current.forecast!.regionName).toBe(GROUP);
+    expect(result.current.forecast!.values.length).toBeGreaterThan(0);
+    // The blank-chart failure mode: a series of nothing but nulls, or a capacity of zero.
+    expect(result.current.forecast!.values.some((point) => typeof point.powerMw === "number")).toBe(
+      true
+    );
+    expect(result.current.capacityMw).toBeGreaterThan(0);
+    // Labels, never raw region names, and one per member.
+    expect(result.current.memberLabels).toHaveLength(members.length);
+    expect(result.current.memberLabels).not.toContain(members[0]);
+
+    // One request for the whole group, not one per member — the roll-up is client-side.
+    expect(seen("/GB/solar/forecasts/period")).toHaveLength(1);
+  });
+
+  test("an empty or unresolved selection disables the hook rather than charting zeroes", async () => {
+    const { result } = renderHook(() => useGspAggregateData(null, null), { wrapper });
+    expect(result.current.scope).toBeNull();
+    expect(result.current.forecast).toBeUndefined();
+    expect(seen("/GB/solar/forecasts/period")).toHaveLength(0);
+  });
+});
+
+describe("useGspRegionNames — the map's numeric feature ids become v1 region names", () => {
+  test("a GSP multi-select resolves to names, not ids", async () => {
+    const { result, rerender } = renderHook(() => useGspRegionNames([String(CITR_1_GSP_ID)]), {
+      wrapper
+    });
+    await waitFor(() => {
+      rerender();
+      expect(result.current).not.toBeNull();
+    });
+    expect(result.current).toEqual(["citr_1"]);
+  });
+
+  test("an empty selection is null, so the caller stays disabled", () => {
+    const { result } = renderHook(() => useGspRegionNames([]), { wrapper });
+    expect(result.current).toBeNull();
   });
 });
