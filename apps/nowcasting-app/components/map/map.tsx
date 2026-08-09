@@ -440,6 +440,7 @@ const Map: FC<IMap> = ({
           >
             {showCloudLayer && (
               <select
+                data-cy="satellite-channel-select"
                 value={activeChannel}
                 onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
                 disabled={!!satelliteError}
@@ -471,6 +472,7 @@ const Map: FC<IMap> = ({
             <div className="flex flex-row items-end gap-2">
               <button
                 type="button"
+                data-cy="clouds-toggle-button"
                 onClick={() => {
                   const turningOff = showCloudLayer;
                   setShowCloudLayer(!showCloudLayer);
@@ -509,6 +511,7 @@ const Map: FC<IMap> = ({
 
               <button
                 type="button"
+                data-cy="pv-toggle-button"
                 title="Toggle the yellow PV forecast overlay so clouds are easier to see"
                 onClick={() => setShowPvLayer((v) => !v)}
                 className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${

@@ -16,9 +16,7 @@ const compileFixtureRoutes = (manifest) => {
       "Fixture manifest is missing or empty. Run `yarn fixtures:update` before Cypress tests."
     );
   }
-  const sorted = [...manifest.routes].sort(
-    (a, b) => b.pattern.length - a.pattern.length
-  );
+  const sorted = [...manifest.routes].sort((a, b) => b.pattern.length - a.pattern.length);
   return sorted.map((route) => {
     const rawPattern = route.pattern.replace(/^\/|\/$/g, "");
     return {
@@ -51,5 +49,12 @@ Cypress.Commands.add("useApiFixtures", () => {
         req.reply({ fixture: match.fixture });
       }
     );
+    cy.intercept("GET", "**/satellite/?*", {
+      body: { url: "https://mock-s3-cdn.test/sample_geotif.tif" }
+    });
+
+    cy.intercept("GET", "**/sample_geotif.tif", {
+      fixture: "sample_geotif.tif,null"
+    }).as("satelliteTifFixture");
   });
 });
