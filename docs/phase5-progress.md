@@ -8,6 +8,42 @@ At phase end: `tsc --noEmit` exit 0, `jest` **37 suites / 936 tests**, `next bui
 
 ---
 
+## Picking this up
+
+**Phase 5 is complete and committed** to `epic/adaptive-eu-ui`, six commits, `c4f96be..9c2556a`:
+
+```
+c4f96be feat(geo)    boundary assets to public/, name-keyed groupings, NESO-canonical GSPs
+e2f0ca5 feat(levels) country-derived aggregation levels replace NationalAggregation
+758c001 feat(map)    geometry fetched on demand, ~36 MB of GeoJSON out of the bundle
+5f7a7d2 feat(sites)  25 MB of sites geojson fetched, peripherals scoped and token-cached
+f033256 fix(charts)  seasonal norms from the registry, NL no longer charted with GB's
+9c2556a docs         phase 5 progress and per-track notes
+```
+
+Verified with the local dev-entitlement override stashed out, i.e. the committed state alone is
+green. Nothing is pushed.
+
+**Deliberately left uncommitted in the working tree** — none of it phase 5 work:
+`lib/api/auth/entitlement.ts` (the TEMPORARY `NEXT_PUBLIC_DEV_ENTITLE_COUNTRIES` override, which
+its own header says to delete when the `countries` claim lands on the Auth0 dev tenant),
+`dist/tsconfig.tsbuildinfo`, and scratch files under `data/` (including the 61 MB
+`zone-geojson-test.json`), `public/bit/`, `public/os-transform.js`, `v1-api.json`.
+
+**Rebuilding the assets:** `node apps/nowcasting-app/scripts/build-geo-assets.mjs`. It reads
+`apps/nowcasting-app/data/*.json` and writes `public/geo/**` + `public/data/**`. Those `data/*.json`
+sources are build inputs and must not be deleted, even though nothing imports them into the bundle
+any more. `data/GSP_regions_4326_20260209.json` and `data/netherlands.json` were untracked before
+this phase and are now committed for that reason; the NESO file is also on `development`, so expect
+it to arrive again at merge with identical content.
+
+**Verification is `cd apps/nowcasting-app` first** — `tsc`/`jest` run from the workspace root pick up
+the wrong config and fail to parse TS at all, which looks like a broken toolchain and is not one.
+
+**Not done, by design:** live verification against prod. The usual split — this is at green build.
+
+---
+
 ## The bundle number
 
 The measurement the phase exists to prove, taken on real production builds before and after:

@@ -19,10 +19,13 @@ null` (NL today), and `undefined` is also what it returns while a real fetch is 
   `useFormatChartData` treats both identically: `if (!gsp && nationalMetrics)` — no
   `SEASONAL_*` keys are written at all when norms are absent, for either reason. NL now renders
   no seasonal-norm band/line, not GB's, not a zero-shaped stand-in.
-- `data/national_metrics.json` (the bundled file) itself was left in place — it wasn't in my
-  file ownership to delete, and `docs/phase5-contract.md` Seam 2 doesn't list it. Only the
-  `import` that pulled it into the JS bundle was removed. If nothing else references it,
-  someone should delete the file in a later pass.
+- `data/national_metrics.json` (the bundled file) itself was left in place. Only the `import`
+  that pulled it into the JS bundle was removed.
+
+  **Correction (checked at phase close): do not delete it.** It is the *input* to
+  `scripts/build-geo-assets.mjs:171`, which emits `public/data/gb/national-metrics.json` from
+  it. Nothing imports it into the bundle any more, so it costs nothing shipped, but removing
+  it breaks the asset build. The same is true of the other `data/*.json` the script reads.
 
 ## tsc fallout (fixed, in-scope)
 
