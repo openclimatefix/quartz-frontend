@@ -30,6 +30,18 @@ export type GeoLayerConfig = {
   /** GeoJSON feature property carrying the region key. */
   joinProperty: string;
   joinTransform?: GeoJoinTransform;
+  /**
+   * Display label, overriding the manifest's for this country's region type.
+   *
+   * The manifest is normally authoritative for labels, and countries that want its wording
+   * simply omit this. It exists because a label is a *product* decision the API cannot make:
+   * GB says "GSP" throughout, where the manifest spells the type "Grid Supply Point".
+   *
+   * Being registry-side also makes it available synchronously. A label taken from the
+   * manifest cannot render until the manifest loads, so a control that shows one flashes the
+   * `fallbackLabel` derivation first ("Gsp") and then swaps — which is what this avoids.
+   */
+  label?: string;
   /** Map zoom band this region type occupies. See `minZoom`/`maxZoom` note below. */
   minZoom?: number;
   maxZoom?: number;
@@ -52,6 +64,16 @@ export type DerivedRegionTypeConfig = {
    * national, 10 for gsp/province — precisely to leave room for these in between.
    */
   level: number;
+  /**
+   * Boundary geometry for the derived level's own polygons.
+   *
+   * Required, not optional: a derived level with a grouping file and no polygons to draw it
+   * on cannot be rendered, so the type refuses to express one. GB's DNO and NG-zone shapes
+   * had nowhere to be declared before Phase 5 — they were `require`d straight into the
+   * bundle from `data/` — which is why this field arrives with the assets rather than with
+   * the registry.
+   */
+  geometry: GeoLayerConfig;
   minZoom?: number;
   maxZoom?: number;
 };
@@ -188,6 +210,8 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         url: "/geo/gb/gsp.json",
         joinProperty: "GSPs",
         joinTransform: "lowercase",
+        // Brad's call: GB reads "GSP" throughout, not the manifest's "Grid Supply Point".
+        label: "GSP",
         minZoom: 7,
         maxZoom: 8.5
       }
@@ -198,6 +222,11 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         groupings: "/geo/gb/dno-groupings.json",
         label: "DNO",
         level: 5,
+        // The 14 licence-area polygons carry `LongName` ("UKPN (East)"), which is spelled
+        // exactly as `dno-groupings.json` keys its groups — hence no transform. The
+        // adjacent `Name` field is the single-letter GSP-group code (`_A`) and joins
+        // nothing.
+        geometry: { url: "/geo/gb/dno.json", joinProperty: "LongName" },
         minZoom: 5,
         maxZoom: 7
       },
@@ -206,6 +235,10 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         groupings: "/geo/gb/zone-groupings.json",
         label: "Zone",
         level: 6,
+        // 19 NG zones keyed on `id` ("NE Scotland"), again matching the grouping keys
+        // verbatim. Both grouping files key on the human-readable name because they predate
+        // v1 entirely; only their *values* were numeric gsp_ids, and Phase 5 re-keyed those.
+        geometry: { url: "/geo/gb/zone.json", joinProperty: "id" },
         minZoom: 5,
         maxZoom: 7
       }
