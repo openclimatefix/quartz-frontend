@@ -20,6 +20,18 @@ const MeasuringUnit = ({
     event.preventDefault();
     setActiveUnit(unit);
   };
+
+  type UnitCategory = "forecast" | "capacity";
+  const isForecastCategory = activeUnit === ActiveUnit.percentage || activeUnit === ActiveUnit.MW;
+  const activeCategory: UnitCategory = isForecastCategory ? "forecast" : "capacity";
+  const onToggleCategory = async (
+    event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
+    category: UnitCategory
+  ) => {
+    event.preventDefault();
+    if (category === activeCategory) return;
+    setActiveUnit(category === "forecast" ? ActiveUnit.MW : ActiveUnit.capacity);
+  };
   const onToggleAggregation = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     aggregation: NationalAggregation
@@ -64,40 +76,74 @@ const MeasuringUnit = ({
 
   return (
     <>
-      <div className="flex justify-end mr-0">
+      <div className="flex flex-row items-center justify-end gap-2">
         <div className="inline-block">
-          <MapUIButton<ActiveUnit>
-            id={"UnitButtonPercentage"}
-            active={activeUnit === ActiveUnit.percentage}
+          <MapUIButton<UnitCategory>
+            id={"CategoryButtonForecast"}
+            active={activeCategory === "forecast"}
             isLoading={isLoading}
-            onToggle={onToggleUnit}
-            text={"%"}
-            value={ActiveUnit.percentage}
+            onToggle={onToggleCategory}
+            text={"Forecast"}
+            value={"forecast"}
           />
-          <MapUIButton<ActiveUnit>
-            id={"UnitButtonMW"}
-            active={activeUnit === ActiveUnit.MW}
+          <MapUIButton<UnitCategory>
+            id={"CategoryButtonCapacity"}
+            active={activeCategory === "capacity"}
             isLoading={isLoading}
-            onToggle={onToggleUnit}
-            text={"MW"}
-            value={ActiveUnit.MW}
-          />
-          <MapUIButton<ActiveUnit>
-            id={"UnitButtonCapacity"}
-            active={activeUnit === ActiveUnit.capacity}
-            isLoading={isLoading}
-            onToggle={onToggleUnit}
+            onToggle={onToggleCategory}
             text={"Capacity"}
-            value={ActiveUnit.capacity}
+            value={"capacity"}
           />
-          <MapUIButton<ActiveUnit>
-            id={"UnitButtonCapacityDensity"}
-            active={activeUnit === ActiveUnit.capacityDensity}
-            isLoading={isLoading}
-            onToggle={onToggleUnit}
-            text={"MW/km²"}
-            value={ActiveUnit.capacityDensity}
-          />
+        </div>
+        <div className="grid">
+          <fieldset
+            disabled={activeCategory !== "forecast"}
+            className={`col-start-1 row-start-1 flex w-full border-0 p-0 m-0 [&>button]:flex-1 [&>button]:justify-center [&>button]:whitespace-nowrap ${
+              activeCategory === "forecast" ? "" : "invisible"
+            }`}
+            aria-hidden={activeCategory !== "forecast"}
+          >
+            <MapUIButton<ActiveUnit>
+              id={"UnitButtonPercentage"}
+              active={activeUnit === ActiveUnit.percentage}
+              isLoading={isLoading}
+              onToggle={onToggleUnit}
+              text={"%"}
+              value={ActiveUnit.percentage}
+            />
+            <MapUIButton<ActiveUnit>
+              id={"UnitButtonMW"}
+              active={activeUnit === ActiveUnit.MW}
+              isLoading={isLoading}
+              onToggle={onToggleUnit}
+              text={"MW"}
+              value={ActiveUnit.MW}
+            />
+          </fieldset>
+          <fieldset
+            disabled={activeCategory !== "capacity"}
+            className={`col-start-1 row-start-1 flex w-full border-0 p-0 m-0 [&>button]:flex-1 [&>button]:justify-center [&>button]:whitespace-nowrap ${
+              activeCategory === "capacity" ? "" : "invisible"
+            }`}
+            aria-hidden={activeCategory !== "capacity"}
+          >
+            <MapUIButton<ActiveUnit>
+              id={"UnitButtonCapacity"}
+              active={activeUnit === ActiveUnit.capacity}
+              isLoading={isLoading}
+              onToggle={onToggleUnit}
+              text={"MW"}
+              value={ActiveUnit.capacity}
+            />
+            <MapUIButton<ActiveUnit>
+              id={"UnitButtonCapacityDensity"}
+              active={activeUnit === ActiveUnit.capacityDensity}
+              isLoading={isLoading}
+              onToggle={onToggleUnit}
+              text={"MW/km²"}
+              value={ActiveUnit.capacityDensity}
+            />
+          </fieldset>
         </div>
       </div>
       <div className="flex justify-end mr-0 mt-3">
