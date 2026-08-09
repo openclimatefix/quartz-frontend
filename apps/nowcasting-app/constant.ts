@@ -38,11 +38,17 @@ export const getViewTitle = (view: VIEWS) => {
   }
 };
 
-// GB-shaped shim. The country-derived list in `components/helpers/aggregationLevels.ts` is
-// the source of truth for what levels a country has and at what zoom; these three enums
-// survive only because they have ~100 consumers, and `aggregationLevels.test.ts` pins GB's
-// derived list equal to them so the two cannot drift. Phase 4 deletes them as it rewrites
-// those consumers — do not add new call sites.
+// The **sites view's** zoom bands. Not the region hierarchy.
+//
+// These were a GB-shaped shim for the region hierarchy; Phase 5 finished that migration and
+// the country-derived list in `components/helpers/aggregationLevels.ts` is now the only
+// source of truth for what levels a country has and at what zoom. What is left here is the
+// solar-sites view, which is a genuinely different thing: it aggregates *sites* (points from
+// the sites API) by zoom, not regions by hierarchy, and SITE has no region layer at all.
+//
+// `aggregationLevels.test.ts` still pins GB's derived bands equal to these, so the two
+// cannot drift while the sites view continues to use them. Do not add new call sites outside
+// the sites view — for anything region-shaped, use `AggregationLevel`.
 export enum AGGREGATION_LEVELS {
   NATIONAL = "NATIONAL",
   REGION = "REGION",

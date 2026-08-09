@@ -1,10 +1,14 @@
 /**
  * The country-derived aggregation levels that replace the GB-shaped enums.
  *
- * The safety property is the GB equivalence: `AGGREGATION_LEVELS`,
- * `AGGREGATION_LEVEL_MIN_ZOOM`/`MAX_ZOOM` and `NationalAggregation` still have ~100
- * consumers, so the derived list has to reproduce GB's four levels and their zoom bands
- * exactly. When Phase 4 deletes the enums, these assertions are what proves nothing moved.
+ * The safety property is the GB equivalence: the derived list has to reproduce GB's four
+ * levels and their zoom bands exactly, so that replacing the enums moved nothing visible.
+ *
+ * `NationalAggregation` is now deleted (Phase 5), and the four labels it held are spelled
+ * out literally below rather than imported. `AGGREGATION_LEVELS` and
+ * `AGGREGATION_LEVEL_MIN_ZOOM`/`MAX_ZOOM` survive, but only as the **sites view's** bands —
+ * every remaining consumer is the sites map, its zoom slider or its chart. They are not the
+ * region hierarchy any more, and nothing here should treat them as such.
  */
 import { describe, expect, test } from "@jest/globals";
 
@@ -15,8 +19,7 @@ import {
   AGGREGATION_LEVEL_MIN_ZOOM
 } from "../../constant";
 import type { RegionTypeCapability } from "../../lib/domain/types";
-import { NationalAggregation } from "../map/types";
-import { deriveAggregationLevels } from "./aggregationLevels";
+import { defaultAggregationLevel, deriveAggregationLevels } from "./aggregationLevels";
 
 /** Manifest region types, as `GET /countries` reports them. Level is sparse by design. */
 const manifest = (
@@ -30,15 +33,42 @@ const manifest = (
     defaultModel: null
   }));
 
+// `gsp` is spelled "Grid Supply Point" here because that is what the live manifest says.
+// The registry overrides it to "GSP" for GB, so this fixture being truthful is what makes
+// the label assertions below prove the override rather than restate the input.
 const GB_MANIFEST = manifest([
   ["national", "National", 0],
-  ["gsp", "GSP", 10]
+  ["gsp", "Grid Supply Point", 10]
 ]);
 
 const NL_MANIFEST = manifest([
   ["national", "National", 0],
   ["province", "Province", 10]
 ]);
+
+describe("GB's registry label overrides the manifest's", () => {
+  // Brad's call: GB reads "GSP" throughout. The manifest says "Grid Supply Point", so
+  // without the override the aggregation control's copy changes under us the moment the
+  // manifest lands — and, before it lands, reads "Gsp" from the fallback derivation.
+  test("uses the registry label, not the manifest's", () => {
+    const levels = deriveAggregationLevels(getCountryConfig("GB"), GB_MANIFEST);
+    expect(levels.find((level) => level.regionType === "gsp")?.label).toBe("GSP");
+  });
+
+  test("resolves the same label before the manifest loads, so the control does not flash", () => {
+    const withManifest = deriveAggregationLevels(getCountryConfig("GB"), GB_MANIFEST);
+    const withoutManifest = deriveAggregationLevels(getCountryConfig("GB"));
+    const labelOf = (levels: ReturnType<typeof deriveAggregationLevels>) =>
+      levels.find((level) => level.regionType === "gsp")?.label;
+    expect(labelOf(withoutManifest)).toBe("GSP");
+    expect(labelOf(withManifest)).toBe(labelOf(withoutManifest));
+  });
+
+  test("NL keeps the manifest's label, having declared no override", () => {
+    const levels = deriveAggregationLevels(getCountryConfig("NL"), NL_MANIFEST);
+    expect(levels.find((level) => level.regionType === "province")?.label).toBe("Province");
+  });
+});
 
 describe("deriveAggregationLevels", () => {
   test.each([
@@ -95,15 +125,58 @@ describe("deriveAggregationLevels", () => {
       manifest([["province", "Province", 10]])
     );
     expect(levels.map((level) => level.regionType)).not.toContain("province");
+    // And nothing else moved: GB still gets exactly the levels its registry entry declares.
+    expect(levels.map((level) => level.regionType)).toEqual(["national", "dno", "zone", "gsp"]);
+  });
+});
+
+describe("defaultAggregationLevel", () => {
+  const GB = getCountryConfig("GB")!;
+
+  test.each([
+    ["GB", getCountryConfig("GB"), GB_MANIFEST, "gsp"],
+    ["NL", getCountryConfig("NL"), NL_MANIFEST, "province"]
+  ])("%s starts on its finest non-derived level", (_name, config, regionTypes, expected) => {
+    expect(defaultAggregationLevel(config, regionTypes)).toBe(expected);
+  });
+
+  test("resolves the same without the manifest, which is how the state layer calls it", () => {
+    // `defaultCountryScopedState` is synchronous and pre-hook: it has the registry and
+    // nothing else. If the two answers could differ, the app would start on one level and
+    // silently move to another when `/countries` resolved.
+    expect(defaultAggregationLevel(getCountryConfig("GB"))).toBe("gsp");
+    expect(defaultAggregationLevel(getCountryConfig("NL"))).toBe("province");
+  });
+
+  test("never picks a derived level, however fine it sorts", () => {
+    // A country with GB's client-side groupings but no sub-national boundaries of its own.
+    // `zone` sorts finer than `national` and would win a naive "last level" rule, but its
+    // values are a rollup over a source region type this config cannot draw.
+    const groupingsOnly = { ...GB, geo: { national: GB.geo.national } };
+    expect(defaultAggregationLevel(groupingsOnly, GB_MANIFEST)).toBe("national");
+  });
+
+  test("falls back to national for a country with no sub-national geo entry", () => {
+    const nationalOnly = { ...GB, geo: { national: GB.geo.national }, derivedRegionTypes: {} };
+    expect(defaultAggregationLevel(nationalOnly, GB_MANIFEST)).toBe("national");
+  });
+
+  test("falls back to national for a country with no registry entry", () => {
+    expect(defaultAggregationLevel(getCountryConfig("ZZ"), GB_MANIFEST)).toBe("national");
   });
 });
 
 describe("GB equivalence with the enums the list replaces", () => {
   const gbLevels = deriveAggregationLevels(getCountryConfig("GB"), GB_MANIFEST);
 
-  test("produces exactly the four levels NationalAggregation enumerates", () => {
+  // These four strings were `NationalAggregation`'s members. The enum is gone as of Phase 5,
+  // so they are spelled out here rather than imported: this test's whole job is to pin GB's
+  // levels against an independent statement of what they were, and deriving the expectation
+  // from the same code under test would make it vacuous. Changing this list means GB's
+  // aggregation control changed, which is a product decision, not a refactor.
+  test("produces exactly the four levels the old NationalAggregation enum listed", () => {
     expect(gbLevels.map((level) => level.label).sort()).toEqual(
-      Object.values(NationalAggregation).sort()
+      ["DNO", "GSP", "National", "Zone"].sort()
     );
   });
 

@@ -19,7 +19,8 @@ import { useMapChrome } from "../components/hooks/use-map-chrome";
 import { useSitesViewData } from "../components/hooks/useSitesViewData";
 import useGlobalState, { useCountryState } from "../components/helpers/globalState";
 import { VIEWS } from "../constant";
-import { NationalAggregation } from "../components/map/types";
+import { useAggregationLevels } from "../hooks/data";
+import { defaultLevelOf } from "../components/helpers/aggregationLevels";
 import {
   CookieStorageKeys,
   setArraySettingInCookieStorage
@@ -49,6 +50,10 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     "nationalAggregationLevel"
   );
   const [, setClickedGspId] = useCountryState("clickedGspId");
+  // The delta view is forced onto the country's finest non-derived level — GB's `gsp`, NL's
+  // `province` — the same rule `defaultAggregationLevel` uses for the state's initial value
+  // (Phase 5 seam 1; was hardcoded `NationalAggregation.GSP`).
+  const finestLevel = defaultLevelOf(useAggregationLevels());
 
   // Local state used to set initial state on server side render, then updated by global state
   const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
@@ -65,11 +70,11 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   // On view change, unset the clicked region if the aggregation is not GSP,
   // and set the national aggregation level to GSP if we're now on Delta view
   useEffect(() => {
-    if (nationalAggregationLevel !== NationalAggregation.GSP) {
+    if (finestLevel && nationalAggregationLevel !== finestLevel.regionType) {
       setClickedGspId(undefined);
     }
-    if (view === VIEWS.DELTA) {
-      setNationalAggregationLevel(NationalAggregation.GSP);
+    if (view === VIEWS.DELTA && finestLevel) {
+      setNationalAggregationLevel(finestLevel.regionType);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view]);

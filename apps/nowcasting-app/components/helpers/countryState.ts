@@ -1,6 +1,6 @@
 import { AGGREGATION_LEVELS } from "../../constant";
-import { NationalAggregation } from "../map/types";
 import { getCountryConfig } from "../../config/countries";
+import { defaultAggregationLevel } from "./aggregationLevels";
 
 // The country dimension of the global state.
 //
@@ -41,7 +41,9 @@ export type CountryScopedStateType = {
   lat: number;
   zoom: number;
   aggregationLevel: AGGREGATION_LEVELS;
-  nationalAggregationLevel: NationalAggregation;
+  /** Region type as the manifest spells it (`"gsp"`, `"province"`, `"national"`), or the
+   *  synthetic name of a derived level (`"dno"`, `"zone"`). Country-keyed, as today. */
+  nationalAggregationLevel: string;
 };
 
 export type CountryScopedKey = keyof CountryScopedStateType;
@@ -91,13 +93,18 @@ export const FALLBACK_MAP_DEFAULTS = {
  * Lazy rather than seeded at init: it gives configured and unconfigured countries the same
  * code path, and means adding a registry entry needs no state migration.
  *
- * `nationalAggregationLevel` starts at `GSP` for every country because `NationalAggregation`
- * is still the GB-shaped enum — NL's equivalent level is `province`, which has no member.
- * Phase 4 replaces the enum with the derived list in `aggregationLevels.ts`, at which point
- * this becomes the country's outermost sub-national level.
+ * `nationalAggregationLevel` starts at the country's finest non-derived level — `gsp` for
+ * GB, `province` for NL, `national` for a country with neither (or with no registry entry at
+ * all). Derived from the registry alone: this function is synchronous and pre-hook, so the
+ * manifest is not available. That is safe because the manifest only ever contributes a level
+ * number and a label, and `deriveAggregationLevels`'s fallback level (0 national, 10
+ * otherwise) puts a sub-national type below national either way — so GB and NL resolve to
+ * the same answer with and without it. A country whose manifest levels disagree with that
+ * fallback *ordering* could differ; none does today.
  */
 export const defaultCountryScopedState = (code: string): CountryScopedStateType => {
-  const map = getCountryConfig(code)?.map ?? FALLBACK_MAP_DEFAULTS;
+  const config = getCountryConfig(code);
+  const map = config?.map ?? FALLBACK_MAP_DEFAULTS;
   return {
     clickedGspId: undefined,
     clickedMapRegionIds: undefined,
@@ -107,7 +114,7 @@ export const defaultCountryScopedState = (code: string): CountryScopedStateType 
     lat: map.center.lat,
     zoom: map.zoom,
     aggregationLevel: AGGREGATION_LEVELS.NATIONAL,
-    nationalAggregationLevel: NationalAggregation.GSP
+    nationalAggregationLevel: defaultAggregationLevel(config)
   };
 };
 

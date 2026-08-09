@@ -21,6 +21,8 @@ export {
 } from "./use-countries";
 export type { UseCountriesResult } from "./use-countries";
 
+export { useAggregationLevels, useCurrentAggregationLevel } from "./use-aggregation-levels";
+
 export { useCountryFormatting } from "./use-country-format";
 export type { CountryFormatting } from "./use-country-format";
 

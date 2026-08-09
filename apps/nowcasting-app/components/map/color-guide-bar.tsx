@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import { ActiveUnit, NationalAggregation } from "./types";
-import useGlobalState, { useCountryState } from "../helpers/globalState";
+import { ActiveUnit } from "./types";
+import { useCurrentAggregationLevel } from "../../hooks/data";
 import { NO_DATA_COLOR, NO_DATA_OPACITY } from "./feature-state";
 
 type ColorGuideBarProps = { unit: ActiveUnit };
 
 const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
-  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
+  const currentLevel = useCurrentAggregationLevel();
   const values = useMemo(() => {
     if (unit === ActiveUnit.percentage) {
       return [
@@ -18,7 +18,11 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
         { value: "70+", opacity: 100, textColor: "black" }
       ];
     }
-    if (nationalAggregationLevel === NationalAggregation.GSP) {
+    // These MW/capacity bands are calibrated to GB's actual scales — a single GSP tops out
+    // around 450 MW, a DNO/zone grouping (dozens of GSPs) around 4.5 GW — not a generic
+    // per-country rule, so the check is on the region type's identity (the one place in this
+    // file that legitimately is), not on `derived`.
+    if (currentLevel?.regionType === "gsp") {
       if (unit === ActiveUnit.MW) {
         return [
           { value: "0-50", opacity: 3, textColor: "ocf-gray-300" },
@@ -38,9 +42,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
           { value: "450+", opacity: 100, textColor: "black" }
         ];
       }
-    } else if (
-      [NationalAggregation.zone, NationalAggregation.DNO].includes(nationalAggregationLevel)
-    ) {
+    } else if (currentLevel?.derived) {
       if (unit === ActiveUnit.MW) {
         return [
           { value: "0-500", opacity: 3, textColor: "ocf-gray-300" },
@@ -61,7 +63,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ unit }) => {
         ];
       }
     }
-  }, [unit, nationalAggregationLevel]);
+  }, [unit, currentLevel]);
   let unitText = unit === ActiveUnit.MW ? "MW" : "%";
   if (unit === ActiveUnit.capacity) {
     unitText = "MW";

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
-import { NationalAggregation } from "./types";
 import { PointLike } from "mapbox-gl";
 
 type UseUpdateMapStateOnClickProps = {
@@ -74,8 +73,11 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     if (!map) return;
     if (!selectedMapRegionIds) return;
 
-    // Force ids to be numbers if national aggregation level is GSP for the map filter
-    if (nationalAggregationLevel === NationalAggregation.GSP) {
+    // Force ids to be numbers if national aggregation level is GSP for the map filter.
+    // `gsp` is the only region type whose feature ids are numeric (the API's `gsp_id`) —
+    // every other region type (DNO/zone groupings, NL's provinces) is keyed on a name, so
+    // this is a genuine identity check, not a stand-in for `derived`.
+    if (nationalAggregationLevel === "gsp") {
       setMapFilterSelectedIds(
         map,
         selectedMapRegionIds.map((id) => Number(id))
@@ -123,7 +125,9 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
             }
           } else {
             let ids: string[] | number[];
-            if (nationalAggregationLevelRef.current === NationalAggregation.GSP) {
+            // Same `gsp`-is-the-only-numeric-id-type rule as above, read off the ref because
+            // this handler is registered once (see the `isEventRegistertedRef` guard below).
+            if (nationalAggregationLevelRef.current === "gsp") {
               ids = [Number(clickedFeature.properties?.id)];
             } else {
               ids = [String(clickedFeature.properties?.id)];

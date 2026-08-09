@@ -6,7 +6,6 @@ import useGlobalState, { useCountryState } from "../helpers/globalState";
 import LegendItem from "./LegendItem";
 import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 import LegendTooltip from "../LegendTooltop";
-import { NationalAggregation } from "../map/types";
 import LegendTooltipContent from "./LegendTooltipContent";
 import { useCurrentCountry, useGenerationSources } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
@@ -53,7 +52,10 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
         "\nSelect a single region to see the \nN-hour forecast.";
     }
     if (
-      nationalAggregationLevel === NationalAggregation.DNO &&
+      // Region type name, not the enum, since Phase 5 seam 1. The copy below ("DNO-level
+      // data" / "GSP-level aggregation") is itself GB-specific, so this stays a literal
+      // identity check rather than a `derived` branch.
+      nationalAggregationLevel === "dno" &&
       selectedMapRegionIds &&
       selectedMapRegionIds.length > 0
     ) {

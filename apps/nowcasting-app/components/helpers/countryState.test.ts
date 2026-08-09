@@ -14,8 +14,8 @@ import Cookies from "js-cookie";
 import { getCountryConfig } from "../../config/countries";
 import { DEFAULT_COUNTRY_CODE as DATA_LAYER_DEFAULT_COUNTRY } from "../../hooks/data/use-countries";
 import { AGGREGATION_LEVELS } from "../../constant";
-import { NationalAggregation } from "../map/types";
 import { CookieStorageKeys } from "./cookieStorage";
+import { defaultAggregationLevel } from "./aggregationLevels";
 import {
   COUNTRY_SCOPED_KEYS,
   DEFAULT_COUNTRY_CODE,
@@ -111,6 +111,25 @@ describe("per-country defaults", () => {
       expect(slice.aggregationLevel).toBe(AGGREGATION_LEVELS.NATIONAL);
     }
   });
+
+  test("the region-type default is the country's finest non-derived level", () => {
+    // Not a hardcoded GSP any more: NL has provinces and no GSPs, and this function is the
+    // reason NL needs no guard downstream. Resolved from the registry alone — it runs during
+    // global state init, before the manifest can exist.
+    expect(defaultCountryScopedState("GB").nationalAggregationLevel).toBe("gsp");
+    expect(defaultCountryScopedState("NL").nationalAggregationLevel).toBe("province");
+    expect(defaultCountryScopedState(UNCONFIGURED).nationalAggregationLevel).toBe("national");
+  });
+
+  test("agrees with defaultAggregationLevel, which the hook layer uses", () => {
+    // Two entry points, one rule: if these drift, the app starts on one level and the map
+    // draws another.
+    for (const code of ["GB", "NL", UNCONFIGURED]) {
+      expect(defaultCountryScopedState(code).nationalAggregationLevel).toBe(
+        defaultAggregationLevel(getCountryConfig(code))
+      );
+    }
+  });
 });
 
 describe("reading and writing through the current country", () => {
@@ -132,7 +151,7 @@ describe("reading and writing through the current country", () => {
     setCountryState("lat", 51.5);
     setCountryState("zoom", 8.25);
     setCountryState("selectedMapRegionIds", ["citr_1"]);
-    setCountryState("nationalAggregationLevel", NationalAggregation.DNO);
+    setCountryState("nationalAggregationLevel", "dno");
 
     setCurrentCountry("NL");
     // NL is untouched: it gets its own defaults, not GB's leftovers.
@@ -145,7 +164,7 @@ describe("reading and writing through the current country", () => {
     expect(getCountryState("lat")).toBe(51.5);
     expect(getCountryState("zoom")).toBe(8.25);
     expect(getCountryState("selectedMapRegionIds")).toEqual(["citr_1"]);
-    expect(getCountryState("nationalAggregationLevel")).toBe(NationalAggregation.DNO);
+    expect(getCountryState("nationalAggregationLevel")).toBe("dno");
 
     setCurrentCountry("NL");
     expect(getCountryState("selectedMapRegionIds")).toEqual(["noord-holland"]);
