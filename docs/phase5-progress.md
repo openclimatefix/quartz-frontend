@@ -8,6 +8,33 @@ At phase end: `tsc --noEmit` exit 0, `jest` **37 suites / 936 tests**, `next bui
 
 ---
 
+## Read this first — two things before Phase 6
+
+**1. The dashboard layout conversation is owed, and Brad wants it ASAP, before Germany.** It was
+raised during Phase 4 wave 4 and pegged to the end of Phase 4; Phase 4 closed and Phase 5 shipped
+without it happening. The present arrangement — all three maps mounted at once inside
+`#map-container`, all three charts inside `SideLayout`, views toggled by a `hidden` class — is an
+artefact of organic growth, and it is what makes the plan's "per-view containers" impossible as
+written. Germany adds a country rather than changing layout, so doing this first avoids
+restructuring around a third country's presence. See `docs/phase4-track-g-notes.md` §1.
+
+**2. We do not discriminate between countries in code.** A country is *added* by configuration and
+*displayed* from configuration plus the manifest. No `if (country === "DE")`, no per-country
+component, no per-country branch in a hook, no country name in a `switch`. Phase 6 is the test of
+whether that held.
+
+The temptation will be at the edges — a label that reads oddly, a zoom that wants nudging, a region
+type with no boundaries yet. **Each of those is a registry field, not a branch.** Country-specific
+*config* is fine and expected: GB's `geo.gsp.label` override ("GSP" over the manifest's "Grid Supply
+Point") is the intended shape — declared in one entry, visible in review, inert elsewhere. The line
+is declared data versus executed branching. If a change cannot be expressed as a registry field, the
+abstraction is wrong: widen the config rather than special-casing the country.
+
+A diff adding a country code anywhere outside `config/countries.ts`, its geo assets and the Auth0
+role should be challenged by default.
+
+---
+
 ## Picking this up
 
 **Phase 5 is complete and committed** to `epic/adaptive-eu-ui`, six commits, `c4f96be..9c2556a`:

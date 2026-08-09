@@ -10,6 +10,16 @@
 // Adding a country should be one entry in `COUNTRY_CONFIG` plus its geo assets. That is the
 // property Phase 6 (Germany) is a test of, so resist putting anything country-conditional
 // anywhere else.
+//
+// **We do not discriminate between countries in code.** A country is added by configuration
+// and displayed from configuration plus the manifest — no `if (country === "DE")`, no
+// per-country component, no per-country branch in a hook, no country name in a `switch`.
+//
+// Country-specific *config* is the sanctioned lever and belongs here: `geo.gsp.label` is
+// GB-only and entirely correct, because it is declared data — visible in review, inert for
+// every other country. The line is declared data versus executed branching. If something
+// cannot be expressed as a field in this file, that is the signal the abstraction is too
+// narrow: widen the config rather than special-casing the country at the call site.
 
 /**
  * How a region name from the API is transformed before it is matched against the GeoJSON

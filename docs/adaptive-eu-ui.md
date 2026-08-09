@@ -621,6 +621,27 @@ absorbing D4's eight copy-pasted `<Line>` blocks and B5's prop-mutating sorts.
 Should reduce to: add the `DE` registry entry, drop in `public/geo/de/*`, add `DE_ROLE_ID`. Any code
 change required here counts as a bug in the abstraction and is fixed there instead.
 
+> **The rule, stated once so it can be pointed at: we do not discriminate between countries in
+> code.** A country is *added* by configuration and *displayed* from configuration plus the
+> manifest — nothing else. No `if (country === "DE")`, no per-country component, no per-country
+> branch in a hook, no country name in a `switch`. Phase 6 is the test of whether that held, and
+> the temptation will be at the edges: a label that reads oddly, a zoom that wants nudging, a
+> region type with no boundaries yet. **Every one of those is a registry field, not a branch.**
+>
+> Config is the sanctioned lever and may legitimately be country-specific — GB's `geo.gsp.label`
+> override ("GSP" over the manifest's "Grid Supply Point", Phase 5) is exactly the intended shape:
+> declared in one entry, visible in review, and inert for every other country. The line is
+> *declared data* versus *executed branching*. If a change cannot be expressed as a registry field,
+> that is the signal the abstraction is wrong — widen the config, do not special-case the country.
+>
+> Corollary for reviewers and agents: a diff that adds a country code anywhere outside
+> `config/countries.ts`, its geo assets, and the Auth0 role should be challenged by default.
+
+**Before Phase 6 starts:** the dashboard layout / screen real-estate conversation is owed and should
+happen first — see *Open items*. It was pegged to the end of Phase 4 and did not happen; Germany adds
+a country rather than changing layout, so doing it first avoids restructuring around a third country's
+presence.
+
 **Phase 7 — Rebrand / reskin.**
 Colours, copy, assets and branding, applied to the decomposed components Phase 4 produces. No file
 moves, no data-layer changes. See *Naming, structure and in-flight work* for why it goes last.
