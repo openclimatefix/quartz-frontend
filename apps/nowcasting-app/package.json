@@ -11,8 +11,8 @@
     "lint": "next lint",
     "pre-commit": "pre-commit run",
     "test": "jest",
-    "test:cypress": "cypress run --browser chrome",
-    "test:cypress:update-snapshots": "cypress run --browser chrome --env updateSnapshots=true",
+    "test:cypress": "cypress run --browser electron",
+    "test:cypress:update-snapshots": "cypress run --browser electron --env updateSnapshots=true",
     "fixtures:update": "node data/scripts/update_fixtures/update-cypress-fixtures.mjs"
   },
   "dependencies": {

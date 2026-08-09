@@ -66,7 +66,7 @@ const fetchJson = async (url, options = {}) => {
 };
 
 const getAccessToken = async () => {
-  const auth0Domain = (process.env.NEXT_PUBLIC_AUTH0_DOMAIN).replace(/^https?:\/\//, "");
+  const auth0Domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN.replace(/^https?:\/\//, "");
   const clientId = process.env.NEXT_PUBLIC_AUTH0_CLIENTID;
   const clientSecret = process.env.AUTH0_CLIENT_SECRET;
   const username = process.env.NEXT_PUBLIC_AUTH0_USERNAME;
@@ -110,16 +110,15 @@ const main = async () => {
     process.env.NEXT_PUBLIC_SITES_API_PREFIX || "https://api-site-dev.quartz.solar";
 
   const referenceTime = process.env.FIXTURE_REFERENCE_TIME
-    ? DateTime.fromISO(process.env.FIXTURE_REFERENCE_TIME).toUTC()
-    : DateTime.utc();
+    ? DateTime.fromISO(process.env.FIXTURE_REFERENCE_TIME, { zone: "utc" }).toUTC()
+    : DateTime.utc().set({ hour: 12, minute: 0, second: 0, millisecond: 0 });
   const nHourForecast = Number(process.env.FIXTURE_N_HOUR_FORECAST || 4);
   if (!Number.isFinite(nHourForecast) || nHourForecast <= 0) {
     throw new Error("FIXTURE_N_HOUR_FORECAST must be a positive number");
   }
 
   const selectedISOTime = get30MinNow(referenceTime);
-  const selectedTime = DateTime.fromISO(selectedISOTime).toUTC().toISO().slice(0, 16);
-  const targetTime = `${DateTime.fromISO(selectedTime).toUTC().toISO().slice(0, 19)}+00:00`;
+  const targetTime = `${DateTime.fromISO(selectedISOTime).toUTC().toISO().slice(0, 19)}+00:00`;
   const actualsLastFetch30MinISO = get30MinNow(referenceTime, -30);
   const actualsStart = `${actualsLastFetch30MinISO.slice(0, 19)}+00:00`;
   const historicForecastStart = getEarliestForecastTimestamp(referenceTime);
@@ -148,7 +147,9 @@ const main = async () => {
   const gspZones = await authedFetch(withUiFlag(`${apiPrefix}/system/GB/gsp/?zones=true`));
   await writeFixture("gsp_system_zones.json", gspZones);
 
-  const gspSingle = await authedFetch(withUiFlag(`${apiPrefix}/system/GB/gsp/?gsp_id=${sampleGspId}`));
+  const gspSingle = await authedFetch(
+    withUiFlag(`${apiPrefix}/system/GB/gsp/?gsp_id=${sampleGspId}`)
+  );
   await writeFixture("gsp_system_single.json", gspSingle);
 
   const nationalForecastBlend = await authedFetch(
@@ -163,7 +164,10 @@ const main = async () => {
       `${apiPrefix}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_ecmwf_only&trend_adjuster_on=true`
     )
   );
-  await writeFixture("national_forecast_pvnet_intraday_ecmwf_only.json", nationalForecastPvnetEcmwf);
+  await writeFixture(
+    "national_forecast_pvnet_intraday_ecmwf_only.json",
+    nationalForecastPvnetEcmwf
+  );
 
   const nationalForecastPvnetDayAhead = await authedFetch(
     withUiFlag(
@@ -184,7 +188,10 @@ const main = async () => {
       `${apiPrefix}/solar/GB/national/forecast?include_metadata=false&model_name=pvnet_intraday_met_office_only&trend_adjuster_on=true`
     )
   );
-  await writeFixture("national_forecast_pvnet_intraday_met_office_only.json", nationalForecastMetOffice);
+  await writeFixture(
+    "national_forecast_pvnet_intraday_met_office_only.json",
+    nationalForecastMetOffice
+  );
 
   const nationalForecastSatOnly = await authedFetch(
     withUiFlag(
@@ -219,13 +226,13 @@ const main = async () => {
   );
   await writeFixture("gsp_forecast_all_target.json", gspForecastTarget);
 
-    const gspForecastHistoric = await authedFetch(
+  const gspForecastHistoric = await authedFetch(
     withUiFlag(
-        `${apiPrefix}/solar/GB/gsp/forecast/all/?compact=true&historic=true&start_datetime_utc=${encodeURIComponent(
+      `${apiPrefix}/solar/GB/gsp/forecast/all/?compact=true&historic=true&start_datetime_utc=${encodeURIComponent(
         historicForecastStart
-        )}&end_datetime_utc=${encodeURIComponent(historicForecastStart)}`
+      )}&end_datetime_utc=${encodeURIComponent(historicForecastStart)}`
     )
-    );
+  );
   await writeFixture("gsp_forecast_all_historic.json", gspForecastHistoric);
 
   const gspPvLiveFuture = await authedFetch(
@@ -408,15 +415,13 @@ const main = async () => {
       {
         id: "gsp-pvlive-all-historic",
         method: "GET",
-        pattern:
-          "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*end_datetime_utc=.*UI=true/",
+        pattern: "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*end_datetime_utc=.*UI=true/",
         fixture: "gsp_pvlive_all_historic.json"
       },
       {
         id: "gsp-pvlive-by-ids-in-day",
         method: "GET",
-        pattern:
-          "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*gsp_ids=.*regime=in-day.*UI=true/",
+        pattern: "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*gsp_ids=.*regime=in-day.*UI=true/",
         fixture: "gsp_pvlive_all_in_day.json"
       },
       {
@@ -429,8 +434,7 @@ const main = async () => {
       {
         id: "gsp-pvlive-all-day-after",
         method: "GET",
-        pattern:
-          "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*regime=day-after.*UI=true/",
+        pattern: "/\\/v0\\/solar\\/GB\\/gsp\\/pvlive\\/all\\?.*regime=day-after.*UI=true/",
         fixture: "gsp_pvlive_all_day_after.json"
       },
       {
