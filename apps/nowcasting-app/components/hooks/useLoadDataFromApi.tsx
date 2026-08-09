@@ -1,8 +1,21 @@
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 import { axiosFetcherAuth } from "../helpers/utils";
+import type { Scope } from "../../lib/domain/types";
 
 const t5min = 1000 * 60 * 5;
 const t2min = 1000 * 60 * 2;
+
+// Auth: this already goes through the app-wide shared token cache. `axiosFetcherAuth`
+// (components/helpers/utils.ts) calls `lib/api/auth/token.ts#getAccessToken()`, the same
+// cache satellite and the v1 client use — there is no separate ad-hoc auth path left in
+// this hook to retire.
+//
+// `scope`, if a caller passes one, is accepted and otherwise unused. Every v0 peripheral
+// (sites, satellite, the status banner) is meant to carry a `Scope` from Phase 5 onward
+// even though the v0 URLs below ignore country — see docs/phase5-track-e-notes.md. That is
+// what makes the later v1 swap a change to the URL-building call site, not a hunt through
+// every caller for where the country should have been threaded.
+type LoadDataFromApiConfig<T> = SWRConfiguration<T, Error> & { scope?: Scope };
 
 // `T` is deliberately unconstrained.
 //
@@ -21,8 +34,10 @@ const t2min = 1000 * 60 * 2;
 // the URL determines the response type instead of the caller asserting it.
 export const useLoadDataFromApi = <T,>(
   url: string | null,
-  config: SWRConfiguration<T, Error> = {}
+  config: LoadDataFromApiConfig<T> = {}
 ): SWRResponse<T, Error> => {
+  const { scope, ...swrConfig } = config;
+  void scope;
   const uiFlag = url?.includes("?") ? "&UI=true" : "?UI=true";
   return useSWR<T, Error>(url ? `${url}${uiFlag}` : null, axiosFetcherAuth, {
     refreshInterval: t5min,
@@ -33,6 +48,6 @@ export const useLoadDataFromApi = <T,>(
       if (retryCount >= 10) return;
       setTimeout(() => revalidate({ retryCount }), 2000);
     },
-    ...config
+    ...swrConfig
   });
 };

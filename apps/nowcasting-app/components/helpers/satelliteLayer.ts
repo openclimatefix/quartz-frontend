@@ -1,5 +1,17 @@
 import { fromArrayBuffer } from "geotiff";
 import { getAccessToken } from "../../lib/api/auth/token";
+import type { Scope } from "../../lib/domain/types";
+
+// The satellite view stays GB-only and on its v0 endpoint this phase (see API_PREFIX
+// below), but Phase 5 asks every peripheral to carry a Scope so the later v1 swap is a
+// change to one URL-building function, not a hunt through every caller. `map.tsx`'s calls
+// into this module predate that and aren't updated to pass one — the default below is
+// exactly what they get implicitly today, so behaviour is unchanged.
+export const DEFAULT_SATELLITE_SCOPE: Scope = {
+  country: "GB",
+  source: "solar",
+  regionType: "national"
+};
 
 export const SATELLITE_CHANNELS = [
   "VIS006",
@@ -198,13 +210,14 @@ function releaseRequestSlot(): void {
 export async function fetchSatelliteTif(
   channel: SatelliteChannel,
   timestamp: string,
-  latest = false
+  latest = false,
+  scope: Scope = DEFAULT_SATELLITE_SCOPE
 ): Promise<ArrayBuffer | null> {
   // The slot is held across the 429 retries too: a rate limit means the API is
   // already saturated, so keeping the queue closed is the useful backpressure.
   await acquireRequestSlot();
   try {
-    return await requestSatelliteTif(channel, timestamp, latest);
+    return await requestSatelliteTif(channel, timestamp, latest, scope);
   } finally {
     releaseRequestSlot();
   }
@@ -213,8 +226,11 @@ export async function fetchSatelliteTif(
 async function requestSatelliteTif(
   channel: SatelliteChannel,
   timestamp: string,
-  latest: boolean
+  latest: boolean,
+  // Accepted, not yet consumed — see DEFAULT_SATELLITE_SCOPE's doc comment above.
+  scope: Scope = DEFAULT_SATELLITE_SCOPE
 ): Promise<ArrayBuffer | null> {
+  void scope;
   const token = await getAccessToken();
   const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
     channel
@@ -331,9 +347,10 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
 export async function fetchAndDecodeSatelliteTif(
   channel: SatelliteChannel,
   timestamp: string,
-  latest = false
+  latest = false,
+  scope: Scope = DEFAULT_SATELLITE_SCOPE
 ): Promise<TifLayerData | null> {
-  const buf = await fetchSatelliteTif(channel, timestamp, latest);
+  const buf = await fetchSatelliteTif(channel, timestamp, latest, scope);
   if (!buf) return null;
   return decodeTif(buf, shouldInvertChannel(channel));
 }

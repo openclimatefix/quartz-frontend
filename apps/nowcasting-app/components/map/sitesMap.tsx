@@ -10,8 +10,7 @@ import {
   MAX_POWER_GENERATED,
   VIEWS
 } from "../../constant";
-import gspShapeData from "../../data/gsp_regions_20220314.json";
-import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
+import { loadGeoAsset } from "../../lib/geo/assets";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
 import {
   formatISODateString,
@@ -58,8 +57,38 @@ const SitesMap: React.FC<SitesMapProps> = ({
   const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const [autoZoom] = useGlobalState("autoZoom");
 
+  // GSP and DNO boundary polygons, used only to draw the two outline overlays below (never
+  // joined against site data — verified: neither feature set is keyed against site/GSP data
+  // anywhere in this file, both are added to Mapbox as-is), fetched once per session via the
+  // shared `loadGeoAsset` cache rather than bundled — this pair was 25 MB of the JS bundle.
+  // GSP boundaries are the canonical 2026 NESO file (`/geo/gb/gsp.json`), the same asset the
+  // region view uses — Brad's call, since sitesMap previously drew the stale 2022 vintage and
+  // there is now exactly one GSP boundary asset in the repo. `dno.json` is the same source
+  // file the region view's derived DNO level already ships, reused as-is.
+  const [gspShapeData, setGspShapeData] = useState<FeatureCollection | undefined>(undefined);
+  const [dnoShapeData, setDnoShapeData] = useState<FeatureCollection | undefined>(undefined);
+
   const [newDataForMap, setNewDataForMap] = useState(false);
   const [updatingMapData, setUpdatingMapData] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadGeoAsset<FeatureCollection>("/geo/gb/gsp.json").then((data) => {
+      if (cancelled) return;
+      setGspShapeData(data);
+      // The boundary source is only added once its data has arrived (see
+      // addOrUpdateMapGroup below); re-flag so that pass runs again now that it has.
+      setNewDataForMap(true);
+    });
+    loadGeoAsset<FeatureCollection>("/geo/gb/dno.json").then((data) => {
+      if (cancelled) return;
+      setDnoShapeData(data);
+      setNewDataForMap(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const latestForecastValue = 0;
   const isNormalized = activeUnit === ActiveUnit.percentage;
   let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
@@ -115,7 +144,13 @@ const SitesMap: React.FC<SitesMapProps> = ({
   ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
     // Exclude first item as it's not representing gsp area
     const gspForecastData = forecastData?.forecasts?.slice(1);
-    const gspShapeJson = gspShapeData as FeatureCollection;
+    // gspShapeData is now fetched (see the effect above) rather than bundled, so it may not
+    // have arrived yet. This function's only caller is commented out above (dead today), but
+    // it is kept type-safe against the async load rather than deleted along with it.
+    const gspShapeJson: FeatureCollection = gspShapeData ?? {
+      type: "FeatureCollection",
+      features: []
+    };
     const forecastGeoJson = {
       ...gspShapeData,
       type: "FeatureCollection" as "FeatureCollection",
@@ -286,11 +321,19 @@ const SitesMap: React.FC<SitesMapProps> = ({
       let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
         | mapboxgl.GeoJSONSource
         | undefined;
+      // dnoShapeData now arrives from a fetch (see the effect above) rather than being
+      // available synchronously on first render. The source is therefore added ONCE with an
+      // empty collection and populated when the geometry lands — never conditionally on the
+      // data being present. The layer below is added unconditionally and names this source,
+      // so deferring the source until the fetch resolves makes `addLayer` reference a source
+      // that does not exist yet, which Mapbox throws on.
       if (!dnoBoundariesSource) {
         map.addSource("dnoBoundaries", {
           type: "geojson",
-          data: dnoShapeData as FeatureCollection
+          data: dnoShapeData ?? { type: "FeatureCollection", features: [] }
         });
+      } else if (dnoShapeData) {
+        dnoBoundariesSource.setData(dnoShapeData);
       }
 
       let dnoBoundariesLayer =
@@ -316,11 +359,15 @@ const SitesMap: React.FC<SitesMapProps> = ({
       let gspBoundariesSource = map.getSource("gspBoundaries") as unknown as
         | mapboxgl.GeoJSONSource
         | undefined;
+      // Same deferred-arrival handling as dnoBoundaries above: source added once, empty,
+      // then populated — so the unconditional `addLayer` below always has it to point at.
       if (!gspBoundariesSource) {
         map.addSource("gspBoundaries", {
           type: "geojson",
-          data: gspShapeData as FeatureCollection
+          data: gspShapeData ?? { type: "FeatureCollection", features: [] }
         });
+      } else if (gspShapeData) {
+        gspBoundariesSource.setData(gspShapeData);
       }
 
       let gspBoundariesLayer =

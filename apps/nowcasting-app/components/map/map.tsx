@@ -29,8 +29,9 @@ import {
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
 
-mapboxgl.accessToken =
-  "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
+// Moved to env by Phase 5 Track E — this was a hardcoded credential in source. See
+// `.env.example` / `docs/phase5-track-e-notes.md`.
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
 // Yellow PV/GSP forecast fill layers added by pvLatestMap/deltaMap that can obscure the cloud layer
 const PV_LAYER_IDS = [

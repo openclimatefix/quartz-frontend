@@ -1,5 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { SITES_API_PREFIX } from "../../constant";
+import { useCurrentCountry } from "../../hooks/data";
+import type { Scope } from "../../lib/domain/types";
 import { useLoadDataFromApi } from "./useLoadDataFromApi";
 import { useAggregateSitesDataForTimestamp } from "./useAggregateSitesDataForTimestamp";
 import { getSitesLoadingState } from "../helpers/utils";
@@ -35,13 +37,20 @@ export const useSitesViewData = (
 } => {
   const [, setSitesLoadingState] = useGlobalState("sitesLoadingState");
 
+  // Sites stays on its v0 backend this phase (see the module doc comment), but every fetch
+  // still carries a Scope — see useLoadDataFromApi's doc comment for why that matters even
+  // though SITES_API_PREFIX is GB-only and ignores it.
+  const country = useCurrentCountry();
+  const scope: Scope = { country, source: "solar", regionType: "site" };
+
   const {
     data: allSitesData,
     isLoading: allSitesLoading,
     isValidating: allSitesValidating,
     error: allSitesError
   } = useLoadDataFromApi<AllSites>(`${SITES_API_PREFIX}/sites`, {
-    isPaused: () => false
+    isPaused: () => false,
+    scope
   });
   const slicedSitesData = useMemo(
     () => allSitesData?.site_list.slice(0, 100) || [],
@@ -64,7 +73,8 @@ export const useSitesViewData = (
     isValidating: sitePvForecastValidating,
     error: sitePvForecastError
   } = useLoadDataFromApi<SitesPvForecast>(
-    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`
+    `${SITES_API_PREFIX}/sites/pv_forecast?site_uuids=${siteUuidsString}`,
+    { scope }
   );
   const {
     data: rawSitesPvActualData,
@@ -72,7 +82,8 @@ export const useSitesViewData = (
     isValidating: sitePvActualValidating,
     error: sitePvActualError
   } = useLoadDataFromApi<SitesPvActual>(
-    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`
+    `${SITES_API_PREFIX}/sites/pv_actual?site_uuids=${siteUuidsString}`,
+    { scope }
   );
 
   const sitesPvForecastData = useMemo(
