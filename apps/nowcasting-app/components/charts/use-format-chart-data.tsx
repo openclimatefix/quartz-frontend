@@ -11,9 +11,9 @@ import {
 } from "./remix-line";
 import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
-import nationalMetrics from "../../data/national_metrics.json";
 import { getAvailablePLevels, getUtcHalfHourIndex } from "../helpers/chartUtils";
 import type { TimeSeries } from "../../lib/domain/types";
+import { useSeasonalNorms, type SeasonalNormsData } from "../../hooks/data/use-seasonal-norms";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -102,8 +102,12 @@ const getDelta: (datum: ChartData) => number = (datum) => {
   return 0;
 };
 
-const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) => {
-  if (date.isValid === false) return { seasonalMean: 0, seasonalBounds: [] };
+const getSeasonalMetricsForDate = (
+  date: DateTime<Valid> | DateTime<Invalid>,
+  nationalMetrics: SeasonalNormsData
+) => {
+  if (date.isValid === false)
+    return { seasonalMean: [] as number[], seasonalBounds: [] as SeasonalBound[] };
 
   const month = date.month;
   const day = date.day;
@@ -125,7 +129,11 @@ const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) =>
         seasonalMetricData.pLevels[seasonalQuantiles.indexOf(lowerQuantile)],
       [upperQuantile.toUpperCase()]:
         seasonalMetricData.pLevels[seasonalQuantiles.indexOf(upperQuantile)]
-    } as SeasonalPValue);
+      // `SeasonalPValue`'s declared shape is one number per quantile; what is actually built
+      // here (and always was, pre-Phase-5 — this was silently `any` behind an `@ts-ignore`
+      // upstream) is one *48-slot array* per quantile, indexed by UTC half-hour slot below.
+      // `as unknown as` documents that mismatch rather than hiding it inside `any` again.
+    } as unknown as SeasonalPValue);
   }
 
   return seasonalMetrics;
@@ -157,6 +165,7 @@ const useFormatChartData = ({
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
+  const nationalMetrics = useSeasonalNorms();
 
   const data = useMemo(() => {
     // The row order of the output follows first-write order and is pinned by the
@@ -265,8 +274,11 @@ const useFormatChartData = ({
         // two slots ahead throughout BST. These used to be the same call (B9). `getUtcHalfHourIndex`
         // must stay UTC: localising it would shift every seasonal line by two slots all summer.
         const utcSlotIndex = getUtcHalfHourIndex(date);
-        if (!gsp) {
-          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
+        // `nationalMetrics` is `undefined` both while the fetch is in flight and permanently
+        // for a country with `seasonalNorms: null` (NL). Either way: no seasonal keys written,
+        // rather than falling back to whatever country's dataset last happened to be loaded.
+        if (!gsp && nationalMetrics) {
+          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date, nationalMetrics);
 
           chartMap[key].SEASONAL_MEAN = seasonalMean[utcSlotIndex] * NATIONAL_CAPACITY;
           chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
@@ -324,7 +336,8 @@ const useFormatChartData = ({
     generationSeries,
     timeTrigger,
     nHourForecast,
-    pLevels
+    pLevels,
+    nationalMetrics
   ]);
 
   return data;

@@ -45,6 +45,16 @@ jest.mock("./gsp-pv-remix-chart", () => ({
   __esModule: true,
   default: () => null
 }));
+// Seasonal norms became a fetched asset in Phase 5 (they were a bundled JSON import), so
+// rendering this chart now reaches for the network. There is no server here and this suite
+// asserts nothing about the norm bands, so the hook is stubbed to "no dataset" — the same
+// state NL is legitimately in. Without this, jsdom pulls in undici and the suite dies on
+// missing `clearImmediate`/`markResourceTiming` rather than on anything it is testing.
+// The norms' own behaviour is covered by `use-seasonal-norms.test.ts`.
+jest.mock("../../hooks/data/use-seasonal-norms", () => ({
+  __esModule: true,
+  useSeasonalNorms: () => undefined
+}));
 
 import countriesFixture from "../../lib/api/v1/__fixtures__/countries.json";
 import gbNationalForecast from "../../lib/api/v1/__fixtures__/gb-national-forecast.json";

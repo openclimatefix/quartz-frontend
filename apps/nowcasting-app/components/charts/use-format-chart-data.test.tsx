@@ -21,8 +21,25 @@ import { DateTime, Settings } from "luxon";
 import useFormatChartData from "./use-format-chart-data";
 import { setGlobalState } from "../helpers/globalState";
 import { ChartData, getPLevelRangeKey } from "./remix-line";
-import nationalMetrics from "../../data/national_metrics.json";
+// The fixture asset itself (Track A shipped it; the numbers are identical to the retired
+// `data/national_metrics.json` bundled import this test used to read — verified byte-for-byte
+// before this test file switched over). Importing the shipped asset rather than the deleted
+// bundle import is what keeps the hand-checked assertions below an oracle on real data.
+import nationalMetrics from "../../public/data/gb/national-metrics.json";
 import { getSettlementPeriodForDate, getUtcHalfHourIndex } from "../helpers/chartUtils";
+import { useSeasonalNorms } from "../../hooks/data/use-seasonal-norms";
+
+// `useFormatChartData` now gets its norms through `useSeasonalNorms` rather than a bundled
+// import (Phase 5). Mocked here to return the same fixture synchronously, so every existing
+// characterisation test — hundreds of them, reading `run(...)` synchronously — is unaffected.
+// The hook's own async-arrival and "no dataset" behaviour is `useSeasonalNorms`'s contract and
+// is tested in `hooks/data/use-seasonal-norms.test.ts`; this file only needs one test proving
+// this hook renders correctly when that contract hands back `undefined`.
+jest.mock("../../hooks/data/use-seasonal-norms", () => ({
+  __esModule: true,
+  useSeasonalNorms: jest.fn()
+}));
+const mockedUseSeasonalNorms = useSeasonalNorms as jest.MockedFunction<typeof useSeasonalNorms>;
 
 // Duplicated from the hook on purpose: if the module's constant changes, these tests should fail
 // rather than silently follow it.
@@ -80,6 +97,7 @@ beforeEach(() => {
   // react-hooks-global-state has no provider, so state is module-global and leaks between tests.
   setGlobalState("nHourForecast", 4);
   setGlobalState("pLevels", [[10, 90]]);
+  mockedUseSeasonalNorms.mockReturnValue(nationalMetrics as ReturnType<typeof useSeasonalNorms>);
 });
 
 afterEach(() => {
@@ -554,6 +572,21 @@ describe("seasonal norms", () => {
   test("gsp: true skips all seasonal keys", () => {
     const datum = at(
       run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]), gsp: true })),
+      "2025-07-01T10:30"
+    );
+    expect(datum.FORECAST).toBe(100);
+    expect(Object.keys(datum).some((k) => k.startsWith("SEASONAL"))).toBe(false);
+  });
+
+  // `useSeasonalNorms` returns `undefined` both while its fetch is in flight and permanently
+  // for a country with no dataset (`seasonalNorms: null`, e.g. NL) — that collapse is its own
+  // contract, tested in `hooks/data/use-seasonal-norms.test.ts`. This is the one thing this
+  // hook must get right about it: render the rest of the chart normally and write no seasonal
+  // keys at all, rather than falling back to a previously-loaded country's norms or to zeros.
+  test("undefined norms (loading, or no dataset for this country) writes no seasonal keys", () => {
+    mockedUseSeasonalNorms.mockReturnValue(undefined);
+    const datum = at(
+      run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]) })),
       "2025-07-01T10:30"
     );
     expect(datum.FORECAST).toBe(100);
