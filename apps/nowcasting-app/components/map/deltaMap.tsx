@@ -45,7 +45,10 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   const levels = useAggregationLevels();
   const level = useMemo(() => defaultLevelOf(levels), [levels]);
 
-  const { featureStates, geometry, isLoading, error } = useMapRegionValues(level, selectedISOTime);
+  const { featureStates, geometry, hasValues, isLoading, error } = useMapRegionValues(
+    level,
+    selectedISOTime
+  );
 
   const fillColor = useMemo(() => deltaFillColorExpression(), []);
 
@@ -196,9 +199,12 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
 
   return (
     <div className={`delta-map relative h-full w-full ${className}`}>
-      {error && !featureStates.size ? (
+      {/* Both gated on `hasValues`, not `featureStates.size` — see the field's doc comment. The
+          loading arm had the same flaw as the error arm: feature states populate the moment
+          `/regions` resolves, so the spinner vanished while the forecast was still in flight. */}
+      {error && !hasValues ? (
         <FailedStateMap error="Failed to load" />
-      ) : isLoading && !featureStates.size ? (
+      ) : isLoading && !hasValues ? (
         <LoadStateMap>
           <ButtonGroup
             rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}

@@ -46,6 +46,22 @@ export type MapRegionValues = {
   /** `{ published, expected, isPartial }` — a partial newest slot is normal, not a fault. */
   coverage: { published: number; expected: number; isPartial: boolean };
   /**
+   * Whether the values pipeline delivered anything at all — at least one region carried by the
+   * forecast payload.
+   *
+   * **Consumers must gate their failure and loading states on this, not on `featureStates.size`.**
+   * Feature states are built from the *region list*, so they are fully populated the moment
+   * `/regions` resolves, whether or not a single forecast value ever arrived. A `!featureStates.size`
+   * guard is therefore false exactly when it is needed: on a `/forecasts/period` failure with the
+   * region list intact, every region paints as `power: 0` and the map renders silently uncoloured.
+   * That is how a 503 reached the UI as "boundaries, no fill, no message".
+   *
+   * `power: 0` cannot carry this signal either — at night every region genuinely *is* zero, so an
+   * all-zero map and a no-data map are indistinguishable by value. Coverage counts whether the
+   * region was *published*, which is the distinction `dataState` exists to preserve.
+   */
+  hasValues: boolean;
+  /**
    * Total installed capacity in MW, summed over the regions that are actually real.
    *
    * **The API's regions are not a partition**, and an earlier version of this comment
@@ -177,6 +193,7 @@ export const useMapRegionValues = (
     featureStates,
     geometry: geo.geometry,
     coverage,
+    hasValues: coverage.published > 0,
     nationalCapacityMw,
     isLoading: regions.isLoading || forecast.isLoading || generation.isLoading || geo.isLoading,
     error: forecast.error ?? generation.error ?? regions.error ?? geo.error

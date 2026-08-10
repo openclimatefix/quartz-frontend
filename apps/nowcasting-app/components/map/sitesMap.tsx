@@ -23,7 +23,8 @@ import {
   AggregatedSitesCombinedData,
   AggregatedSitesDataGroupMap,
   CombinedSitesData,
-  FcAllResData
+  FcAllResData,
+  SitesCombinedErrors
 } from "../types";
 import { theme } from "../../tailwind.config";
 import { Feature, FeatureCollection } from "geojson";
@@ -38,7 +39,8 @@ type SitesMapProps = {
   className?: string;
   sitesData: CombinedSitesData;
   aggregatedSitesData: AggregatedSitesCombinedData;
-  sitesErrors: any;
+  /** Typed rather than `any`, which is what let `sitesErrors?.length` compile on an object. */
+  sitesErrors: SitesCombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
@@ -579,7 +581,10 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
   return (
     <div className={`relative h-full w-full ${className}`}>
-      {sitesErrors?.length ? (
+      {/* `sitesErrors` is an object keyed by fetch, not an array — `?.length` was always
+          `undefined`, so this failure state could never render. Count the truthy entries, the
+          same way `useSitesViewData` does internally for its loading state. */}
+      {Object.values(sitesErrors ?? {}).some(Boolean) ? (
         <FailedStateMap error="Failed to load" />
       ) : forecastLoading ? (
         <LoadStateMap>

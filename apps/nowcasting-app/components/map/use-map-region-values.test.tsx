@@ -234,4 +234,59 @@ describe("useMapRegionValues", () => {
     // All 338 are still fetched and still expected to publish values; only the sum narrows.
     expect(view.result.current.coverage.expected).toBe(338);
   });
+
+  // The 503 that reached the UI as "boundaries drawn, no fill, no message" (2026-08-10).
+  //
+  // The map's failure state was gated on `error && !featureStates.size`. Feature states are
+  // built from the *region list*, so `/regions` succeeding populates all 332 of them whether or
+  // not a single forecast value arrives — the guard was false in exactly the case it existed
+  // for, and every region painted as `power: 0`.
+  //
+  // Asserting `featureStates.size > 0` alongside `hasValues === false` is what makes this
+  // discriminating: it pins the *divergence* between the two signals, so reverting the guard to
+  // `.size` fails here rather than passing on a technicality.
+  test("reports no values when the forecast fails but the region list arrives", async () => {
+    server.use(
+      http.get(`${V1}/GB/solar/forecasts/period`, () =>
+        HttpResponse.json({ message: "Service Unavailable" }, { status: 503 })
+      )
+    );
+
+    const view = renderMap(FIRST);
+    await waitFor(() => {
+      view.rerender({ targetTime: FIRST });
+      expect(view.result.current.error).toBeTruthy();
+      expect(view.result.current.isLoading).toBe(false);
+    });
+
+    expect(view.result.current.featureStates.size).toBeGreaterThan(0);
+    expect(view.result.current.hasValues).toBe(false);
+    expect(view.result.current.coverage.published).toBe(0);
+  });
+
+  // The counterpart, and the reason `hasValues` cannot be derived from the values themselves:
+  // at night every region genuinely reads 0 MW, so "all zero" must stay distinguishable from
+  // "nothing published". Coverage counts publication, not magnitude.
+  test("reports values present even when every published region reads zero", async () => {
+    // `regions` is an array, and must stay one — rebuilding it as an object keys it by index
+    // and the payload no longer normalises.
+    const allZero = {
+      ...gbGspForecastPeriod,
+      regions: gbGspForecastPeriod.regions.map((region) => ({
+        ...region,
+        power_kW: region.power_kW.map(() => 0)
+      }))
+    };
+    server.use(json("/GB/solar/forecasts/period", allZero));
+
+    const view = renderMap(FIRST);
+    await waitFor(() => {
+      view.rerender({ targetTime: FIRST });
+      expect(view.result.current.isLoading).toBe(false);
+      expect(view.result.current.featureStates.size).toBeGreaterThan(0);
+    });
+
+    expect(view.result.current.hasValues).toBe(true);
+    expect(view.result.current.featureStates.get(67)!.power).toBe(0);
+  });
 });

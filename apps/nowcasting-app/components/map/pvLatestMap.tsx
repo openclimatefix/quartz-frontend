@@ -73,10 +73,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const { featureStates, geometry, nationalCapacityMw, isLoading, error } = useMapRegionValues(
-    level,
-    selectedISOTime
-  );
+  const { featureStates, geometry, nationalCapacityMw, hasValues, isLoading, error } =
+    useMapRegionValues(level, selectedISOTime);
 
   // The network constraint overlay. Fetched rather than imported since Phase 5 — it was
   // 430 KB of GeoJSON in the bundle of every page that imports this module, for a layer that
@@ -476,7 +474,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     return () => clearTimeout(t);
   }, [isLoading]);
 
-  if (error && !featureStates.size) {
+  // Gated on `hasValues`, not `featureStates.size` — see the field's doc comment. The old guard
+  // could not fire once `/regions` had resolved, which is every case that matters.
+  if (error && !hasValues) {
     return (
       <div className={`pv-map relative h-full w-full ${className}`}>
         <FailedStateMap error="Failed to load" />
