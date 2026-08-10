@@ -1,0 +1,1111 @@
+<title>Phase 6 chrome — layout prototype</title>
+<style>
+  :root {
+    --ground: #191a1a;
+    --panel: #262624;
+    --panel-hi: #343332;
+    --rail: #545454;
+    --hair: rgba(255, 255, 255, 0.09);
+    --ink: #E4E4E4;
+    --ink-dim: #ACACAC;
+    --ink-mute: #747474;
+    --yellow: #FFD053;
+    --blue: #48B0DF;
+    --orange: #FF9736;
+    --delta-warm: #F19F38;
+    --delta-cool: #9EC8FA;
+    --neutral: #6C6C6C;
+    --nav-h: 52px;
+    --time-h: 88px;
+    --rail-w: 260px;
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  .micro {
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 600;
+  }
+
+  .num { font-variant-numeric: tabular-nums; }
+
+  button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+  button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+
+  /* ---------- shell ---------- */
+
+  #app {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    grid-template-rows: var(--nav-h) 1fr var(--time-h);
+    transition: grid-template-rows 0.35s var(--ease);
+  }
+
+  #app.dash { grid-template-rows: 0 1fr 0; }
+  #app.dash #nav, #app.dash #time { opacity: 0; pointer-events: none; }
+
+  /* ---------- nav ---------- */
+
+  #nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 14px;
+    background: var(--ground);
+    border-bottom: 1px solid var(--hair);
+    z-index: 40;
+    overflow: hidden;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .brand { display: flex; align-items: baseline; gap: 7px; flex: none; }
+  .brand b { font-size: 15px; letter-spacing: -0.01em; font-weight: 700; }
+  .brand span { font-size: 10px; color: var(--ink-mute); }
+
+  .modes { display: flex; gap: 2px; flex: none; }
+  .modes button {
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--ink-dim);
+    white-space: nowrap;
+  }
+  .modes button:hover { background: rgba(255,255,255,0.05); color: var(--ink); }
+  .modes button[aria-pressed="true"] { background: var(--panel-hi); color: var(--yellow); }
+  .modes .sep { width: 1px; background: var(--hair); margin: 6px 8px; }
+
+  .countries { display: flex; align-items: center; gap: 6px; margin-left: auto; flex: none; }
+  .cbtn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 9px 4px 7px;
+    border: 1px solid var(--hair);
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+  .cbtn .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rail); }
+  .cbtn[data-on="1"] { color: var(--ink); border-color: rgba(255,255,255,0.22); }
+  .cbtn[data-on="1"] .dot { background: var(--c); }
+  .cbtn[data-focus="1"] { background: var(--panel-hi); border-color: var(--c); }
+  .cbtn[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .cbtn:hover:not([disabled]) { border-color: rgba(255,255,255,0.3); }
+
+  .navtools { display: flex; align-items: center; gap: 4px; flex: none; }
+  .icon-btn {
+    width: 30px; height: 30px; border-radius: 5px;
+    display: grid; place-items: center; color: var(--ink-mute);
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.06); color: var(--ink); }
+  .icon-btn[aria-pressed="true"] { color: var(--yellow); background: var(--panel-hi); }
+
+  /* ---------- stage ---------- */
+
+  #stage { position: relative; overflow: hidden; }
+  #map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .maplabel {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+
+  /* ---------- floating chart ---------- */
+
+  #chart {
+    position: absolute;
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--hair);
+    border-radius: 8px;
+    box-shadow: 0 18px 50px rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+    transition: left 0.4s var(--ease), top 0.4s var(--ease),
+                width 0.4s var(--ease), height 0.4s var(--ease), opacity 0.25s var(--ease);
+    overflow: hidden;
+  }
+
+  .chart-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--hair);
+    cursor: grab;
+    flex: none;
+  }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px 3px 7px;
+    background: var(--panel-hi);
+    border: 1px solid var(--c, var(--rail));
+    border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+  }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--c, var(--rail)); }
+  .chip.flash { animation: flash 0.55s var(--ease); }
+  @keyframes flash {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.12); background: var(--c); color: #191a1a; }
+    100% { transform: scale(1); }
+  }
+
+  .chart-title { font-size: 13px; color: var(--ink); }
+  .chart-title em { font-style: normal; color: var(--ink-mute); }
+  .chart-head .grow { margin-left: auto; }
+
+  .readout { display: flex; align-items: baseline; gap: 5px; }
+  .readout b { font-size: 19px; font-weight: 650; letter-spacing: -0.01em; }
+  .readout span { font-size: 11px; color: var(--ink-mute); }
+
+  .plot { flex: 1; position: relative; min-height: 0; }
+  .plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 4px 14px;
+    padding: 7px 12px 9px;
+    border-top: 1px solid var(--hair);
+    flex: none;
+  }
+  .lg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ink-dim); }
+  .lg i { width: 13px; height: 2px; border-radius: 1px; background: var(--c); display: block; }
+  .lg.dash i { background: repeating-linear-gradient(90deg, var(--c) 0 4px, transparent 4px 7px); }
+
+  /* ---------- map control cluster ----------
+     Comparison lives here, not in the display panel: it selects what the map's colour MEANS,
+     which is the colour guide's own subject. Unit sits with it for the same reason. */
+
+  #mapctl {
+    position: absolute;
+    bottom: 14px;
+    width: 244px;
+    padding: 10px 11px 11px;
+    background: color-mix(in srgb, var(--panel) 92%, transparent);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--hair);
+    border-radius: 8px;
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; gap: 7px;
+    transition: right 0.35s var(--ease);
+    z-index: 15;
+  }
+  .mc-row { display: flex; align-items: center; justify-content: space-between; }
+  .seg.thin button { padding: 4px 0; font-size: 11px; }
+
+  .guide { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
+  .guide-bar { height: 8px; border-radius: 2px; }
+  .guide-scale { display: flex; justify-content: space-between; }
+  .guide-scale span { font-size: 9px; color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+
+  /* ---------- sidebar ---------- */
+
+  #rail {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: var(--rail-w);
+    background: color-mix(in srgb, var(--panel) 94%, transparent);
+    backdrop-filter: blur(14px);
+    border-left: 1px solid var(--hair);
+    display: flex; flex-direction: column;
+    transform: translateX(0);
+    transition: transform 0.35s var(--ease);
+    z-index: 20;
+  }
+  #rail[data-open="0"] { transform: translateX(100%); }
+
+  .rail-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 12px; border-bottom: 1px solid var(--hair); flex: none;
+  }
+  .rail-body { overflow-y: auto; padding: 4px 0 16px; }
+  .grp { padding: 12px 12px 6px; }
+  .grp + .grp { border-top: 1px solid var(--hair); }
+  .grp > .micro { margin-bottom: 9px; display: block; }
+
+  .seg { display: flex; gap: 2px; background: var(--ground); border-radius: 5px; padding: 2px; }
+  .seg button { flex: 1; padding: 5px 0; border-radius: 4px; font-size: 12px; color: var(--ink-mute); }
+  .seg button[aria-pressed="true"] { background: var(--panel-hi); color: var(--ink); }
+
+  .row { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 13px; color: var(--ink-dim); }
+  .row .sw {
+    width: 30px; height: 17px; border-radius: 999px; background: var(--rail);
+    position: relative; flex: none; transition: background 0.2s var(--ease);
+  }
+  .row .sw::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 13px; height: 13px; border-radius: 50%; background: var(--ink);
+    transition: transform 0.2s var(--ease);
+  }
+  .row[data-on="1"] .sw { background: var(--yellow); }
+  .row[data-on="1"] .sw::after { transform: translateX(13px); background: #191a1a; }
+  .row[data-on="1"] { color: var(--ink); }
+
+  .rail-toggle {
+    position: absolute; top: 12px; right: calc(var(--rail-w) + 8px);
+    width: 28px; height: 28px; border-radius: 5px;
+    background: var(--panel); border: 1px solid var(--hair);
+    display: grid; place-items: center; color: var(--ink-dim);
+    transition: right 0.35s var(--ease);
+    z-index: 21;
+  }
+  #rail[data-open="0"] ~ .rail-toggle { right: 8px; }
+  .rail-toggle:hover { color: var(--ink); }
+
+  /* ---------- time chrome ---------- */
+
+  #time {
+    background: var(--ground);
+    border-top: 1px solid var(--hair);
+    padding: 9px 16px 0;
+    display: flex; flex-direction: column; gap: 7px;
+    z-index: 30; overflow: hidden;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .time-top { display: flex; align-items: center; gap: 16px; }
+  .ranges { display: flex; gap: 2px; }
+  .ranges button { padding: 3px 9px; border-radius: 4px; font-size: 12px; color: var(--ink-mute); }
+  .ranges button[aria-pressed="true"] { background: var(--panel-hi); color: var(--ink); }
+
+  .slots { display: flex; gap: 16px; margin-left: auto; align-items: baseline; }
+  .slot { display: flex; align-items: baseline; gap: 6px; font-size: 12px; }
+  .slot .k { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c); font-weight: 700; }
+  .slot .v { color: var(--ink); }
+  .slot .d { color: var(--ink-mute); font-size: 11px; }
+
+  .cursor-utc { font-size: 12px; color: var(--ink-dim); }
+  .cursor-utc b { color: var(--ink); font-weight: 650; }
+
+  #track { position: relative; height: 30px; cursor: ew-resize; flex: none; }
+  #track .bar {
+    position: absolute; left: 0; right: 0; top: 13px; height: 3px;
+    background: var(--panel-hi); border-radius: 2px;
+  }
+  #track .past { position: absolute; left: 0; top: 13px; height: 3px; background: var(--rail); border-radius: 2px; }
+  #track .now {
+    position: absolute; top: 6px; width: 1px; height: 17px;
+    background: var(--ink-mute);
+  }
+  #track .now::after {
+    content: "now"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-mute);
+  }
+  #track .knob {
+    position: absolute; top: 7px; width: 3px; height: 15px; background: var(--yellow);
+    border-radius: 2px; transform: translateX(-1px);
+  }
+  #track .knob::after {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    width: 26px; height: 26px; transform: translate(-50%, -50%);
+  }
+  .ticks { display: flex; justify-content: space-between; padding-bottom: 6px; }
+  .ticks span { font-size: 10px; color: var(--ink-mute); }
+
+  /* ---------- annotation overlay ---------- */
+
+  #annot {
+    position: absolute; inset: 0; z-index: 60; pointer-events: none;
+    opacity: 0; transition: opacity 0.25s var(--ease);
+  }
+  #annot[data-on="1"] { opacity: 1; }
+  .an {
+    position: absolute;
+    border: 1px dashed var(--yellow);
+    border-radius: 6px;
+    background: rgba(255, 208, 83, 0.05);
+  }
+  .an b {
+    position: absolute; top: -9px; left: 10px;
+    background: var(--ground); color: var(--yellow);
+    font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+    padding: 0 6px; white-space: nowrap;
+  }
+  .an i {
+    position: absolute; top: 14px; left: 10px; right: 10px;
+    font-style: normal; font-size: 11px; color: var(--ink-dim);
+  }
+
+  .seg.col { flex-direction: column; gap: 2px; }
+  .seg.col button { text-align: left; padding: 6px 9px; }
+  .grp.compare { background: rgba(255, 208, 83, 0.045); }
+
+  .grain { color: var(--ink-mute); font-size: 11px; margin-left: 6px; }
+
+  /* The way out of dashboard mode. Fades in on hover / focus / pointer movement so a wall
+     display shows nothing, but a person at the machine can always find the door. */
+  #exitDash {
+    position: fixed; top: 12px; right: 12px; z-index: 80;
+    display: none; align-items: center; gap: 7px;
+    padding: 6px 11px; border-radius: 6px;
+    background: var(--panel-hi); border: 1px solid var(--hair);
+    color: var(--ink-dim); font-size: 12px;
+    opacity: 0; transition: opacity 0.3s var(--ease);
+  }
+  #app.dash ~ #exitDash { display: flex; }
+  #exitDash.seen { opacity: 1; }
+  #exitDash:hover, #exitDash:focus-visible { opacity: 1; color: var(--ink); }
+  #exitDash kbd {
+    font: inherit; font-size: 10px; padding: 1px 5px;
+    border: 1px solid var(--rail); border-radius: 3px; color: var(--ink-mute);
+  }
+
+  #note {
+    position: fixed; left: 50%; bottom: calc(var(--time-h) + 16px);
+    transform: translateX(-50%);
+    background: var(--panel-hi); border: 1px solid var(--hair);
+    border-radius: 6px; padding: 7px 13px; font-size: 12px;
+    z-index: 70; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s var(--ease);
+  }
+  #note[data-on="1"] { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div id="app">
+  <header id="nav">
+    <div class="brand"><b>Quartz</b><span>solar</span></div>
+
+    <nav class="modes" id="modes" aria-label="View">
+      <button data-mode="forecast" aria-pressed="true">Forecast</button>
+      <button data-mode="sites" aria-pressed="false">Sites</button>
+    </nav>
+
+    <div class="countries" id="countries" aria-label="Countries"></div>
+
+    <div class="navtools">
+      <button class="icon-btn" id="annotBtn" aria-pressed="false" title="Explain the chrome">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4M8 4.9v.1"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="dashBtn" aria-pressed="false" title="Dashboard mode">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 6.5h12"/>
+        </svg>
+      </button>
+      <button class="icon-btn" title="Account">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="5.6" r="2.6"/><path d="M2.9 13.4c.6-2.5 2.6-3.8 5.1-3.8s4.5 1.3 5.1 3.8"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="map"></canvas>
+    <div id="maplabels"></div>
+
+    <section id="mapctl" aria-label="Map encoding">
+      <div class="mc-row">
+        <span class="micro">Colour by</span>
+      </div>
+      <div class="seg" id="compare">
+        <button data-b="none" aria-pressed="true">Output</button>
+        <button data-b="generation" aria-pressed="false">vs Generation</button>
+        <button data-b="nhour" aria-pressed="false">vs 4-hour</button>
+      </div>
+      <div class="seg thin" id="units">
+        <button data-u="pct" aria-pressed="true">% cap</button>
+        <button data-u="mw" aria-pressed="false">MW</button>
+        <button data-u="cap" aria-pressed="false">Capacity</button>
+      </div>
+      <div class="guide">
+        <div class="guide-bar" id="guideBar"></div>
+        <div class="guide-scale" id="guideScale"></div>
+      </div>
+    </section>
+
+    <section id="chart">
+      <div class="chart-head">
+        <span class="chip" id="chip"><span class="dot"></span><span id="chipName">GB</span></span>
+        <span class="chart-title" id="chartTitle">National forecast</span>
+        <div class="grow"></div>
+        <div class="readout"><b class="num" id="roVal">64.2</b><span id="roUnit">% of capacity</span></div>
+      </div>
+      <div class="plot"><svg id="plot" preserveAspectRatio="none"></svg></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <aside id="rail" data-open="1">
+      <div class="rail-head">
+        <span class="micro">Display</span>
+        <span class="micro" id="railHint">how it&rsquo;s drawn</span>
+      </div>
+      <div class="rail-body">
+        <div class="grp">
+          <span class="micro">Confidence</span>
+          <div class="row" data-on="1" tabindex="0"><span class="sw"></span>P10&ndash;P90 band</div>
+          <div class="row" data-on="0" tabindex="0"><span class="sw"></span>P25&ndash;P75 band</div>
+          <div class="row" data-on="0" tabindex="0"><span class="sw"></span>Colour map by spread</div>
+        </div>
+        <div class="grp">
+          <span class="micro">Map layers</span>
+          <div class="row" data-on="1" tabindex="0"><span class="sw"></span>Forecast fill</div>
+          <div class="row" data-on="0" tabindex="0"><span class="sw"></span>Satellite cloud</div>
+          <div class="row" data-on="0" tabindex="0"><span class="sw"></span>Network constraints</div>
+          <div class="row" data-on="1" tabindex="0"><span class="sw"></span>Region labels</div>
+        </div>
+        <div class="grp">
+          <span class="micro">Series</span>
+          <div class="row" data-on="1" tabindex="0"><span class="sw"></span>Generation</div>
+          <div class="row" data-on="1" tabindex="0"><span class="sw"></span>N-hour forecast</div>
+          <div class="row" data-on="0" tabindex="0"><span class="sw"></span>Comparison models</div>
+          <div class="row" data-on="0" tabindex="0"><span class="sw"></span>Seasonal norm</div>
+        </div>
+      </div>
+    </aside>
+
+    <button class="rail-toggle" id="railBtn" title="Toggle display panel">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5.5 2.5 10 7l-4.5 4.5"/>
+      </svg>
+    </button>
+
+    <div id="annot">
+      <div class="an" id="anNav"><b>What you&rsquo;re looking at</b><i>Mode, countries, focus &mdash; navigation, always visible</i></div>
+      <div class="an" id="anRail"><b>How it&rsquo;s drawn</b><i>Display only. Collapses to nothing in dashboard mode.</i></div>
+      <div class="an" id="anCtl"><b>What the colour means</b><i>Comparison + unit, docked to the guide that explains them</i></div>
+      <div class="an" id="anTime"><b>Shared cursor</b><i>Steps on the finest enabled cadence. One UTC instant, resolved per country.</i></div>
+      <div class="an" id="anChart"><b>Floating readout</b><i>Split follows the mode; user can override</i></div>
+    </div>
+  </main>
+
+  <footer id="time">
+    <div class="time-top">
+      <span class="cursor-utc">cursor <b class="num" id="utcOut">16:15</b> UTC
+        <span class="grain" id="grainOut"></span></span>
+      <div class="slots" id="slots"></div>
+    </div>
+    <div id="track">
+      <div class="bar"></div>
+      <div class="past" id="past"></div>
+      <div class="now" id="nowMark"></div>
+      <div class="knob" id="knob"></div>
+    </div>
+    <div class="ticks" id="ticks"></div>
+  </footer>
+</div>
+
+<button id="exitDash" title="Exit dashboard mode (Esc)">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6">
+    <path d="M2 5V2.6h2.4M12 5V2.6H9.6M2 9v2.4h2.4M12 9v2.4H9.6"/>
+  </svg>
+  Exit dashboard <kbd>Esc</kbd>
+</button>
+
+<div id="note"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  // ---------- model ----------
+
+  const COUNTRIES = {
+    GB: { name: "Great Britain", colour: "#FFD053", step: 30, offset: 60,  tzName: "BST",  regions: "GSP",      enabled: true,  available: true },
+    NL: { name: "Netherlands",   colour: "#48B0DF", step: 15, offset: 120, tzName: "CEST", regions: "Province", enabled: true,  available: true },
+    DE: { name: "Germany",       colour: "#FF9736", step: 15, offset: 120, tzName: "CEST", regions: "State",    enabled: false, available: false }
+  };
+
+  // Split presets per view. Comparison is no longer a view — it is the `compare` control in
+  // the panel — so the split now varies with whether a comparison is active.
+  const MODES = {
+    forecast: { title: "National forecast", split: { w: 46, h: 62 } },
+    sites:    { title: "Your sites",        split: { w: 52, h: 70 } }
+  };
+
+  const COMPARE = {
+    none:       { label: "Forecast",             title: "National forecast" },
+    generation: { label: "Observed generation",  title: "Forecast vs generation" },
+    nhour:      { label: "4-hour-ahead forecast", title: "Forecast vs 4-hour-ahead" }
+  };
+
+  const state = {
+    mode: "forecast",
+    compare: "none",
+    unit: "pct",
+    focus: "GB",
+    cursorMin: 0,        // absolute minutes; always on the finest enabled country's grid
+    rail: true,
+    dash: false,
+    annot: false
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const enabledCodes = () => Object.keys(COUNTRIES).filter((c) => COUNTRIES[c].enabled);
+
+  // ---------- time ----------
+  //
+  // Timestamps label the END of their period, so a country resolves by rounding UP to its
+  // next published slot.
+  //
+  // The cursor itself is NOT continuous: it steps on the **finest enabled country's** grid.
+  // With NL on that is 15 min, so NL is always exact and GB rounds up to its 30-min slot;
+  // with only GB on, the grid is 30 min and GB is always exact. Nothing loses resolution,
+  // and every cursor position is a real published instant for at least one country.
+
+  const RANGE_MIN = 48 * 60;         // the window we already show today — unchanged for v1
+  const RANGE_START = 22 * 60;
+
+  const ceilTo = (minutes, step) => Math.ceil(minutes / step) * step;
+
+  const finestStep = () => {
+    const steps = enabledCodes().map((c) => COUNTRIES[c].step);
+    return steps.length ? Math.min(...steps) : 30;
+  };
+
+  const setCursor = (minutes) => {
+    const step = finestStep();
+    const lo = ceilTo(RANGE_START, step);
+    const hi = Math.floor((RANGE_START + RANGE_MIN) / step) * step;
+    state.cursorMin = Math.max(lo, Math.min(hi, Math.round(minutes / step) * step));
+  };
+
+  const cursorMinutes = () => state.cursorMin;
+  const cursorFraction = () => (state.cursorMin - RANGE_START) / RANGE_MIN;
+
+  const hhmm = (minutes) => {
+    const m = ((Math.round(minutes) % 1440) + 1440) % 1440;
+    return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+  };
+
+  // ---------- map ----------
+
+  const canvas = $("map");
+  const ctx = canvas.getContext("2d");
+
+  // Seeded PRNG so the region field is stable across redraws.
+  const mulberry = (seed) => () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  // A crude country outline: a closed radial blob, deterministic per seed. Not geography —
+  // it only has to read as "a country" so the chrome can be judged against a real ground.
+  const blob = (cx, cy, rx, ry, seed, lobes) => {
+    const rnd = mulberry(seed);
+    const wob = Array.from({ length: lobes }, () => 0.72 + rnd() * 0.5);
+    const pts = [];
+    for (let i = 0; i <= 96; i++) {
+      const a = (i / 96) * Math.PI * 2;
+      const f = a / (Math.PI * 2) * lobes;
+      const i0 = Math.floor(f) % lobes;
+      const i1 = (i0 + 1) % lobes;
+      const t = f - Math.floor(f);
+      const s = t * t * (3 - 2 * t);
+      const r = wob[i0] * (1 - s) + wob[i1] * s;
+      pts.push([cx + Math.cos(a) * rx * r, cy + Math.sin(a) * ry * r]);
+    }
+    return pts;
+  };
+
+  const pathOf = (pts) => {
+    const p = new Path2D();
+    p.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) p.lineTo(pts[i][0], pts[i][1]);
+    p.closePath();
+    return p;
+  };
+
+  // Region hit-boxes for click-to-focus.
+  let hitboxes = [];
+
+  const layoutOf = (w, h) => ({
+    GB: { cx: w * 0.30, cy: h * 0.48, rx: w * 0.15, ry: h * 0.33, seed: 7,  lobes: 7, cell: 34 },
+    NL: { cx: w * 0.60, cy: h * 0.44, rx: w * 0.075, ry: h * 0.15, seed: 21, lobes: 6, cell: 30 },
+    DE: { cx: w * 0.76, cy: h * 0.56, rx: w * 0.10, ry: h * 0.24, seed: 43, lobes: 6, cell: 40 }
+  });
+
+  const rampFill = (v, code) => {
+    // Sequential, one hue per country, light->dark by magnitude. Delta mode swaps to the
+    // diverging pair with a neutral midpoint.
+    if (state.compare !== "none") {
+      const d = v * 2 - 1;
+      const c = d >= 0 ? "241,159,56" : "158,200,250";
+      return `rgba(${c},${(0.10 + Math.abs(d) * 0.62).toFixed(3)})`;
+    }
+    const rgb = code === "GB" ? "255,208,83" : code === "NL" ? "72,176,223" : "255,151,54";
+    return `rgba(${rgb},${(0.06 + v * 0.66).toFixed(3)})`;
+  };
+
+  const drawMap = () => {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    // Ground: a faint graticule, so the map reads as a map even where no country sits.
+    ctx.strokeStyle = "rgba(255,255,255,0.032)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 64) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    for (let y = 0; y < h; y += 64) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+    hitboxes = [];
+    const L = layoutOf(w, h);
+    const labels = [];
+
+    for (const code of Object.keys(COUNTRIES)) {
+      const c = COUNTRIES[code];
+      const g = L[code];
+      const outline = blob(g.cx, g.cy, g.rx, g.ry, g.seed, g.lobes);
+      const path = pathOf(outline);
+
+      if (!c.enabled) {
+        ctx.save();
+        ctx.setLineDash([4, 5]);
+        ctx.strokeStyle = "rgba(255,255,255,0.13)";
+        ctx.lineWidth = 1;
+        ctx.stroke(path);
+        ctx.restore();
+        labels.push({ x: g.cx, y: g.cy, text: c.available ? code + " · off" : code + " · no data yet" });
+        continue;
+      }
+
+      // Jittered grid of regions, clipped to the outline. Stands in for a choropleth of
+      // GSPs / provinces / states without pretending to be real geography.
+      ctx.save();
+      ctx.clip(path);
+      const rnd = mulberry(g.seed * 13 + 5);
+      const cell = g.cell;
+      const phase = cursorFraction() * Math.PI * 2;
+      for (let y = g.cy - g.ry * 1.4; y < g.cy + g.ry * 1.4; y += cell) {
+        for (let x = g.cx - g.rx * 1.6; x < g.cx + g.rx * 1.6; x += cell) {
+          const jx = (rnd() - 0.5) * cell * 0.5;
+          const jy = (rnd() - 0.5) * cell * 0.5;
+          const seedv = rnd();
+          // Value varies with the cursor so scrubbing visibly repaints the map.
+          const v = Math.max(0, Math.min(1,
+            0.5 + 0.42 * Math.sin(phase + seedv * 5.2 + (x / w) * 2.4) * (0.55 + seedv * 0.6)));
+          const px = x + jx, py = y + jy;
+          ctx.fillStyle = rampFill(v, code);
+          ctx.beginPath();
+          ctx.rect(px, py, cell - 2, cell - 2);   // 2px surface gap between fills
+          ctx.fill();
+          ctx.strokeStyle = "rgba(25,26,26,0.55)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          hitboxes.push({ code, x: px, y: py, w: cell - 2, h: cell - 2 });
+        }
+      }
+      ctx.restore();
+
+      ctx.strokeStyle = code === state.focus ? c.colour : "rgba(255,255,255,0.22)";
+      ctx.lineWidth = code === state.focus ? 1.6 : 1;
+      ctx.stroke(path);
+
+      labels.push({ x: g.cx, y: g.cy - g.ry - 12, text: code + " · " + c.regions });
+    }
+
+    const holder = $("maplabels");
+    holder.innerHTML = "";
+    for (const l of labels) {
+      const el = document.createElement("div");
+      el.className = "maplabel";
+      el.style.left = l.x + "px";
+      el.style.top = l.y + "px";
+      el.textContent = l.text;
+      holder.appendChild(el);
+    }
+  };
+
+  // ---------- chart ----------
+
+  const series = () => {
+    const base = [
+      { key: "forecast",   label: "Forecast",         c: "#FFD053", w: 2,   dash: false },
+      { key: "generation", label: "Generation",       c: "#48B0DF", w: 2,   dash: false },
+      { key: "nhour",      label: "4-hour forecast",  c: "#FF9736", w: 1.6, dash: true }
+    ];
+    if (state.mode === "sites") return [base[0], base[1]];
+    if (state.compare === "none") return [base[0]];
+    if (state.compare === "generation") return [base[0], base[1]];
+    return [base[0], base[2]];
+  };
+
+  const curve = (n, phase, amp, skew) =>
+    Array.from({ length: n }, (_, i) => {
+      const t = i / (n - 1);
+      const day = Math.max(0, Math.sin((t * 1.9 - 0.28 + skew) * Math.PI));
+      return Math.pow(day, 1.35) * amp * (0.86 + 0.14 * Math.sin(t * 11 + phase));
+    });
+
+  const drawChart = () => {
+    const svg = $("plot");
+    const box = svg.getBoundingClientRect();
+    const W = Math.max(box.width, 10), H = Math.max(box.height, 10);
+    const pad = { t: 12, r: 12, b: 20, l: 34 };
+    const iw = W - pad.l - pad.r, ih = H - pad.t - pad.b;
+    const N = 96;
+    const ss = series();
+
+    const x = (i) => pad.l + (i / (N - 1)) * iw;
+    const y = (v) => pad.t + ih - v * ih;
+
+    let out = "";
+
+    // Recessive grid + axis, four steps.
+    for (let g = 0; g <= 4; g++) {
+      const gy = pad.t + (g / 4) * ih;
+      out += `<line x1="${pad.l}" y1="${gy.toFixed(1)}" x2="${(W - pad.r).toFixed(1)}" y2="${gy.toFixed(1)}" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>`;
+      out += `<text x="${pad.l - 7}" y="${(gy + 3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#747474" font-variant-numeric="tabular-nums">${100 - g * 25}</text>`;
+    }
+
+    const data = {};
+    ss.forEach((s, i) => { data[s.key] = curve(N, i * 2.1, i === 0 ? 0.84 : i === 1 ? 0.79 : 0.72, i * 0.02); });
+
+    // P10-P90 band on the primary series, drawn under the lines.
+    if (state.compare === "none") {
+      const hi = data.forecast.map((v) => Math.min(1, v * 1.16 + 0.02));
+      const lo = data.forecast.map((v) => Math.max(0, v * 0.82 - 0.01));
+      let band = `M ${x(0).toFixed(1)} ${y(hi[0]).toFixed(1)}`;
+      hi.forEach((v, i) => { if (i) band += ` L ${x(i).toFixed(1)} ${y(v).toFixed(1)}`; });
+      for (let i = N - 1; i >= 0; i--) band += ` L ${x(i).toFixed(1)} ${y(lo[i]).toFixed(1)}`;
+      out += `<path d="${band} Z" fill="rgba(255,208,83,0.13)"/>`;
+    }
+
+    // "Now" divider — past is observed, future is forecast.
+    const nowX = x(Math.round(N * 0.58));
+    out += `<line x1="${nowX.toFixed(1)}" y1="${pad.t}" x2="${nowX.toFixed(1)}" y2="${(pad.t + ih).toFixed(1)}" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="2 3"/>`;
+
+    for (const s of ss) {
+      const d = data[s.key].map((v, i) => `${i ? "L" : "M"} ${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(" ");
+      out += `<path d="${d}" fill="none" stroke="${s.c}" stroke-width="${s.w}" stroke-linecap="round" stroke-linejoin="round"${s.dash ? ' stroke-dasharray="4 3"' : ""}/>`;
+    }
+
+    // Crosshair at the shared cursor, plus an emphasised endpoint on the primary series.
+    const ci = Math.round(cursorFraction() * (N - 1));
+    const cx = x(ci);
+    out += `<line x1="${cx.toFixed(1)}" y1="${pad.t}" x2="${cx.toFixed(1)}" y2="${(pad.t + ih).toFixed(1)}" stroke="#FFD053" stroke-width="1" opacity="0.55"/>`;
+    for (const s of ss) {
+      out += `<circle cx="${cx.toFixed(1)}" cy="${y(data[s.key][ci]).toFixed(1)}" r="4" fill="${s.c}" stroke="#262624" stroke-width="2"/>`;
+    }
+
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = out;
+
+    $("roVal").textContent = (data.forecast[ci] * 100).toFixed(1);
+
+    $("legend").innerHTML = ss.map((s) =>
+      `<span class="lg${s.dash ? " dash" : ""}" style="--c:${s.c}"><i></i>${s.label}</span>`).join("");
+  };
+
+  // ---------- chrome ----------
+
+  const renderCountries = () => {
+    $("countries").innerHTML = Object.entries(COUNTRIES).map(([code, c]) => `
+      <button class="cbtn" data-code="${code}" data-on="${c.enabled ? 1 : 0}"
+              data-focus="${state.focus === code && c.enabled ? 1 : 0}"
+              style="--c:${c.colour}" ${c.available ? "" : "disabled"}
+              title="${c.available ? (c.enabled ? "Enabled" : "Disabled") : "No forecasts on the API yet"}">
+        <span class="dot"></span>${code}
+      </button>`).join("");
+  };
+
+  const renderSlots = () => {
+    const cur = cursorMinutes();
+    $("utcOut").textContent = hhmm(cur);
+    const step = finestStep();
+    $("grainOut").textContent = `· ${step}-min steps (finest enabled)`;
+
+    $("slots").innerHTML = enabledCodes().map((code) => {
+      const c = COUNTRIES[code];
+      const slot = ceilTo(cur, c.step);          // period-END labelling: round UP
+      const lag = Math.round(slot - cur);
+      return `<span class="slot" style="--c:${c.colour}">
+        <span class="k">${code}</span>
+        <span class="v num">${hhmm(slot + c.offset)} ${c.tzName}</span>
+        <span class="d num">${lag === 0 ? "exact" : "+" + lag + "m"}</span>
+      </span>`;
+    }).join("");
+  };
+
+  const renderChartFrame = () => {
+    const m = MODES[state.mode];
+    const el = $("chart");
+    const stage = $("stage");
+    const W = stage.clientWidth, H = stage.clientHeight;
+    const railW = state.rail && !state.dash ? 260 : 0;
+    const avail = W - railW;
+    const gap = 14;
+
+    const comparing = state.mode !== "sites" && state.compare !== "none";
+    const wPct = comparing ? m.split.w - 12 : m.split.w;
+    const hPct = comparing ? m.split.h - 18 : m.split.h;
+    const w = Math.min(avail - gap * 2, (avail * wPct) / 100);
+    const h = (H * hPct) / 100;
+
+    el.style.left = gap + "px";
+    el.style.top = (H - h - gap) + "px";
+    el.style.width = w + "px";
+    el.style.height = h + "px";
+
+    const c = COUNTRIES[state.focus];
+    $("chip").style.setProperty("--c", c.colour);
+    $("chipName").textContent = state.focus;
+    const title = state.mode === "sites" ? m.title : COMPARE[state.compare].title;
+    $("chartTitle").innerHTML = title + ' <em>&middot; national</em>';
+  };
+
+  const UNITS = { pct: "% of capacity", mw: "MW", cap: "MW capacity" };
+
+  const renderMapCtl = () => {
+    const stage = $("stage");
+    const railW = state.rail && !state.dash ? 260 : 0;
+    $("mapctl").style.right = (railW + 14) + "px";
+
+    const comparing = state.mode !== "sites" && state.compare !== "none";
+    const bar = $("guideBar");
+    const scale = $("guideScale");
+
+    if (comparing) {
+      // Diverging: two hues with a neutral midpoint. Never a hue at the middle.
+      bar.style.background = "linear-gradient(90deg, #9EC8FA 0%, rgba(108,108,108,0.55) 50%, #F19F38 100%)";
+      scale.innerHTML = "<span>&minus;20%</span><span>0</span><span>+20%</span>";
+    } else {
+      // Sequential: one hue, light to dark, taken from the focused country.
+      const c = COUNTRIES[state.focus].colour;
+      bar.style.background = `linear-gradient(90deg, rgba(255,255,255,0.06) 0%, ${c} 100%)`;
+      const top = state.unit === "pct" ? "100%" : state.unit === "mw" ? "4.2 GW" : "21.8 GW";
+      scale.innerHTML = `<span>0</span><span>${top}</span>`;
+    }
+  };
+
+  const renderAnnot = () => {
+    $("annot").dataset.on = state.annot ? "1" : "0";
+    if (!state.annot) return;
+    const stage = $("stage").getBoundingClientRect();
+    const put = (id, r) => {
+      const el = $(id);
+      el.style.left = r.l + "px"; el.style.top = r.t + "px";
+      el.style.width = r.w + "px"; el.style.height = r.h + "px";
+    };
+    const navR = $("nav").getBoundingClientRect();
+    const timeR = $("time").getBoundingClientRect();
+    const chartR = $("chart").getBoundingClientRect();
+    const ctlR = $("mapctl").getBoundingClientRect();
+    put("anNav", { l: 4, t: navR.top - stage.top + 4, w: window.innerWidth - 8, h: navR.height - 8 });
+    put("anTime", { l: 4, t: timeR.top - stage.top + 4, w: window.innerWidth - 8, h: timeR.height - 8 });
+    put("anChart", { l: chartR.left - stage.left, t: chartR.top - stage.top, w: chartR.width, h: chartR.height });
+    put("anCtl", { l: ctlR.left - stage.left, t: ctlR.top - stage.top, w: ctlR.width, h: ctlR.height });
+    if (state.rail && !state.dash) {
+      put("anRail", { l: stage.width - 260, t: 4, w: 256, h: stage.height - 8 });
+      $("anRail").style.display = "";
+    } else {
+      $("anRail").style.display = "none";
+    }
+  };
+
+  const renderTicks = () => {
+    const marks = [];
+    for (let i = 0; i <= 4; i++) marks.push(hhmm(RANGE_START + (i / 4) * RANGE_MIN));
+    $("ticks").innerHTML = marks.map((m) => `<span class="num">${m}</span>`).join("");
+    $("knob").style.left = (cursorFraction() * 100) + "%";
+    $("past").style.width = "58%";
+    $("nowMark").style.left = "58%";
+  };
+
+  let noteTimer;
+  const note = (text) => {
+    const el = $("note");
+    el.textContent = text;
+    el.dataset.on = "1";
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(() => { el.dataset.on = "0"; }, 2600);
+  };
+
+  const renderAll = () => {
+    renderCountries();
+    renderSlots();
+    renderMapCtl();
+    renderChartFrame();
+    renderTicks();
+    drawMap();
+    requestAnimationFrame(() => { drawChart(); renderAnnot(); });
+  };
+
+  // ---------- events ----------
+
+  $("modes").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-mode]");
+    if (!b) return;
+    state.mode = b.dataset.mode;
+    [...$("modes").querySelectorAll("button")].forEach((x) =>
+      x.setAttribute("aria-pressed", String(x === b)));
+    renderAll();
+    note(`${b.textContent} view`);
+  });
+
+  $("countries").addEventListener("click", (e) => {
+    const b = e.target.closest(".cbtn");
+    if (!b || b.disabled) return;
+    const code = b.dataset.code;
+    const c = COUNTRIES[code];
+    c.enabled = !c.enabled;
+    if (!c.enabled && state.focus === code) {
+      const next = enabledCodes()[0];
+      if (next) state.focus = next;
+      else { c.enabled = true; note("At least one country stays enabled"); }
+    }
+    // The cursor grid is the finest enabled cadence, so enabling/disabling can move it.
+    setCursor(state.cursorMin);
+    renderAll();
+  });
+
+  // Clicking any enabled country's region focuses that country and clears the old selection.
+  $("map").addEventListener("click", (e) => {
+    const r = canvas.getBoundingClientRect();
+    const px = e.clientX - r.left, py = e.clientY - r.top;
+    const hit = hitboxes.find((b) => px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h);
+    if (!hit) return;
+    if (hit.code !== state.focus) {
+      state.focus = hit.code;
+      renderAll();
+      $("chip").classList.remove("flash");
+      void $("chip").offsetWidth;
+      $("chip").classList.add("flash");
+      note(`Focus → ${COUNTRIES[hit.code].name}. Previous region selection cleared.`);
+    } else {
+      note(`Region selected · ${COUNTRIES[hit.code].regions}`);
+    }
+  });
+
+  // Click-to-set-time on the chart. The chart is an input to the shared cursor like the track is,
+  // and snaps to the same grid — moving the cursor into chrome must not cost this interaction.
+  $("plot").addEventListener("click", (e) => {
+    const r = $("plot").getBoundingClientRect();
+    const padL = 34, padR = 12;
+    const frac = (e.clientX - r.left - padL) / Math.max(1, r.width - padL - padR);
+    setCursor(RANGE_START + Math.max(0, Math.min(1, frac)) * RANGE_MIN);
+    renderSlots(); renderTicks(); renderMapCtl(); drawMap(); drawChart();
+    note(`Time set from the chart · ${hhmm(cursorMinutes())} UTC`);
+  });
+  $("plot").style.cursor = "crosshair";
+
+  $("railBtn").addEventListener("click", () => {
+    state.rail = !state.rail;
+    $("rail").dataset.open = state.rail ? "1" : "0";
+    $("railBtn").style.transform = state.rail ? "" : "rotate(180deg)";
+    renderMapCtl();
+    renderChartFrame();
+    requestAnimationFrame(() => { drawChart(); renderAnnot(); });
+  });
+
+  $("dashBtn").addEventListener("click", () => {
+    state.dash = !state.dash;
+    $("app").classList.toggle("dash", state.dash);
+    $("dashBtn").setAttribute("aria-pressed", String(state.dash));
+    if (state.dash) { state.rail = false; $("rail").dataset.open = "0"; }
+    setTimeout(() => { renderAll(); }, 360);
+    note(state.dash ? "Dashboard mode — all chrome collapsed" : "Chrome restored");
+  });
+
+  $("annotBtn").addEventListener("click", () => {
+    state.annot = !state.annot;
+    $("annotBtn").setAttribute("aria-pressed", String(state.annot));
+    renderAnnot();
+  });
+
+  $("compare").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    state.compare = b.dataset.b;
+    [...$("compare").children].forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    renderAll();
+    note(state.compare === "none"
+      ? "Map coloured by output — sequential, one hue"
+      : `Map coloured by difference vs ${COMPARE[state.compare].label.toLowerCase()} — diverging`);
+  });
+
+  $("units").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    state.unit = b.dataset.u;
+    [...$("units").children].forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $("roUnit").textContent = UNITS[state.unit];
+    renderMapCtl();
+  });
+
+  // Switch rows in the rail are illustrative only.
+  $("rail").addEventListener("click", (e) => {
+    const row = e.target.closest(".row");
+    if (row) row.dataset.on = row.dataset.on === "1" ? "0" : "1";
+  });
+  $("rail").addEventListener("keydown", (e) => {
+    if ((e.key === " " || e.key === "Enter") && e.target.classList.contains("row")) {
+      e.preventDefault();
+      e.target.dataset.on = e.target.dataset.on === "1" ? "0" : "1";
+    }
+  });
+
+  // Cursor drag.
+  let dragging = false;
+  const setCursorFromEvent = (e) => {
+    const r = $("track").getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const frac = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+    setCursor(RANGE_START + frac * RANGE_MIN);
+    renderSlots();
+    renderTicks();
+    drawMap();
+    drawChart();
+  };
+  $("track").addEventListener("pointerdown", (e) => { dragging = true; $("track").setPointerCapture(e.pointerId); setCursorFromEvent(e); });
+  $("track").addEventListener("pointermove", (e) => { if (dragging) setCursorFromEvent(e); });
+  $("track").addEventListener("pointerup", () => { dragging = false; });
+
+  const leaveDash = () => {
+    if (!state.dash) return;
+    state.dash = false;
+    $("app").classList.remove("dash");
+    $("dashBtn").setAttribute("aria-pressed", "false");
+    setTimeout(renderAll, 360);
+    note("Chrome restored");
+  };
+
+  $("exitDash").addEventListener("click", leaveDash);
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape") leaveDash(); });
+
+  // A wall display shows no chrome at all; someone at the keyboard needs the door to appear.
+  let hideTimer;
+  window.addEventListener("pointermove", () => {
+    if (!state.dash) return;
+    $("exitDash").classList.add("seen");
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => $("exitDash").classList.remove("seen"), 2400);
+  });
+
+  let rt;
+  window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(renderAll, 80); });
+
+  setCursor(RANGE_START + 0.62 * RANGE_MIN);
+  renderAll();
+  setTimeout(() => note("Click a region to switch focus · ⓘ in the nav explains the chrome"), 700);
+})();
+</script>
