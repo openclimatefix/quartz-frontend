@@ -16,13 +16,27 @@ const StatusBanner = ({ view, solarStatus, sitesStatus }: StatusBannerProps) => 
     status = solarStatus;
   }
 
-  if (!status || status.status === "ok" || status.message === "") {
+  const message = status?.message?.trim();
+
+  if (!message) {
     return null;
+  }
+
+  let emoji = "ℹ️";
+  switch (status?.status?.trim().toLowerCase()) {
+    case "warning":
+      emoji = "⚠️";
+      break;
+    case "error":
+      emoji = "🚨";
+      break;
   }
 
   return (
     <div className="bg-mapbox-black text-ocf-gray-600 text-center px-4 py-2">
-      <p>⚠️&nbsp;{solarStatus?.message}</p>
+      <p>
+        {emoji}&nbsp;{message}
+      </p>
     </div>
   );
 };
