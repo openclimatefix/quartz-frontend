@@ -63,7 +63,7 @@ import gbNationalGenerationDayAfter from "../../lib/api/v1/__fixtures__/gb-natio
 import nlNationalGeneration from "../../lib/api/v1/__fixtures__/nl-national-generation-ned_nl.json";
 import { resetTokenCache } from "../../lib/api/auth/token";
 import { COUNTRY_CONFIG, forecastSeriesModel } from "../../config/countries";
-import { setCurrentCountry, setGlobalState } from "../helpers/globalState";
+import { setFocusedCountry, setGlobalState } from "../helpers/globalState";
 import { DEFAULT_COUNTRY_CODE } from "../helpers/countryState";
 import PvRemixChart from "./pv-remix-chart";
 
@@ -118,13 +118,13 @@ beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
   server.resetHandlers();
   requests = [];
-  act(() => setCurrentCountry(DEFAULT_COUNTRY_CODE));
+  act(() => setFocusedCountry(DEFAULT_COUNTRY_CODE));
 });
 afterAll(() => server.close());
 beforeEach(() => {
   resetTokenCache();
   // react-hooks-global-state is module-global with no provider, so it leaks between tests.
-  setGlobalState("currentCountry", DEFAULT_COUNTRY_CODE);
+  setGlobalState("focusedCountry", DEFAULT_COUNTRY_CODE);
   setGlobalState("showNHourView", false);
   setGlobalState("nHourForecast", 4);
   setGlobalState("pLevels", []);
@@ -276,7 +276,7 @@ describe("observers are per country and there may be exactly one", () => {
   // NL has one observer, so there must be exactly one generation request and no attempt at
   // a second, undefined one.
   test("NL fetches its single observer and never a second", async () => {
-    setGlobalState("currentCountry", "NL");
+    setGlobalState("focusedCountry", "NL");
     const view = renderChart();
     await settled(view, 2);
 
@@ -311,7 +311,7 @@ describe("the legend follows the same two lists", () => {
   // No comparison models configured for NL, and one observer — so no orphaned legend rows
   // toggling lines that were never fetched.
   test("NL labels its single observer and no comparison models", async () => {
-    setGlobalState("currentCountry", "NL");
+    setGlobalState("focusedCountry", "NL");
     const view = renderChart();
     await settled(view, 2);
     await waitFor(() => {

@@ -1,12 +1,16 @@
 /**
- * The header country toggle.
+ * The header country control — which countries are drawn on the map.
  *
- * Two properties matter beyond "it renders the right buttons". First, an unentitled country
- * must be *shown and unclickable* — `/countries` returns every country the API serves so a
- * prospect can see what exists, and hiding them would defeat that. Second, the states where
- * there is no real choice (manifest loading, manifest failed, one country) must not render a
- * half-drawn toggle: the app still works in all of them, because the current country comes
- * from the cookie rather than the manifest.
+ * Since Phase 6 this is a plain multi-select and nothing more: *focused* (which country the
+ * chart reads) moved to the chart header, so the property most worth pinning here is the
+ * negative one — enabling a country must not silently move the chart.
+ *
+ * Two older properties still matter. First, an unentitled country must be *shown and
+ * unclickable* — `/countries` returns every country the API serves so a prospect can see
+ * what exists, and hiding them would defeat that. Second, the states where there is no real
+ * choice (manifest loading, manifest failed, one country) must not render a half-drawn
+ * toggle: the app still works in all of them, because the enabled set comes from the cookie
+ * rather than the manifest.
  *
  * Everything is driven off the recorded `/countries` fixture — the same payload the contract
  * test validates against `v1-api.json`.
@@ -42,7 +46,12 @@ import { COUNTRY_CLAIM_KEY } from "../../../lib/api/auth/entitlement";
 import { resetTokenCache } from "../../../lib/api/auth/token";
 import { CookieStorageKeys } from "../../helpers/cookieStorage";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
-import { getGlobalState, setGlobalState } from "../../helpers/globalState";
+import {
+  getGlobalState,
+  setEnabledCountries,
+  setFocusedCountry,
+  setGlobalState
+} from "../../helpers/globalState";
 import CountryToggle from "./country-toggle";
 
 const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
@@ -56,6 +65,7 @@ beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => {
   server.resetHandlers();
   Cookies.remove(CookieStorageKeys.COUNTRY);
+  Cookies.remove(CookieStorageKeys.ENABLED_COUNTRIES);
 });
 afterAll(() => server.close());
 
@@ -64,7 +74,8 @@ beforeEach(() => {
   mockUser = null;
   process.env.NEXT_PUBLIC_DEV_MODE = "false";
   // `react-hooks-global-state`'s store is module-global and leaks between tests.
-  setGlobalState("currentCountry", DEFAULT_COUNTRY_CODE);
+  setGlobalState("focusedCountry", DEFAULT_COUNTRY_CODE);
+  setGlobalState("enabledCountries", [DEFAULT_COUNTRY_CODE]);
 });
 
 // A fresh SWR cache per render, so one test's hour-long manifest cache cannot satisfy the
@@ -87,28 +98,73 @@ describe("with the manifest loaded", () => {
     expect(options()).toEqual(["GB", "NL"]);
   });
 
-  test("marks the current country as pressed", async () => {
+  // `aria-pressed` is the enabled state, and it is the *only* state this control carries.
+  // Focus moved to the chart header in Phase 6, so nothing here should reflect it.
+  test("reports which countries are drawn, and nothing about focus", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
     await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
 
     expect(screen.getByRole("button", { name: "GB" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: "NL" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "GB" })).not.toHaveAttribute("aria-current");
   });
 
-  test("selecting a country sets it in state and persists the cookie", async () => {
+  test("enabling a country adds it to the map and persists, without moving focus", async () => {
+    // The point of the split: "draw this" and "read this" are two gestures in two places.
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
     await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
 
     fireEvent.click(screen.getByRole("button", { name: "NL" }));
 
-    // `setCurrentCountry` owns normalisation and persistence; this is the whole contract.
-    expect(getGlobalState("currentCountry")).toBe("NL");
-    expect(Cookies.get(CookieStorageKeys.COUNTRY)).toBe(JSON.stringify("NL"));
+    expect(getGlobalState("enabledCountries")).toEqual(["GB", "NL"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+    expect(Cookies.get(CookieStorageKeys.ENABLED_COUNTRIES)).toBe(JSON.stringify(["GB", "NL"]));
+
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "NL" })).toHaveAttribute("aria-pressed", "true")
     );
+  });
+
+  test("disabling an unfocused country leaves focus alone", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
+    setEnabledCountries(["GB", "NL"]);
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: "NL" }));
+
+    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+  });
+
+  // The one case where this control touches focus, and it is the invariant rather than a
+  // choice: the chart cannot be reading a country that is not drawn.
+  test("disabling the focused country hands focus to what is left", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole("button", { name: "NL" }));
+
+    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+  });
+
+  // An empty set is a blank map with no way back. `setEnabledCountries` refuses it too; the
+  // point here is that the button does not pretend otherwise.
+  test("the last enabled country is not clickable", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+
+    expect(screen.getByRole("button", { name: "GB" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "GB" }));
+    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
   });
 
   // Shown-but-disabled is the deliberate design: a prospect should be able to see that NL
@@ -124,7 +180,7 @@ describe("with the manifest loaded", () => {
     // React DOM does not invoke handlers for mouse events on disabled form controls, so
     // this is the real "unselectable", not just "looks greyed out".
     fireEvent.click(nl);
-    expect(getGlobalState("currentCountry")).toBe("GB");
+    expect(getGlobalState("focusedCountry")).toBe("GB");
     expect(Cookies.get(CookieStorageKeys.COUNTRY)).toBeUndefined();
   });
 
@@ -168,16 +224,16 @@ describe("with the manifest loaded", () => {
 });
 
 describe("states with no real choice", () => {
-  test("while the manifest loads, it names the current country rather than nothing", async () => {
+  test("while the manifest loads, it names the focused country rather than nothing", async () => {
     server.use(http.get(COUNTRIES_URL, () => new Promise(() => {})));
     renderToggle();
 
-    expect(screen.getByRole("group", { name: "Country" })).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("group", { name: "Countries" })).toHaveAttribute("aria-busy", "true");
     expect(screen.getByText("GB")).toBeInTheDocument();
     expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
-  test("a failed manifest still names the current country, with no false choices", async () => {
+  test("a failed manifest still names the focused country, with no false choices", async () => {
     server.use(http.get(COUNTRIES_URL, () => HttpResponse.json({ detail: "no" }, { status: 403 })));
     renderToggle();
 

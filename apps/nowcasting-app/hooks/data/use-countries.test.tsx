@@ -33,10 +33,20 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
 import Cookies from "js-cookie";
 import countriesFixture from "../../lib/api/v1/__fixtures__/countries.json";
 import { CookieStorageKeys } from "../../components/helpers/cookieStorage";
-import { setCurrentCountry, setGlobalState } from "../../components/helpers/globalState";
+import {
+  setEnabledCountries,
+  setFocusedCountry,
+  setGlobalState
+} from "../../components/helpers/globalState";
 import { COUNTRY_CLAIM_KEY } from "../../lib/api/auth/entitlement";
 import { resetTokenCache } from "../../lib/api/auth/token";
-import { useCountries, useCurrentCountry, useEntitledCountries } from "./use-countries";
+import {
+  useCountries,
+  useEnabledCountries,
+  useEnabledCountryListings,
+  useEntitledCountries,
+  useFocusedCountry
+} from "./use-countries";
 
 const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
 
@@ -63,6 +73,13 @@ beforeEach(() => {
   resetTokenCache();
   mockUser = null;
   process.env.NEXT_PUBLIC_DEV_MODE = "false";
+  // `react-hooks-global-state`'s store is module-global and leaks between tests. Reset both
+  // country keys together — `setFocusedCountry` writes both, so resetting one is how a test
+  // that only touched focus still leaves NL enabled for the next one.
+  setGlobalState("focusedCountry", "GB");
+  setGlobalState("enabledCountries", ["GB"]);
+  Cookies.remove(CookieStorageKeys.COUNTRY);
+  Cookies.remove(CookieStorageKeys.ENABLED_COUNTRIES);
 });
 
 // A fresh SWR cache per render, so one test's long-lived (one hour) manifest cache cannot
@@ -217,16 +234,9 @@ describe("useEntitledCountries", () => {
   });
 });
 
-describe("useCurrentCountry", () => {
-  afterEach(() => {
-    // The store is module-global and leaks between tests. `act` because a hook rendered by
-    // a still-mounted test is subscribed to it.
-    act(() => setGlobalState("currentCountry", "GB"));
-    Cookies.remove(CookieStorageKeys.COUNTRY);
-  });
-
+describe("useFocusedCountry", () => {
   test("defaults to GB", () => {
-    const { result } = renderHook(() => useCurrentCountry());
+    const { result } = renderHook(() => useFocusedCountry());
     expect(result.current).toBe("GB");
   });
 
@@ -234,14 +244,70 @@ describe("useCurrentCountry", () => {
   // country re-renders the charts, headline figures and CSV without any of them knowing
   // where the country came from.
   test("reflects a country change", () => {
-    const { result } = renderHook(() => useCurrentCountry());
-    act(() => setCurrentCountry("NL"));
+    const { result } = renderHook(() => useFocusedCountry());
+    act(() => setFocusedCountry("NL"));
     expect(result.current).toBe("NL");
   });
 
-  test("reflects the normalisation setCurrentCountry applies", () => {
-    const { result } = renderHook(() => useCurrentCountry());
-    act(() => setCurrentCountry("nl"));
+  test("reflects the normalisation setFocusedCountry applies", () => {
+    const { result } = renderHook(() => useFocusedCountry());
+    act(() => setFocusedCountry("nl"));
     expect(result.current).toBe("NL");
+  });
+});
+
+describe("useEnabledCountries", () => {
+  // Codes, not listings: this is synchronous global state, so a map layer or a cursor grid
+  // can depend on it without inheriting the manifest's loading and error states.
+  test("is the default country alone until something enables more", () => {
+    const { result } = renderHook(() => useEnabledCountries());
+    expect(result.current).toEqual(["GB"]);
+  });
+
+  test("reflects the set live, like the focused country does", () => {
+    const { result } = renderHook(() => useEnabledCountries());
+    act(() => setEnabledCountries(["GB", "NL"]));
+    expect(result.current).toEqual(["GB", "NL"]);
+  });
+
+  test("always contains the focused country", () => {
+    const { result } = renderHook(() => ({
+      enabled: useEnabledCountries(),
+      focused: useFocusedCountry()
+    }));
+    act(() => setFocusedCountry("NL"));
+    expect(result.current.enabled).toContain(result.current.focused);
+  });
+});
+
+describe("useEnabledCountryListings", () => {
+  test("is the enabled set joined to the manifest, in enabled order", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
+    act(() => setEnabledCountries(["NL", "GB"]));
+
+    const { result } = renderHook(() => useEnabledCountryListings(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.countries.map((c) => c.code)).toEqual(["NL", "GB"]);
+    expect(result.current.countries[0].config).toBeDefined();
+  });
+
+  // Entitlement is applied here rather than in the state layer, because the claim arrives
+  // asynchronously and does not exist on the tenant yet. State keeps the user's choice; this
+  // is what refuses to draw it.
+  test("drops an enabled country the user is not entitled to", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
+    act(() => setEnabledCountries(["GB", "NL"]));
+
+    const { result } = renderHook(() => useEnabledCountryListings(), { wrapper });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.countries.map((c) => c.code)).toEqual(["GB"]);
+  });
+
+  test("is empty while the manifest is still loading, rather than guessing", () => {
+    const { result } = renderHook(() => useEnabledCountryListings(), { wrapper });
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.countries).toEqual([]);
   });
 });

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { getCountryConfig } from "../../config/countries";
 import { DEFAULT_LOCALE, DEFAULT_TIMEZONE } from "../../components/helpers/utils";
-import { useCurrentCountry } from "./use-countries";
+import { useFocusedCountry } from "./use-countries";
 
 /**
  * The zone and locale every date helper is rendered in, for the country currently selected.
@@ -23,7 +23,7 @@ export type CountryFormatting = {
 };
 
 export const useCountryFormatting = (): CountryFormatting => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   return useMemo(() => {
     const config = getCountryConfig(country);
     return {

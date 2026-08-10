@@ -313,9 +313,12 @@ real information — but that is presentation and belongs to this phase, not to 
    see "The chart is one country at a time" above.
 2. ~~Cursor snapping across differing cadences.~~ **CLOSED** — continuous cursor, ceiling to each
    country's next published slot. See "Time is chrome" above, including the end-of-period invariant.
-3. **Does focus follow a map click across countries, and how is it signalled?** Clicking an NL
-   province while focused on GB switches the chart out from under you. Switch with visible feedback,
-   or require an explicit focus change? *Blocks: the country control's design.*
+3. ~~Does focus follow a map click across countries, and how is it signalled?~~ **CLOSED — and it
+   was already closed when this list was written.** "Selection sets focus" under §1 above decides
+   it: every enabled country's regions are clickable, clicking one switches focus to it, and the
+   change is signalled by the country chip moving in the chart header. This entry survived the edit
+   that closed it, and cost Track A a wrong deferral before it was spotted (2026-08-10). The
+   remaining work is the chip's *animation*, which is presentation, not a decision.
 4. ~~The modes, and their default splits.~~ **CLOSED** — there are no modes in the nav. Comparison
    moved to the map cluster and Sites moved to its own route, so the nav carries the country toggles
    and account only. The chart's default split is set by whether a comparison is active (comparison

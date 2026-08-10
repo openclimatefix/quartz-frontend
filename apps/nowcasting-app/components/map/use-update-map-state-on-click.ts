@@ -1,11 +1,26 @@
 import { useEffect, useRef } from "react";
-import useGlobalState, { useCountryState } from "../helpers/globalState";
+import useGlobalState, { focusAndSelectRegions, useCountryState } from "../helpers/globalState";
+import { useFocusedCountry } from "../../hooks/data/use-countries";
 import { PointLike } from "mapbox-gl";
 
 type UseUpdateMapStateOnClickProps = {
   map?: mapboxgl.Map;
   isMapReady: boolean;
 };
+
+/**
+ * The feature property naming the country a region belongs to.
+ *
+ * Contract §1: every enabled country's regions are clickable and clicking one focuses its
+ * country — one gesture, no inert map. That needs the clicked feature to say whose it is.
+ *
+ * Nothing stamps it yet: the map still draws one country at a time (`useMapGeometry` is
+ * scoped to the focused country), so today every feature is unambiguously the focused
+ * country's and the fallback below is always taken. **Track D stamps this when it fans the
+ * map out over `useEnabledCountryListings()`, and cross-country focus then works with no
+ * further change here.**
+ */
+export const REGION_COUNTRY_PROPERTY = "country";
 
 const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) => {
   if (!map) return;
@@ -33,6 +48,11 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   const isEventRegistertedRef = useRef(false);
   const nationalAggregationLevelRef = useRef(nationalAggregationLevel);
   nationalAggregationLevelRef.current = nationalAggregationLevel;
+  // Read through a ref for the same reason as the level above: the click handler is
+  // registered once and would otherwise close over the country the map had on first render.
+  const focusedCountry = useFocusedCountry();
+  const focusedCountryRef = useRef(focusedCountry);
+  focusedCountryRef.current = focusedCountry;
 
   useEffect(() => {
     if (!map || !clickedMapRegionIds) return;
@@ -99,6 +119,22 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
       map.on("click", "latestPV-forecast", (e) => {
         const clickedFeature = e.features && e.features[0];
         if (clickedFeature) {
+          // Whose region was clicked. Absent until Track D fans the map out, at which point
+          // every branch below is already country-aware.
+          const featureCountry = String(
+            clickedFeature.properties?.[REGION_COUNTRY_PROPERTY] ?? focusedCountryRef.current
+          );
+
+          // A click on another country's region focuses it and starts that country's
+          // selection fresh — including under shift, because a selection spanning two
+          // countries is exactly what contract §1 makes unreachable. `focusAndSelectRegions`
+          // owns the focus-then-select ordering; doing it by hand here would silently drop
+          // the click.
+          if (featureCountry.toUpperCase() !== focusedCountryRef.current.toUpperCase()) {
+            focusAndSelectRegions(featureCountry, [String(clickedFeature.properties?.id)]);
+            return;
+          }
+
           if (e.originalEvent.shiftKey) {
             const bbox: [PointLike, PointLike] = [
               [e.point.x - 5, e.point.y - 5],

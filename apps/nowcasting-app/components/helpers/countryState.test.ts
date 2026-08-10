@@ -1,11 +1,18 @@
 /**
  * The country dimension of the global state.
  *
- * The property worth protecting is the *restore*: switching country and switching back must
- * put the map and the selection where the user left them. Everything else here — the lazy
- * per-country defaults, the fallback for an unconfigured country, the cookie round-trip — is
- * in service of that, plus the guarantee that a GB-only user sees exactly what they saw
- * before the split.
+ * Two properties are worth protecting, and Phase 6 put them in tension:
+ *
+ * - the *restore* — switching country and switching back must put the map where the user
+ *   left it, which is the whole reason these keys are country-keyed rather than reset;
+ * - the *selection rule* — a region selection may **not** survive its country losing focus
+ *   (contract §1, §7), which is what makes multi-region selection structurally
+ *   single-country rather than a rule something has to police.
+ *
+ * So the viewport and the level restore and the selection does not. Everything else here —
+ * the lazy per-country defaults, the fallback for an unconfigured country, the cookie round
+ * trip, the enabled/focused invariants — is in service of those, plus the guarantee that a
+ * GB-only user sees exactly what they saw before either split.
  */
 import { afterEach, beforeEach, describe, expect, test } from "@jest/globals";
 import { act, renderHook } from "@testing-library/react";
@@ -21,14 +28,18 @@ import {
   DEFAULT_COUNTRY_CODE,
   FALLBACK_MAP_DEFAULTS,
   defaultCountryScopedState,
-  normaliseCountryCode
+  normaliseCountryCode,
+  normaliseCountryCodes
 } from "./countryState";
 import {
+  focusAndSelectRegions,
   getCountryState,
   getGlobalState,
   setCountryState,
-  setCurrentCountry,
+  setEnabledCountries,
+  setFocusedCountry,
   setGlobalState,
+  toggleCountryEnabled,
   useCountryState
 } from "./globalState";
 
@@ -41,7 +52,8 @@ const UNCONFIGURED = "ZZ";
 // tests. Emptying every country-keyed record puts each test back at "no country visited
 // yet", which is what the lazy defaults are keyed off.
 const resetState = () => {
-  setGlobalState("currentCountry", DEFAULT_COUNTRY_CODE);
+  setGlobalState("focusedCountry", DEFAULT_COUNTRY_CODE);
+  setGlobalState("enabledCountries", [DEFAULT_COUNTRY_CODE]);
   for (const key of COUNTRY_SCOPED_KEYS) {
     // Every country-keyed value is a `Record<string, …>`; the loop cannot express that the
     // key and the record's value type are correlated, so one member stands in for all.
@@ -50,7 +62,10 @@ const resetState = () => {
 };
 
 beforeEach(resetState);
-afterEach(() => Cookies.remove(CookieStorageKeys.COUNTRY));
+afterEach(() => {
+  Cookies.remove(CookieStorageKeys.COUNTRY);
+  Cookies.remove(CookieStorageKeys.ENABLED_COUNTRIES);
+});
 
 describe("the default country", () => {
   test("matches the data layer's, which declares it separately", () => {
@@ -132,41 +147,61 @@ describe("per-country defaults", () => {
   });
 });
 
-describe("reading and writing through the current country", () => {
-  test("reads the current country's slice", () => {
+describe("reading and writing through the focused country", () => {
+  test("reads the focused country's slice", () => {
     expect(getCountryState("lng")).toBe(GB.map.center.lng);
-    setCurrentCountry("NL");
+    setFocusedCountry("NL");
     expect(getCountryState("lng")).toBe(NL.map.center.lng);
   });
 
-  test("a write lands only on the current country", () => {
+  test("a write lands only on the focused country", () => {
     setCountryState("zoom", 9);
-    setCurrentCountry("NL");
+    setFocusedCountry("NL");
     expect(getCountryState("zoom")).toBe(NL.map.zoom);
     expect(getCountryState("zoom", "GB")).toBe(9);
   });
 
-  test("switching country and back restores the viewport and the selection", () => {
+  test("switching country and back restores the viewport and the level", () => {
     setCountryState("lng", 1.5);
     setCountryState("lat", 51.5);
     setCountryState("zoom", 8.25);
-    setCountryState("selectedMapRegionIds", ["citr_1"]);
     setCountryState("nationalAggregationLevel", "dno");
 
-    setCurrentCountry("NL");
+    setFocusedCountry("NL");
     // NL is untouched: it gets its own defaults, not GB's leftovers.
     expect(getCountryState("lng")).toBe(NL.map.center.lng);
-    expect(getCountryState("selectedMapRegionIds")).toBeUndefined();
-    setCountryState("selectedMapRegionIds", ["noord-holland"]);
+    expect(getCountryState("nationalAggregationLevel")).toBe("province");
 
-    setCurrentCountry("GB");
+    setFocusedCountry("GB");
     expect(getCountryState("lng")).toBe(1.5);
     expect(getCountryState("lat")).toBe(51.5);
     expect(getCountryState("zoom")).toBe(8.25);
-    expect(getCountryState("selectedMapRegionIds")).toEqual(["citr_1"]);
     expect(getCountryState("nationalAggregationLevel")).toBe("dno");
+  });
 
-    setCurrentCountry("NL");
+  // The Phase 6 exception to the restore above, and the reason `SELECTION_SCOPED_KEYS`
+  // exists: a selection cannot outlive the country it belongs to (contract §1, §7). Where
+  // you were looking survives; what you had picked does not.
+  test("the selection does not survive the country losing focus", () => {
+    setCountryState("selectedMapRegionIds", ["citr_1"]);
+    setCountryState("clickedMapRegionIds", ["citr_1"]);
+    setCountryState("clickedGspId", 12);
+
+    setFocusedCountry("NL");
+    setFocusedCountry("GB");
+
+    expect(getCountryState("selectedMapRegionIds")).toBeUndefined();
+    expect(getCountryState("clickedMapRegionIds")).toBeUndefined();
+    expect(getCountryState("clickedGspId")).toBeUndefined();
+  });
+
+  test("each country's selection is cleared independently", () => {
+    setCountryState("selectedMapRegionIds", ["citr_1"]);
+    setFocusedCountry("NL");
+    setCountryState("selectedMapRegionIds", ["noord-holland"]);
+
+    // GB lost its selection on the way out; NL still holds the one just made.
+    expect(getCountryState("selectedMapRegionIds", "GB")).toBeUndefined();
     expect(getCountryState("selectedMapRegionIds")).toEqual(["noord-holland"]);
   });
 
@@ -178,8 +213,8 @@ describe("reading and writing through the current country", () => {
     expect(getCountryState("selectedMapRegionIds")).toBeUndefined();
   });
 
-  test("an unconfigured current country is usable rather than fatal", () => {
-    setCurrentCountry(UNCONFIGURED);
+  test("an unconfigured focused country is usable rather than fatal", () => {
+    setFocusedCountry(UNCONFIGURED);
     expect(getCountryState("zoom")).toBe(FALLBACK_MAP_DEFAULTS.zoom);
     setCountryState("zoom", 7);
     expect(getCountryState("zoom")).toBe(7);
@@ -187,7 +222,7 @@ describe("reading and writing through the current country", () => {
 });
 
 describe("useCountryState", () => {
-  test("gives the same tuple shape as useGlobalState, scoped to the current country", () => {
+  test("gives the same tuple shape as useGlobalState, scoped to the focused country", () => {
     const { result } = renderHook(() => useCountryState("zoom"));
     expect(result.current[0]).toBe(GB.map.zoom);
 
@@ -203,35 +238,201 @@ describe("useCountryState", () => {
     const { result } = renderHook(() => useCountryState("lng"));
     act(() => result.current[1](1.5));
 
-    act(() => setCurrentCountry("NL"));
+    act(() => setFocusedCountry("NL"));
     expect(result.current[0]).toBe(NL.map.center.lng);
 
-    act(() => setCurrentCountry("GB"));
+    act(() => setFocusedCountry("GB"));
     expect(result.current[0]).toBe(1.5);
   });
 });
 
-describe("the country cookie", () => {
-  // `getValidatedCountry` runs once at module load, so each case needs a fresh copy of the
-  // store. `isolateModules` + `require` keeps that copy out of the statically imported one
-  // the tests above use.
-  const loadCurrentCountry = (): string => {
-    let country = "";
+/**
+ * The Phase 6 split. Two invariants carry the whole model, and everything downstream — the
+ * map fan-out, the cursor grid, the chart's single country — assumes both hold without
+ * checking:
+ *
+ *   1. `enabledCountries` is never empty.
+ *   2. `focusedCountry` is always a member of it.
+ *
+ * They are enforced in the writers rather than asserted at the call sites, so these are the
+ * tests that stand between the model and a blank map.
+ */
+describe("enabled and focused", () => {
+  const enabled = () => getGlobalState("enabledCountries");
+  const focused = () => getGlobalState("focusedCountry");
+
+  test("start as the default country alone, so a GB-only user sees what they always saw", () => {
+    expect(enabled()).toEqual([DEFAULT_COUNTRY_CODE]);
+    expect(focused()).toBe(DEFAULT_COUNTRY_CODE);
+  });
+
+  test("focusing a country that is not enabled enables it", () => {
+    // One gesture, not two: you cannot read a chart for a country that is not on the map.
+    setFocusedCountry("NL");
+    expect(enabled()).toEqual(["GB", "NL"]);
+    expect(focused()).toBe("NL");
+  });
+
+  test("focusing an already-enabled country does not reorder or re-add it", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    expect(enabled()).toEqual(["GB", "NL"]);
+  });
+
+  test("disabling the focused country hands focus to what is left", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+
+    setEnabledCountries(["GB"]);
+    expect(enabled()).toEqual(["GB"]);
+    expect(focused()).toBe("GB");
+  });
+
+  test("disabling a country that is not focused leaves focus alone", () => {
+    setEnabledCountries(["GB", "NL"]);
+    expect(focused()).toBe("GB");
+
+    setEnabledCountries(["GB"]);
+    expect(focused()).toBe("GB");
+  });
+
+  test("the last enabled country cannot be disabled", () => {
+    // An empty set is a blank map with no way back. The toggle disables the affordance too;
+    // this is the backstop.
+    setEnabledCountries([]);
+    expect(enabled()).toEqual([DEFAULT_COUNTRY_CODE]);
+    expect(focused()).toBe(DEFAULT_COUNTRY_CODE);
+  });
+
+  test("an unconfigured country cannot be enabled", () => {
+    setEnabledCountries(["GB", UNCONFIGURED]);
+    expect(enabled()).toEqual(["GB"]);
+  });
+
+  test("codes are normalised and de-duplicated, so case cannot fork the set", () => {
+    setEnabledCountries(["gb", " nl ", "GB"]);
+    expect(enabled()).toEqual(["GB", "NL"]);
+  });
+
+  test("a country dropped from the set loses its selection", () => {
+    // Same rule as losing focus: its regions are no longer drawn, so a selection naming them
+    // would come back stale on re-enable.
+    setEnabledCountries(["GB", "NL"]);
+    setCountryState("selectedMapRegionIds", ["noord-holland"], "NL");
+
+    setEnabledCountries(["GB"]);
+    expect(getCountryState("selectedMapRegionIds", "NL")).toBeUndefined();
+  });
+
+  test("a country dropped from the set keeps its viewport", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setCountryState("zoom", 9, "NL");
+
+    setEnabledCountries(["GB"]);
+    expect(getCountryState("zoom", "NL")).toBe(9);
+  });
+});
+
+/**
+ * The map click path — contract §1, "selection sets focus".
+ *
+ * The reason this is one function rather than two calls at the call site is the ordering:
+ * focusing clears the outgoing country's selection, so selecting *then* focusing silently
+ * drops the click, on the cross-country case only. These tests are what stop that spelling
+ * coming back.
+ */
+describe("focusAndSelectRegions", () => {
+  test("focuses the region's country and selects it there", () => {
+    focusAndSelectRegions("NL", ["noord-holland"]);
+
+    expect(getGlobalState("focusedCountry")).toBe("NL");
+    expect(getCountryState("selectedMapRegionIds", "NL")).toEqual(["noord-holland"]);
+  });
+
+  test("the selection survives the focus change that carried it", () => {
+    // The trap, stated as a test: the country being focused is also the country whose
+    // selection is being written, and focusing clears selections.
+    setCountryState("selectedMapRegionIds", ["citr_1"], "GB");
+
+    focusAndSelectRegions("NL", ["noord-holland"]);
+
+    expect(getCountryState("selectedMapRegionIds", "NL")).toEqual(["noord-holland"]);
+    // The country left behind loses its selection, per the same rule.
+    expect(getCountryState("selectedMapRegionIds", "GB")).toBeUndefined();
+  });
+
+  test("enables the country if it was not drawn", () => {
+    focusAndSelectRegions("NL", ["noord-holland"]);
+    expect(getGlobalState("enabledCountries")).toEqual(["GB", "NL"]);
+  });
+
+  test("within one country it is a plain selection, clearing nothing", () => {
+    focusAndSelectRegions("GB", ["citr_1"]);
+    focusAndSelectRegions("GB", ["citr_1", "citr_2"]);
+
+    expect(getCountryState("selectedMapRegionIds", "GB")).toEqual(["citr_1", "citr_2"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+  });
+
+  test("normalises the country, so a lower-case feature property cannot fork the state", () => {
+    focusAndSelectRegions("nl", ["noord-holland"]);
+
+    expect(getGlobalState("focusedCountry")).toBe("NL");
+    expect(getCountryState("selectedMapRegionIds", "NL")).toEqual(["noord-holland"]);
+  });
+});
+
+describe("toggleCountryEnabled", () => {
+  // "Draw this" and "read this" are two gestures in two controls: the header toggle owns the
+  // set, the chart header owns focus. Enabling must not quietly do both.
+  test("turning a country on draws it without moving focus", () => {
+    toggleCountryEnabled("NL");
+    expect(getGlobalState("enabledCountries")).toEqual(["GB", "NL"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+  });
+
+  test("turning the focused country off moves focus and leaves the rest enabled", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+
+    toggleCountryEnabled("NL");
+    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+  });
+
+  test("turning the last country off does nothing", () => {
+    toggleCountryEnabled("GB");
+    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
+    expect(getGlobalState("focusedCountry")).toBe("GB");
+  });
+});
+
+describe("the country cookies", () => {
+  // `getValidatedFocusedCountry` and `getValidatedEnabledCountries` run once at module load,
+  // so each case needs a fresh copy of the store. `isolateModules` + `require` keeps that
+  // copy out of the statically imported one the tests above use.
+  const loadCountryState = (): { focused: string; enabled: string[] } => {
+    let loaded = { focused: "", enabled: [] as string[] };
     jest.isolateModules(() => {
       const globalState = require("./globalState") as typeof import("./globalState");
-      country = globalState.getGlobalState("currentCountry");
+      loaded = {
+        focused: globalState.getGlobalState("focusedCountry"),
+        enabled: globalState.getGlobalState("enabledCountries")
+      };
     });
-    return country;
+    return loaded;
   };
 
+  const loadCurrentCountry = (): string => loadCountryState().focused;
+
   test("round-trips a configured country", () => {
-    setCurrentCountry("NL");
-    expect(getGlobalState("currentCountry")).toBe("NL");
+    setFocusedCountry("NL");
+    expect(getGlobalState("focusedCountry")).toBe("NL");
     expect(loadCurrentCountry()).toBe("NL");
   });
 
   test("is normalised on write, so case cannot fork the state", () => {
-    setCurrentCountry("nl");
+    setFocusedCountry("nl");
     expect(loadCurrentCountry()).toBe("NL");
   });
 
@@ -249,5 +450,59 @@ describe("the country cookie", () => {
 
   test("defaults when no cookie has been written", () => {
     expect(loadCurrentCountry()).toBe(DEFAULT_COUNTRY_CODE);
+  });
+
+  test("round-trips the enabled set", () => {
+    setEnabledCountries(["GB", "NL"]);
+    expect(loadCountryState().enabled).toEqual(["GB", "NL"]);
+  });
+
+  test("both invariants survive the round trip, whatever the cookies say", () => {
+    // The interesting case: two cookies written independently can disagree. A focused
+    // country missing from the enabled set must be added rather than dropped — dropping it
+    // would boot the chart to a country the user did not choose.
+    Cookies.set(CookieStorageKeys.COUNTRY, JSON.stringify("NL"));
+    Cookies.set(CookieStorageKeys.ENABLED_COUNTRIES, JSON.stringify(["GB"]));
+
+    const loaded = loadCountryState();
+    expect(loaded.focused).toBe("NL");
+    expect(loaded.enabled).toContain("NL");
+    expect(loaded.enabled).toContain("GB");
+  });
+
+  test("drops enabled countries this build has no config for", () => {
+    Cookies.set(CookieStorageKeys.ENABLED_COUNTRIES, JSON.stringify(["GB", UNCONFIGURED]));
+    expect(loadCountryState().enabled).toEqual(["GB"]);
+  });
+
+  test("falls back to the default set when the cookie leaves nothing usable", () => {
+    // Blank entries are dropped rather than defaulted (see `normaliseCountryCodes`), so this
+    // empties — and an empty enabled set is not a state the app may start in.
+    Cookies.set(CookieStorageKeys.ENABLED_COUNTRIES, JSON.stringify([UNCONFIGURED, "", "  "]));
+    expect(loadCountryState().enabled).toEqual([DEFAULT_COUNTRY_CODE]);
+  });
+
+  test("survives a cookie that is not a list at all", () => {
+    Cookies.set(CookieStorageKeys.ENABLED_COUNTRIES, JSON.stringify("GB"));
+    expect(loadCountryState().enabled).toEqual([DEFAULT_COUNTRY_CODE]);
+  });
+});
+
+describe("normaliseCountryCodes", () => {
+  test("upper-cases, trims and de-duplicates, keeping order", () => {
+    expect(normaliseCountryCodes([" nl ", "gb", "NL"])).toEqual(["NL", "GB"]);
+  });
+
+  test("drops blanks rather than defaulting them, unlike the single-code normaliser", () => {
+    // The one deliberate divergence: in a list `""` means nothing, and reading it as GB
+    // would silently re-enable a country the user turned off.
+    expect(normaliseCountryCodes(["", "   ", "NL"])).toEqual(["NL"]);
+    expect(normaliseCountryCode("")).toBe(DEFAULT_COUNTRY_CODE);
+  });
+
+  test("ignores non-strings and a missing list", () => {
+    expect(normaliseCountryCodes([1, null, undefined, {}, "GB"])).toEqual(["GB"]);
+    expect(normaliseCountryCodes(null)).toEqual([]);
+    expect(normaliseCountryCodes(undefined)).toEqual([]);
   });
 });

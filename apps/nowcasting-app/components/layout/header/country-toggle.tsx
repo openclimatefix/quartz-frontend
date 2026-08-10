@@ -1,24 +1,26 @@
 import React from "react";
 
-import { setCurrentCountry } from "../../helpers/globalState";
-import { useCountries, useCurrentCountry } from "../../../hooks/data/use-countries";
+import { toggleCountryEnabled } from "../../helpers/globalState";
+import { useCountries, useEnabledCountries } from "../../../hooks/data/use-countries";
 import type { CountryListing } from "../../../lib/domain/types";
 
-// Country switcher for the header menu.
+// Which countries draw on the map. A multi-select, and nothing else.
 //
-// Adapted from `country-toggle.tsx` on the `feat/NL-toggle` branch, with the hardcoded
-// ["GB","NL"] replaced by the manifest. `/countries` returns every country the API serves,
-// by design, so prospects can see what exists before a subscription completes — which is
-// why an unentitled country is rendered *disabled* rather than hidden.
+// Phase 6 split "which country" in two (`docs/phase6-layout-contract.md` §1): *enabled* is a
+// set and belongs to the map, *focused* is one country and belongs to the chart. This
+// control owns the first half only. Focus is picked in the chart header, next to the numbers
+// it governs — see `components/charts/country-picker.tsx` — because that is where the choice
+// has a visible effect, and putting both in the header made one gesture quietly do two
+// things.
 //
-// Selecting one calls `setCurrentCountry`, whose whole contract is: normalise the code,
-// write `currentCountry`, persist the cookie. Nothing is reset on switch — every
-// country-scoped key (viewport, region selection, aggregation level) keeps its own slice,
-// so switching back restores what the user was looking at.
+// `/countries` returns every country the API serves, by design, so prospects can see what
+// exists before a subscription completes — which is why an unentitled country is rendered
+// *disabled* rather than hidden. This is the one place entitlement gates a write: the
+// enabled set is persisted, so it must never come to hold a country the user cannot see.
 
 const BUTTON_BASE =
   "px-2 py-0.5 text-sm font-bold rounded transition-colors first:rounded-l last:rounded-r";
-const BUTTON_SELECTED = "bg-ocf-yellow text-black";
+const BUTTON_ENABLED = "bg-ocf-yellow text-black";
 const BUTTON_SELECTABLE = "bg-mapbox-black text-ocf-gray-400 hover:text-white";
 const BUTTON_DISABLED = "bg-mapbox-black text-ocf-gray-800 cursor-not-allowed";
 
@@ -38,27 +40,36 @@ const unselectableReason = (country: CountryListing): string =>
  *
  * Rendered as a real `<button disabled>` rather than a styled `<div>` so an unentitled
  * country is unclickable, unfocusable and announced as disabled, rather than merely looking
- * greyed out.
+ * greyed out. `aria-pressed` carries the enabled state — this is a set of independent
+ * toggles, not a radio group.
+ *
+ * The last enabled country is `disabled` too: an empty set is a blank map with no way back.
+ * `setEnabledCountries` refuses it as well, but the button should not pretend otherwise.
  */
 const CountryOption: React.FC<{
   country: CountryListing;
-  selected: boolean;
-  onSelect: (code: string) => void;
-}> = ({ country, selected, onSelect }) => {
+  enabled: boolean;
+  isLastEnabled: boolean;
+  onToggle: (code: string) => void;
+}> = ({ country, enabled, isLastEnabled, onToggle }) => {
   const selectable = isSelectable(country);
-  const stateClasses = selected
-    ? BUTTON_SELECTED
-    : selectable
-    ? BUTTON_SELECTABLE
-    : BUTTON_DISABLED;
+  const stateClasses = !selectable ? BUTTON_DISABLED : enabled ? BUTTON_ENABLED : BUTTON_SELECTABLE;
+
+  const hint = !selectable
+    ? unselectableReason(country)
+    : isLastEnabled
+    ? "The only country on the map"
+    : enabled
+    ? "Remove from the map"
+    : "Add to the map";
 
   return (
     <button
       type="button"
-      disabled={!selectable}
-      aria-pressed={selected}
-      title={selectable ? country.name : `${country.name} — ${unselectableReason(country)}`}
-      onClick={() => onSelect(country.code)}
+      disabled={!selectable || isLastEnabled}
+      aria-pressed={enabled}
+      title={`${country.name} — ${hint}`}
+      onClick={() => onToggle(country.code)}
       className={`${BUTTON_BASE} ${stateClasses}`}
     >
       {country.code}
@@ -66,8 +77,8 @@ const CountryOption: React.FC<{
   );
 };
 
-/** The current country with no choice attached, for the states where a choice is a lie. */
-const CurrentCountryLabel: React.FC<{ code: string; title: string }> = ({ code, title }) => (
+/** A country named with no choice attached, for the states where a choice would be a lie. */
+const CountryLabel: React.FC<{ code: string; title: string }> = ({ code, title }) => (
   <span
     title={title}
     className="px-2 py-0.5 text-sm font-bold rounded bg-mapbox-black text-ocf-gray-400"
@@ -78,24 +89,24 @@ const CurrentCountryLabel: React.FC<{ code: string; title: string }> = ({ code, 
 
 const CountryToggle: React.FC = () => {
   const { countries, isLoading, error } = useCountries();
-  const currentCountry = useCurrentCountry();
+  const enabledCountries = useEnabledCountries();
 
   // The manifest is an hour-cached request that can also cold-start with a retryable 503.
-  // A momentarily empty toggle would read as "your countries went away", so both the
-  // in-flight and the failed case fall back to naming where the user actually is. The app
-  // is fully usable in either: the current country comes from the cookie, not the manifest.
+  // A momentarily empty control would read as "your countries went away", so both the
+  // in-flight and the failed case fall back to naming what is actually drawn. The app is
+  // fully usable in either: the enabled set comes from the cookie, not the manifest.
   if (isLoading) {
     return (
-      <div className="flex items-center px-2" role="group" aria-label="Country" aria-busy="true">
-        <CurrentCountryLabel code={currentCountry} title="Loading countries" />
+      <div className="flex items-center px-2" role="group" aria-label="Countries" aria-busy="true">
+        <CountryLabel code={enabledCountries.join(" ")} title="Loading countries" />
       </div>
     );
   }
 
   if (error || countries.length === 0) {
     return (
-      <div className="flex items-center px-2" role="group" aria-label="Country">
-        <CurrentCountryLabel code={currentCountry} title="Country list unavailable" />
+      <div className="flex items-center px-2" role="group" aria-label="Countries">
+        <CountryLabel code={enabledCountries.join(" ")} title="Country list unavailable" />
       </div>
     );
   }
@@ -105,20 +116,21 @@ const CountryToggle: React.FC = () => {
   if (countries.length === 1) {
     const only = countries[0];
     return (
-      <div className="flex items-center px-2" role="group" aria-label="Country">
-        <CurrentCountryLabel code={only.code} title={only.name} />
+      <div className="flex items-center px-2" role="group" aria-label="Countries">
+        <CountryLabel code={only.code} title={only.name} />
       </div>
     );
   }
 
   return (
-    <div className="flex items-center px-2" role="group" aria-label="Country">
+    <div className="flex items-center px-2" role="group" aria-label="Countries">
       {countries.map((country) => (
         <CountryOption
           key={country.code}
           country={country}
-          selected={country.code === currentCountry}
-          onSelect={setCurrentCountry}
+          enabled={enabledCountries.includes(country.code)}
+          isLastEnabled={enabledCountries.length === 1 && enabledCountries[0] === country.code}
+          onToggle={toggleCountryEnabled}
         />
       ))}
     </div>

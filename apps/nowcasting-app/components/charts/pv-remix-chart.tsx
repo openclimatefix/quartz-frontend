@@ -15,7 +15,7 @@ import { calculateChartYMax } from "../helpers/utils";
 import { getTicks } from "../helpers/chartUtils";
 import {
   NATIONAL_REGION_TYPE,
-  useCurrentCountry,
+  useFocusedCountry,
   useGenerationSources,
   useLoadingState,
   useNationalForecast,
@@ -58,15 +58,15 @@ const PvRemixChart: FC<{
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
 
-  const currentCountry = useCurrentCountry();
-  const countryConfig = getCountryConfig(currentCountry);
+  const focusedCountry = useFocusedCountry();
+  const countryConfig = getCountryConfig(focusedCountry);
   const seriesConfig = useMemo(
     () => (countryConfig?.nationalChartSeries ?? []).slice(0, MAX_FORECAST_SERIES),
     [countryConfig]
   );
 
-  const scope: Scope | null = currentCountry
-    ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+  const scope: Scope | null = focusedCountry
+    ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
   // Only `start` is pinned. `/regions/{region}/forecast` defaults its window to **now → +48h**

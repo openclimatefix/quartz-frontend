@@ -18,8 +18,11 @@ import {
   CountryScopedKey,
   CountryScopedStateType,
   DEFAULT_COUNTRY_CODE,
+  DEFAULT_ENABLED_COUNTRY_CODES,
+  SELECTION_SCOPED_KEYS,
   initialCountryKeyedState,
   normaliseCountryCode,
+  normaliseCountryCodes,
   readCountryScoped,
   writeCountryScoped
 } from "./countryState";
@@ -72,8 +75,20 @@ export function getNext30MinSlot(isoTime: Date) {
  * reached through `useCountryState` rather than `useGlobalState`.
  */
 export type FlatGlobalStateType = {
-  /** The country the charts, headline figures and map are currently showing. */
-  currentCountry: string;
+  /**
+   * The country that owns the chart, the capacity figure, the level selector and the
+   * number/date formatting. Always a member of `enabledCountries`.
+   *
+   * Read it through `useFocusedCountry()`, never straight off global state.
+   */
+  focusedCountry: string;
+  /**
+   * Every country that draws on the map. Never empty, always contains `focusedCountry`.
+   *
+   * Read it through `useEnabledCountries()`. Written only by `setEnabledCountries` and
+   * `setFocusedCountry`, which between them keep both invariants.
+   */
+  enabledCountries: string[];
   activeUnit: ActiveUnit;
   selectedISOTime: string;
   timeNow: string;
@@ -117,18 +132,44 @@ const getValidatedPLevels = (): [number, number][] => {
 
 // Same shape of check as getValidatedPLevels above: a cookie written by an older build (or
 // by hand) can name a country this build has no registry entry for, and an unconfigured
-// current country has no boundaries to draw or timezone to render in. Fall back rather than
+// focused country has no boundaries to draw or timezone to render in. Fall back rather than
 // trust it.
-const getValidatedCountry = (): string => {
+const getValidatedFocusedCountry = (): string => {
   const stored = getSettingFromCookieStorage<string>(CookieStorageKeys.COUNTRY);
   const code = normaliseCountryCode(stored);
   return getCountryConfig(code) ? code : DEFAULT_COUNTRY_CODE;
 };
 
+/**
+ * The enabled set from the cookie, forced to satisfy both invariants before anything reads it.
+ *
+ * Same shape of check again: drop anything this build has no registry entry for (no
+ * boundaries to draw, no timezone to render in), fall back to the default set if that leaves
+ * nothing, and make sure the focused country is in it. A cookie written by an older build,
+ * by hand, or by a user whose entitlement has since been revoked can say anything; none of
+ * it may reach the map.
+ *
+ * Entitlement is deliberately *not* applied here. The claim arrives asynchronously with the
+ * Auth0 user and does not exist on the tenant yet (`lib/api/auth/entitlement.ts`), so
+ * filtering on it at init would empty the set for every user in production today. The
+ * entitlement gate lives where it can wait for the claim: the toggle, which will not enable
+ * a country the user has no access to, and `useEnabledCountryListings`, which intersects
+ * before fanning out.
+ */
+const getValidatedEnabledCountries = (focused: string): string[] => {
+  const stored = getArraySettingFromCookieStorage<string>(CookieStorageKeys.ENABLED_COUNTRIES);
+  const configured = normaliseCountryCodes(stored).filter((code) => getCountryConfig(code));
+  const enabled = configured.length > 0 ? configured : [...DEFAULT_ENABLED_COUNTRY_CODES];
+  return enabled.includes(focused) ? enabled : [focused, ...enabled];
+};
+
+const INITIAL_FOCUSED_COUNTRY = getValidatedFocusedCountry();
+
 export const { useGlobalState, getGlobalState, setGlobalState } =
   createGlobalState<GlobalStateType>({
     ...initialCountryKeyedState(),
-    currentCountry: getValidatedCountry(),
+    focusedCountry: INITIAL_FOCUSED_COUNTRY,
+    enabledCountries: getValidatedEnabledCountries(INITIAL_FOCUSED_COUNTRY),
     activeUnit: ActiveUnit.percentage,
     selectedISOTime: get30MinNow(),
     timeNow: get30MinNow(),
@@ -167,7 +208,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
   });
 
 /**
- * `useGlobalState` for a country-scoped key: reads and writes the current country's slice.
+ * `useGlobalState` for a country-scoped key: reads and writes the focused country's slice.
  *
  * The tuple is deliberately identical in shape to `useGlobalState`'s — value plus setter,
  * setter accepting a value or an updater — so a call site changes only in which hook it
@@ -176,14 +217,14 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
 export function useCountryState<K extends CountryScopedKey>(
   key: K
 ): [CountryScopedStateType[K], (update: CountryScopedUpdate<K>) => void] {
-  const [currentCountry] = useGlobalState("currentCountry");
+  const [focusedCountry] = useGlobalState("focusedCountry");
   // `GlobalStateType` is an intersection, and indexing one with a *generic* key collapses
   // to the union of every member's value type — TypeScript cannot carry the correlation
   // between `K` and the record's value through it. The cast restores what the mapped type
   // in `CountryKeyedState` already guarantees; `K` is still checked at the call site.
   const [record, setRecord] = useGlobalState(key) as unknown as CountryRecordTuple<K>;
 
-  const value = readCountryScoped(record, currentCountry, key);
+  const value = readCountryScoped(record, focusedCountry, key);
 
   const setValue = useCallback(
     (update: CountryScopedUpdate<K>) => {
@@ -191,12 +232,12 @@ export function useCountryState<K extends CountryScopedKey>(
       // above, so two writes in one tick (the map writes lng/lat/zoom on every pan) cannot
       // clobber each other with a stale slice.
       setRecord((previous) => {
-        const current = readCountryScoped(previous, currentCountry, key);
+        const current = readCountryScoped(previous, focusedCountry, key);
         const next = isUpdater(update) ? update(current) : update;
-        return writeCountryScoped(previous, currentCountry, next);
+        return writeCountryScoped(previous, focusedCountry, next);
       });
     },
-    [setRecord, currentCountry, key]
+    [setRecord, focusedCountry, key]
   );
 
   return [value, setValue];
@@ -225,7 +266,7 @@ const isUpdater = <K extends CountryScopedKey>(
 /** Imperative read of a country-scoped key, outside React. Mirrors `getGlobalState`. */
 export const getCountryState = <K extends CountryScopedKey>(
   key: K,
-  country: string = getGlobalState("currentCountry")
+  country: string = getGlobalState("focusedCountry")
 ): CountryScopedStateType[K] =>
   readCountryScoped(getGlobalState(key) as unknown as CountryRecord<K>, country, key);
 
@@ -233,7 +274,7 @@ export const getCountryState = <K extends CountryScopedKey>(
 export const setCountryState = <K extends CountryScopedKey>(
   key: K,
   value: CountryScopedStateType[K],
-  country: string = getGlobalState("currentCountry")
+  country: string = getGlobalState("focusedCountry")
 ): void => {
   const setRecord = ((update) =>
     setGlobalState(key, update as GlobalStateType[K])) as CountryRecordTuple<K>[1];
@@ -241,18 +282,127 @@ export const setCountryState = <K extends CountryScopedKey>(
 };
 
 /**
- * Switch the current country.
+ * Drop a country's region selection, leaving where it was looking alone.
  *
- * Nothing country-scoped is cleared: every slice stays where it was, so switching back
- * restores the viewport and selection the user left behind. That is the whole reason these
- * keys are keyed rather than reset.
+ * Called when a country stops being the chart's country — focus moving away, or the country
+ * being disabled. See `SELECTION_SCOPED_KEYS` for why the viewport and level are exempt.
  */
-export const setCurrentCountry = (code: string): void => {
+const clearCountrySelection = (country: string): void => {
+  for (const key of SELECTION_SCOPED_KEYS) {
+    // Each key's record has a different value type, which one loop cannot express; the
+    // written value is `undefined` for all three, which every one of them accepts.
+    setCountryState(key as "selectedMapRegionIds", undefined, country);
+  }
+};
+
+/** State plus cookie, so the two can never be written apart. */
+const writeEnabledCountries = (codes: string[]): void => {
+  setGlobalState("enabledCountries", codes);
+  setSettingInCookieStorage(CookieStorageKeys.ENABLED_COUNTRIES, codes);
+};
+
+/**
+ * Move focus — the chart, the capacity figure, the level selector, the formatting.
+ *
+ * Focusing a country enables it if it was not already: you cannot read a chart for a country
+ * that is not on the map, and this is what makes "clicking a region focuses its country" a
+ * single gesture rather than two.
+ *
+ * The *outgoing* country's region selection is cleared. Its viewport and aggregation level
+ * are not — switching away and back still restores what the user was looking at, which is
+ * why these keys are country-keyed in the first place.
+ */
+export const setFocusedCountry = (code: string): void => {
   const country = normaliseCountryCode(code);
-  setGlobalState("currentCountry", country);
+  const previous = getGlobalState("focusedCountry");
+  if (previous === country) return;
+
+  clearCountrySelection(previous);
+
+  const enabled = getGlobalState("enabledCountries");
+  if (!enabled.includes(country)) writeEnabledCountries([...enabled, country]);
+
+  setGlobalState("focusedCountry", country);
   // Persisted here rather than in the toggle so any future caller gets persistence for
-  // free; `getValidatedCountry` above is what makes a stale value harmless on read.
+  // free; `getValidatedFocusedCountry` above is what makes a stale value harmless on read.
   setSettingInCookieStorage(CookieStorageKeys.COUNTRY, country);
+};
+
+/**
+ * Replace the enabled set — which countries draw on the map.
+ *
+ * Enforces both invariants rather than trusting the caller:
+ *
+ * - **Never empty.** An empty set is a blank map with no way back, so a request to disable
+ *   the last country is ignored. The toggle disables the affordance too; this is the
+ *   backstop, not the message.
+ * - **Focus stays inside the set.** Disabling the focused country hands focus to the first
+ *   remaining member, with the same selection-clearing that any focus change does.
+ *
+ * Every country dropped from the set loses its region selection, for the same reason a
+ * country losing focus does: its regions are no longer drawn, so a selection naming them
+ * would come back stale on re-enable.
+ *
+ * Unconfigured codes are dropped, matching `getValidatedEnabledCountries`.
+ */
+export const setEnabledCountries = (codes: readonly string[]): void => {
+  const next = normaliseCountryCodes(codes).filter((code) => getCountryConfig(code));
+  if (next.length === 0) return;
+
+  const previous = getGlobalState("enabledCountries");
+  const focused = getGlobalState("focusedCountry");
+
+  writeEnabledCountries(next);
+
+  for (const code of previous) {
+    if (!next.includes(code) && code !== focused) clearCountrySelection(code);
+  }
+
+  // Last, so the focus change sees the new set and does not re-add the country it is
+  // leaving. `setFocusedCountry` clears the outgoing selection, which covers the case the
+  // loop above skips.
+  if (!next.includes(focused)) setFocusedCountry(next[0]);
+};
+
+/**
+ * Turn one country on or off, keeping everything else enabled.
+ *
+ * The header toggle's whole write path, and it touches *only* the map's set. Enabling a
+ * country deliberately does **not** focus it: enabling is "draw this", focusing is "read
+ * this", and since Phase 6 those live in two different controls precisely so one gesture
+ * cannot quietly do both. Disabling still moves focus when it has to — that is the
+ * invariant, not a choice — and `setEnabledCountries` owns it.
+ */
+export const toggleCountryEnabled = (code: string): void => {
+  const country = normaliseCountryCode(code);
+  const enabled = getGlobalState("enabledCountries");
+  if (enabled.includes(country)) {
+    setEnabledCountries(enabled.filter((entry) => entry !== country));
+  } else {
+    setEnabledCountries([...enabled, country]);
+  }
+};
+
+/**
+ * Select regions, focusing the country they belong to. **The map click path.**
+ *
+ * Contract §1: "Selection sets focus. Clicking a region focuses its country." That is what
+ * makes "multi-region selection is same-country only" structurally impossible to violate
+ * rather than a rule something has to police — a selection is always made *through* focus.
+ *
+ * It exists as one function because the order is a trap. `setFocusedCountry` clears the
+ * outgoing country's selection, so the obvious spelling
+ *
+ *     setSelectedMapRegionIds(ids);   // ← wiped a moment later
+ *     setFocusedCountry(country);
+ *
+ * silently drops the click, on the cross-country case only, in a way that looks like a
+ * missed event rather than an ordering bug. Focus first, then select, always.
+ */
+export const focusAndSelectRegions = (country: string, regionIds: string[]): void => {
+  const code = normaliseCountryCode(country);
+  setFocusedCountry(code);
+  setCountryState("selectedMapRegionIds", regionIds, code);
 };
 
 export default useGlobalState;

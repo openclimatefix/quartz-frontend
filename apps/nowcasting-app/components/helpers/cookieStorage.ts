@@ -5,9 +5,13 @@ export enum CookieStorageKeys {
   "VISIBLE_LINES" = "visibleLines",
   "CONSTRAINTS" = "constraints",
   "P_LEVELS" = "pLevels",
-  // The current country, validated on read against the static registry — see
-  // `getValidatedCountry` in globalState.tsx.
-  "COUNTRY" = "country"
+  // The focused country — the one the chart, the capacity figure and the formatting follow.
+  // Validated on read against the static registry — see `getValidatedFocusedCountry` in
+  // globalState.tsx.
+  "COUNTRY" = "country",
+  // The enabled set — every country that draws on the map. A superset of the focused one,
+  // never empty. See `getValidatedEnabledCountries` in globalState.tsx.
+  "ENABLED_COUNTRIES" = "enabledCountries"
 }
 
 export const getSettingFromCookieStorage = <T>(key: string): null | T => {

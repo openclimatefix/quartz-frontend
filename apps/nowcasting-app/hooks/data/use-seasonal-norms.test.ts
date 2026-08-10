@@ -13,10 +13,10 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react";
 
-let currentCountry: string = "GB";
+let focusedCountry: string = "GB";
 jest.mock("./use-countries", () => ({
   __esModule: true,
-  useCurrentCountry: () => currentCountry
+  useFocusedCountry: () => focusedCountry
 }));
 
 // Deferred per URL, matching `use-map-geometry.test.tsx`'s stub: a test decides the settle
@@ -60,7 +60,7 @@ const settle = async (url: string, value: unknown) => {
 };
 
 beforeEach(() => {
-  currentCountry = "GB";
+  focusedCountry = "GB";
   deferrals.clear();
   promises.clear();
   requestedUrls.length = 0;
@@ -81,7 +81,7 @@ describe("useSeasonalNorms", () => {
   });
 
   test("NL has no seasonal-norm dataset: no fetch, and undefined forever", async () => {
-    currentCountry = "NL";
+    focusedCountry = "NL";
     const view = renderHook(() => useSeasonalNorms());
     expect(requestedUrls).toEqual([]);
     expect(view.result.current).toBeUndefined();
@@ -96,7 +96,7 @@ describe("useSeasonalNorms", () => {
     expect(requestedUrls).toEqual([GB_URL]);
 
     // The user switches to NL — which has no dataset — before GB's fetch lands.
-    currentCountry = "NL";
+    focusedCountry = "NL";
     view.rerender();
     expect(view.result.current).toBeUndefined();
 
@@ -111,11 +111,11 @@ describe("useSeasonalNorms", () => {
     await settle(GB_URL, fixture);
     await waitFor(() => expect(view.result.current).toBeDefined());
 
-    currentCountry = "NL";
+    focusedCountry = "NL";
     view.rerender();
     expect(view.result.current).toBeUndefined();
 
-    currentCountry = "GB";
+    focusedCountry = "GB";
     view.rerender();
     await waitFor(() => expect(view.result.current).toEqual(fixture));
     expect(requestedUrls).toEqual([GB_URL]);

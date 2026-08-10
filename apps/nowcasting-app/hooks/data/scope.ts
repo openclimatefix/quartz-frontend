@@ -5,7 +5,7 @@ import type { Scope } from "../../lib/domain/types";
  *
  * There is no ambient country anywhere in this layer. Every hook takes an explicit `Scope`,
  * which is what makes the map's N-country fanout cost one extra argument instead of a second
- * refactor. `useCurrentCountry()` supplies the default scope in the UI, never here.
+ * refactor. `useFocusedCountry()` supplies the default scope in the UI, never here.
  */
 
 /**

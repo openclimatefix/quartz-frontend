@@ -7,7 +7,7 @@ import { VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
-import { useCurrentAggregationLevel, useCurrentCountry } from "../../hooks/data";
+import { useCurrentAggregationLevel, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
@@ -62,7 +62,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { timezone, locale } = useCountryFormatting();
   const level = useCurrentAggregationLevel();
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
 

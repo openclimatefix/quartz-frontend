@@ -6,7 +6,7 @@ import { buildMapGeometry } from "../../components/helpers/data";
 import type { AggregationLevel } from "../../components/helpers/aggregationLevels";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import type { Region } from "../../lib/domain/types";
-import { useCurrentCountry } from "./use-countries";
+import { useFocusedCountry } from "./use-countries";
 
 // Boundary geometry — and the grouping files — for the level the map is showing.
 //
@@ -105,7 +105,7 @@ const assetsFor = (
 export const useLevelGroupings = (
   level: AggregationLevel | undefined
 ): GeoAssetResult<Record<string, string[]>> => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const { groupingsUrl } = useMemo(() => assetsFor(country, level), [country, level]);
   return useGeoAsset<Record<string, string[]>>(groupingsUrl);
 };
@@ -129,7 +129,7 @@ export const useMapGeometry = (
   level: AggregationLevel | undefined,
   regions: Region[] | undefined
 ): MapGeometryResult => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   // Both come out of the static registry, so these identities are stable for the life of the
   // module and are safe as `useMemo` dependencies.
   const { layer, groupingsUrl } = useMemo(() => assetsFor(country, level), [country, level]);

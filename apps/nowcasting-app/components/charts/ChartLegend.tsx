@@ -7,7 +7,7 @@ import LegendItem from "./LegendItem";
 import { N_HOUR_FORECAST_OPTIONS } from "../../constant";
 import LegendTooltip from "../LegendTooltop";
 import LegendTooltipContent from "./LegendTooltipContent";
-import { useCurrentCountry, useGenerationSources } from "../../hooks/data";
+import { useFocusedCountry, useGenerationSources } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { GENERATION_CHART_KEYS } from "./pv-remix-chart";
 
@@ -25,8 +25,8 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   // (which has its own two breakpoint-specific entries below) and minus any series with no
   // legend presentation. GB yields ECMWF/Met Office/Satellite, exactly as before; NL yields
   // none, because NL charts one line.
-  const currentCountry = useCurrentCountry();
-  const modelLegendItems = (getCountryConfig(currentCountry)?.nationalChartSeries ?? [])
+  const focusedCountry = useFocusedCountry();
+  const modelLegendItems = (getCountryConfig(focusedCountry)?.nationalChartSeries ?? [])
     .slice(1)
     .filter((series) => !!series.legend);
 
@@ -34,7 +34,7 @@ export const ChartLegend: FC<ChartLegendProps> = ({ className }) => {
   // never a hardcoded pair. GB has two, NL has one, and the second entry simply is not
   // rendered there rather than sitting permanently empty.
   const generationSources = useGenerationSources(
-    currentCountry ? { country: currentCountry, source: "solar" } : null
+    focusedCountry ? { country: focusedCountry, source: "solar" } : null
   );
   const generationLegendItems = (generationSources.data ?? [])
     .slice(0, GENERATION_CHART_KEYS.length)

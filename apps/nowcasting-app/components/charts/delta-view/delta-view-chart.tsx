@@ -30,7 +30,7 @@ import DataLoadingChartStatus from "../DataLoadingChartStatus";
 import { getTicks } from "../../helpers/chartUtils";
 import {
   NATIONAL_REGION_TYPE,
-  useCurrentCountry,
+  useFocusedCountry,
   useGenerationSources,
   useLoadingState,
   useNationalForecast,
@@ -283,14 +283,14 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   const { gspDeltas, scope: gspScope, window: gspWindow } = useGspDeltas(selectedTime);
 
-  const currentCountry = useCurrentCountry();
-  const countryConfig = getCountryConfig(currentCountry);
+  const focusedCountry = useFocusedCountry();
+  const countryConfig = getCountryConfig(focusedCountry);
   // The country's primary national series, per Track B's convention: first entry writes
   // FORECAST/PAST_FORECAST and is the model the staleness indicator reports on.
   const primarySeries = countryConfig?.nationalChartSeries?.[0];
 
-  const scope: Scope | null = currentCountry
-    ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+  const scope: Scope | null = focusedCountry
+    ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
   // Start only — see the note in `pv-remix-chart.tsx`. `/regions/{region}/forecast` starts at

@@ -16,8 +16,10 @@ export type { RegionScope } from "./scope";
 export {
   DEFAULT_COUNTRY_CODE,
   useCountries,
-  useCurrentCountry,
-  useEntitledCountries
+  useEnabledCountries,
+  useEnabledCountryListings,
+  useEntitledCountries,
+  useFocusedCountry
 } from "./use-countries";
 export type { UseCountriesResult } from "./use-countries";
 

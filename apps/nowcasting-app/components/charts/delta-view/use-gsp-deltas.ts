@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import {
-  useCurrentCountry,
+  useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
   useRegions
@@ -48,7 +48,7 @@ export type GspDeltasResult = {
  * still lands in `DELTA_BUCKET.ZERO`; an incomparable region does not land anywhere.
  */
 export const useGspDeltas = (targetTime: string): GspDeltasResult => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const [timeNow] = useGlobalState("timeNow");
 
   const scope: Scope = useMemo(

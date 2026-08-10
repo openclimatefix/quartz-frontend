@@ -7,7 +7,7 @@ import {
   deriveAggregationLevels,
   type AggregationLevel
 } from "../../components/helpers/aggregationLevels";
-import { useCurrentCountry } from "./use-countries";
+import { useFocusedCountry } from "./use-countries";
 import { useRegionTypes } from "./use-regions";
 
 // The current country's region-type hierarchy, as the UI consumes it.
@@ -24,7 +24,7 @@ import { useRegionTypes } from "./use-regions";
 
 /** The current country's aggregation levels, outermost first. `[]` for an unconfigured country. */
 export const useAggregationLevels = (): AggregationLevel[] => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   // `useRegionTypes` takes a `Pick<Scope, "country">`; memoised so the identity is stable
   // across renders and the hook's own `useMemo` on `scope?.country` is not defeated.
   const scope = useMemo(() => ({ country }), [country]);

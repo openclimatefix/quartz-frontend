@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { getCountryConfig } from "../../config/countries";
 import { loadGeoAsset } from "../../lib/geo/assets";
-import { useCurrentCountry } from "./use-countries";
+import { useFocusedCountry } from "./use-countries";
 
 /**
  * The seasonal-norm dataset behind `getCountryConfig(country).seasonalNorms` — mean and
@@ -32,7 +32,7 @@ export type SeasonalNormsData = {
  * land after the switch and paint GB's norms under NL's chart.
  */
 export const useSeasonalNorms = (): SeasonalNormsData | undefined => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const url = getCountryConfig(country)?.seasonalNorms ?? undefined;
   const [entry, setEntry] = useState<{ url: string; data: SeasonalNormsData } | undefined>(
     undefined

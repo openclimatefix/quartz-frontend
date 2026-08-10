@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { Analytics } from "@vercel/analytics/next";
 import { getViewTitle, VIEWS } from "../../constant";
-import { useCurrentCountry } from "../../hooks/data";
+import { useFocusedCountry } from "../../hooks/data";
 import { useSitesStatus, useSolarStatus } from "../hooks/useStatus";
 import useGlobalState from "../helpers/globalState";
 import StatusBanner from "./StatusBanner";
@@ -14,7 +14,7 @@ interface ILayout {
 const Layout = ({ children }: ILayout) => {
   // Both status fetches carry a Scope even though neither backend consumes it yet — see
   // components/hooks/useStatus.ts for why.
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const { data: solarStatus } = useSolarStatus({
     country,
     source: "solar",

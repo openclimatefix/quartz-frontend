@@ -89,14 +89,57 @@ export const useEntitledCountries = (): UseCountriesResult => {
 };
 
 /**
- * The country charts, headline figures and CSV default to.
+ * The country the chart, the headline figures, the level selector and the CSV follow.
  *
- * Now backed by global state, which is seeded from the `country` cookie and written by the
- * header's country toggle through `setCurrentCountry`. The signature is unchanged from when
- * this returned a constant, which is what made the swap a one-line edit — and the reason to
- * keep it that way: do not read `currentCountry` from global state anywhere but here.
+ * One of the two halves `useCurrentCountry` split into (`docs/phase6-layout-contract.md`
+ * §1). This is the "which country am I reading" question; `useEnabledCountries` is the
+ * "which countries am I looking at" one.
  *
- * The value is always a valid code: `getValidatedCountry` falls the cookie back to
- * `DEFAULT_COUNTRY_CODE` on load, and `setCurrentCountry` normalises whatever it is given.
+ * Backed by global state, seeded from the `country` cookie and written by
+ * `setFocusedCountry` — from the header toggle, and from a map region click, which focuses
+ * the country the region belongs to. Do not read `focusedCountry` from global state
+ * anywhere but here.
+ *
+ * The value is always a valid, enabled code: `getValidatedFocusedCountry` falls the cookie
+ * back to `DEFAULT_COUNTRY_CODE` on load, and `setFocusedCountry` normalises whatever it is
+ * given and enables it if it was not already.
  */
-export const useCurrentCountry = (): string => useGlobalState("currentCountry")[0];
+export const useFocusedCountry = (): string => useGlobalState("focusedCountry")[0];
+
+/**
+ * Every country currently drawn on the map, focused one included.
+ *
+ * The other half of the split. Never empty, and always contains the focused country — see
+ * `setEnabledCountries` for where those invariants are kept.
+ *
+ * Codes rather than listings, on purpose: this is synchronous global state with no request
+ * behind it, so a map layer or a cursor grid can depend on it without inheriting the
+ * manifest's loading and error states. Use `useEnabledCountryListings` when you need the
+ * name, the config or the entitlement alongside.
+ */
+export const useEnabledCountries = (): string[] => useGlobalState("enabledCountries")[0];
+
+/**
+ * The enabled set as manifest listings — name, config and entitlement attached.
+ *
+ * The intersection of three things: enabled (what the user turned on), entitled (what they
+ * may see) and configured (what this build can draw). Entitlement is applied *here* rather
+ * than in the state layer because the claim arrives asynchronously and does not exist on the
+ * tenant yet: a hook can wait for it behind `isLoading`, whereas state initialisation
+ * cannot, and would have emptied the set for every user in production.
+ *
+ * Ordered by the enabled set, not the manifest, so the order the user built is the order
+ * things render in.
+ */
+export const useEnabledCountryListings = (): UseCountriesResult => {
+  const { countries, isLoading, error } = useEntitledCountries();
+  const enabled = useEnabledCountries();
+  const listings = useMemo(
+    () =>
+      enabled
+        .map((code) => countries.find((country) => country.code === code))
+        .filter((country): country is CountryListing => country !== undefined),
+    [countries, enabled]
+  );
+  return { countries: listings, isLoading, error };
+};

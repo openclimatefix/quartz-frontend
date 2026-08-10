@@ -19,7 +19,7 @@ import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
 import { SettingsModal } from "./settingsModal";
 import {
   NATIONAL_REGION_TYPE,
-  useCurrentCountry,
+  useFocusedCountry,
   useGenerationSources,
   useNationalForecast,
   useNationalGeneration
@@ -48,13 +48,13 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
   // The CSV's own fetches, per the data-layer contract's "call the hooks you need where you
   // need them" — this is the last consumer of `CombinedData`'s national fields, so the prop
   // deletes itself here rather than being threaded down from `Header`.
-  const currentCountry = useCurrentCountry();
-  const countryConfig = getCountryConfig(currentCountry);
+  const focusedCountry = useFocusedCountry();
+  const countryConfig = getCountryConfig(focusedCountry);
   // Same convention as the national chart and the delta view's top chart: the country's first
   // configured series is the primary one the CSV's "Current Forecast" column reflects.
   const primarySeries = countryConfig?.nationalChartSeries?.[0];
-  const nationalScope: Scope | null = currentCountry
-    ? { country: currentCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+  const nationalScope: Scope | null = focusedCountry
+    ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
   // Start only — see the note in `pv-remix-chart.tsx`. Pinning `end` here would clip the

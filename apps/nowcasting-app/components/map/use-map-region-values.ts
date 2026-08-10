@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import {
-  useCurrentCountry,
+  useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
   useRegions
@@ -118,7 +118,7 @@ export const useMapRegionValues = (
   level: AggregationLevel | undefined,
   targetTime: string
 ): MapRegionValues => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const [timeNow] = useGlobalState("timeNow");
 
   const regionType = valueRegionTypeFor(level, country);

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import {
-  useCurrentCountry,
+  useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
   useGenerationSources,
@@ -56,7 +56,7 @@ export const useGspRegionData = (
   enabled: boolean,
   nHour: { show: boolean; horizonMinutes: number }
 ): GspRegionData => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
 
   const regionsScope: Scope | null =
     enabled && country ? { country, source: SOURCE, regionType: GSP_REGION_TYPE } : null;
@@ -160,7 +160,7 @@ export type GspAggregateData = {
  * series of zeroes.
  */
 export const useGspRegionNames = (gspIds: string[] | null): string[] | null => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const scope: Scope | null =
     country && gspIds && gspIds.length > 0
       ? { country, source: SOURCE, regionType: GSP_REGION_TYPE }
@@ -202,7 +202,7 @@ export const useGspAggregateData = (
   regionNames: string[] | null,
   groupName: string | null
 ): GspAggregateData => {
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const enabled = !!country && !!regionNames && regionNames.length > 0 && !!groupName;
 
   const regionsScope: Scope | null =

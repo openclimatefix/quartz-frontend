@@ -21,7 +21,7 @@ import type { Region } from "../../lib/domain/types";
 
 jest.mock("./use-countries", () => ({
   __esModule: true,
-  useCurrentCountry: () => "GB"
+  useFocusedCountry: () => "GB"
 }));
 
 // Deferred per URL, so a test decides the settle order rather than the event loop. The stub

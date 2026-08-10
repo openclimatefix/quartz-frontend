@@ -44,7 +44,7 @@ import gbNationalForecast from "../../../lib/api/v1/__fixtures__/gb-national-for
 import gbNationalGenerationInDay from "../../../lib/api/v1/__fixtures__/gb-national-generation-pvlive_in_day.json";
 import gbNationalGenerationDayAfter from "../../../lib/api/v1/__fixtures__/gb-national-generation-pvlive_day_after.json";
 import { resetTokenCache } from "../../../lib/api/auth/token";
-import { setCurrentCountry } from "../../helpers/globalState";
+import { setFocusedCountry } from "../../helpers/globalState";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
 import gbGspForecastPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json";
 import gbGspGenerationPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-generation-period.json";
@@ -96,7 +96,7 @@ afterEach(() => {
 afterAll(() => server.close());
 beforeEach(() => {
   resetTokenCache();
-  setCurrentCountry(DEFAULT_COUNTRY_CODE);
+  setFocusedCountry(DEFAULT_COUNTRY_CODE);
 });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

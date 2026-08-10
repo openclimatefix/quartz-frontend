@@ -119,7 +119,7 @@ const Map: FC<IMap> = ({
   const [maps, setMaps] = useGlobalState("maps");
   const [currentAggregation, setAggregation] = useCountryState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
-  const [currentCountry] = useGlobalState("currentCountry");
+  const [focusedCountry] = useGlobalState("focusedCountry");
 
   // Mapbox owns its own camera, so switching country has to move it explicitly. The
   // viewport it moves to is whatever that country's state slice holds — where the user left
@@ -127,13 +127,13 @@ const Map: FC<IMap> = ({
   // (which writes lng/lat/zoom continuously) does not re-run this.
   const viewportRef = useRef({ lng, lat, zoom });
   viewportRef.current = { lng, lat, zoom };
-  const renderedCountry = useRef(currentCountry);
+  const renderedCountry = useRef(focusedCountry);
   useEffect(() => {
-    if (renderedCountry.current === currentCountry) return;
-    renderedCountry.current = currentCountry;
+    if (renderedCountry.current === focusedCountry) return;
+    renderedCountry.current = focusedCountry;
     const viewport = viewportRef.current;
     map.current?.jumpTo({ center: [viewport.lng, viewport.lat], zoom: viewport.zoom });
-  }, [currentCountry]);
+  }, [focusedCountry]);
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");

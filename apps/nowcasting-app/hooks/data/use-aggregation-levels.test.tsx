@@ -34,7 +34,7 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
 import countriesFixture from "../../lib/api/v1/__fixtures__/countries.json";
 import {
   setCountryState,
-  setCurrentCountry,
+  setFocusedCountry,
   setGlobalState
 } from "../../components/helpers/globalState";
 import { COUNTRY_SCOPED_KEYS } from "../../components/helpers/countryState";
@@ -55,7 +55,7 @@ afterAll(() => server.close());
 beforeEach(() => {
   resetTokenCache();
   process.env.NEXT_PUBLIC_DEV_MODE = "false";
-  setGlobalState("currentCountry", "GB");
+  setGlobalState("focusedCountry", "GB");
   for (const key of COUNTRY_SCOPED_KEYS) setGlobalState(key as "lng", {});
 });
 
@@ -88,7 +88,7 @@ describe("useAggregationLevels", () => {
   });
 
   test("follows the current country", async () => {
-    setCurrentCountry("NL");
+    setFocusedCountry("NL");
     const { result } = renderHook(() => useAggregationLevels(), { wrapper });
     await waitFor(() =>
       expect(result.current.map((level) => level.regionType)).toEqual(["national", "province"])
@@ -125,13 +125,13 @@ describe("useCurrentAggregationLevel", () => {
     // visited, so it takes its own default — and even if a stale `gsp` were stored against
     // NL, NL has no such level and must resolve to `province`, not to `undefined`.
     setCountryState("nationalAggregationLevel", "gsp", "NL");
-    setCurrentCountry("NL");
+    setFocusedCountry("NL");
     const { result } = renderHook(() => useCurrentAggregationLevel(), { wrapper });
     await waitFor(() => expect(result.current?.regionType).toBe("province"));
   });
 
   test("is undefined only for a country with no registry entry", async () => {
-    setCurrentCountry("ZZ");
+    setFocusedCountry("ZZ");
     const { result } = renderHook(() => useCurrentAggregationLevel(), { wrapper });
     await waitFor(() => expect(result.current).toBeUndefined());
   });

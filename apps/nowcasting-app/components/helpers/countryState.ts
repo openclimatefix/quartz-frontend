@@ -11,6 +11,19 @@ import { defaultAggregationLevel } from "./aggregationLevels";
 // and switching back restores what you were looking at rather than resetting it. That
 // restore is the whole point of keying rather than clearing.
 //
+// Phase 6 splits "which country" into two questions that used to share one answer
+// (`docs/phase6-layout-contract.md` §1):
+//
+//   enabled — a set. Which countries draw on the map.
+//   focused — one. Which country owns the chart, the capacity figure, the level selector
+//             and the number/date formatting.
+//
+// `focused ∈ enabled` and `enabled` is never empty; both invariants are enforced in
+// `globalState.tsx`, which owns the writers. Country-scoped state below is keyed by code
+// regardless of either, so a country's viewport survives being disabled and re-enabled —
+// with the deliberate exception of the *selection* keys, which do not (see
+// `SELECTION_SCOPED_KEYS`).
+//
 // This module is deliberately React-free and synchronous: it is called during global state
 // initialisation, before any hook can run. It reads the *static* registry only — nothing
 // here may reach for the country manifest or the API, both of which are async.
@@ -29,6 +42,35 @@ export const DEFAULT_COUNTRY_CODE = "GB";
 /** Codes are canonicalised to uppercase so `gb` and `GB` cannot become two separate slices. */
 export const normaliseCountryCode = (code: string | null | undefined): string =>
   typeof code === "string" && code.trim() !== "" ? code.trim().toUpperCase() : DEFAULT_COUNTRY_CODE;
+
+/**
+ * The enabled set before a cookie or the toggle says otherwise: the default country alone.
+ *
+ * A fresh user therefore sees exactly what they saw before the split — one country on the
+ * map, that country in the chart. Enabling a second is an explicit act.
+ */
+export const DEFAULT_ENABLED_COUNTRY_CODES: readonly string[] = [DEFAULT_COUNTRY_CODE];
+
+/**
+ * The list form of `normaliseCountryCode`: upper-cased, trimmed, de-duplicated, order kept.
+ *
+ * A blank entry is *dropped* rather than defaulted, which is the one place this differs from
+ * the single-code normaliser. In a list, `""` means nothing at all — reading it as GB would
+ * silently re-enable a country the user turned off, and a malformed cookie is exactly where
+ * a blank comes from.
+ */
+export const normaliseCountryCodes = (codes: unknown): string[] => {
+  // `Array.isArray` rather than a null check: the cookie is `JSON.parse`d, so it can hold a
+  // bare string, and iterating one would spell "GB" as two one-letter countries.
+  if (!Array.isArray(codes)) return [];
+  const seen = new Set<string>();
+  for (const code of codes) {
+    if (typeof code !== "string") continue;
+    const trimmed = code.trim().toUpperCase();
+    if (trimmed !== "") seen.add(trimmed);
+  }
+  return Array.from(seen);
+};
 
 /** State whose meaning is country-relative. Every key here is stored per country code. */
 export type CountryScopedStateType = {
@@ -71,6 +113,25 @@ export const COUNTRY_SCOPED_KEYS = [
   "zoom",
   "aggregationLevel",
   "nationalAggregationLevel"
+] as const satisfies readonly CountryScopedKey[];
+
+/**
+ * The country-scoped keys that do **not** survive a country leaving the chart.
+ *
+ * Contract §1 and §7: "a selection cannot outlive the country it belongs to." Focus moving
+ * away from a country, or that country being disabled altogether, clears its region
+ * selection — so multi-region selection is structurally single-country rather than a rule
+ * something has to police. The viewport and the aggregation level are *not* here on
+ * purpose: those are where you were looking, and restoring them is the whole point of
+ * keying state by country.
+ *
+ * `clickedSiteGroupId` is omitted because sites are tenancy-scoped rather than
+ * country-scoped and are leaving the dashboard entirely in Wave 2.
+ */
+export const SELECTION_SCOPED_KEYS = [
+  "clickedGspId",
+  "clickedMapRegionIds",
+  "selectedMapRegionIds"
 ] as const satisfies readonly CountryScopedKey[];
 
 /**

@@ -25,7 +25,7 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
 import Cookies from "js-cookie";
 import { CookieStorageKeys } from "../../helpers/cookieStorage";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
-import { setCurrentCountry, setGlobalState } from "../../helpers/globalState";
+import { setFocusedCountry, setGlobalState } from "../../helpers/globalState";
 import { PvRealData, ForecastData } from "../../types";
 import ForecastHeader from "./index";
 
@@ -50,10 +50,10 @@ const renderHeader = () =>
 const renderedTimes = () => screen.getAllByText(/^\d{2}:\d{2}$/).map((el) => el.textContent);
 
 beforeEach(() => {
-  setGlobalState("currentCountry", DEFAULT_COUNTRY_CODE);
+  setGlobalState("focusedCountry", DEFAULT_COUNTRY_CODE);
 });
 afterEach(() => {
-  act(() => setCurrentCountry(DEFAULT_COUNTRY_CODE));
+  act(() => setFocusedCountry(DEFAULT_COUNTRY_CODE));
   Cookies.remove(CookieStorageKeys.COUNTRY);
 });
 
@@ -67,7 +67,7 @@ describe("the current country drives how instants are rendered", () => {
     renderHeader();
     expect(renderedTimes()).toEqual(["11:00", "11:30"]);
 
-    act(() => setCurrentCountry("NL"));
+    act(() => setFocusedCountry("NL"));
 
     // Same UTC instants, one hour later on the wall clock. This is the assertion that
     // separates real wiring from a threaded-but-unused argument.
@@ -76,8 +76,8 @@ describe("the current country drives how instants are rendered", () => {
 
   test("switching back restores the GB rendering", () => {
     renderHeader();
-    act(() => setCurrentCountry("NL"));
-    act(() => setCurrentCountry("GB"));
+    act(() => setFocusedCountry("NL"));
+    act(() => setFocusedCountry("GB"));
     expect(renderedTimes()).toEqual(["11:00", "11:30"]);
   });
 });

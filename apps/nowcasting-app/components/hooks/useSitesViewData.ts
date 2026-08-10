@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { SITES_API_PREFIX } from "../../constant";
-import { useCurrentCountry } from "../../hooks/data";
+import { useFocusedCountry } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
 import { useLoadDataFromApi } from "./useLoadDataFromApi";
 import { useAggregateSitesDataForTimestamp } from "./useAggregateSitesDataForTimestamp";
@@ -40,7 +40,7 @@ export const useSitesViewData = (
   // Sites stays on its v0 backend this phase (see the module doc comment), but every fetch
   // still carries a Scope — see useLoadDataFromApi's doc comment for why that matters even
   // though SITES_API_PREFIX is GB-only and ignores it.
-  const country = useCurrentCountry();
+  const country = useFocusedCountry();
   const scope: Scope = { country, source: "solar", regionType: "site" };
 
   const {
