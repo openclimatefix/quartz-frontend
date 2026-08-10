@@ -8,14 +8,11 @@ import {
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import { useGspAggregateData, useGspRegionData, useGspRegionNames } from "./use-gsp-region-data";
-import { useCurrentAggregationLevel } from "../../../hooks/data";
+import { useCurrentAggregationLevel, useFocusedCountry } from "../../../hooks/data";
 import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
 import { groupRegionNames } from "../../helpers/data";
-import useGlobalState, {
-  useCountryState,
-  get30MinNow,
-  getNext30MinSlot
-} from "../../helpers/globalState";
+import useGlobalState, { useCountryState } from "../../helpers/globalState";
+import { cadenceMinutesFor, cursorNow, nextSlot } from "../../../lib/time/cursor";
 import Spinner from "../../icons/spinner";
 import React, { FC, useMemo } from "react";
 import { getTicks } from "../../helpers/chartUtils";
@@ -55,6 +52,7 @@ const GspPvRemixChart: FC<{
 }) => {
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const { timezone, locale } = useCountryFormatting();
+  const focusedCountry = useFocusedCountry();
   const [show4hView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
 
@@ -122,7 +120,10 @@ const GspPvRemixChart: FC<{
 
   const gspAggregateData = useGspAggregateData(selection.regionNames, selection.groupName);
 
-  const now30min = formatISODateString(get30MinNow());
+  // This chart reads one country's regions, so "now" and "the next slot" are that country's,
+  // not the shared cursor's finest-enabled grid — see `lib/time/cursor.ts`.
+  const cadenceMinutes = cadenceMinutesFor(focusedCountry);
+  const nowSlot = formatISODateString(cursorNow(cadenceMinutes));
 
   // The active series, whichever of the two paths is live. Both hooks always run (rules of
   // hooks), so this is just picking which result feeds the chart and the header math below.
@@ -162,7 +163,7 @@ const GspPvRemixChart: FC<{
   const latestGeneration = latestReading(activePrimaryGeneration);
   const latestPvActualDatetime = latestGeneration?.timeUtc ?? timeNow;
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime);
-  const followingPvForecastDatetime = getNext30MinSlot(new Date(latestPvActualDatetime));
+  const followingPvForecastDatetime = new Date(nextSlot(latestPvActualDatetime, cadenceMinutes));
   const followingPvForecastDateString = formatISODateString(
     followingPvForecastDatetime.toISOString()
   );
@@ -179,7 +180,7 @@ const GspPvRemixChart: FC<{
     locale
   );
   const forecastNextPvMw = forecastAt(followingPvForecastDateString);
-  const forecastAtSelectedTimeMw = forecastAt(now30min);
+  const forecastAtSelectedTimeMw = forecastAt(nowSlot);
   const deltaValue = dataMissing ? "---" : (pvValueMw - forecastPvMw).toFixed(1);
 
   const chartData = useFormatChartData({

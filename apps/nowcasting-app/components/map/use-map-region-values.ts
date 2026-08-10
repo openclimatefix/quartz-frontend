@@ -13,6 +13,7 @@ import type { AggregationLevel } from "../helpers/aggregationLevels";
 import type { Scope } from "../../lib/domain/types";
 import useGlobalState from "../helpers/globalState";
 import { buildMapFeatureStates, type MapFeatureState } from "../helpers/data";
+import { slotForInstant } from "../../lib/time/cursor";
 
 /**
  * The map's value pipeline, in one hook.
@@ -116,10 +117,18 @@ const valueRegionTypeFor = (
 
 export const useMapRegionValues = (
   level: AggregationLevel | undefined,
-  targetTime: string
+  /** The shared cursor, not a country slot — resolved to one below. */
+  cursorTime: string
 ): MapRegionValues => {
   const country = useFocusedCountry();
-  const [timeNow] = useGlobalState("timeNow");
+  const [cursorNow] = useGlobalState("timeNow");
+
+  // The cursor is one instant on the finest *enabled* country's grid; this country's data is
+  // published on its own. Resolve both before anything is looked up, or a GB map read at NL's
+  // 16:15 finds nothing in every region and draws as a blank country rather than an error.
+  // Track D's fan-out gives each country's layer its own instance, and each resolves its own.
+  const targetSlot = slotForInstant(cursorTime, country);
+  const timeNow = slotForInstant(cursorNow, country);
 
   const regionType = valueRegionTypeFor(level, country);
 
@@ -158,7 +167,7 @@ export const useMapRegionValues = (
           regions: regions.data,
           forecast: forecast.data,
           generation: generation.data,
-          targetTime,
+          targetTime: targetSlot,
           timeNow
         },
         { groupings: geo.groupings, country }
@@ -168,7 +177,7 @@ export const useMapRegionValues = (
       regions.data,
       forecast.data,
       generation.data,
-      targetTime,
+      targetSlot,
       timeNow,
       geo.groupings,
       country

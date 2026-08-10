@@ -4,15 +4,12 @@ import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "..
 import ForecastHeader from "../forecast-header";
 import useGlobalState, {
   useCountryState,
-  get30MinSlot,
-  get30MinNow
+  getCursorCadenceMinutes,
+  getCursorNow
 } from "../../helpers/globalState";
+import { slotForInstant, snapToCadence } from "../../../lib/time/cursor";
 import useFormatChartData from "../use-format-chart-data";
-import {
-  calculateChartYMax,
-  convertToLocaleDateString,
-  formatISODateString
-} from "../../helpers/utils";
+import { calculateChartYMax, formatISODateString } from "../../helpers/utils";
 import { getEarliestForecastTimestamp } from "../../helpers/data";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
@@ -278,12 +275,16 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
+  const focusedCountry = useFocusedCountry();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const selectedTimeHalfHourSlot = get30MinSlot(new Date(convertToLocaleDateString(selectedTime)));
+  // The cursor resolved onto the focused country's own grid. This used to round via
+  // `convertToLocaleDateString` + a `Date` whose `getMinutes()` reads the *viewer's* zone —
+  // a no-op for whole-hour offsets and the reason it never misbehaved, but it rounded on the
+  // wrong clock and at a hardcoded half hour. `slotForInstant` is the same answer stated once.
+  const selectedTimeSlot = slotForInstant(selectedTime, focusedCountry);
 
   const { gspDeltas, scope: gspScope, window: gspWindow } = useGspDeltas(selectedTime);
 
-  const focusedCountry = useFocusedCountry();
   const countryConfig = getCountryConfig(focusedCountry);
   // The country's primary national series, per Track B's convention: first entry writes
   // FORECAST/PAST_FORECAST and is the model the staleness indicator reports on.
@@ -350,8 +351,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   });
 
   const hasGspPvInitialForSelectedTime = generation0.data?.values.some(
-    (v) =>
-      v.timeUtc.slice(0, 16) === `${formatISODateString(selectedTimeHalfHourSlot.toISOString())}`
+    (v) => v.timeUtc.slice(0, 16) === formatISODateString(selectedTimeSlot)
   );
 
   // const chartLimits = useMemo(
@@ -380,15 +380,15 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   useEffect(() => {
     if (view === VIEWS.DELTA && chartData?.length) {
       if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
-        setSelectedISOTime(get30MinNow());
+        setSelectedISOTime(getCursorNow());
       }
     }
   }, [view, chartData, selectedTime, setSelectedISOTime]);
 
   // While N-hour is not available, we default to the latest interval with an Initial Estimate
   // useEffect(() => {
-  //   if (selectedISOTime === get30MinNow() && view === VIEWS.DELTA) {
-  //     setSelectedISOTime(get30MinNow(-60));
+  //   if (selectedISOTime === getCursorNow() && view === VIEWS.DELTA) {
+  //     setSelectedISOTime(getCursorNow(-60));
   //   }
   // }, [view]);
 
@@ -405,9 +405,12 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
       </div>
     );
 
+  // Click-to-set-time. The label comes off this country's axis, so it may sit between two
+  // slots of the shared cursor grid when a finer country is enabled — snap it, so the chart
+  // and the map are never a slot apart. On a single-cadence session this is a no-op.
   const setSelectedTime = (time: string) => {
     stopTime();
-    setSelectedISOTime(time + ":00.000Z");
+    setSelectedISOTime(snapToCadence(`${time}:00.000Z`, getCursorCadenceMinutes()));
   };
 
   let selectedRegions: string[] = [];

@@ -69,9 +69,14 @@ describe("the current country drives how instants are rendered", () => {
 
     act(() => setFocusedCountry("NL"));
 
-    // Same UTC instants, one hour later on the wall clock. This is the assertion that
-    // separates real wiring from a threaded-but-unused argument.
-    expect(renderedTimes()).toEqual(["12:00", "12:30"]);
+    // The first value is the assertion this test exists for: the same UTC instant, one hour
+    // later on the wall clock, which separates real wiring from a threaded-but-unused
+    // argument.
+    //
+    // The second moved from 12:30 to 12:15 in Phase 6 Track B, and deliberately: "the next
+    // forecast" is one step on the *country's* grid, and NL publishes every 15 minutes where
+    // GB publishes every 30. It used to be a hardcoded half hour for everyone.
+    expect(renderedTimes()).toEqual(["12:00", "12:15"]);
   });
 
   test("switching back restores the GB rendering", () => {

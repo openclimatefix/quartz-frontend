@@ -1,5 +1,7 @@
 import React from "react";
-import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
+import useGlobalState, { getCursorNow } from "../../helpers/globalState";
+import { useFocusedCountry } from "../../../hooks/data/use-countries";
+import { cadenceMinutesFor, nextSlot } from "../../../lib/time/cursor";
 import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
@@ -52,6 +54,9 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
 }) => {
   const timeNow = useTimeNow();
   const { timezone, locale } = useCountryFormatting();
+  // The header reads one country's numbers, so it steps on that country's grid — 30 minutes
+  // for GB, 15 for NL — rather than on the shared cursor's.
+  const cadenceMinutes = cadenceMinutesFor(useFocusedCountry());
 
   const latestGeneration = latestReading(generationSeries);
 
@@ -70,9 +75,9 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime) || timeNow;
 
   // Get the next OCF forecast following the latest PV actual datetime
-  const followingPvForecastDatetime = latestPvActualDatetime
-    ? getNext30MinSlot(new Date(latestPvActualDatetime))
-    : new Date(timeNow);
+  const followingPvForecastDatetime = new Date(
+    latestPvActualDatetime ? nextSlot(latestPvActualDatetime, cadenceMinutes) : timeNow
+  );
   const followingPvForecastDateString = formatISODateString(
     followingPvForecastDatetime.toISOString()
   );
@@ -107,7 +112,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
         forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
-        <PlayButton startTime={get30MinNow()} endTime={forecastEndTime}></PlayButton>
+        <PlayButton startTime={getCursorNow()} endTime={forecastEndTime}></PlayButton>
       </ForecastHeaderUI>
     );
   }
@@ -120,7 +125,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
       forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
     >
-      <PlayButton startTime={get30MinNow()} endTime={forecastEndTime}></PlayButton>
+      <PlayButton startTime={getCursorNow()} endTime={forecastEndTime}></PlayButton>
     </ForecastHeaderUI>
   );
 };

@@ -327,6 +327,12 @@ real information — but that is presentation and belongs to this phase, not to 
    PV_Live). If NL or Germany differ, the cursor's ceiling rule is per-country and becomes a registry
    field. *Blocks: the resolution helper — a wrong assumption here is off by a whole period and looks
    plausible on screen.*
+   **UNBLOCKED, not answered** (Track B, 2026-08-10). It *is* a registry field —
+   `CountryConfig.slotLabelling` — and `slotForInstant` floors rather than ceilings when it says
+   `period-start`, so the resolution helper no longer assumes. NL is set to `period-end` because
+   that is what the old single-cadence code did everywhere, i.e. the no-change answer, **not
+   because anyone confirmed NED publishes period-end.** Still needs the fact; confirming it is a
+   one-word edit. See `phase6-track-b-notes.md`.
 4b. **`ChartInfo` says "The Y axis units are in MW for the National and GSP charts"**
    (`ChartInfo.tsx:28`) while `globalState.tsx:132` defaults `activeUnit` to `percentage`. One of the
    two is stale. Minor, but it is the tooltip users read to interpret the axis.

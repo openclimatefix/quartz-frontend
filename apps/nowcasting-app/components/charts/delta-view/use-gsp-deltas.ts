@@ -10,6 +10,7 @@ import type { Scope } from "../../../lib/domain/types";
 import type { PeriodWindow } from "../../../lib/api/v1/queries";
 import useGlobalState from "../../helpers/globalState";
 import { buildRegionBridge, buildRegionValues } from "../../helpers/data";
+import { slotForInstant } from "../../../lib/time/cursor";
 import { DELTA_BUCKET } from "../../../constant";
 import { GspDeltaValue } from "../../types";
 
@@ -47,9 +48,15 @@ export type GspDeltasResult = {
  * "draws nothing" treatment the delta map gives those regions. A genuine near-zero delta
  * still lands in `DELTA_BUCKET.ZERO`; an incomparable region does not land anywhere.
  */
-export const useGspDeltas = (targetTime: string): GspDeltasResult => {
+export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
   const country = useFocusedCountry();
-  const [timeNow] = useGlobalState("timeNow");
+  const [cursorNow] = useGlobalState("timeNow");
+
+  // Same resolution the map does, and it has to be the same or the two disagree about which
+  // slot a delta belongs to: the cursor is on the finest enabled country's grid, the data is
+  // on this country's. See `lib/time/cursor.ts`.
+  const targetTime = slotForInstant(cursorTime, country);
+  const timeNow = slotForInstant(cursorNow, country);
 
   const scope: Scope = useMemo(
     () => ({ country, source: SOURCE, regionType: DELTA_REGION_TYPE }),

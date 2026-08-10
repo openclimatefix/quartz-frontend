@@ -10,7 +10,7 @@ import { convertToLocaleDateString } from "./utils";
 //
 // This is what let a real bug through: `solar-site-chart.tsx` used the result as a lookup key
 // against a plain UTC epoch, missed by the viewer's offset, and fell through to
-// `setSelectedISOTime(get30MinNow())` — silently discarding the user's selected time on every
+// `setSelectedISOTime(getCursorNow())` — silently discarding the user's selected time on every
 // mount, for every non-UTC viewer. Correct in GMT, wrong in BST, so it failed seasonally.
 
 const withViewerZone = <T>(zone: string, fn: () => T): T => {

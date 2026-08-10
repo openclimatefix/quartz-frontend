@@ -10,9 +10,9 @@ import {
 } from "./cookieStorage";
 import { LoadingState, SitesEndpointStates } from "../types";
 import { ActiveUnit } from "../map/types";
-import { DateTime } from "luxon";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
+import { cursorNow, finestCadenceMinutes, snapToCadence } from "../../lib/time/cursor";
 import {
   CountryKeyedState,
   CountryScopedKey,
@@ -27,45 +27,30 @@ import {
   writeCountryScoped
 } from "./countryState";
 
-export function get30MinNow(offsetMinutes = 0) {
-  // this is a function to get the date of now, but rounded up to the closest 30 minutes
-  let date = DateTime.utc();
+/**
+ * The cursor grid: the finest cadence among the countries currently drawn.
+ *
+ * Global state rather than a hook because the cursor is written from places React is not —
+ * the 60-second interval in `use-and-update-selected-time`, the play button, the initial
+ * state below. `lib/time/cursor.ts` holds the arithmetic and knows nothing about state; this
+ * is the one line that joins the two.
+ */
+export const getCursorCadenceMinutes = (): number =>
+  finestCadenceMinutes(getGlobalState("enabledCountries"));
 
-  let minutes: number = date.minute;
-  if (offsetMinutes !== 0) {
-    minutes += offsetMinutes;
-    date = date.set({ minute: minutes });
-  }
-  const jsDate = getNext30MinSlot(date.toJSDate());
-  const newDate = DateTime.fromJSDate(jsDate);
-  return newDate.toUTC().toISO() as string;
-}
-export function get30MinSlot(isoTime: Date) {
-  if (isoTime.getMinutes() === 30) {
-    return isoTime;
-  } else if (isoTime.getMinutes() === 0) {
-    return isoTime;
-  } else if (isoTime.getMinutes() < 30) {
-    isoTime.setHours(isoTime.getHours());
-    isoTime.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
-  } else {
-    isoTime.setHours(isoTime.getHours() + 1);
-    isoTime.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
-  }
-  return isoTime;
-}
-export function getNext30MinSlot(isoTime: Date) {
-  if (isoTime.getMinutes() === 30) {
-    isoTime.setHours(isoTime.getHours() + 1);
-    isoTime.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
-  } else if (isoTime.getMinutes() < 30) {
-    isoTime.setHours(isoTime.getHours());
-    isoTime.setMinutes(30, 0, 0); // Resets also seconds and milliseconds
-  } else {
-    isoTime.setHours(isoTime.getHours() + 1);
-    isoTime.setMinutes(0, 0, 0); // Resets also seconds and milliseconds
-  }
-  return isoTime;
+/**
+ * Now, on the cursor grid — the slot currently filling.
+ *
+ * Replaces `get30MinNow`, which did exactly this at GB's cadence hardcoded. Naming the
+ * cadence rather than assuming it is the single change that makes the shared cursor correct
+ * on a country that does not publish every 30 minutes; on a GB-only session the value is
+ * identical to what it always was.
+ *
+ * This is a cursor value, not a country's slot. Anything looking data up for one country
+ * resolves it first with `slotForInstant(instant, country)`.
+ */
+export function getCursorNow(offsetMinutes = 0): string {
+  return cursorNow(getCursorCadenceMinutes(), offsetMinutes);
 }
 
 /**
@@ -164,15 +149,19 @@ const getValidatedEnabledCountries = (focused: string): string[] => {
 };
 
 const INITIAL_FOCUSED_COUNTRY = getValidatedFocusedCountry();
+const INITIAL_ENABLED_COUNTRIES = getValidatedEnabledCountries(INITIAL_FOCUSED_COUNTRY);
+// `getCursorNow` reads the enabled set off global state, which does not exist yet at this
+// point — so the initial cursor takes the same grid from the set being installed.
+const INITIAL_CURSOR = cursorNow(finestCadenceMinutes(INITIAL_ENABLED_COUNTRIES));
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
   createGlobalState<GlobalStateType>({
     ...initialCountryKeyedState(),
     focusedCountry: INITIAL_FOCUSED_COUNTRY,
-    enabledCountries: getValidatedEnabledCountries(INITIAL_FOCUSED_COUNTRY),
+    enabledCountries: INITIAL_ENABLED_COUNTRIES,
     activeUnit: ActiveUnit.percentage,
-    selectedISOTime: get30MinNow(),
-    timeNow: get30MinNow(),
+    selectedISOTime: INITIAL_CURSOR,
+    timeNow: INITIAL_CURSOR,
     intervals: [],
     forecastCreationTime: undefined,
     view: VIEWS.FORECAST,
@@ -295,10 +284,30 @@ const clearCountrySelection = (country: string): void => {
   }
 };
 
+/**
+ * Put the cursor back on the grid after the enabled set changed it.
+ *
+ * The cursor runs on the finest enabled country's cadence, so disabling the fine-grained
+ * country coarsens the grid under a value already on it — NL switched off with the cursor at
+ * 16:15 leaves an instant GB never publishes, and every lookup at it comes back empty.
+ * Enabling one only ever refines the grid, which no existing value can be off, so this is a
+ * no-op in that direction.
+ *
+ * `timeNow` is re-derived rather than snapped: it means "now", and the two 60-second timers
+ * would otherwise leave it a slot stale until the next tick.
+ */
+const resnapCursorToGrid = (codes: string[]): void => {
+  const cadence = finestCadenceMinutes(codes);
+  const selected = getGlobalState("selectedISOTime");
+  if (selected) setGlobalState("selectedISOTime", snapToCadence(selected, cadence));
+  setGlobalState("timeNow", cursorNow(cadence));
+};
+
 /** State plus cookie, so the two can never be written apart. */
 const writeEnabledCountries = (codes: string[]): void => {
   setGlobalState("enabledCountries", codes);
   setSettingInCookieStorage(CookieStorageKeys.ENABLED_COUNTRIES, codes);
+  resnapCursorToGrid(codes);
 };
 
 /**

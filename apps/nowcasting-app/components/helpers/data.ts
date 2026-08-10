@@ -135,7 +135,7 @@ export type MapRegionValue = MapFeatureState & {
  * Minute-precision UTC key, the join key between a selected time and a `RegionSeries` axis.
  *
  * Parsed as UTC when the string carries no offset. `selectedISOTime` is written by
- * `get30MinNow`, which is UTC throughout, and `RegionSeries.times` is canonicalised to
+ * `getCursorNow`, which is UTC throughout, and `RegionSeries.times` is canonicalised to
  * `…Z` — so both sides land on the same key without a timezone ever entering it.
  */
 export const utcMinuteKey = (instant: string): string => {

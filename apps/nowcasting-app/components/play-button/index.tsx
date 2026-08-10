@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, { getCursorCadenceMinutes } from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
 import Ui from "./ui";
@@ -28,7 +28,9 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
         if (formatISODateString(selectedISOTime || "") === formatISODateString(endTime)) {
           return startTime;
         }
-        return addMinutesToISODate(selectedISOTime || "", 30);
+        // Step the cursor by one slot on its own grid, not by a hardcoded half hour — on a
+        // 15-minute grid that stride skipped every other published value.
+        return addMinutesToISODate(selectedISOTime || "", getCursorCadenceMinutes());
       });
     }, 1000);
   };

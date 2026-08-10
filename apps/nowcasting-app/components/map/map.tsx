@@ -4,7 +4,11 @@ import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
 import { IMap } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
-import useGlobalState, { useCountryState, get30MinNow } from "../helpers/globalState";
+import useGlobalState, {
+  useCountryState,
+  getCursorCadenceMinutes,
+  getCursorNow
+} from "../helpers/globalState";
 import QuickLRU from "quick-lru";
 import { ResetIcon } from "../icons/icons";
 import {
@@ -215,13 +219,13 @@ const Map: FC<IMap> = ({
     // `timeNow` and `selectedISOTime` are written by two independent 60s timers
     // (use-time-now, mounted via ForecastHeader, and use-and-update-selected-time
     // in pages/index) whose phase isn't locked — ForecastHeader unmounts on a view
-    // switch and restarts its timer at a fresh offset. Across a half-hour boundary
+    // switch and restarts its timer at a fresh offset. Across a slot boundary
     // that leaves a window where selectedISOTime has advanced but timeNow hasn't,
     // and trusting `timeNow` alone would read the new slot as a future timestamp:
     // clouds hidden behind "not yet available", healing itself a minute later.
     // Deriving the slot directly makes this path independent of that race.
     // Scrubbing to a genuinely future slot still fails the check, as it should.
-    const isNow = ts === timeNow || ts === get30MinNow();
+    const isNow = ts === timeNow || ts === getCursorNow();
     if (!isNow && isFutureTimestamp(satTs)) {
       applySatelliteVisibility(map.current, false);
       currentKeyRef.current = null;
@@ -287,17 +291,21 @@ const Map: FC<IMap> = ({
       const channels = channelsForSelection(activeChannel);
       for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
         if (offset === 0) continue;
-        const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
+        // One cursor step per offset, not a fixed half hour — on a 15-minute grid the old
+        // stride prefetched every *other* neighbour and left the ones in between cold.
+        const satTs = satelliteTimestampFor(
+          addMinutesToISODate(selectedISOTime, offset * getCursorCadenceMinutes())
+        );
         if (isFutureTimestamp(satTs)) continue;
         channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
       }
     })();
 
     // Parked on "now": poll for a fresher image. Both selectedISOTime and timeNow
-    // only advance on the half hour (get30MinNow rounds to the slot, so the string
-    // is identical in between and React bails out of the re-render), which would
-    // otherwise leave the displayed frame up to 30 minutes behind imagery that
-    // lands every ~5. Silent, so the spinner doesn't flash on a wallboard.
+    // only advance one cursor slot at a time (`getCursorNow` rounds to the slot, so the
+    // string is identical in between and React bails out of the re-render), which would
+    // otherwise leave the displayed frame up to a whole slot behind imagery that lands
+    // every ~5 minutes. Silent, so the spinner doesn't flash on a wallboard.
     const refresh =
       selectedISOTime === timeNow
         ? setInterval(

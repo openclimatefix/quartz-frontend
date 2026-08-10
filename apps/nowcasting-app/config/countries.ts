@@ -161,11 +161,37 @@ export const NATIONAL_FORECAST_MODEL_SUFFIX = "";
 export const forecastSeriesModel = (series: ForecastSeriesConfig): string | undefined =>
   series.model === null ? undefined : `${series.model}${NATIONAL_FORECAST_MODEL_SUFFIX}`;
 
+/**
+ * Whether a timestamp names the end or the start of the period it covers.
+ *
+ * GB labels period-end, following PV_Live — a slot labelled 16:00 covers 15:30–16:00, which
+ * is what `ChartInfo.tsx`'s legend tooltip tells users. It is a per-country convention rather
+ * than a universal one, and it decides which way `lib/time/cursor.ts` rounds the shared
+ * cursor onto a country's grid: period-end rounds up, period-start rounds down. Getting it
+ * wrong is off by a whole period and looks entirely plausible on screen, so it is declared
+ * here rather than assumed at the call site.
+ */
+export type SlotLabelling = "period-end" | "period-start";
+
 export type CountryConfig = {
   /** ISO code as the API spells it, uppercase. Matches `CountryCapability.code`. */
   code: string;
   /** IANA zone. Replaces the `Europe/London` hardcoded through every date helper. */
   timezone: string;
+  /**
+   * Minutes between the country's published values — its step on the time axis.
+   *
+   * A per-country fact, not an app-wide constant: GB publishes every 30 minutes, NL every 15
+   * (`lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json`,
+   * `nl-province-forecasts-period.json`). The shared cursor runs on the *finest* enabled
+   * country's cadence and each country resolves it to its own slot; see `lib/time/cursor.ts`.
+   *
+   * **Must divide 60.** The grid is anchored to the UTC hour, so a cadence that does not
+   * divide an hour would drift across the day. Pinned in `cursor.test.ts`.
+   */
+  cadenceMinutes: number;
+  /** See `SlotLabelling`. Decides which way the cursor rounds onto this country's grid. */
+  slotLabelling: SlotLabelling;
   /** BCP-47 tag for number and date formatting at the render boundary. */
   locale: string;
   map: MapDefaults;
@@ -202,6 +228,10 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     code: "GB",
     timezone: "Europe/London",
     locale: "en-GB",
+    cadenceMinutes: 30,
+    // The settlement period, and PV_Live's convention: 16:00 covers 15:30-16:00. Stated to
+    // users in `ChartInfo.tsx`'s legend tooltip.
+    slotLabelling: "period-end",
     // The centre and zoom currently hardcoded in `globalState.tsx`'s initial state.
     map: {
       center: { lng: -2.3175601, lat: 54.70534432 },
@@ -297,6 +327,13 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     code: "NL",
     timezone: "Europe/Amsterdam",
     locale: "nl-NL",
+    cadenceMinutes: 15,
+    // **UNCONFIRMED** — assumed to match GB because that is what the old single-cadence code
+    // did everywhere, so this is the no-change answer rather than a finding. Nobody has
+    // confirmed that NED publishes period-end, and if it publishes period-start every NL
+    // lookup is one 15-minute slot out: plausible on screen, wrong. Flip this one field when
+    // it is confirmed either way — that is the whole change.
+    slotLabelling: "period-end",
     // Centred on the manifest's NL centroid (52.13, 5.29) at a zoom that fits the whole
     // country — NL is roughly a quarter of GB's span, hence the tighter default.
     map: {

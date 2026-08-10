@@ -10,7 +10,7 @@
  *
  * Two things dominate:
  *  - the past/future split, which depends on the wall clock, so time is frozen via Luxon's
- *    `Settings.now` (the only clock `get30MinNow` reads);
+ *    `Settings.now` (the only clock `getCursorNow` reads);
  *  - the UTC-slot vs GB-settlement-period distinction, which disagree by two slots all summer.
  *
  * Fixtures are hand-written and tiny so every expected number is checkable by eye.

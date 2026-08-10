@@ -34,6 +34,7 @@ import {
 import {
   focusAndSelectRegions,
   getCountryState,
+  getCursorCadenceMinutes,
   getGlobalState,
   setCountryState,
   setEnabledCountries,
@@ -504,5 +505,43 @@ describe("normaliseCountryCodes", () => {
     expect(normaliseCountryCodes([1, null, undefined, {}, "GB"])).toEqual(["GB"]);
     expect(normaliseCountryCodes(null)).toEqual([]);
     expect(normaliseCountryCodes(undefined)).toEqual([]);
+  });
+});
+
+// Track B's half of the same seam: the shared cursor runs on the finest *enabled* country's
+// grid, so the writers above move it as well as the map. Kept here rather than beside the
+// pure arithmetic in `lib/time/cursor.test.ts` because what is under test is the state
+// transition, not the rounding.
+describe("the cursor grid follows the enabled set", () => {
+  const cursor = () => getGlobalState("selectedISOTime");
+
+  test("is the finest enabled country's cadence", () => {
+    expect(getCursorCadenceMinutes()).toBe(30);
+    setEnabledCountries(["GB", "NL"]);
+    expect(getCursorCadenceMinutes()).toBe(15);
+  });
+
+  test("re-snaps a cursor the grid has coarsened under", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setGlobalState("selectedISOTime", "2026-08-10T16:15:00.000Z");
+
+    // NL off: 16:15 is an instant GB never publishes, and every lookup at it comes back
+    // empty — a blank map rather than an error.
+    setEnabledCountries(["GB"]);
+    expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
+  });
+
+  test("leaves the cursor alone when the grid only refines", () => {
+    setGlobalState("selectedISOTime", "2026-08-10T16:30:00.000Z");
+    setEnabledCountries(["GB", "NL"]);
+    expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
+  });
+
+  test("re-snaps through the toggle too, not just the setter", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setGlobalState("selectedISOTime", "2026-08-10T16:45:00.000Z");
+
+    toggleCountryEnabled("NL");
+    expect(cursor()).toBe("2026-08-10T17:00:00.000Z");
   });
 });

@@ -1,7 +1,7 @@
 import React, { FC, useEffect } from "react";
 import RemixLine from "../remix-line";
 import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
-import useGlobalState, { useCountryState, get30MinNow } from "../../helpers/globalState";
+import useGlobalState, { useCountryState, getCursorNow } from "../../helpers/globalState";
 import {
   convertToLocaleDateString,
   formatISODateString,
@@ -61,13 +61,13 @@ const SolarSiteChart: FC<{
     // which is a plain UTC epoch, so the conversion has to be a no-op. Unlike the sibling
     // call in remix-line.tsx, the result keeps its "Z" and so parses as an absolute instant —
     // there is no local re-parse to cancel a viewer-zone shift. On the default it missed by
-    // the viewer's offset, and the miss falls through to `setSelectedISOTime(get30MinNow())`,
+    // the viewer's offset, and the miss falls through to `setSelectedISOTime(getCursorNow())`,
     // silently discarding the user's selected time on every mount for any non-UTC viewer.
     const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z", "UTC"))
       .getTime()
       .toString();
     if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
-      setSelectedISOTime(get30MinNow());
+      setSelectedISOTime(getCursorNow());
     }
   }, [view]);
 
@@ -292,7 +292,7 @@ const SolarSiteChart: FC<{
                 {/*/>*/}
               </div>
             </div>
-            <PlayButton startTime={get30MinNow()} endTime={forecastEndTime} />
+            <PlayButton startTime={getCursorNow()} endTime={forecastEndTime} />
           </div>
           <div className="flex-1 relative">
             <DataLoadingChartStatus loadingState={sitesLoadingState} />

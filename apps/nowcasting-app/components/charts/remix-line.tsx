@@ -23,7 +23,7 @@ import {
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { theme } from "../../tailwind.config";
-import useGlobalState, { useCountryState, getNext30MinSlot } from "../helpers/globalState";
+import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { ZoomOutIcon } from "@heroicons/react/solid";
@@ -199,7 +199,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [showNHourView] = useGlobalState("showNHourView");
   const [view] = useGlobalState("view");
   const [largeScreenMode] = useGlobalState("dashboardMode");
-  const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
+  // The "now" reference line, on the cursor grid — it is compared against `timeOfInterest`,
+  // which is the cursor, so the two have to be rounded the same way. The helper this replaced
+  // read `getMinutes()` off a local-zone `Date`, which also only worked by cancellation.
+  const currentTime = getCursorNow().slice(0, 16);
   // Deliberately NOT given the country's zone, unlike the display helpers below.
   //
   // This value is not shown to anyone: it is turned into epoch millis and matched against the

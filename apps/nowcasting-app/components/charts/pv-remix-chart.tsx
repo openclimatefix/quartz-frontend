@@ -1,7 +1,12 @@
 import { FC, useEffect, useMemo } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
-import useGlobalState, { useCountryState, get30MinNow } from "../helpers/globalState";
+import useGlobalState, {
+  useCountryState,
+  getCursorCadenceMinutes,
+  getCursorNow
+} from "../helpers/globalState";
+import { snapToCadence } from "../../lib/time/cursor";
 import useFormatChartData, { type ChartSeriesInput } from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
@@ -196,9 +201,12 @@ const PvRemixChart: FC<{
   const waitingForData =
     !forecastSeries || generationSeries.some((series) => series.series === undefined);
 
+  // Click-to-set-time. The label comes off this country's axis, so it may sit between two
+  // slots of the shared cursor grid when a finer country is enabled — snap it, so the chart
+  // and the map are never a slot apart. On a single-cadence session this is a no-op.
   const setSelectedTime = (time: string) => {
     stopTime();
-    setSelectedISOTime(time + ":00.000Z");
+    setSelectedISOTime(snapToCadence(`${time}:00.000Z`, getCursorCadenceMinutes()));
   };
 
   let selectedRegions: string[] = [];
@@ -210,7 +218,7 @@ const PvRemixChart: FC<{
   useEffect(() => {
     if (view === VIEWS.FORECAST && chartData?.length) {
       if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
-        setSelectedISOTime(get30MinNow());
+        setSelectedISOTime(getCursorNow());
       }
     }
   }, [view, chartData, selectedTime, setSelectedISOTime]);

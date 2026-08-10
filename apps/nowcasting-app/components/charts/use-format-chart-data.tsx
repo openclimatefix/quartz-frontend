@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { get30MinNow, useGlobalState } from "../helpers/globalState";
+import { useGlobalState } from "../helpers/globalState";
 import { formatISODateString, getDeltaBucket } from "../helpers/utils";
 import {
   ChartData,
@@ -14,6 +14,8 @@ import { Invalid, Valid } from "luxon/src/_util";
 import { getAvailablePLevels, getUtcHalfHourIndex } from "../helpers/chartUtils";
 import type { TimeSeries } from "../../lib/domain/types";
 import { useSeasonalNorms, type SeasonalNormsData } from "../../hooks/data/use-seasonal-norms";
+import { useFocusedCountry } from "../../hooks/data/use-countries";
+import { cadenceMinutesFor, cursorNow } from "../../lib/time/cursor";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -166,6 +168,12 @@ const useFormatChartData = ({
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
   const nationalMetrics = useSeasonalNorms();
+  // The past/future split has to land on a row this chart actually has, and the rows are the
+  // focused country's timestamps — so it steps on that country's cadence, not on the shared
+  // cursor's finest-enabled one. Enabling NL alongside GB puts the cursor on a 15-minute grid
+  // that GB never publishes: the boundary row would then compare as past, and `FUTURE` would
+  // start one slot late, which draws as a gap at "now".
+  const cadenceMinutes = cadenceMinutesFor(useFocusedCountry());
 
   const data = useMemo(() => {
     // The row order of the output follows first-write order and is pinned by the
@@ -188,7 +196,7 @@ const useFormatChartData = ({
     const generationReady = generation.every((series) => !!series.points);
 
     if (primaryPoints && generationReady && timeTrigger) {
-      const timeNow = formatISODateString(get30MinNow());
+      const timeNow = formatISODateString(cursorNow(cadenceMinutes));
       const chartMap: Record<string, ChartData> = {};
 
       const addDataToMap = (
@@ -337,7 +345,8 @@ const useFormatChartData = ({
     timeTrigger,
     nHourForecast,
     pLevels,
-    nationalMetrics
+    nationalMetrics,
+    cadenceMinutes
   ]);
 
   return data;
