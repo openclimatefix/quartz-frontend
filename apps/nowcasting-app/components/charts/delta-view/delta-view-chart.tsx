@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from "react";
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
 import ForecastHeader from "../forecast-header";
@@ -375,23 +375,53 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
 
+  /**
+   * The most recent slot that actually has a delta, or `undefined` if none does.
+   *
+   * A delta needs an observation to compare against, so it only exists in the past, and only
+   * once generation has published for that slot — `useFormatChartData` leaves `DELTA` absent
+   * otherwise, the same "no delta is not a delta of zero" rule `buildRegionValues` applies for
+   * the map. Derived from the data rather than a fixed offset: GB and NL publish on different
+   * cadences and lag by different amounts, so "now minus an hour" is right for neither.
+   */
+  const latestSlotWithDelta = useMemo(() => {
+    if (!chartData?.length) return undefined;
+    for (let i = chartData.length - 1; i >= 0; i--) {
+      if ((chartData[i] as any).DELTA !== undefined) return (chartData[i] as any).formattedDate;
+    }
+    return undefined;
+  }, [chartData]);
+
   // Used to be guarded on `view === VIEWS.DELTA`; `pages/index.tsx` only ever mounts this
   // component when `comparison` is set (Wave 4), so the guard was true on every render this
   // effect could fire on, and dropped rather than swapped for an equivalent check.
   useEffect(() => {
     if (chartData?.length) {
       if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
-        setSelectedISOTime(getCursorNow());
+        setSelectedISOTime(latestSlotWithDelta ?? getCursorNow());
       }
     }
-  }, [chartData, selectedTime, setSelectedISOTime]);
+  }, [chartData, selectedTime, setSelectedISOTime, latestSlotWithDelta]);
 
-  // While N-hour is not available, we default to the latest interval with an Initial Estimate
-  // useEffect(() => {
-  //   if (selectedISOTime === getCursorNow()) {
-  //     setSelectedISOTime(getCursorNow(-60));
-  //   }
-  // }, []);
+  /**
+   * Land the cursor somewhere the delta view can actually show something — once.
+   *
+   * Entering a comparison used to leave the cursor wherever it was, which is usually "now",
+   * where by definition nothing has a delta yet: every region drew transparent and every
+   * tooltip said "no delta yet", so the view opened blank and read as broken. This moves the
+   * cursor to the most recent slot that has one, but only on the first render where the data
+   * is known — afterwards the cursor is the user's, and scrubbing deliberately into the
+   * forecast must not be yanked back.
+   */
+  const landedRef = useRef(false);
+  useEffect(() => {
+    if (landedRef.current || !chartData?.length) return;
+    landedRef.current = true;
+    const current = chartData.find((d: any) => d.formattedDate === selectedTime);
+    if (current && (current as any).DELTA === undefined && latestSlotWithDelta) {
+      setSelectedISOTime(latestSlotWithDelta);
+    }
+  }, [chartData, selectedTime, setSelectedISOTime, latestSlotWithDelta]);
 
   const hasError = [forecast, ...generationResults, nHour].some((result) => !!result.error);
   // The single-observer generalisation from Track B: a country with one observer waits for
