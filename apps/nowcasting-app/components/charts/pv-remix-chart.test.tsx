@@ -291,37 +291,38 @@ describe("observers are per country and there may be exactly one", () => {
   });
 });
 
-describe("the legend follows the same two lists", () => {
-  test("GB labels its three comparison models and both observers", async () => {
+// Phase 6 followup, Track G: the chart's own legend (`ChartLegend`, which produced the labels
+// this block used to assert on — "ECMWF-only", "PV Live Estimated", "NED NL Initial") is gone.
+// It duplicated the display rail's series toggles (`components/shell/display-panel.tsx`,
+// `SeriesToggles`), which already built the identical list off the same two config sources
+// (`nationalChartSeries` and `useGenerationSources`) and now carries the colour swatch that
+// used to live only in the chart legend — see `docs/phase6-followup-track-g-notes.md`. That
+// component has no dedicated test yet; this suite is end-to-end for the *chart*, not the rail,
+// so the equivalent "series list drives legend rows" coverage belongs over there rather than
+// rebuilt against a component this file does not render. What is worth pinning here is the
+// negative: the chart itself renders no legend text at all any more.
+describe("the chart no longer carries its own legend", () => {
+  test("GB: none of the old chart-legend labels render inside the chart", async () => {
     const view = renderChart();
     await settled(view, 8);
     await waitFor(() => {
       rerender(view);
-      expect(screen.queryAllByText("PV Live Estimated")).toHaveLength(1);
+      expect(screen.queryAllByText("PV Live Estimated")).toHaveLength(0);
     });
 
     for (const label of ["ECMWF-only", "Met Office-only", "Satellite-only"]) {
-      expect(screen.getAllByText(label).length).toBeGreaterThan(0);
+      expect(screen.queryAllByText(label)).toHaveLength(0);
     }
-    // Observer labels come from the manifest, so they are the API's own display names.
-    // `queryAllByText` because the staleness indicator has a row with the same wording.
-    expect(screen.queryAllByText("PV Live Updated").length).toBeGreaterThan(0);
   });
 
-  // No comparison models configured for NL, and one observer — so no orphaned legend rows
-  // toggling lines that were never fetched.
-  test("NL labels its single observer and no comparison models", async () => {
+  test("NL: same — no legend labels render inside the chart", async () => {
     setGlobalState("focusedCountry", "NL");
     const view = renderChart();
     await settled(view, 2);
     await waitFor(() => {
       rerender(view);
-      expect(screen.queryAllByText("NED NL Initial")).toHaveLength(1);
+      expect(screen.queryAllByText("NED NL Initial")).toHaveLength(0);
     });
-
-    expect(screen.queryAllByText("ECMWF-only")).toHaveLength(0);
-    expect(screen.queryAllByText("Met Office-only")).toHaveLength(0);
-    expect(screen.queryAllByText("PV Live Updated")).toHaveLength(0);
   });
 });
 

@@ -86,13 +86,20 @@ const ConfidenceBands: FC = () => {
 };
 
 /**
- * Series visibility, over the same `visibleLines` state the chart legend writes.
+ * Series visibility, over the same `visibleLines` state the chart used to write via its own
+ * legend.
  *
  * Derived from the country's configured series and the manifest's observers rather than from a
- * fixed list, for the same reason the legend is: GB charts six forecast lines and two
- * observers, NL one of each. The legend keeps its own copy of these toggles for now — it is
- * also the key to the colours, so it cannot simply lose them, and consolidating the two is
- * chart work rather than shell work.
+ * fixed list, for the same reason the old chart legend was: GB charts six forecast lines and
+ * two observers, NL one of each.
+ *
+ * Phase 6 followup (Track G): this *is* the colour key now. The chart's own legend
+ * (`ChartLegend`/`LegendItem` mounted inside `pv-remix-chart.tsx` and `delta-view-chart.tsx`)
+ * duplicated these toggles and was removed; each `LegendItem` below carries the same
+ * `iconClasses` swatch the chart legend used, so a toggle still identifies the line it
+ * controls by colour — it just lives here instead of also living bottom-left of the chart.
+ * `/sites` is untouched: it has no display rail and renders its own `LegendItem`s inline
+ * (`solar-site-view/solar-site-chart.tsx`), which was never `ChartLegend` and was out of scope.
  */
 const SeriesToggles: FC = () => {
   const [showNHourView] = useGlobalState("showNHourView");

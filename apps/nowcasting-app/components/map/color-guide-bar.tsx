@@ -53,7 +53,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
   const currentLevel = useCurrentAggregationLevel();
 
   return (
-    <div className="overflow-x-auto">
+    <div>
       {comparison ? (
         <DeltaBands />
       ) : (
@@ -144,15 +144,20 @@ const SequentialBands: React.FC<{
           {country} bands
         </span>
       )}
-      <div className="flex justify-between text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
+      {/*
+        Was one row in an `overflow-x-auto` sized to `MAP_CONTROL_WIDTH_PX` (260px) — six bands
+        plus the "no data" pill do not fit that width in one line, so the last two scrolled out
+        of view (§6a: "near its limit"). Wrapping is the fix rather than shaving pixels: each
+        pill is now self-contained (its own border on every side, not a chain of `border-l`s
+        that assumed a single row) so it reads correctly whichever row it lands on, with or
+        without the "GB bands" attribution line above it, and at any wrap count — this also
+        covers `DeltaBands` below, whose nine buckets wrap the same way.
+      */}
+      <div className="flex flex-wrap gap-1 text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
         {values?.map((value, index) => (
           <div
             key={value.value}
-            className={`px-3 py-[1px] dash:px-4 dash:py-[2px] bg-ocf-yellow/${
-              value.opacity
-            } whitespace-nowrap ${index !== 0 ? "border-l border-ocf-black-600" : ""} text-${
-              value.textColor
-            }`}
+            className={`rounded border border-ocf-black-600 px-3 py-[1px] dash:px-4 dash:py-[2px] bg-ocf-yellow/${value.opacity} whitespace-nowrap text-${value.textColor}`}
           >
             {value.value}
             {index === 0 && (
@@ -173,7 +178,7 @@ const SequentialBands: React.FC<{
           band above, which is why that band is 3% opacity rather than invisible.
         */}
         <div
-          className="whitespace-nowrap border-l border-ocf-black-600 px-3 py-[1px] text-white dash:px-4 dash:py-[2px]"
+          className="whitespace-nowrap rounded border border-ocf-black-600 px-3 py-[1px] text-white dash:px-4 dash:py-[2px]"
           style={{ backgroundColor: NO_DATA_COLOR, opacity: NO_DATA_OPACITY + 0.4 }}
           title="Reported no value for this time. Regions still to publish are left unfilled."
         >
@@ -188,7 +193,7 @@ const DeltaBands: React.FC = () => {
   const deltaKeys = getDeltaBucketKeys();
   return (
     <div className="flex bg-mapbox-black-700">
-      <div className="flex justify-between h-full font-bold relative items-end text-sm">
+      <div className="flex flex-wrap gap-1 h-full font-bold relative items-end text-sm">
         {deltaKeys.map((value) => {
           let background = "";
           let opacity = 0;
@@ -235,9 +240,7 @@ const DeltaBands: React.FC = () => {
           return (
             <div
               key={value}
-              className={`px-3 py-[1px] ${background} text-xs md:text-sm dash:text-xl dash:tracking-wide whitespace-nowrap ${
-                text !== 0 ? "border-l border-ocf-black-100" : ""
-              } ${textColor}`}
+              className={`rounded border border-ocf-black-100 px-3 py-[1px] ${background} text-xs md:text-sm dash:text-xl dash:tracking-wide whitespace-nowrap ${textColor}`}
             >
               {text > 0 ? "+" : ""}
               {text}

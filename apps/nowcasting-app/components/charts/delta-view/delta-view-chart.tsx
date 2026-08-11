@@ -22,7 +22,6 @@ import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
 import useGspDeltas from "./use-gsp-deltas";
 import useTimeNow from "../../hooks/use-time-now";
-import { ChartLegend } from "../ChartLegend";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
 import { getTicks } from "../../helpers/chartUtils";
 import {
@@ -486,7 +485,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
           )}
         </div>
       </div>
-      {!className?.includes("hidden") && <ChartLegend />}
     </>
   );
 };

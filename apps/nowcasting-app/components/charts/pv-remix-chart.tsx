@@ -14,7 +14,6 @@ import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
 import { getTicks } from "../helpers/chartUtils";
@@ -271,7 +270,6 @@ const PvRemixChart: FC<{
           </div>
         )}
       </div>
-      {!className?.includes("hidden") && <ChartLegend />}
     </>
   );
 };
