@@ -15,7 +15,6 @@ import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selecte
 import { useSitesViewData } from "../components/hooks/useSitesViewData";
 import useGlobalState from "../components/helpers/globalState";
 import { CookieStorageKeys } from "../components/helpers/cookieStorage";
-import { VIEWS } from "../constant";
 
 /**
  * Solar Sites, on its own route (Phase 6, Track C — `phase6-layout-contract.md` §2).
@@ -40,16 +39,16 @@ export default function Sites({ dashboardModeServer }: { dashboardModeServer: st
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
   const { user, isLoading, error } = useUser();
   const [largeScreenMode] = useGlobalState("dashboardMode");
-  const [, setView] = useGlobalState("view");
+  const [, setIsSitesChart] = useGlobalState("isSitesChart");
 
-  // The route declares its view, which is how the components still keyed on `view` — the sites
+  // The route declares itself, which is how the components still keyed on it — the sites
   // chart's time axis, the status banner, the CSV entry in the account menu — know they are
-  // here rather than on the dashboard. Track D's half of the move; the dashboard's `view` is
-  // written by `setComparison` for the same reason. Wave 4 retires the key.
+  // here rather than on the dashboard. Wave 4 replaced the three-member `view` this used to
+  // write with this one boolean, since SOLAR_SITES was the only branch anything still read.
   useEffect(() => {
-    setView(VIEWS.SOLAR_SITES);
-    return () => setView(VIEWS.FORECAST);
-  }, [setView]);
+    setIsSitesChart(true);
+    return () => setIsSitesChart(false);
+  }, [setIsSitesChart]);
 
   // Local state used to set initial state on server side render, then updated by global state —
   // same pattern as `pages/index.tsx`.

@@ -11,7 +11,6 @@ import DeltaMap from "../components/map/deltaMap";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
-import { useMapChrome } from "../components/hooks/use-map-chrome";
 import useGlobalState, { useCountryState } from "../components/helpers/globalState";
 import { useAggregationLevels } from "../hooks/data";
 import { defaultLevelOf } from "../components/helpers/aggregationLevels";
@@ -31,8 +30,10 @@ import {
  * **One map and one chart, chosen by the comparison state.** The three `hidden`-class views are
  * gone: Solar Sites moved to `/sites` (§2, Track C) and Delta stopped being a view at all — it
  * is the "vs generation" comparison preset, and the pair below is what that preset selects.
- * Because nothing is mounted-but-hidden any more, no map is ever alive at the wrong size, which
- * is what let `use-map-chrome` shed two of its three effects.
+ * Because nothing is mounted-but-hidden any more, no map is ever alive at the wrong size — the
+ * two `use-map-chrome` effects that compensated for that went with Track D's shell (Wave 2).
+ * What was left — resizing the live map when dashboard mode changes its box — is inlined below
+ * (Wave 4): a single effect with one call site does not earn a hook of its own.
  */
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
@@ -89,7 +90,15 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   }, [user, isLoading, error]);
 
-  useMapChrome(combinedDashboardModeActive);
+  // Resize the live Mapbox instance when dashboard mode changes the container's box — the one
+  // chrome change that can alter it without the map hearing about it, and cheap insurance on a
+  // mode that runs unattended for days on a wall display. Formerly `use-map-chrome.tsx`; with
+  // exactly one effect and one caller left after Track D's shell, the hook was pure indirection.
+  const [maps] = useGlobalState("maps");
+  useEffect(() => {
+    maps.forEach((map) => map.resize());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [combinedDashboardModeActive]);
 
   return (
     <Layout>

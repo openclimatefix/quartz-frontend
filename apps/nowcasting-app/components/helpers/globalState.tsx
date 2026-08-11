@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { createGlobalState } from "react-hooks-global-state";
-import { getDeltaBucketKeys, P_LEVEL_OPTIONS, SORT_BY, VIEWS } from "../../constant";
+import { getDeltaBucketKeys, P_LEVEL_OPTIONS, SORT_BY } from "../../constant";
 import {
   CookieStorageKeys,
   getArraySettingFromCookieStorage,
@@ -12,7 +12,7 @@ import { LoadingState, SitesEndpointStates } from "../types";
 import { ActiveUnit } from "../map/types";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
-import { ComparisonSelection, viewForComparison } from "./comparison";
+import { ComparisonSelection } from "./comparison";
 import { cursorNow, finestCadenceMinutes, snapToCadence } from "../../lib/time/cursor";
 import {
   CountryKeyedState,
@@ -79,7 +79,7 @@ export type FlatGlobalStateType = {
    * What the map's colour means: a comparison preset, or `null` for the plain forecast.
    *
    * This is what the dashboard switches on since Phase 6 — see `helpers/comparison.ts` and
-   * contract §2. Write it through `setComparison`, never straight, so `view` stays in step.
+   * contract §2. Write it through `setComparison`.
    */
   comparison: ComparisonSelection;
   activeUnit: ActiveUnit;
@@ -87,7 +87,17 @@ export type FlatGlobalStateType = {
   timeNow: string;
   intervals: any[];
   forecastCreationTime?: string;
-  view: VIEWS;
+  /**
+   * True only on `/sites` (`pages/sites.tsx` sets it on mount, clears it on unmount). The
+   * dashboard route never writes it.
+   *
+   * Replaces `view: VIEWS` (Wave 4). `view`'s FORECAST/DELTA split is `comparison` now; its
+   * SOLAR_SITES branch was the only one anything still read for a real decision, so it is
+   * this one boolean rather than a three-member enum. Consumers that used to distinguish
+   * FORECAST from DELTA get that from the pane that is actually mounted (`pages/index.tsx`
+   * mounts one of `PvRemixChart`/`DeltaViewChart` on `comparison`), not from state.
+   */
+  isSitesChart: boolean;
   visibleLines: string[];
   selectedBuckets: string[];
   maps: mapboxgl.Map[];
@@ -173,7 +183,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     timeNow: INITIAL_CURSOR,
     intervals: [],
     forecastCreationTime: undefined,
-    view: VIEWS.FORECAST,
+    isSitesChart: false,
     visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
       "GENERATION",
       "GENERATION_UPDATED",
@@ -408,15 +418,12 @@ export const toggleCountryEnabled = (code: string): void => {
  * chart's extra series follow from it, and so does the chart's default split: a comparison
  * shrinks the chart because the difference is a *spatial* question.
  *
- * It also writes `view`, and that pairing is why this is a function rather than a plain
- * `setGlobalState`. `view` stopped being what the dashboard switches on, but it is still read
- * by `remix-line`, `StatusBanner`, the CSV modal and both charts' reset effects; keeping the
- * two in step here means no consumer has to know which of them is authoritative while Wave 4
- * migrates them off `view` entirely. Nothing else may write `view` on the dashboard.
+ * Through Wave 3 this also wrote `view` in lockstep, because a dozen components still read
+ * it. Wave 4 migrated every one of them onto `comparison` (and, for the sites/dashboard
+ * split, `isSitesChart`), so this is a plain `setGlobalState` again.
  */
 export const setComparison = (id: ComparisonSelection): void => {
   setGlobalState("comparison", id);
-  setGlobalState("view", viewForComparison(id));
 };
 
 /**

@@ -2,13 +2,12 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map as MapComponent } from "./";
-import { ActiveUnit, SelectedData } from "./types";
+import { ActiveUnit, MAP_TITLE_SOLAR_SITES, SelectedData } from "./types";
 import {
   AGGREGATION_LEVEL_MAX_ZOOM,
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
-  MAX_POWER_GENERATED,
-  VIEWS
+  MAX_POWER_GENERATED
 } from "../../constant";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
@@ -610,7 +609,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
               {/* <ShowSiteCount /> */}
             </>
           )}
-          title={VIEWS.SOLAR_SITES}
+          title={MAP_TITLE_SOLAR_SITES}
         >
           {/*<SitesLegend color={"color"} />*/}
         </MapComponent>

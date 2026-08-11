@@ -2,20 +2,14 @@ import React, { Dispatch, SetStateAction, useMemo, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map } from "./";
-import { ActiveUnit } from "./types";
-import { VIEWS } from "../../constant";
+import { ActiveUnit, MAP_TITLE_DELTA } from "./types";
 import useGlobalState from "../helpers/globalState";
-import { formatISODateStringHuman } from "../helpers/utils";
-import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { FeatureCollection } from "geojson";
-import dynamic from "next/dynamic";
 import useEnabledCountryMapData from "./use-enabled-country-map-data";
 import { PV_SOURCE_ID, applyFeatureStates, deltaFillColorExpression } from "./feature-state";
 import { FEATURE_KEY_PROPERTY } from "./country-features";
 import type { MapFeatureState } from "../helpers/data";
-
-const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type DeltaMapProps = {
   className?: string;
@@ -33,7 +27,6 @@ const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features:
 
 const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { timezone, locale } = useCountryFormatting();
 
   // The delta view is single-region-level only. Rather than reading the user's stored level
   // (which `pages/index.tsx` forces to the finest one on entering this view anyway), take
@@ -204,11 +197,8 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
       {error && !hasValues ? (
         <FailedStateMap error="Failed to load" />
       ) : isLoading && !hasValues ? (
-        <LoadStateMap>
-          <ButtonGroup
-            rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
-          />
-        </LoadStateMap>
+        // No time readout here any more (Wave 4) — see the comment on `controlOverlay` below.
+        <LoadStateMap>{null}</LoadStateMap>
       ) : (
         <Map
           loadDataOverlay={(map: { current: mapboxgl.Map }) =>
@@ -218,14 +208,11 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
             newData: true,
             updateMapData: (map) => safelyUpdateMapData(map, addOrUpdateFCData)
           }}
-          controlOverlay={(map: { current?: mapboxgl.Map }) => (
-            <>
-              <ButtonGroup
-                rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
-              />
-            </>
-          )}
-          title={VIEWS.DELTA}
+          // The corner's own time readout went here (Wave 4) — the shell's cursor readout
+          // (`components/shell/cursor-readout.tsx`) already says it, better, once for both
+          // panes.
+          controlOverlay={() => null}
+          title={MAP_TITLE_DELTA}
         ></Map>
       )}
     </div>

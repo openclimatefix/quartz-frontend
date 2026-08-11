@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from "react";
 import RemixLine from "../remix-line";
-import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
+import { AGGREGATION_LEVELS } from "../../../constant";
 import useGlobalState, { useCountryState, getCursorNow } from "../../helpers/globalState";
 import {
   convertToLocaleDateString,
@@ -54,7 +54,7 @@ const SolarSiteChart: FC<{
     timeTrigger: selectedTime
   });
 
-  const [view] = useGlobalState("view");
+  const [isSitesChart] = useGlobalState("isSitesChart");
   const { timezone, locale } = useCountryFormatting();
   useEffect(() => {
     // "UTC" is load-bearing: this value is a lookup key against `chartData.formattedDate`,
@@ -69,7 +69,9 @@ const SolarSiteChart: FC<{
     if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
       setSelectedISOTime(getCursorNow());
     }
-  }, [view]);
+    // Was keyed on `view` flipping FORECAST -> SOLAR_SITES on mount; `isSitesChart` flipping
+    // false -> true on mount is the same edge (Wave 4).
+  }, [isSitesChart]);
 
   const getSelectedSitesData = (
     sitesData: Site[],

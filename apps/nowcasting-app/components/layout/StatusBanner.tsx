@@ -1,16 +1,15 @@
-import { VIEWS } from "../../constant";
 import { SolarStatus } from "../types";
 
 interface StatusBannerProps {
-  view: VIEWS;
+  isSitesChart: boolean;
   solarStatus?: SolarStatus;
   sitesStatus?: SolarStatus;
 }
 
-const StatusBanner = ({ view, solarStatus, sitesStatus }: StatusBannerProps) => {
+const StatusBanner = ({ isSitesChart, solarStatus, sitesStatus }: StatusBannerProps) => {
   let status;
 
-  if (view === VIEWS.SOLAR_SITES) {
+  if (isSitesChart) {
     status = sitesStatus;
   } else {
     status = solarStatus;

@@ -1,6 +1,6 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine from "../remix-line";
-import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../../constant";
+import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, {
   useCountryState,
@@ -376,21 +376,23 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
 
-  const [view] = useGlobalState("view");
+  // Used to be guarded on `view === VIEWS.DELTA`; `pages/index.tsx` only ever mounts this
+  // component when `comparison` is set (Wave 4), so the guard was true on every render this
+  // effect could fire on, and dropped rather than swapped for an equivalent check.
   useEffect(() => {
-    if (view === VIEWS.DELTA && chartData?.length) {
+    if (chartData?.length) {
       if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
         setSelectedISOTime(getCursorNow());
       }
     }
-  }, [view, chartData, selectedTime, setSelectedISOTime]);
+  }, [chartData, selectedTime, setSelectedISOTime]);
 
   // While N-hour is not available, we default to the latest interval with an Initial Estimate
   // useEffect(() => {
-  //   if (selectedISOTime === getCursorNow() && view === VIEWS.DELTA) {
+  //   if (selectedISOTime === getCursorNow()) {
   //     setSelectedISOTime(getCursorNow(-60));
   //   }
-  // }, [view]);
+  // }, []);
 
   const hasError = [forecast, ...generationResults, nHour].some((result) => !!result.error);
   // The single-observer generalisation from Track B: a country with one observer waits for

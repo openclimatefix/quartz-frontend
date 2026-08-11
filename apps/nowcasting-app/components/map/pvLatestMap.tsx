@@ -2,11 +2,8 @@ import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState }
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map } from "./";
-import { ActiveUnit } from "./types";
-import { VIEWS } from "../../constant";
+import { ActiveUnit, MAP_TITLE_FORECAST } from "./types";
 import useGlobalState from "../helpers/globalState";
-import { formatISODateStringHuman } from "../helpers/utils";
-import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { loadGeoAsset } from "../../lib/geo/assets";
@@ -17,7 +14,6 @@ import {
   safelyUpdateMapData,
   setActiveUnitOnMap
 } from "../helpers/mapUtils";
-import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
 import { FeatureCollection } from "geojson";
@@ -50,8 +46,6 @@ const orange = theme.extend.colors["ocf-orange"].DEFAULT;
  */
 const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
-const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
-
 type PvLatestMapProps = {
   className?: string;
   activeUnit: ActiveUnit;
@@ -60,7 +54,6 @@ type PvLatestMapProps = {
 
 const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const { timezone, locale } = useCountryFormatting();
   const country = useFocusedCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
@@ -122,7 +115,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
   useEffect(() => {
     // Add unit to map container so that it can be accessed by popup in the map event listeners
-    const map: HTMLDivElement | null = document.querySelector(`#Map-${VIEWS.FORECAST}`);
+    const map: HTMLDivElement | null = document.querySelector(`#Map-${MAP_TITLE_FORECAST}`);
     if (map) {
       setActiveUnitOnMap(map, activeUnit);
     }
@@ -521,14 +514,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
                 safelyUpdateMapData(map, addOrUpdateMapData);
               }
             }}
-            controlOverlay={(map: { current?: mapboxgl.Map }) => (
-              <>
-                <ButtonGroup
-                  rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
-                />
-              </>
-            )}
-            title={VIEWS.FORECAST}
+            // The corner's own time readout went here (Wave 4) — the shell's cursor readout
+            // (`components/shell/cursor-readout.tsx`) already says it, better, once for both
+            // panes. `sitesMap.tsx` keeps its own: `/sites` has no shell cursor readout to
+            // duplicate.
+            controlOverlay={() => null}
+            title={MAP_TITLE_FORECAST}
           ></Map>
         </>
       }

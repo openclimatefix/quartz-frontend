@@ -13,7 +13,6 @@ import {
   getBooleanSettingFromCookieStorage,
   setBooleanSettingInLocalStorage
 } from "../../helpers/cookieStorage";
-import { VIEWS } from "../../../constant";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
 import {
@@ -32,16 +31,17 @@ const ProfileDropDown = () => {
   const { user } = useUser();
   // Read rather than passed down: the header no longer knows or cares which view is showing
   // since the three-way switcher went (contract §2), and this menu is the last thing in the
-  // header that does. What it actually asks is "are we on the sites route", which `view`
-  // answers until Wave 4 retires it.
-  const [view] = useGlobalState("view");
+  // header that asks "are we on the sites route" (`isSitesChart`) or "is a comparison active"
+  // (`comparison`) — the two facts `view` used to fold into one value.
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  const [comparison] = useGlobalState("comparison");
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
   const [pLevels] = useGlobalState("pLevels");
   const { timezone } = useCountryFormatting();
-  const canDownloadCsv = view !== VIEWS.SOLAR_SITES;
+  const canDownloadCsv = !isSitesChart;
 
   // The CSV's own fetches, per the data-layer contract's "call the hooks you need where you
   // need them" — this is the last consumer of `CombinedData`'s national fields, so the prop
@@ -317,7 +317,7 @@ const ProfileDropDown = () => {
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleDownload}
         nHourForecast={nHourForecast}
-        view={view}
+        comparisonActive={!!comparison}
       />
     </>
   );

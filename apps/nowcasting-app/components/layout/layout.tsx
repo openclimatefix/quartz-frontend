@@ -1,6 +1,5 @@
 import Head from "next/head";
 import { Analytics } from "@vercel/analytics/next";
-import { getViewTitle, VIEWS } from "../../constant";
 import { useFocusedCountry } from "../../hooks/data";
 import { useSitesStatus, useSolarStatus } from "../hooks/useStatus";
 import useGlobalState from "../helpers/globalState";
@@ -21,9 +20,13 @@ const Layout = ({ children }: ILayout) => {
     regionType: "national"
   });
   const { data: sitesStatus } = useSitesStatus({ country, source: "solar", regionType: "site" });
-  const [view] = useGlobalState("view");
-  const viewTitle = getViewTitle(view);
-  const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  const [comparison] = useGlobalState("comparison");
+  // Replaces `getViewTitle(view)` (Wave 4): the three titles it produced — "PV Forecast",
+  // "Delta", "Solar Sites" — now come from the two facts that used to be folded into `view`,
+  // route and comparison, rather than from a third piece of state mirroring both.
+  const viewTitle = isSitesChart ? "Solar Sites" : comparison ? "Delta" : "PV Forecast";
+  const pageTitle = `Quartz Solar - ${viewTitle}`;
 
   return (
     <>
@@ -32,7 +35,11 @@ const Layout = ({ children }: ILayout) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-col h-screen">
-        <StatusBanner view={view} solarStatus={solarStatus} sitesStatus={sitesStatus} />
+        <StatusBanner
+          isSitesChart={isSitesChart}
+          solarStatus={solarStatus}
+          sitesStatus={sitesStatus}
+        />
         {children}
         <Analytics />
       </main>

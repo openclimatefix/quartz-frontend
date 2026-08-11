@@ -1,5 +1,3 @@
-import { VIEWS } from "../../constant";
-
 /**
  * Comparison — what the map's colour means, and the one series the chart gains.
  *
@@ -41,14 +39,3 @@ export const comparisonPresetOf = (id: ComparisonSelection): ComparisonPreset | 
 /** The chart header's echo of the map's encoding. Authoritative control is the map cluster. */
 export const comparisonTitle = (id: ComparisonSelection): string =>
   comparisonPresetOf(id)?.title ?? "National forecast";
-
-/**
- * The `VIEWS` value a comparison selection corresponds to.
- *
- * `view` is no longer what the dashboard switches on — comparison is — but a dozen components
- * still read it (`remix-line`, `StatusBanner`, the CSV modal, both charts' reset effects), and
- * migrating them is Wave 4's cleanup rather than this track's. So the shell keeps `view` in
- * step through `setComparison`, and this is the mapping.
- */
-export const viewForComparison = (id: ComparisonSelection): VIEWS =>
-  id ? VIEWS.DELTA : VIEWS.FORECAST;

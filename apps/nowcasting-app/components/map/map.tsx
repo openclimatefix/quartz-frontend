@@ -2,7 +2,7 @@ import mapboxgl, { Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
-import { IMap } from "./types";
+import { IMap, MAP_TITLE_FORECAST } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState, {
   useCountryState,
@@ -14,8 +14,7 @@ import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
-  MAX_POWER_GENERATED,
-  VIEWS
+  MAX_POWER_GENERATED
 } from "../../constant";
 import {
   SATELLITE_CHANNELS,
@@ -280,7 +279,7 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     // Nothing satellite-related runs until the user actually enables clouds, so a
     // visitor who never turns the layer on pays no satellite requests at all.
-    if (title !== VIEWS.FORECAST || !showCloudLayer || !isMapReady || !selectedISOTime) return;
+    if (title !== MAP_TITLE_FORECAST || !showCloudLayer || !isMapReady || !selectedISOTime) return;
     let cancelled = false;
     (async () => {
       // Load the frame the user is actually looking at first, then warm the
@@ -458,7 +457,7 @@ const Map: FC<IMap> = ({
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full flex flex-col gap-1 pointer-events-none">
         <div className="pointer-events-auto">{controlOverlay(map)}</div>
-        {title === VIEWS.FORECAST && (
+        {title === MAP_TITLE_FORECAST && (
           <div
             className={`pointer-events-auto flex flex-row items-start justify-end gap-2 transition-all duration-300 mt-3`}
           >

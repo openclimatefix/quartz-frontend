@@ -1,34 +1,38 @@
 /**
- * Comparison, and the `view` value it keeps in step.
+ * Comparison.
  *
  * Phase 6 §2 replaced the dashboard's three-way view switch with comparison state: `null` is
- * the plain forecast, an id is a preset. `view` survives only because a dozen components still
- * read it — `remix-line`'s axis, `StatusBanner`, the CSV modal, both charts' reset effects —
- * and Wave 4 is what retires them. Until then the two must never disagree: a `view` of
- * `FORECAST` with a comparison active would draw the delta map under a chart that reset the
- * cursor whenever the delta series lagged, which is the kind of wrong that looks plausible.
+ * the plain forecast, an id is a preset.
  *
- * That is the whole of what is pinned here. The presets themselves are Track E's to grow.
+ * Through Wave 3, `setComparison` also wrote a `view: VIEWS` value in lockstep, because a
+ * dozen components still read it, and this file pinned that the two could never disagree — a
+ * `view` of `FORECAST` with a comparison active would draw the delta map under a chart that
+ * reset the cursor whenever the delta series lagged, which is the kind of wrong that looks
+ * plausible.
+ *
+ * Wave 4 retired `view` and its mirroring: every consumer now reads `comparison` directly, or
+ * (for the sites/dashboard split `view` also served) the new `isSitesChart` flag. There is no
+ * second value left to disagree with, so the "never disagree" tests go — they would otherwise
+ * be asserting a relationship that no longer exists — and what is left is what was always the
+ * substance underneath them: `setComparison` sets `comparison`, and the chart header's echo
+ * names it correctly.
  */
 import { afterEach, describe, expect, test } from "@jest/globals";
 
-import { VIEWS } from "../../constant";
-import { COMPARISON_PRESETS, comparisonTitle, viewForComparison } from "./comparison";
+import { comparisonTitle } from "./comparison";
 import { getGlobalState, setComparison } from "./globalState";
 
 afterEach(() => setComparison(null));
 
 describe("setComparison", () => {
-  test("defaults to no comparison, on the forecast view", () => {
+  test("defaults to no comparison", () => {
     expect(getGlobalState("comparison")).toBeNull();
-    expect(getGlobalState("view")).toBe(VIEWS.FORECAST);
   });
 
-  test("selecting a preset moves both the comparison and the view it mirrors", () => {
+  test("selecting a preset sets the comparison", () => {
     setComparison("generation");
 
     expect(getGlobalState("comparison")).toBe("generation");
-    expect(getGlobalState("view")).toBe(VIEWS.DELTA);
   });
 
   test("clearing it returns to the plain forecast", () => {
@@ -36,13 +40,6 @@ describe("setComparison", () => {
     setComparison(null);
 
     expect(getGlobalState("comparison")).toBeNull();
-    expect(getGlobalState("view")).toBe(VIEWS.FORECAST);
-  });
-
-  test("every configured preset maps to the delta view", () => {
-    for (const preset of COMPARISON_PRESETS) {
-      expect(viewForComparison(preset.id)).toBe(VIEWS.DELTA);
-    }
   });
 });
 

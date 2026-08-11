@@ -22,22 +22,6 @@ export const Y_MAX_TICKS = [
   6000, 7000, 7500, 8000, 9000, 10000, 11000, 12000, 12500, 13000, 14000, 15000
 ];
 
-export enum VIEWS {
-  FORECAST = "FORECAST",
-  DELTA = "DELTA",
-  SOLAR_SITES = "SOLAR SITES"
-}
-export const getViewTitle = (view: VIEWS) => {
-  switch (view) {
-    case VIEWS.FORECAST:
-      return "PV Forecast";
-    case VIEWS.DELTA:
-      return "Delta";
-    case VIEWS.SOLAR_SITES:
-      return "Solar Sites";
-  }
-};
-
 // The **sites view's** zoom bands. Not the region hierarchy.
 //
 // These were a GB-shaped shim for the region hierarchy; Phase 5 finished that migration and

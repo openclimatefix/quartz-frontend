@@ -24,7 +24,7 @@ import {
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
-import { DELTA_BUCKET, VIEWS } from "../../constant";
+import { DELTA_BUCKET } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
@@ -197,7 +197,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
   const [showNHourView] = useGlobalState("showNHourView");
-  const [view] = useGlobalState("view");
+  const [isSitesChart] = useGlobalState("isSitesChart");
   const [largeScreenMode] = useGlobalState("dashboardMode");
   // The "now" reference line, on the cursor grid — it is compared against `timeOfInterest`,
   // which is the cursor, so the two have to be rounded the same way. The helper this replaced
@@ -376,7 +376,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               if (globalIsZooming) return;
 
               if (setTimeOfInterest && e?.activeLabel) {
-                view === VIEWS.SOLAR_SITES
+                isSitesChart
                   ? setTimeOfInterest(
                       new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
                     )
@@ -435,26 +435,26 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="formattedDate"
               xAxisId={"x-axis"}
               tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              scale={isSitesChart ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
-              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+              type={isSitesChart ? "number" : "category"}
+              ticks={isSitesChart ? ticks : undefined}
+              domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={isSitesChart ? undefined : 11}
             />
             <XAxis
               className="select-none"
               dataKey="formattedDate"
               xAxisId={"x-axis-2"}
               tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              scale={isSitesChart ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
-              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
+              type={isSitesChart ? "number" : "category"}
+              ticks={isSitesChart ? ticks : undefined}
+              domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={isSitesChart ? undefined : 11}
               orientation="top"
               padding="no-gap"
               hide={true}
@@ -463,17 +463,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dataKey="formattedDate"
               xAxisId={"x-axis-3"}
               tickFormatter={(x) => prettyPrintDayLabelWithDate(x, timezone, locale)}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              scale={isSitesChart ? "time" : "auto"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
-              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
-              domain={
-                view === VIEWS.SOLAR_SITES
-                  ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
-                  : undefined
-              }
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
+              type={isSitesChart ? "number" : "category"}
+              ticks={isSitesChart ? timeTicks : undefined}
+              domain={isSitesChart ? [timeTicks[0], timeTicks[timeTicks.length - 1]] : undefined}
+              interval={isSitesChart ? undefined : 47}
               orientation="bottom"
               axisLine={false}
               tickMargin={-12}
@@ -482,21 +478,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <YAxis
               tickFormatter={
-                view === VIEWS.SOLAR_SITES
-                  ? undefined
-                  : (val, i) => prettyPrintYNumberWithCommas(val)
+                isSitesChart ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
               }
               yAxisId={"y-axis"}
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={false}
               ticks={yTicks}
-              domain={
-                globalIsZoomed && view !== VIEWS.SOLAR_SITES
-                  ? [0, Number(zoomYMax * 1.1)]
-                  : [0, yMax]
-              }
+              domain={globalIsZoomed && !isSitesChart ? [0, Number(zoomYMax * 1.1)] : [0, yMax]}
               label={{
-                value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
+                value: isSitesChart ? "Generation (KW)" : "Generation (MW)",
                 angle: 270,
                 position: "outsideLeft",
                 fill: "white",
@@ -544,16 +534,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             <ReferenceLine
-              x={
-                view === VIEWS.SOLAR_SITES
-                  ? new Date(currentTime + ":00.000Z").getTime()
-                  : currentTime
-              }
+              x={isSitesChart ? new Date(currentTime + ":00.000Z").getTime() : currentTime}
               stroke="white"
               strokeWidth={currentTime === timeOfInterest ? 2 : 1}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              scale={isSitesChart ? "time" : "auto"}
               strokeDasharray="3 3"
               className={currentTime !== timeOfInterest ? "" : "hidden"}
               label={
@@ -566,16 +552,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
             />
 
             <ReferenceLine
-              x={
-                view === VIEWS.SOLAR_SITES
-                  ? new Date(localeTimeOfInterest).getTime()
-                  : timeOfInterest
-              }
+              x={isSitesChart ? new Date(localeTimeOfInterest).getTime() : timeOfInterest}
               stroke="white"
               strokeWidth={2}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              scale={isSitesChart ? "time" : "auto"}
               label={
                 <CustomizedLabel
                   className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
@@ -832,7 +814,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   return <div></div>;
 
                 let formattedDate = data?.formattedDate + ":00+00:00";
-                if (view === VIEWS.SOLAR_SITES) {
+                if (isSitesChart) {
                   const date = new Date(Number(data?.formattedDate));
                   formattedDate = dateToZonedDateTimeString(date, timezone, locale);
                 }
@@ -869,7 +851,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         <div className="pr-3">
                           {formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale)}
                         </div>
-                        <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
+                        <div>{isSitesChart ? "KW" : "MW"}</div>
                       </li>
                       {Object.entries(toolTiplabels)
                         .filter(

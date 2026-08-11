@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getNHourForecastLabel } from "../../helpers/csvDownload";
-import { VIEWS } from "../../../constant";
 import Toggle from "../../Toggle";
 import { CloseButtonIcon } from "../../icons/icons";
 
@@ -32,7 +31,8 @@ interface Props {
   onClose: () => void;
   onDownload: (cols: CSVColumn[]) => void;
   nHourForecast: number;
-  view: VIEWS;
+  /** Whether a comparison is active — the delta column only makes sense against a B side. */
+  comparisonActive: boolean;
 }
 
 export const CSVDownloadModal: React.FC<Props> = ({
@@ -40,7 +40,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
   onClose,
   onDownload,
   nHourForecast,
-  view
+  comparisonActive
 }) => {
   const selectableColumns = useMemo(
     () =>
@@ -53,8 +53,8 @@ export const CSVDownloadModal: React.FC<Props> = ({
   );
 
   const availableSelectableColumns = useMemo(
-    () => selectableColumns.filter((column) => column.id !== "delta" || view === VIEWS.DELTA),
-    [selectableColumns, view]
+    () => selectableColumns.filter((column) => column.id !== "delta" || comparisonActive),
+    [selectableColumns, comparisonActive]
   );
 
   const allSelectableIds = useMemo(
@@ -115,7 +115,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
 
             {/* Column rows */}
             {selectableColumns.map((col) => {
-              const isDisabled = col.id === "delta" && view !== VIEWS.DELTA;
+              const isDisabled = col.id === "delta" && !comparisonActive;
               return (
                 <div key={col.id} className="flex items-center gap-3">
                   <div className="-ml-2">

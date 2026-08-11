@@ -12,7 +12,6 @@ type PlayButtonProps = {
 const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
   const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
-  const [view] = useGlobalState("view");
   const { stopTime } = useStopAndResetTime();
   const intervalRef = useRef<any>();
   const pause = () => {
@@ -41,10 +40,17 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
     }
   }, [isPlaying]);
 
-  // Pause when tab changes
+  // Pause on mount. Used to be keyed on `view`, back when the three dashboard views were
+  // mounted-but-hidden and this component stayed mounted across a tab switch — the dependency
+  // was what caught the "switched away while playing" case. Every owner of `PlayButton` now
+  // fully unmounts and remounts on the equivalent transitions (`pages/index.tsx` swaps
+  // `PvRemixChart`/`DeltaViewChart` on `comparison`, and `/sites` is a real route change), so
+  // this instance is always freshly mounted when it matters and an empty dependency array is
+  // the same edge, not a behaviour change.
   useEffect(() => {
     pause();
-  }, [view]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Ui

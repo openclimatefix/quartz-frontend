@@ -12,7 +12,7 @@ import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../constant";
+import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import { ChartLegend } from "./ChartLegend";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
@@ -214,14 +214,16 @@ const PvRemixChart: FC<{
     selectedRegions = selectedMapRegionIds.map((id) => String(id));
   }
 
-  const [view] = useGlobalState("view");
+  // Used to be guarded on `view === VIEWS.FORECAST`; `pages/index.tsx` only ever mounts this
+  // component when `comparison` is null (Wave 4), so the guard was true on every render this
+  // effect could fire on, and dropped rather than swapped for an equivalent check.
   useEffect(() => {
-    if (view === VIEWS.FORECAST && chartData?.length) {
+    if (chartData?.length) {
       if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
         setSelectedISOTime(getCursorNow());
       }
     }
-  }, [view, chartData, selectedTime, setSelectedISOTime]);
+  }, [chartData, selectedTime, setSelectedISOTime]);
 
   return (
     <>
