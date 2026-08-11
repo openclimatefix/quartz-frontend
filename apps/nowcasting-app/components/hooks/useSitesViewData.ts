@@ -18,15 +18,24 @@ import {
 } from "../types";
 
 /**
- * The Solar Sites view's data, lifted whole out of `pages/index.tsx`.
+ * The Solar Sites view's data, lifted whole out of `pages/index.tsx` (Phase 5) and now called
+ * only from `pages/sites.tsx` (Phase 6, Track C) — the dashboard no longer mounts this hook, so
+ * opening the Forecast view no longer fetches the sites list, a site forecast and site actuals
+ * it never shows.
  *
  * This is deliberately still the **v0** shape — sites are Phase 5 by design (`SITES_API_PREFIX`,
  * `sitesMap.tsx`, `solar-site-view/*` and `satelliteLayer.ts` all stay on v0 until then). Pulling
- * it into one hook is the point: when Phase 5 migrates sites there is a single file holding every
- * v0 sites fetch, rather than a slice of the page component.
+ * it into one hook is the point: when the sites v1 migration lands there is a single file holding
+ * every v0 sites fetch, rather than a slice of the page component.
  *
  * It owns the `sitesLoadingState` global write, because the effect that computes it needs all
  * three fetches' loading/validating/error triples and nothing outside this hook has them.
+ *
+ * The `nl_`-prefixed-site filter that used to live here is gone (contract §2: sites is
+ * tenancy-scoped, never country-scoped, and now that it is its own route rather than a tab on the
+ * country dashboard there is no country context to filter against). It also had a
+ * splice-while-iterating bug — skipping the element after every removal — so it never actually
+ * dropped every NL site; see `phase6-track-c-notes.md`.
  */
 export const useSitesViewData = (
   selectedISOTime: string
@@ -56,15 +65,6 @@ export const useSitesViewData = (
     () => allSitesData?.site_list.slice(0, 100) || [],
     [allSitesData]
   );
-
-  // Remove NL sites.
-  // NOTE: pinned as-is from `pages/index.tsx` — splicing the array being iterated skips the
-  // element after each removal, so two adjacent `nl_` sites leave one behind. Phase 5's problem.
-  slicedSitesData.forEach((site, index) => {
-    if (site.client_site_name.startsWith("nl_")) {
-      slicedSitesData.splice(index, 1);
-    }
-  });
 
   const siteUuidsString = slicedSitesData.map((site) => site.site_uuid).join(",");
   const {
