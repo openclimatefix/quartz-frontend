@@ -7,7 +7,7 @@ import { VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
-import { useCurrentAggregationLevel, useFocusedCountry } from "../../hooks/data";
+import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
@@ -22,13 +22,14 @@ import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
 import { FeatureCollection } from "geojson";
 import * as turf from "@turf/turf";
-import useMapRegionValues from "./use-map-region-values";
+import useEnabledCountryMapData from "./use-enabled-country-map-data";
 import {
   PV_SOURCE_ID,
   applyFeatureStates,
   fillColorExpression,
   fillOpacityExpression
 } from "./feature-state";
+import { FEATURE_KEY_PROPERTY, REGION_COUNTRY_PROPERTY } from "./country-features";
 import type { MapFeatureState } from "../helpers/data";
 
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -60,7 +61,6 @@ type PvLatestMapProps = {
 const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { timezone, locale } = useCountryFormatting();
-  const level = useCurrentAggregationLevel();
   const country = useFocusedCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
@@ -72,8 +72,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const { featureStates, geometry, nationalCapacityMw, hasValues, isLoading, error } =
-    useMapRegionValues(level, selectedISOTime);
+  // Every ENABLED country, not just the focused one (contract §1/§3). One instance of the
+  // value pipeline per country, merged into one source; `loaders` are those instances and
+  // must be rendered. See `use-enabled-country-map-data.tsx`.
+  const { featureStates, geometry, capacityByCountry, hasValues, isLoading, error, loaders } =
+    useEnabledCountryMapData(selectedISOTime);
 
   // The network constraint overlay. Fetched rather than imported since Phase 5 — it was
   // 430 KB of GeoJSON in the bundle of every page that imports this module, for a layer that
@@ -125,8 +128,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     }
   }, [activeUnit]);
 
-  const nationalCapacityRef = useRef(nationalCapacityMw);
-  nationalCapacityRef.current = nationalCapacityMw;
+  // Capacity per country, not one figure: the "% of national" popup on an NL province must
+  // divide by NL's installed capacity, and with both countries drawn a single value would
+  // silently report NL regions as a percentage of GB.
+  const capacityByCountryRef = useRef(capacityByCountry);
+  capacityByCountryRef.current = capacityByCountry;
 
   // Toggle constraints visibility on map
   useEffect(() => {
@@ -146,14 +152,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     }
   }, [showConstraints]);
 
-  // The ten-times MW bands belong to the client-side rollups (GB's DNO / NG zone), which is
-  // a branch on the level's *kind*, not on its name — NL's `province` is an API-served level
-  // and reads on the GSP-scale bands, as it should.
-  const isGrouped = level?.derived ?? false;
-  const fillOpacity = useMemo(
-    () => fillOpacityExpression(activeUnit, isGrouped),
-    [activeUnit, isGrouped]
-  );
+  // The ten-times MW bands belong to the client-side rollups (GB's DNO / NG zone). That is a
+  // branch on the level's *kind*, not on its name — and since each drawn country is on its
+  // own level it is now a per-FEATURE fact rather than a per-map one, carried as feature
+  // state and read inside the expression. See `feature-state.ts`.
+  const fillOpacity = useMemo(() => fillOpacityExpression(activeUnit), [activeUnit]);
   const fillColor = useMemo(() => fillColorExpression(activeUnit), [activeUnit]);
 
   // Create a popup, but don't add it to the map yet.
@@ -180,7 +183,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
       map.addSource(PV_SOURCE_ID, {
         type: "geojson",
         data,
-        promoteId: "id"
+        // The country-qualified key, not the bare region id: one source carries every enabled
+        // country and GB's `5` is not Germany's `5`. See `country-features.ts`.
+        promoteId: FEATURE_KEY_PROPERTY
       });
       appliedGeometryRef.current = data;
       appliedStatesRef.current = null;
@@ -264,7 +269,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             forecastValue = forecastPercentText;
             unit = "%";
           } else if (currentActiveUnit === ActiveUnit.capacity) {
-            const nationalCapacity = nationalCapacityRef.current;
+            // This region's own country's national capacity, off the feature.
+            const featureCountry = String(
+              properties?.[REGION_COUNTRY_PROPERTY] ?? ""
+            ).toUpperCase();
+            const nationalCapacity = capacityByCountryRef.current[featureCountry] ?? 0;
             actualValue =
               nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : "-";
             forecastValue = "-";
@@ -364,7 +373,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           "line-width": 2,
           "line-opacity": 1
         },
-        filter: ["in", "id", ""]
+        filter: ["in", FEATURE_KEY_PROPERTY, ""]
       });
     }
 
@@ -475,9 +484,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
   // Gated on `hasValues`, not `featureStates.size` — see the field's doc comment. The old guard
   // could not fire once `/regions` had resolved, which is every case that matters.
+  //
+  // `loaders` is rendered on BOTH arms. It carries the per-country data hooks, so dropping it
+  // on the failure arm would unmount the pipeline that produced the error — clearing the
+  // error, re-rendering the normal arm, remounting, re-failing: a flicker loop rather than a
+  // failure state.
   if (error && !hasValues) {
     return (
       <div className={`pv-map relative h-full w-full ${className}`}>
+        {loaders}
         <FailedStateMap error="Failed to load" />
       </div>
     );
@@ -487,6 +502,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     <div className={`pv-map relative h-full w-full ${className}`}>
       {
         <>
+          {/* One per enabled country; they render nothing and exist for their hooks. */}
+          {loaders}
           {showSpinner && showPvLayer && (
             <LoadStateMap>
               <Spinner />

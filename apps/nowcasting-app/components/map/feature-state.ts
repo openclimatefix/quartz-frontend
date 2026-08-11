@@ -13,9 +13,12 @@ import { ActiveUnit } from "./types";
  * the geometry is handed over once and the numbers travel as **feature state**, with the
  * colour and opacity ramps expressed as `step` expressions over `["feature-state", …]`.
  *
- * The source already declares `promoteId: "id"`, so a feature's Mapbox id is its
- * `properties.id` — the numeric GSP id at GSP level, the grouping name above it. See
- * `buildMapGeometry`, which is the other half of that agreement.
+ * The source declares `promoteId: FEATURE_KEY_PROPERTY`, so a feature's Mapbox id is its
+ * **country-qualified** key (`"GB:5"`, `"NL:groningen"`) rather than its bare region id. That
+ * changed in Phase 6 Track F, when the source started carrying every enabled country at once
+ * and a bare `5` stopped being unique. `components/map/country-features.ts` is the other half
+ * of the agreement — it stamps the key, and `namespaceFeatureStates` re-keys the value map
+ * that arrives here.
  */
 export const PV_SOURCE_ID = "latestPV";
 
@@ -57,23 +60,40 @@ const state = (key: keyof MapFeatureState): Expression =>
   ["coalesce", ["feature-state", key], 0] as unknown as Expression;
 
 /**
+ * Pick a band expression per feature, on the feature-state `grouped` flag.
+ *
+ * Grouped-ness used to be an argument, because the map drew one country at one level. Since
+ * Phase 6 Track F it draws every *enabled* country in one source, and each country picks its
+ * own aggregation level — GB can be on its DNO rollup (bands ten times higher) while NL is on
+ * provinces in the same frame. A single `isGrouped` argument cannot describe that frame: one
+ * of the two countries gets the other's thresholds, which is not an error, just a map where
+ * every NL province sits in the faintest band. So the choice moves into the expression, where
+ * it is made per feature. `namespaceFeatureStates` stamps the flag.
+ */
+const groupedAwareBands = (input: Expression): Expression =>
+  [
+    "case",
+    ["==", ["feature-state", "grouped"], true],
+    bandExpression(input, MW_THRESHOLDS_GROUPED),
+    bandExpression(input, MW_THRESHOLDS_GSP)
+  ] as unknown as Expression;
+
+/**
  * `fill-opacity` for the forecast layer.
  *
  * Capacity mode is not gated on `dataState`: installed capacity is known for every region
  * whether or not it has published a reading, so gating it would blank the capacity view
  * every time the newest slot was mid-fill.
  */
-export const fillOpacityExpression = (unit: ActiveUnit, isGrouped: boolean): Expression => {
-  const mwThresholds = isGrouped ? MW_THRESHOLDS_GROUPED : MW_THRESHOLDS_GSP;
-
+export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
   if (unit === ActiveUnit.capacity) {
-    return bandExpression(state("capacity"), mwThresholds);
+    return groupedAwareBands(state("capacity"));
   }
 
   const valueOpacity =
     unit === ActiveUnit.percentage
       ? bandExpression(state("normalized"), NORMALIZED_THRESHOLDS)
-      : bandExpression(state("power"), mwThresholds);
+      : groupedAwareBands(state("power"));
 
   return [
     "case",

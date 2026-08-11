@@ -103,9 +103,11 @@ const assetsFor = (
  * chart path mid-Phase-5 has nowhere left to live.
  */
 export const useLevelGroupings = (
-  level: AggregationLevel | undefined
+  level: AggregationLevel | undefined,
+  countryCode?: string
 ): GeoAssetResult<Record<string, string[]>> => {
-  const country = useFocusedCountry();
+  const focusedCountry = useFocusedCountry();
+  const country = countryCode ?? focusedCountry;
   const { groupingsUrl } = useMemo(() => assetsFor(country, level), [country, level]);
   return useGeoAsset<Record<string, string[]>>(groupingsUrl);
 };
@@ -125,11 +127,20 @@ export type MapGeometryResult = {
   error: unknown;
 };
 
+/**
+ * `countryCode` defaults to the focused country. The map passes it explicitly: since Phase 6
+ * Track F it draws every *enabled* country, one instance of this hook per country, each
+ * resolving its own level's assets. Nothing is fetched eagerly — enabling two countries
+ * fetches two countries' boundaries and no more, which is the Phase 5 property this had to
+ * preserve.
+ */
 export const useMapGeometry = (
   level: AggregationLevel | undefined,
-  regions: Region[] | undefined
+  regions: Region[] | undefined,
+  countryCode?: string
 ): MapGeometryResult => {
-  const country = useFocusedCountry();
+  const focusedCountry = useFocusedCountry();
+  const country = countryCode ?? focusedCountry;
   // Both come out of the static registry, so these identities are stable for the life of the
   // module and are safe as `useMemo` dependencies.
   const { layer, groupingsUrl } = useMemo(() => assetsFor(country, level), [country, level]);

@@ -118,15 +118,21 @@ const valueRegionTypeFor = (
 export const useMapRegionValues = (
   level: AggregationLevel | undefined,
   /** The shared cursor, not a country slot — resolved to one below. */
-  cursorTime: string
+  cursorTime: string,
+  /**
+   * Whose values these are. Defaults to the focused country; the map passes it explicitly,
+   * one instance of this hook per enabled country (Phase 6 Track F).
+   */
+  countryCode?: string
 ): MapRegionValues => {
-  const country = useFocusedCountry();
+  const focusedCountry = useFocusedCountry();
+  const country = countryCode ?? focusedCountry;
   const [cursorNow] = useGlobalState("timeNow");
 
   // The cursor is one instant on the finest *enabled* country's grid; this country's data is
   // published on its own. Resolve both before anything is looked up, or a GB map read at NL's
   // 16:15 finds nothing in every region and draws as a blank country rather than an error.
-  // Track D's fan-out gives each country's layer its own instance, and each resolves its own.
+  // Track F's fan-out gives each country's layer its own instance, and each resolves its own.
   const targetSlot = slotForInstant(cursorTime, country);
   const timeNow = slotForInstant(cursorNow, country);
 
@@ -157,7 +163,7 @@ export const useMapRegionValues = (
   // since Phase 5. `groupings` comes back on the same object because the two must agree:
   // rolling values up with one level's groupings onto another level's polygons is exactly
   // the out-of-order failure `useMapGeometry` guards against.
-  const geo = useMapGeometry(level, regions.data);
+  const geo = useMapGeometry(level, regions.data, country);
 
   const featureStates = useMemo(
     () =>

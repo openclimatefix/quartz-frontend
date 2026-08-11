@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 
 import { getCountryConfig } from "../../config/countries";
-import { useCountryState } from "../../components/helpers/globalState";
+import useGlobalState from "../../components/helpers/globalState";
+import { readCountryScoped } from "../../components/helpers/countryState";
 import {
   defaultLevelOf,
   deriveAggregationLevels,
@@ -22,9 +23,17 @@ import { useRegionTypes } from "./use-regions";
 // level numbers of a list the map could already draw. Callers wanting the manifest's own
 // loading state have `useRegionTypes`.
 
-/** The current country's aggregation levels, outermost first. `[]` for an unconfigured country. */
-export const useAggregationLevels = (): AggregationLevel[] => {
-  const country = useFocusedCountry();
+/**
+ * A country's aggregation levels, outermost first. `[]` for an unconfigured country.
+ *
+ * Defaults to the focused country, which is what every chart-side caller wants. The explicit
+ * argument is for the map: since Phase 6 Track F it draws every *enabled* country at once, and
+ * each of them is at its own level (the level is country-keyed state), so the map asks per
+ * country rather than once.
+ */
+export const useAggregationLevels = (countryCode?: string): AggregationLevel[] => {
+  const focusedCountry = useFocusedCountry();
+  const country = countryCode ?? focusedCountry;
   // `useRegionTypes` takes a `Pick<Scope, "country">`; memoised so the identity is stable
   // across renders and the hook's own `useMemo` on `scope?.country` is not defeated.
   const scope = useMemo(() => ({ country }), [country]);
@@ -48,9 +57,14 @@ export const useAggregationLevels = (): AggregationLevel[] => {
  * `undefined` therefore means one thing only: the country has no levels at all, i.e. no
  * registry entry.
  */
-export const useCurrentAggregationLevel = (): AggregationLevel | undefined => {
-  const levels = useAggregationLevels();
-  const [regionType] = useCountryState("nationalAggregationLevel");
+export const useCurrentAggregationLevel = (countryCode?: string): AggregationLevel | undefined => {
+  const focusedCountry = useFocusedCountry();
+  const country = countryCode ?? focusedCountry;
+  const levels = useAggregationLevels(country);
+  // Read through the record rather than `useCountryState`, which is focused-country only. The
+  // map needs a non-focused country's level, and this is the same read `useCountryState` does.
+  const [record] = useGlobalState("nationalAggregationLevel");
+  const regionType = readCountryScoped(record, country, "nationalAggregationLevel");
 
   return useMemo(
     () => levels.find((level) => level.regionType === regionType) ?? defaultLevelOf(levels),

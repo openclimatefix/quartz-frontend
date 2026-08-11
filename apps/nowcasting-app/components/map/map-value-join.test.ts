@@ -379,7 +379,10 @@ describe("paint expressions render the three states distinctly", () => {
   const genuineZero = { ...base, dataState: "value" };
   const generating = { ...base, dataState: "value", power: 300, normalized: 0.6 };
 
-  const opacity = fillOpacityExpression(ActiveUnit.MW, false);
+  // Grouped-ness moved from an argument into feature state in Phase 6 Track F: the map draws
+  // several countries at once and each is on its own level, so one expression has to serve a
+  // GB DNO rollup and an NL province in the same frame. Absent flag = region-level bands.
+  const opacity = fillOpacityExpression(ActiveUnit.MW);
   const colour = fillColorExpression(ActiveUnit.MW);
 
   test("a genuine zero is faint but drawn; unpublished is not drawn at all", () => {
@@ -401,20 +404,31 @@ describe("paint expressions render the three states distinctly", () => {
   });
 
   test("grouped levels use the ten-times bands the zone/DNO legend shows", () => {
-    const grouped = fillOpacityExpression(ActiveUnit.MW, true);
-    expect(evaluate(grouped, { ...base, dataState: "value", power: 300 })).toBe(0.03);
-    expect(evaluate(grouped, { ...base, dataState: "value", power: 3000 })).toBe(0.6);
+    expect(evaluate(opacity, { ...base, dataState: "value", power: 300, grouped: true })).toBe(
+      0.03
+    );
+    expect(evaluate(opacity, { ...base, dataState: "value", power: 3000, grouped: true })).toBe(
+      0.6
+    );
+  });
+
+  test("one expression bands a grouped and an ungrouped feature differently in the same frame", () => {
+    // The reason grouped-ness became feature state: GB on its DNO rollup and NL on provinces
+    // are drawn by the same paint expression, and 300 MW means different things to each.
+    const value = { ...base, dataState: "value", power: 300 };
+    expect(evaluate(opacity, { ...value, grouped: true })).toBe(0.03);
+    expect(evaluate(opacity, { ...value, grouped: false })).toBe(0.6);
   });
 
   test("percentage mode reproduces getOpacityValueFromPVNormalized's table", () => {
-    const percentage = fillOpacityExpression(ActiveUnit.percentage, false);
+    const percentage = fillOpacityExpression(ActiveUnit.percentage);
     expect(evaluate(percentage, { ...base, dataState: "value", normalized: 0 })).toBe(0.03);
     expect(evaluate(percentage, { ...base, dataState: "value", normalized: 0.36 })).toBe(0.6);
     expect(evaluate(percentage, { ...base, dataState: "value", normalized: 0.9 })).toBe(1);
   });
 
   test("capacity mode is not gated on dataState — capacity is known regardless", () => {
-    const capacity = fillOpacityExpression(ActiveUnit.capacity, false);
+    const capacity = fillOpacityExpression(ActiveUnit.capacity);
     expect(evaluate(capacity, { ...unpublished, capacity: 300 })).toBe(0.6);
   });
 

@@ -7,13 +7,12 @@ import { VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
 import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
-import { useAggregationLevels } from "../../hooks/data";
-import { defaultLevelOf } from "../helpers/aggregationLevels";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { FeatureCollection } from "geojson";
 import dynamic from "next/dynamic";
-import useMapRegionValues from "./use-map-region-values";
+import useEnabledCountryMapData from "./use-enabled-country-map-data";
 import { PV_SOURCE_ID, applyFeatureStates, deltaFillColorExpression } from "./feature-state";
+import { FEATURE_KEY_PROPERTY } from "./country-features";
 import type { MapFeatureState } from "../helpers/data";
 
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
@@ -38,16 +37,12 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
 
   // The delta view is single-region-level only. Rather than reading the user's stored level
   // (which `pages/index.tsx` forces to the finest one on entering this view anyway), take
-  // the country's finest non-derived level directly — GB's `gsp`, NL's `province`. That is
+  // each country's finest non-derived level directly — GB's `gsp`, NL's `province`. That is
   // the same rule `defaultLevelOf` encodes for the initial state, so the two cannot drift,
-  // and it removes this file's dependence on `pages/index.tsx` doing the forcing.
-  const levels = useAggregationLevels();
-  const level = useMemo(() => defaultLevelOf(levels), [levels]);
-
-  const { featureStates, geometry, hasValues, isLoading, error } = useMapRegionValues(
-    level,
-    selectedISOTime
-  );
+  // and it removes this file's dependence on `pages/index.tsx` doing the forcing. That is
+  // what `finestLevel` asks the fan-out for, per country.
+  const { featureStates, geometry, hasValues, isLoading, error, loaders } =
+    useEnabledCountryMapData(selectedISOTime, { finestLevel: true });
 
   const fillColor = useMemo(() => deltaFillColorExpression(), []);
 
@@ -67,7 +62,8 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
       map.addSource(PV_SOURCE_ID, {
         type: "geojson",
         data,
-        promoteId: "id"
+        // Country-qualified — see the same call in `pvLatestMap.tsx`.
+        promoteId: FEATURE_KEY_PROPERTY
       });
       appliedGeometryRef.current = data;
       appliedStatesRef.current = null;
@@ -191,13 +187,17 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
           "line-width": 2,
           "line-opacity": 1
         },
-        filter: ["in", "id", ""]
+        filter: ["in", FEATURE_KEY_PROPERTY, ""]
       });
     }
   };
 
   return (
     <div className={`delta-map relative h-full w-full ${className}`}>
+      {/* Outside the three arms deliberately: these are the per-country data hooks, and an arm
+          that dropped them would unmount the pipeline whose state chose the arm — the failure
+          arm would clear its own error and flicker. */}
+      {loaders}
       {/* Both gated on `hasValues`, not `featureStates.size` — see the field's doc comment. The
           loading arm had the same flaw as the error arm: feature states populate the moment
           `/regions` resolves, so the spinner vanished while the forecast was still in flight. */}

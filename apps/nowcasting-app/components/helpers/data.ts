@@ -121,6 +121,18 @@ export type MapFeatureState = {
   hasDelta: boolean;
   /** Human label — `Region.label` ("City Road"), never the raw `citr_1`. */
   label: string;
+  /**
+   * Whether this feature belongs to a client-side rollup level (GB's DNO / NG zone), whose MW
+   * opacity bands are ten times the region-level ones.
+   *
+   * Not written here — the value join has no opinion about how a level is drawn. It is
+   * stamped per country by `namespaceFeatureStates` (`components/map/country-features.ts`),
+   * because since Phase 6 the map draws several countries at once and each picks its own
+   * aggregation level: GB can be on its DNO rollup while NL is on provinces in the same
+   * frame. `fillOpacityExpression` reads the flag rather than taking an argument, which is
+   * what lets one paint expression serve both. Absent means false, i.e. region-level bands.
+   */
+  grouped?: boolean;
 };
 
 /** One region's joined values, before it is flattened to feature state. */
