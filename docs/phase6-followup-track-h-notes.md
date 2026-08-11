@@ -203,3 +203,121 @@ The track is the footer's second row, under the readout.
   presentation decision nobody has taken.
 - **The map corner's `ButtonGroup` still prints the selected time.** Track D flagged it as a
   Wave 4 trim; the track makes it redundant twice over rather than once.
+
+---
+
+# Followup — the drag model
+
+Brad's live pass: the scrubber is "pretty janky" when dragging. The at-rest design was the cause,
+and it is still the right design at rest; what follows is the drag-scoped exception.
+
+## The diagnosis, confirmed and refined
+
+The proposed diagnosis was that `onPointerMove` writing global state on every pointer event
+re-renders every consumer, so the handle moves at the app's re-render rate. That is right in
+substance, and I confirmed the expensive half by reading the path: a distinct `selectedISOTime`
+invalidates `useEnabledCountryMapData`'s `loaders` memo, which re-renders a `CountryMapLayer` per
+enabled country, which recomputes `useMapRegionValues`' `featureStates` (`targetSlot` is a
+dependency) — a full `buildMapFeatureStates` over every region, ~332 for GB alone — and the map
+then applies the result region by region through `setFeatureState`. Both charts recompute
+alongside. That is far more work than a frame.
+
+**One part of the diagnosis is wrong, and it changes what the fix buys.** I probed
+`react-hooks-global-state` directly rather than reasoning about React's bailout: with each write
+in its own event, **ten identical writes cause one render and ten distinct writes cause ten**.
+Because the committed value is *already snapped*, pointer moves within a single slot write an
+identical string and were therefore always free. The storm was never "one commit per pointer
+event"; it was **one commit per slot crossing** — up to 96 on a GB track and 192 with NL enabled,
+each doing the O(regions) work above, and with the handle unable to move until each one landed.
+
+So the felt jank had two components, and the second was the larger:
+
+1. commits far too frequent during a fast drag (real, but bounded by slot count, not event rate);
+2. **the handle's motion coupled to the heaviest work in the app** — it could only advance once a
+   global re-render completed.
+
+The fix addresses both, and the second is why it should feel different even though the commit
+count during a slow drag barely changes.
+
+## Two rates
+
+```
+pointermove ──► dragInstant (local state)  ──► handle renders now, in this component only
+            └─► pendingRef + one rAF       ──► selectedISOTime commits next frame, latest only
+```
+
+- **`dragInstant`** is the handle's position while a drag is live, and `null` at every other
+  moment. The render falls back to `selectedISOTime` whenever it is `null`, so **at rest the
+  code path is exactly the one that was there before** — no second source of truth outlives the
+  gesture, and the chart click, arrow keys and playback still drive the handle with nothing to
+  keep in step.
+- **The commit is coalesced to one animation frame**, latest position wins. `pendingRef` is
+  overwritten rather than queued and a frame is requested only when none is outstanding, so a
+  fast drag can never build a backlog of frames replaying stale positions after the finger stops.
+- **A press commits immediately** rather than waiting a frame: a press is a click as much as the
+  start of a drag, and a tap should repaint the map with no perceptible delay.
+- **Release commits the true final position exactly once** — the pending frame is cancelled and
+  its value written directly — so a drag can never end on a stale instant.
+
+**The handle renders at the snapped position, not the raw pointer position.** This was my call and
+it is deliberate: §4's whole point is that the cursor is a grid and every position is a real
+published instant, so a handle that glides continuously and then jumps on release would hide the
+grid and promise a precision the cursor does not have. At 480–1400px of track that is a 5–12px
+step per slot with GB alone and half that with NL — crisp rather than coarse. It also has a
+useful safety property: **the drag-local value and the committed value are the same instant**,
+one merely arriving sooner, so dropping the local value and committing the final one land in the
+same batch and cannot disagree or flash.
+
+## Two things fixed while in here
+
+- **Pointer capture** was already released on `pointercancel` as well as `pointerup` (both were
+  wired to `endDrag`). Added `onLostPointerCapture` too: capture can be lost without either
+  firing, which would otherwise strand `draggingRef` at `true` and leave the handle stuck on its
+  drag-local value. `endDrag` bails when no drag is live, so the ordinary
+  pointerup-then-lostpointercapture pair is idempotent rather than a double commit.
+- **A drag no longer fights the play button.** This was a real bug, not a hypothetical:
+  `stopTime()` clears the *global* `intervals`, but `PlayButton` keeps its ticker in a ref of its
+  own that is not among them, so playback carried on advancing the cursor once a second
+  underneath a drag. The track now clears the shared `isPlaying` flag, which pauses the button
+  through its own effect rather than reaching into the component. The same `beginUserInput()`
+  runs on the keyboard path, which had the identical problem.
+
+## Tests
+
+**+7, all in `scrub-track.test.tsx`** (38 in the two shell suites, from 31). The drag model has a
+real oracle and gets one:
+
+- a run of four moves inside one frame commits **nothing**, then one frame commits **one** value
+  and it is the latest — asserted as the *sequence of instants that reached the app*, so the
+  intermediates are provably absent;
+- a second frame afterwards does nothing, i.e. no backlog;
+- release commits the snapped final position once, and the frame it cancelled never fires;
+- the handle tracks the pointer during all of the above while the committed value does not move;
+- the drag-local value is dropped on release and the handle derives from shared state again;
+- a press pauses playback;
+- a pointer dragged off either end clamps rather than being lost.
+
+Commits are recorded as **values, not render counts**: how many times React re-renders a
+subscriber for one write is the state library's business, and pinning it would test something
+this track does not control. Frame *timing* is not tested either — `requestAnimationFrame` is
+replaced by a manual queue that tests step explicitly.
+
+Two environment gaps had to be shimmed, both documented at their definitions: jsdom has no
+`PointerEvent` (so Testing Library silently drops `clientX` and `button`) and no pointer capture,
+and every element measures zero-width.
+
+## Verification
+
+`yarn tsc --noEmit` clean bar the known `jest.globalSetup.ts(14,1) TS1208`; `npx next lint` **16
+warnings / 0 errors**; full Jest **1080 passed / 44 suites**, from 1073 / 44 — additions only.
+
+## If it is still not smooth
+
+One commit per frame is the right first step and it is where I have stopped, per the brief. If a
+fast drag still stutters, the remaining cost is the map redraw itself, not the commit rate, and
+the next step I would propose — **not** implemented — is to commit on a slower cadence during the
+drag (every second or third frame) and exactly once on release, keeping the handle at pointer
+rate throughout. That trades how closely the map follows the finger for smoothness, which is a
+feel judgement and Brad's to make; I did not want to buy it unasked. The more invasive options
+below that — making the map's feature-state application incremental, or skipping map repaints
+entirely while a drag is live — are real but are map work, not shell work.
