@@ -162,6 +162,19 @@ export const isOnCadence = (instant: Instant, cadenceMinutes: number): boolean =
 export const snapToCadence = (instant: Instant, cadenceMinutes: number): string =>
   toCursorString(roundToCadence(instant, cadenceMinutes, "up"));
 
+/**
+ * The last slot at or before an instant — `snapToCadence`'s floor.
+ *
+ * The ceiling is the rule for a cursor *value*, and nothing here changes that. This exists for
+ * the one job the ceiling cannot do: finding the far end of a **bounded** span. The scrub
+ * track's last reachable slot is the last one inside the data window, and ceiling the window's
+ * end would put it one slot past the last published value — a handle that can be dragged onto
+ * an instant nothing has a number for. Floor at the top of a range, ceiling everywhere a
+ * cursor input is resolved.
+ */
+export const snapDownToCadence = (instant: Instant, cadenceMinutes: number): string =>
+  toCursorString(roundToCadence(instant, cadenceMinutes, "down"));
+
 /** The next slot strictly after an instant. `get30MinNow`'s rounding, generalised. */
 export const nextSlot = (instant: Instant, cadenceMinutes: number): string =>
   toCursorString(roundToCadence(instant, cadenceMinutes, "up", true));

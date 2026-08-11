@@ -5,15 +5,29 @@ import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { finestCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
 import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, formatISODateStringAsZonedTime } from "../helpers/utils";
+import ScrubTrack from "./scrub-track";
 
 /**
- * The shared cursor, said out loud.
+ * The zone the footer's own axis is written in.
+ *
+ * The readout leads with UTC and names each country's slot alongside, so the track's ticks are
+ * UTC too — an axis in one zone and a cursor in another is a readout you have to do arithmetic
+ * on. Whether the footer should lead with the focused country's local time instead is Brad's
+ * open decision; this constant is the whole of the change if it goes the other way, since the
+ * track takes the zone as a prop and holds no timezone of its own.
+ */
+const READOUT_ZONE = "UTC";
+
+/**
+ * The shared cursor, said out loud — and, since the Phase 6 live pass, moved as well.
  *
  * Contract §4: with the map and the chart reading one instant, the cursor is what makes them
- * one instrument, so the control belongs to the shell rather than to either pane. This is the
- * readout half of that. The *inputs* have not moved — clicking the chart, the arrow keys and
- * the play button all still write `selectedISOTime` — and per §4 they must not have to: any
- * input snapping to the same grid is what keeps chart and map from ever being a slot apart.
+ * one instrument, so the control belongs to the shell rather than to either pane. Track D
+ * shipped the readout and deferred the track; `scrub-track.tsx` below is the interaction half,
+ * added at Brad's request. The three existing inputs are untouched — clicking the chart, the
+ * arrow keys and the play button all still write `selectedISOTime` — and the track is a fourth
+ * peer rather than a replacement: it reads the same state, so it follows them and they follow
+ * it with nothing to keep in step.
  *
  * Three things are on screen because each is a different fact:
  *
@@ -80,31 +94,34 @@ const CursorReadout: FC = () => {
   return (
     <footer
       aria-label="Time cursor"
-      className="flex flex-none flex-wrap items-baseline gap-x-5 gap-y-1 border-t border-white/10 bg-black px-4 py-2 text-xs text-ocf-gray-300"
+      className="flex flex-none flex-col border-t border-white/10 bg-black text-xs text-ocf-gray-300"
     >
-      <span className="flex items-baseline gap-1.5">
-        <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
-          Cursor
-        </span>
-        <span className="font-semibold text-white">{utc}</span>
-        <span className="text-ocf-gray-600">UTC</span>
-        {selectedISOTime === timeNow && (
-          <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-yellow">
-            live
+      <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1 px-4 pb-1.5 pt-2">
+        <span className="flex items-baseline gap-1.5">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+            Cursor
           </span>
-        )}
-      </span>
-      <span className="text-2xs text-ocf-gray-600">{`${cadenceMinutes}-minute steps`}</span>
-      <div className="ml-auto flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        {enabledCountries.map((code) => (
-          <CountrySlot
-            key={code}
-            code={code}
-            cursor={selectedISOTime}
-            focused={code === focusedCountry}
-          />
-        ))}
+          <span className="font-semibold text-white">{utc}</span>
+          <span className="text-ocf-gray-600">UTC</span>
+          {selectedISOTime === timeNow && (
+            <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-yellow">
+              live
+            </span>
+          )}
+        </span>
+        <span className="text-2xs text-ocf-gray-600">{`${cadenceMinutes}-minute steps`}</span>
+        <div className="ml-auto flex flex-wrap items-baseline gap-x-4 gap-y-1">
+          {enabledCountries.map((code) => (
+            <CountrySlot
+              key={code}
+              code={code}
+              cursor={selectedISOTime}
+              focused={code === focusedCountry}
+            />
+          ))}
+        </div>
       </div>
+      <ScrubTrack zone={READOUT_ZONE} />
     </footer>
   );
 };

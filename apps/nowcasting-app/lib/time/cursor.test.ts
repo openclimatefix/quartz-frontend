@@ -11,6 +11,7 @@ import {
   nextSlot,
   slotForInstant,
   slotLabellingFor,
+  snapDownToCadence,
   snapToCadence
 } from "./cursor";
 
@@ -86,6 +87,32 @@ describe("snapToCadence — cursor inputs", () => {
 
   it("rejects an unparseable instant rather than inventing one", () => {
     expect(() => snapToCadence("not a time", 30)).toThrow(/Invalid instant/);
+  });
+});
+
+describe("snapDownToCadence — the far end of a bounded span", () => {
+  // Added with the scrub track (Track H). It is deliberately NOT a second rounding rule for
+  // cursor values: the ceiling stays the rule everywhere an input is resolved. This exists so
+  // a range's END can be the last slot INSIDE it. Ceiling there would give the track a final
+  // position one step past the last published value, which draws perfectly and has no data.
+  it("leaves an instant already on the grid alone", () => {
+    expect(snapDownToCadence("2026-08-10T16:30:00.000Z", 30)).toBe("2026-08-10T16:30:00.000Z");
+  });
+
+  it("rounds back to the previous slot, which is the opposite of snapToCadence", () => {
+    expect(snapDownToCadence("2026-08-10T16:15:00.000Z", 30)).toBe("2026-08-10T16:00:00.000Z");
+    expect(snapToCadence("2026-08-10T16:15:00.000Z", 30)).toBe("2026-08-10T16:30:00.000Z");
+    expect(snapDownToCadence("2026-08-10T16:29:59.999Z", 30)).toBe("2026-08-10T16:00:00.000Z");
+  });
+
+  it("floors instants before the epoch-hour boundary rather than towards zero", () => {
+    // JS `%` is signed, so a naive implementation rounds the wrong way before 1970. The app
+    // never sees such an instant, but the sign handling is the part that looks fine and is not.
+    expect(snapDownToCadence("1969-12-31T23:45:00.000Z", 30)).toBe("1969-12-31T23:30:00.000Z");
+  });
+
+  it("rejects a cadence that cannot describe a grid", () => {
+    expect(() => snapDownToCadence("2026-08-10T16:00:00.000Z", -30)).toThrow(/positive/);
   });
 });
 
