@@ -1,4 +1,4 @@
-import { FC, KeyboardEvent, PointerEvent, useEffect, useMemo, useRef } from "react";
+import { FC, KeyboardEvent, PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
 
 import useGlobalState from "../helpers/globalState";
@@ -39,10 +39,20 @@ import {
  *   duplicated here;
  * - **the window is the one the app already shows** (`useCursorRange`), not a new one.
  *
- * It stays in sync with the other three inputs by construction: the handle's position is
- * derived from `selectedISOTime` on every render, and the chart click, the arrow keys and the
- * play button all write that. There is no local position state to fall out of step, which is
- * why the handle follows playback without knowing playback exists.
+ * **At rest it stays in sync with the other three inputs by construction**: the handle's
+ * position is derived from `selectedISOTime`, and the chart click, the arrow keys and the play
+ * button all write that. There is no position state to fall out of step, which is why the
+ * handle follows playback without knowing playback exists.
+ *
+ * **During a drag that same property is what made it janky**, and the drag model below is the
+ * fix. Writing the cursor is a global commit: every distinct value rebuilds the map's feature
+ * states across all enabled countries and recomputes both charts, so a handle derived only from
+ * the committed value moves at the app's re-render rate rather than the pointer's.
+ *
+ * So a drag runs at **two rates**: the handle renders from drag-local state on every pointer
+ * event, in a render confined to this component, while the shared cursor is committed at most
+ * once per animation frame. Both carry the same snapped instant — the local one is not a
+ * different value, only an earlier one. See `dragInstant` and `scheduleCommit` below.
  *
  * **"Now" is marked** because the cursor sitting in the past and the cursor sitting in the
  * forecast mean different things, and on a track that is mostly forecast there is otherwise no
@@ -89,6 +99,7 @@ const TrackTicks: FC<{ scale: ScrubScale; zone: string }> = ({ scale, zone }) =>
 const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
+  const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
   const enabledCountries = useEnabledCountries();
   const { stopTime } = useStopAndResetTime();
   const range = useCursorRange();
@@ -96,6 +107,23 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
   const scaleRef = useRef<ScrubScale | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const pendingRef = useRef<string | null>(null);
+
+  /**
+   * The handle's position **while a drag is in progress**, and at no other time.
+   *
+   * Strictly drag-scoped: set on pointerdown, dropped on release, `null` the rest of the time,
+   * and the render below falls back to `selectedISOTime` whenever it is `null`. So this is not
+   * a second source of truth that outlives the gesture — at rest the at-rest design is exactly
+   * as it was.
+   *
+   * It is also not a *different* value from the committed one. It holds the same snapped
+   * instant the commit will carry, just sooner, which is what makes the handoff on release
+   * incapable of flashing: dropping the local value and committing the final one land in the
+   * same batch and name the same instant.
+   */
+  const [dragInstant, setDragInstant] = useState<string | null>(null);
 
   const cadenceMinutes = finestCadenceMinutes(enabledCountries);
   const scale = useMemo(() => scrubScale(range, cadenceMinutes), [range, cadenceMinutes]);
@@ -106,15 +134,61 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
     scaleRef.current = scale;
   }, [scale]);
 
-  // Writing the cursor from a pointer position. `stopTime` is what the chart click does too:
-  // any deliberate cursor input stops the minute timer (and the play button's own interval
-  // clears when it is paused), so a scrub is not overwritten a moment later by "now".
-  const writeFromPointer = (clientX: number) => {
+  const cancelPendingCommit = () => {
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+    pendingRef.current = null;
+  };
+
+  // A drag that is torn down mid-gesture must not leave a frame pointing at a dead component.
+  useEffect(() => cancelPendingCommit, []);
+
+  /**
+   * Commit at most once per animation frame, always the latest position.
+   *
+   * `pendingRef` is overwritten rather than queued, and a frame is only requested when one is
+   * not already outstanding, so a fast drag produces one commit per frame and never a backlog
+   * of frames replaying stale positions after the finger has stopped.
+   */
+  const flushCommit = () => {
+    frameRef.current = null;
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (pending !== null) setSelectedISOTime(pending);
+  };
+
+  const scheduleCommit = (instant: string) => {
+    pendingRef.current = instant;
+    if (frameRef.current !== null) return;
+    frameRef.current = requestAnimationFrame(flushCommit);
+  };
+
+  /** The snapped instant under a pointer, or `null` if the track cannot be measured yet. */
+  const instantAt = (clientX: number): string | null => {
     const current = scaleRef.current;
     const element = trackRef.current;
-    if (!current || !element) return;
-    const rect = element.getBoundingClientRect();
-    setSelectedISOTime(instantForFraction(fractionForClientX(clientX, rect), current));
+    if (!current || !element) return null;
+    return instantForFraction(
+      fractionForClientX(clientX, element.getBoundingClientRect()),
+      current
+    );
+  };
+
+  /**
+   * What any deliberate cursor input has to do before it writes.
+   *
+   * `stopTime` clears the minute timer, as the chart click does, so a scrub into the past is
+   * not overwritten by "now" within the minute. Clearing `isPlaying` is the other half and was
+   * missing: the play button's interval lives in a ref of its own and is **not** one of the
+   * globals `stopTime` clears, so it kept stepping the cursor once a second underneath a drag,
+   * fighting it. Writing the shared flag pauses it through the button's own effect rather than
+   * reaching into the component.
+   */
+  const beginUserInput = () => {
+    stopTime();
+    if (isPlaying) setIsPlaying(false);
   };
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -122,18 +196,38 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
     draggingRef.current = true;
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.focus();
-    stopTime();
-    writeFromPointer(event.clientX);
+    beginUserInput();
+
+    // A press is a click as much as the start of a drag, so it commits at once rather than
+    // waiting a frame — the map should react to a tap with no perceptible delay.
+    const instant = instantAt(event.clientX);
+    if (instant === null) return;
+    cancelPendingCommit();
+    setDragInstant(instant);
+    setSelectedISOTime(instant);
   };
 
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!draggingRef.current) return;
-    writeFromPointer(event.clientX);
+    const instant = instantAt(event.clientX);
+    if (instant === null) return;
+    // Two different rates, deliberately. The handle moves now, in a render confined to this
+    // component; the cursor the rest of the app reads is committed on the next frame.
+    setDragInstant(instant);
+    scheduleCommit(instant);
   };
 
   const endDrag = (event: PointerEvent<HTMLDivElement>) => {
     if (!draggingRef.current) return;
     draggingRef.current = false;
+
+    // The drag always ends on its true final value, committed exactly once: take whatever the
+    // last frame did not get to, cancel that frame, and write it here instead.
+    const pending = pendingRef.current;
+    cancelPendingCommit();
+    if (pending !== null) setSelectedISOTime(pending);
+    setDragInstant(null);
+
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -177,7 +271,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
 
     if (target === null) return;
     event.preventDefault();
-    stopTime();
+    beginUserInput();
     setSelectedISOTime(instantForSlotIndex(target, current));
   };
 
@@ -192,7 +286,9 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
     );
   }
 
-  const cursor = clampToScale(selectedISOTime, scale);
+  // The drag-local value while a drag is live, the shared cursor otherwise. `dragInstant` is
+  // null at rest, so at rest this line *is* the original derive-from-`selectedISOTime`.
+  const cursor = clampToScale(dragInstant ?? selectedISOTime, scale);
   const cursorFraction = fractionForInstant(cursor, scale);
   const nowFraction = timeNow ? fractionForInstant(timeNow, scale) : null;
   const cursorLabel = DateTime.fromISO(cursor, { zone: "utc" })
@@ -216,6 +312,11 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
+        // Capture can be lost without either of the above firing — a browser-level interruption
+        // mid-gesture. Without this the drag flag would stay set and the handle would be stuck
+        // on its drag-local value. `endDrag` bails when no drag is live, so the ordinary
+        // pointerup-then-lostpointercapture pair is idempotent rather than a double commit.
+        onLostPointerCapture={endDrag}
         onKeyDown={onKeyDown}
       >
         {/* The window. */}

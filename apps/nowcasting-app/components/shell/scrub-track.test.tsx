@@ -8,9 +8,12 @@
  * re-derived from the enabled set**, so toggling NL changes what the control can reach rather
  * than only what the readout says.
  *
- * Pointer dragging is deliberately not asserted here: jsdom gives every element a zero-width
- * `getBoundingClientRect`, so a synthetic drag would exercise the fallback rather than the
- * conversion. The conversion is `fractionForClientX` and it is pinned pure.
+ * The drag model is asserted here too, since the split between the handle's rate and the
+ * commit's rate is precisely the kind of thing that looks right and is not. jsdom gives every
+ * element a zero-width `getBoundingClientRect`, so the track is given a measurable one; and
+ * `requestAnimationFrame` is replaced by a manual queue, so frames are *stepped* rather than
+ * waited on. Frame timing itself is not under test — only that commits coalesce to one per
+ * frame and that a release always commits the true final position exactly once.
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import React from "react";
@@ -22,7 +25,11 @@ jest.mock("./use-cursor-range", () => ({
   useCursorRange: () => mockRange
 }));
 
-import { setEnabledCountries, setGlobalState } from "../helpers/globalState";
+import useGlobalState, {
+  getGlobalState,
+  setEnabledCountries,
+  setGlobalState
+} from "../helpers/globalState";
 import ScrubTrack from "./scrub-track";
 import type { CursorRange } from "./scrub-scale";
 
@@ -31,16 +38,106 @@ const RANGE: CursorRange = { start: "2026-08-10T00:00:00.000Z", end: "2026-08-12
 let mockRange: CursorRange | null = RANGE;
 
 const slider = () => screen.getByRole("slider");
-const cursor = () => require("../helpers/globalState").getGlobalState("selectedISOTime");
+const cursor = () => getGlobalState("selectedISOTime");
+
+// The track laid out 480px wide from x=0, so a client x IS a pixel offset along it: the
+// 48-hour window works out at 6 minutes per pixel, i.e. 5px per 30-minute slot.
+const TRACK_WIDTH = 480;
+const measureTrack = () => {
+  const node = slider();
+  node.getBoundingClientRect = () =>
+    ({
+      left: 0,
+      width: TRACK_WIDTH,
+      right: TRACK_WIDTH,
+      top: 0,
+      bottom: 28,
+      height: 28,
+      x: 0,
+      y: 0
+    } as DOMRect);
+  // jsdom has no pointer capture; the component's calls must not throw.
+  node.setPointerCapture = () => undefined;
+  node.releasePointerCapture = () => undefined;
+  node.hasPointerCapture = () => true;
+};
+
+/**
+ * jsdom implements no `PointerEvent`, so Testing Library falls back to a bare `Event` and
+ * **silently drops `clientX` and `button`** — a drag fired without this shim arrives at the
+ * handler with both `undefined`, which reads as "not the primary button" and does nothing.
+ * `MouseEvent` is what `PointerEvent` extends in the standard, and it carries the coordinates.
+ */
+class PointerEventShim extends MouseEvent {
+  public pointerId: number;
+  constructor(type: string, init: MouseEventInit & { pointerId?: number } = {}) {
+    super(type, init);
+    this.pointerId = init.pointerId ?? 0;
+  }
+}
+(globalThis as unknown as { PointerEvent: typeof PointerEventShim }).PointerEvent =
+  PointerEventShim;
+
+const down = (clientX: number) =>
+  fireEvent.pointerDown(slider(), { clientX, button: 0, pointerId: 1 });
+const move = (clientX: number) => fireEvent.pointerMove(slider(), { clientX, pointerId: 1 });
+const up = (clientX: number) => fireEvent.pointerUp(slider(), { clientX, pointerId: 1 });
+
+/** Frames only advance when a test says so, so "once per frame" is observable. */
+let frames: Array<() => void> = [];
+const stepFrame = () => {
+  const due = frames;
+  frames = [];
+  act(() => due.forEach((callback) => callback()));
+};
+
+/**
+ * The sequence of cursor values that actually reached the rest of the app.
+ *
+ * Recorded as *values* rather than as a render count on purpose: how many times React chooses
+ * to re-render a subscriber for one write is an implementation detail of the state library, and
+ * asserting on it would pin something this track does not control. What "once per frame rather
+ * than once per event" is really a claim about is which instants the map and the charts were
+ * asked to draw — so that is what is collected, with consecutive repeats collapsed.
+ */
+let committed: string[] = [];
+const CommitCounter: React.FC = () => {
+  const [value] = useGlobalState("selectedISOTime");
+  if (committed[committed.length - 1] !== value) committed.push(value);
+  return null;
+};
+const renderTrack = () => {
+  const view = render(
+    <>
+      <ScrubTrack />
+      <CommitCounter />
+    </>
+  );
+  measureTrack();
+  committed = [];
+  return view;
+};
 
 beforeEach(() => {
+  frames = [];
+  jest
+    .spyOn(window, "requestAnimationFrame")
+    .mockImplementation((callback: FrameRequestCallback) => {
+      frames.push(() => callback(0));
+      return frames.length;
+    });
+  jest.spyOn(window, "cancelAnimationFrame").mockImplementation((handle: number) => {
+    frames[handle - 1] = () => undefined;
+  });
   mockRange = RANGE;
   setEnabledCountries(["GB"]);
   setGlobalState("selectedISOTime", "2026-08-11T00:00:00.000Z");
   setGlobalState("timeNow", "2026-08-10T12:00:00.000Z");
+  setGlobalState("isPlaying", false);
 });
 
 afterEach(() => {
+  jest.restoreAllMocks();
   setEnabledCountries(["GB"]);
 });
 
@@ -115,6 +212,106 @@ describe("the keyboard", () => {
   test("a key the track does not own is left alone for the app's other handlers", () => {
     render(<ScrubTrack />);
     fireEvent.keyDown(slider(), { key: "a" });
+    expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
+  });
+});
+
+describe("dragging — the handle's rate and the commit's rate are not the same", () => {
+  // x=240 is halfway, i.e. 2026-08-11T00:00 and slot 48. From there each 5px is one slot.
+  test("a press commits at once, because a press is also a click", () => {
+    renderTrack();
+    down(250);
+    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
+  });
+
+  test("a run of moves commits once per frame, not once per event", () => {
+    renderTrack();
+    // Pressed at 01:00, not at the 00:00 the cursor already holds — writing a value identical
+    // to the current one is free (React bails), so starting there would prove nothing.
+    down(250);
+    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
+
+    // Four pointer events inside one frame. This is the case that was janky: each of these
+    // used to be a global write, and each global write rebuilds every enabled country's map
+    // feature states and recomputes both charts.
+    move(260);
+    move(270);
+    move(280);
+    move(300);
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
+
+    // The handle, meanwhile, has been tracking the pointer the whole time.
+    expect(slider()).toHaveAttribute("aria-valuenow", "60");
+
+    // One frame, one commit — and it carries the LATEST position, not a replay of the four.
+    stepFrame();
+    expect(cursor()).toBe("2026-08-11T06:00:00.000Z");
+    // Two instants reached the app for five pointer events, and neither is an intermediate.
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T06:00:00.000Z"]);
+
+    // No backlog left behind: a further frame has nothing to do.
+    stepFrame();
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T06:00:00.000Z"]);
+  });
+
+  test("releasing commits the final position exactly once, and it is the snapped one", () => {
+    renderTrack();
+    down(250);
+    move(260);
+    move(283); // 1698 minutes from the start: 04:18, which is NOT on the grid
+
+    // Release before the pending frame ever runs.
+    up(283);
+    // Ceiling, as everywhere: 04:18 belongs to the 04:30 slot. And 02:00, the intermediate the
+    // pending frame was holding, never reached the app at all.
+    expect(cursor()).toBe("2026-08-11T04:30:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T04:30:00.000Z"]);
+
+    // And the frame that was pending must not fire a second, stale commit.
+    stepFrame();
+    expect(cursor()).toBe("2026-08-11T04:30:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T04:30:00.000Z"]);
+  });
+
+  test("the drag-local position is dropped on release, so the handle derives from state again", () => {
+    renderTrack();
+    down(240);
+    move(300);
+    up(300);
+    expect(slider()).toHaveAttribute("aria-valuenow", "60");
+
+    // Nothing of the drag outlives it: another input moves the handle as it does at rest.
+    act(() => setGlobalState("selectedISOTime", "2026-08-10T12:00:00.000Z"));
+    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+  });
+
+  test("a drag does not fight the play button", () => {
+    setGlobalState("isPlaying", true);
+    renderTrack();
+    down(250);
+    // The play interval steps the cursor once a second from a ref of its own, which `stopTime`
+    // does not clear. Without pausing it, it would walk over the drag.
+    expect(getGlobalState("isPlaying")).toBe(false);
+  });
+
+  test("a pointer that leaves the track is clamped to its ends, not lost", () => {
+    renderTrack();
+    down(240);
+    move(-500);
+    stepFrame();
+    expect(cursor()).toBe(RANGE.start);
+    move(9999);
+    stepFrame();
+    expect(cursor()).toBe(RANGE.end);
+  });
+
+  test("moves before any press are ignored", () => {
+    renderTrack();
+    move(300);
+    expect(committed).toEqual([]);
     expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
   });
 });
