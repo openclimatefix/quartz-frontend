@@ -2,6 +2,8 @@ import { theme } from "../../../tailwind.config";
 import { ClockIcon } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
 import ChartCountryPicker from "../country-picker";
+import useGlobalState from "../../helpers/globalState";
+import { comparisonTitle } from "../../helpers/comparison";
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 
 export const ForecastHeadlineFigure: React.FC<{
@@ -155,6 +157,24 @@ type ForecastHeaderProps = {
   forecastNextTimeOnly: string;
 };
 
+/**
+ * A passive echo of the map's encoding, so the state is legible where the numbers are.
+ *
+ * Contract §5: comparison is authoritative on the map cluster, because it is the answer to
+ * "what does the colour mean?" — it changes the map's whole encoding and the chart by one
+ * series. It is named here anyway, and only named: reading a difference off a chart whose
+ * header still says "National" is how you misread it.
+ */
+const ComparisonEcho: React.FC = () => {
+  const [comparison] = useGlobalState("comparison");
+  if (!comparison) return null;
+  return (
+    <span className="text-ocf-gray-400 text-xs md:text-sm dash:text-lg" data-test="comparison-echo">
+      {comparisonTitle(comparison)}
+    </span>
+  );
+};
+
 const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
   forecastPV,
@@ -177,6 +197,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
         <span className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black">
           National
         </span>
+        <ComparisonEcho />
       </div>
       <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 3xl:px-6">
         <div className="pr-4 lg:pr-4 3xl:pr-6">

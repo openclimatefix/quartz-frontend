@@ -3,30 +3,35 @@ import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Menu } from "@headlessui/react";
-import { getViewTitle, VIEWS } from "../../../constant";
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { ReactNode } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
+
+/**
+ * The top nav — "what you are looking at", and only that (contract §6).
+ *
+ * It used to carry a three-way view switcher: Forecast, Solar Sites and Delta, hardcoded and
+ * shown for every country whether or not the country had the data. Phase 6 dissolves all three
+ * (§2). Delta was never a peer view, it was a *comparison*, and it now lives on the map
+ * cluster where the colour it changes is explained. Solar Sites was never a country view — it
+ * is tenancy-scoped, on a different backend, with different geometry — and it now has its own
+ * route, so what is left of it here is a link rather than a mode.
+ *
+ * That leaves navigation proper: where you are, which countries are drawn, and the account.
+ * Which country the *chart* reads is picked in the chart header instead — see Track A's notes
+ * and `components/charts/country-picker.tsx`.
+ */
 
 type HeaderLinkProps = {
   url: string;
   text: string;
   className?: string;
   disabled?: boolean;
-  currentView?: VIEWS;
-  view?: VIEWS;
-  setViewFunc?: Dispatch<SetStateAction<VIEWS>>;
-  isLoggedIn?: boolean;
 };
-const HeaderLink: React.FC<HeaderLinkProps> = ({
-  url,
-  text,
-  className,
-  disabled = false,
-  currentView,
-  view,
-  setViewFunc
-}) => {
+
+const HeaderLink: React.FC<HeaderLinkProps> = ({ url, text, className, disabled = false }) => {
+  const { pathname } = useRouter();
   const computedClasses = classNames(
     className || "",
     disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
@@ -45,30 +50,19 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
     );
   }
 
-  if (setViewFunc && view) {
-    const isCurrentView = currentView === view;
-    let textColorClasses = isCurrentView ? "text-ocf-yellow" : "text-white";
-    if (disabled) textColorClasses = "text-gray-500 cursor-not-allowed";
-    return (
-      <Menu.Item>
-        <a
-          className={classNames(computedClasses, textColorClasses)}
-          onClick={() => {
-            if (!disabled) setViewFunc(view);
-          }}
-        >
-          {text}
-        </a>
-      </Menu.Item>
-    );
-  }
+  // The route itself says which one is current, rather than a `view` passed down from a page.
+  const isCurrent = pathname === url;
 
   return (
     <Menu.Item>
       {({ active }) => (
         <Link
           href={url}
-          className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+          aria-current={isCurrent ? "page" : undefined}
+          className={classNames(
+            computedClasses,
+            isCurrent || active ? "text-ocf-yellow" : "text-white"
+          )}
         >
           {text}
         </Link>
@@ -78,13 +72,11 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 };
 
 type HeaderProps = {
-  view: VIEWS;
-  setView: Dispatch<SetStateAction<VIEWS>>;
   isLoggedIn?: boolean;
   children?: ReactNode;
 };
 
-const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true, children }) => {
+const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
   return (
     <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
@@ -118,34 +110,15 @@ const Header: React.FC<HeaderProps> = ({ view, setView, isLoggedIn = true, child
       <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">
         {isLoggedIn && (
           <Menu>
-            <HeaderLink
-              url="/"
-              view={VIEWS.FORECAST}
-              currentView={view}
-              setViewFunc={setView}
-              text={getViewTitle(VIEWS.FORECAST)}
-            />
-            <HeaderLink
-              url="/"
-              view={VIEWS.SOLAR_SITES}
-              currentView={view}
-              setViewFunc={setView}
-              text={getViewTitle(VIEWS.SOLAR_SITES)}
-            />
-            <HeaderLink
-              url="/"
-              view={VIEWS.DELTA}
-              currentView={view}
-              setViewFunc={setView}
-              text={getViewTitle(VIEWS.DELTA)}
-            />
+            <HeaderLink url="/" text="Forecast" />
+            <HeaderLink url="/sites" text="Solar Sites" />
           </Menu>
         )}
       </div>
       <div className="flex items-center gap-2">
         {isLoggedIn && <CountryToggle />}
         <div className="py-1">
-          {isLoggedIn && <ProfileDropDown view={view} />}
+          {isLoggedIn && <ProfileDropDown />}
           {children}
         </div>
       </div>

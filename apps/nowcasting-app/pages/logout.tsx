@@ -5,7 +5,6 @@ import { ChevronRightIcon } from "@heroicons/react/solid";
 import { BookOpenIcon, SupportIcon, ViewListIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import Header from "../components/layout/header";
-import { VIEWS } from "../constant";
 
 const links = [
   {
@@ -37,7 +36,7 @@ const LogoutPage: NextPage = () => {
       </Head>
 
       <main className="bg-mapbox-black min-h-screen w-full mx-auto flex flex-col items-center">
-        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false} />
+        <Header isLoggedIn={false} />
         <div className="flex-1 flex flex-col items-center justify-center mt-16 px-4 py-4 max-w-7xl sm:px-6 lg:px-8 mx-auto sm:py-24 text-white">
           <div className="text-center">
             <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ocf-gray-500 sm:text-5xl">

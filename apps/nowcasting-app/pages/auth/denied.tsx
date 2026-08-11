@@ -4,7 +4,6 @@ import Link from "next/link";
 import Head from "next/head";
 import { useSearchParams } from "next/navigation";
 import Header from "../../components/layout/header";
-import { VIEWS } from "../../constant";
 import { useEffect, useState } from "react";
 
 const AccessDeniedPage = ({ query }: { query: any }) => {
@@ -33,7 +32,7 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
       </Head>
 
       <div className="bg-mapbox-black min-h-screen flex flex-col">
-        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false} />
+        <Header isLoggedIn={false} />
         <main className="w-full px-4 mx-auto max-w-lg sm:px-6 lg:px-8 flex-1 flex flex-col items-center justify-center">
           <div className="max-w-xl py-16 mx-auto sm:py-24 text-center gap-6 flex flex-col mt-2 text-lg text-white">
             {isEmailVerification ? (

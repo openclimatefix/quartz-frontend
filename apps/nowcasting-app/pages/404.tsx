@@ -2,7 +2,6 @@ import { NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import Header from "../components/layout/header";
-import { VIEWS } from "../constant";
 
 const NotFoundPage: NextPage = () => {
   return (
@@ -11,7 +10,7 @@ const NotFoundPage: NextPage = () => {
         <title>Not found | Quartz Solar UI</title>
       </Head>
       <div className="bg-mapbox-black flex flex-col min-h-screen pt-16">
-        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false} />
+        <Header isLoggedIn={false} />
         <main className="flex flex-col justify-center flex-grow w-full px-4 mx-auto max-w-7xl sm:px-6 lg:px-8 text-white">
           <div className="py-16">
             <div className="text-center">

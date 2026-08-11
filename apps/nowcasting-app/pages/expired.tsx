@@ -4,7 +4,6 @@ import Link from "next/link";
 import Head from "next/head";
 import { useSearchParams } from "next/navigation";
 import Header from "../components/layout/header";
-import { VIEWS } from "../constant";
 import React from "react";
 
 const TrialExpiredPage = () => {
@@ -18,7 +17,7 @@ const TrialExpiredPage = () => {
       </Head>
 
       <div className="bg-mapbox-black min-h-screen flex flex-col">
-        <Header view={VIEWS.FORECAST} setView={() => {}} isLoggedIn={false}>
+        <Header isLoggedIn={false}>
           <Link href="/api/auth/logout?redirectToLogin=true" legacyBehavior>
             <a id={"UserMenu-LogoutBtn"} className="!text-xs btn btn-outline rounded-md">
               Sign out&nbsp;→

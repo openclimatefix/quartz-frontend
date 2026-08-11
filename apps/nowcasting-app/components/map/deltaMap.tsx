@@ -9,7 +9,6 @@ import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useAggregationLevels } from "../../hooks/data";
 import { defaultLevelOf } from "../helpers/aggregationLevels";
-import DeltaColorGuideBar from "./delta-color-guide-bar";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { FeatureCollection } from "geojson";
 import dynamic from "next/dynamic";
@@ -227,9 +226,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
             </>
           )}
           title={VIEWS.DELTA}
-        >
-          <DeltaColorGuideBar />
-        </Map>
+        ></Map>
       )}
     </div>
   );

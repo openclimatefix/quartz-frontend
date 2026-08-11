@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 
-import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
+import { FailedStateMap, LoadStateMap, Map } from "./";
 import { ActiveUnit } from "./types";
 import { VIEWS } from "../../constant";
 import useGlobalState from "../helpers/globalState";
@@ -11,7 +11,6 @@ import { useCurrentAggregationLevel, useFocusedCountry } from "../../hooks/data"
 import { getCountryConfig } from "../../config/countries";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
-import ColorGuideBar from "./color-guide-bar";
 import {
   getActiveUnitFromMap,
   getBoundingBoxFromPoint,
@@ -510,17 +509,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
                 <ButtonGroup
                   rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
                 />
-                <MeasuringUnit
-                  activeUnit={activeUnit}
-                  setActiveUnit={setActiveUnit}
-                  isLoading={isLoading}
-                />
               </>
             )}
             title={VIEWS.FORECAST}
-          >
-            <ColorGuideBar unit={activeUnit} />
-          </Map>
+          ></Map>
         </>
       }
     </div>

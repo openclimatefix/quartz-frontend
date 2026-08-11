@@ -5,20 +5,14 @@ import Cookies from "cookies";
 import * as Sentry from "@sentry/nextjs";
 
 import Layout from "../components/layout/layout";
-import Header from "../components/layout/header";
-import DeprecatedDomainNotice from "../components/layout/deprecated-domain-notice";
-import SideLayout from "../components/side-layout";
+import DashboardShell from "../components/shell/dashboard-shell";
 import { PvLatestMap } from "../components/map";
 import DeltaMap from "../components/map/deltaMap";
-import SitesMap from "../components/map/sitesMap";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
-import SolarSiteChart from "../components/charts/solar-site-view/solar-site-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
 import { useMapChrome } from "../components/hooks/use-map-chrome";
-import { useSitesViewData } from "../components/hooks/useSitesViewData";
 import useGlobalState, { useCountryState } from "../components/helpers/globalState";
-import { VIEWS } from "../constant";
 import { useAggregationLevels } from "../hooks/data";
 import { defaultLevelOf } from "../components/helpers/aggregationLevels";
 import {
@@ -27,22 +21,23 @@ import {
 } from "../components/helpers/cookieStorage";
 
 /**
- * The dashboard shell.
+ * The dashboard.
  *
- * Since Phase 4 this page fetches nothing for the national and regional views — each view owns
- * its own queries through `hooks/data/*`, so what is left here is genuinely page-level: which
- * view is showing, the layout that puts maps on one side and charts on the other, and the
- * cross-view chrome (Sentry identity, cookie-persisted settings, Mapbox resize/recentre).
+ * Since Phase 4 this page fetches nothing — each pane owns its own queries through
+ * `hooks/data/*` — and since Phase 6 it does not lay anything out either: `DashboardShell`
+ * owns the arrangement (contract §3, §4, §6). What is left is genuinely page-level: which pair
+ * of panes is mounted, Sentry identity, and the cookie-persisted settings.
  *
- * The one exception is Solar Sites, still on v0 by design and quarantined in
- * `useSitesViewData` — its map and its chart sit in different halves of the layout, so the data
- * has to be held one level above both of them.
+ * **One map and one chart, chosen by the comparison state.** The three `hidden`-class views are
+ * gone: Solar Sites moved to `/sites` (§2, Track C) and Delta stopped being a view at all — it
+ * is the "vs generation" comparison preset, and the pair below is what that preset selects.
+ * Because nothing is mounted-but-hidden any more, no map is ever alive at the wrong size, which
+ * is what let `use-map-chrome` shed two of its three effects.
  */
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
-  const [view, setView] = useGlobalState("view");
+  const [comparison] = useGlobalState("comparison");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
-  const [selectedISOTime] = useGlobalState("selectedISOTime");
   const { user, isLoading, error } = useUser();
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -50,7 +45,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     "nationalAggregationLevel"
   );
   const [, setClickedGspId] = useCountryState("clickedGspId");
-  // The delta view is forced onto the country's finest non-derived level — GB's `gsp`, NL's
+  // A comparison is drawn on the country's finest non-derived level — GB's `gsp`, NL's
   // `province` — the same rule `defaultAggregationLevel` uses for the state's initial value
   // (Phase 5 seam 1; was hardcoded `NationalAggregation.GSP`).
   const finestLevel = defaultLevelOf(useAggregationLevels());
@@ -67,19 +62,19 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
   }, [visibleLines]);
 
-  // On view change, unset the clicked region if the aggregation is not GSP,
-  // and set the national aggregation level to GSP if we're now on Delta view
+  // On a comparison change, unset the clicked region if the aggregation is not the finest
+  // level, and snap the level to it when a comparison is turned on. Keyed on `comparison`
+  // rather than on `view`, which is the same effect it always was — the delta view was
+  // reachable only by the switch this state replaced.
   useEffect(() => {
     if (finestLevel && nationalAggregationLevel !== finestLevel.regionType) {
       setClickedGspId(undefined);
     }
-    if (view === VIEWS.DELTA && finestLevel) {
+    if (comparison && finestLevel) {
       setNationalAggregationLevel(finestLevel.regionType);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view]);
-
-  const currentView = (v: VIEWS) => v === view;
+  }, [comparison]);
 
   useEffect(() => {
     if (user && !isLoading && !error) {
@@ -94,60 +89,22 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   }, [user, isLoading, error]);
 
-  useMapChrome(view, combinedDashboardModeActive);
-
-  const { sitesData, sitesErrors, aggregatedSitesData } = useSitesViewData(selectedISOTime);
-
-  // const closedWidth = combinedDashboardModeActive ? "50%" : "56%";
-  const closedWidth = "50%";
+  useMapChrome(combinedDashboardModeActive);
 
   return (
     <Layout>
-      <div
-        className={`h-full relative pt-16${
-          combinedDashboardModeActive ? " @container dashboard-mode" : ""
-        }`}
-      >
-        <Header view={view} setView={setView} />
-        <div
-          id="map-container"
-          className={`relative float-right h-full`}
-          style={{ width: closedWidth }}
-        >
-          <PvLatestMap
-            className={currentView(VIEWS.FORECAST) ? "" : "hidden"}
-            activeUnit={activeUnit}
-            setActiveUnit={setActiveUnit}
-          />
-          <SitesMap
-            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-            sitesData={sitesData}
-            aggregatedSitesData={aggregatedSitesData}
-            sitesErrors={sitesErrors}
-            activeUnit={activeUnit}
-            setActiveUnit={setActiveUnit}
-          />
-          <DeltaMap
-            className={currentView(VIEWS.DELTA) ? "" : "hidden"}
-            activeUnit={activeUnit}
-            setActiveUnit={setActiveUnit}
-          />
-        </div>
-
-        <SideLayout
-          bottomPadding={!currentView(VIEWS.SOLAR_SITES)}
-          dashboardModeActive={combinedDashboardModeActive}
-        >
-          <PvRemixChart className={currentView(VIEWS.FORECAST) ? "" : "hidden"} />
-          <SolarSiteChart
-            combinedSitesData={sitesData}
-            aggregatedSitesData={aggregatedSitesData}
-            className={currentView(VIEWS.SOLAR_SITES) ? "" : "hidden"}
-          />
-          <DeltaViewChart className={currentView(VIEWS.DELTA) ? "" : "hidden"} />
-        </SideLayout>
-        <DeprecatedDomainNotice />
-      </div>
+      <DashboardShell
+        dashboardModeActive={combinedDashboardModeActive}
+        comparisonActive={!!comparison}
+        map={
+          comparison ? (
+            <DeltaMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />
+          ) : (
+            <PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />
+          )
+        }
+        chart={comparison ? <DeltaViewChart /> : <PvRemixChart />}
+      />
     </Layout>
   );
 }

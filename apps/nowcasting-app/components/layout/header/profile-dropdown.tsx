@@ -16,7 +16,6 @@ import {
 import { VIEWS } from "../../../constant";
 import { downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
-import { SettingsModal } from "./settingsModal";
 import {
   NATIONAL_REGION_TYPE,
   useFocusedCountry,
@@ -29,18 +28,17 @@ import { forecastSeriesModel, getCountryConfig } from "../../../config/countries
 import { getEarliestForecastTimestamp } from "../../helpers/data";
 const { version } = pkg;
 
-interface IProfileDropDown {
-  view: VIEWS;
-}
-
-const ProfileDropDown = ({ view }: IProfileDropDown) => {
+const ProfileDropDown = () => {
   const { user } = useUser();
+  // Read rather than passed down: the header no longer knows or cares which view is showing
+  // since the three-way switcher went (contract §2), and this menu is the last thing in the
+  // header that does. What it actually asks is "are we on the sites route", which `view`
+  // answers until Wave 4 retires it.
+  const [view] = useGlobalState("view");
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
-  const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pLevels] = useGlobalState("pLevels");
   const { timezone } = useCountryFormatting();
   const canDownloadCsv = view !== VIEWS.SOLAR_SITES;
@@ -112,10 +110,6 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
   const toggle4hView = () => {
     setShowNHourView(!showNHourView);
     setBooleanSettingInLocalStorage(CookieStorageKeys.N_HOUR_VIEW, !showNHourView);
-  };
-  const toggleConstraints = () => {
-    setShowConstraints(!showConstraints);
-    setBooleanSettingInLocalStorage(CookieStorageKeys.CONSTRAINTS, !showConstraints);
   };
   // Check cookies for the N-hour view setting and update the state if it's different
   // Doing this here on client-side because the user's cookies are not available on the server,
@@ -199,49 +193,9 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
                 </div>
               )}
             </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <div
-                  className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                  )}
-                >
-                  {showConstraints && (
-                    <span className="flex items-center">
-                      <Checkmark />
-                    </span>
-                  )}
-                  <button
-                    id={"UserMenu-ConstraintsBtn"}
-                    onClick={toggleConstraints}
-                    className="ml-1 text-sm  font-medium text-ocf-black-600"
-                  >
-                    {`Constraint Boundaries`}
-                  </button>
-                </div>
-              )}
-            </Menu.Item>
-
-            <div className="w-full border-t border-gray-300" />
-            <Menu.Item>
-              {({ active }) => (
-                <div
-                  className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                  )}
-                >
-                  <button
-                    id={"UserMenu-SettingsBtn"}
-                    onClick={() => setShowSettingsModal(true)}
-                    className="ml-1 text-sm font-medium text-ocf-black-600"
-                  >
-                    {`Settings`}
-                  </button>
-                </div>
-              )}
-            </Menu.Item>
+            {/* Constraint boundaries and the p-level settings modal both left this menu in
+                Phase 6: they are "how it is drawn", so they live in the display rail now
+                (contract §6). The modal held nothing else and is gone with them. */}
 
             {canDownloadCsv && (
               <>
@@ -365,8 +319,6 @@ const ProfileDropDown = ({ view }: IProfileDropDown) => {
         nHourForecast={nHourForecast}
         view={view}
       />
-
-      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
     </>
   );
 };

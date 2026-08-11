@@ -5,7 +5,10 @@ const DeltaColorGuideBar: FC<{}> = () => {
   const deltaKeys = getDeltaBucketKeys();
   return (
     <>
-      <div className="absolute bg-mapbox-black-700 bottom-12 flex left-0 ml-12 z-20">
+      {/* Positioning only: this used to anchor itself to the map's bottom-left corner
+          (`absolute bottom-12 left-0 ml-12 z-20`), which is where the floating chart now sits. It
+          lays out in normal flow inside the map control dock instead. Contents untouched. */}
+      <div className="flex bg-mapbox-black-700">
         <div className="flex justify-between h-full font-bold relative items-end text-sm">
           {deltaKeys.map((value) => {
             let background = "";

@@ -12,6 +12,7 @@ import { LoadingState, SitesEndpointStates } from "../types";
 import { ActiveUnit } from "../map/types";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
+import { ComparisonSelection, viewForComparison } from "./comparison";
 import { cursorNow, finestCadenceMinutes, snapToCadence } from "../../lib/time/cursor";
 import {
   CountryKeyedState,
@@ -74,6 +75,13 @@ export type FlatGlobalStateType = {
    * `setFocusedCountry`, which between them keep both invariants.
    */
   enabledCountries: string[];
+  /**
+   * What the map's colour means: a comparison preset, or `null` for the plain forecast.
+   *
+   * This is what the dashboard switches on since Phase 6 — see `helpers/comparison.ts` and
+   * contract §2. Write it through `setComparison`, never straight, so `view` stays in step.
+   */
+  comparison: ComparisonSelection;
   activeUnit: ActiveUnit;
   selectedISOTime: string;
   timeNow: string;
@@ -159,6 +167,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     ...initialCountryKeyedState(),
     focusedCountry: INITIAL_FOCUSED_COUNTRY,
     enabledCountries: INITIAL_ENABLED_COUNTRIES,
+    comparison: null,
     activeUnit: ActiveUnit.percentage,
     selectedISOTime: INITIAL_CURSOR,
     timeNow: INITIAL_CURSOR,
@@ -390,6 +399,24 @@ export const toggleCountryEnabled = (code: string): void => {
   } else {
     setEnabledCountries([...enabled, country]);
   }
+};
+
+/**
+ * Choose what the map's colour means — the dashboard's one mode axis since Phase 6 §2.
+ *
+ * `null` is the plain forecast, an id is a comparison preset. Both the map's fill and the
+ * chart's extra series follow from it, and so does the chart's default split: a comparison
+ * shrinks the chart because the difference is a *spatial* question.
+ *
+ * It also writes `view`, and that pairing is why this is a function rather than a plain
+ * `setGlobalState`. `view` stopped being what the dashboard switches on, but it is still read
+ * by `remix-line`, `StatusBanner`, the CSV modal and both charts' reset effects; keeping the
+ * two in step here means no consumer has to know which of them is authoritative while Wave 4
+ * migrates them off `view` entirely. Nothing else may write `view` on the dashboard.
+ */
+export const setComparison = (id: ComparisonSelection): void => {
+  setGlobalState("comparison", id);
+  setGlobalState("view", viewForComparison(id));
 };
 
 /**
