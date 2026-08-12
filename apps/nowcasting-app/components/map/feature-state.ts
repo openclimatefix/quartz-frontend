@@ -153,26 +153,56 @@ export const deltaFillColorExpression = (): Expression =>
     ]
   ] as unknown as Expression;
 
+/** Shallow equality over a feature state's own keys — all values are primitives. */
+const sameFeatureState = (a: MapFeatureState, b: MapFeatureState): boolean => {
+  const keys = Object.keys(a) as (keyof MapFeatureState)[];
+  if (keys.length !== Object.keys(b).length) return false;
+  return keys.every((key) => a[key] === b[key]);
+};
+
 /**
- * Push a whole value set onto the source's features.
+ * Push a value set onto the source's features, writing only what actually changed.
  *
  * Returns `false` — having changed nothing — when the source is not ready. A GeoJSON source
  * silently discards feature state set before it has finished loading, so the caller re-runs
  * this from the source's `sourcedata` event rather than assuming the first attempt landed.
  *
- * The previous set is cleared in one call before the new one is written, so a region that
- * dropped out of the payload does not keep rendering the value it had last tick.
+ * `previous` is the set this map last had applied, or `null` when the caller cannot vouch for
+ * what is on the map — a fresh source, or geometry that has just reloaded, which silently
+ * drops all feature state. With `null` this does what it always did: blanket-clear, then
+ * write everything.
+ *
+ * With a `previous` set it diffs instead, and that is the whole point. The blanket
+ * `removeFeatureState` invalidates every feature in the source and is paid *in addition* to
+ * rewriting them, so the old path cost two full passes over ~332 features for GB and ~664
+ * with NL enabled — on every cursor tick. Holding an arrow key at the OS repeat rate made
+ * that tens of times a second, which is what made the cursor feel heavy once Track F drew a
+ * second country. Ids that vanish from the payload are cleared individually, which is what
+ * the blanket clear was really there for.
  */
 export const applyFeatureStates = (
   map: mapboxgl.Map,
-  states: Map<string | number, MapFeatureState>
+  states: Map<string | number, MapFeatureState>,
+  previous?: Map<string | number, MapFeatureState> | null
 ): boolean => {
   if (!map.getSource(PV_SOURCE_ID)) return false;
   if (!map.isSourceLoaded(PV_SOURCE_ID)) return false;
 
-  map.removeFeatureState({ source: PV_SOURCE_ID });
+  if (!previous) {
+    map.removeFeatureState({ source: PV_SOURCE_ID });
+    states.forEach((featureState, id) => {
+      map.setFeatureState({ source: PV_SOURCE_ID, id }, featureState);
+    });
+    return true;
+  }
+
   states.forEach((featureState, id) => {
+    const before = previous.get(id);
+    if (before && sameFeatureState(before, featureState)) return;
     map.setFeatureState({ source: PV_SOURCE_ID, id }, featureState);
+  });
+  previous.forEach((_before, id) => {
+    if (!states.has(id)) map.removeFeatureState({ source: PV_SOURCE_ID, id });
   });
   return true;
 };

@@ -200,7 +200,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     // returning false (source not loaded yet) leaves the ref alone so the `sourcedata`
     // handler below retries.
     if (appliedStatesRef.current !== statesRef.current) {
-      if (applyFeatureStates(map, statesRef.current)) {
+      if (applyFeatureStates(map, statesRef.current, appliedStatesRef.current)) {
         appliedStatesRef.current = statesRef.current;
       }
     }
@@ -328,7 +328,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           appliedStatesRef.current = null;
         }
         if (appliedStatesRef.current === statesRef.current) return;
-        if (applyFeatureStates(map, statesRef.current)) {
+        if (applyFeatureStates(map, statesRef.current, appliedStatesRef.current)) {
           appliedStatesRef.current = statesRef.current;
         }
       });

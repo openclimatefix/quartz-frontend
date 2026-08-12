@@ -71,7 +71,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
     // Values that arrived while the boundary file was still in flight were applied to an
     // empty source and dropped; clearing `appliedStatesRef` above is what re-applies them.
     if (appliedStatesRef.current !== statesRef.current) {
-      if (applyFeatureStates(map, statesRef.current)) {
+      if (applyFeatureStates(map, statesRef.current, appliedStatesRef.current)) {
         appliedStatesRef.current = statesRef.current;
       }
     }
@@ -97,7 +97,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
           appliedStatesRef.current = null;
         }
         if (appliedStatesRef.current === statesRef.current) return;
-        if (applyFeatureStates(map, statesRef.current)) {
+        if (applyFeatureStates(map, statesRef.current, appliedStatesRef.current)) {
           appliedStatesRef.current = statesRef.current;
         }
       });
