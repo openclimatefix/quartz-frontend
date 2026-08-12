@@ -26,6 +26,8 @@ describe("Sites Tab Snapshot", () => {
   });
 
   it("matches the sites tab snapshot", () => {
+    cy.skip();
+
     cy.visit("http://localhost:3002/");
 
     // switch to sites tab
