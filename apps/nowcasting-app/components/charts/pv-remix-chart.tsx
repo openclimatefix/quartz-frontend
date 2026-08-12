@@ -216,11 +216,18 @@ const PvRemixChart: FC<{
   // Used to be guarded on `view === VIEWS.FORECAST`; `pages/index.tsx` only ever mounts this
   // component when `comparison` is null (Wave 4), so the guard was true on every render this
   // effect could fire on, and dropped rather than swapped for an equivalent check.
+  // The test is "outside this chart's range", NOT "not an exact slot in it". The cursor is one
+  // instant on the finest *enabled* country's grid (Track B), and each country resolves its own
+  // slot from it — so with NL enabled the cursor steps every 15 minutes while GB's series is on
+  // 30. Half of those instants have no exact match here, and demanding one made this effect
+  // yank the cursor to "now" on every other scrub step, which then re-committed and fought back.
+  // Out of range still resets: that is a cursor pointing at nothing, which is what this guards.
   useEffect(() => {
-    if (chartData?.length) {
-      if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
-        setSelectedISOTime(getCursorNow());
-      }
+    if (!chartData?.length) return;
+    const first = (chartData[0] as any).formattedDate;
+    const last = (chartData[chartData.length - 1] as any).formattedDate;
+    if (!selectedTime || selectedTime < first || selectedTime > last) {
+      setSelectedISOTime(getCursorNow());
     }
   }, [chartData, selectedTime, setSelectedISOTime]);
 

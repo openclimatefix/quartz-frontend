@@ -395,11 +395,14 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   // Used to be guarded on `view === VIEWS.DELTA`; `pages/index.tsx` only ever mounts this
   // component when `comparison` is set (Wave 4), so the guard was true on every render this
   // effect could fire on, and dropped rather than swapped for an equivalent check.
+  // Range, not exact slot — see the same effect in `pv-remix-chart.tsx`. The cursor steps on
+  // the finest enabled country's grid, so requiring an exact match here fought the scrubber.
   useEffect(() => {
-    if (chartData?.length) {
-      if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
-        setSelectedISOTime(latestSlotWithDelta ?? getCursorNow());
-      }
+    if (!chartData?.length) return;
+    const first = (chartData[0] as any).formattedDate;
+    const last = (chartData[chartData.length - 1] as any).formattedDate;
+    if (!selectedTime || selectedTime < first || selectedTime > last) {
+      setSelectedISOTime(latestSlotWithDelta ?? getCursorNow());
     }
   }, [chartData, selectedTime, setSelectedISOTime, latestSlotWithDelta]);
 
