@@ -4,6 +4,7 @@ import {
   useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
+  useGenerationSources,
   useRegions
 } from "../../hooks/data";
 import { useMapGeometry } from "../../hooks/data/use-map-geometry";
@@ -157,7 +158,19 @@ export const useMapRegionValues = (
 
   const regions = useRegions(scope);
   const forecast = useForecastPeriod(scope, window);
-  const generation = useGenerationPeriod(scope, window);
+
+  // The `observer` query param is optional, and the API defaults it to `pvlive_in_day` — GB's
+  // in-day observer. Omitting it therefore works by accident for GB and 400s for everyone
+  // else: "Observer 'pvlive_in_day' is not available for NL solar. Available: ['ned_nl']".
+  // Track F's fan-out is what surfaced it, because generation is now fetched for every
+  // *enabled* country rather than only the focused one.
+  //
+  // So name it, from the manifest, never from a constant — and hold the request until it is
+  // known rather than letting the default fire and fail. `useGenerationSources` is a slice of
+  // the `/countries` response the header already has, so this costs no extra request.
+  const generationSources = useGenerationSources(scope);
+  const observer = generationSources.data?.[0]?.name;
+  const generation = useGenerationPeriod(observer ? scope : null, { ...window, observer });
 
   // Geometry (and, for a derived level, its grouping file) is fetched rather than bundled
   // since Phase 5. `groupings` comes back on the same object because the two must agree:
@@ -210,7 +223,15 @@ export const useMapRegionValues = (
     coverage,
     hasValues: coverage.published > 0,
     nationalCapacityMw,
-    isLoading: regions.isLoading || forecast.isLoading || generation.isLoading || geo.isLoading,
+    // `generationSources` counts: until the manifest names this country's observer the
+    // generation request is deliberately not made, and without this the map would report
+    // itself loaded while still missing every observed value.
+    isLoading:
+      regions.isLoading ||
+      forecast.isLoading ||
+      generationSources.isLoading ||
+      generation.isLoading ||
+      geo.isLoading,
     error: forecast.error ?? generation.error ?? regions.error ?? geo.error
   };
 };
