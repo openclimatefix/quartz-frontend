@@ -4,8 +4,12 @@ import {
   useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
+  useGenerationSources,
   useRegions
 } from "../../../hooks/data";
+import { useCurrentAggregationLevel } from "../../../hooks/data/use-aggregation-levels";
+import { getCountryConfig } from "../../../config/countries";
+import { valueRegionTypeFor } from "../../helpers/aggregationLevels";
 import type { Scope } from "../../../lib/domain/types";
 import type { PeriodWindow } from "../../../lib/api/v1/queries";
 import useGlobalState from "../../helpers/globalState";
@@ -14,8 +18,6 @@ import { slotForInstant } from "../../../lib/time/cursor";
 import { DELTA_BUCKET } from "../../../constant";
 import { GspDeltaValue } from "../../types";
 
-/** GSP-level, matching the delta map — `period` 400s on `region_type=national`. */
-const DELTA_REGION_TYPE = "gsp";
 const SOURCE = "solar";
 
 export type GspDeltasResult = {
@@ -27,8 +29,12 @@ export type GspDeltasResult = {
    * pass it the identical `regionScope`/`periodWindow` and have the indicator's own request
    * dedupe onto this hook's, per the contract's "same scope, window, model and observers"
    * rule.
+   *
+   * `null` until the country's region type resolves — a caller must pass it straight through
+   * rather than substituting one of its own, or the two stop deduping and the second request
+   * is the one that 400s.
    */
-  scope: Scope;
+  scope: Scope | null;
   window: PeriodWindow;
 };
 
@@ -58,9 +64,20 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
   const targetTime = slotForInstant(cursorTime, country);
   const timeNow = slotForInstant(cursorNow, country);
 
-  const scope: Scope = useMemo(
-    () => ({ country, source: SOURCE, regionType: DELTA_REGION_TYPE }),
-    [country]
+  // The region type is the focused country's, never a constant. This used to be a hardcoded
+  // `"gsp"`, so opening the delta view with NL focused asked for `region_type=gsp` — which NL
+  // does not have — and the request 400d. Same fix, same reason, as the selected-region chart's scopes in
+  // `gsp-pv-remix-chart/use-gsp-region-data.ts`: a derived level resolves to the finer type it
+  // groups, which is what `valueRegionTypeFor` answers.
+  const level = useCurrentAggregationLevel(country ?? undefined);
+  const regionType = useMemo(
+    () => valueRegionTypeFor(level, getCountryConfig(country)),
+    [level, country]
+  );
+
+  const scope: Scope | null = useMemo(
+    () => (country && regionType ? { country, source: SOURCE, regionType } : null),
+    [country, regionType]
   );
 
   // No window at all, deliberately. `/forecasts/period` and `/generation/period` both default
@@ -77,7 +94,14 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
 
   const regions = useRegions(scope);
   const forecast = useForecastPeriod(scope, window);
-  const generation = useGenerationPeriod(scope, window);
+
+  // Name the observer, for the same reason the map's value path does: the API defaults the
+  // param to `pvlive_in_day`, which is GB's, so an unnamed request works by luck for GB and
+  // 400s for NL ("Observer 'pvlive_in_day' is not available for NL solar"). Hold the request
+  // until the manifest names it rather than firing one that is known to fail.
+  const generationSources = useGenerationSources(scope);
+  const observer = generationSources.data?.[0]?.name;
+  const generation = useGenerationPeriod(observer ? scope : null, { ...window, observer });
 
   const gspDeltas = useMemo(() => {
     const bridge = buildRegionBridge(regions.data);

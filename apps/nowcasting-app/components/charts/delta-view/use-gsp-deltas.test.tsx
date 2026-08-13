@@ -34,6 +34,7 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
   useUser: () => ({ user: null, isLoading: false, error: undefined })
 }));
 
+import countriesManifest from "../../../lib/api/v1/__fixtures__/countries.json";
 import gbGspForecastPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json";
 import gbGspGenerationPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-generation-period.json";
 import gbRegionsGsp from "../../../lib/api/v1/__fixtures__/gb-regions-gsp.json";
@@ -54,6 +55,10 @@ const json = (path: string, body: Parameters<typeof HttpResponse.json>[0]) =>
 
 const server = setupServer(
   http.get("/api/get_token", () => HttpResponse.json({ accessToken: "test-token" })),
+  // The manifest is a real dependency now: the hook takes its region type from the country's
+  // aggregation level and names the generation `observer` from `generation_sources`, rather
+  // than hardcoding "gsp" and letting the API default the observer to GB's.
+  json("/countries", countriesManifest),
   json("/GB/solar/regions", gbRegionsGsp),
   json("/GB/solar/forecasts/period", gbGspForecastPeriod),
   json("/GB/solar/generation/period", gbGspGenerationPeriod)

@@ -113,7 +113,14 @@ export const useLoadingState = (
     observer: observers[1]
   });
   const forecastPeriod = useForecastPeriod(regionScope, periodWindow);
-  const generationPeriod = useGenerationPeriod(regionScope, periodWindow);
+  // Named observer, and gated on having one: the API defaults this param to `pvlive_in_day`,
+  // GB's, so an unnamed region-scoped request 400s for every other country — and this hook's
+  // whole purpose is to dedupe onto the *caller's* request, which does name it. Without this
+  // the indicator fired a second, different, failing request alongside the working one.
+  const generationPeriod = useGenerationPeriod(observers[0] === undefined ? null : regionScope, {
+    ...periodWindow,
+    observer: observers[0]
+  });
 
   return useMemo(() => {
     // Order is load-bearing: the message names the first validating endpoint and degrades to
