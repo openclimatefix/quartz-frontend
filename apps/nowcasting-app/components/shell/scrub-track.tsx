@@ -462,7 +462,9 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
         ))}
         {/* Layer 4: the handle. */}
         <div
-          className="pointer-events-none absolute top-[8px] h-6 w-[3px] -translate-x-[1px] rounded-sm bg-ocf-yellow"
+          // Wider, rounded and ringed rather than a hairline rule: it is a control, and it was
+          // reading as one more vertical line among the midnight hairlines and the now mark.
+          className="pointer-events-none absolute top-[6px] h-7 w-[6px] -translate-x-1/2 rounded-full bg-ocf-yellow shadow-[0_0_0_1px_rgba(0,0,0,0.55)]"
           style={{ left: `${cursorFraction * 100}%` }}
         />
         {/* The tethered reading: the focused country's own time, riding with the handle. Not
@@ -503,36 +505,42 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
             className="absolute top-0 h-full w-px bg-white"
             style={{ left: `${nowFraction * 100}%` }}
           >
-            <button
-              type="button"
-              // The track owns pointerdown for scrubbing; without this, pressing the button
-              // would also begin a drag and the click would land somewhere else entirely.
-              onPointerDown={(event) => event.stopPropagation()}
-              onClick={resetTime}
-              title={
-                isLive
-                  ? "The cursor is following now"
-                  : "Return to now and follow it as it advances"
-              }
-              aria-label={isLive ? "Following now" : "Return to now"}
-              aria-pressed={isLive}
-              // Centred *on* the line, not offset to one side of it. Offset, it read as
-              // labelling whichever half of the strip it sat in rather than the rule itself —
-              // and it is the rule it names. Inside the strip rather than below, where it
-              // collided with the tick labels and took their baseline.
-              //
-              // Called "now" and not "live": the mark is a *place*, and clicking it means
-              // "take me there". Whether the cursor is *following* that place is a mode, and
-              // the orange dot on the tethered tag is what says so — one label cannot honestly
-              // do both jobs, which is what this one was trying to do.
-              className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded bg-black/70 px-1 py-px text-[9px] font-semibold uppercase leading-none tracking-wider transition-colors ${
-                isLive
-                  ? "text-white"
-                  : "text-white/50 hover:bg-black/80 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
-              }`}
-            >
-              now
-            </button>
+            {/* Only while adrift. The label is a *destination* — "there is a place to get back
+                to" — which says nothing when you are already there, and that is exactly when it
+                sits on top of the handle and hides the one thing you would want to grab. It
+                comes back the moment you scrub away, which is when it starts being useful. */}
+            {!isLive && (
+              <button
+                type="button"
+                // The track owns pointerdown for scrubbing; without this, pressing the button
+                // would also begin a drag and the click would land somewhere else entirely.
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={resetTime}
+                title={
+                  isLive
+                    ? "The cursor is following now"
+                    : "Return to now and follow it as it advances"
+                }
+                aria-label={isLive ? "Following now" : "Return to now"}
+                aria-pressed={isLive}
+                // Centred *on* the line, not offset to one side of it. Offset, it read as
+                // labelling whichever half of the strip it sat in rather than the rule itself —
+                // and it is the rule it names. Inside the strip rather than below, where it
+                // collided with the tick labels and took their baseline.
+                //
+                // Called "now" and not "live": the mark is a *place*, and clicking it means
+                // "take me there". Whether the cursor is *following* that place is a mode, and
+                // the orange dot on the tethered tag is what says so — one label cannot honestly
+                // do both jobs, which is what this one was trying to do.
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded bg-black/70 px-1 py-px text-[9px] font-semibold uppercase leading-none tracking-wider transition-colors ${
+                  isLive
+                    ? "text-white"
+                    : "text-white/50 hover:bg-black/80 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
+                }`}
+              >
+                now
+              </button>
+            )}
           </div>
         )}
       </div>

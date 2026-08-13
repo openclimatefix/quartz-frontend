@@ -399,12 +399,14 @@ describe("the live control", () => {
     expect(getGlobalState("intervals").length).toBeGreaterThan(0);
   });
 
-  test("reads as following, not as an invitation, once it is live", () => {
+  test("gets out of the way once you are already there", () => {
     setGlobalState("selectedISOTime", "2026-08-11T06:00:00.000Z");
     setGlobalState("intervals", [1 as unknown as ReturnType<typeof setInterval>]);
     render(<ScrubTrack zone="UTC" />);
 
-    const live = screen.getByRole("button", { name: "Following now" });
-    expect(live).toHaveAttribute("aria-pressed", "true");
+    // While live the cursor sits on the now mark, so the label lands on top of the handle and
+    // hides the thing you would grab. It is a destination, and there is nowhere to go — so it
+    // is not rendered at all. The tag's live dot is what says you are following.
+    expect(screen.queryByRole("button", { name: /now/i })).not.toBeInTheDocument();
   });
 });
