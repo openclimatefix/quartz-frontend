@@ -336,15 +336,30 @@ real information — but that is presentation and belongs to this phase, not to 
 4b. **`ChartInfo` says "The Y axis units are in MW for the National and GSP charts"**
    (`ChartInfo.tsx:28`) while `globalState.tsx:132` defaults `activeUnit` to `percentage`. One of the
    two is stale. Minor, but it is the tooltip users read to interpret the axis.
-5. **Floating chart mechanics.** Movable, resizable, dockable? Persisted per user? What are the
-   limits on the override — can it be dismissed entirely? Not blocking: ship the mode-set default
-   first and add the override once there is something to override.
+5. ~~Floating chart mechanics.~~ **CLOSED** (followup Track L, 2026-08-13). Resizable by dragging a
+   corner grip; **not** movable or dockable. `CHART_SPLIT` is now a *seed* per mode, not a live
+   default — Brad: mode-based scaling that keeps resizing the panel under the user "feels quite
+   uncontrolled". The user's size is stored **per mode** and cookie-persisted, and once a mode has
+   been sized its seed is never read again. The expand handle is deleted: dragging replaces it.
+   See `docs/phase6-followup-track-l-notes.md`.
 6. ~~Sidebar contents at launch.~~ **CLOSED enough to start** — layers, confidence bands, series
    toggles. Comparison and unit went to the map cluster. Expect to cut further once it is real.
-6a. **The map corner is near its limit.** The cluster is ~244px and three controls deep, and it
-   shares the corner with the sites zoom slider and the layer toggles. One more control and it wants
-   to be a popover rather than an always-open panel.
-7. **Where partial coverage surfaces** — see the orphaned `coverage` above.
+6a. ~~The map corner is near its limit.~~ **CLOSED, differently than predicted** (followup Tracks
+   G and I, 2026-08-13). The prediction was that one more control would force a popover. What
+   actually happened: Brad asked for *all* the map controls in **one panel**, top right, so the
+   cluster absorbed the Clouds/PV layer toggles too. It answers the budget with a two-tier panel —
+   the encoding, unit and legend always visible, the aggregation level behind a "more map
+   settings" disclosure — rather than a popover.
+
+   **A warning worth keeping**, because this item caused the mistake: while it was open, its
+   observation ("near its limit") was quoted into three successive agent briefs as if it were a
+   settled constraint, and was load-bearing enough to justify hiding the Clouds toggle — a
+   flagship feature — behind the disclosure by default. Brad caught it. An open question is not a
+   constraint; anything that hides, demotes or defaults-off a user-facing feature is his call.
+7. **Where partial coverage surfaces** — see the orphaned `coverage` above. **Partly answered**
+   (followup Track M): a country-level coverage indicator now distinguishes "loading", "no
+   forecast at all" and "values exist but none at this instant". Still open for the *chart* and
+   for partial coverage *within* a country.
 8. **Region types across countries.** Brad's read: genericise to share, worst case per-region
    selected. Needs pinning down once the German region types are known.
 9. **The full A/B comparison picker (Delta v2).** Deferred deliberately (Brad: "circle back"). The
