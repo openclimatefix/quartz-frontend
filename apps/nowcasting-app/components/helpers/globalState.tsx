@@ -117,6 +117,15 @@ export type FlatGlobalStateType = {
   showCloudLayer: boolean;
   activeChannel: ChannelSelection;
   showPvLayer: boolean;
+  /**
+   * The satellite fetch/decode pipeline's own status, lifted out of `map.tsx`'s local state by
+   * the Phase 6 followup (Track I) so `map-layer-controls.tsx` — mounted in the consolidated
+   * top-right panel, not inside `map.tsx` any more — can show the spinner and the error text
+   * without `map.tsx` rendering anything itself. `map.tsx` still owns writing these; it is the
+   * only thing holding the live Mapbox instance the fetch pipeline needs.
+   */
+  isSatelliteLoading: boolean;
+  satelliteError: string | null;
 };
 
 export type GlobalStateType = FlatGlobalStateType & CountryKeyedState;
@@ -212,7 +221,9 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     pLevels: getValidatedPLevels(),
     showCloudLayer: false,
     activeChannel: "COMPOSITE_VISIBLE",
-    showPvLayer: true
+    showPvLayer: true,
+    isSatelliteLoading: false,
+    satelliteError: null
   });
 
 /**

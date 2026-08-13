@@ -22,51 +22,43 @@ export const STAGE_GUTTER_PX = 14;
 export const MAP_CONTROL_WIDTH_PX = 260;
 
 /**
- * Phase 6 followup, Track G: **the cluster moved corners.** It was bottom-right, sharing
- * nothing vertically with the chart (also bottom-anchored, so only their widths could ever
- * collide — `MAP_CONTROL_WIDTH_PX` capped the chart's). Brad's live pass asked for it to move
- * top-right instead, to sit with the Clouds/PV layer toggles `map.tsx` already renders there
- * (`justify-end` inside a full-width top row, forecast map only) — one corner for "what does
- * the map show", rather than two.
+ * Phase 6 followup, Track G moved the cluster from bottom-right to top-right, to sit with the
+ * Clouds/PV layer toggles `map.tsx` rendered there itself (forecast map only). `map.tsx` was
+ * off-limits to that track (concurrent, unrelated work), so it stopped at "same corner,
+ * stacked below that row" and reserved the row's height with a constant sized by eye rather
+ * than measurement — `MAP_TOP_ROW_RESERVE_PX`, since removed.
  *
- * **This move is partial, on purpose.** `map.tsx` (and `pvLatestMap.tsx`/`deltaMap.tsx`, which
- * mount it) are not owned by this track, and were under concurrent investigation for an
- * unrelated delta-map bug while this change was made — moving the Clouds/PV buttons' own JSX
- * out of `map.tsx` to genuinely interleave them with this cluster risked colliding with that
- * work and was explicitly out of bounds. So the cluster now sits in the *same corner*, stacked
- * below that row, rather than merged into one row with it. Flagged as a followup once `map.tsx`
- * is free.
- *
- * `MAP_TOP_ROW_RESERVE_PX` is what makes the stacking possible without reading `map.tsx`: the
- * vertical space to clear before the cluster starts, sized to the Clouds/PV row's rendered
- * height (a `p-4` container, `mt-3` above the row, one line of buttons/select ~28-32px tall).
- * Generous rather than tight, since that row's exact height is not this track's to guarantee —
- * on the delta map, which renders no such row, the cluster just sits with extra headroom above
- * it, which is a cosmetic asymmetry, not a bug. **Worth Brad's eye specifically**: this number
- * cannot be verified by a green build, only by looking.
+ * Phase 6 followup, Track I finishes the move Brad actually asked for ("consolidate ... into
+ * one panel"): the Clouds/PV buttons and the satellite channel select moved out of `map.tsx`
+ * into `map-layer-controls.tsx`, which now mounts *inside* `map-encoding-controls.tsx` behind
+ * a "more settings" disclosure. There is only one top-right box now, not two stacked ones, so
+ * the guess-another-file's-height problem `MAP_TOP_ROW_RESERVE_PX` existed to paper over is
+ * gone — the dock anchors at `STAGE_GUTTER_PX` from the top like it does from the right, and
+ * only its own height needs reserving.
  */
-export const MAP_TOP_ROW_RESERVE_PX = 64;
 
 /**
- * Typical maximum rendered height of the encoding cluster itself (`map-encoding-controls.tsx`:
- * the "Colour by" toggle, the unit control, and `ColorGuideBar` at its tallest — the "GB bands"
- * attribution row present, bands wrapped to two lines). Used only to cap the floating chart's
- * height so a tall chart cannot grow up underneath the cluster now that both are on the same
- * (right) side — see `CHART_TOP_CLEARANCE_PX` below and `floating-chart.tsx`. A judgement call
- * in the same spirit as `MAP_CONTROL_WIDTH_PX` was for the old width cap: re-tune by eye if the
- * cluster's real content grows past it.
+ * Typical maximum rendered height of the encoding panel (`map-encoding-controls.tsx`): "Colour
+ * by", the unit toggle, `ColorGuideBar` at its tallest (the "GB bands" attribution row present,
+ * bands wrapped to two lines), the "more settings" disclosure row, and — when that disclosure
+ * is open — the aggregation-level toggle and `MapLayerControls` with its satellite channel
+ * select showing. Used only to cap the floating chart's height so a tall chart cannot grow up
+ * underneath the panel — see `CHART_TOP_CLEARANCE_PX` below and `floating-chart.tsx`.
+ *
+ * Sized to the *expanded* state, not the collapsed default, because the chart must not overlap
+ * the panel in whichever state the user leaves it — a user who opens "more settings" and then
+ * expands the chart must still see the settings, not have the chart grow over them. A
+ * judgement call in the same spirit as `MAP_CONTROL_WIDTH_PX` was for the old width cap:
+ * re-tune by eye if the panel's real content grows past it.
  */
-export const MAP_CONTROL_HEIGHT_RESERVE_PX = 230;
+export const MAP_CONTROL_HEIGHT_RESERVE_PX = 350;
 
 /**
- * Combined vertical space the floating chart must clear at the top of the stage: the Clouds/PV
- * row, the cluster stacked beneath it, and a gutter. Replaces the old `MAP_CONTROL_WIDTH_PX`
- * width cap on the chart now that the cluster is no longer in the chart's own bottom-right
- * corner — the coupling didn't disappear, it changed axis, from "don't reach right into the
- * cluster's column" to "don't grow up into the cluster's row."
+ * Vertical space the floating chart must clear at the top of the stage: the encoding panel's
+ * own height plus a gutter. Simpler than Track G's version now that the panel is the only
+ * thing in the corner — no separate row above it to also clear.
  */
-export const CHART_TOP_CLEARANCE_PX =
-  MAP_TOP_ROW_RESERVE_PX + MAP_CONTROL_HEIGHT_RESERVE_PX + STAGE_GUTTER_PX;
+export const CHART_TOP_CLEARANCE_PX = MAP_CONTROL_HEIGHT_RESERVE_PX + STAGE_GUTTER_PX;
 
 /**
  * The chart's default split, as percentages of the inset.

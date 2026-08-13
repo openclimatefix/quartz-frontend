@@ -17,11 +17,8 @@ import {
   MAX_POWER_GENERATED
 } from "../../constant";
 import {
-  SATELLITE_CHANNELS,
-  SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
   ChannelSelection,
-  COMPOSITE_SELECTIONS,
   MAX_COMPOSITE_CHANNELS,
   channelsForSelection,
   TifLayerData,
@@ -140,17 +137,24 @@ const Map: FC<IMap> = ({
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
-  const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
-  const [showPvLayer, setShowPvLayer] = useGlobalState("showPvLayer");
+  // Setters for these three are no longer called here — the Clouds/PV buttons and the channel
+  // select that used to write them moved to `map-layer-controls.tsx` (Track I). Read-only here;
+  // this component still consumes the values to drive the fetch/decode pipeline and the PV fill
+  // layer's visibility.
+  const [showCloudLayer] = useGlobalState("showCloudLayer");
+  const [activeChannel] = useGlobalState("activeChannel");
+  const [showPvLayer] = useGlobalState("showPvLayer");
   const showPvRef = useRef(showPvLayer);
   const showCloudRef = useRef(showCloudLayer);
   const channelRef = useRef(activeChannel);
   const tifCache = useRef(new QuickLRU<string, TifLayerData>({ maxSize: TIF_CACHE_SIZE }));
   const currentKeyRef = useRef<string | null>(null);
   const requestedKeyRef = useRef<string | null>(null);
-  const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
-  const [satelliteError, setSatelliteError] = useState<string | null>(null);
+  // Lifted to global state (Phase 6 followup, Track I) so `map-layer-controls.tsx` — now
+  // mounted in the consolidated top-right panel rather than inside this component — can show
+  // the spinner and error text it used to render itself. See globalState.tsx's doc comment.
+  const [isSatelliteLoading, setIsSatelliteLoading] = useGlobalState("isSatelliteLoading");
+  const [satelliteError, setSatelliteError] = useGlobalState("satelliteError");
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
   // Show the selected channel(s) and hide the rest. A composite selection resolves
@@ -455,96 +459,14 @@ const Map: FC<IMap> = ({
 
   return (
     <div className="relative h-full overflow-hidden bg-ocf-gray-900">
+      {/* The Clouds/PV layer toggles and the satellite channel select used to render here —
+          moved to `map-layer-controls.tsx`, mounted inside the consolidated top-right panel
+          (Phase 6 followup, Track I). This component keeps the fetch/decode pipeline, since it
+          needs the live Mapbox instance; `showCloudLayer`/`activeChannel`/`showPvLayer` were
+          already global state for the same cross-component reason, and `isSatelliteLoading`/
+          `satelliteError` joined them so the panel can read what this effect is doing. */}
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full flex flex-col gap-1 pointer-events-none">
         <div className="pointer-events-auto">{controlOverlay(map)}</div>
-        {title === MAP_TITLE_FORECAST && (
-          <div
-            className={`pointer-events-auto flex flex-row items-start justify-end gap-2 transition-all duration-300 mt-3`}
-          >
-            {showCloudLayer && (
-              <select
-                value={activeChannel}
-                onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
-                disabled={!!satelliteError}
-                className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {satelliteError ? (
-                  <option value={activeChannel}>{satelliteError}</option>
-                ) : (
-                  <>
-                    <optgroup label="Composites">
-                      {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
-                        <option key={key} value={key}>
-                          {label}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Individual bands">
-                      {SATELLITE_CHANNELS.map((ch) => (
-                        <option key={ch} value={ch}>
-                          {SATELLITE_CHANNEL_LABELS[ch]}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </>
-                )}
-              </select>
-            )}
-
-            <div className="flex flex-row items-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const turningOff = showCloudLayer;
-                  setShowCloudLayer(!showCloudLayer);
-                  if (turningOff) setShowPvLayer(true);
-                }}
-                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-                  showCloudLayer
-                    ? "text-black bg-ocf-yellow"
-                    : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
-                }`}
-              >
-                {isSatelliteLoading && (
-                  <svg
-                    className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                )}
-                Clouds
-              </button>
-
-              <button
-                type="button"
-                title="Toggle the yellow PV forecast overlay so clouds are easier to see"
-                onClick={() => setShowPvLayer((v) => !v)}
-                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-                  showPvLayer
-                    ? "text-black bg-ocf-yellow"
-                    : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
-                }`}
-              >
-                PV
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <div ref={mapContainer} id={`Map-${title}`} data-title={title} className="h-full w-full" />

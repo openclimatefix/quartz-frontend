@@ -33,11 +33,12 @@ import { CHART_SPLIT, CHART_TOP_CLEARANCE_PX, STAGE_GUTTER_PX } from "./geometry
  * "the chart cannot be dragged behind the rail" is a property of where it is mounted rather
  * than a rule enforced with `z-index`.
  *
- * **The map control cluster moved top-right** (Phase 6 followup, Track G — see
- * `map-control-dock.tsx`). It used to share the chart's bottom edge, so only a *width* cap
- * kept an expanded chart from covering it; now it shares the chart's right-hand side instead,
- * so a *height* cap does that job — `CHART_TOP_CLEARANCE_PX` — leaving the chart's width
- * bounded only by the inset itself, the same way its height already was.
+ * **The map control panel lives top-right** (Phase 6 followup, Track G moved it there; Track I
+ * consolidated the map's layer toggles into it — see `map-control-dock.tsx`). It used to share
+ * the chart's bottom edge, so only a *width* cap kept an expanded chart from covering it; now
+ * it shares the chart's right-hand side instead, so a *height* cap does that job —
+ * `CHART_TOP_CLEARANCE_PX` — leaving the chart's width bounded only by the inset itself, the
+ * same way its height already was.
  */
 
 const NARROW_QUERY = "(max-width: 1023px)";
