@@ -1,9 +1,8 @@
 import { FC } from "react";
-import { DateTime } from "luxon";
 
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
-import { getCountryConfig } from "../../config/countries";
+import { getCountryConfig, sortCountryCodes } from "../../config/countries";
 import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
 import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, formatISODateStringAsZonedTime } from "../helpers/utils";
 import ScrubTrack from "./scrub-track";
@@ -121,21 +120,17 @@ const CursorReadout: FC = () => {
   const utc = formatISODateStringAsZonedTime(selectedISOTime, "UTC");
 
   /**
-   * The stack runs west to east — in time order, not in the order countries were enabled.
+   * The stack runs in the registry's order — the same order the header toggle and the chart's
+   * country picker use, so a user reading down one list and across another sees the same
+   * sequence. `config/countries.ts` owns it.
    *
-   * UTC is the zero mark and every European zone reads after it, so the column tells you the
-   * offsets as a shape: each row is at or ahead of the one above. Sorted by the *actual* offset
-   * at the cursor's instant rather than by a stored number, so a country in summer time sorts
-   * where it currently is, and the order is right on both sides of a DST change — including
-   * the weeks when GB and NL have already switched and one has not.
+   * This was sorted by each country's actual UTC offset at the cursor's instant, which reads
+   * west to east and is the natural order *here*. It is the wrong rule to share, though: an
+   * offset-derived order silently reorders itself at DST, and consistency across the three
+   * surfaces is worth more than a footer-specific nicety. They agree today anyway — the
+   * registry reads GB then NL, which is also west to east.
    */
-  const zoneOrder = [...enabledCountries].sort((a, b) => {
-    const offsetOf = (code: string) =>
-      DateTime.fromISO(selectedISOTime, {
-        zone: getCountryConfig(code)?.timezone ?? DEFAULT_TIMEZONE
-      }).offset;
-    return offsetOf(a) - offsetOf(b) || a.localeCompare(b);
-  });
+  const zoneOrder = sortCountryCodes(enabledCountries, (code) => code);
 
   return (
     <footer

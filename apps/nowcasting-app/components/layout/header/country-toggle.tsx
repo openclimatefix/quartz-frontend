@@ -1,6 +1,7 @@
 import React from "react";
 
 import { toggleCountryEnabled } from "../../helpers/globalState";
+import { sortCountryCodes } from "../../../config/countries";
 import { useCountries, useEnabledCountries } from "../../../hooks/data/use-countries";
 import type { CountryListing } from "../../../lib/domain/types";
 
@@ -124,7 +125,9 @@ const CountryToggle: React.FC = () => {
 
   return (
     <div className="flex items-center px-2" role="group" aria-label="Countries">
-      {countries.map((country) => (
+      {/* Registry order, not the manifest's — the same sequence the chart's country picker and
+          the footer's zone stack use. See `sortCountryCodes` in `config/countries.ts`. */}
+      {sortCountryCodes(countries, (country) => country.code).map((country) => (
         <CountryOption
           key={country.code}
           country={country}

@@ -115,9 +115,10 @@ describe("the zone stack", () => {
     expect(codeIn("GB")).not.toHaveClass("text-ocf-yellow");
   });
 
-  test("runs in time order, west to east, not in enabled order", () => {
-    // Enabled NL-first on purpose: the stack must not inherit that order. In August GB is
-    // UTC+1 and NL UTC+2, so GB reads above NL whichever way they were switched on.
+  test("runs in registry order, not in the order countries were enabled", () => {
+    // Enabled NL-first on purpose: the stack must not inherit that order, or it would reorder
+    // itself as the user toggles countries. The registry reads GB then NL — which is also west
+    // to east, though it is the file's order and not the offsets that decides.
     setEnabledCountries(["NL", "GB"]);
     setFocusedCountry("NL");
     render(<CursorReadout />);

@@ -480,3 +480,35 @@ export const getCountryConfig = (code: string | null | undefined): CountryConfig
 
 /** Codes this build carries configuration for. Not the same as the entitled set. */
 export const configuredCountryCodes = (): string[] => Object.keys(COUNTRY_CONFIG);
+
+/**
+ * The order countries are listed in, everywhere they are listed.
+ *
+ * One rule for the header toggle, the chart's country picker and the footer's zone stack.
+ * Before this they had three: the header took the manifest's order, the picker took the order
+ * the user happened to enable them in — so it *reordered as you used it* — and the footer
+ * sorted by UTC offset. Three surfaces, three answers, on the same screen.
+ *
+ * The registry's declaration order is the source, so the answer is stable, reviewable in one
+ * file, and does not move when a user toggles something or when the API changes what it
+ * returns. It reads west to east today (GB, then NL), and it should stay that way as countries
+ * are added — but the *order in this file* is what decides, not the offsets: a rule derived
+ * from offsets silently reorders itself twice a year at DST, which is not something a
+ * navigation control should do.
+ *
+ * Codes with no registry entry sort last, alphabetically. The header lists every country the
+ * API serves — including ones this build cannot draw — so that case is real, not defensive.
+ */
+const REGISTRY_ORDER = Object.keys(COUNTRY_CONFIG);
+
+export const countryOrderIndex = (code: string | null | undefined): number => {
+  const index = REGISTRY_ORDER.indexOf((code ?? "").toUpperCase());
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+};
+
+/** `codes` in registry order, unconfigured ones last. Does not mutate the input. */
+export const sortCountryCodes = <T>(items: readonly T[], codeOf: (item: T) => string): T[] =>
+  [...items].sort((a, b) => {
+    const byRegistry = countryOrderIndex(codeOf(a)) - countryOrderIndex(codeOf(b));
+    return byRegistry !== 0 ? byRegistry : codeOf(a).localeCompare(codeOf(b));
+  });

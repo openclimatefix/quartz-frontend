@@ -6,7 +6,8 @@ import {
   configuredCountryCodes,
   forecastSeriesModel,
   getCountryConfig,
-  type CountryConfig
+  type CountryConfig,
+  sortCountryCodes
 } from "./countries";
 
 const entries = Object.entries(COUNTRY_CONFIG);
@@ -177,5 +178,43 @@ describe("getCountryConfig", () => {
 
   test.each([[null], [undefined], [42], [{}]])("tolerates the non-string %p", (input) => {
     expect(getCountryConfig(input as never)).toBeUndefined();
+  });
+});
+
+/**
+ * One list order, shared by every surface that lists countries.
+ *
+ * The header toggle, the chart's country picker and the footer's zone stack each had their own
+ * rule — manifest order, enabled-set order, and UTC offset respectively — so the same two
+ * countries appeared in different sequences on one screen, and the picker reordered itself as
+ * the user toggled things.
+ */
+describe("sortCountryCodes", () => {
+  test("returns registry order regardless of the order it is given", () => {
+    const codes = (order: string[]) => sortCountryCodes(order, (code) => code);
+    expect(codes(["NL", "GB"])).toEqual(["GB", "NL"]);
+    expect(codes(["GB", "NL"])).toEqual(["GB", "NL"]);
+  });
+
+  test("sorts countries this build has no config for last, alphabetically", () => {
+    // The header lists every country the API serves, including ones with no registry entry —
+    // they have to land somewhere predictable rather than at the front.
+    expect(sortCountryCodes(["ZZ", "NL", "AA", "GB"], (code) => code)).toEqual([
+      "GB",
+      "NL",
+      "AA",
+      "ZZ"
+    ]);
+  });
+
+  test("does not mutate its input", () => {
+    const input = ["NL", "GB"];
+    sortCountryCodes(input, (code) => code);
+    expect(input).toEqual(["NL", "GB"]);
+  });
+
+  test("orders objects by the code the accessor picks out", () => {
+    const rows = [{ code: "NL" }, { code: "GB" }];
+    expect(sortCountryCodes(rows, (row) => row.code).map((row) => row.code)).toEqual(["GB", "NL"]);
   });
 });

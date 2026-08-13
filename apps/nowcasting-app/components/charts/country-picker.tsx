@@ -1,5 +1,6 @@
 import React from "react";
 
+import { sortCountryCodes } from "../../config/countries";
 import { setFocusedCountry } from "../helpers/globalState";
 import {
   useCountries,
@@ -62,7 +63,7 @@ const ChartCountryPicker: React.FC = () => {
 
   return (
     <div className="flex items-center gap-px" role="group" aria-label="Chart country">
-      {enabledCountries.map((code) => {
+      {sortCountryCodes(enabledCountries, (code) => code).map((code) => {
         const focused = code === focusedCountry;
         return (
           <button
