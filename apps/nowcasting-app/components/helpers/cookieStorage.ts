@@ -11,7 +11,11 @@ export enum CookieStorageKeys {
   "COUNTRY" = "country",
   // The enabled set — every country that draws on the map. A superset of the focused one,
   // never empty. See `getValidatedEnabledCountries` in globalState.tsx.
-  "ENABLED_COUNTRIES" = "enabledCountries"
+  "ENABLED_COUNTRIES" = "enabledCountries",
+  // Per-mode floating chart sizes the user has dragged to — see `geometry.ts`'s `ChartMode`
+  // and `floating-chart.tsx`. A mode absent from the stored object has not been resized and
+  // still reads its `CHART_SPLIT` seed.
+  "CHART_SPLIT_OVERRIDES" = "chartSplitOverrides"
 }
 
 export const getSettingFromCookieStorage = <T>(key: string): null | T => {

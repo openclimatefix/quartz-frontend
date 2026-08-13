@@ -13,6 +13,7 @@ import { ActiveUnit } from "../map/types";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
 import { ComparisonSelection } from "./comparison";
+import { ChartMode, ChartSplitPercent } from "../shell/geometry";
 import { cursorNow, finestCadenceMinutes, snapToCadence } from "../../lib/time/cursor";
 import {
   CountryKeyedState,
@@ -126,6 +127,14 @@ export type FlatGlobalStateType = {
    */
   isSatelliteLoading: boolean;
   satelliteError: string | null;
+  /**
+   * The floating chart's per-mode size overrides — Phase 6 followup, OPEN 5. `CHART_SPLIT` in
+   * `geometry.ts` is the seed each `ChartMode` starts from; once the user drags a mode to a
+   * size, that size lives here and the seed is never read again for that mode. A mode absent
+   * from this object has not been resized. Write it through `setChartSplitOverride`, never
+   * directly — that is what keeps the cookie in step.
+   */
+  chartSplitOverrides: Partial<Record<ChartMode, ChartSplitPercent>>;
 };
 
 export type GlobalStateType = FlatGlobalStateType & CountryKeyedState;
@@ -223,7 +232,11 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     activeChannel: "COMPOSITE_VISIBLE",
     showPvLayer: true,
     isSatelliteLoading: false,
-    satelliteError: null
+    satelliteError: null,
+    chartSplitOverrides:
+      getSettingFromCookieStorage<Partial<Record<ChartMode, ChartSplitPercent>>>(
+        CookieStorageKeys.CHART_SPLIT_OVERRIDES
+      ) || {}
   });
 
 /**
@@ -435,6 +448,29 @@ export const toggleCountryEnabled = (code: string): void => {
  */
 export const setComparison = (id: ComparisonSelection): void => {
   setGlobalState("comparison", id);
+};
+
+/**
+ * Store, or clear, a mode's floating-chart size override.
+ *
+ * `split: null` clears the mode's entry rather than storing it — the reset affordance
+ * (`chart-resize-handle.tsx`'s double-click/Enter) returns a mode to its `CHART_SPLIT` seed by
+ * removing the override rather than writing the seed's numbers back as an override, so a later
+ * change to the seed in `geometry.ts` still reaches a user who has reset.
+ *
+ * Persisted alongside `visibleLines` and `dashboardMode` — same cookie-plus-state pattern, so
+ * "state and cookie can never be written apart" holds here too.
+ */
+export const setChartSplitOverride = (mode: ChartMode, split: ChartSplitPercent | null): void => {
+  const previous = getGlobalState("chartSplitOverrides");
+  const next = { ...previous };
+  if (split) {
+    next[mode] = split;
+  } else {
+    delete next[mode];
+  }
+  setGlobalState("chartSplitOverrides", next);
+  setSettingInCookieStorage(CookieStorageKeys.CHART_SPLIT_OVERRIDES, next);
 };
 
 /**
