@@ -38,7 +38,10 @@ import countriesManifest from "../../../lib/api/v1/__fixtures__/countries.json";
 import gbGspForecastPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json";
 import gbGspGenerationPeriod from "../../../lib/api/v1/__fixtures__/gb-gsp-generation-period.json";
 import gbRegionsGsp from "../../../lib/api/v1/__fixtures__/gb-regions-gsp.json";
+import nlRegionsProvince from "../../../lib/api/v1/__fixtures__/nl-regions-province.json";
+import nlProvinceForecastPeriod from "../../../lib/api/v1/__fixtures__/nl-province-forecasts-period.json";
 import { resetTokenCache } from "../../../lib/api/auth/token";
+import { setFocusedCountry } from "../../helpers/globalState";
 import { useGspDeltas } from "./use-gsp-deltas";
 
 const V1 = "https://api.quartz.solar/v1";
@@ -136,5 +139,59 @@ describe("useGspDeltas", () => {
     });
 
     expect(view.result.current.gspDeltas.size).toBe(0);
+  });
+});
+
+/**
+ * NL's provinces reach the delta table at all.
+ *
+ * They did not: the hook resolved every region through `bridge.gspIdFor`, GB's numeric
+ * `gsp_id`, and `return`ed when there was none. NL's provinces carry `metadata.region_id` and
+ * no `gsp_id`, so all twelve were dropped before the table saw them — the delta map coloured
+ * NL correctly while the list beside it stayed empty. `regionId` is the map's own id for the
+ * region, which is what a selection is made of, and it falls back to the region name.
+ */
+describe("a country whose regions have no gsp_id", () => {
+  // Focus is global and this file's other tests assume GB; put it back rather than depending
+  // on test order.
+  afterEach(() => setFocusedCountry("GB"));
+
+  // Observation = forecast + a fixed offset, so every province has a computable delta and the
+  // arithmetic is not what is under test here — presence is.
+  const nlGenerationPeriod = {
+    cache_updated_utc: nlProvinceForecastPeriod.cache_updated_utc,
+    observer_name: "ned_nl",
+    times_utc: nlProvinceForecastPeriod.times_utc,
+    regions: nlProvinceForecastPeriod.regions.map((region) => ({
+      region_name: region.region_name,
+      capacity_kW: region.capacity_kW,
+      power_kW: region.power_kW.map((value: number) => value + 1000)
+    }))
+  };
+
+  test("keys the delta by region name and exposes it as the selectable id", async () => {
+    server.use(
+      json("/NL/solar/regions", nlRegionsProvince),
+      json("/NL/solar/forecasts/period", nlProvinceForecastPeriod),
+      json("/NL/solar/generation/period", nlGenerationPeriod)
+    );
+    setFocusedCountry("NL");
+
+    const view = renderHook(({ targetTime }: { targetTime: string }) => useGspDeltas(targetTime), {
+      wrapper,
+      initialProps: { targetTime: nlProvinceForecastPeriod.times_utc[20] }
+    });
+
+    await waitFor(() => {
+      view.rerender({ targetTime: nlProvinceForecastPeriod.times_utc[20] });
+      expect(view.result.current.gspDeltas.size).toBeGreaterThan(0);
+    });
+
+    const zeeland = view.result.current.gspDeltas.get("zeeland");
+    expect(zeeland).toBeDefined();
+    // The map keys NL features by region name, so that is what a selection compares against.
+    expect(zeeland!.regionId).toBe("zeeland");
+    // And the GB-only numeric id is simply absent rather than faked.
+    expect(zeeland!.gspId).toBeUndefined();
   });
 });

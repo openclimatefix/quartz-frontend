@@ -95,7 +95,21 @@ export type SitesCombinedErrors = {
   sitesPvActualError: any;
 };
 export type GspDeltaValue = {
-  gspId: number;
+  /**
+   * The id the *map* knows this region by, and what a selection is made of — a GB GSP's
+   * numeric `gsp_id` as a string, an NL province's region name.
+   *
+   * This exists because `gspId` below is GB-only. The delta table used to key and select on
+   * `gspId`, so every region without one — every NL province — was dropped before it reached
+   * the table, and the delta view listed nothing for NL while colouring it correctly on the
+   * map.
+   */
+  regionId: string;
+  /**
+   * GB's numeric GSP id, absent for a country whose regions have none. Kept because the CSV
+   * export and the GB-only region bridge still speak it; nothing new should depend on it.
+   */
+  gspId?: number;
   gspRegion: string;
   gspInstalledCapacity: number;
   currentYield: number;

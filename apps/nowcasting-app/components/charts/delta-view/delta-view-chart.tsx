@@ -120,9 +120,11 @@ const GspDeltaColumn: FC<{
             hasRows = true;
           }
 
-          const isSelectedGsp =
-            gspDelta.gspId &&
-            selectedMapRegionIds?.map((gspId) => Number(gspId)).includes(Number(gspDelta.gspId));
+          // Compared as strings, on the map's own id. It used to coerce both sides with
+          // `Number()`, which works for GB's numeric GSP ids and turns every NL province name
+          // into `NaN` — and `NaN !== NaN`, so an NL row could never show as selected even
+          // once the rows themselves started appearing.
+          const isSelectedGsp = selectedMapRegionIds?.includes(gspDelta.regionId);
 
           // this is normalized putting the delta value over the installed capacity of a gsp
           const deltaNormalizedPercentage = Math.abs(
@@ -149,15 +151,15 @@ const GspDeltaColumn: FC<{
                 negative ? "rounded-l" : "rounded-r"
               } box-content cursor-pointer relative flex w-full transition duration-200 ease-out 
               hover:bg-ocf-gray-900 hover:ease-in`}
-              key={`gspCol${gspDelta.gspId}`}
-              onClick={() => setSelectedMapRegionIds([String(gspDelta.gspId)])}
+              key={`gspCol${gspDelta.regionId}`}
+              onClick={() => setSelectedMapRegionIds([gspDelta.regionId])}
             >
               <div
                 className={`items-start xl:items-center text-xs grid grid-cols-12 flex-1 py-1.5 justify-between px-2 
                 transition duration-200 ease-out hover:ease-in ${bucketColor} ${
                   gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
                 }`}
-                key={`gspCol${gspDelta.gspId}`}
+                key={`gspCol${gspDelta.regionId}`}
               >
                 <div className="col-span-10 xl:col-span-5 flex-initial flex justify-between self-stretch items-center dash:max-w-full">
                   <span className="">{gspDelta.gspRegion}</span>

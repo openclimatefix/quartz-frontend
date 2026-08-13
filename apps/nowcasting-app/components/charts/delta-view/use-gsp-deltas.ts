@@ -117,8 +117,13 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
     values.forEach((value, regionName) => {
       if (!value.hasDelta) return;
 
+      // The map's id for this region, which is what a selection is made of. GB's features are
+      // keyed by numeric `gsp_id`; a country whose regions have none (NL's provinces) is keyed
+      // by region name — `country-features.ts` stamps whichever applies. This used to `return`
+      // when there was no `gsp_id`, which silently dropped every NL province before it reached
+      // the table: the delta map coloured NL correctly while the list beside it showed nothing.
       const gspId = bridge.gspIdFor(regionName);
-      if (gspId === undefined) return;
+      const regionId = gspId === undefined ? regionName : String(gspId);
 
       const deltaBucket = value.deltaBucket as DELTA_BUCKET;
       const deltaNormalized = value.capacity > 0 ? value.delta / value.capacity : 0;
@@ -126,6 +131,7 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       const currentYield = value.actual ?? 0;
 
       result.set(regionName, {
+        regionId,
         gspId,
         gspRegion: value.label,
         gspInstalledCapacity: value.capacity,
