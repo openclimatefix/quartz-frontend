@@ -148,7 +148,7 @@ const CursorReadout: FC = () => {
   return (
     <footer
       aria-label="Time cursor"
-      className="flex flex-none items-center gap-4 border-t border-white/10 bg-black px-4 py-2 text-xs text-ocf-gray-300"
+      className="flex flex-none items-center gap-3 border-t border-white/10 bg-black px-4 py-2 text-xs text-ocf-gray-300"
     >
       {/*
        * A stack of zones, not a sentence about the cursor.
@@ -179,18 +179,26 @@ const CursorReadout: FC = () => {
           />
         ))}
       </div>
-      {/* The grain, as a value rather than a sentence. The explanation moves to the tooltip:
-          it is a thing you check once, not something to read on every glance. */}
-      <span
-        className="flex-none cursor-default text-2xs tabular-nums text-ocf-gray-600"
-        title={`The cursor steps in ${cadenceMinutes}-minute slots — ${focusedCountry} publishes on that grid. Changing the focused country changes the step.`}
-      >
-        {`${cadenceMinutes}m`}
-      </span>
-      {/* Left of the track, so the row reads control-then-timeline. Fed from this component's
-          own `useCursorRange()` call rather than `ScrubTrack`'s — same hook, same SWR cache key,
-          so the values agree; not rendered until that data exists, same as the track itself. */}
-      {rangeData && <PlayButton startTime={rangeData.range.start} endTime={rangeData.range.end} />}
+      {/* The grain and playback read as one group — both are about *how* the cursor moves —
+          sitting between the zone stack (what time it is) and the track (where that time is).
+          They were three equally-spaced siblings, which left the grain floating between two
+          things it belonged to neither of. The grain keeps a fixed width so switching a 30m
+          country for a 15m one does not nudge the play button sideways.
+          
+          Playback is fed from this component's own `useCursorRange()` call rather than
+          `ScrubTrack`'s — same hook, same SWR cache key, so the values agree; not rendered
+          until that data exists, same as the track itself. */}
+      <div className="flex flex-none items-center gap-2">
+        <span
+          className="w-7 cursor-default text-right text-2xs tabular-nums text-ocf-gray-600"
+          title={`The cursor steps in ${cadenceMinutes}-minute slots — ${focusedCountry} publishes on that grid. Changing the focused country changes the step.`}
+        >
+          {`${cadenceMinutes}m`}
+        </span>
+        {rangeData && (
+          <PlayButton startTime={rangeData.range.start} endTime={rangeData.range.end} />
+        )}
+      </div>
       <div className="min-w-[140px] flex-1">
         <ScrubTrack zone={focusedZone} />
       </div>

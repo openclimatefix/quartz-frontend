@@ -24,14 +24,14 @@ const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
       aria-pressed={isPlaying}
       aria-label={isPlaying ? "Pause" : "Play"}
       title={isPlaying ? "Pause playback" : "Play through the window"}
-      className="flex h-6 w-6 flex-none items-center justify-center rounded border border-white/10 text-ocf-yellow hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow"
+      className="flex h-7 w-7 flex-none items-center justify-center rounded border border-white/10 text-ocf-yellow transition-colors hover:border-white/20 hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow"
     >
       {isPlaying ? (
-        <svg width="10" height="10" viewBox="0 0 22 24" fill="none" aria-hidden="true">
+        <svg width="14" height="14" viewBox="7 6 10 12" fill="none" aria-hidden="true">
           <path fill="currentColor" d="M11 7H8v10h3V7zM13 17h3V7h-3v10z" />
         </svg>
       ) : (
-        <svg width="10" height="10" viewBox="0 0 42 42" fill="currentColor" aria-hidden="true">
+        <svg width="14" height="14" viewBox="12 9 21 24" fill="currentColor" aria-hidden="true">
           <path d="M13.75 10.5V31.5L31.25 21L13.75 10.5Z" />
         </svg>
       )}
