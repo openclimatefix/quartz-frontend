@@ -11,6 +11,11 @@ import {
   namespaceFeatureStates,
   stampCountryFeatures
 } from "./country-features";
+import {
+  computeCountryCoverage,
+  EMPTY_COUNTRY_COVERAGE,
+  type CountryCoverage
+} from "./country-coverage";
 import useMapRegionValues from "./use-map-region-values";
 
 /**
@@ -57,19 +62,28 @@ import useMapRegionValues from "./use-map-region-values";
  * `useMemo`s, and geometry only changes when geometry changes.
  */
 
-/** What one country contributes, after namespacing. */
-type CountryStatus = {
+/**
+ * What one country contributes, after namespacing.
+ *
+ * `coverage` is the per-cursor legibility fact (Phase 6 followup, Track M) — computed once per
+ * country here, alongside the same values pipeline that already builds `hasValues`, rather than
+ * `deltaMap`/`pvLatestMap` each re-deriving it from the merged, namespaced feature-state map.
+ * See `country-coverage.ts` for what it distinguishes and why.
+ */
+export type CountryStatus = {
   nationalCapacityMw: number;
   hasValues: boolean;
   isLoading: boolean;
   error: unknown;
+  coverage: CountryCoverage;
 };
 
 const EMPTY_STATUS: CountryStatus = {
   nationalCapacityMw: 0,
   hasValues: false,
   isLoading: false,
-  error: undefined
+  error: undefined,
+  coverage: EMPTY_COUNTRY_COVERAGE
 };
 
 export type EnabledCountryMapData = {
@@ -94,6 +108,14 @@ export type EnabledCountryMapData = {
   hasValues: boolean;
   /** The first error any country reported, or `undefined`. */
   error: unknown;
+  /**
+   * Per-country status, keyed by country code, for every currently enabled country (falling
+   * back to `EMPTY_STATUS` for one that has not reported yet). This is the per-country
+   * breakdown the merged `hasValues`/`isLoading`/`error` above deliberately discard — added for
+   * `country-coverage-banner.tsx`, which needs to say which country has nothing to draw, not
+   * just whether any of them do.
+   */
+  countryStatus: Record<string, CountryStatus>;
   /** Render these. They are the per-country hook instances; they draw nothing themselves. */
   loaders: React.ReactNode;
 };
@@ -136,14 +158,22 @@ const CountryMapLayer: React.FC<LoaderProps> = ({
     () => namespaceFeatureStates(country, values.featureStates, { grouped }),
     [country, values.featureStates, grouped]
   );
+  // Off the UN-namespaced states — the namespace is a map-layer concern (see
+  // `country-features.ts`) and has no bearing on `dataState`/`hasDelta`, which is all this
+  // reads. Computed here, once per country, rather than by each map re-scanning the merged set.
+  const coverage = useMemo(
+    () => computeCountryCoverage(values.featureStates),
+    [values.featureStates]
+  );
   const status = useMemo<CountryStatus>(
     () => ({
       nationalCapacityMw: values.nationalCapacityMw,
       hasValues: values.hasValues,
       isLoading: values.isLoading,
-      error: values.error
+      error: values.error,
+      coverage
     }),
-    [values.nationalCapacityMw, values.hasValues, values.isLoading, values.error]
+    [values.nationalCapacityMw, values.hasValues, values.isLoading, values.error, coverage]
   );
 
   useEffect(() => onGeometry(country, geometry), [country, geometry, onGeometry]);
@@ -240,7 +270,8 @@ export const useEnabledCountryMapData = (
       ),
       isLoading: statuses.some((entry) => entry.isLoading),
       hasValues: statuses.some((entry) => entry.hasValues),
-      error: statuses.find((entry) => entry.error !== undefined)?.error
+      error: statuses.find((entry) => entry.error !== undefined)?.error,
+      countryStatus: Object.fromEntries(codes.map((code, index) => [code, statuses[index]]))
     };
   }, [codes, statusByCountry]);
 

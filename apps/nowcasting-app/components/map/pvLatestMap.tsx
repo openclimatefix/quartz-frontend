@@ -26,6 +26,7 @@ import {
   fillOpacityExpression
 } from "./feature-state";
 import { FEATURE_KEY_PROPERTY, REGION_COUNTRY_PROPERTY } from "./country-features";
+import CountryCoverageBanner from "./country-coverage-banner";
 import type { MapFeatureState } from "../helpers/data";
 
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -68,8 +69,16 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   // Every ENABLED country, not just the focused one (contract §1/§3). One instance of the
   // value pipeline per country, merged into one source; `loaders` are those instances and
   // must be rendered. See `use-enabled-country-map-data.tsx`.
-  const { featureStates, geometry, capacityByCountry, hasValues, isLoading, error, loaders } =
-    useEnabledCountryMapData(selectedISOTime);
+  const {
+    featureStates,
+    geometry,
+    capacityByCountry,
+    hasValues,
+    isLoading,
+    error,
+    loaders,
+    countryStatus
+  } = useEnabledCountryMapData(selectedISOTime);
 
   // The network constraint overlay. Fetched rather than imported since Phase 5 — it was
   // 430 KB of GeoJSON in the bundle of every page that imports this module, for a layer that
@@ -517,8 +526,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             // The corner's own time readout went here (Wave 4) — the shell's cursor readout
             // (`components/shell/cursor-readout.tsx`) already says it, better, once for both
             // panes. `sitesMap.tsx` keeps its own: `/sites` has no shell cursor readout to
-            // duplicate.
-            controlOverlay={() => null}
+            // duplicate. Reused (Phase 6 followup, Track M) for the per-country coverage
+            // banner — quiet unless an enabled country has nothing published at this instant,
+            // or nothing at all.
+            controlOverlay={() => (
+              <CountryCoverageBanner countryStatus={countryStatus} metric="value" />
+            )}
             title={MAP_TITLE_FORECAST}
           ></Map>
         </>

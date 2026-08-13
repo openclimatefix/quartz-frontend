@@ -9,6 +9,7 @@ import { FeatureCollection } from "geojson";
 import useEnabledCountryMapData from "./use-enabled-country-map-data";
 import { PV_SOURCE_ID, applyFeatureStates, deltaFillColorExpression } from "./feature-state";
 import { FEATURE_KEY_PROPERTY } from "./country-features";
+import CountryCoverageBanner from "./country-coverage-banner";
 import type { MapFeatureState } from "../helpers/data";
 
 type DeltaMapProps = {
@@ -34,7 +35,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   // the same rule `defaultLevelOf` encodes for the initial state, so the two cannot drift,
   // and it removes this file's dependence on `pages/index.tsx` doing the forcing. That is
   // what `finestLevel` asks the fan-out for, per country.
-  const { featureStates, geometry, hasValues, isLoading, error, loaders } =
+  const { featureStates, geometry, hasValues, isLoading, error, loaders, countryStatus } =
     useEnabledCountryMapData(selectedISOTime, { finestLevel: true });
 
   const fillColor = useMemo(() => deltaFillColorExpression(), []);
@@ -210,8 +211,13 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
           }}
           // The corner's own time readout went here (Wave 4) — the shell's cursor readout
           // (`components/shell/cursor-readout.tsx`) already says it, better, once for both
-          // panes.
-          controlOverlay={() => null}
+          // panes. Reused (Phase 6 followup, Track M) for the per-country coverage banner: a
+          // country with no computable delta at this instant is the common case on this map —
+          // "no delta" is the default reading, not the exception — and this corner is where the
+          // reader is told which enabled country that is true for right now.
+          controlOverlay={() => (
+            <CountryCoverageBanner countryStatus={countryStatus} metric="delta" />
+          )}
           title={MAP_TITLE_DELTA}
         ></Map>
       )}
