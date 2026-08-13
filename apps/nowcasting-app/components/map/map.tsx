@@ -31,6 +31,11 @@ import { addMinutesToISODate } from "../helpers/utils";
 import { useEnabledCountries } from "../../hooks/data/use-countries";
 import { getCountryConfig } from "../../config/countries";
 
+/** Breathing room between a framed country and whatever chrome sits beside it. */
+const MAP_FRAME_GUTTER_PX = 40;
+/** The narrowest strip the countries may be squeezed into before padding is scaled back. */
+const MIN_FRAMED_WIDTH_PX = 240;
+
 // Moved to env by Phase 5 Track E — this was a hardcoded credential in source. See
 // `.env.example` / `docs/phase5-track-e-notes.md`.
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
@@ -161,14 +166,44 @@ const Map: FC<IMap> = ({
       Math.max(acc[2], box[2]),
       Math.max(acc[3], box[3])
     ]);
+    // Frame the countries in the *visible* map, not the whole canvas. The floating chart covers
+    // the lower left and the control panel the upper right, so centring on the canvas pushed GB
+    // under the chart and left the right-hand side empty. Padding each side by what actually
+    // covers it centres the countries in the gap between them instead.
+    //
+    // Measured rather than derived from `CHART_SPLIT`: the chart's size is the user's since the
+    // drag-resize landed, so there is no constant left to read. This runs only when the enabled
+    // set changes, so one layout read costs nothing. A missing element (the sites route, an
+    // early frame) simply contributes no padding.
+    const canvas = map.current.getContainer().getBoundingClientRect();
+    const occlusion = (selector: string): number => {
+      const box = document.querySelector(selector)?.getBoundingClientRect();
+      if (!box || box.width === 0) return 0;
+      return Math.round(box.width + MAP_FRAME_GUTTER_PX);
+    };
+    const left = occlusion('[aria-label="Chart"]');
+    const right = occlusion('[aria-label="Map controls"]');
+    // Never let padding swallow the viewport: Mapbox throws if padding exceeds the canvas, and
+    // a narrow window with a full-width chart can genuinely ask for that.
+    const horizontalBudget = Math.max(0, canvas.width - MIN_FRAMED_WIDTH_PX);
+    const scale = left + right > horizontalBudget ? horizontalBudget / (left + right || 1) : 1;
+
     map.current.fitBounds(
       [
         [union[0], union[1]],
         [union[2], union[3]]
       ],
-      // The first framing is the initial view and should not animate in; later ones are a
-      // response to the user toggling a country, where the movement explains what changed.
-      { padding: 40, duration: isFirstFraming ? 0 : 700 }
+      {
+        padding: {
+          top: MAP_FRAME_GUTTER_PX,
+          bottom: MAP_FRAME_GUTTER_PX,
+          left: Math.round(left * scale),
+          right: Math.round(right * scale)
+        },
+        // The first framing is the initial view and should not animate in; later ones are a
+        // response to the user toggling a country, where the movement explains what changed.
+        duration: isFirstFraming ? 0 : 700
+      }
     );
   }, [enabledKey, enabledCountries, isMapReady]);
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);

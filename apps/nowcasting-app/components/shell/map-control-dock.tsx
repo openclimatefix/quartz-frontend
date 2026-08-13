@@ -40,6 +40,11 @@ import { MAP_CONTROL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
  */
 const MapControlDock: FC<{ children: ReactNode }> = ({ children }) => (
   <div
+    // Labelled because it is a group of controls, and because `map.tsx` finds it by this label
+    // to work out how much of the map's right-hand side is covered when it frames the enabled
+    // countries. A rename here changes what the camera sees as occluded.
+    role="group"
+    aria-label="Map controls"
     className="pointer-events-auto absolute z-[15] flex flex-col gap-2"
     style={{
       right: STAGE_GUTTER_PX,
