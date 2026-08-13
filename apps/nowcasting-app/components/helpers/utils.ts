@@ -1,5 +1,6 @@
 import axios from "axios";
 import { DateTime, Settings } from "luxon";
+import { DISPLAY_LOCALE } from "../../lib/time/display";
 import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
 import {
   Bucket,
@@ -114,7 +115,16 @@ export const formatISODateString = (date: string) => {
  * be in.
  */
 export const DEFAULT_TIMEZONE = "Europe/London";
-export const DEFAULT_LOCALE = "en-GB";
+
+/**
+ * Re-exported from `lib/time/display.ts`, which is the single seam a future user preference
+ * changes. Importing it here also applies Luxon's global default wherever formatting happens,
+ * including server rendering and non-React consumers, without depending on `_app.tsx`.
+ *
+ * Note this is a *display* default and says nothing about zones: a country's `timezone` is
+ * still its own, so an NL slot is shown at NL's wall-clock time — written the GB way.
+ */
+export const DEFAULT_LOCALE = DISPLAY_LOCALE;
 
 const TIME_ONLY: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
 const LONG_DATE: Intl.DateTimeFormatOptions = {

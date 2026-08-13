@@ -1,4 +1,5 @@
 import "../styles/globals.css";
+import { applyDisplayLocale } from "../lib/time/display";
 import { SWRConfig } from "swr";
 import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
@@ -7,6 +8,10 @@ import CustomUserProvider from "../components/auth/CustomUserProvider";
 import { PresenceProvider } from "../components/presence/presenceProvider";
 import { PresenceMetadataBridge } from "../components/presence/presenceMetadataBridge";
 import { LinkedInInsightTag } from "nextjs-linkedin-insight-tag";
+
+// Applies Luxon's global display locale on import — every date and time in the app is written
+// the GB way regardless of the viewer's browser. See `lib/time/display.ts`.
+applyDisplayLocale();
 
 function MyApp({ Component, pageProps }: any) {
   return (

@@ -51,10 +51,14 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
 }) => {
   const config = getCountryConfig(code);
   const slot = slotForInstant(cursor, code);
+  // The country's *timezone*, but not its locale: NL's slot is shown at NL's wall clock,
+  // written the GB way. `config.locale` ("nl-NL") stays in the registry for when a per-user
+  // display preference lands — until then every date and time in the app reads the same,
+  // rather than switching convention halfway along a row. See `lib/time/display.ts`.
   const local = formatISODateStringAsZonedTime(
     slot,
     config?.timezone ?? DEFAULT_TIMEZONE,
-    config?.locale ?? DEFAULT_LOCALE
+    DEFAULT_LOCALE
   );
   // How far the country's slot sits ahead of the cursor. Zero for whichever country owns the
   // grid; a whole cadence step for one that publishes more coarsely.
