@@ -28,28 +28,31 @@ import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDo
  * the layer controls joined it. One panel does not have to mean one flat stack, so it splits
  * into two tiers:
  *
- * - **Always visible**: "Colour by" (which encoding), `UnitToggle` (%/MW/Capacity) and
- *   `ColorGuideBar` (the legend). These three are one conversation — select the encoding, pick
- *   the unit it's shown in, read what the current colours mean — and the unit toggle stays out
- *   of the collapsible tier deliberately: it changes the numbers the always-visible legend
- *   shows, so hiding it behind a disclosure would hide the reason those numbers just changed.
- * - **Behind "More map settings"**: `AggregationLevelToggle` (GSP/DNO grouping) and
- *   `MapLayerControls` (Clouds/PV + satellite channel). Both are closer to *how the map is
- *   drawn* than *what the colour means* — the same "what vs how" line contract §6 draws
- *   between navigation and the display rail, applied one level down inside a cluster that
- *   §5 keeps off the rail entirely. They are lower-frequency changes than the encoding above
- *   them, so collapsing them is what keeps the always-visible footprint close to what it was
- *   before this track added a second control group to the corner.
+ * - **Always visible**: `MapLayerControls` (Clouds/PV + satellite channel), "Colour by" (which
+ *   encoding), `UnitToggle` (%/MW/Capacity) and `ColorGuideBar` (the legend). The middle three
+ *   are one conversation — select the encoding, pick the unit it's shown in, read what the
+ *   current colours mean — and the unit toggle stays out of the collapsible tier deliberately:
+ *   it changes the numbers the always-visible legend shows, so hiding it behind a disclosure
+ *   would hide the reason those numbers just changed.
+ * - **Behind "More map settings"**: `AggregationLevelToggle` (GSP/DNO grouping) alone. It is
+ *   the one control here that is genuinely set-once — which polygons the map is cut into —
+ *   rather than something read or switched while interpreting a forecast.
+ *
+ * **Cloud cover is a flagship feature, not a setting.** The first version of this panel filed
+ * `MapLayerControls` behind the disclosure alongside the grouping toggle, reasoning that both
+ * describe *how the map is drawn* rather than *what the colour means*. That line is real, but
+ * it was the wrong cut: clouds are the context a user reads the forecast *against*, so the
+ * toggle belongs where they can reach it without opening anything — and it was a top-level
+ * control before this panel existed. A consolidation must not demote what it absorbs. It sits
+ * first, above the encoding, because it is the ground the rest is drawn on.
  *
  * Rejected: putting `AggregationLevelToggle` and `MapLayerControls` on the display rail
- * instead of behind a disclosure here. That would satisfy §6's letter but not Brad's explicit
- * ask — "into one panel" — and it would split one coherent "what/how the map draws" story
- * across two different pieces of chrome (this corner and the rail) for no gain, since the rail
- * is about the *chart's* series and confidence bands, not the map's basemap.
+ * instead. That would satisfy §6's letter but not Brad's explicit ask — "into one panel" — and
+ * it would split one coherent "what/how the map draws" story across two pieces of chrome for
+ * no gain, since the rail is about the *chart's* series and confidence bands.
  *
- * Collapsed by default: a fresh session shows the encoding + legend only, the state most
- * people read most often; `settingsOpen` is local (not persisted) since it's a disclosure, not
- * a preference like `visibleLines`.
+ * `settingsOpen` is local and not persisted: it is a disclosure, not a preference like
+ * `visibleLines`.
  */
 
 const OPTION_BASE = "flex-1 rounded px-2 py-1 text-xs font-semibold transition-colors";
@@ -80,6 +83,16 @@ const MapEncodingControls: FC = () => {
 
   return (
     <div className="flex flex-col gap-1.5 rounded-lg border border-white/10 bg-mapbox-black-700/95 p-2 text-white shadow-2xl">
+      {/* Satellite/PV layers are forecast-map concepts only — the delta map has no basemap fill
+          to toggle, so this mirrors `map.tsx`'s old `title === MAP_TITLE_FORECAST` gate,
+          expressed here since this panel is now the one place that knows which map is mounted
+          (`comparison === null` is the forecast map, contract §2). */}
+      {comparison === null && (
+        <>
+          <MapLayerControls />
+          <div className="border-b border-white/10" />
+        </>
+      )}
       <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
         Colour by
       </span>
@@ -122,11 +135,6 @@ const MapEncodingControls: FC = () => {
       {settingsOpen && (
         <div className="flex flex-col gap-1.5">
           <AggregationLevelToggle isLoading={false} />
-          {/* Satellite/PV layers are forecast-map concepts only — the delta map has no basemap
-              fill to toggle, so this mirrors `map.tsx`'s old `title === MAP_TITLE_FORECAST`
-              gate, expressed here since this panel is now the one place that knows which map
-              is mounted (`comparison === null` is the forecast map, contract §2). */}
-          {comparison === null && <MapLayerControls />}
         </div>
       )}
     </div>
