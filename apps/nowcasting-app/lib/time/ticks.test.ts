@@ -1,0 +1,152 @@
+import { describe, expect, it } from "@jest/globals";
+
+import { selectAxisTicks, tickInstants } from "./ticks";
+
+// A 48-hour window, both ends on a clean UTC day boundary — the shape a real chart/scrubber
+// range has. `jest.globalSetup.ts` pins the process to UTC, so a zone has to be passed
+// explicitly to exercise anything zone-sensitive.
+const START = Date.parse("2026-08-10T00:00:00.000Z");
+const END = Date.parse("2026-08-12T00:00:00.000Z");
+
+describe("tickInstants", () => {
+  it("names every 6-hourly boundary in UTC", () => {
+    const ticks = tickInstants(START, END, "UTC", "six-hourly");
+    expect(ticks.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-10T00:00:00.000Z",
+      "2026-08-10T06:00:00.000Z",
+      "2026-08-10T12:00:00.000Z",
+      "2026-08-10T18:00:00.000Z",
+      "2026-08-11T00:00:00.000Z",
+      "2026-08-11T06:00:00.000Z",
+      "2026-08-11T12:00:00.000Z",
+      "2026-08-11T18:00:00.000Z",
+      "2026-08-12T00:00:00.000Z"
+    ]);
+  });
+
+  it("collapses to midnight/midday only", () => {
+    const ticks = tickInstants(START, END, "UTC", "midday-midnight");
+    expect(ticks.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-10T00:00:00.000Z",
+      "2026-08-10T12:00:00.000Z",
+      "2026-08-11T00:00:00.000Z",
+      "2026-08-11T12:00:00.000Z",
+      "2026-08-12T00:00:00.000Z"
+    ]);
+  });
+
+  it("labels local midnight/midday, not UTC — a BST range's 00:00 is 23:00 UTC the day before", () => {
+    // Europe/London is UTC+1 in August (BST). A range in local terms of 10 Aug 00:00 to
+    // 11 Aug 00:00 is 9 Aug 23:00Z to 10 Aug 23:00Z.
+    const startLocalMidnight = Date.parse("2026-08-09T23:00:00.000Z");
+    const endLocalMidnight = Date.parse("2026-08-10T23:00:00.000Z");
+    const ticks = tickInstants(
+      startLocalMidnight,
+      endLocalMidnight,
+      "Europe/London",
+      "midday-midnight"
+    );
+    expect(ticks.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-09T23:00:00.000Z", // 10 Aug 00:00 BST
+      "2026-08-10T11:00:00.000Z", // 10 Aug 12:00 BST
+      "2026-08-10T23:00:00.000Z" // 11 Aug 00:00 BST
+    ]);
+  });
+
+  it("survives a DST transition without drifting off the clock hour", () => {
+    // GB clocks go back on 2026-10-25, 02:00 BST -> 01:00 GMT: a 25-hour local day.
+    const start = Date.parse("2026-10-24T23:00:00.000Z"); // 25 Oct 00:00 BST
+    const end = Date.parse("2026-10-26T00:00:00.000Z"); // 26 Oct 00:00 GMT
+    const ticks = tickInstants(start, end, "Europe/London", "six-hourly");
+    const local = ticks.map((ms) =>
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/London",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(ms)
+    );
+    // Every tick still lands on a clock-hour boundary in {00,06,12,18}:00 local time, including
+    // through the fold — nothing drifts to e.g. 05:00 or 19:00 because a fixed duration was
+    // added across the transition instead of each hour being constructed directly.
+    for (const time of local) {
+      expect(["00:00", "06:00", "12:00", "18:00"]).toContain(time);
+    }
+    // `.set({ hour })` resolves an ambiguous local time (the repeated 01:00 in the fold) to one
+    // instant rather than enumerating both, so the transition day still has exactly one tick per
+    // labelled hour — the point of the test is that none of them drifted, not that the fold
+    // produces an extra one.
+    expect(ticks).toHaveLength(5);
+  });
+
+  it("returns nothing for an inverted or empty range", () => {
+    expect(tickInstants(END, START, "UTC", "six-hourly")).toEqual([]);
+    expect(tickInstants(START, START, "UTC", "six-hourly")).toEqual([]);
+  });
+});
+
+describe("selectAxisTicks — the space decision", () => {
+  const gaps = 8; // 9 six-hourly ticks across the 48h window above
+
+  it("picks 6-hourly when there is comfortably enough space", () => {
+    const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: gaps * 80 });
+    expect(result.density).toBe("six-hourly");
+    expect(result.ticks).toHaveLength(9);
+  });
+
+  it("picks midnight/midday when the space is clearly too narrow", () => {
+    const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: gaps * 20 });
+    expect(result.density).toBe("midday-midnight");
+    expect(result.ticks).toHaveLength(5);
+  });
+
+  it("starts narrow rather than dense when nothing has been measured yet", () => {
+    const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: 0 });
+    expect(result.density).toBe("midday-midnight");
+  });
+
+  it("has hysteresis at the boundary: a resize that only just crosses the narrow threshold does not flip back on the next tiny change", () => {
+    // Starting six-hourly, drop spacing just below the narrow threshold (44px) — should flip.
+    const narrowed = selectAxisTicks({
+      startMs: START,
+      endMs: END,
+      zone: "UTC",
+      widthPx: gaps * 43,
+      previousDensity: "six-hourly"
+    });
+    expect(narrowed.density).toBe("midday-midnight");
+
+    // Now widen back to just above the narrow threshold but still below the wide threshold
+    // (60px): a bare `>=` would flip straight back to six-hourly here. The hysteresis band must
+    // hold it at midday-midnight.
+    const stillNarrow = selectAxisTicks({
+      startMs: START,
+      endMs: END,
+      zone: "UTC",
+      widthPx: gaps * 50,
+      previousDensity: narrowed.density
+    });
+    expect(stillNarrow.density).toBe("midday-midnight");
+
+    // Only once space clears the wide threshold does it switch back.
+    const widened = selectAxisTicks({
+      startMs: START,
+      endMs: END,
+      zone: "UTC",
+      widthPx: gaps * 61,
+      previousDensity: stillNarrow.density
+    });
+    expect(widened.density).toBe("six-hourly");
+  });
+
+  it("is stable the other direction too: coming from six-hourly, space has to drop below the narrow threshold, not just below the wide one", () => {
+    const stillWide = selectAxisTicks({
+      startMs: START,
+      endMs: END,
+      zone: "UTC",
+      widthPx: gaps * 50, // between the two thresholds
+      previousDensity: "six-hourly"
+    });
+    expect(stillWide.density).toBe("six-hourly");
+  });
+});

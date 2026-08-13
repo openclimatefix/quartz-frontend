@@ -1,4 +1,5 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
+import { DateTime } from "luxon";
 import {
   Area,
   Bar,
@@ -26,6 +27,7 @@ import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
 import { DELTA_BUCKET } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
+import { selectAxisTicks, TickDensity } from "../../lib/time/ticks";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
 const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
@@ -229,6 +231,70 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [pLevels] = useGlobalState("pLevels");
   const { timezone, locale } = useCountryFormatting();
 
+  /**
+   * The x axis's tick labels — 6-hourly (00:00/06:00/12:00/18:00) with room, midnight/midday
+   * only when there is not. `lib/time/ticks.ts` holds the rule (shared with the scrub track)
+   * and the hysteresis that keeps a resize from relabelling every frame; this only measures the
+   * chart's own width, which moves independently of the browser window (`CHART_SPLIT`, the
+   * display rail, dashboard mode) so a `window.innerWidth` breakpoint would be wrong here.
+   *
+   * The category axis (national/GSP/delta charts) needs the chosen instants translated back
+   * into `formattedDate` strings that actually appear in the data, because Recharts' `ticks`
+   * prop on a category axis has to name real category values, not arbitrary points on the
+   * timeline. `isSitesChart` uses its own numeric axis below and is untouched here.
+   */
+  const chartContainerRef = useRef<HTMLDivElement | null>(null);
+  const [chartWidthPx, setChartWidthPx] = useState(0);
+  const previousTickDensityRef = useRef<TickDensity | null>(null);
+
+  useEffect(() => {
+    const element = chartContainerRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width !== undefined) setChartWidthPx(width);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  // The category axis' domain — whatever is actually plotted, zoomed or not — is what the tick
+  // instants have to be found inside and translated back to.
+  const displayedChartData = zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData;
+
+  const categoryTicks = useMemo(() => {
+    if (isSitesChart || displayedChartData.length === 0) return undefined;
+    const startMs = DateTime.fromISO(displayedChartData[0].formattedDate, {
+      zone: "utc"
+    }).toMillis();
+    const endMs = DateTime.fromISO(
+      displayedChartData[displayedChartData.length - 1].formattedDate,
+      {
+        zone: "utc"
+      }
+    ).toMillis();
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return undefined;
+
+    const selection = selectAxisTicks({
+      startMs,
+      endMs,
+      zone: timezone,
+      widthPx: chartWidthPx,
+      previousDensity: previousTickDensityRef.current
+    });
+    previousTickDensityRef.current = selection.density;
+
+    // Only instants the data actually has an entry for can be a Recharts category tick — a
+    // 00:00/06:00/etc boundary always lands on a real point (both GB and NL sit on whole-hour
+    // UTC offsets, so a local day boundary is always on the cadence grid), but this still guards
+    // against a gap or a window that does not reach a boundary.
+    const available = new Set(displayedChartData.map((d) => d.formattedDate));
+    const keys = selection.ticks
+      .map((ms) => DateTime.fromMillis(ms, { zone: "utc" }).toFormat("yyyy-LL-dd'T'HH:mm"))
+      .filter((key) => available.has(key));
+    return keys.length > 0 ? keys : undefined;
+  }, [isSitesChart, displayedChartData, timezone, chartWidthPx]);
+
   function prettyPrintYNumberWithCommas(
     x: string | number,
     showDecimals: number = 2,
@@ -346,7 +412,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   console.log("DELTA", deltaView);
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div ref={chartContainerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
         <div className={`absolute top-5 z-10 ${deltaView ? `right-16 mr-3` : `right-4`}`}>
           <button
@@ -439,9 +505,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
               type={isSitesChart ? "number" : "category"}
-              ticks={isSitesChart ? ticks : undefined}
+              ticks={isSitesChart ? ticks : categoryTicks}
               domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={isSitesChart ? undefined : 11}
+              interval={isSitesChart ? undefined : categoryTicks ? 0 : 11}
             />
             <XAxis
               className="select-none"
@@ -452,9 +518,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
               tick={{ fill: "white", style: { fontSize: "12px" } }}
               tickLine={true}
               type={isSitesChart ? "number" : "category"}
-              ticks={isSitesChart ? ticks : undefined}
+              ticks={isSitesChart ? ticks : categoryTicks}
               domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={isSitesChart ? undefined : 11}
+              interval={isSitesChart ? undefined : categoryTicks ? 0 : 11}
               orientation="top"
               padding="no-gap"
               hide={true}

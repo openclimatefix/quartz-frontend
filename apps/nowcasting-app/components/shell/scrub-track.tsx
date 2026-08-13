@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries } from "../../hooks/data";
 import { finestCadenceMinutes } from "../../lib/time/cursor";
+import { selectAxisTicks, TickDensity } from "../../lib/time/ticks";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import useCursorRange from "./use-cursor-range";
 import {
@@ -59,20 +60,48 @@ import {
  * way to tell which side you are on. The past is drawn filled; the future is not.
  */
 
-/** How many labels along the axis. Five gives a mark per ~12h over the ~72h window. */
-const TICK_COUNT = 5;
-
 /** PageUp/PageDown stride, in minutes — a coarse jump, in slots so it always lands on grid. */
 const PAGE_MINUTES = 180;
 
+/**
+ * The track's own tick labels — 6-hourly (00:00/06:00/12:00/18:00) when there is room,
+ * midnight/midday only when there is not. `lib/time/ticks.ts` owns the rule and the hysteresis
+ * that keeps a resize from relabelling every frame; this component only measures its own width
+ * and asks for instants in the country's zone.
+ *
+ * `previousDensityRef` is a plain ref, not state: the density is a derived value with nowhere
+ * else it needs to live, and reading it during render (then writing it back) is one render
+ * cheaper than round-tripping it through `useState` for the same result.
+ */
 const TrackTicks: FC<{ scale: ScrubScale; zone: string }> = ({ scale, zone }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [widthPx, setWidthPx] = useState(0);
+  const previousDensityRef = useRef<TickDensity | null>(null);
+
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width !== undefined) setWidthPx(width);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
   const ticks = useMemo(() => {
-    const span = scale.endMs - scale.startMs;
+    const selection = selectAxisTicks({
+      startMs: scale.startMs,
+      endMs: scale.endMs,
+      zone,
+      widthPx,
+      previousDensity: previousDensityRef.current
+    });
+    previousDensityRef.current = selection.density;
+
     let previousDay = "";
-    return Array.from({ length: TICK_COUNT }, (_, index) => {
-      const dt = DateTime.fromMillis(scale.startMs + (index / (TICK_COUNT - 1)) * span, {
-        zone
-      });
+    return selection.ticks.map((ms) => {
+      const dt = DateTime.fromMillis(ms, { zone });
       const day = dt.toFormat("yyyy-LL-dd");
       // The window is ~three days long, so bare times repeat and a reader cannot place them.
       // Name the day only when it changes — including on the first mark, which anchors the rest.
@@ -83,10 +112,10 @@ const TrackTicks: FC<{ scale: ScrubScale; zone: string }> = ({ scale, zone }) =>
         label: dt.toFormat(showDay ? "ccc HH:mm" : "HH:mm")
       };
     });
-  }, [scale.startMs, scale.endMs, zone]);
+  }, [scale.startMs, scale.endMs, zone, widthPx]);
 
   return (
-    <div aria-hidden="true" className="flex justify-between pt-1">
+    <div ref={containerRef} aria-hidden="true" className="flex justify-between pt-1">
       {ticks.map((tick) => (
         <span key={tick.key} className="text-2xs tabular-nums text-ocf-gray-600">
           {tick.label}
