@@ -28,6 +28,8 @@ import {
   orderSatelliteLayers
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
+import { useEnabledCountries } from "../../hooks/data/use-countries";
+import { getCountryConfig } from "../../config/countries";
 
 // Moved to env by Phase 5 Track E — this was a hardcoded credential in source. See
 // `.env.example` / `docs/phase5-track-e-notes.md`.
@@ -121,19 +123,54 @@ const Map: FC<IMap> = ({
   const [autoZoom] = useGlobalState("autoZoom");
   const [focusedCountry] = useGlobalState("focusedCountry");
 
-  // Mapbox owns its own camera, so switching country has to move it explicitly. The
-  // viewport it moves to is whatever that country's state slice holds — where the user left
-  // it last visit, or the registry default on a first visit. Read through a ref so panning
-  // (which writes lng/lat/zoom continuously) does not re-run this.
+  // Read through a ref so panning (which writes lng/lat/zoom continuously) cannot re-run any
+  // camera effect below.
   const viewportRef = useRef({ lng, lat, zoom });
   viewportRef.current = { lng, lat, zoom };
-  const renderedCountry = useRef(focusedCountry);
+
+  /**
+   * The camera frames the countries that are **enabled**, and moves only when that set changes.
+   *
+   * It used to jump to the *focused* country's stored viewport whenever focus changed. Since
+   * Track F the map draws every enabled country at once, which made that wrong twice over: it
+   * threw away the view of the countries still on screen, and — because selecting a region in
+   * the other country sets focus (contract §1) — it fired on ordinary region clicks, yanking
+   * the camera to NL mid-interaction. Focus is now about whose numbers the chart shows, not
+   * where the camera points.
+   *
+   * Keyed on the enabled set alone, so nothing else moves the camera: not focus, not a region
+   * selection, not an aggregation-level change. Once framed, the view is the user's to pan.
+   */
+  const enabledCountries = useEnabledCountries();
+  const enabledKey = enabledCountries.join(",");
+  const framedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (renderedCountry.current === focusedCountry) return;
-    renderedCountry.current = focusedCountry;
-    const viewport = viewportRef.current;
-    map.current?.jumpTo({ center: [viewport.lng, viewport.lat], zoom: viewport.zoom });
-  }, [focusedCountry]);
+    if (!map.current || !isMapReady) return;
+    if (framedRef.current === enabledKey) return;
+
+    const boxes = enabledCountries
+      .map((code) => getCountryConfig(code)?.map.bounds)
+      .filter((box): box is [number, number, number, number] => box !== undefined);
+    if (boxes.length === 0) return;
+
+    const isFirstFraming = framedRef.current === null;
+    framedRef.current = enabledKey;
+    const union = boxes.reduce((acc, box) => [
+      Math.min(acc[0], box[0]),
+      Math.min(acc[1], box[1]),
+      Math.max(acc[2], box[2]),
+      Math.max(acc[3], box[3])
+    ]);
+    map.current.fitBounds(
+      [
+        [union[0], union[1]],
+        [union[2], union[3]]
+      ],
+      // The first framing is the initial view and should not animate in; later ones are a
+      // response to the user toggling a country, where the movement explains what changed.
+      { padding: 40, duration: isFirstFraming ? 0 : 700 }
+    );
+  }, [enabledKey, enabledCountries, isMapReady]);
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");

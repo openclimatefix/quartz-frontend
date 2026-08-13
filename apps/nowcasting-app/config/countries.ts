@@ -93,6 +93,18 @@ export type MapDefaults = {
   zoom: number;
   minZoom: number;
   maxZoom: number;
+  /**
+   * The country's extent, `[west, south, east, north]`, for framing the *enabled set*.
+   *
+   * `center`/`zoom` frame one country and cannot be combined: two countries' centres average
+   * to a point in the sea at a zoom that fits neither. A bounding box unions, so the camera
+   * can fit whatever the user has enabled.
+   *
+   * Config rather than computed from the geometry, because the geometry is fetched on demand
+   * (Phase 5) and the camera should not wait on ~9 MB of boundaries to know where a country
+   * is. Approximate on purpose: it frames a view, it never decides what is drawn or joined.
+   */
+  bounds: [number, number, number, number];
 };
 
 /** A non-data map layer, e.g. GB's network constraints. */
@@ -237,7 +249,9 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       center: { lng: -2.3175601, lat: 54.70534432 },
       zoom: 5,
       minZoom: 0,
-      maxZoom: 14
+      maxZoom: 14,
+      // Mainland GB plus the Northern Isles; excludes NI, which the GSP set does not cover.
+      bounds: [-8.65, 49.86, 1.77, 60.86]
     },
     geo: {
       national: {
@@ -340,7 +354,9 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       center: { lng: 5.29, lat: 52.13 },
       zoom: 6.5,
       minZoom: 0,
-      maxZoom: 14
+      maxZoom: 14,
+      // Mainland NL; excludes the Caribbean municipalities, which carry no solar regions.
+      bounds: [3.31, 50.75, 7.23, 53.56]
     },
     geo: {
       national: {
