@@ -308,7 +308,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   // be a scrubber that is wrong rather than absent, and the footer keeps its height either way.
   if (!scale || !selectedISOTime) {
     return (
-      <div className="px-4 pb-2" data-testid="scrub-track-idle">
+      <div data-testid="scrub-track-idle">
         <div className="h-[3px] w-full rounded-sm bg-white/10" />
         <div className="h-4" />
       </div>
@@ -325,7 +325,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
     .toFormat("ccc d LLL HH:mm");
 
   return (
-    <div className="px-4 pb-2" data-cursor-scrubber="true">
+    <div data-cursor-scrubber="true">
       <div
         ref={trackRef}
         role="slider"
