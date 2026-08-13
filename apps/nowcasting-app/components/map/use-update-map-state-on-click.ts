@@ -126,11 +126,29 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     setMapFilterSelectedIds(map, focusedCountry, selectedMapRegionIds);
   }, [selectedMapRegionIds, focusedCountry]);
 
+  /**
+   * A level change invalidates the selection — but only *within* one country.
+   *
+   * Region ids belong to a level, so switching GB from GSP to DNO must drop what was selected.
+   * `nationalAggregationLevel` is the **focused country's** level, though, so it also changes
+   * when focus moves between countries on different levels (GB `gsp` → NL `province`) — and
+   * that is precisely when a selection has just been made deliberately. Clicking a region in
+   * the unfocused country calls `focusAndSelectRegions`, which sets focus and that country's
+   * selection together; this effect then saw the level change and wiped it, so only the
+   * country focused at load could ever hold a selection. The country is part of the identity
+   * of "the level changed", so compare the pair, not the level alone.
+   */
+  const lastLevelKeyRef = useRef<string | null>(null);
   useEffect(() => {
     if (!map) return;
-
+    const key = `${focusedCountry}:${nationalAggregationLevel}`;
+    const previous = lastLevelKeyRef.current;
+    lastLevelKeyRef.current = key;
+    // First run has nothing to invalidate, and a focus change carries its own fresh selection.
+    if (previous === null || previous.split(":")[0] !== focusedCountry) return;
+    if (previous === key) return;
     setSelectedMapRegionIds([]);
-  }, [nationalAggregationLevel]);
+  }, [nationalAggregationLevel, focusedCountry]);
 
   useEffect(() => {
     if (map && isMapReady && !isEventRegistertedRef.current) {
