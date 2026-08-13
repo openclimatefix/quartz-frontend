@@ -60,7 +60,12 @@ const DashboardShell: FC<{
     >
       <Header />
 
-      <div className="relative min-h-0 flex-1">
+      {/* `overflow-hidden` is structural, not cosmetic. `DisplayPanel` parks itself off-stage
+          with `translateX(100%)` when closed, and the resize handle and rail toggle hang outside
+          their own boxes — all of which widen the document and give the page a horizontal
+          scrollbar unless the stage clips them. Clipping here rather than on `body` keeps the
+          fix next to the thing that overflows. */}
+      <div className="relative min-h-0 flex-1 overflow-hidden">
         <div className="absolute inset-0">{map}</div>
 
         <div

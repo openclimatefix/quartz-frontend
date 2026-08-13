@@ -34,7 +34,11 @@ const Layout = ({ children }: ILayout) => {
         <title>{pageTitle}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex flex-col h-screen">
+      {/* `overflow-x-hidden` is the backstop for the page, not the fix: the dashboard's stage
+          clips its own off-screen chrome (see `dashboard-shell.tsx`). This stops any future
+          floating pane that escapes its container from giving the whole page a horizontal
+          scrollbar, which is never what is wanted on a full-height app shell. */}
+      <main className="flex h-screen flex-col overflow-x-hidden">
         <StatusBanner
           isSitesChart={isSitesChart}
           solarStatus={solarStatus}
