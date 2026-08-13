@@ -148,7 +148,9 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
 };
 
 type ForecastHeaderProps = {
-  children: React.ReactNode;
+  // Optional since Track P: the play button that used to guarantee a child here moved to the
+  // footer, and the non-delta branch of `ForecastHeader` now renders no children at all.
+  children?: React.ReactNode;
   forecastNextPV: string;
   forecastPV: string;
   actualPV: string;

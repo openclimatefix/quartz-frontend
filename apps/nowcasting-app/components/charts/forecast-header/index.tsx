@@ -1,9 +1,7 @@
 import React from "react";
-import useGlobalState, { getCursorNow } from "../../helpers/globalState";
 import { useFocusedCountry } from "../../../hooks/data/use-countries";
 import { cadenceMinutesFor, nextSlot } from "../../../lib/time/cursor";
 import useTimeNow from "../../hooks/use-time-now";
-import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
 import {
   formatDateAsZonedTime,
@@ -99,8 +97,6 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   // Get the next OCF forecast
   const nextPvForecastInGW = MWtoGW(forecastAt(followingPvForecastDateString));
 
-  const forecastEndTime = forecastPoints[forecastPoints.length - 1]?.timeUtc;
-
   if (deltaView) {
     const deltaValue = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
     return (
@@ -112,7 +108,6 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
         forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
-        <PlayButton startTime={getCursorNow()} endTime={forecastEndTime}></PlayButton>
       </ForecastHeaderUI>
     );
   }
@@ -124,9 +119,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastPV={selectedPvForecastInGW}
       pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
       forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
-    >
-      <PlayButton startTime={getCursorNow()} endTime={forecastEndTime}></PlayButton>
-    </ForecastHeaderUI>
+    />
   );
 };
 

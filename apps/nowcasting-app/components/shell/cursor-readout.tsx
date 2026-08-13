@@ -5,7 +5,9 @@ import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig, sortCountryCodes } from "../../config/countries";
 import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
 import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, formatISODateStringAsZonedTime } from "../helpers/utils";
+import PlayButton from "../play-button";
 import ScrubTrack from "./scrub-track";
+import useCursorRange from "./use-cursor-range";
 
 /**
  * The shared cursor, said out loud — and, since the Phase 6 live pass, moved as well.
@@ -52,6 +54,16 @@ import ScrubTrack from "./scrub-track";
  *   that becomes visible rather than mysterious.
  *
  * The arithmetic is entirely Track B's (`lib/time/cursor.ts`); nothing here rounds anything.
+ *
+ * **Track P adds the play button, left of the track.** It used to be mounted twice in the chart
+ * header and once more in the sites chart; the footer is its home now (the chart header mounts
+ * are gone). It reads `startTime`/`endTime` from this component's own `useCursorRange()` call —
+ * the exact same hook `ScrubTrack` calls to draw the strip — rather than a separate derivation,
+ * so the window it plays across is by construction the window the track draws. Until that data
+ * arrives it is not rendered at all, the same "inert until there is real data" rule the track
+ * itself follows rather than guessing a range. See `components/play-button/index.tsx` for the
+ * play/follow mutual-exclusion rules, and its doc comment for why `/sites` keeps its own,
+ * separately-propped instance rather than losing the control outright.
  */
 
 const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
@@ -112,6 +124,7 @@ const CursorReadout: FC = () => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const enabledCountries = useEnabledCountries();
   const focusedCountry = useFocusedCountry();
+  const rangeData = useCursorRange();
 
   if (!selectedISOTime) return null;
 
@@ -174,6 +187,10 @@ const CursorReadout: FC = () => {
       >
         {`${cadenceMinutes}m`}
       </span>
+      {/* Left of the track, so the row reads control-then-timeline. Fed from this component's
+          own `useCursorRange()` call rather than `ScrubTrack`'s — same hook, same SWR cache key,
+          so the values agree; not rendered until that data exists, same as the track itself. */}
+      {rangeData && <PlayButton startTime={rangeData.range.start} endTime={rangeData.range.end} />}
       <div className="min-w-[140px] flex-1">
         <ScrubTrack zone={focusedZone} />
       </div>

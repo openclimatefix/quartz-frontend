@@ -8,27 +8,37 @@
  * about which country they are describing), and the focused country stops appearing twice —
  * once as the primary reading, once more in the per-country list it used to share with everyone.
  */
-import { describe, expect, jest, test } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import React from "react";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 const MOCK_RANGE_DATA = {
   range: { start: "2026-08-10T00:00:00.000Z", end: "2026-08-12T00:00:00.000Z" },
   daylight: []
 };
 
+// A mutable box, not a constant: one test (the play button's "no data yet" case) needs the hook
+// to report `null`, same trick `scrub-track.test.tsx` uses for its own "idle track" test.
+let mockRangeData: typeof MOCK_RANGE_DATA | null = MOCK_RANGE_DATA;
+
 jest.mock("./use-cursor-range", () => ({
   __esModule: true,
-  default: () => MOCK_RANGE_DATA,
-  useCursorRange: () => MOCK_RANGE_DATA
+  default: () => mockRangeData,
+  useCursorRange: () => mockRangeData
 }));
 
-import { setEnabledCountries, setFocusedCountry, setGlobalState } from "../helpers/globalState";
+import {
+  getGlobalState,
+  setEnabledCountries,
+  setFocusedCountry,
+  setGlobalState
+} from "../helpers/globalState";
 import CursorReadout from "./cursor-readout";
 
 const slider = () => screen.getByRole("slider");
 
 beforeEach(() => {
+  mockRangeData = MOCK_RANGE_DATA;
   setEnabledCountries(["GB"]);
   setFocusedCountry("GB");
   setGlobalState("selectedISOTime", "2026-08-11T12:00:00.000Z");
@@ -126,5 +136,52 @@ describe("the zone stack", () => {
       .getAllByTitle(/published slot/)
       .map((node) => node.firstElementChild?.textContent);
     expect(order).toEqual(["GB", "NL"]);
+  });
+});
+
+/**
+ * Track P: the play button, fed from this component's own `useCursorRange()` call — the same
+ * hook `ScrubTrack` reads to draw the strip.
+ */
+describe("the play button plays across the footer's own range", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    (getGlobalState("intervals") as ReturnType<typeof setInterval>[]).forEach((id) =>
+      clearInterval(id)
+    );
+    setGlobalState("intervals", []);
+    setGlobalState("isPlaying", false);
+    jest.useRealTimers();
+  });
+
+  test("wraps at the range end useCursorRange returned, not a separately computed one", () => {
+    // Parked one step before the mocked range's own end — playing one tick from here can only
+    // land exactly on `MOCK_RANGE_DATA.range.end` if the button's `endTime` really is that value
+    // rather than something derived independently (the old chart-header derivation, or a guess).
+    setGlobalState("selectedISOTime", MOCK_RANGE_DATA.range.end);
+    render(<CursorReadout />);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    });
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    // Wrapping to `range.start` — not stalling past `range.end`, not continuing past it — is
+    // only possible if both ends the button plays across are exactly `useCursorRange`'s.
+    expect(getGlobalState("selectedISOTime")).toBe(MOCK_RANGE_DATA.range.start);
+  });
+
+  test("is not rendered until useCursorRange has data, same as the track it plays across", () => {
+    mockRangeData = null;
+    render(<CursorReadout />);
+    // The track itself draws its own idle placeholder in this state (`scrub-track.test.tsx`
+    // pins that separately); this only asserts the button's half — no range, no button, rather
+    // than a button wired to a guessed or stale window.
+    expect(screen.queryByRole("button", { name: "Play" })).not.toBeInTheDocument();
   });
 });
