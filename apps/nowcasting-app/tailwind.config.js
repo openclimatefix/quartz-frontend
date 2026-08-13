@@ -207,6 +207,12 @@ module.exports = {
   content: ["./pages/**/*.{js,ts,jsx,tsx}", "./components/**/*.{js,ts,jsx,tsx}"],
   safelist: [
     "bg-ocf-yellow",
+    // The legend's faintest band renders at /3, matching `BAND_OPACITIES[0]` (0.03) in
+    // `feature-state.ts` — the deliberate "published a real zero" band, which must stay
+    // distinguishable from "published nothing". Without this entry the class is never
+    // generated and that pill renders with no fill at all, so the legend showed five bands
+    // where the map paints six.
+    "bg-ocf-yellow/3",
     "bg-ocf-yellow/5",
     "bg-ocf-yellow/10",
     "bg-ocf-yellow/20",
