@@ -137,3 +137,27 @@ export const defaultAggregationLevel = (
   config: CountryConfig | undefined,
   regionTypes: RegionTypeCapability[] = []
 ): string => defaultLevelOf(deriveAggregationLevels(config, regionTypes))?.regionType ?? NATIONAL;
+
+/**
+ * The region type whose *data* backs a level — which is not always the level's own name.
+ *
+ * A derived level (GB's DNO and NG-zone rollups) has no regions of its own on the API: it is
+ * groups of some finer type's regions, and the registry's `derivedRegionTypes` names which.
+ * A non-derived level is its own source. `null` for `national` and for an unresolved level,
+ * both of which mean "no sub-national request to make".
+ *
+ * Shared because getting it wrong is a 400, not a wrong number: the selected-region chart
+ * hardcoded `"gsp"` here, so clicking an NL province asked the API for a GSP region type that
+ * does not exist in NL. Country-specific facts come from the registry, never from a constant.
+ */
+export const valueRegionTypeFor = (
+  level: AggregationLevel | undefined,
+  config: CountryConfig | undefined
+): string | null => {
+  if (!level) return null;
+  const regionType = level.derived
+    ? config?.derivedRegionTypes[level.regionType]?.source
+    : level.regionType;
+  if (!regionType || regionType === NATIONAL) return null;
+  return regionType;
+};

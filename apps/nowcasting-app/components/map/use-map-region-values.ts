@@ -10,7 +10,10 @@ import {
 import { useMapGeometry } from "../../hooks/data/use-map-geometry";
 import { getCountryConfig } from "../../config/countries";
 import { isLegacyRegion } from "../../config/geo-aliases";
-import type { AggregationLevel } from "../helpers/aggregationLevels";
+import {
+  valueRegionTypeFor as resolveValueRegionType,
+  type AggregationLevel
+} from "../helpers/aggregationLevels";
 import type { Scope } from "../../lib/domain/types";
 import useGlobalState from "../helpers/globalState";
 import { buildMapFeatureStates, type MapFeatureState } from "../helpers/data";
@@ -104,17 +107,8 @@ const SOURCE = "solar";
  * there is nothing to preserve. If the national map level is ever wanted back it needs a
  * values path of its own (a synthetic all-regions group, or the snapshot endpoints).
  */
-const valueRegionTypeFor = (
-  level: AggregationLevel | undefined,
-  country: string | null
-): string | null => {
-  if (!level) return null;
-  const regionType = level.derived
-    ? getCountryConfig(country)?.derivedRegionTypes[level.regionType]?.source
-    : level.regionType;
-  if (!regionType || regionType === "national") return null;
-  return regionType;
-};
+const valueRegionTypeFor = (level: AggregationLevel | undefined, country: string | null) =>
+  resolveValueRegionType(level, getCountryConfig(country));
 
 export const useMapRegionValues = (
   level: AggregationLevel | undefined,

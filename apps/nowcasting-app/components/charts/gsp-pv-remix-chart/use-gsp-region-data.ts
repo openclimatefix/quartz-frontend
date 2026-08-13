@@ -8,12 +8,29 @@ import {
   useRegionGeneration,
   useRegions
 } from "../../../hooks/data";
+import { useCurrentAggregationLevel } from "../../../hooks/data/use-aggregation-levels";
+import { getCountryConfig } from "../../../config/countries";
+import { valueRegionTypeFor } from "../../helpers/aggregationLevels";
 import type { Region, RegionSeries, Scope, TimeSeries } from "../../../lib/domain/types";
 import type { ChartSeriesInput } from "../use-format-chart-data";
 import { buildRegionBridge, rollUpRegionSeries } from "../../helpers/data";
 
 const GSP_REGION_TYPE = "gsp";
 const SOURCE = "solar";
+
+/**
+ * The region type the *selected* regions belong to, for the focused country.
+ *
+ * `GSP_REGION_TYPE` is still right for `useGspRegionData`, which only runs when the level
+ * genuinely is GB's GSP level (its caller gates on that, and it resolves regions by the
+ * GB-only `gsp_id` bridge). It was wrong everywhere else: selecting an NL province asked the
+ * API for `region_type=gsp`, which NL does not have, and the request 400d. A derived level
+ * resolves to the finer type it groups — see `valueRegionTypeFor`.
+ */
+const useSelectionRegionType = (country: string | null): string | null => {
+  const level = useCurrentAggregationLevel(country ?? undefined);
+  return useMemo(() => valueRegionTypeFor(level, getCountryConfig(country)), [level, country]);
+};
 
 /**
  * `pv-remix-chart.tsx`'s `GENERATION_CHART_KEYS`, duplicated rather than imported: that file
@@ -161,17 +178,23 @@ export type GspAggregateData = {
  */
 export const useGspRegionNames = (gspIds: string[] | null): string[] | null => {
   const country = useFocusedCountry();
+  const regionType = useSelectionRegionType(country);
   const scope: Scope | null =
-    country && gspIds && gspIds.length > 0
-      ? { country, source: SOURCE, regionType: GSP_REGION_TYPE }
+    country && regionType && gspIds && gspIds.length > 0
+      ? { country, source: SOURCE, regionType }
       : null;
   const regionsResult = useRegions(scope);
 
   return useMemo(() => {
     if (!gspIds || gspIds.length === 0) return null;
     const bridge = buildRegionBridge(regionsResult.data);
+    // Two id shapes, because the map's feature ids are the country's, not one scheme. GB's GSP
+    // features are numeric `gsp_id`s and need the bridge; a country whose regions have no
+    // `gsp_id` at all (NL's provinces) carries the region name itself. Try the numeric bridge
+    // first and fall back to a name match — never assume the GB shape, which is what made
+    // selecting an NL province resolve to nothing.
     const names = gspIds
-      .map((id) => bridge.byGspId.get(Number(id))?.name)
+      .map((id) => bridge.byGspId.get(Number(id))?.name ?? bridge.byName.get(String(id))?.name)
       .filter((name): name is string => name !== undefined);
     return names.length > 0 ? names : null;
   }, [gspIds, regionsResult.data]);
@@ -203,10 +226,12 @@ export const useGspAggregateData = (
   groupName: string | null
 ): GspAggregateData => {
   const country = useFocusedCountry();
-  const enabled = !!country && !!regionNames && regionNames.length > 0 && !!groupName;
+  const regionType = useSelectionRegionType(country);
+  const enabled =
+    !!country && !!regionType && !!regionNames && regionNames.length > 0 && !!groupName;
 
   const regionsScope: Scope | null =
-    enabled && country ? { country, source: SOURCE, regionType: GSP_REGION_TYPE } : null;
+    enabled && country && regionType ? { country, source: SOURCE, regionType } : null;
 
   // No window at all, deliberately. `/forecasts/period` and `/generation/period` both default
   // to **2 days before → 2 days after now, floored to 6 hours**, and are "served entirely from
