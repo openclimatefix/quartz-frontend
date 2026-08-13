@@ -1,8 +1,10 @@
 import type { Expression } from "mapbox-gl";
 
+import { COUNTRY_CONFIG, type MapBandThresholds } from "../../config/countries";
 import { DELTA_BUCKET } from "../../constant";
 import { theme } from "../../tailwind.config";
 import type { MapFeatureState } from "../helpers/data";
+import { REGION_COUNTRY_PROPERTY } from "./country-features";
 import { ActiveUnit } from "./types";
 
 /**
@@ -41,14 +43,64 @@ export const NO_DATA_OPACITY = 0.25;
  * published nothing. The old `interpolate` ramp started at opacity 0 and erased it, which is
  * audit B8's bug class and is what the legend has always claimed ("0-50" at 3%).
  */
-const BAND_OPACITIES = [0.03, 0.2, 0.4, 0.6, 0.8, 1];
+export const BAND_OPACITIES = [0.03, 0.2, 0.4, 0.6, 0.8, 1];
 const NORMALIZED_THRESHOLDS = [0.1, 0.2, 0.35, 0.5, 0.7];
-/** GSP level, MW. Matches `ColorGuideBar`'s 0-50 / 50-150 / … labels. */
-const MW_THRESHOLDS_GSP = [50, 150, 250, 350, 450];
-/** Zone and DNO levels, MW. Ten times the GSP bands, as the legend says. */
-const MW_THRESHOLDS_GROUPED = [500, 1500, 2500, 3500, 4500];
 
-const bandExpression = (input: Expression, thresholds: number[]): Expression => {
+/**
+ * Opacity for a feature whose country this build has no bands for.
+ *
+ * `match` needs a fallback and this is it. It should be unreachable: the map's source is fed
+ * by `stampCountryFeatures`, which stamps `country` on every feature, and the fan-out draws
+ * `useEnabledCountries()`, which is enabled ∩ *configured*. Full opacity is chosen so that if
+ * it ever is reached the map is conspicuously, uniformly wrong rather than plausibly faint —
+ * the failure being fixed here was a country rendering as "almost nothing" and nobody
+ * noticing, so the fallback must not be able to look like a quiet answer.
+ */
+export const UNBANDED_COUNTRY_OPACITY = 1;
+
+/**
+ * The MW thresholds for one country at one tier, or `undefined` if there are none.
+ *
+ * The single lookup both halves of the feature go through: the paint expression below builds
+ * its steps from it, and `ColorGuideBar` labels its pills from it. `undefined` for a country
+ * with no registry entry, and for the grouped tier of a country with no groupings — which is a
+ * real answer ("this country has no such level"), not a reason to borrow another country's.
+ */
+export const mapBandsFor = (
+  country: string | null | undefined,
+  grouped: boolean
+): MapBandThresholds | undefined => {
+  if (typeof country !== "string") return undefined;
+  const bands = COUNTRY_CONFIG[country.toUpperCase()]?.mapBands;
+  if (!bands) return undefined;
+  return grouped ? bands.grouped ?? undefined : bands.region;
+};
+
+/** `1500` -> `"1.5k"`, `4000` -> `"4k"`, `450` -> `"450"`. Presentation only. */
+const formatBand = (value: number): string =>
+  value < 1000 ? String(value) : `${Number((value / 1000).toFixed(1))}k`;
+
+/**
+ * The legend's six labels for a threshold set: `["0-50", "50-150", …, "450+"]`.
+ *
+ * Lives here, next to `bandExpression`, because it exists to make the legend and the paint
+ * expression incapable of disagreeing. They were two hand-maintained copies of the same five
+ * numbers — the map could be drawn one way and explained another, and with per-country bands
+ * that stops being a theoretical risk. One array in, both the steps and the labels out.
+ */
+export const bandLabels = (thresholds: readonly number[]): string[] => [
+  `0-${formatBand(thresholds[0])}`,
+  ...thresholds
+    .slice(1)
+    .map((value, index) => `${formatBand(thresholds[index])}-${formatBand(value)}`),
+  `${formatBand(thresholds[thresholds.length - 1])}+`
+];
+
+/** The percentage-mode labels, from the same thresholds the expression steps at. */
+export const normalizedBandLabels = (): string[] =>
+  bandLabels(NORMALIZED_THRESHOLDS.map((fraction) => Math.round(fraction * 100)));
+
+const bandExpression = (input: Expression, thresholds: readonly number[]): Expression => {
   const expression: unknown[] = ["step", input, BAND_OPACITIES[0]];
   thresholds.forEach((threshold, index) => {
     expression.push(threshold, BAND_OPACITIES[index + 1]);
@@ -60,23 +112,49 @@ const state = (key: keyof MapFeatureState): Expression =>
   ["coalesce", ["feature-state", key], 0] as unknown as Expression;
 
 /**
- * Pick a band expression per feature, on the feature-state `grouped` flag.
+ * Pick a band expression per feature: first on the feature's country, then on the
+ * feature-state `grouped` flag.
  *
- * Grouped-ness used to be an argument, because the map drew one country at one level. Since
- * Phase 6 Track F it draws every *enabled* country in one source, and each country picks its
- * own aggregation level — GB can be on its DNO rollup (bands ten times higher) while NL is on
- * provinces in the same frame. A single `isGrouped` argument cannot describe that frame: one
- * of the two countries gets the other's thresholds, which is not an error, just a map where
- * every NL province sits in the faintest band. So the choice moves into the expression, where
- * it is made per feature. `namespaceFeatureStates` stamps the flag.
+ * Both choices are per feature, and for the same reason. The map draws every *enabled*
+ * country in one source, each at its own aggregation level, so a single frame can hold a GB
+ * DNO rollup (thousands of MW) next to an NL province (also thousands, but on NL's scale) next
+ * to a GB GSP (hundreds). Neither an `isGrouped` argument nor a per-country layer can describe
+ * that: an argument gets one of them wrong, and a layer per country makes the count of
+ * countries visible to the click handler, the select-borders filter and the `beforeId` search
+ * (see `use-enabled-country-map-data.tsx`). Adding to the expression is free; adding a layer
+ * is not.
+ *
+ * The country comes from `["get", REGION_COUNTRY_PROPERTY]` — a feature *property*, stamped by
+ * `stampCountryFeatures`, not feature state. It is already there, it never changes while the
+ * feature exists, and it costs nothing per tick. `grouped` genuinely does change (the user
+ * switches level) and stays in feature state.
+ *
+ * A country with no grouped tier emits no `case` at all, so it is structurally incapable of
+ * picking up another country's grouped numbers.
  */
-const groupedAwareBands = (input: Expression): Expression =>
-  [
-    "case",
-    ["==", ["feature-state", "grouped"], true],
-    bandExpression(input, MW_THRESHOLDS_GROUPED),
-    bandExpression(input, MW_THRESHOLDS_GSP)
+const countryAwareBands = (input: Expression): Expression => {
+  const arms: unknown[] = [];
+  Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
+    const { region, grouped } = config.mapBands;
+    arms.push(
+      code,
+      grouped
+        ? [
+            "case",
+            ["==", ["feature-state", "grouped"], true],
+            bandExpression(input, grouped),
+            bandExpression(input, region)
+          ]
+        : bandExpression(input, region)
+    );
+  });
+  return [
+    "match",
+    ["get", REGION_COUNTRY_PROPERTY],
+    ...arms,
+    UNBANDED_COUNTRY_OPACITY
   ] as unknown as Expression;
+};
 
 /**
  * `fill-opacity` for the forecast layer.
@@ -87,13 +165,13 @@ const groupedAwareBands = (input: Expression): Expression =>
  */
 export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
   if (unit === ActiveUnit.capacity) {
-    return groupedAwareBands(state("capacity"));
+    return countryAwareBands(state("capacity"));
   }
 
   const valueOpacity =
     unit === ActiveUnit.percentage
       ? bandExpression(state("normalized"), NORMALIZED_THRESHOLDS)
-      : groupedAwareBands(state("power"));
+      : countryAwareBands(state("power"));
 
   return [
     "case",

@@ -4,7 +4,14 @@ import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
 import { useCurrentAggregationLevel } from "../../hooks/data";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data/use-countries";
 import { ComparisonSelection } from "../helpers/comparison";
-import { NO_DATA_COLOR, NO_DATA_OPACITY } from "./feature-state";
+import {
+  BAND_OPACITIES,
+  bandLabels,
+  mapBandsFor,
+  NO_DATA_COLOR,
+  NO_DATA_OPACITY,
+  normalizedBandLabels
+} from "./feature-state";
 import { ActiveUnit } from "./types";
 
 type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
@@ -34,10 +41,13 @@ type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
  *   it once per enabled country needs the same child-component fan-out
  *   `use-enabled-country-map-data.tsx` used for the same reason. That is a lot of machinery
  *   for a legend.
- * - It would usually buy nothing: the percentage bands never read the level at all (see
- *   below), so two countries showing "%" would render the *same* row twice. The bands only
- *   diverge for MW/capacity, and only when the enabled countries sit at different grouping
- *   tiers — exactly the case `feature-state.ts`'s per-feature `grouped` flag exists for.
+ * - It would usually buy nothing: the percentage bands never read the level or the country at
+ *   all (see below), so two countries showing "%" would render the *same* row twice. The bands
+ *   only diverge for MW/capacity — where, since this follow-up, they diverge by *country* as
+ *   well as by grouping tier, since each country's thresholds are its own registry entry's.
+ *   That is exactly the case `feature-state.ts`'s per-feature country/`grouped` selection
+ *   exists for, and it is also why the attribution line below matters more than it did: with
+ *   GB and NL enabled, "GB bands" now means numbers NL's polygons are genuinely not on.
  *
  * So: one row, explicitly attributed, rather than a second row that usually agrees with the
  * first and spends §6a's tight budget doing it. A user who needs the other enabled country's
@@ -60,76 +70,57 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
         <SequentialBands
           unit={unit}
           currentLevel={currentLevel}
-          country={enabledCountries.length > 1 ? focusedCountry : undefined}
+          country={focusedCountry}
+          attributed={enabledCountries.length > 1}
         />
       )}
     </div>
   );
 };
 
+/** The six pills, from a label per band. Opacity and text colour are fixed per position. */
+const bandPills = (labels: string[]) =>
+  labels.map((value, index) => ({
+    value,
+    // The same array the paint expression steps to, as a Tailwind opacity suffix. 0.03 * 100
+    // is 3.0000000000000004 in floating point and `bg-ocf-yellow/3.0000000000000004` is not a
+    // class, hence the round.
+    opacity: Math.round(BAND_OPACITIES[index] * 100),
+    // The top three bands are dark enough to need dark text on them.
+    textColor: index < 3 ? "ocf-gray-300" : "black"
+  }));
+
 const SequentialBands: React.FC<{
   unit: ActiveUnit;
   currentLevel: ReturnType<typeof useCurrentAggregationLevel>;
-  /** Set only when more than one country is enabled, to label whose bands these are. */
-  country?: string;
-}> = ({ unit, currentLevel, country }) => {
+  /** The focused country — whose bands these are, and where the numbers come from. */
+  country: string;
+  /** Label the row with the country, done when more than one country is enabled. */
+  attributed: boolean;
+}> = ({ unit, currentLevel, country, attributed }) => {
   const values = useMemo(() => {
     if (unit === ActiveUnit.percentage) {
-      return [
-        { value: "0-10", opacity: 3, textColor: "ocf-gray-300" },
-        { value: "10-20", opacity: 20, textColor: "ocf-gray-300" },
-        { value: "20-35", opacity: 40, textColor: "ocf-gray-300" },
-        { value: "35-50", opacity: 60, textColor: "black" },
-        { value: "50-70", opacity: 80, textColor: "black" },
-        { value: "70+", opacity: 100, textColor: "black" }
-      ];
+      // A fraction of the region's own capacity, so these are the same for every country and
+      // every level — the one encoding that never needed calibrating.
+      return bandPills(normalizedBandLabels());
     }
-    // These MW/capacity bands are calibrated to GB's actual scales — a single GSP tops out
-    // around 450 MW, a DNO/zone grouping (dozens of GSPs) around 4.5 GW — not a generic
-    // per-country rule, so the check is on the region type's identity (the one place in this
-    // file that legitimately is), not on `derived`.
-    if (currentLevel?.regionType === "gsp") {
-      if (unit === ActiveUnit.MW) {
-        return [
-          { value: "0-50", opacity: 3, textColor: "ocf-gray-300" },
-          { value: "50-150", opacity: 20, textColor: "ocf-gray-300" },
-          { value: "150-250", opacity: 40, textColor: "ocf-gray-300" },
-          { value: "250-350", opacity: 60, textColor: "black" },
-          { value: "350-450", opacity: 80, textColor: "black" },
-          { value: "450+", opacity: 100, textColor: "black" }
-        ];
-      } else if (unit === ActiveUnit.capacity) {
-        return [
-          { value: "0-50", opacity: 3, textColor: "ocf-gray-300" },
-          { value: "50-150", opacity: 20, textColor: "ocf-gray-300" },
-          { value: "150-250", opacity: 40, textColor: "ocf-gray-300" },
-          { value: "250-350", opacity: 60, textColor: "black" },
-          { value: "350-450", opacity: 80, textColor: "black" },
-          { value: "450+", opacity: 100, textColor: "black" }
-        ];
-      }
-    } else if (currentLevel?.derived) {
-      if (unit === ActiveUnit.MW) {
-        return [
-          { value: "0-500", opacity: 3, textColor: "ocf-gray-300" },
-          { value: "500-1.5k", opacity: 20, textColor: "ocf-gray-300" },
-          { value: "1.5k-2.5k", opacity: 40, textColor: "ocf-gray-300" },
-          { value: "2.5k-3.5k", opacity: 60, textColor: "black" },
-          { value: "3.5k-4.5k", opacity: 80, textColor: "black" },
-          { value: "4.5k+", opacity: 100, textColor: "black" }
-        ];
-      } else if (unit === ActiveUnit.capacity) {
-        return [
-          { value: "0-500", opacity: 3, textColor: "ocf-gray-300" },
-          { value: "500-1.5k", opacity: 20, textColor: "ocf-gray-300" },
-          { value: "1.5k-2.5k", opacity: 40, textColor: "ocf-gray-300" },
-          { value: "2.5k-3.5k", opacity: 60, textColor: "black" },
-          { value: "3.5k-4.5k", opacity: 80, textColor: "black" },
-          { value: "4.5k+", opacity: 100, textColor: "black" }
-        ];
-      }
-    }
-  }, [unit, currentLevel]);
+    // MW and capacity are absolute megawatts, so they need the focused country's scale. Both
+    // read the same thresholds, as they always have.
+    //
+    // These used to be four hardcoded lists in this file, branching on
+    // `currentLevel.regionType === "gsp"` — GB's region type by name, so NL's provinces
+    // matched neither branch and drew no bands at all while the map painted them on GB's
+    // scale. The numbers now come from `config/countries.ts` via the same lookup
+    // `fillOpacityExpression` uses, and the labels are formatted from that same array, so the
+    // legend cannot describe a band the map does not draw.
+    //
+    // National level draws one polygon per country and has no useful band scale; it showed
+    // nothing before and shows nothing now.
+    if (!currentLevel || currentLevel.level <= 0) return undefined;
+    const thresholds = mapBandsFor(country, currentLevel.derived);
+    if (!thresholds) return undefined;
+    return bandPills(bandLabels(thresholds));
+  }, [unit, currentLevel, country]);
   let unitText = unit === ActiveUnit.MW ? "MW" : "%";
   if (unit === ActiveUnit.capacity) {
     unitText = "MW";
@@ -139,7 +130,7 @@ const SequentialBands: React.FC<{
     // (`absolute bottom-12 left-0 ml-12 z-20`), which is where the floating chart now sits. It
     // lays out in normal flow inside the map control dock instead. Bands and colours untouched.
     <div className="flex flex-col bg-mapbox-black-700">
-      {country && (
+      {attributed && (
         <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
           {country} bands
         </span>

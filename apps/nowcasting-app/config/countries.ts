@@ -88,6 +88,51 @@ export type DerivedRegionTypeConfig = {
   maxZoom?: number;
 };
 
+/**
+ * The five MW thresholds the map's six opacity bands step at.
+ *
+ * A tuple, not `number[]`, because the band count is fixed by `BAND_OPACITIES` in
+ * `components/map/feature-state.ts` (six opacities, five boundaries between them) and the
+ * legend draws one pill per band. A country that supplied four or six would produce a map and
+ * a legend that quietly disagreed about which band a value is in, which is exactly the class
+ * of failure this whole field exists to remove. The type refuses it instead.
+ */
+export type MapBandThresholds = readonly [number, number, number, number, number];
+
+/**
+ * How much power makes a region dark, per country.
+ *
+ * These used to be two constants in `feature-state.ts` (`MW_THRESHOLDS_GSP`,
+ * `MW_THRESHOLDS_GROUPED`) applied to every country, and they were calibrated to GB: a single
+ * GSP tops out around 450 MW, a DNO/zone grouping around 4.5 GW. Since Phase 6 Track F the map
+ * draws every enabled country at once, so NL's provinces were banded on GB's GSP scale — a
+ * province producing 1.3 GW normally landed in the same top band as everything else and the
+ * whole country rendered flat, reading as "producing almost nothing". Percentage mode was
+ * unaffected, because a fraction of capacity is genuinely country-agnostic.
+ *
+ * Two tiers, because a country can be shown at two magnitudes:
+ *
+ *  - `region` — one region as the API serves it (a GB GSP, an NL province).
+ *  - `grouped` — a client-side rollup of many of them (GB's DNO and NG-zone levels), or
+ *    `null` for a country with no `derivedRegionTypes`.
+ *
+ * `null` rather than an omitted field, and rather than falling back to `region`: a country
+ * without a grouped tier can never have a grouped feature on the map (the flag comes from
+ * `AggregationLevel.derived`, and the levels come from this same registry), so the honest
+ * value is "there is no such thing here". Writing it explicitly is what stops the next country
+ * silently inheriting GB's 4.5 GW ceiling the way NL inherited its 450 MW one.
+ *
+ * MW mode and capacity mode share one scale, as they always have — installed capacity and
+ * instantaneous output are both megawatts of the same region, and a scale that reads well for
+ * one reads well for the other.
+ */
+export type MapBandsConfig = {
+  /** Thresholds for one API-served region. */
+  region: MapBandThresholds;
+  /** Thresholds for a client-side grouping, or `null` where the country has none. */
+  grouped: MapBandThresholds | null;
+};
+
 export type MapDefaults = {
   center: { lng: number; lat: number };
   zoom: number;
@@ -207,6 +252,8 @@ export type CountryConfig = {
   /** BCP-47 tag for number and date formatting at the render boundary. */
   locale: string;
   map: MapDefaults;
+  /** The map's opacity bands, in MW. See `MapBandsConfig`. */
+  mapBands: MapBandsConfig;
   /** Keyed by region type as the manifest spells it. */
   geo: Record<string, GeoLayerConfig>;
   /** Keyed by the synthetic region type name. Empty for countries with no groupings. */
@@ -252,6 +299,15 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       maxZoom: 14,
       // Mainland GB plus the Northern Isles; excludes NI, which the GSP set does not cover.
       bounds: [-8.65, 49.86, 1.77, 60.86]
+    },
+    // Unchanged from the constants these replaced, so the GB map looks exactly as it did.
+    // For the record of how they were arrived at (`lib/api/v1/__fixtures__/gb-regions-gsp.json`,
+    // 338 GSPs, 22.6 GW installed): the largest GSP carries 654 MW and the 99th percentile
+    // 507 MW, so a 450 MW top band saturates the handful of biggest GSPs at midday and the
+    // steps below it spread the rest. The grouped set is exactly ten times the region set.
+    mapBands: {
+      region: [50, 150, 250, 350, 450],
+      grouped: [500, 1500, 2500, 3500, 4500]
     },
     geo: {
       national: {
@@ -357,6 +413,28 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       maxZoom: 14,
       // Mainland NL; excludes the Caribbean municipalities, which carry no solar regions.
       bounds: [3.31, 50.75, 7.23, 53.56]
+    },
+    // GB's region bands times eight, which is the ratio between the two countries' largest
+    // single regions. NL has 12 provinces holding 25.1 GW (more than GB's 22.6 GW over 338
+    // GSPs), so a province is a DNO-sized object, not a GSP-sized one.
+    //
+    // Derivation, from `lib/api/v1/__fixtures__/nl-regions-province.json` and
+    // `nl-province-forecasts-period.json`:
+    //   - Installed capacity per province runs 943 MW (Zeeland) to 4,437 MW (Noord-Brabant).
+    //   - Peak output in the recorded day is ~0.8 x capacity (Noord-Brabant 3,654 MW,
+    //     Drenthe 1,313 MW, Zeeland 753 MW), so the biggest province peaks near 3.6 GW.
+    //   - 3,600 / 450 = 8, so the whole GB shape scales by 8 and keeps its proportions:
+    //     the top band saturates the largest province at midday, and the twelve provinces'
+    //     midday values spread across bands two to five rather than piling into one.
+    // Capacity mode uses the same numbers: 943-4,437 MW also spans these bands sensibly.
+    //
+    // The ratio is the claim here, not five hand-picked numbers — if NL's installed base
+    // grows, rescale from the largest province's peak the same way.
+    mapBands: {
+      region: [400, 1200, 2000, 2800, 3600],
+      // No `derivedRegionTypes`, so no grouped tier can ever be asked for. Explicitly absent
+      // rather than inherited: see `MapBandsConfig`.
+      grouped: null
     },
     geo: {
       national: {
