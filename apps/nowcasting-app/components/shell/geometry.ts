@@ -81,9 +81,9 @@ export const CHART_TOP_CLEARANCE_PX = MAP_CONTROL_HEIGHT_RESERVE_PX + STAGE_GUTT
  */
 export const CHART_SPLIT = {
   plain: { width: 46, height: 67 },
-  comparing: { width: 34, height: 46 },
+  comparing: { width: 40, height: 58 },
   selected: { width: 54, height: 90 },
-  comparingSelected: { width: 40, height: 60 },
+  comparingSelected: { width: 46, height: 80 },
   // Raised from 80 with `selected`: the expand handle is an explicit user override and must
   // always give *more* than a state the user did not ask for, or expanding a selected region
   // would shrink the panel.
