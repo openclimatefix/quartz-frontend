@@ -3,7 +3,7 @@ import { FC } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
-import { finestCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
+import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
 import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, formatISODateStringAsZonedTime } from "../helpers/utils";
 import ScrubTrack from "./scrub-track";
 
@@ -37,9 +37,11 @@ const READOUT_ZONE = "UTC";
  *   survives DST landing on different dates in different countries. Note that these are *not*
  *   the same instant rendered twice: a country whose cadence is coarser than the cursor grid
  *   resolves to a later slot, which is what the `+15m` lag says.
- * - **the grain**, because the cursor steps on the finest *enabled* country's grid. Enabling
- *   or disabling a country changes the step, and the readout is where that becomes visible
- *   rather than mysterious.
+ * - **the grain**, because the cursor steps on the *focused* country's grid. Changing focus
+ *   changes the step — GB publishes every 30 minutes, NL every 15 — and the readout is where
+ *   that becomes visible rather than mysterious. It used to be the finest grid across the
+ *   enabled set, which meant scrubbing moved the cursor twice for every time a coarser
+ *   country's map changed; keying on focus means whatever you are reading moves every step.
  *
  * The arithmetic is entirely Track B's (`lib/time/cursor.ts`); nothing here rounds anything.
  */
@@ -92,7 +94,7 @@ const CursorReadout: FC = () => {
 
   if (!selectedISOTime) return null;
 
-  const cadenceMinutes = finestCadenceMinutes(enabledCountries);
+  const cadenceMinutes = cursorCadenceMinutes(focusedCountry);
   const utc = formatISODateStringAsZonedTime(selectedISOTime, "UTC");
 
   return (

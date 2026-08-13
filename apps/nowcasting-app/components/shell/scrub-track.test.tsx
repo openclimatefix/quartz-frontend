@@ -28,6 +28,7 @@ jest.mock("./use-cursor-range", () => ({
 import useGlobalState, {
   getGlobalState,
   setEnabledCountries,
+  setFocusedCountry,
   setGlobalState
 } from "../helpers/globalState";
 import ScrubTrack from "./scrub-track";
@@ -316,12 +317,15 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
   });
 });
 
-describe("when the enabled set changes underneath it", () => {
-  test("the grid refines with NL enabled, and the reachable positions double", () => {
+describe("when focus changes underneath it", () => {
+  test("the grid refines when focus moves to the finer country, and positions double", () => {
+    setEnabledCountries(["GB", "NL"]);
     const view = render(<ScrubTrack />);
+    // Both countries are drawn, but GB is focused and GB publishes every 30 minutes — the
+    // track steps on what is being read, not on the finest grid present.
     expect(slider()).toHaveAttribute("aria-valuemax", "96");
 
-    act(() => setEnabledCountries(["GB", "NL"]));
+    act(() => setFocusedCountry("NL"));
     view.rerender(<ScrubTrack />);
     expect(slider()).toHaveAttribute("aria-valuemax", "192");
     expect(slider()).toHaveAccessibleName("Time cursor, 15-minute steps");
@@ -333,6 +337,7 @@ describe("when the enabled set changes underneath it", () => {
 
   test("coarsening the grid moves the cursor forward onto a slot GB actually publishes", () => {
     setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
     const view = render(<ScrubTrack />);
     act(() => setGlobalState("selectedISOTime", "2026-08-11T00:15:00.000Z"));
     view.rerender(<ScrubTrack />);
@@ -340,9 +345,18 @@ describe("when the enabled set changes underneath it", () => {
 
     // `globalState.resnapCursorToGrid` owns the re-snap; the track must agree with it rather
     // than round the other way and leave the handle a slot behind the map.
-    act(() => setEnabledCountries(["GB"]));
+    act(() => setFocusedCountry("GB"));
     view.rerender(<ScrubTrack />);
     expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
     expect(slider()).toHaveAttribute("aria-valuenow", "49");
+  });
+
+  test("enabling another country leaves the grid alone", () => {
+    const view = render(<ScrubTrack />);
+    expect(slider()).toHaveAttribute("aria-valuemax", "96");
+
+    act(() => setEnabledCountries(["GB", "NL"]));
+    view.rerender(<ScrubTrack />);
+    expect(slider()).toHaveAttribute("aria-valuemax", "96");
   });
 });

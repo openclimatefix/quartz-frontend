@@ -512,36 +512,49 @@ describe("normaliseCountryCodes", () => {
 // grid, so the writers above move it as well as the map. Kept here rather than beside the
 // pure arithmetic in `lib/time/cursor.test.ts` because what is under test is the state
 // transition, not the rounding.
-describe("the cursor grid follows the enabled set", () => {
+describe("the cursor grid follows the focused country", () => {
   const cursor = () => getGlobalState("selectedISOTime");
 
-  test("is the finest enabled country's cadence", () => {
+  test("is the focused country's cadence, not the finest one enabled", () => {
     expect(getCursorCadenceMinutes()).toBe(30);
+    // NL on the map as well makes no difference: GB is still what is being read, and GB
+    // publishes every 30 minutes. Under the old finest-enabled rule this was 15, which made
+    // the cursor step twice for every time GB's map changed.
     setEnabledCountries(["GB", "NL"]);
-    expect(getCursorCadenceMinutes()).toBe(15);
+    expect(getCursorCadenceMinutes()).toBe(30);
   });
 
-  test("re-snaps a cursor the grid has coarsened under", () => {
+  test("changes with focus", () => {
     setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    expect(getCursorCadenceMinutes()).toBe(15);
+    setFocusedCountry("GB");
+    expect(getCursorCadenceMinutes()).toBe(30);
+  });
+
+  test("re-snaps a cursor the grid has coarsened under, on a focus change", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
     setGlobalState("selectedISOTime", "2026-08-10T16:15:00.000Z");
 
-    // NL off: 16:15 is an instant GB never publishes, and every lookup at it comes back
+    // Back to GB: 16:15 is an instant GB never publishes, and every lookup at it comes back
     // empty — a blank map rather than an error.
-    setEnabledCountries(["GB"]);
+    setFocusedCountry("GB");
     expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
   });
 
-  test("leaves the cursor alone when the grid only refines", () => {
+  test("leaves the cursor alone when focus only refines the grid", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setGlobalState("selectedISOTime", "2026-08-10T16:30:00.000Z");
+    setFocusedCountry("NL");
+    expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
+  });
+
+  test("enabling or disabling a country does not move the cursor", () => {
     setGlobalState("selectedISOTime", "2026-08-10T16:30:00.000Z");
     setEnabledCountries(["GB", "NL"]);
     expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
-  });
-
-  test("re-snaps through the toggle too, not just the setter", () => {
-    setEnabledCountries(["GB", "NL"]);
-    setGlobalState("selectedISOTime", "2026-08-10T16:45:00.000Z");
-
     toggleCountryEnabled("NL");
-    expect(cursor()).toBe("2026-08-10T17:00:00.000Z");
+    expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
   });
 });

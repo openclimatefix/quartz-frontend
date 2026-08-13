@@ -2,8 +2,8 @@ import { FC, KeyboardEvent, PointerEvent, useEffect, useMemo, useRef, useState }
 import { DateTime } from "luxon";
 
 import useGlobalState from "../helpers/globalState";
-import { useEnabledCountries } from "../../hooks/data";
-import { finestCadenceMinutes } from "../../lib/time/cursor";
+import { useFocusedCountry } from "../../hooks/data";
+import { cursorCadenceMinutes } from "../../lib/time/cursor";
 import { selectAxisTicks, TickDensity } from "../../lib/time/ticks";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import useCursorRange from "./use-cursor-range";
@@ -129,7 +129,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
-  const enabledCountries = useEnabledCountries();
+  const focusedCountry = useFocusedCountry();
   const { stopTime } = useStopAndResetTime();
   const range = useCursorRange();
 
@@ -154,7 +154,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
    */
   const [dragInstant, setDragInstant] = useState<string | null>(null);
 
-  const cadenceMinutes = finestCadenceMinutes(enabledCountries);
+  const cadenceMinutes = cursorCadenceMinutes(focusedCountry);
   const scale = useMemo(() => scrubScale(range, cadenceMinutes), [range, cadenceMinutes]);
 
   // The pointer handlers close over this ref rather than over `scale`, so a grain change

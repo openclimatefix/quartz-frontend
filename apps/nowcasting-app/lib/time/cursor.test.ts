@@ -6,7 +6,7 @@ import {
   cadenceMinutesFor,
   cursorNow,
   FALLBACK_CADENCE_MINUTES,
-  finestCadenceMinutes,
+  cursorCadenceMinutes,
   isOnCadence,
   nextSlot,
   slotForInstant,
@@ -44,21 +44,21 @@ describe("cadence from the registry", () => {
   });
 });
 
-describe("finestCadenceMinutes", () => {
-  it("takes the finest enabled grid, so nothing loses resolution", () => {
-    expect(finestCadenceMinutes(["GB"])).toBe(30);
-    expect(finestCadenceMinutes(["GB", "NL"])).toBe(15);
-    expect(finestCadenceMinutes(["NL"])).toBe(15);
+describe("cursorCadenceMinutes", () => {
+  it("takes the focused country's grid, not the finest one on the map", () => {
+    // The rule this replaced took the finest cadence across the *enabled* set, so GB+NL
+    // stepped every 15 minutes while GB publishes every 30 — the cursor moved twice for every
+    // time GB's map changed, and read as a skip. Focus decides the grid now; whichever country
+    // is being read moves on every step, and the other still resolves its own slot by ceiling.
+    expect(cursorCadenceMinutes("GB")).toBe(30);
+    expect(cursorCadenceMinutes("NL")).toBe(15);
   });
 
-  it("ignores unconfigured codes rather than letting them set the grid", () => {
-    expect(finestCadenceMinutes(["GB", "XX"])).toBe(30);
-  });
-
-  it("falls back rather than throwing on an empty set", () => {
-    // `enabledCountries` is invariant-checked upstream; a blank grid has no useful meaning.
-    expect(finestCadenceMinutes([])).toBe(FALLBACK_CADENCE_MINUTES);
-    expect(finestCadenceMinutes(undefined)).toBe(FALLBACK_CADENCE_MINUTES);
+  it("falls back rather than throwing on an unconfigured or absent country", () => {
+    // `focusedCountry` is invariant-checked upstream; a blank grid has no useful meaning.
+    expect(cursorCadenceMinutes("XX")).toBe(FALLBACK_CADENCE_MINUTES);
+    expect(cursorCadenceMinutes(null)).toBe(FALLBACK_CADENCE_MINUTES);
+    expect(cursorCadenceMinutes(undefined)).toBe(FALLBACK_CADENCE_MINUTES);
   });
 });
 

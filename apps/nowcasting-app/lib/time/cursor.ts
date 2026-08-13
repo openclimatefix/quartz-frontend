@@ -131,20 +131,25 @@ export const slotLabellingFor = (country: string | null | undefined): SlotLabell
   getCountryConfig(country)?.slotLabelling ?? DEFAULT_SLOT_LABELLING;
 
 /**
- * The grid the cursor moves on: the finest cadence among the enabled countries.
+ * The grid the cursor moves on: the **focused** country's cadence.
  *
- * Finest rather than coarsest so nothing loses resolution — the country with the fine grid is
- * always exact and the coarse one rounds, rather than the fine country being pinned to
- * instants it never publishes. Unconfigured codes contribute nothing; an empty or entirely
- * unconfigured set falls back rather than throwing, because a blank grid has no sensible
- * meaning and `enabledCountries` is invariant-checked upstream anyway.
+ * This used to be the finest cadence across the *enabled* set, so nothing lost resolution —
+ * the fine-grid country was always exact and the coarse one rounded. Correct, and it read as
+ * broken: with NL enabled the cursor stepped every 15 minutes while GB publishes every 30, so
+ * scrubbing or arrow-keying moved the cursor twice for every time GB's map changed. GB had
+ * genuinely nothing new to show at 14:45, but the map appeared to skip (Brad, 2026-08-13).
+ *
+ * Focused rather than coarsest: coarsest would fix the stutter by permanently denying NL its
+ * 15-minute resolution whenever GB happened to be enabled. Keying on focus means whatever you
+ * are actually reading moves on every step, and the country you are not reading resolves its
+ * own slot by ceiling exactly as before — `slotForInstant` is unchanged, and the readout keeps
+ * showing both countries' slots so the lag stays visible rather than hidden.
+ *
+ * A country with no registry entry falls back rather than throwing; `focusedCountry` is
+ * invariant-checked upstream anyway.
  */
-export const finestCadenceMinutes = (countries: readonly string[] | undefined): number => {
-  const cadences = (countries ?? [])
-    .map((code) => getCountryConfig(code)?.cadenceMinutes)
-    .filter((minutes): minutes is number => typeof minutes === "number" && minutes > 0);
-  return cadences.length > 0 ? Math.min(...cadences) : FALLBACK_CADENCE_MINUTES;
-};
+export const cursorCadenceMinutes = (country: string | null | undefined): number =>
+  cadenceMinutesFor(country);
 
 /** Whether an instant already sits on a cadence grid. */
 export const isOnCadence = (instant: Instant, cadenceMinutes: number): boolean =>

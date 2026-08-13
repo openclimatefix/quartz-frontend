@@ -14,7 +14,7 @@ import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
 import { ComparisonSelection } from "./comparison";
 import { ChartMode, ChartSplitPercent } from "../shell/geometry";
-import { cursorNow, finestCadenceMinutes, snapToCadence } from "../../lib/time/cursor";
+import { cursorCadenceMinutes, cursorNow, snapToCadence } from "../../lib/time/cursor";
 import {
   CountryKeyedState,
   CountryScopedKey,
@@ -30,7 +30,7 @@ import {
 } from "./countryState";
 
 /**
- * The cursor grid: the finest cadence among the countries currently drawn.
+ * The cursor grid: the focused country's cadence.
  *
  * Global state rather than a hook because the cursor is written from places React is not —
  * the 60-second interval in `use-and-update-selected-time`, the play button, the initial
@@ -38,7 +38,7 @@ import {
  * is the one line that joins the two.
  */
 export const getCursorCadenceMinutes = (): number =>
-  finestCadenceMinutes(getGlobalState("enabledCountries"));
+  cursorCadenceMinutes(getGlobalState("focusedCountry"));
 
 /**
  * Now, on the cursor grid — the slot currently filling.
@@ -186,9 +186,9 @@ const getValidatedEnabledCountries = (focused: string): string[] => {
 
 const INITIAL_FOCUSED_COUNTRY = getValidatedFocusedCountry();
 const INITIAL_ENABLED_COUNTRIES = getValidatedEnabledCountries(INITIAL_FOCUSED_COUNTRY);
-// `getCursorNow` reads the enabled set off global state, which does not exist yet at this
-// point — so the initial cursor takes the same grid from the set being installed.
-const INITIAL_CURSOR = cursorNow(finestCadenceMinutes(INITIAL_ENABLED_COUNTRIES));
+// `getCursorNow` reads focus off global state, which does not exist yet at this point — so
+// the initial cursor takes the same grid from the country being installed as focused.
+const INITIAL_CURSOR = cursorNow(cursorCadenceMinutes(INITIAL_FOCUSED_COUNTRY));
 
 export const { useGlobalState, getGlobalState, setGlobalState } =
   createGlobalState<GlobalStateType>({
@@ -339,8 +339,8 @@ const clearCountrySelection = (country: string): void => {
  * `timeNow` is re-derived rather than snapped: it means "now", and the two 60-second timers
  * would otherwise leave it a slot stale until the next tick.
  */
-const resnapCursorToGrid = (codes: string[]): void => {
-  const cadence = finestCadenceMinutes(codes);
+const resnapCursorToGrid = (country: string | null | undefined): void => {
+  const cadence = cursorCadenceMinutes(country);
   const selected = getGlobalState("selectedISOTime");
   if (selected) setGlobalState("selectedISOTime", snapToCadence(selected, cadence));
   setGlobalState("timeNow", cursorNow(cadence));
@@ -350,7 +350,9 @@ const resnapCursorToGrid = (codes: string[]): void => {
 const writeEnabledCountries = (codes: string[]): void => {
   setGlobalState("enabledCountries", codes);
   setSettingInCookieStorage(CookieStorageKeys.ENABLED_COUNTRIES, codes);
-  resnapCursorToGrid(codes);
+  // No resnap: the grid follows the *focused* country now, and enabling or disabling another
+  // country does not change it. `setEnabledCountries` resnaps only in the case where dropping
+  // a country also moves focus.
 };
 
 /**
@@ -378,6 +380,10 @@ export const setFocusedCountry = (code: string): void => {
   // Persisted here rather than in the toggle so any future caller gets persistence for
   // free; `getValidatedFocusedCountry` above is what makes a stale value harmless on read.
   setSettingInCookieStorage(CookieStorageKeys.COUNTRY, country);
+  // The cursor grid is this country's cadence, so focusing a country with a different one
+  // moves the grid under the current cursor. Snapping up keeps the invariant every lookup
+  // depends on — the cursor always sits on a slot the focused country actually publishes.
+  resnapCursorToGrid(country);
 };
 
 /**
