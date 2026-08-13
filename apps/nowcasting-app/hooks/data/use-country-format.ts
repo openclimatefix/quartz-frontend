@@ -27,8 +27,15 @@ export const useCountryFormatting = (): CountryFormatting => {
   return useMemo(() => {
     const config = getCountryConfig(country);
     return {
+      // The country's zone, so a Dutch slot is shown at Dutch wall-clock time...
       timezone: config?.timezone ?? DEFAULT_TIMEZONE,
-      locale: config?.locale ?? DEFAULT_LOCALE
+      // ...but never the country's locale. `config.locale` is "nl-NL" for NL, which rendered
+      // the chart's own axis in Dutch ("di 11", "wo 12") while the scrub track directly below
+      // it read "Tue 12:00" — two time axes, one screen, two languages. Dates and times are
+      // written the GB way throughout until a per-user preference lands; `DEFAULT_LOCALE` is
+      // re-exported from `lib/time/display.ts`, which is that seam. The registry keeps
+      // `locale` for that day.
+      locale: DEFAULT_LOCALE
     };
   }, [country]);
 };
