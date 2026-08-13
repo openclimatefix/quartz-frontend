@@ -10,12 +10,17 @@
  */
 import { describe, expect, jest, test } from "@jest/globals";
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
+
+const MOCK_RANGE_DATA = {
+  range: { start: "2026-08-10T00:00:00.000Z", end: "2026-08-12T00:00:00.000Z" },
+  daylight: []
+};
 
 jest.mock("./use-cursor-range", () => ({
   __esModule: true,
-  default: () => ({ start: "2026-08-10T00:00:00.000Z", end: "2026-08-12T00:00:00.000Z" }),
-  useCursorRange: () => ({ start: "2026-08-10T00:00:00.000Z", end: "2026-08-12T00:00:00.000Z" })
+  default: () => MOCK_RANGE_DATA,
+  useCursorRange: () => MOCK_RANGE_DATA
 }));
 
 import { setEnabledCountries, setFocusedCountry, setGlobalState } from "../helpers/globalState";
@@ -55,25 +60,70 @@ describe("the zone follows focus", () => {
 
   test("UTC stays on screen, demoted rather than dropped", () => {
     render(<CursorReadout />);
-    expect(screen.getByText("UTC")).toBeInTheDocument();
-    // "12:00" also appears as a tick label; scope to the readout row's own UTC span.
-    expect(screen.getByText("UTC").parentElement).toHaveTextContent("Cursor12:00UTC");
+    // "utc" is a row label in the stack now, not a suffix in a sentence — and the word
+    // "Cursor" is gone: the footer *is* the cursor, so naming it explained nothing.
+    expect(screen.getByText("utc")).toBeInTheDocument();
+    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
+    expect(screen.queryByText(/Cursor/)).not.toBeInTheDocument();
   });
 });
 
-describe("the focused country is not shown twice", () => {
-  test("with only the focused country enabled, no secondary slot duplicates the primary reading", () => {
-    render(<CursorReadout />);
-    // The primary chip and the (absent) secondary chip would otherwise both read "GB" — pin
-    // that there is exactly one.
-    expect(screen.getAllByText("GB")).toHaveLength(1);
-  });
-
-  test("a second enabled country still gets its own slot, focus does not", () => {
+/**
+ * The stack holds every zone in a fixed slot, focused or not.
+ *
+ * This replaces "the focused country is not shown twice", which pinned the opposite rule:
+ * the focused country used to be filtered out of the list because its time was shown
+ * separately. That made a focus change *reorder* the readout — the one moment you most want a
+ * stable reference is the moment it moved. Brad's call: keep every enabled country in the same
+ * slot always, and let focus be a weight change instead of a membership change.
+ */
+describe("the zone stack", () => {
+  test("lists every enabled country, including the focused one", () => {
     setEnabledCountries(["GB", "NL"]);
     setFocusedCountry("GB");
     render(<CursorReadout />);
-    expect(screen.getAllByText("GB")).toHaveLength(1);
-    expect(screen.getAllByText("NL")).toHaveLength(1);
+    // Counted by row, not by text: the focused country's code appears again in the track's
+    // tethered tag, which is a different thing in a different place.
+    const codes = screen
+      .getAllByTitle(/published slot/)
+      .map((node) => node.firstElementChild?.textContent);
+    expect(codes).toEqual(["GB", "NL"]);
+  });
+
+  test("keeps both slots, in the same order, when focus moves", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("GB");
+    const view = render(<CursorReadout />);
+    const order = () =>
+      screen.getAllByTitle(/published slot/).map((node) => node.firstElementChild?.textContent);
+    expect(order()).toEqual(["GB", "NL"]);
+
+    act(() => setFocusedCountry("NL"));
+    view.rerender(<CursorReadout />);
+    expect(order()).toEqual(["GB", "NL"]);
+  });
+
+  test("marks the focused country rather than moving it", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    render(<CursorReadout />);
+    // Scoped to the stack: the focused country's code also appears in the track's tethered
+    // tag, so a bare `getByText` matches twice.
+    const codeIn = (code: string) =>
+      screen.getByTitle(new RegExp(`^${code} published slot`)).firstElementChild;
+    expect(codeIn("NL")).toHaveClass("text-ocf-yellow");
+    expect(codeIn("GB")).not.toHaveClass("text-ocf-yellow");
+  });
+
+  test("runs in time order, west to east, not in enabled order", () => {
+    // Enabled NL-first on purpose: the stack must not inherit that order. In August GB is
+    // UTC+1 and NL UTC+2, so GB reads above NL whichever way they were switched on.
+    setEnabledCountries(["NL", "GB"]);
+    setFocusedCountry("NL");
+    render(<CursorReadout />);
+    const order = screen
+      .getAllByTitle(/published slot/)
+      .map((node) => node.firstElementChild?.textContent);
+    expect(order).toEqual(["GB", "NL"]);
   });
 });

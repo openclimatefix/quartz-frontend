@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { DateTime } from "luxon";
 
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
@@ -28,12 +29,17 @@ import ScrubTrack from "./scrub-track";
  *    (and, via `cursorCadenceMinutes`, the step) together, which is what keeps the handle from
  *    jumping — both come from one call and change on one render.
  *
+ * **Track O moved the focused country's primary reading again — off this row entirely.**
+ * Sitting at a fixed spot left of the track (Track N's placement, described below for history)
+ * did not read as tethered to the handle: Brad's words were "the times changing on one side of
+ * the footer don't immediately click as tethered to where the cursor is on the scrub line." The
+ * reading now renders inside `ScrubTrack` itself, positioned at the handle's own x and moving
+ * with it at pointer rate — see that file. This component no longer computes or renders it;
+ * `otherCountries` still excludes the focused country from the secondary list below, since the
+ * reading has not stopped being "shown once", it has only moved where that once is.
+ *
  * What is on screen, and why each fact earns its place:
  *
- * - **the focused country's local time, primary, closest to the track.** This is the reading
- *   the cursor and the track's own axis now agree on, so it sits immediately to the track's
- *   left — near the handle, not at the far edge — with the country's code as a small chip
- *   rather than a paragraph, since it is implied by everything else on the page.
  * - **UTC, demoted but not dropped.** It is the one unambiguous instant on screen and the
  *   canonical value everything else derives from; it stays, in the smaller gray type the
  *   country chip used to have, alongside the cadence and the "live" flag.
@@ -49,7 +55,11 @@ import ScrubTrack from "./scrub-track";
  * The arithmetic is entirely Track B's (`lib/time/cursor.ts`); nothing here rounds anything.
  */
 
-const CountrySlot: FC<{ code: string; cursor: string }> = ({ code, cursor }) => {
+const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
+  code,
+  cursor,
+  focused
+}) => {
   const config = getCountryConfig(code);
   const slot = slotForInstant(cursor, code);
   // The country's *timezone*, but not its locale: NL's slot is shown at NL's wall clock,
@@ -69,19 +79,38 @@ const CountrySlot: FC<{ code: string; cursor: string }> = ({ code, cursor }) => 
 
   return (
     <span
-      className="flex items-baseline gap-1.5"
-      title={`${code} published slot, ${config?.timezone ?? DEFAULT_TIMEZONE}`}
+      className="flex items-baseline gap-1.5 text-2xs"
+      title={`${code} published slot, ${config?.timezone ?? DEFAULT_TIMEZONE}${
+        focused ? " — the country the cursor's grid and the axis follow" : ""
+      }`}
     >
-      <span className="text-2xs font-bold uppercase tracking-wider text-ocf-gray-600">{code}</span>
-      <span className="text-white">{local}</span>
-      {lagMinutes > 0 && <span className="text-2xs text-ocf-gray-600">{`+${lagMinutes}m`}</span>}
+      {/* Same fixed cells as the UTC row above, so the stack is a column and not a ragged list.
+          Focus is weight and colour only — the row never moves. */}
+      <span
+        className={`w-5 shrink-0 font-bold uppercase tracking-wider ${
+          focused ? "text-ocf-yellow" : "text-ocf-gray-600"
+        }`}
+      >
+        {code}
+      </span>
+      <span
+        className={`w-10 shrink-0 tabular-nums ${focused ? "text-white" : "text-ocf-gray-400"}`}
+      >
+        {local}
+      </span>
+      {/* The lag slot is always rendered and always the same width, even when empty. It toggles
+          on and off as the cursor steps — a country coarser than the cursor grid lags on every
+          other slot — and mounting/unmounting it re-flowed the whole row on each step, which
+          read as the readout jittering rather than as the number changing. */}
+      <span className="inline-block w-7 shrink-0 tabular-nums text-ocf-gray-600">
+        {lagMinutes > 0 ? `+${lagMinutes}m` : ""}
+      </span>
     </span>
   );
 };
 
 const CursorReadout: FC = () => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [timeNow] = useGlobalState("timeNow");
   const enabledCountries = useEnabledCountries();
   const focusedCountry = useFocusedCountry();
 
@@ -89,45 +118,67 @@ const CursorReadout: FC = () => {
 
   const cadenceMinutes = cursorCadenceMinutes(focusedCountry);
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
-  // The focused country's own slot for this cursor — the same resolution every `CountrySlot`
-  // uses, so the primary reading and the track's axis (which shares this zone) agree with the
-  // secondary rows about what "GB's time" means for this instant.
-  const focusedLocal = formatISODateStringAsZonedTime(
-    slotForInstant(selectedISOTime, focusedCountry),
-    focusedZone,
-    DEFAULT_LOCALE
-  );
   const utc = formatISODateStringAsZonedTime(selectedISOTime, "UTC");
-  const otherCountries = enabledCountries.filter((code) => code !== focusedCountry);
+
+  /**
+   * The stack runs west to east — in time order, not in the order countries were enabled.
+   *
+   * UTC is the zero mark and every European zone reads after it, so the column tells you the
+   * offsets as a shape: each row is at or ahead of the one above. Sorted by the *actual* offset
+   * at the cursor's instant rather than by a stored number, so a country in summer time sorts
+   * where it currently is, and the order is right on both sides of a DST change — including
+   * the weeks when GB and NL have already switched and one has not.
+   */
+  const zoneOrder = [...enabledCountries].sort((a, b) => {
+    const offsetOf = (code: string) =>
+      DateTime.fromISO(selectedISOTime, {
+        zone: getCountryConfig(code)?.timezone ?? DEFAULT_TIMEZONE
+      }).offset;
+    return offsetOf(a) - offsetOf(b) || a.localeCompare(b);
+  });
 
   return (
     <footer
       aria-label="Time cursor"
       className="flex flex-none items-center gap-4 border-t border-white/10 bg-black px-4 py-2 text-xs text-ocf-gray-300"
     >
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      {/*
+       * A stack of zones, not a sentence about the cursor.
+       *
+       * This was a wrapping row of labelled phrases — "CURSOR 18:15 UTC", "15-minute steps",
+       * then each country. Three problems, all of which this shape answers: it explained more
+       * than it showed; "cursor" named the thing the whole footer already is; and because the
+       * focused country was filtered out of the list, changing focus *reordered* the row, so
+       * the one moment you most want a stable reference was the moment it moved.
+       *
+       * Every zone now holds the same slot on every render — UTC first as the canonical
+       * instant, then each enabled country in the enabled set's own order, focused or not.
+       * Focus is a *weight* change (bright, yellow code) rather than a membership change, so a
+       * focus switch reads as emphasis moving down a stable list. Every cell is fixed-width
+       * and tabular, so nothing reflows as the digits or the lag marker change.
+       */}
+      <div className="flex flex-none flex-col justify-center gap-px leading-none">
         <span className="flex items-baseline gap-1.5 text-2xs text-ocf-gray-600">
-          <span className="font-semibold uppercase tracking-wider">Cursor</span>
-          <span>{utc}</span>
-          <span>UTC</span>
-          {selectedISOTime === timeNow && (
-            <span className="font-semibold uppercase tracking-wider text-ocf-yellow">live</span>
-          )}
+          <span className="w-5 shrink-0 font-bold uppercase tracking-wider">utc</span>
+          <span className="w-10 shrink-0 tabular-nums">{utc}</span>
         </span>
-        <span className="text-2xs text-ocf-gray-600">{`${cadenceMinutes}-minute steps`}</span>
-        {otherCountries.map((code) => (
-          <CountrySlot key={code} code={code} cursor={selectedISOTime} />
+        {zoneOrder.map((code) => (
+          <CountrySlot
+            key={code}
+            code={code}
+            cursor={selectedISOTime}
+            focused={code === focusedCountry}
+          />
         ))}
-        <span
-          className="flex items-baseline gap-1.5"
-          title={`${focusedCountry} focused, ${focusedZone}`}
-        >
-          <span className="text-2xs font-bold uppercase tracking-wider text-ocf-yellow">
-            {focusedCountry}
-          </span>
-          <span className="text-sm font-semibold text-white">{focusedLocal}</span>
-        </span>
       </div>
+      {/* The grain, as a value rather than a sentence. The explanation moves to the tooltip:
+          it is a thing you check once, not something to read on every glance. */}
+      <span
+        className="flex-none cursor-default text-2xs tabular-nums text-ocf-gray-600"
+        title={`The cursor steps in ${cadenceMinutes}-minute slots — ${focusedCountry} publishes on that grid. Changing the focused country changes the step.`}
+      >
+        {`${cadenceMinutes}m`}
+      </span>
       <div className="min-w-[140px] flex-1">
         <ScrubTrack zone={focusedZone} />
       </div>

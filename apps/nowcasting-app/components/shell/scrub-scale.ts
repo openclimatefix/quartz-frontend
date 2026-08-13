@@ -54,6 +54,12 @@ export type ScrubScale = {
   slotCount: number;
 };
 
+/** A stretch of the strip where the focused country's forecast is above zero. */
+export type DaylightWindow = { startMs: number; endMs: number };
+
+/** The shape `deriveDaylightWindows` needs from a forecast point — not the full `TimeSeriesPoint`. */
+type DaylightPoint = { timeUtc: string; powerMw: number | null };
+
 const MS_PER_MINUTE = 60_000;
 
 const msOf = (instant: Instant): number => {
@@ -104,6 +110,49 @@ export const scrubScale = (
 };
 
 /**
+ * Daylight windows for the strip's shading — derived from the series `useCursorRange` already
+ * fetches for the range, never a separate request or an astronomical calculation. Track O.
+ *
+ * **Daylight is exactly "forecast > 0"**, the honest proxy the brief asked for — not sunrise,
+ * not sunset, just whatever the focused country's own forecast says. Points label the *end* of
+ * their period (Track B), so a run of positive values covers the span from the point *before*
+ * the run started (its period's start) to the last positive point (that period's own end):
+ *
+ * ```
+ * powerMw   0    0    12   40   55   20   0    0
+ * timeUtc   t0   t1   t2   t3   t4   t5   t6   t7
+ *                     └────── window: t1 to t5 ──────┘
+ * ```
+ *
+ * **A `null` or non-positive value breaks a run.** A gap in the data reads as "no known
+ * daylight here", not as darkness and not as an assumed continuation across whatever the gap
+ * covers — the same caution `RegionSnapshot`'s three-way absent/null/zero split takes elsewhere
+ * in this app, applied to a single series instead of a region set.
+ */
+export const deriveDaylightWindows = (values: readonly DaylightPoint[]): DaylightWindow[] => {
+  const windows: DaylightWindow[] = [];
+  let runStart: number | null = null;
+
+  for (let index = 1; index < values.length; index++) {
+    const previousMs = msOf(values[index - 1].timeUtc);
+    const isDaylight = (values[index].powerMw ?? 0) > 0;
+
+    if (isDaylight) {
+      if (runStart === null) runStart = previousMs;
+    } else if (runStart !== null) {
+      windows.push({ startMs: runStart, endMs: previousMs });
+      runStart = null;
+    }
+  }
+
+  if (runStart !== null) {
+    windows.push({ startMs: runStart, endMs: msOf(values[values.length - 1].timeUtc) });
+  }
+
+  return windows;
+};
+
+/**
  * Put an instant on the grid and inside the track — the one function every input goes through.
  *
  * Ceiling first (Track B's rule), then clamp. Doing it in that order matters at the top end:
@@ -116,9 +165,13 @@ export const clampToScale = (instant: Instant, scale: ScrubScale): string => {
   return toIso(clamp(snapped, scale.firstMs, scale.lastMs));
 };
 
+/** Where a raw millisecond sits along the track, 0 at the window's start and 1 at its end. */
+export const fractionForMs = (ms: number, scale: ScrubScale): number =>
+  clamp((ms - scale.startMs) / (scale.endMs - scale.startMs), 0, 1);
+
 /** Where an instant sits along the track, 0 at the window's start and 1 at its end. */
 export const fractionForInstant = (instant: Instant, scale: ScrubScale): number =>
-  clamp((msOf(instant) - scale.startMs) / (scale.endMs - scale.startMs), 0, 1);
+  fractionForMs(msOf(instant), scale);
 
 /** The snapped, clamped instant a fraction of the way along the track. */
 export const instantForFraction = (fraction: number, scale: ScrubScale): string => {

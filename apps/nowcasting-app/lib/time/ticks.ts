@@ -60,15 +60,17 @@ const WIDE_THRESHOLD_PX = 60;
  * so a day that is 23 or 25 real hours long (a DST transition) still gets its labelled hours in
  * the right places rather than sliding by the hour the clocks moved.
  */
-export const tickInstants = (
-  startMs: number,
-  endMs: number,
-  zone: string,
-  density: TickDensity
-): number[] => {
+/**
+ * Walk whole calendar days in `zone` between `startMs` and `endMs`, constructing each candidate
+ * hour directly with `.set` rather than adding a fixed duration — the shared machinery behind
+ * both `tickInstants` (which hours depends on density) and `midnightInstants` (always hour 0,
+ * regardless of whatever density the axis has chosen). A day that is 23 or 25 real hours long
+ * (a DST transition) still gets its labelled hours in the right places rather than sliding by
+ * the hour the clocks moved.
+ */
+const walkDays = (startMs: number, endMs: number, zone: string, hours: number[]): number[] => {
   if (!(endMs > startMs)) return [];
 
-  const hours = HOURS_BY_DENSITY[density];
   const startDay = DateTime.fromMillis(startMs, { zone }).startOf("day");
   const endDay = DateTime.fromMillis(endMs, { zone }).startOf("day");
 
@@ -86,6 +88,23 @@ export const tickInstants = (
   }
   return out;
 };
+
+export const tickInstants = (
+  startMs: number,
+  endMs: number,
+  zone: string,
+  density: TickDensity
+): number[] => walkDays(startMs, endMs, zone, HOURS_BY_DENSITY[density]);
+
+/**
+ * Local midnight in `zone` for every calendar day the range touches — **independent of tick
+ * density**. The scrub track's hairlines mark hard calendar edges regardless of whether the
+ * axis below is currently labelled 6-hourly or midnight/midday, and they must agree with
+ * whichever midnight labels are showing rather than compute the boundary a second, possibly
+ * different, way. Track O.
+ */
+export const midnightInstants = (startMs: number, endMs: number, zone: string): number[] =>
+  walkDays(startMs, endMs, zone, [0]);
 
 /**
  * The Schmitt trigger: which density to use next, given the space available for 6-hourly ticks

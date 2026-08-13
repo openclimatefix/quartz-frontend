@@ -3,8 +3,10 @@ import { DateTime, Settings } from "luxon";
 
 import {
   clampToScale,
+  deriveDaylightWindows,
   fractionForClientX,
   fractionForInstant,
+  fractionForMs,
   instantForFraction,
   instantForSlotIndex,
   scrubScale,
@@ -226,5 +228,99 @@ describe("across a DST transition", () => {
     );
     expect(london).toEqual(["01:00", "01:30", "01:00", "01:30"]);
     expect(amsterdam).toEqual(["02:00", "02:30", "02:00", "02:30"]);
+  });
+});
+
+// Track O: the strip's daylight shading. "Daylight" is exactly forecast > 0 — an honest proxy,
+// not sunrise/sunset — derived from the series the app already fetches for the range.
+describe("deriving daylight windows from a forecast series", () => {
+  const point = (timeUtc: string, powerMw: number | null) => ({ timeUtc, powerMw });
+
+  it("windows a single run of positive values from the point before it to its last point", () => {
+    const values = [
+      point("2026-08-10T04:00:00.000Z", 0),
+      point("2026-08-10T04:30:00.000Z", 0),
+      point("2026-08-10T05:00:00.000Z", 12), // run starts: window opens at 04:30 (previous point)
+      point("2026-08-10T05:30:00.000Z", 55),
+      point("2026-08-10T06:00:00.000Z", 20), // run ends here
+      point("2026-08-10T06:30:00.000Z", 0),
+      point("2026-08-10T07:00:00.000Z", 0)
+    ];
+    expect(deriveDaylightWindows(values)).toEqual([
+      {
+        startMs: Date.parse("2026-08-10T04:30:00.000Z"),
+        endMs: Date.parse("2026-08-10T06:00:00.000Z")
+      }
+    ]);
+  });
+
+  it("a day with no daylight at all produces no windows", () => {
+    const values = [
+      point("2026-08-10T00:00:00.000Z", 0),
+      point("2026-08-10T00:30:00.000Z", 0),
+      point("2026-08-10T01:00:00.000Z", 0)
+    ];
+    expect(deriveDaylightWindows(values)).toEqual([]);
+  });
+
+  it("a run still open at the series' end closes at the last point", () => {
+    const values = [
+      point("2026-08-10T17:00:00.000Z", 0),
+      point("2026-08-10T17:30:00.000Z", 10),
+      point("2026-08-10T18:00:00.000Z", 5)
+    ];
+    expect(deriveDaylightWindows(values)).toEqual([
+      {
+        startMs: Date.parse("2026-08-10T17:00:00.000Z"),
+        endMs: Date.parse("2026-08-10T18:00:00.000Z")
+      }
+    ]);
+  });
+
+  it("a gap of missing values (null powerMw) breaks one run into two, rather than bridging it", () => {
+    const values = [
+      point("2026-08-10T05:00:00.000Z", 0),
+      point("2026-08-10T05:30:00.000Z", 10), // run 1 opens at 05:00
+      point("2026-08-10T06:00:00.000Z", 20), // run 1 closes at 06:00
+      point("2026-08-10T06:30:00.000Z", null), // missing data, not darkness — breaks the run
+      point("2026-08-10T07:00:00.000Z", null),
+      point("2026-08-10T07:30:00.000Z", 15), // run 2 opens at 07:00
+      point("2026-08-10T08:00:00.000Z", 8) // run 2 closes at 08:00
+    ];
+    expect(deriveDaylightWindows(values)).toEqual([
+      {
+        startMs: Date.parse("2026-08-10T05:00:00.000Z"),
+        endMs: Date.parse("2026-08-10T06:00:00.000Z")
+      },
+      {
+        startMs: Date.parse("2026-08-10T07:00:00.000Z"),
+        endMs: Date.parse("2026-08-10T08:00:00.000Z")
+      }
+    ]);
+  });
+
+  it("fewer than two points cannot make a window", () => {
+    expect(deriveDaylightWindows([])).toEqual([]);
+    expect(deriveDaylightWindows([point("2026-08-10T05:00:00.000Z", 40)])).toEqual([]);
+  });
+});
+
+// Track O: past-versus-future is a contrast on the one strip, computed as a fraction like any
+// other instant — no separate arithmetic, so it inherits the clamp-at-both-ends behaviour every
+// other position on the track has.
+describe("partitioning the strip around NOW", () => {
+  it("an instant before NOW yields a smaller fraction than NOW's own", () => {
+    const built = scale(GB);
+    const nowFraction = fractionForInstant("2026-08-11T00:00:00.000Z", built);
+    const pastFraction = fractionForInstant("2026-08-10T12:00:00.000Z", built);
+    const futureFraction = fractionForInstant("2026-08-11T12:00:00.000Z", built);
+    expect(pastFraction).toBeLessThan(nowFraction);
+    expect(futureFraction).toBeGreaterThan(nowFraction);
+  });
+
+  it("NOW outside the window clamps to the same edge fractionForMs gives any other instant", () => {
+    const built = scale(GB);
+    expect(fractionForMs(Date.parse("2026-08-09T00:00:00.000Z"), built)).toBe(0);
+    expect(fractionForMs(Date.parse("2026-08-13T00:00:00.000Z"), built)).toBe(1);
   });
 });

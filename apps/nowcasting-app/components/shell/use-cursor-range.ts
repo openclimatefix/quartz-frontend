@@ -4,7 +4,7 @@ import { NATIONAL_REGION_TYPE, useFocusedCountry, useNationalForecast } from "..
 import type { Scope } from "../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
 import { getEarliestForecastTimestamp } from "../helpers/data";
-import type { CursorRange } from "./scrub-scale";
+import { deriveDaylightWindows, type CursorRange, type DaylightWindow } from "./scrub-scale";
 
 /**
  * The window the scrub track spans — **derived, never invented**.
@@ -36,8 +36,20 @@ import type { CursorRange } from "./scrub-scale";
  *
  * Returns `null` until values arrive. The caller draws an inert track rather than guessing a
  * horizon; there is no defensible default for "how far ahead does this country forecast".
+ *
+ * **Also returns the focused country's daylight windows**, Track O. The brief is explicit that
+ * this should extend what the hook already returns rather than add a second request: the same
+ * forecast series that establishes the range is the one thing the track's daylight shading needs
+ * ("forecast > 0"), so `deriveDaylightWindows` runs over the same `values` array `range` is read
+ * from, inside the one `useMemo` keyed on `forecast.data` — the shading is recomputed only when
+ * new forecast data arrives, never per pointer move during a drag.
  */
-export const useCursorRange = (): CursorRange | null => {
+export type CursorRangeData = {
+  range: CursorRange;
+  daylight: DaylightWindow[];
+};
+
+export const useCursorRange = (): CursorRangeData | null => {
   const focusedCountry = useFocusedCountry();
   const countryConfig = getCountryConfig(focusedCountry);
 
@@ -60,7 +72,8 @@ export const useCursorRange = (): CursorRange | null => {
     if (!values?.length) return null;
     const first = values[0]?.timeUtc;
     const last = values[values.length - 1]?.timeUtc;
-    return first && last ? { start: first, end: last } : null;
+    if (!first || !last) return null;
+    return { range: { start: first, end: last }, daylight: deriveDaylightWindows(values) };
   }, [forecast.data]);
 };
 

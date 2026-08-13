@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { selectAxisTicks, tickInstants } from "./ticks";
+import { midnightInstants, selectAxisTicks, tickInstants } from "./ticks";
 
 // A 48-hour window, both ends on a clean UTC day boundary — the shape a real chart/scrubber
 // range has. `jest.globalSetup.ts` pins the process to UTC, so a zone has to be passed
@@ -148,5 +148,49 @@ describe("selectAxisTicks — the space decision", () => {
       previousDensity: "six-hourly"
     });
     expect(stillWide.density).toBe("six-hourly");
+  });
+});
+
+// Track O: the scrub track's midnight hairlines. They must land on exactly the same instants as
+// the midnight labels `tickInstants` already produces at "midday-midnight" density, independent
+// of whichever density the axis has actually chosen to show.
+describe("midnightInstants", () => {
+  it("agrees with the midnight half of tickInstants' midday-midnight density", () => {
+    const midnights = midnightInstants(START, END, "UTC");
+    const fromDensity = tickInstants(START, END, "UTC", "midday-midnight").filter(
+      (ms) => new Date(ms).getUTCHours() === 0
+    );
+    expect(midnights).toEqual(fromDensity);
+    expect(midnights.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-10T00:00:00.000Z",
+      "2026-08-11T00:00:00.000Z",
+      "2026-08-12T00:00:00.000Z"
+    ]);
+  });
+
+  it("reads local midnight, not UTC midnight — same BST case as tickInstants", () => {
+    const startLocalMidnight = Date.parse("2026-08-09T23:00:00.000Z");
+    const endLocalMidnight = Date.parse("2026-08-10T23:00:00.000Z");
+    const midnights = midnightInstants(startLocalMidnight, endLocalMidnight, "Europe/London");
+    expect(midnights.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-09T23:00:00.000Z", // 10 Aug 00:00 BST
+      "2026-08-10T23:00:00.000Z" // 11 Aug 00:00 BST
+    ]);
+  });
+
+  it("survives a DST transition on the clock hour, same as tickInstants", () => {
+    // GB clocks go back on 2026-10-25, so the local day is 25 real hours long.
+    const start = Date.parse("2026-10-24T23:00:00.000Z"); // 25 Oct 00:00 BST
+    const end = Date.parse("2026-10-26T00:00:00.000Z"); // 26 Oct 00:00 GMT
+    const midnights = midnightInstants(start, end, "Europe/London");
+    expect(midnights.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-10-24T23:00:00.000Z", // 25 Oct 00:00 BST
+      "2026-10-26T00:00:00.000Z" // 26 Oct 00:00 GMT — the transition day has no midnight of its own
+    ]);
+  });
+
+  it("an inverted or empty range produces nothing", () => {
+    expect(midnightInstants(END, START, "UTC")).toEqual([]);
+    expect(midnightInstants(START, START, "UTC")).toEqual([]);
   });
 });

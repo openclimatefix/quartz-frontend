@@ -21,8 +21,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("./use-cursor-range", () => ({
   __esModule: true,
-  default: () => mockRange,
-  useCursorRange: () => mockRange
+  default: () => mockRangeData,
+  useCursorRange: () => mockRangeData
 }));
 
 import useGlobalState, {
@@ -33,10 +33,13 @@ import useGlobalState, {
 } from "../helpers/globalState";
 import ScrubTrack from "./scrub-track";
 import type { CursorRange } from "./scrub-scale";
+import type { CursorRangeData } from "./use-cursor-range";
 
-// A 48-hour window on the 30-minute grid, as a GB forecast axis is.
+// A 48-hour window on the 30-minute grid, as a GB forecast axis is. No daylight windows are
+// under test here — that's `use-cursor-range.test.ts` and `scrub-scale.test.ts`'s job — so this
+// suite's mock always reports none, which also exercises the "no daylight data" render path.
 const RANGE: CursorRange = { start: "2026-08-10T00:00:00.000Z", end: "2026-08-12T00:00:00.000Z" };
-let mockRange: CursorRange | null = RANGE;
+let mockRangeData: CursorRangeData | null = { range: RANGE, daylight: [] };
 
 const slider = () => screen.getByRole("slider");
 const cursor = () => getGlobalState("selectedISOTime");
@@ -130,7 +133,7 @@ beforeEach(() => {
   jest.spyOn(window, "cancelAnimationFrame").mockImplementation((handle: number) => {
     frames[handle - 1] = () => undefined;
   });
-  mockRange = RANGE;
+  mockRangeData = { range: RANGE, daylight: [] };
   setEnabledCountries(["GB"]);
   setGlobalState("selectedISOTime", "2026-08-11T00:00:00.000Z");
   setGlobalState("timeNow", "2026-08-10T12:00:00.000Z");
@@ -157,7 +160,7 @@ describe("what the track reports", () => {
   });
 
   test("draws an inert track rather than guessing a window it has no data for", () => {
-    mockRange = null;
+    mockRangeData = null;
     render(<ScrubTrack />);
     expect(screen.queryByRole("slider")).toBeNull();
     expect(screen.getByTestId("scrub-track-idle")).toBeInTheDocument();
@@ -358,5 +361,50 @@ describe("when focus changes underneath it", () => {
     act(() => setEnabledCountries(["GB", "NL"]));
     view.rerender(<ScrubTrack />);
     expect(slider()).toHaveAttribute("aria-valuemax", "96");
+  });
+});
+
+/**
+ * Live is a mode, and the way back to it.
+ *
+ * The old readout chip rendered `selectedISOTime === timeNow` — an equality that is true while
+ * nothing is following, if you scrub away and then land back on the current slot. What decides
+ * it is whether `use-and-update-selected-time`'s 60-second interval exists. And until now there
+ * was no way back to now at all except dragging the handle to the right pixel.
+ */
+describe("the live control", () => {
+  test("offers the way back when the cursor is adrift, and says so", () => {
+    setGlobalState("intervals", []);
+    setGlobalState("selectedISOTime", "2026-08-11T06:00:00.000Z");
+    render(<ScrubTrack zone="UTC" />);
+
+    const live = screen.getByRole("button", { name: "Return to now" });
+    expect(live).toHaveAttribute("aria-pressed", "false");
+  });
+
+  test("clicking it moves the cursor off its old slot and resumes following", () => {
+    setGlobalState("intervals", []);
+    setGlobalState("selectedISOTime", "2026-08-11T06:00:00.000Z");
+    render(<ScrubTrack zone="UTC" />);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Return to now" }));
+    });
+
+    // Not compared against the `timeNow` global: `resetTime` derives now from the real clock,
+    // so pinning an exact instant would pin the test to the machine's time. What the control
+    // promises is that the cursor leaves where it was *and* that following restarts — the
+    // second half is the mode, and is what the old equality-based chip could never express.
+    expect(cursor()).not.toBe("2026-08-11T06:00:00.000Z");
+    expect(getGlobalState("intervals").length).toBeGreaterThan(0);
+  });
+
+  test("reads as following, not as an invitation, once it is live", () => {
+    setGlobalState("selectedISOTime", "2026-08-11T06:00:00.000Z");
+    setGlobalState("intervals", [1 as unknown as ReturnType<typeof setInterval>]);
+    render(<ScrubTrack zone="UTC" />);
+
+    const live = screen.getByRole("button", { name: "Following now" });
+    expect(live).toHaveAttribute("aria-pressed", "true");
   });
 });
