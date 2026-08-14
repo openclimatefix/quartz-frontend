@@ -1,10 +1,6 @@
 import { FC, ReactNode, useEffect, useState } from "react";
 
 import ChartResizeHandle from "./chart-resize-handle";
-import { ChartInfo } from "../../ChartInfo";
-import { InfoIcon } from "../icons/icons";
-import Tooltip from "../tooltip";
-import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import useGlobalState, { setChartSplitOverride, useCountryState } from "../helpers/globalState";
 import { CHART_SPLIT, chartModeFor, STAGE_GUTTER_PX } from "./geometry";
 import { useResizableChartSplit } from "./use-resizable-chart-split";
@@ -39,10 +35,30 @@ import { useResizableChartSplit } from "./use-resizable-chart-split";
  * than a rule enforced with `z-index` — and the drag handle below is bounded by the same
  * inset, via `clampChartSplit` measuring the panel's own `offsetParent`.
  *
- * **The map control panel lives top-right** (Phase 6 followup, Track G moved it there; Track I
- * consolidated the map's layer toggles into it). `clampChartSplit` only reserves height for it
- * when the chart's *width* would actually reach that column (`overlapsControlDock`) — a narrow
- * chart can grow tall without needing to know the dock is there at all.
+ * **The panel hangs from the top edge.** It used to hang from the bottom; Brad moved it because
+ * the countries the map now frames sit low in the viewport, so a chart growing downward from
+ * the top eats empty sea rather than the landmass. Two things follow from the anchor, and they
+ * are the only places the direction is encoded:
+ *
+ * - `top` rather than `bottom` below, so growth runs downward and the panel's fixed corner is
+ *   top-left. The resize handle moves to the opposite corner with it (`chart-resize-handle.tsx`)
+ *   and `use-resizable-chart-split.ts`'s vertical drag loses its sign flip.
+ * - **The map control panel lives top-right** (Phase 6 followup, Track G moved it there; Track I
+ *   consolidated the map's layer toggles into it), so chart and dock now share the top row from
+ *   the chart's first pixel instead of only meeting when the chart grew tall. `clampChartSplit`
+ *   caps the chart's *width* short of the dock's column rather than reserving height under it —
+ *   see `geometry.ts`'s `maxChartWidthPx`.
+ *
+ * **Except when narrow**, where the chart is full width and a top anchor would simply cover the
+ * dock — no width cap can save a panel that spans the whole stage. Below `lg` it keeps hanging
+ * from the bottom, which is where it always was.
+ *
+ * That bottom anchor is a **holding position, not a design**. Brad's read is that the narrow
+ * layout needs a broader change than an anchor: a full-width chart at 67% height leaves the map
+ * — the thing the chart is a readout *of* — as a strip, and making that work needs rules about
+ * how the chart, the map controls and the display rail give way to each other, plus a control
+ * for the user to choose between them. None of that exists yet. All this branch does is stop
+ * the chart sitting on top of the control dock in the meantime; see the phase 6 followup notes.
  */
 
 const NARROW_QUERY = "(max-width: 1023px)";
@@ -51,7 +67,6 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
   children,
   comparisonActive
 }) => {
-  const { timezone } = useCountryFormatting();
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [chartSplitOverrides] = useGlobalState("chartSplitOverrides");
   const regionSelected = !!selectedMapRegionIds && selectedMapRegionIds.length > 0;
@@ -87,7 +102,10 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
       }`}
       style={{
         left: STAGE_GUTTER_PX,
-        bottom: STAGE_GUTTER_PX,
+        // Wide: hangs from the top, growing down. Narrow: full width, so a top anchor would sit
+        // straight over the top-right control dock — it keeps the old bottom anchor instead.
+        // A holding position until the narrow stage is designed properly — see above.
+        ...(isNarrow ? { bottom: STAGE_GUTTER_PX } : { top: STAGE_GUTTER_PX }),
         width: isNarrow ? `calc(100% - ${STAGE_GUTTER_PX * 2}px)` : `${split.width}%`,
         height: `${split.height}%`
       }}
@@ -103,23 +121,6 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
           layouts, and the narrow layout ignores the split entirely (full width, seed height) —
           so the handle only renders at `lg` and up, alongside the transition it also skips. */}
       {!isNarrow && <ChartResizeHandle {...handleProps} />}
-
-      {/* Hung off the right edge, as they were on `SideLayout` — the panel's own corners are
-          spoken for by the chart header and the legend. */}
-      <div className="absolute bottom-3 -right-4 z-20 rounded-full bg-mapbox-black-500 p-1.5">
-        <Tooltip
-          tip={
-            <div className="w-64 rounded-md">
-              <ChartInfo timezone={timezone} />
-            </div>
-          }
-          position="top"
-          className="text-right"
-          fullWidth
-        >
-          <InfoIcon />
-        </Tooltip>
-      </div>
     </div>
   );
 };

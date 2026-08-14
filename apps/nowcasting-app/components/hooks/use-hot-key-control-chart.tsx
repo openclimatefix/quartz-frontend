@@ -10,15 +10,24 @@ const useHotKeyControlChart = (limits?: { start: string; end: string }) => {
   // so enabling a country mid-session changes the stride without re-binding the listener.
   const handleKeyDown = useMemo(
     () => (e: KeyboardEvent) => {
-      // The footer's scrub track is a `role="slider"`, so ARIA requires it to step on Left and
-      // Right while focused — and it must, since this hook's only caller is the forecast chart
-      // and the delta view's call is commented out, leaving that view with no arrow keys at
-      // all. The track therefore handles the arrows itself when it has focus. This listener is
-      // on `document` and would otherwise also fire, moving the cursor two slots per press, so
-      // it stands down for events originating inside the track. Everywhere else it is
-      // unchanged: the arrows still work with nothing focused, which is how they always have.
+      // This listener is on `document`, so it fires no matter what has focus — including
+      // controls that bind the arrow keys to something of their own. Those double up: a press
+      // moves the control *and* walks the cursor. So it stands down for events originating
+      // inside anything that claims the arrows for itself. Two do:
+      //
+      // - the footer's scrub track (`[data-cursor-scrubber]`), a `role="slider"` that ARIA
+      //   requires to step on Left/Right while focused — and it must, since this hook's only
+      //   caller is the forecast chart and the delta view's call is commented out, leaving that
+      //   view with no arrow keys at all. Without this it would move the cursor two slots per
+      //   press;
+      // - the chart's resize handle (`[data-arrow-keys-handled]`), where all four arrows resize
+      //   the panel (`use-resizable-chart-split.ts`) and Left/Right would otherwise also drag
+      //   the forecast time along with them.
+      //
+      // Everywhere else it is unchanged: the arrows still work with nothing focused, which is
+      // how they always have.
       const target = e.target as HTMLElement | null;
-      if (target?.closest?.("[data-cursor-scrubber]")) return;
+      if (target?.closest?.("[data-cursor-scrubber],[data-arrow-keys-handled]")) return;
 
       if (e.key === leftKey) {
         setSelectedISOTime((selectedISOTime) => {

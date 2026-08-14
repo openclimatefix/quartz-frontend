@@ -27,9 +27,12 @@ import { MAP_CONTROL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
  *   thing in the corner, there is no second row above it to clear, so the old
  *   `MAP_TOP_ROW_RESERVE_PX` top offset is gone;
  * - it keeps a fixed column width, which is what lets the floating chart cap itself short of
- *   the panel — that cap is the panel's height, not its width, since the chart shares the
- *   panel's right-hand side rather than its bottom edge (`CHART_TOP_CLEARANCE_PX`,
- *   `floating-chart.tsx`);
+ *   the panel. That cap used to be on the chart's *height*, back when the chart hung from the
+ *   bottom edge and only met this panel by growing tall. The chart now hangs from the top edge
+ *   and shares this row from its first pixel, so the cap is on its width instead — see
+ *   `geometry.ts`'s `maxChartWidthPx`. `MAP_CONTROL_WIDTH_PX` is therefore load-bearing in a way
+ *   it was not before: this dock rendering wider than it declares would put the chart under it;
+ *   note that the height guess the old rule needed is gone entirely, which is a simplification;
  * - it establishes the positioning context, so its contents lay out in normal flow. A control
  *   that positions itself absolutely against the *map* — as both guide bars still do — has
  *   not moved in here yet.

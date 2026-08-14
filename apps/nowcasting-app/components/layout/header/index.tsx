@@ -1,6 +1,7 @@
 import { classNames } from "../../helpers/utils";
 import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
+import DataInfoButton from "./data-info-button";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -117,6 +118,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
       </div>
       <div className="flex items-center gap-2">
         {isLoggedIn && <CountryToggle />}
+        {isLoggedIn && <DataInfoButton />}
         <div className="py-1">
           {isLoggedIn && <ProfileDropDown />}
           {children}

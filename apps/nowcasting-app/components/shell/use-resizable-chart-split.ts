@@ -108,10 +108,11 @@ export function useResizableChartSplit({
     const size = liveContainerSize();
     if (size.widthPx <= 0 || size.heightPx <= 0) return;
     const dxPercent = ((event.clientX - startRef.current.x) / size.widthPx) * 100;
-    // The panel's fixed corner is bottom-left (`left`/`bottom` in `floating-chart.tsx`), so the
-    // handle sits top-right: dragging up is a negative `clientY` delta but must *grow* the
-    // height, hence the sign flip here and nowhere else.
-    const dyPercent = ((startRef.current.y - event.clientY) / size.heightPx) * 100;
+    // The panel's fixed corner is top-left (`left`/`top` in `floating-chart.tsx`), so the handle
+    // sits bottom-right and both axes now read straight off the pointer: down and right grow.
+    // While the panel hung from the bottom edge this line carried a sign flip, because dragging
+    // *up* had to grow the height — the anchor move is what removed it.
+    const dyPercent = ((event.clientY - startRef.current.y) / size.heightPx) * 100;
     const proposed: ChartSplitPercent = {
       width: startRef.current.split.width + dxPercent,
       height: startRef.current.split.height + dyPercent
@@ -153,10 +154,12 @@ export function useResizableChartSplit({
       case "ArrowRight":
         dWidth = KEY_STEP_PERCENT;
         break;
-      case "ArrowUp":
+      // Same direction as the drag: the free edge is the bottom one, so Down grows and Up
+      // shrinks. This is the reverse of what it was when the panel hung from the bottom.
+      case "ArrowDown":
         dHeight = KEY_STEP_PERCENT;
         break;
-      case "ArrowDown":
+      case "ArrowUp":
         dHeight = -KEY_STEP_PERCENT;
         break;
       case "Enter":

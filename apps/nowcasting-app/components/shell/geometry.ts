@@ -16,7 +16,7 @@
 export const RAIL_WIDTH_PX = 256;
 
 /** Breathing room between a floating pane and the edges of the inset it lives in. */
-export const STAGE_GUTTER_PX = 14;
+export const STAGE_GUTTER_PX = 10;
 
 /** Width the map control cluster is laid out around — see `map-control-dock.tsx`. */
 export const MAP_CONTROL_WIDTH_PX = 260;
@@ -33,36 +33,25 @@ export const MAP_CONTROL_WIDTH_PX = 260;
  * into `map-layer-controls.tsx`, which now mounts *inside* `map-encoding-controls.tsx` behind
  * a "more settings" disclosure. There is only one top-right box now, not two stacked ones, so
  * the guess-another-file's-height problem `MAP_TOP_ROW_RESERVE_PX` existed to paper over is
- * gone — the dock anchors at `STAGE_GUTTER_PX` from the top like it does from the right, and
- * only its own height needs reserving.
- */
-
-/**
- * Typical maximum rendered height of the encoding panel (`map-encoding-controls.tsx`), sized
- * to its *expanded* state ("more map settings" open) rather than the collapsed default.
+ * gone — the dock anchors at `STAGE_GUTTER_PX` from the top like it does from the right.
  *
- * Track L (this file's resize followup) narrowed where this constant actually applies: see
- * `overlapsControlDock` below. It used to cap the chart's height unconditionally, which is the
- * bug Brad filed against `CHART_SPLIT.selected` — a chart at 54% width never reaches under a
- * 260px dock pinned to the right edge on any normal-width screen, so there was nothing to clamp
- * against and the 90% height seed was being discarded for no reason. Reserving this much height
- * is only correct for the (still real, still worth guarding) case of a *wide* chart — a large
- * drag, or `comparingSelected`'s combination — whose right edge genuinely reaches the dock's
- * column. A live measurement of the dock's actual (usually collapsed, much shorter) height
- * would tighten this further, but `map-control-dock.tsx` is not owned by this track and
- * publishing a measurement from it is a change to that file — see the Track L followup notes
- * for what's needed if this is worth doing.
+ * **Then the chart moved to the top edge too**, which turns the dock constraint from a vertical
+ * one into a horizontal one.
+ *
+ * While the chart anchored bottom-left it only met the top-right dock when a *tall* chart grew
+ * up into the dock's column, so the clamp reserved height (`MAP_CONTROL_HEIGHT_RESERVE_PX` /
+ * `CHART_TOP_CLEARANCE_PX`, both now gone) and only when `overlapsControlDock` said the two
+ * x-ranges intersected. Anchored top-left the chart shares the dock's row from its first pixel:
+ * there is no height at which they miss each other, so no height reserve can express the rule.
+ * What keeps them apart is the chart's *width* stopping short of the dock's column — see
+ * `maxChartWidthPx` — after which height is free all the way to the bottom gutter.
+ *
+ * Guessing the dock's rendered height is also gone with it, which was the weakest part of the
+ * old clamp (a constant sized by eye to the *expanded* panel, capping the chart even when the
+ * panel was collapsed and much shorter). The dock's width is a real published constant
+ * (`MAP_CONTROL_WIDTH_PX`, which `map-control-dock.tsx` actually renders at), so the new rule
+ * needs no estimate at all.
  */
-export const MAP_CONTROL_HEIGHT_RESERVE_PX = 350;
-
-/**
- * Vertical space the floating chart must clear at the top of the stage *when it overlaps the
- * dock's column* — the encoding panel's own height plus a gutter. Exported for anything that
- * wants the old unconditional figure (nothing in this codebase does any more); `clampChartSplit`
- * is what actually applies it, and only when `overlapsControlDock` says the two panes' x-ranges
- * intersect.
- */
-export const CHART_TOP_CLEARANCE_PX = MAP_CONTROL_HEIGHT_RESERVE_PX + STAGE_GUTTER_PX;
 
 /** Floor on the chart's rendered size, so a drag cannot shrink it to an unreadable sliver. */
 export const MIN_CHART_WIDTH_PX = 320;
@@ -143,29 +132,31 @@ const clampNumber = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
 
 /**
- * Whether a chart of the given rendered width would reach under the map control dock's column.
+ * The widest the chart may render before its right edge reaches the map control dock's column.
  *
  * The dock is pinned top-right, `STAGE_GUTTER_PX` in from both edges and `MAP_CONTROL_WIDTH_PX`
- * wide (`map-control-dock.tsx`); the chart grows from the opposite corner (`floating-chart.tsx`
- * anchors it `left`/`bottom`). Their vertical ranges only matter to each other when their
- * horizontal ranges also overlap — a narrow chart can grow to the very top of the stage without
- * ever passing under the dock, whatever its height. This is what `clampChartSplit` uses to
- * decide whether `MAP_CONTROL_HEIGHT_RESERVE_PX` applies at all.
+ * wide (`map-control-dock.tsx`); the chart is pinned top-*left*, `STAGE_GUTTER_PX` in from its
+ * own two edges (`floating-chart.tsx`). They occupy the same band of the stage, so the only
+ * thing separating them is horizontal: the chart may run from its left gutter up to a gutter's
+ * clearance short of the dock's left edge.
+ *
+ * This can come out smaller than `MIN_CHART_WIDTH_PX` on a genuinely tiny stage. It is returned
+ * as measured rather than floored here — `clampChartSplit` resolves that collision the same way
+ * it resolves every other min/max inversion, by letting the minimum win.
  */
-export function overlapsControlDock(chartWidthPx: number, containerWidthPx: number): boolean {
-  const chartRightEdgePx = STAGE_GUTTER_PX + chartWidthPx;
+export function maxChartWidthPx(containerWidthPx: number): number {
   const dockLeftEdgePx = containerWidthPx - STAGE_GUTTER_PX - MAP_CONTROL_WIDTH_PX;
-  return chartRightEdgePx > dockLeftEdgePx;
+  return dockLeftEdgePx - STAGE_GUTTER_PX - STAGE_GUTTER_PX;
 }
 
 /**
  * Fit a proposed split inside the inset: never smaller than `MIN_CHART_*_PX`, never wider than
- * the inset's own gutters allow, and never taller than the space above the map control dock
- * *when the two would actually overlap* (`overlapsControlDock`) — otherwise only the gutter.
+ * `maxChartWidthPx` allows (short of the map control dock's column), never taller than the
+ * inset's own gutters allow.
  *
- * Width is clamped first and height second, off the clamped width, so a diagonal drag that
- * crosses the overlap boundary mid-gesture reads the correct regime rather than the one it
- * started in.
+ * Height no longer depends on width. It did while the chart anchored bottom-left and could grow
+ * up into the dock; top-anchored, width is the whole of the dock constraint and height only has
+ * to clear the bottom gutter — see this file's note above `maxChartWidthPx`.
  *
  * Container dimensions of `0` (not yet measured — first paint, before a `ResizeObserver` has
  * reported) are treated as "unknown" and the split passes through unclamped, matching how
@@ -173,27 +164,21 @@ export function overlapsControlDock(chartWidthPx: number, containerWidthPx: numb
  */
 export function clampChartSplit(
   split: ChartSplitPercent,
-  container: ChartContainerSizePx,
-  controlPanelReservePx: number = MAP_CONTROL_HEIGHT_RESERVE_PX
+  container: ChartContainerSizePx
 ): ChartSplitPercent {
   const { widthPx, heightPx } = container;
   if (widthPx <= 0 || heightPx <= 0) return split;
 
   const minWidthPercent = (MIN_CHART_WIDTH_PX / widthPx) * 100;
-  const maxWidthPercent = ((widthPx - STAGE_GUTTER_PX * 2) / widthPx) * 100;
+  const maxWidthPercent = (maxChartWidthPx(widthPx) / widthPx) * 100;
   const width = clampNumber(
     split.width,
     minWidthPercent,
     Math.max(minWidthPercent, maxWidthPercent)
   );
 
-  const chartWidthPx = (width / 100) * widthPx;
-  const topReservePx = overlapsControlDock(chartWidthPx, widthPx)
-    ? controlPanelReservePx + STAGE_GUTTER_PX
-    : STAGE_GUTTER_PX;
-
   const minHeightPercent = (MIN_CHART_HEIGHT_PX / heightPx) * 100;
-  const maxHeightPercent = ((heightPx - topReservePx) / heightPx) * 100;
+  const maxHeightPercent = ((heightPx - STAGE_GUTTER_PX * 2) / heightPx) * 100;
   const height = clampNumber(
     split.height,
     minHeightPercent,

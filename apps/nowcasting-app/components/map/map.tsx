@@ -166,10 +166,14 @@ const Map: FC<IMap> = ({
       Math.max(acc[2], box[2]),
       Math.max(acc[3], box[3])
     ]);
-    // Frame the countries in the *visible* map, not the whole canvas. The floating chart covers
-    // the lower left and the control panel the upper right, so centring on the canvas pushed GB
-    // under the chart and left the right-hand side empty. Padding each side by what actually
-    // covers it centres the countries in the gap between them instead.
+    // Frame the countries in the *visible* map, not the whole canvas. The floating chart and the
+    // control panel cover the left and right of the stage respectively, so centring on the canvas
+    // pushed GB under the chart and left the right-hand side empty. Padding each side by what
+    // actually covers it centres the countries in the gap between them instead.
+    //
+    // Only their widths are read, which is why the chart moving from the bottom edge to the top
+    // did not change this: both panes span enough of the stage's height that the horizontal gap
+    // between them is the framing constraint either way.
     //
     // Measured rather than derived from `CHART_SPLIT`: the chart's size is the user's since the
     // drag-resize landed, so there is no constant left to read. This runs only when the enabled

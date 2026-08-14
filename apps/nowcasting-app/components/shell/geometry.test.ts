@@ -8,15 +8,15 @@ import {
   STAGE_GUTTER_PX,
   chartModeFor,
   clampChartSplit,
-  overlapsControlDock,
+  maxChartWidthPx,
   resolveChartSplit
 } from "./geometry";
 
 // The pure oracle for OPEN 5's override: seeding from `CHART_SPLIT`, per-mode isolation, mode
-// switching restoring the right remembered size, and clamping (min, max, and the overlap-aware
-// version of the control-panel reserve that fixed the `selected` height bug). Drag feel and
-// frame timing live in `use-resizable-chart-split.ts` and are not tested here — nothing there
-// is a pure function of its inputs.
+// switching restoring the right remembered size, and clamping (min, max, and the width cap that
+// keeps the top-anchored chart clear of the top-right control dock). Drag feel and frame timing
+// live in `use-resizable-chart-split.ts` and are not tested here — nothing there is a pure
+// function of its inputs.
 
 describe("chartModeFor", () => {
   it("is plain with neither comparison nor a selection", () => {
@@ -65,18 +65,19 @@ describe("resolveChartSplit", () => {
   });
 });
 
-describe("overlapsControlDock", () => {
+describe("maxChartWidthPx", () => {
   const containerWidthPx = 1400;
   const dockLeftEdgePx = containerWidthPx - STAGE_GUTTER_PX - MAP_CONTROL_WIDTH_PX;
 
-  it("does not overlap when the chart's right edge stays left of the dock", () => {
-    const chartWidthPx = dockLeftEdgePx - STAGE_GUTTER_PX - 1;
-    expect(overlapsControlDock(chartWidthPx, containerWidthPx)).toBe(false);
+  it("stops a gutter short of the dock's left edge, from a gutter's inset", () => {
+    // The chart starts at `STAGE_GUTTER_PX` from the left, so its right edge lands at
+    // `STAGE_GUTTER_PX + maxChartWidthPx` — which must clear the dock by one gutter.
+    const chartRightEdgePx = STAGE_GUTTER_PX + maxChartWidthPx(containerWidthPx);
+    expect(chartRightEdgePx).toBe(dockLeftEdgePx - STAGE_GUTTER_PX);
   });
 
-  it("overlaps once the chart's right edge reaches the dock's column", () => {
-    const chartWidthPx = dockLeftEdgePx - STAGE_GUTTER_PX + 1;
-    expect(overlapsControlDock(chartWidthPx, containerWidthPx)).toBe(true);
+  it("shrinks with the container, since the dock is pinned to its right edge", () => {
+    expect(maxChartWidthPx(1000)).toBe(maxChartWidthPx(1400) - 400);
   });
 });
 
@@ -97,33 +98,36 @@ describe("clampChartSplit", () => {
     expect(clamped.height).toBeCloseTo((MIN_CHART_HEIGHT_PX / wideContainer.heightPx) * 100);
   });
 
-  it("caps width at the inset's gutters, regardless of the control dock", () => {
+  it("caps width short of the control dock's column", () => {
     const huge = { width: 500, height: 10 };
     const clamped = clampChartSplit(huge, wideContainer);
     const expectedMaxWidthPercent =
-      ((wideContainer.widthPx - STAGE_GUTTER_PX * 2) / wideContainer.widthPx) * 100;
+      (maxChartWidthPx(wideContainer.widthPx) / wideContainer.widthPx) * 100;
     expect(clamped.width).toBeCloseTo(expectedMaxWidthPercent);
+    // And that cap is strictly tighter than the bare gutters would give — the dock's column is
+    // what is being reserved, so the chart may not simply span the inset.
+    const gutteredWidthPercent =
+      ((wideContainer.widthPx - STAGE_GUTTER_PX * 2) / wideContainer.widthPx) * 100;
+    expect(clamped.width).toBeLessThan(gutteredWidthPercent);
   });
 
-  it("reaches CHART_SPLIT.selected's 90% height on a normal-width stage — the bug this fixes", () => {
-    // Regression: `selected` used to be clamped by a height cap applied unconditionally,
-    // discarding the 90% seed even though a 54%-wide chart never reaches the dock's column on
-    // any realistic screen. It must be fully reachable here.
+  it("reaches CHART_SPLIT.selected's 90% height on a normal-width stage", () => {
+    // Regression from when the clamp reserved height for the dock unconditionally, discarding
+    // the 90% seed. Top-anchored the dock costs width, never height, so this is now true of any
+    // seed height at all — the panel runs to the bottom gutter whatever the dock is doing.
     const clamped = clampChartSplit(CHART_SPLIT.selected, wideContainer);
     expect(clamped).toEqual(CHART_SPLIT.selected);
   });
 
-  it("reserves height for the control dock once the chart's width actually overlaps it", () => {
-    // A wide, short container where the seed's width does reach under the dock.
-    const narrowerContainer = { widthPx: 700, heightPx: 900 };
-    const wide = { width: 90, height: 95 };
-    const controlPanelReservePx = 350;
-    const clamped = clampChartSplit(wide, narrowerContainer, controlPanelReservePx);
+  it("caps height only at the bottom gutter, whatever the chart's width", () => {
+    const tall = { width: 90, height: 99.9 };
     const expectedMaxHeightPercent =
-      ((narrowerContainer.heightPx - (controlPanelReservePx + STAGE_GUTTER_PX)) /
-        narrowerContainer.heightPx) *
-      100;
-    expect(clamped.height).toBeCloseTo(expectedMaxHeightPercent);
+      ((wideContainer.heightPx - STAGE_GUTTER_PX * 2) / wideContainer.heightPx) * 100;
+    expect(clampChartSplit(tall, wideContainer).height).toBeCloseTo(expectedMaxHeightPercent);
+    // A narrow chart on the same stage gets exactly the same height ceiling: width and height
+    // are independent now, which is the whole simplification the top anchor bought.
+    const narrow = { width: 30, height: 99.9 };
+    expect(clampChartSplit(narrow, wideContainer).height).toBeCloseTo(expectedMaxHeightPercent);
   });
 
   it("never lets the maximum fall below the minimum on a very small container", () => {

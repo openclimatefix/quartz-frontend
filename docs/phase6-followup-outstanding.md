@@ -25,6 +25,17 @@ pre-warm cache not updating properly... we'll need to look at that soon."
 `COUNTRY_CONFIG` entry plus geo assets plus an Auth0 role. Track K's notes list exactly what a new
 country must supply.
 
+**The narrow (`<lg`) stage needs designing, not patching.** Raised 2026-08-14, while moving the
+floating chart from the bottom edge of the stage to the top. Wide layouts are fine — the chart caps
+its width short of the map control dock and grows downward. Narrow is not: the chart is full width
+at its seed height, so the map it is a readout *of* is left as a strip, and Brad's read is that
+this "covers far too much for the map" and "needs specific rules and relationships with other
+elements (and user controls) to work on smaller screens." That is a stage design — how chart, map
+control dock and display rail give way to each other, and what the user gets to drive it with —
+not an anchor tweak. **In the meantime** `floating-chart.tsx` keeps the *bottom* anchor below `lg`,
+which does nothing except stop the chart covering the top-right control dock; it is labelled in
+that file as a holding position. Do not build on it.
+
 ## 2. Decisions Brad has not made
 
 - **Does `/sites` get a footer?** It came up twice today. It has no scrub track, no `now`, no
