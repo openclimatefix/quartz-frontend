@@ -1,5 +1,9 @@
 import { useEffect, useRef } from "react";
-import useGlobalState, { focusAndSelectRegions, useCountryState } from "../helpers/globalState";
+import useGlobalState, {
+  focusAndSelectRegions,
+  setCountryState,
+  useCountryState
+} from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
 import { PointLike } from "mapbox-gl";
 import {
@@ -204,7 +208,8 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
                   newSelectedMapRegionIds.push(id);
                 }
               });
-              setClickedMapRegionIds(newSelectedMapRegionIds);
+              // Named country, not the hook setter — see the note on the plain-click branch.
+              setCountryState("clickedMapRegionIds", newSelectedMapRegionIds, featureCountry);
             } else {
               console.log("no features clicked");
             }
@@ -223,7 +228,26 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
               ids = [];
             }
             setMapFilterSelectedIds(map, featureCountry, ids);
-            setSelectedMapRegionIds(ids);
+            // **`setCountryState` with the country named, not `useCountryState`'s setter.**
+            //
+            // This handler is registered once (`isEventRegistertedRef`, deps `[map, isMapReady]`)
+            // and so closes over that render's values for the whole session — which is why
+            // `focusedCountry` and `clickedMapRegionIds` are read through refs above. The hook
+            // *setters* have the same problem and do not look like it: `useCountryState` memoises
+            // its setter on `[setRecord, focusedCountry, key]` and writes through
+            // `writeCountryScoped(previous, focusedCountry, next)`, so the one captured here
+            // writes to whichever country was focused at registration, for ever.
+            //
+            // The failure was silent and looked like three unrelated faults: the clicked country
+            // never selected (its slice was never written), a country nobody had clicked
+            // accumulated a selection, and the outline flashed on and vanished — the direct
+            // `setFilter` above painted it, then the effect that re-derives the filter from
+            // `selectedMapRegionIds` found that state unchanged and cleared it again.
+            //
+            // `featureCountry` is the click's own answer to "whose region is this", and by here
+            // it always equals the focused country (the cross-country case returned above), so
+            // naming it costs nothing and cannot go stale.
+            setCountryState("selectedMapRegionIds", ids, featureCountry);
           }
         }
       });
