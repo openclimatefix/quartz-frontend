@@ -8,7 +8,13 @@ import {
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import { useGspAggregateData, useGspRegionData, useGspRegionNames } from "./use-gsp-region-data";
-import { useCurrentAggregationLevel, useFocusedCountry } from "../../../hooks/data";
+import {
+  useAggregationLevels,
+  useCurrentAggregationLevel,
+  useFocusedCountry
+} from "../../../hooks/data";
+import { getCountryConfig } from "../../../config/countries";
+import { formatRegionLabel } from "../../../lib/domain/region-label";
 import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
 import { groupRegionNames } from "../../helpers/data";
 import useGlobalState, { useCountryState } from "../../helpers/globalState";
@@ -18,6 +24,17 @@ import React, { FC, useMemo } from "react";
 import { getTicks } from "../../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../../constant";
 import type { TimeSeries } from "../../../lib/domain/types";
+
+/**
+ * Plural of a region-type label, for "3 GSPs selected" / "3 Provinces selected".
+ *
+ * Naive on purpose — an `s` unless the label already ends in one. The labels this ever sees
+ * come from `config/countries.ts` or the API manifest and are short nouns ("GSP", "Province",
+ * "Zone"); a country whose label needs real inflection should carry the plural in the registry
+ * rather than have a rule guessed for it here.
+ */
+const pluralise = (label: string): string =>
+  label.length === 0 || label.endsWith("s") ? label : `${label}s`;
 
 /**
  * The latest point that actually carries a reading. Mirrors `forecast-header/index.tsx`'s
@@ -92,6 +109,31 @@ const GspPvRemixChart: FC<{
   const level = useCurrentAggregationLevel();
   const groupings = useLevelGroupings(level);
 
+  /**
+   * The finest level a country actually has regions at — GB's GSP, NL's province — whatever
+   * level is on screen right now. It names the national sum ("National GSP Sum") and pluralises
+   * a multi-select, both of which are statements about what is being summed rather than about
+   * the current view. `level > 0` excludes national (level 0 by construction) without needing
+   * to match its name, and `!derived` excludes GB's client-side DNO and zone groupings.
+   */
+  const levels = useAggregationLevels();
+  const regionLevelLabel = useMemo(() => {
+    const finest = levels
+      .filter((candidate) => !candidate.derived && candidate.level > 0)
+      .sort((a, b) => b.level - a.level)[0];
+    return finest?.label ?? "";
+  }, [levels]);
+
+  /**
+   * How this level's individual region names should be cased — declared per region type in the
+   * registry, because nothing can tell GB's `citr_1` from NL's `noord-brabant` by looking. A
+   * derived level has no region type of its own (it selects groups), so it never has a style.
+   */
+  const regionNameStyle = useMemo(() => {
+    if (!level || level.derived) return undefined;
+    return getCountryConfig(focusedCountry)?.geo[level.regionType]?.regionNameStyle;
+  }, [level, focusedCountry]);
+
   const isGroupSelection = !isSingleGsp && !!level?.derived;
   const groupName = isGroupSelection ? selectedRegions[0] ?? null : null;
   const groupRegions = useMemo(
@@ -113,9 +155,21 @@ const GspPvRemixChart: FC<{
         ? { regionNames: groupRegions, groupName }
         : {
             regionNames: multiSelectNames,
-            groupName: multiSelectNames ? `${selectedRegions.length} GSPs` : null
+            // Names the rolled-up series internally; not displayed (the title is built below).
+            // Off the level's label all the same, so a debug read of the series does not claim
+            // an NL province rollup is a GSP one.
+            groupName: multiSelectNames
+              ? `${selectedRegions.length} ${pluralise(regionLevelLabel)}`
+              : null
           },
-    [isGroupSelection, groupRegions, groupName, multiSelectNames, selectedRegions.length]
+    [
+      isGroupSelection,
+      groupRegions,
+      groupName,
+      multiSelectNames,
+      selectedRegions.length,
+      regionLevelLabel
+    ]
   );
 
   const gspAggregateData = useGspAggregateData(selection.regionNames, selection.groupName);
@@ -141,23 +195,52 @@ const GspPvRemixChart: FC<{
     ? gspRegionData.isLoading || gspRegionData.hasError
     : gspAggregateData.isLoading || gspAggregateData.hasError;
 
+  /**
+   * The title, off the level's own label rather than off the string `"gsp"`.
+   *
+   * Every branch of this ladder used to name GB: the single-region case required
+   * `nationalAggregationLevel === "gsp"`, the multi-select hardcoded "GSPs", and the national
+   * sum hardcoded "National GSP Sum". NL fell through all of it to `String(selectedRegions[0])`
+   * — the raw Mapbox feature id, lowercased for the boundary join, so a selected province
+   * titled the chart "noord-brabant" and a multi-select titled it after whichever one was
+   * clicked first.
+   *
+   * `regionLevelLabel` is the finest *real* level's label — "GSP" for GB, "Province" for NL —
+   * which reproduces GB's existing copy exactly ("National GSP Sum", "3 GSPs selected") while
+   * being right for any country. The casing of an individual region's name is a separate
+   * question the registry answers per region type; see `formatRegionLabel`.
+   */
   let title: string;
   let selectedGSPNames: string[] = [];
   if (isSingleGsp) {
-    title = gspRegionData.region?.label || String(selectedRegions[0]);
-  } else if (nationalAggregationLevel === "gsp" && selectedRegions.length > 1) {
-    // Was `${nationalAggregationLevel}s selected` off the enum's "GSP" value ("GSPs
-    // selected"); the region-type name is lowercase now, so this is hardcoded to keep the
-    // same visible copy rather than silently becoming "gsps selected".
-    title = `${selectedRegions.length} GSPs selected`;
+    title = formatRegionLabel(
+      gspRegionData.region?.label || String(selectedRegions[0]),
+      regionNameStyle
+    );
+  } else if (isGroupSelection) {
+    // A derived level selects a named group — "UKPN (East)", "NE Scotland". Those names come
+    // from the grouping file already written the way they should read, so they are never put
+    // through `formatRegionLabel`: title-casing one would give "Ukpn (East)".
+    title = groupName || "";
+  } else if (nationalAggregationLevel === "national") {
+    title = `National ${regionLevelLabel} Sum`;
+  } else if (selectedRegions.length === 1) {
+    // A single region at a level this component has no dedicated per-region path for (NL's
+    // province). The rollup path is already resolving its label, so there is nothing to fetch.
+    title = formatRegionLabel(
+      gspAggregateData.memberLabels[0] || String(selectedRegions[0]),
+      regionNameStyle
+    );
+  } else if (selectedRegions.length > 1) {
+    title = `${selectedRegions.length} ${pluralise(regionLevelLabel)} selected`;
     // Per-member display names for the tooltip, resolved inside `useGspAggregateData` from the
     // `useRegions` data it already holds — no extra request. Labels ("City Road"), never the
     // raw region names (`citr_1`).
-    selectedGSPNames = gspAggregateData.memberLabels;
-  } else if (nationalAggregationLevel === "national") {
-    title = "National GSP Sum";
+    selectedGSPNames = gspAggregateData.memberLabels.map((label) =>
+      formatRegionLabel(label, regionNameStyle)
+    );
   } else {
-    title = groupName || String(selectedRegions[0] ?? "");
+    title = "";
   }
 
   const latestGeneration = latestReading(activePrimaryGeneration);

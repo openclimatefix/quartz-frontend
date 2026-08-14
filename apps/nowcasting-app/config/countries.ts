@@ -1,3 +1,5 @@
+import type { RegionNameStyle } from "../lib/domain/region-label";
+
 // The static half of a country's configuration.
 //
 // The split is deliberate and the rule is one-way: anything `GET /countries` can tell us
@@ -52,6 +54,20 @@ export type GeoLayerConfig = {
    * `fallbackLabel` derivation first ("Gsp") and then swaps — which is what this avoids.
    */
   label?: string;
+  /**
+   * How this region type's *individual region names* are written for display.
+   *
+   * `Region.label` comes from the API's `metadata.full_name`, falling back to the raw `name`.
+   * The fallback is right for a region type whose names are codes — GB's `citr_1` is not a
+   * word, and casing it produces "Citr_1" rather than English — and wrong for one whose names
+   * are already the English, served lowercased because that is the boundary join's key. NL's
+   * provinces are the latter: `noord-brabant` is a proper noun the API happens to lowercase.
+   *
+   * Nothing can distinguish those two by inspection, which is why it is declared here rather
+   * than guessed at the point of display. Omitted means `"raw"`, so this is invisible to every
+   * region type that does not opt in. See `lib/domain/region-label.ts`.
+   */
+  regionNameStyle?: RegionNameStyle;
   /** Map zoom band this region type occupies. See `minZoom`/`maxZoom` note below. */
   minZoom?: number;
   maxZoom?: number;
@@ -447,6 +463,10 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         url: "/geo/nl/province.json",
         joinProperty: "name",
         joinTransform: "lowercase",
+        // v1 serves these names lowercased ("noord-brabant") and supplies no `full_name`, so
+        // `Region.label` falls back to the raw name and a province reached the chart title in
+        // lower case. They are proper nouns, unlike GB's GSP codes — hence the opt-in.
+        regionNameStyle: "titleCase",
         minZoom: 6,
         maxZoom: 14
       }
