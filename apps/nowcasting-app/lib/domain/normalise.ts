@@ -42,14 +42,44 @@ type GenerationSnapshot = components["schemas"]["GenerationSnapshot"];
 const kwToMw = (kw: number | null | undefined): PowerMw =>
   kw === null || kw === undefined ? null : kw / 1000;
 
-/** As `kwToMw`, but for a plevels object (`{"10": kW, "90": kW}`). `undefined` in -> `undefined` out, so an absent `plevels_kW` stays absent rather than becoming `{}`. */
+/**
+ * Strips v1's `p` prefix from a plevel key: `p10` -> `10`, `p2` -> `2`.
+ *
+ * Anchored and requiring a digit after the `p`, so it only ever removes the wire's prefix and
+ * could not eat the first character of some other key shape.
+ */
+const PLEVEL_PREFIX = /^p(?=\d)/;
+
+/**
+ * **The wire says `p10`; the canonical model says `10`** — see `PlevelsMw`, which documents the
+ * key as "the wire's plevel name" and means the bare level. This is where the two are reconciled,
+ * and it was missing: keys went through untouched, so every consumer looked up a key that was
+ * never there.
+ *
+ * It failed silently in both places that read them, because both are written to tolerate a
+ * partial payload — an absent band is a legitimate state (`getAvailablePLevels` filters to the
+ * pairs actually present, and the CSV writes `null` for a missing one), so "every band absent"
+ * looked exactly like "this forecast has no plevels" rather than like a bug. The chart drew no
+ * confidence bands however they were toggled, and the CSV's p-level columns came out empty.
+ *
+ * The unit tests could not catch it: they build `plevelsMw` by hand in the shape the consumers
+ * assume, so they agreed with each other about a spelling neither had checked against a real
+ * payload. `normalise.fixtures.test.ts` is where that gap is now closed, against the captured
+ * `gb-national-forecast.json`.
+ *
+ * Both spellings are accepted rather than only the current one: a bare-numeric key passes
+ * through unchanged, so this stays correct if the API drops the prefix later.
+ *
+ * As `kwToMw` otherwise — `undefined` in -> `undefined` out, so an absent `plevels_kW` stays
+ * absent rather than becoming `{}`.
+ */
 const normalisePlevels = (
   plevels: Record<string, number> | null | undefined
 ): PlevelsMw | undefined => {
   if (plevels === null || plevels === undefined) return undefined;
   const out: PlevelsMw = {};
   for (const [key, value] of Object.entries(plevels)) {
-    out[key] = kwToMw(value);
+    out[key.replace(PLEVEL_PREFIX, "")] = kwToMw(value);
   }
   return out;
 };

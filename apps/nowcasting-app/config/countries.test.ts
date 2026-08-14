@@ -117,15 +117,24 @@ describe("the national chart's series list", () => {
   // The v0 -> v1 model mapping, pinned. Every one of these existed as a hardcoded fetch in
   // pages/index.tsx; if a name drifts, the line silently disappears rather than erroring,
   // because an unknown model is the API's problem and the chart just draws nothing.
-  test("GB charts the same six models v0 did, under the v1 names", () => {
+  test("GB charts the blend and the three single-input models, under the v1 names", () => {
+    // Four, not v0's six: `pvnet_day_ahead` and `pvnet_intraday` were fetched but had neither a
+    // legend entry nor a line to draw them on, and they are most of what the blend is made of.
+    // Every key here must have both, which is what stops this list growing dead entries again.
     expect(COUNTRY_CONFIG.GB.nationalChartSeries.map((s) => [s.key, s.model])).toEqual([
       ["FORECAST", "blend"],
       ["INTRADAY_ECMWF_ONLY", "pvnet_ecmwf"],
-      ["PVNET_DAY_AHEAD", "pvnet_day_ahead"],
-      ["PVNET_INTRADAY", "pvnet_intraday"],
       ["MET_OFFICE_ONLY", "pvnet_ukv"],
       ["SAT_ONLY", "pvnet_sat"]
     ]);
+  });
+
+  test("every charted series past the primary is offered in the rail", () => {
+    // The rail renders `nationalChartSeries.slice(1).filter((s) => !!s.legend)`
+    // (`display-panel.tsx`), so a series without a `legend` block is fetched on every load and
+    // can never be shown or turned off. That is exactly how the two removed above went unnoticed.
+    const undisplayable = COUNTRY_CONFIG.GB.nationalChartSeries.slice(1).filter((s) => !s.legend);
+    expect(undisplayable).toEqual([]);
   });
 
   // The point of the whole exercise: the two-line-plus-five-comparisons chart is a GB fact.

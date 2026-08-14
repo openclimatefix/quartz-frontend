@@ -214,6 +214,53 @@ describe("normaliseForecast", () => {
     });
   });
 
+  /**
+   * The wire spells plevel keys `p10`; `PlevelsMw` is keyed by the bare level.
+   *
+   * The case above passes `{ "10": … }`, which is the shape the *consumers* assume — and every
+   * other plevel test in this repo does the same, so they all agreed with each other about a
+   * spelling none of them had checked against a real payload. `gb-national-forecast.json` (a
+   * capture, not a hand-written fixture) sends `p10`/`p90`, those keys reached the chart and the
+   * CSV untouched, and both looked up a key that was never there. Neither reports a missing band
+   * as an error — an absent plevel is legal — so it read as "this forecast has no plevels".
+   */
+  test("strips the wire's `p` prefix, so the canonical keys are the bare levels", () => {
+    const result = normaliseForecast({
+      region_name: "national_GB",
+      capacity_kW: 15_000_000,
+      values: [
+        {
+          time_utc: "2026-08-05T14:43:00Z",
+          power_kW: 10_500_000,
+          plevels_kW: { p2: 7_000_000, p10: 9_000_000, p90: 12_000_000, p98: 13_000_000 }
+        }
+      ]
+    });
+
+    expect(result.values[0].plevelsMw).toEqual({
+      "2": 7_000,
+      "10": 9_000,
+      "90": 12_000,
+      "98": 13_000
+    });
+  });
+
+  test("leaves an already-bare key alone, so dropping the prefix upstream is not a break", () => {
+    const result = normaliseForecast({
+      region_name: "national_GB",
+      capacity_kW: 15_000_000,
+      values: [
+        {
+          time_utc: "2026-08-05T14:43:00Z",
+          power_kW: 10_500_000,
+          plevels_kW: { "10": 9_000_000, p90: 12_000_000 }
+        }
+      ]
+    });
+
+    expect(result.values[0].plevelsMw).toEqual({ "10": 9_000, "90": 12_000 });
+  });
+
   test("null/absent metadata passes through as null, not undefined", () => {
     const result = normaliseForecast({
       region_name: "r1",

@@ -6,7 +6,7 @@
  * What this is for is the two things that are only true if the wiring is genuinely
  * config-driven rather than copy-pasted:
  *
- *  1. **The series list drives the requests.** GB asks for its six configured models, by their
+ *  1. **The series list drives the requests.** GB asks for its four configured models, by their
  *     v1 names, one request each. Nothing is hardcoded in the component.
  *  2. **Country-varying row counts.** Switching to NL yields one forecast request and ONE
  *     generation request, because NL has a single observer. The GB two-line
@@ -162,9 +162,9 @@ const settled = async (view: View, expected: number) => {
 };
 
 describe("the forecast series are driven by the country's config, not by the component", () => {
-  test("GB asks for exactly its six configured models, by their v1 names", async () => {
+  test("GB asks for exactly its four configured models, by their v1 names", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
     const path = "/GB/solar/regions/national/forecast";
     const configured = COUNTRY_CONFIG.GB.nationalChartSeries.map(forecastSeriesModel);
@@ -173,16 +173,18 @@ describe("the forecast series are driven by the country's config, not by the com
   });
 
   // The whole reason the list is curated rather than derived: GB national offers twelve
-  // models and the chart draws six of them.
+  // models and the chart draws four of them. It drew six until `pvnet_day_ahead` and
+  // `pvnet_intraday` were removed — fetched on every load with no legend entry and no line to
+  // draw them on, and close enough to the blend they mostly make up to add nothing.
   test("it does not fan out over every model the manifest offers", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
     const manifestModels = (countriesFixture as any[])
       .find((c) => c.country === "GB")
       .region_types.find((rt: any) => rt.type === "national").forecast_models;
     expect(manifestModels.length).toBe(12);
-    expect(seen("/GB/solar/regions/national/forecast").length).toBe(6);
+    expect(seen("/GB/solar/regions/national/forecast").length).toBe(4);
   });
 
   // v1 has no `trend_adjuster_on`; it exposes `_adjust` model variants instead, and the
@@ -190,7 +192,7 @@ describe("the forecast series are driven by the country's config, not by the com
   // NATIONAL_FORECAST_MODEL_SUFFIX, this and the config test move together.
   test("no request asks for an _adjust variant", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
     for (const model of queryValues("/GB/solar/regions/national/forecast", "model")) {
       expect(model).not.toMatch(/_adjust$/);
     }
@@ -211,7 +213,7 @@ describe("the forecast series are driven by the country's config, not by the com
    */
   test("every national request pins a start, so the past is not cut off", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
     const forecasts = seen("/GB/solar/regions/national/forecast");
     const generation = seen("/GB/solar/regions/national/generation");
@@ -228,7 +230,7 @@ describe("the forecast series are driven by the country's config, not by the com
 
   test("no national request pins an end, so the forward horizon is not clipped", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
     for (const { url } of [
       ...seen("/GB/solar/regions/national/forecast"),
@@ -243,7 +245,7 @@ describe("the forecast series are driven by the country's config, not by the com
   // the indicator's free cache hits back into real requests.
   test("all national requests share one window", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
     const windows = [
       ...seen("/GB/solar/regions/national/forecast"),
@@ -254,9 +256,10 @@ describe("the forecast series are driven by the country's config, not by the com
 
   test("the N-hour series is only fetched when the N-hour view is on", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
+    // One entry per configured series, none of them carrying a horizon.
     expect(queryValues("/GB/solar/regions/national/forecast", "horizon_minutes")).toEqual(
-      new Array(6).fill(null)
+      new Array(COUNTRY_CONFIG.GB.nationalChartSeries.length).fill(null)
     );
   });
 });
@@ -264,7 +267,7 @@ describe("the forecast series are driven by the country's config, not by the com
 describe("observers are per country and there may be exactly one", () => {
   test("GB fetches both of its observers, one request each", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
     expect(queryValues("/GB/solar/regions/national/generation", "observer")).toEqual([
       "pvlive_day_after",
@@ -285,7 +288,7 @@ describe("observers are per country and there may be exactly one", () => {
       expect(seen("/NL/solar/regions/national/generation")).toHaveLength(1);
     });
     expect(queryValues("/NL/solar/regions/national/generation", "observer")).toEqual(["ned_nl"]);
-    // ...and one forecast line, not GB's six.
+    // ...and one forecast line, not GB's four.
     expect(seen("/NL/solar/regions/national/forecast")).toHaveLength(1);
     expect(seen("/GB/solar/regions/national/generation")).toHaveLength(0);
   });
@@ -304,7 +307,7 @@ describe("observers are per country and there may be exactly one", () => {
 describe("the chart no longer carries its own legend", () => {
   test("GB: none of the old chart-legend labels render inside the chart", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
     await waitFor(() => {
       rerender(view);
       expect(screen.queryAllByText("PV Live Estimated")).toHaveLength(0);
@@ -332,12 +335,16 @@ describe("the staleness indicator", () => {
   // would show up here as extra requests rather than as a wrong message.
   test("adopting useLoadingState adds no requests of its own", async () => {
     const view = renderChart();
-    await settled(view, 8);
+    await settled(view, 6);
 
-    // 1 manifest + 6 forecasts + 2 generations. Anything more means a key mismatch.
+    // 1 manifest + one forecast per configured series + 2 generations. Anything more means a
+    // key mismatch. Off the config's own length, so removing a series does not leave this
+    // asserting a count nothing produces any more.
     await waitFor(() => {
       rerender(view);
-      expect(seen("/GB/solar/regions/national/forecast")).toHaveLength(6);
+      expect(seen("/GB/solar/regions/national/forecast")).toHaveLength(
+        COUNTRY_CONFIG.GB.nationalChartSeries.length
+      );
     });
     expect(seen("/GB/solar/regions/national/generation")).toHaveLength(2);
     expect(seen("/countries").length).toBeGreaterThanOrEqual(1);
@@ -346,7 +353,7 @@ describe("the staleness indicator", () => {
   test("it stops showing the loading message once the data has arrived", async () => {
     const view = renderChart();
     expect(screen.queryByText(/Loading initial data/)).not.toBeNull();
-    await settled(view, 8);
+    await settled(view, 6);
     await waitFor(() => {
       rerender(view);
       expect(screen.queryByText(/Loading initial data/)).toBeNull();

@@ -131,6 +131,26 @@ describe("normalise over recorded v1 payloads", () => {
     const withPlevels = result.values.find((v) => v.plevelsMw && Object.keys(v.plevelsMw).length);
     expect(withPlevels).toBeDefined();
     expect(Object.keys(withPlevels!.plevelsMw!)).not.toContain("p50");
+
+    // **The key shape, which is what the chart and the CSV actually index by.** `PlevelsMw` is
+    // documented as keyed by the bare level, and both consumers look up `"10"` / `plevel_10`;
+    // the wire sends `p10`, and for a while the prefix was passed straight through, so every
+    // lookup missed and no confidence band was ever drawn. Nothing failed — an absent band is a
+    // legal state — so this went unseen.
+    //
+    // Note what the `p50` assertion above could *not* do: it is true whether the keys are
+    // `p2, p10, …` or `2, 10, …`, so it agreed with the bug as readily as with the fix. An
+    // assertion that cannot come out differently when the thing is broken is not evidence.
+    const plevelKeys = Object.keys(withPlevels!.plevelsMw!);
+    expect(plevelKeys.every((key) => /^\d+$/.test(key))).toBe(true);
+    expect(plevelKeys.sort((a, b) => Number(a) - Number(b))).toEqual([
+      "2",
+      "10",
+      "25",
+      "75",
+      "90",
+      "98"
+    ]);
   });
 
   test("national generation: observer preserved, values in MW", () => {

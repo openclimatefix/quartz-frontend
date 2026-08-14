@@ -390,8 +390,12 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         label: "ECMWF-only",
         legend: { iconClasses: "text-ocf-teal-500", tooltipInputs: ["ECMWF"] }
       },
-      { key: "PVNET_DAY_AHEAD", model: "pvnet_day_ahead", label: "PVNet Day Ahead" },
-      { key: "PVNET_INTRADAY", model: "pvnet_intraday", label: "PVNet Intraday" },
+      // `pvnet_day_ahead` and `pvnet_intraday` used to sit here, carried over from v0's six.
+      // Neither had a `legend` block (so the rail never offered them) and neither had a `<Line>`
+      // in `remix-line.tsx` (so nothing could draw them) — two requests per national load whose
+      // responses were parsed and discarded. Removed rather than completed, on Brad's call: they
+      // are most of what the blend is made of, so they track the yellow line closely enough that
+      // a reader gains nothing for the extra ink.
       {
         key: "MET_OFFICE_ONLY",
         model: "pvnet_ukv",
