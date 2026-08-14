@@ -1,6 +1,6 @@
 import { describe, expect, it } from "@jest/globals";
 
-import { midnightInstants, selectAxisTicks, tickInstants } from "./ticks";
+import { middayInstants, midnightInstants, selectAxisTicks, tickInstants } from "./ticks";
 
 // A 48-hour window, both ends on a clean UTC day boundary — the shape a real chart/scrubber
 // range has. `jest.globalSetup.ts` pins the process to UTC, so a zone has to be passed
@@ -192,5 +192,48 @@ describe("midnightInstants", () => {
   it("an inverted or empty range produces nothing", () => {
     expect(midnightInstants(END, START, "UTC")).toEqual([]);
     expect(midnightInstants(START, START, "UTC")).toEqual([]);
+  });
+});
+
+// The scrub track's midday ticks — the half-height, centred companion to the midnight hairlines.
+// Same contract as `midnightInstants`, one hour along, so the same three properties are what
+// matter: it agrees with the labelled midday ticks, it is local rather than UTC, and it walks
+// calendar days so DST cannot slide it.
+describe("middayInstants", () => {
+  it("agrees with the midday half of tickInstants' midday-midnight density", () => {
+    const middays = middayInstants(START, END, "UTC");
+    const fromDensity = tickInstants(START, END, "UTC", "midday-midnight").filter(
+      (ms) => new Date(ms).getUTCHours() === 12
+    );
+    expect(middays).toEqual(fromDensity);
+    expect(middays.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-10T12:00:00.000Z",
+      "2026-08-11T12:00:00.000Z"
+    ]);
+  });
+
+  it("reads local midday, not UTC midday — a BST range's 12:00 is 11:00 UTC", () => {
+    const middays = middayInstants(START, END, "Europe/London");
+    expect(middays.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-08-10T11:00:00.000Z", // 10 Aug 12:00 BST
+      "2026-08-11T11:00:00.000Z" // 11 Aug 12:00 BST
+    ]);
+  });
+
+  it("stays on the clock hour across a DST transition", () => {
+    // The 25 Oct 2026 day is 25 real hours long; midday must still be local 12:00, which is GMT
+    // that afternoon rather than sliding an hour with the change.
+    const start = Date.parse("2026-10-24T23:00:00.000Z"); // 25 Oct 00:00 BST
+    const end = Date.parse("2026-10-26T00:00:00.000Z"); // 26 Oct 00:00 GMT
+    const middays = middayInstants(start, end, "Europe/London");
+    // 26 Oct's midday falls past `end` and is correctly left out.
+    expect(middays.map((ms) => new Date(ms).toISOString())).toEqual([
+      "2026-10-25T12:00:00.000Z" // 25 Oct 12:00 GMT — after the clocks went back
+    ]);
+  });
+
+  it("an inverted or empty range produces nothing", () => {
+    expect(middayInstants(END, START, "UTC")).toEqual([]);
+    expect(middayInstants(START, START, "UTC")).toEqual([]);
   });
 });

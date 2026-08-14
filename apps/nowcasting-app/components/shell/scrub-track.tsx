@@ -4,7 +4,12 @@ import { DateTime } from "luxon";
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
-import { midnightInstants, selectAxisTicks, TickDensity } from "../../lib/time/ticks";
+import {
+  middayInstants,
+  midnightInstants,
+  selectAxisTicks,
+  TickDensity
+} from "../../lib/time/ticks";
 import { DEFAULT_LOCALE, formatISODateStringAsZonedTime } from "../helpers/utils";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import useCursorRange from "./use-cursor-range";
@@ -63,9 +68,10 @@ import {
  * way to tell which side you are on. The past is drawn filled; the future is not.
  *
  * **Track O adds three more layers to the strip**, ranked deliberately so the whole thing does
- * not turn to mud: NOW (strongest) > the handle > midnight hairlines > past/future contrast >
- * daylight shading (softest, bottom). Later siblings paint over earlier ones with no `z-index`,
- * so **paint order below is the hierarchy, read top to bottom of the JSX**:
+ * not turn to mud: NOW (strongest) > the handle > midnight hairlines > midday ticks >
+ * past/future contrast > daylight shading (softest, bottom). Later siblings paint over earlier
+ * ones with no `z-index`, so **paint order below is the hierarchy, read top to bottom of the
+ * JSX**:
  *
  * 1. daylight shading — the focused country's forecast-is-positive windows, from
  *    `useCursorRange`'s `daylight` (no separate request, no astronomical calculation);
@@ -73,8 +79,16 @@ import {
  *    rather than a second fill;
  * 3. midnight hairlines — `midnightInstants`, independent of whatever tick density
  *    `TrackTicks` has chosen below, but landing on the same calendar boundaries;
+ * 3b. midday ticks — `middayInstants`, the same density-independent walk. Half a hairline's
+ *    height, vertically centred and dimmer: midday divides a day, midnight separates two, and
+ *    the mark says which it is without needing a label;
  * 4. the handle;
  * 5. NOW, drawn last so it is never covered.
+ *
+ * **The strip is 20px tall**, halved from 40px along with every offset inside it, which is what
+ * sets the footer's height — nothing else in `cursor-readout.tsx`'s row is as tall. The floor is
+ * the zone stack beside it (one `text-2xs` line per enabled country plus UTC), so on a
+ * two-country build the track can shrink a little further before the footer stops following it.
  *
  * **The tethered reading is a sixth thing, layered between 4 and 5, and it is not part of the
  * ranked strip encodings above** — it is text riding above the strip's own box, not a mark on
@@ -206,6 +220,11 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   const midnightFractions = useMemo(() => {
     if (!scale) return [];
     return midnightInstants(scale.startMs, scale.endMs, zone).map((ms) => fractionForMs(ms, scale));
+  }, [scale, zone]);
+
+  const middayFractions = useMemo(() => {
+    if (!scale) return [];
+    return middayInstants(scale.startMs, scale.endMs, zone).map((ms) => fractionForMs(ms, scale));
   }, [scale, zone]);
 
   const daylightBands = useMemo(() => {
@@ -367,11 +386,19 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
 
   // An inert track while the window is unknown. Drawing a handle over a guessed horizon would
   // be a scrubber that is wrong rather than absent, and the footer keeps its height either way.
+  //
+  // "Either way" is now true, which it was not before: this used to be 3px + 16px against a live
+  // track of 40px + a 20px tick row, so the footer grew by ~21px the moment a range arrived. The
+  // two boxes below mirror the live layout exactly — an `h-5` strip with the resting line centred
+  // in it, then an `h-5` stand-in for `TrackTicks` (its `pt-1` plus one `text-2xs`/`text-xs`
+  // line). Halving the track was the moment to make the claim honest rather than re-break it.
   if (!scale || !selectedISOTime) {
     return (
       <div data-testid="scrub-track-idle">
-        <div className="h-[3px] w-full rounded-sm bg-white/10" />
-        <div className="h-4" />
+        <div className="flex h-5 items-center">
+          <div className="h-[3px] w-full rounded-sm bg-white/10" />
+        </div>
+        <div className="h-5" />
       </div>
     );
   }
@@ -407,8 +434,20 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
 
   return (
     <div data-cursor-scrubber="true">
+      {/* **The target is bigger than the drawing, deliberately.** The strip is 20px tall (halved
+          from 40px, along with every offset inside it, so it is the same drawing at half scale
+          rather than the same marks in a shorter box). But the whole strip is what you grab —
+          `onPointerDown` is here, not on the handle — and a 20px-tall target fails WCAG 2.2
+          SC 2.5.8, which asks for 24×24 CSS px. So the interactive box is this element, padded
+          to 28px, and the painted box is the child below at 20px.
+
+          The padding has to live on a wrapper rather than on the strip itself: absolutely
+          positioned children resolve against the *padding* box, so padding here would stretch
+          the `inset-y-0` bands and NOW's `h-full` back to 28px and undo the halving.
+
+          Nothing about the drag maths cares — `instantAt` reads `getBoundingClientRect()` for x
+          only, and `trackRef` stays on the painted strip, whose width is identical. */}
       <div
-        ref={trackRef}
         role="slider"
         tabIndex={0}
         aria-label={`Time cursor, ${cadenceMinutes}-minute steps`}
@@ -417,7 +456,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
         aria-valuenow={slotIndexOf(cursor, scale)}
         aria-valuetext={`${cursorLabel} ${zone}`}
         aria-orientation="horizontal"
-        className="relative h-10 cursor-ew-resize touch-none select-none outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow"
+        className="group cursor-ew-resize touch-none select-none py-1 outline-none"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -429,120 +468,141 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
         onLostPointerCapture={endDrag}
         onKeyDown={onKeyDown}
       >
-        {/* Layer 1 (softest, bottom): daylight — the focused country's forecast > 0 windows. */}
-        {daylightBands.map((band) => (
-          <div
-            key={`${band.startFraction}-${band.endFraction}`}
-            className="pointer-events-none absolute inset-y-0 bg-ocf-yellow/[0.14]"
-            style={{
-              left: `${band.startFraction * 100}%`,
-              width: `${(band.endFraction - band.startFraction) * 100}%`
-            }}
-          />
-        ))}
-        {/* Layer 2: past (observed + forecast) versus future (forecast only). A background
+        <div
+          ref={trackRef}
+          // The focus ring belongs on the drawing, not the padded hit box — focus should outline
+          // the strip the user sees, so it is driven from the focusable parent via `group`.
+          className="relative h-5 group-focus-visible:ring-1 group-focus-visible:ring-ocf-yellow"
+        >
+          {/* Layer 1 (softest, bottom): daylight — the focused country's forecast > 0 windows. */}
+          {daylightBands.map((band) => (
+            <div
+              key={`${band.startFraction}-${band.endFraction}`}
+              className="pointer-events-none absolute inset-y-0 bg-ocf-yellow/[0.14]"
+              style={{
+                left: `${band.startFraction * 100}%`,
+                width: `${(band.endFraction - band.startFraction) * 100}%`
+              }}
+            />
+          ))}
+          {/* Layer 2: past (observed + forecast) versus future (forecast only). A background
             wash across the strip's height rather than a brighter track line — the line version
             was louder than the daylight ground it was supposed to sit above, which inverted the
             hierarchy. The line itself is now one neutral baseline the whole way across. */}
-        {nowFraction !== null && (
+          {nowFraction !== null && (
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 bg-white/[0.05]"
+              style={{ width: `${nowFraction * 100}%` }}
+            />
+          )}
+          <div className="pointer-events-none absolute inset-x-0 top-[9px] h-[2px] rounded-sm bg-white/15" />
+          {/* Layer 3: midnight hairlines — hard calendar edges, agreeing with `TrackTicks`' own
+            midnight labels regardless of which tick density it has chosen. Full height less a
+            2px inset top and bottom. */}
+          {midnightFractions.map((fraction) => (
+            <div
+              key={fraction}
+              className="pointer-events-none absolute top-0.5 h-4 w-px bg-white/20"
+              style={{ left: `${fraction * 100}%` }}
+            />
+          ))}
+          {/* Layer 3b: midday. Half a midnight hairline's height and vertically centred, because
+            midday *divides* a day where midnight *separates* two — a lesser boundary, drawn as
+            a lesser mark. Dimmer as well as shorter (`white/10` against midnight's `white/20`),
+            so it stays below midnight in the strip's ranked hierarchy on both counts and cannot
+            be mistaken for a calendar edge at a glance. It reads as a centred tick on the
+            baseline rather than a rule crossing the whole strip. */}
+          {middayFractions.map((fraction) => (
+            <div
+              key={fraction}
+              className="pointer-events-none absolute top-1.5 h-2 w-px bg-white/10"
+              style={{ left: `${fraction * 100}%` }}
+            />
+          ))}
+          {/* Layer 4: the handle. */}
           <div
-            className="pointer-events-none absolute inset-y-0 left-0 bg-white/[0.05]"
-            style={{ width: `${nowFraction * 100}%` }}
+            // Wider, rounded and ringed rather than a hairline rule: it is a control, and it was
+            // reading as one more vertical line among the midnight hairlines and the now mark.
+            className="pointer-events-none absolute top-[3px] h-3.5 w-[6px] -translate-x-1/2 rounded-full bg-ocf-yellow shadow-[0_0_0_1px_rgba(0,0,0,0.55)]"
+            style={{ left: `${cursorFraction * 100}%` }}
           />
-        )}
-        <div className="pointer-events-none absolute inset-x-0 top-[18px] h-[2px] rounded-sm bg-white/15" />
-        {/* Layer 3: midnight hairlines — hard calendar edges, agreeing with `TrackTicks`' own
-            midnight labels regardless of which tick density it has chosen. */}
-        {midnightFractions.map((fraction) => (
-          <div
-            key={fraction}
-            className="pointer-events-none absolute top-1 h-8 w-px bg-white/20"
-            style={{ left: `${fraction * 100}%` }}
-          />
-        ))}
-        {/* Layer 4: the handle. */}
-        <div
-          // Wider, rounded and ringed rather than a hairline rule: it is a control, and it was
-          // reading as one more vertical line among the midnight hairlines and the now mark.
-          className="pointer-events-none absolute top-[6px] h-7 w-[6px] -translate-x-1/2 rounded-full bg-ocf-yellow shadow-[0_0_0_1px_rgba(0,0,0,0.55)]"
-          style={{ left: `${cursorFraction * 100}%` }}
-        />
-        {/* The tethered reading: the focused country's own time, riding with the handle. Not
+          {/* The tethered reading: the focused country's own time, riding with the handle. Not
             part of the five-layer strip hierarchy above (it sits above the strip's own box,
             not on it) but drawn before NOW so NOW's mark is never covered by it. No transition
             — it must track the handle exactly, pointer-rate, with no lag or smoothing. */}
-        <div
-          // `items-center`, not `items-baseline`: the country code is `text-2xs` and the time
-          // larger, so baseline alignment sat them on a shared baseline with visibly different
-          // cap heights and left the tag looking tilted. Centring aligns what the eye reads.
-          className="pointer-events-none absolute -top-6 flex items-center gap-1 whitespace-nowrap rounded border border-white/10 bg-mapbox-black-700 px-1.5 py-0.5 tabular-nums shadow-lg"
-          style={{ left: `${cursorFraction * 100}%`, transform: `translateX(${labelTranslate})` }}
-        >
-          <span className="text-2xs font-bold uppercase tracking-wider text-ocf-yellow">
-            {focusedCountry}
-          </span>
-          <span className="text-xs font-semibold leading-none text-white">{focusedLocal}</span>
-          {/* The live dot: state, on the thing that moves. Orange rather than red because red
+          <div
+            // `items-center`, not `items-baseline`: the country code is `text-2xs` and the time
+            // larger, so baseline alignment sat them on a shared baseline with visibly different
+            // cap heights and left the tag looking tilted. Centring aligns what the eye reads.
+            className="pointer-events-none absolute -top-6 flex items-center gap-1 whitespace-nowrap rounded border border-white/10 bg-mapbox-black-700 px-1.5 py-0.5 tabular-nums shadow-lg"
+            style={{ left: `${cursorFraction * 100}%`, transform: `translateX(${labelTranslate})` }}
+          >
+            <span className="text-2xs font-bold uppercase tracking-wider text-ocf-yellow">
+              {focusedCountry}
+            </span>
+            <span className="text-xs font-semibold leading-none text-white">{focusedLocal}</span>
+            {/* The live dot: state, on the thing that moves. Orange rather than red because red
               is not in this palette and would read as an alert; small and never a fill, for the
               same reason. `motion-safe` so a slow pulse does not become a permanently animating
               element for anyone who has asked the OS for less motion — they get a static dot,
               which says the same thing. */}
-          {isLive && (
-            <span
-              aria-hidden
-              className="h-1.5 w-1.5 shrink-0 self-center rounded-full bg-ocf-orange motion-safe:animate-pulse"
-            />
-          )}
-        </div>
-        {/* Layer 5 (strongest, top): NOW — full-height, drawn last so nothing covers it. */}
-        {/* Layer 5 (strongest, top): NOW — and the one control that takes you back to it.
+            {isLive && (
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 shrink-0 self-center rounded-full bg-ocf-orange motion-safe:animate-pulse"
+              />
+            )}
+          </div>
+          {/* Layer 5 (strongest, top): NOW — full-height, drawn last so nothing covers it. */}
+          {/* Layer 5 (strongest, top): NOW — and the one control that takes you back to it.
             The *action* is here rather than on the tethered tag because the tag moves: a "take
             me back to now" button that sits wherever your handle happens to be is a target you
             have to hunt for. This one is always in the same place. Bright while following,
             dimmed while adrift — which is also the only honest reading of the mode. */}
-        {nowFraction !== null && (
-          <div
-            className="absolute top-0 h-full w-px bg-white"
-            style={{ left: `${nowFraction * 100}%` }}
-          >
-            {/* Only while adrift. The label is a *destination* — "there is a place to get back
+          {nowFraction !== null && (
+            <div
+              className="absolute top-0 h-full w-px bg-white"
+              style={{ left: `${nowFraction * 100}%` }}
+            >
+              {/* Only while adrift. The label is a *destination* — "there is a place to get back
                 to" — which says nothing when you are already there, and that is exactly when it
                 sits on top of the handle and hides the one thing you would want to grab. It
                 comes back the moment you scrub away, which is when it starts being useful. */}
-            {!isLive && (
-              <button
-                type="button"
-                // The track owns pointerdown for scrubbing; without this, pressing the button
-                // would also begin a drag and the click would land somewhere else entirely.
-                onPointerDown={(event) => event.stopPropagation()}
-                onClick={resetTime}
-                title={
-                  isLive
-                    ? "The cursor is following now"
-                    : "Return to now and follow it as it advances"
-                }
-                aria-label={isLive ? "Following now" : "Return to now"}
-                aria-pressed={isLive}
-                // Centred *on* the line, not offset to one side of it. Offset, it read as
-                // labelling whichever half of the strip it sat in rather than the rule itself —
-                // and it is the rule it names. Inside the strip rather than below, where it
-                // collided with the tick labels and took their baseline.
-                //
-                // Called "now" and not "live": the mark is a *place*, and clicking it means
-                // "take me there". Whether the cursor is *following* that place is a mode, and
-                // the orange dot on the tethered tag is what says so — one label cannot honestly
-                // do both jobs, which is what this one was trying to do.
-                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded bg-black/70 px-1 py-px text-[9px] font-semibold uppercase leading-none tracking-wider transition-colors ${
-                  isLive
-                    ? "text-white"
-                    : "text-white/50 hover:bg-black/80 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
-                }`}
-              >
-                now
-              </button>
-            )}
-          </div>
-        )}
+              {!isLive && (
+                <button
+                  type="button"
+                  // The track owns pointerdown for scrubbing; without this, pressing the button
+                  // would also begin a drag and the click would land somewhere else entirely.
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={resetTime}
+                  title={
+                    isLive
+                      ? "The cursor is following now"
+                      : "Return to now and follow it as it advances"
+                  }
+                  aria-label={isLive ? "Following now" : "Return to now"}
+                  aria-pressed={isLive}
+                  // Centred *on* the line, not offset to one side of it. Offset, it read as
+                  // labelling whichever half of the strip it sat in rather than the rule itself —
+                  // and it is the rule it names. Inside the strip rather than below, where it
+                  // collided with the tick labels and took their baseline.
+                  //
+                  // Called "now" and not "live": the mark is a *place*, and clicking it means
+                  // "take me there". Whether the cursor is *following* that place is a mode, and
+                  // the orange dot on the tethered tag is what says so — one label cannot honestly
+                  // do both jobs, which is what this one was trying to do.
+                  className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded bg-black/70 px-1 py-px text-[9px] font-semibold uppercase leading-none tracking-wider transition-colors ${
+                    isLive
+                      ? "text-white"
+                      : "text-white/50 hover:bg-black/80 hover:text-white focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50"
+                  }`}
+                >
+                  now
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       <TrackTicks scale={scale} zone={zone} />
     </div>

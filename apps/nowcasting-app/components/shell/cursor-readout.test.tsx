@@ -73,8 +73,64 @@ describe("the zone follows focus", () => {
     // "utc" is a row label in the stack now, not a suffix in a sentence — and the word
     // "Cursor" is gone: the footer *is* the cursor, so naming it explained nothing.
     expect(screen.getByText("utc")).toBeInTheDocument();
+    // UTC has no cell in the grid column — it is the cursor's instant, not a publisher.
     expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
     expect(screen.queryByText(/Cursor/)).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * The grid column: every row states its own cadence, and the focused row's *is* the grain.
+ *
+ * Three properties make the column coherent rather than merely compact, and each is pinned
+ * below: the grain is stated at its source (the focused row) and moves with focus; a row only
+ * swaps its cadence for an offset when it is genuinely off-grid; and the focused row can never
+ * do so, because the cursor's grid is by definition its own cadence.
+ */
+describe("the grid column", () => {
+  // A country's code appears twice on screen — once as this stack's row label and once in the
+  // track's tethered tag — so rows are found by their own title rather than by their code.
+  const row = (code: string) => screen.getByTitle(new RegExp(`^${code} published slot`));
+
+  test("the focused row states the grain; UTC has no cell in this column", () => {
+    setEnabledCountries(["GB", "NL"]);
+    render(<CursorReadout />);
+    // GB focused, so the cursor steps in 30s and GB's row is where that is said.
+    expect(row("GB")).toHaveTextContent("GB13:0030m");
+    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
+  });
+
+  test("the grain follows focus, because the grid is the focused country's cadence", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    render(<CursorReadout />);
+    expect(row("NL")).toHaveTextContent("NL14:0015m");
+  });
+
+  test("a resting row shows its own cadence, which is what makes the column predictive", () => {
+    // 12:00 sits on GB's 30-minute grid and on NL's 15-minute one, so nothing diverges. Both
+    // rows still carry a number: NL's 15 is smaller than the focused 30, which is exactly why
+    // NL can never drift off this grid.
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("GB");
+    render(<CursorReadout />);
+    expect(row("GB")).toHaveTextContent("GB13:0030m");
+    expect(row("NL")).toHaveTextContent("NL14:0015m");
+  });
+
+  test("a country coarser than the cursor grid swaps its cadence for the offset", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    // A cursor on a :15 is on NL's 15-minute grid but not on GB's 30-minute one — the only
+    // arrangement that produces an offset: GB rounds up to 12:30 UTC, a quarter hour ahead.
+    setGlobalState("selectedISOTime", "2026-08-11T12:15:00.000Z");
+    render(<CursorReadout />);
+
+    // GB reads its own slot (12:30 UTC = 13:30 BST) and declares the gap in place of its 30m.
+    expect(row("GB")).toHaveTextContent("GB13:30+15m");
+    expect(row("GB")).not.toHaveTextContent("30m");
+    // NL is focused, so it is on the grid by definition — always its cadence, never an offset.
+    expect(row("NL")).toHaveTextContent("NL14:1515m");
   });
 });
 

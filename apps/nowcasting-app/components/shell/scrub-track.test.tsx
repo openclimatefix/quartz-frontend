@@ -49,18 +49,24 @@ const cursor = () => getGlobalState("selectedISOTime");
 const TRACK_WIDTH = 480;
 const measureTrack = () => {
   const node = slider();
-  node.getBoundingClientRect = () =>
+  // **Two elements, not one.** The `role="slider"` is the padded hit box (28px, so the target
+  // clears WCAG 2.2's 24px minimum); the painted 20px strip is its child, and that child is what
+  // `trackRef` measures. Stub the rect on the strip, since that is what the drag maths reads —
+  // widths are identical, the padding is vertical only.
+  const strip = node.firstElementChild as HTMLElement;
+  strip.getBoundingClientRect = () =>
     ({
       left: 0,
       width: TRACK_WIDTH,
       right: TRACK_WIDTH,
-      top: 0,
-      bottom: 28,
-      height: 28,
+      top: 4,
+      bottom: 24,
+      height: 20,
       x: 0,
-      y: 0
+      y: 4
     } as DOMRect);
-  // jsdom has no pointer capture; the component's calls must not throw.
+  // jsdom has no pointer capture; the component's calls must not throw. These stay on the
+  // slider — it is the element the handlers are bound to and that captures the pointer.
   node.setPointerCapture = () => undefined;
   node.releasePointerCapture = () => undefined;
   node.hasPointerCapture = () => true;

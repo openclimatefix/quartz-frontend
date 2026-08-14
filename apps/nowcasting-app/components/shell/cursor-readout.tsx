@@ -3,7 +3,11 @@ import { FC } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig, sortCountryCodes } from "../../config/countries";
-import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
+// `cadenceMinutesFor`, not `cursorCadenceMinutes`: each row states its *own* country's cadence,
+// and the cursor's grid is simply whichever of those belongs to the focused row. Reading the
+// cursor helper here as well would compute the same number by a second route and invite the two
+// to disagree — the point of the column is that they are the same fact.
+import { cadenceMinutesFor, slotForInstant } from "../../lib/time/cursor";
 import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, formatISODateStringAsZonedTime } from "../helpers/utils";
 import PlayButton from "../play-button";
 import ScrubTrack from "./scrub-track";
@@ -53,6 +57,47 @@ import useCursorRange from "./use-cursor-range";
  *   changes the step — GB publishes every 30 minutes, NL every 15 — and the readout is where
  *   that becomes visible rather than mysterious.
  *
+ * **The grain and the lag are one column, not two facts in two places.** The grain used to sit
+ * beside the play button, grouped with it as "how the cursor moves"; the lag had a reserved
+ * fixed-width cell on each country row that was empty most of the time, and the two together
+ * read as a gap in the middle of the footer. They are the same subject: the lag exists *because*
+ * of the grain, and only for a country whose cadence differs from it. So the stack's third
+ * column is now that one subject — **every row states its own cadence, and the focused row's is
+ * the grain**, because the cursor steps on exactly that country's grid (`cursorCadenceMinutes`,
+ * `lib/time/cursor.ts`):
+ *
+ * ```
+ *   NL focused · GB publishes every 30m, NL every 15m
+ *
+ *   cursor 17:15 UTC — on NL's grid, not GB's
+ *     UTC 17:15
+ *     GB  18:30   +15m   gray-300  · GB rounds up to 17:30 UTC; off-grid right now
+ *     NL  19:15    15m   white     · the grid itself
+ *
+ *   cursor 17:00 UTC — on both grids
+ *     UTC 17:00
+ *     GB  18:00    30m   gray-600  · its cadence, in step
+ *     NL  19:00    15m   white     · the grid itself
+ * ```
+ *
+ * **The column is predictive, which is what earns it the space.** Every row is a cadence in the
+ * same units, so a row whose number is *larger* than the bold one is a row that can drift off
+ * the grid, and one equal or smaller never can — you can see before it happens that GB will
+ * diverge on odd quarter-hours and that NL never will while GB leads. A resting row is a fact,
+ * not a placeholder, which is the difference between a quiet field and a dead one.
+ *
+ * **Brightness carries the distinction, not the `+`.** A lag is usually equal to some country's
+ * cadence, so `15m` and `+15m` are both the same digits and one character apart; leaning on the
+ * sign would rest the whole reading on the character least likely to be noticed. Three steps —
+ * white for the grid, gray-300 for a live divergence, gray-600 at rest — with the sign as
+ * confirmation. The sign is also *hung outside the number* in a reserved left strip rather than
+ * set in the flow, so the digits hold one x position in every state: a column read vertically
+ * must not shift sideways at the moment it changes. **The focused row can never lag** (the cursor grid *is* its cadence, so
+ * `slotForInstant` is a no-op on it), so the bold cell is always the grain and never an offset.
+ *
+ * The UTC row has no cell in this column: it is the cursor's canonical instant, not a publisher,
+ * and it has no cadence to state.
+ *
  * The arithmetic is entirely Track B's (`lib/time/cursor.ts`); nothing here rounds anything.
  *
  * **Track P adds the play button, left of the track.** It used to be mounted twice in the chart
@@ -87,6 +132,7 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
   const lagMinutes = Math.round(
     (new Date(slot).getTime() - new Date(cursor).getTime()) / (60 * 1000)
   );
+  const cadenceMinutes = cadenceMinutesFor(code);
 
   return (
     <span
@@ -109,12 +155,45 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
       >
         {local}
       </span>
-      {/* The lag slot is always rendered and always the same width, even when empty. It toggles
-          on and off as the cursor steps — a country coarser than the cursor grid lags on every
-          other slot — and mounting/unmounting it re-flowed the whole row on each step, which
-          read as the readout jittering rather than as the number changing. */}
-      <span className="inline-block w-7 shrink-0 tabular-nums text-ocf-gray-600">
-        {lagMinutes > 0 ? `+${lagMinutes}m` : ""}
+      {/* The grid column — see this file's doc comment. Always rendered, always the same width:
+          its content changes as the cursor steps, and mounting/unmounting it re-flowed the whole
+          row on each step, which read as the readout jittering rather than as a value changing.
+
+          Three states, one ladder of brightness, and the brightness is what distinguishes them
+          rather than the `+`. `15m` and `+15m` are one character apart and the lag is usually
+          *equal* to a cadence, so those digits genuinely coincide — leaning on the sign alone
+          would put the whole distinction on the character least likely to be read. */}
+      <span
+        className={`relative inline-block w-8 shrink-0 pl-1.5 tabular-nums ${
+          focused
+            ? // The grid itself. The cursor steps on the focused country's cadence, so this row
+              // *is* the grain — stated at its source rather than restated on a row above.
+              "font-semibold text-white"
+            : lagMinutes > 0
+            ? // Off-grid right now: this country's reading is for a different instant than the
+              // focused one. Brighter than its resting state, so the eye lands on the row that
+              // has something to say.
+              "text-ocf-gray-300"
+            : // In step. Its own cadence, dimmed — not a placeholder but a fact, and the one
+              // that makes the column predictive: any row whose number is larger than the bold
+              // one is a row that can drift off the grid. Equal or smaller never can.
+              "text-ocf-gray-600"
+        }`}
+        title={
+          focused
+            ? `The cursor steps on ${code}'s ${cadenceMinutes}-minute grid. Changing the focused country changes the step.`
+            : lagMinutes > 0
+            ? `${code} publishes every ${cadenceMinutes} minutes, so its slot is ${lagMinutes} minutes ahead of the cursor — this reading is for a different instant.`
+            : `${code} publishes every ${cadenceMinutes} minutes and is on the cursor's grid.`
+        }
+      >
+        {/* The sign hangs in the `pl-1.5` strip rather than sitting in the flow, so the digits
+            begin at the same x whether or not there is one. Otherwise the whole number shifts
+            right by a character the moment a row goes off-grid, and a column whose job is to be
+            scanned vertically would jump sideways exactly when it changed. It stays a real text
+            node in reading order, so the cell still reads as "+15m". */}
+        {!focused && lagMinutes > 0 && <span className="absolute left-0">+</span>}
+        {!focused && lagMinutes > 0 ? `${lagMinutes}m` : `${cadenceMinutes}m`}
       </span>
     </span>
   );
@@ -128,7 +207,6 @@ const CursorReadout: FC = () => {
 
   if (!selectedISOTime) return null;
 
-  const cadenceMinutes = cursorCadenceMinutes(focusedCountry);
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
   const utc = formatISODateStringAsZonedTime(selectedISOTime, "UTC");
 
@@ -169,6 +247,10 @@ const CursorReadout: FC = () => {
         <span className="flex items-baseline gap-1.5 text-2xs text-ocf-gray-600">
           <span className="w-5 shrink-0 font-bold uppercase tracking-wider">utc</span>
           <span className="w-10 shrink-0 tabular-nums">{utc}</span>
+          {/* No grid cell on this row. UTC has no cadence of its own — it is the cursor's
+              canonical instant, not a publisher — and the grain is already stated where it comes
+              from, in bold on the focused country's row below. An empty cell here would be the
+              one genuinely dead space left in the column. */}
         </span>
         {zoneOrder.map((code) => (
           <CountrySlot
@@ -179,26 +261,28 @@ const CursorReadout: FC = () => {
           />
         ))}
       </div>
-      {/* The grain and playback read as one group — both are about *how* the cursor moves —
-          sitting between the zone stack (what time it is) and the track (where that time is).
-          They were three equally-spaced siblings, which left the grain floating between two
-          things it belonged to neither of. The grain keeps a fixed width so switching a 30m
-          country for a 15m one does not nudge the play button sideways.
-          
+      {/* Playback, alone now. The grain used to sit here, grouped with it on the grounds that
+          both are about *how* the cursor moves (Track P). It moved into the zone stack's third
+          column instead: the grain and the per-country lag are the same subject — the cursor's
+          grid, and who is off it — so they share one column rather than sitting apart with the
+          lag's reserved width reading as a gap between them. What is left here is one control,
+          which needs no group of its own.
+
           Playback is fed from this component's own `useCursorRange()` call rather than
           `ScrubTrack`'s — same hook, same SWR cache key, so the values agree; not rendered
           until that data exists, same as the track itself. */}
-      <div className="flex flex-none items-center gap-2">
-        <span
-          className="w-7 cursor-default text-right text-2xs tabular-nums text-ocf-gray-600"
-          title={`The cursor steps in ${cadenceMinutes}-minute slots — ${focusedCountry} publishes on that grid. Changing the focused country changes the step.`}
-        >
-          {`${cadenceMinutes}m`}
-        </span>
-        {rangeData && (
+      {/* `self-start` lines the button up with the *track*, not with the track plus its axis
+          labels. `ScrubTrack` is the tallest thing in this row, so the row's top edge is its top
+          edge — and its first 28px are the strip's hit box (`py-1` around an `h-5` strip), which
+          is exactly the button's own `h-7`. Two 28px boxes sharing a top edge share a centre, so
+          the button reads as being on the strip's line with no nudge to keep in step. Centring
+          it instead measured it against the full 48px block and sat it visibly low, level with
+          the gap between the strip and the tick labels. */}
+      {rangeData && (
+        <div className="flex flex-none self-start">
           <PlayButton startTime={rangeData.range.start} endTime={rangeData.range.end} />
-        )}
-      </div>
+        </div>
+      )}
       <div className="min-w-[140px] flex-1">
         <ScrubTrack zone={focusedZone} />
       </div>

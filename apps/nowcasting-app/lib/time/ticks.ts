@@ -107,6 +107,18 @@ export const midnightInstants = (startMs: number, endMs: number, zone: string): 
   walkDays(startMs, endMs, zone, [0]);
 
 /**
+ * Local midday, on the same terms as `midnightInstants` — density-independent, walked as a
+ * calendar hour so a DST day puts it in the right place rather than 11:00 or 13:00.
+ *
+ * Midday is a *softer* boundary than midnight: it divides a day rather than separating two, so
+ * the scrub track draws it at half the hairline's height and dimmer (see `scrub-track.tsx`'s
+ * layer 3). Nothing above midnight in the ranked hierarchy may be pushed down to make room for
+ * it — it is the weakest mark on the strip that is still a mark.
+ */
+export const middayInstants = (startMs: number, endMs: number, zone: string): number[] =>
+  walkDays(startMs, endMs, zone, [12]);
+
+/**
  * The Schmitt trigger: which density to use next, given the space available for 6-hourly ticks
  * and the density last rendered.
  *
