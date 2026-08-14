@@ -467,7 +467,11 @@ export const setComparison = (id: ComparisonSelection): void => {
  * Persisted alongside `visibleLines` and `dashboardMode` — same cookie-plus-state pattern, so
  * "state and cookie can never be written apart" holds here too.
  */
-export const setChartSplitOverride = (mode: ChartMode, split: ChartSplitPercent | null): void => {
+export const setChartSplitOverride = (
+  mode: ChartMode,
+  split: ChartSplitPercent | null,
+  { persist = true }: { persist?: boolean } = {}
+): void => {
   const previous = getGlobalState("chartSplitOverrides");
   const next = { ...previous };
   if (split) {
@@ -476,7 +480,14 @@ export const setChartSplitOverride = (mode: ChartMode, split: ChartSplitPercent 
     delete next[mode];
   }
   setGlobalState("chartSplitOverrides", next);
-  setSettingInCookieStorage(CookieStorageKeys.CHART_SPLIT_OVERRIDES, next);
+  // `persist: false` is the in-drag frame — state moves, the cookie does not. A resize fires
+  // one of these per animation frame, and `Cookies.set` is a `JSON.stringify` plus a
+  // synchronous `document.cookie` write, so persisting each frame put ~60 cookie-jar writes a
+  // second on the critical path of a direct manipulation. Only the size the gesture *ends* on
+  // is worth remembering, and `use-resizable-chart-split` guarantees a `transient: false` call
+  // at the end of every gesture — so "state and cookie can never be written apart" still holds
+  // for every value a reload could observe.
+  if (persist) setSettingInCookieStorage(CookieStorageKeys.CHART_SPLIT_OVERRIDES, next);
 };
 
 /**

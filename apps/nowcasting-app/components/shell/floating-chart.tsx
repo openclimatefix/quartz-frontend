@@ -87,18 +87,25 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
   const seed = CHART_SPLIT[mode];
   const override = chartSplitOverrides[mode];
 
-  const { split, panelRef, handleProps } = useResizableChartSplit({
+  const { split, isDragging, panelRef, handleProps } = useResizableChartSplit({
     seed,
     override,
-    onCommit: (next) => setChartSplitOverride(mode, next),
+    // In-drag frames update state only; the cookie is written once, when the gesture ends.
+    onCommit: (next, { transient }) => setChartSplitOverride(mode, next, { persist: !transient }),
     onReset: () => setChartSplitOverride(mode, null)
   });
 
   return (
     <div
       ref={panelRef}
+      // The transition is for size changes the user did not make with their hand — a mode
+      // change swapping one seed for another, the rail opening and reflowing the inset. During
+      // a drag it is exactly wrong: the hook writes a new size every frame and a 300ms ease
+      // makes the panel chase the pointer 300ms behind, which reads as a sluggish, rubbery
+      // handle rather than a grabbed edge. Direct manipulation should be instant, so the
+      // transition is off for as long as the pointer owns the size.
       className={`pointer-events-auto absolute z-20${
-        isNarrow ? "" : " transition-[width,height] duration-300"
+        isNarrow || isDragging ? "" : " transition-[width,height] duration-300"
       }`}
       style={{
         left: STAGE_GUTTER_PX,

@@ -34,8 +34,16 @@ export function useResizableChartSplit({
   seed: ChartSplitPercent;
   /** The mode's stored override, if the user has sized this mode before. */
   override: ChartSplitPercent | undefined;
-  /** Called with the clamped, final split — on each animation frame while dragging, and once more on release. */
-  onCommit: (split: ChartSplitPercent) => void;
+  /**
+   * Called with the clamped split — on each animation frame while dragging, and once more on
+   * release.
+   *
+   * `transient` marks the in-drag frames. They exist so the rest of the app tracks the size
+   * live, and they are cheap only if the consumer treats them as cheap: the drag fires ~60 of
+   * these a second, so anything with a real cost per call (writing a cookie, hitting storage,
+   * a network request) must wait for the `transient: false` call that always ends a gesture.
+   */
+  onCommit: (split: ChartSplitPercent, meta: { transient: boolean }) => void;
   /** Called to clear the current mode's override, returning it to its seed. */
   onReset: () => void;
 }) {
@@ -87,7 +95,7 @@ export function useResizableChartSplit({
     frameRef.current = null;
     const pending = pendingRef.current;
     pendingRef.current = null;
-    if (pending) onCommit(pending);
+    if (pending) onCommit(pending, { transient: true });
   };
   const scheduleCommit = (split: ChartSplitPercent) => {
     pendingRef.current = split;
@@ -129,9 +137,15 @@ export function useResizableChartSplit({
     // The drag always ends on its true final value, committed exactly once — the same handoff
     // `scrub-track.tsx` uses, for the same reason: take whatever the last frame did not get to,
     // cancel that frame, and write it here instead.
-    const pending = pendingRef.current;
+    //
+    // Falling back to `dragSplit` matters now that this call is the one that persists. If the
+    // last frame already flushed, `pendingRef` is null — harmless when every call did the same
+    // thing, but it would mean a gesture that happened to end just after a frame never wrote a
+    // non-transient commit at all, and the size would be forgotten on reload. `pendingRef`
+    // first, since it holds the newer value when a move and the release land in one tick.
+    const finalSplit = pendingRef.current ?? dragSplit;
     cancelPendingCommit();
-    if (pending) onCommit(pending);
+    if (finalSplit) onCommit(finalSplit, { transient: false });
     setDragSplit(null);
     startRef.current = null;
 
@@ -176,7 +190,8 @@ export function useResizableChartSplit({
       width: committed.width + dWidth,
       height: committed.height + dHeight
     };
-    onCommit(clampChartSplit(proposed, size));
+    // A keypress is a whole gesture, not a frame of one, so it persists like a release.
+    onCommit(clampChartSplit(proposed, size), { transient: false });
   };
 
   return {
