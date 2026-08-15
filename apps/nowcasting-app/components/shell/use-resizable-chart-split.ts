@@ -6,6 +6,16 @@ import { ChartContainerSizePx, ChartSplitPercent, clampChartSplit } from "./geom
 const KEY_STEP_PERCENT = 3;
 
 /**
+ * Which dimensions a given grip moves.
+ *
+ * The corner drags both, as it always did; the right and bottom edges each drag one, which is
+ * the whole reason they exist — a user wanting the chart wider should not have to hold its
+ * height steady by hand on the diagonal. The axis is fixed per grip and captured at
+ * pointerdown, so a drag that wanders off-axis still only moves the edge that was grabbed.
+ */
+export type ResizeAxis = "both" | "x" | "y";
+
+/**
  * Drag-to-resize for the floating chart panel — the override half of OPEN 5, replacing the
  * expand handle.
  *
@@ -49,7 +59,12 @@ export function useResizableChartSplit({
 }) {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const draggingRef = useRef(false);
-  const startRef = useRef<{ x: number; y: number; split: ChartSplitPercent } | null>(null);
+  const startRef = useRef<{
+    x: number;
+    y: number;
+    split: ChartSplitPercent;
+    axis: ResizeAxis;
+  } | null>(null);
   const frameRef = useRef<number | null>(null);
   const pendingRef = useRef<ChartSplitPercent | null>(null);
   const [dragSplit, setDragSplit] = useState<ChartSplitPercent | null>(null);
@@ -103,11 +118,11 @@ export function useResizableChartSplit({
     frameRef.current = requestAnimationFrame(flushCommit);
   };
 
-  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
+  const onPointerDown = (axis: ResizeAxis) => (event: PointerEvent<HTMLElement>) => {
     if (event.button !== 0) return;
     draggingRef.current = true;
     event.currentTarget.setPointerCapture(event.pointerId);
-    startRef.current = { x: event.clientX, y: event.clientY, split: committed };
+    startRef.current = { x: event.clientX, y: event.clientY, split: committed, axis };
     setDragSplit(committed);
   };
 
@@ -115,12 +130,15 @@ export function useResizableChartSplit({
     if (!draggingRef.current || !startRef.current) return;
     const size = liveContainerSize();
     if (size.widthPx <= 0 || size.heightPx <= 0) return;
-    const dxPercent = ((event.clientX - startRef.current.x) / size.widthPx) * 100;
+    const axis = startRef.current.axis;
+    const dxPercent =
+      axis === "y" ? 0 : ((event.clientX - startRef.current.x) / size.widthPx) * 100;
     // The panel's fixed corner is top-left (`left`/`top` in `floating-chart.tsx`), so the handle
     // sits bottom-right and both axes now read straight off the pointer: down and right grow.
     // While the panel hung from the bottom edge this line carried a sign flip, because dragging
     // *up* had to grow the height — the anchor move is what removed it.
-    const dyPercent = ((event.clientY - startRef.current.y) / size.heightPx) * 100;
+    const dyPercent =
+      axis === "x" ? 0 : ((event.clientY - startRef.current.y) / size.heightPx) * 100;
     const proposed: ChartSplitPercent = {
       width: startRef.current.split.width + dxPercent,
       height: startRef.current.split.height + dyPercent
@@ -158,7 +176,7 @@ export function useResizableChartSplit({
    * Arrow keys resize in `KEY_STEP_PERCENT` steps; Enter/Space reset to the mode's seed — the
    * keyboard equivalent of the double-click reset, since a keyboard user cannot double-click.
    */
-  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+  const onKeyDown = (axis: ResizeAxis) => (event: KeyboardEvent<HTMLElement>) => {
     let dWidth = 0;
     let dHeight = 0;
     switch (event.key) {
@@ -184,6 +202,10 @@ export function useResizableChartSplit({
       default:
         return;
     }
+    // An edge grip ignores the keys for the axis it does not own, rather than silently
+    // resizing the other dimension: pressing Down on the right edge should do nothing, the
+    // same as dragging it downward does.
+    if ((axis === "x" && dWidth === 0) || (axis === "y" && dHeight === 0)) return;
     event.preventDefault();
     const size = liveContainerSize();
     const proposed: ChartSplitPercent = {
@@ -199,14 +221,18 @@ export function useResizableChartSplit({
     split: dragSplit ?? clampChartSplit(committed, restingSize),
     isDragging: dragSplit !== null,
     panelRef,
-    handleProps: {
-      onPointerDown,
+    /**
+     * The event wiring for one grip. Every grip shares the same gesture — the axis is the only
+     * thing that differs, so it is a parameter rather than three copies of the handler set.
+     */
+    handlePropsFor: (axis: ResizeAxis) => ({
+      onPointerDown: onPointerDown(axis),
       onPointerMove,
       onPointerUp: endDrag,
       onPointerCancel: endDrag,
       onLostPointerCapture: endDrag,
-      onKeyDown,
+      onKeyDown: onKeyDown(axis),
       onDoubleClick: onReset
-    }
+    })
   };
 }

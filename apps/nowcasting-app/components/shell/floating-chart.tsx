@@ -87,7 +87,7 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
   const seed = CHART_SPLIT[mode];
   const override = chartSplitOverrides[mode];
 
-  const { split, isDragging, panelRef, handleProps } = useResizableChartSplit({
+  const { split, isDragging, panelRef, handlePropsFor } = useResizableChartSplit({
     seed,
     override,
     // In-drag frames update state only; the cookie is written once, when the gesture ends.
@@ -126,8 +126,18 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
 
       {/* Resizing is a pointer/keyboard interaction that does not translate to touch-only
           layouts, and the narrow layout ignores the split entirely (full width, seed height) —
-          so the handle only renders at `lg` and up, alongside the transition it also skips. */}
-      {!isNarrow && <ChartResizeHandle {...handleProps} />}
+          so the handles only render at `lg` and up, alongside the transition they also skip.
+
+          Three grips for the three edges that move: the right edge takes width, the bottom edge
+          takes height, and the corner between them takes both. The corner alone forced anyone
+          wanting one dimension to hold the other steady along a diagonal. */}
+      {!isNarrow && (
+        <>
+          <ChartResizeHandle axis="x" {...handlePropsFor("x")} />
+          <ChartResizeHandle axis="y" {...handlePropsFor("y")} />
+          <ChartResizeHandle axis="both" {...handlePropsFor("both")} />
+        </>
+      )}
     </div>
   );
 };
