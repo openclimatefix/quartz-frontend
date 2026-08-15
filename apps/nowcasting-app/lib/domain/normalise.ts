@@ -51,6 +51,17 @@ const kwToMw = (kw: number | null | undefined): PowerMw =>
 const PLEVEL_PREFIX = /^p(?=\d)/;
 
 /**
+ * The canonical plevel key for a wire key. Used by **both** plevel normalisers below.
+ *
+ * Shared rather than written twice on purpose: `plevels_kW` appears in three schemas
+ * (`ForecastValue`, `RegionForecast`, `RegionForecastValue`) and each has its own normaliser
+ * here. Two of them keying the same field differently is the trap that produced the original
+ * bug one level up, and it would be invisible until an endpoint that currently returns an empty
+ * plevels object started returning a populated one.
+ */
+const plevelKey = (wireKey: string): string => wireKey.replace(PLEVEL_PREFIX, "");
+
+/**
  * **The wire says `p10`; the canonical model says `10`** — see `PlevelsMw`, which documents the
  * key as "the wire's plevel name" and means the bare level. This is where the two are reconciled,
  * and it was missing: keys went through untouched, so every consumer looked up a key that was
@@ -79,7 +90,7 @@ const normalisePlevels = (
   if (plevels === null || plevels === undefined) return undefined;
   const out: PlevelsMw = {};
   for (const [key, value] of Object.entries(plevels)) {
-    out[key.replace(PLEVEL_PREFIX, "")] = kwToMw(value);
+    out[plevelKey(key)] = kwToMw(value);
   }
   return out;
 };
@@ -109,6 +120,16 @@ const alignToLength = (values: number[], length: number): (number | null)[] => {
 const alignAndConvert = (values: number[], length: number): PowerMw[] =>
   alignToLength(values, length).map(kwToMw);
 
+/**
+ * The matrix shape's plevels: one array per level rather than one number.
+ *
+ * Keyed through `plevelKey` like the scalar case, so `RegionSeries` and `TimeSeries` agree on
+ * what a plevel is called. Every recorded matrix payload currently carries `plevels_kW: {}` —
+ * GSP forecasts publish no bands — so nothing is reading these yet and the alignment below is
+ * untested against real values. That is exactly why the key rule is shared rather than
+ * reimplemented: the day the endpoint starts populating them, it must not be a second
+ * discovery of the same bug.
+ */
 const alignPlevels = (
   plevels: Record<string, number[]> | null | undefined,
   length: number
@@ -116,7 +137,7 @@ const alignPlevels = (
   if (plevels === null || plevels === undefined) return undefined;
   const out: Record<string, PowerMw[]> = {};
   for (const [key, values] of Object.entries(plevels)) {
-    out[key] = alignAndConvert(values, length);
+    out[plevelKey(key)] = alignAndConvert(values, length);
   }
   return out;
 };

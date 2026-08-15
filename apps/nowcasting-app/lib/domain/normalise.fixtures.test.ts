@@ -21,6 +21,9 @@ import gbGspForecastsSnapshot from "../api/v1/__fixtures__/gb-gsp-forecasts-snap
 import gbGspGenerationSnapshot from "../api/v1/__fixtures__/gb-gsp-generation-snapshot.json";
 import gbGspGenerationSnapshotPartial from "../api/v1/__fixtures__/gb-gsp-generation-snapshot-partial.json";
 import nlProvinceForecastsPeriod from "../api/v1/__fixtures__/nl-province-forecasts-period.json";
+import nlRegionsProvince from "../api/v1/__fixtures__/nl-regions-province.json";
+import nlNationalGeneration from "../api/v1/__fixtures__/nl-national-generation-ned_nl.json";
+import * as normalisers from "./normalise";
 
 // normalise.test.ts covers the behaviour with hand-built samples; this suite runs the
 // same functions over payloads recorded verbatim from the production v1 API, which is
@@ -32,6 +35,9 @@ const CANONICAL_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
 
 /** GB national peaks around 8-12 GW. Catches an inverted or missing kW->MW conversion. */
 const GB_NATIONAL_PEAK_MW = { min: 1_000, max: 20_000 };
+
+/** NL national, against 25.1 GW installed. Same job: a magnitude sanity band, not a value. */
+const NL_NATIONAL_PEAK_MW = { min: 1_000, max: 26_000 };
 
 // `undefined` leaking into a value is the bug the domain types exist to prevent: a
 // missing reading must arrive as `null`, because `undefined` yields NaN downstream in
@@ -240,5 +246,123 @@ describe("normalise over recorded v1 payloads", () => {
 
     // Recorded at a slot old enough to have fully published: complete GSP coverage.
     expect(Object.keys(generation.regions).length).toBe(336);
+  });
+
+  // --- NL, the least-exercised country -------------------------------------------------
+
+  test("NL regions: no full_name on the wire, so the label falls back to the raw name", () => {
+    const result = normaliseRegions(nlRegionsProvince as Parameters<typeof normaliseRegions>[0]);
+
+    expect(result).toHaveLength(12);
+    // This is the fact `GeoLayerConfig.regionNameStyle` exists for, recorded against the real
+    // payload rather than assumed: v1 serves NL provinces with `metadata.region_id` and **no**
+    // `full_name`, so `Region.label` is the raw lowercase name and the UI must case it itself
+    // (`lib/domain/region-label.ts`). If the API ever starts sending `full_name`, this test is
+    // what says so, and the registry opt-in can be dropped.
+    expect(result.every((region) => region.metadata["full_name"] === undefined)).toBe(true);
+    expect(result.every((region) => region.label === region.name)).toBe(true);
+    expect(result.every((region) => region.label === region.label.toLowerCase())).toBe(true);
+    expect(result.map((region) => region.name)).toContain("noord-brabant");
+
+    // GB is the contrast, and it is what makes the flag a per-region-type decision rather than
+    // a global one: its GSP names are codes with a human `full_name` alongside.
+    const gb = normaliseRegions(gbRegionsGsp as Parameters<typeof normaliseRegions>[0]);
+    expect(gb.some((region) => region.label !== region.name)).toBe(true);
+  });
+
+  /**
+   * `metadata` is the spec's other free-form object — `additionalProperties` with no declared
+   * keys — so `fixtures.contract.test.ts` validates it whatever is inside, and every key the
+   * client reads out of it is an unchecked string. Two are load-bearing:
+   *
+   *  - `gsp_id`, which `buildRegionBridge().byGspId` needs as a **number** to resolve a clicked
+   *    Mapbox feature id to a v1 region (`components/helpers/data.ts`). It is typed
+   *    `string | integer` in the spec, and the bridge silently skips anything non-numeric — so
+   *    a payload that started quoting it would empty the map-click path with no error at all.
+   *  - `full_name`, asserted above.
+   */
+  test("GB gsp metadata carries a numeric gsp_id, which the click-to-chart bridge needs", () => {
+    const gb = normaliseRegions(gbRegionsGsp as Parameters<typeof normaliseRegions>[0]);
+    const withGspId = gb.filter((region) => typeof region.metadata["gsp_id"] === "number");
+
+    expect(withGspId).toHaveLength(gb.length);
+  });
+
+  test("NL national generation: single observer, values in MW", () => {
+    const result = normaliseGeneration(
+      nlNationalGeneration as Parameters<typeof normaliseGeneration>[0]
+    );
+
+    expect(result.observerName).toBe("ned_nl");
+    const peakMw = Math.max(...result.values.map((v) => v.powerMw ?? 0));
+    expect(peakMw).toBeGreaterThan(NL_NATIONAL_PEAK_MW.min);
+    expect(peakMw).toBeLessThan(NL_NATIONAL_PEAK_MW.max);
+    expect(result.values.every((v) => CANONICAL_INSTANT.test(v.timeUtc))).toBe(true);
+  });
+
+  // --- the seam the schema cannot police ------------------------------------------------
+
+  /**
+   * **Two payloads, joined by a key neither of them agrees to spell the same way.**
+   *
+   * This is the shape of the plevel bug one level up: the OpenAPI spec types the joining field
+   * loosely (or types the two sides independently), so `fixtures.contract.test.ts` passes while
+   * the client's join silently matches nothing. The app really does this join —
+   * `buildRegionBridge().byName` in `components/helpers/data.ts` — keyed on the exact string,
+   * and a case or spelling difference between `/regions` and `/forecasts/period` would empty
+   * the map with no error anywhere.
+   *
+   * Asserted per country, because the two have different naming conventions (GB codes,
+   * NL lowercase proper nouns) and a rule that holds for one proves nothing about the other.
+   */
+  test.each([
+    ["GB gsp", gbRegionsGsp, gbGspForecastsPeriod],
+    ["NL province", nlRegionsProvince, nlProvinceForecastsPeriod]
+  ])(
+    "%s: every matrix region key exists verbatim in the /regions payload",
+    (_l, regions, matrix) => {
+      const known = new Set(
+        normaliseRegions(regions as Parameters<typeof normaliseRegions>[0]).map((r) => r.name)
+      );
+      const keyed = Object.keys(
+        normaliseForecastMatrix(matrix as Parameters<typeof normaliseForecastMatrix>[0]).regions
+      );
+
+      expect(keyed.length).toBeGreaterThan(0);
+      expect(keyed.filter((name) => !known.has(name))).toEqual([]);
+    }
+  );
+});
+
+/**
+ * The mechanical half: a normaliser that no recorded payload is ever passed through is a seam
+ * with nothing watching it, and that is precisely where the plevel bug lived.
+ *
+ * Read off the module's own exports rather than a list someone remembers to update, so adding a
+ * normaliser without a fixture-driven test fails here rather than going unnoticed. It cannot
+ * force a *good* assertion — `not.toContain("p50")` passed for months — but it does convert an
+ * invisible gap into a red test, which is the failure mode that actually occurred.
+ */
+describe("every normaliser is exercised by a recorded payload", () => {
+  const COVERED = new Set([
+    "normaliseCountries",
+    "normaliseRegions",
+    "normaliseForecast",
+    "normaliseGeneration",
+    "normaliseForecastMatrix",
+    "normaliseGenerationMatrix",
+    "normaliseForecastSnapshot",
+    "normaliseGenerationSnapshot"
+  ]);
+
+  test("no exported normaliser is missing from this suite", () => {
+    const exported = Object.keys(normalisers).filter((name) => name.startsWith("normalise"));
+    expect(exported.length).toBeGreaterThan(0);
+    expect(exported.filter((name) => !COVERED.has(name))).toEqual([]);
+  });
+
+  test("the covered list names nothing that no longer exists", () => {
+    const exported = new Set(Object.keys(normalisers));
+    expect([...COVERED].filter((name) => !exported.has(name))).toEqual([]);
   });
 });
