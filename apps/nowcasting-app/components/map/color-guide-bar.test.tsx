@@ -68,7 +68,9 @@ describe("the legend's bands are the focused country's", () => {
     enabled = ["GB"];
     currentLevel = level("gsp");
     const bands = bandsShown(ActiveUnit.MW);
-    expect(bands).toEqual(["0-50MW", "50-150", "150-250", "250-350", "350-450", "450+", "no data"]);
+    // "no data" is no longer among the pills — the legend carries the value scale only, and the
+    // other two states are named on hover. See the absence test below.
+    expect(bands).toEqual(["0-50MW", "50-150", "150-250", "250-350", "350-450", "450+"]);
   });
 
   test("GB on a derived level draws the ten-times bands", () => {
@@ -83,15 +85,7 @@ describe("the legend's bands are the focused country's", () => {
     enabled = ["NL"];
     currentLevel = level("province");
     const bands = bandsShown(ActiveUnit.MW);
-    expect(bands).toEqual([
-      "0-400MW",
-      "400-1.2k",
-      "1.2k-2k",
-      "2k-2.8k",
-      "2.8k-3.6k",
-      "3.6k+",
-      "no data"
-    ]);
+    expect(bands).toEqual(["0-400MW", "400-1.2k", "1.2k-2k", "2k-2.8k", "2.8k-3.6k", "3.6k+"]);
   });
 
   test("capacity mode reads the same scale as MW", () => {
@@ -101,23 +95,82 @@ describe("the legend's bands are the focused country's", () => {
     expect(bandsShown(ActiveUnit.capacity)).toEqual(bandsShown(ActiveUnit.MW));
   });
 
-  test("percentage mode is the same everywhere — it never needed calibrating", () => {
-    focused = "NL";
-    enabled = ["NL"];
-    currentLevel = level("province");
-    const nl = bandsShown(ActiveUnit.percentage);
+  /**
+   * Percentage stopped being banded on 2026-08-15 — it renders as a ramp with the reference
+   * values ticked along it, so there are no pills to compare. What still has to hold is that it
+   * is identical in every country and at every level (it is a fraction of the region's own
+   * capacity, so it never needed calibrating).
+   */
+  describe("percentage mode renders a ramp, not bands", () => {
+    const rampTicks = (): string[] => {
+      const { container, unmount } = render(
+        <ColorGuideBar comparison={null} unit={ActiveUnit.percentage} />
+      );
+      const ticks = Array.from(container.querySelectorAll("span.absolute"))
+        .map((node) => node.textContent ?? "")
+        .filter((text) => text.length > 0);
+      unmount();
+      return ticks;
+    };
+
+    test("the ticks are the reference values, and the top one is open-ended", () => {
+      focused = "GB";
+      enabled = ["GB"];
+      currentLevel = level("gsp");
+      expect(rampTicks()).toEqual(["3", "10", "20", "30", "40", "50", "70%+"]);
+    });
+
+    test("it is the same everywhere — it never needed calibrating", () => {
+      focused = "NL";
+      enabled = ["NL"];
+      currentLevel = level("province");
+      const nl = rampTicks();
+      focused = "GB";
+      enabled = ["GB"];
+      currentLevel = level("gsp");
+      expect(rampTicks()).toEqual(nl);
+    });
+
+    test("no pills are drawn at all", () => {
+      focused = "GB";
+      enabled = ["GB"];
+      currentLevel = level("gsp");
+      // `bandsShown` selects `div.rounded`, which now also matches the ramp bar itself — it is
+      // rounded too, and carries no text. Dropping the empty entry leaves what this asserts:
+      // percentage contributes no labelled pill of its own.
+      expect(bandsShown(ActiveUnit.percentage).filter(Boolean)).toEqual([]);
+    });
+  });
+
+  /**
+   * The legend explains the value scale and nothing else (2026-08-15).
+   *
+   * "No data" was a seventh pill, then briefly a key line, and is now absent: the map's popup
+   * already reads "no data" or "awaiting" in place of the figure, per region and per instant,
+   * which is more use than a swatch. Across two full days of real data no region reported
+   * nothing even once, so a permanent entry was billing an anomaly as everyday furniture.
+   *
+   * Pinned as an absence because it has moved twice — this stops it drifting back into the
+   * scale, where a non-quantity reads as a step on it.
+   */
+  test.each([
+    ["percentage", ActiveUnit.percentage],
+    ["MW", ActiveUnit.MW],
+    ["capacity", ActiveUnit.capacity]
+  ])("%s mode's legend carries the scale only, no 'no data' entry", (_label, unit) => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = level("gsp");
-    expect(bandsShown(ActiveUnit.percentage)).toEqual(nl);
-    expect(nl).toEqual(["0-10%", "10-20", "20-35", "35-50", "50-70", "70+", "no data"]);
+    const { container, unmount } = render(<ColorGuideBar comparison={null} unit={unit} />);
+    expect(container.textContent).not.toContain("no data");
+    unmount();
   });
 
   test("national level has no band scale and shows none, as before", () => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = { ...level("national"), level: 0 };
-    expect(bandsShown(ActiveUnit.MW)).toEqual(["no data"]);
+    expect(bandsShown(ActiveUnit.MW)).toEqual([]);
   });
 
   test("with several countries enabled the row says whose bands these are", () => {

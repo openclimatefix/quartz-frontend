@@ -44,7 +44,46 @@ export const NO_DATA_OPACITY = 0.25;
  * audit B8's bug class and is what the legend has always claimed ("0-50" at 3%).
  */
 export const BAND_OPACITIES = [0.03, 0.2, 0.4, 0.6, 0.8, 1];
-const NORMALIZED_THRESHOLDS = [0.1, 0.2, 0.35, 0.5, 0.7];
+
+/**
+ * Percentage mode is a **continuous ramp**, not bands (2026-08-15).
+ *
+ * Six fixed bands could not serve a quantity whose distribution moves this much across the year.
+ * Measured over six days, two countries and two seasons: at 06:00 in August every GB region sat
+ * inside the bottom band while genuinely spanning 0–16%; at noon in December roughly half the
+ * country sat there all day, with the top three bands never reached. Re-placing the thresholds
+ * helped, but every candidate set was tuned to whichever days it was fitted on — and December's
+ * median (6% of capacity) against August's (35%) means no single set is right year-round.
+ *
+ * A ramp has no thresholds to mistune. It also serves what the map is *for*: the control room
+ * describes the value as watching brightening "moving across the country", and banding turns
+ * travel into a series of jumps as regions cross a threshold.
+ *
+ * Two properties are deliberately preserved from the banded version:
+ *
+ * - **`ZERO_OPACITY` is the ramp's bottom stop**, so a region generating a real 0 still draws at
+ *   3% rather than vanishing — audit B8's distinction, and the reason a night map reads as dark
+ *   rather than empty. Brad's call to keep 3% rather than raise it.
+ * - **The ramp saturates at `PERCENT_RAMP_TOP`**, matching the old top band, so anything at or
+ *   above 70% of capacity is full strength. GB reaches this rarely and NL routinely; both are
+ *   correct, and `interpolate` clamps beyond its last stop.
+ */
+export const ZERO_OPACITY = BAND_OPACITIES[0];
+
+/** Fraction of installed capacity at which the percentage ramp reaches full opacity. */
+export const PERCENT_RAMP_TOP = 0.7;
+
+/**
+ * Reference values marked on the percentage legend, as fractions.
+ *
+ * These are *annotations on the ramp*, not thresholds — nothing in the paint expression steps at
+ * them. They exist so the legend can still be read as numbers: matching a discrete swatch to a
+ * polygon across two different backgrounds is a hard perceptual task, whereas reading a position
+ * along a ramp is not, and ticks give the eye somewhere to land. Chosen as round numbers because
+ * a measured comparison found rounding free: only the lowest value is load-bearing (moving it
+ * from 3% to 5% doubled December's bottom-of-scale crowding), and it is kept low for that reason.
+ */
+export const NORMALIZED_TICKS = [0.03, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7];
 
 /**
  * Opacity for a feature whose country this build has no bands for.
@@ -96,9 +135,19 @@ export const bandLabels = (thresholds: readonly number[]): string[] => [
   `${formatBand(thresholds[thresholds.length - 1])}+`
 ];
 
-/** The percentage-mode labels, from the same thresholds the expression steps at. */
-export const normalizedBandLabels = (): string[] =>
-  bandLabels(NORMALIZED_THRESHOLDS.map((fraction) => Math.round(fraction * 100)));
+/** The percentage legend's tick labels — `["3", "10", …, "70"]`, to sit under the ramp. */
+export const normalizedTickLabels = (): string[] =>
+  NORMALIZED_TICKS.map((fraction) => String(Math.round(fraction * 100)));
+
+/**
+ * The percentage ramp: linear from a real zero at `ZERO_OPACITY` to full at `PERCENT_RAMP_TOP`.
+ *
+ * `interpolate` clamps outside its stops, so a region above 70% of capacity draws at 1 rather
+ * than overshooting — which matters because capacity registers lag and observed values above
+ * 100% do occur.
+ */
+const continuousOpacity = (input: Expression): Expression =>
+  ["interpolate", ["linear"], input, 0, ZERO_OPACITY, PERCENT_RAMP_TOP, 1] as unknown as Expression;
 
 const bandExpression = (input: Expression, thresholds: readonly number[]): Expression => {
   const expression: unknown[] = ["step", input, BAND_OPACITIES[0]];
@@ -168,9 +217,12 @@ export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
     return countryAwareBands(state("capacity"));
   }
 
+  // Percentage is continuous; MW and capacity stay banded. They are absolute megawatts on a
+  // per-country scale, so their bands are a registry fact rather than a fitted guess, and the
+  // seasonal-mistuning argument above does not apply to them in the same way.
   const valueOpacity =
     unit === ActiveUnit.percentage
-      ? bandExpression(state("normalized"), NORMALIZED_THRESHOLDS)
+      ? continuousOpacity(state("normalized"))
       : countryAwareBands(state("power"));
 
   return [

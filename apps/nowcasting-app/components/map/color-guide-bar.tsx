@@ -8,16 +8,17 @@ import {
   BAND_OPACITIES,
   bandLabels,
   mapBandsFor,
-  NO_DATA_COLOR,
-  NO_DATA_OPACITY,
-  normalizedBandLabels
+  NORMALIZED_TICKS,
+  normalizedTickLabels,
+  PERCENT_RAMP_TOP,
+  ZERO_OPACITY
 } from "./feature-state";
 import { ActiveUnit } from "./types";
 
 type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
 
 /**
- * What the map's fill means, for whichever encoding "Colour by" currently selects.
+ * What the map's fill means, for whichever encoding "Map shows" currently selects.
  *
  * Phase 6 §5: `color-guide-bar` and `delta-color-guide-bar` were two components swapped by a
  * ternary on `comparison`, below the segmented control that sets it. They are now one control
@@ -56,6 +57,22 @@ type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
  *
  * The diverging (delta) buckets are a fixed MW scale from `constant.ts`, not derived from the
  * aggregation level, so they do not vary by country or level and never needed this label.
+ *
+ * ## Why there is no "no data" key here (2026-08-15)
+ *
+ * The legend explains the **value scale** and nothing else. The map draws three states — a value,
+ * a region that reported nothing, and a region that has not published this slot — and the other
+ * two are named on hover instead: `pvLatestMap.tsx`'s popup reads "no data" or "awaiting" in
+ * place of the figure, per region and per instant, which is more use than a swatch that can only
+ * say the category exists.
+ *
+ * This used to be a seventh pill on the end of the band row, which made a non-quantity read as a
+ * step on the scale. Measured across two full days of real data — 24,529 region-slots, GB and NL
+ * — **no region reported nothing even once**. Permanent legend billing for a state that rare is
+ * the same mistake as painting it heavier than a real zero: it is an anomaly, and the design
+ * should treat it as one. If it ever becomes common enough to confuse someone, the upgrade is to
+ * render a key *conditionally*, when a region in frame is actually in that state — by which
+ * point there would be evidence it happens.
  */
 const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
   const focusedCountry = useFocusedCountry();
@@ -74,6 +91,48 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
           attributed={enabledCountries.length > 1}
         />
       )}
+    </div>
+  );
+};
+
+/**
+ * The percentage legend: the ramp itself, with the reference values ticked along it.
+ *
+ * Not pills, because percentage is no longer banded. The gradient runs the same stops the paint
+ * expression interpolates between — a real zero at 3% opacity, full at 70% of capacity — so the
+ * legend and the map are the same scale rather than two descriptions of one. Ticks are placed by
+ * their own value, so they stay honest if the ramp's top ever moves.
+ */
+const PercentRamp: React.FC = () => {
+  const ticks = normalizedTickLabels();
+  return (
+    <div className="flex w-full min-w-[10rem] max-w-[16rem] flex-col dash:max-w-[24rem]">
+      <div
+        className="relative h-4 w-full rounded border border-ocf-black-600 dash:h-6"
+        style={{
+          backgroundImage: `linear-gradient(to right, rgba(255,208,83,${ZERO_OPACITY}), rgba(255,208,83,1))`
+        }}
+      >
+        {NORMALIZED_TICKS.map((fraction) => (
+          <span
+            key={fraction}
+            className="absolute top-0 bottom-0 w-px bg-white/50"
+            style={{ left: `${Math.min(100, (fraction / PERCENT_RAMP_TOP) * 100)}%` }}
+          />
+        ))}
+      </div>
+      <div className="relative mt-0.5 h-3 text-2xs text-ocf-gray-600 dash:h-4 dash:text-xs">
+        {NORMALIZED_TICKS.map((fraction, index) => (
+          <span
+            key={fraction}
+            className="absolute -translate-x-1/2 whitespace-nowrap tabular-nums"
+            style={{ left: `${Math.min(100, (fraction / PERCENT_RAMP_TOP) * 100)}%` }}
+          >
+            {ticks[index]}
+            {index === ticks.length - 1 && "%+"}
+          </span>
+        ))}
+      </div>
     </div>
   );
 };
@@ -99,11 +158,9 @@ const SequentialBands: React.FC<{
   attributed: boolean;
 }> = ({ unit, currentLevel, country, attributed }) => {
   const values = useMemo(() => {
-    if (unit === ActiveUnit.percentage) {
-      // A fraction of the region's own capacity, so these are the same for every country and
-      // every level — the one encoding that never needed calibrating.
-      return bandPills(normalizedBandLabels());
-    }
+    // Percentage is drawn as a continuous ramp, so it has no pills to build — see
+    // `PercentRamp` below and the note on `NORMALIZED_TICKS` in `feature-state.ts`.
+    if (unit === ActiveUnit.percentage) return undefined;
     // MW and capacity are absolute megawatts, so they need the focused country's scale. Both
     // read the same thresholds, as they always have.
     //
@@ -145,6 +202,7 @@ const SequentialBands: React.FC<{
         covers `DeltaBands` below, whose nine buckets wrap the same way.
       */}
       <div className="flex flex-wrap gap-1 text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
+        {unit === ActiveUnit.percentage && <PercentRamp />}
         {values?.map((value, index) => (
           <div
             key={value.value}
@@ -162,19 +220,6 @@ const SequentialBands: React.FC<{
             )}
           </div>
         ))}
-        {/*
-          The map draws three different things and the legend has to name them. A region that
-          reported nothing is grey; a region that has not published this slot yet is left
-          unfilled (border only); a region generating 0 MW is a real value and gets the first
-          band above, which is why that band is 3% opacity rather than invisible.
-        */}
-        <div
-          className="whitespace-nowrap rounded border border-ocf-black-600 px-3 py-[1px] text-white dash:px-4 dash:py-[2px]"
-          style={{ backgroundColor: NO_DATA_COLOR, opacity: NO_DATA_OPACITY + 0.4 }}
-          title="Reported no value for this time. Regions still to publish are left unfilled."
-        >
-          no data
-        </div>
       </div>
     </div>
   );

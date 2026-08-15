@@ -41,6 +41,8 @@ import type { AggregationLevel } from "../helpers/aggregationLevels";
 import { theme } from "../../tailwind.config";
 import {
   BAND_OPACITIES,
+  PERCENT_RAMP_TOP,
+  ZERO_OPACITY,
   NO_DATA_COLOR,
   NO_DATA_OPACITY,
   UNBANDED_COUNTRY_OPACITY,
@@ -435,6 +437,25 @@ const evaluate = (
       }
       return output;
     }
+    // Linear `interpolate` only — the percentage ramp is the one place it is used, and Mapbox
+    // clamps outside the stop range rather than extrapolating, which this reproduces.
+    case "interpolate": {
+      const input = Number(next(args[1]));
+      const stops: Array<[number, number]> = [];
+      for (let i = 2; i + 1 < args.length; i += 2) {
+        stops.push([Number(args[i]), Number(next(args[i + 1]))]);
+      }
+      if (!stops.length) return undefined;
+      if (input <= stops[0][0]) return stops[0][1];
+      const last = stops[stops.length - 1];
+      if (input >= last[0]) return last[1];
+      for (let i = 0; i + 1 < stops.length; i++) {
+        const [x0, y0] = stops[i];
+        const [x1, y1] = stops[i + 1];
+        if (input >= x0 && input <= x1) return y0 + ((input - x0) / (x1 - x0)) * (y1 - y0);
+      }
+      return last[1];
+    }
     default:
       return expression;
   }
@@ -544,13 +565,54 @@ describe("paint expressions render the three states distinctly", () => {
     );
   });
 
-  test("percentage mode reproduces getOpacityValueFromPVNormalized's table", () => {
+  /**
+   * Percentage stopped being banded on 2026-08-15 — it is a linear ramp from a real zero at
+   * `ZERO_OPACITY` to full at `PERCENT_RAMP_TOP`. These replace the old assertions against
+   * `getOpacityValueFromPVNormalized`'s six-step table, which no longer describes the map.
+   */
+  describe("percentage mode is a continuous ramp", () => {
     // Unaffected by country: a fraction of the region's own capacity is comparable anywhere,
-    // which is why this mode never showed the bug. No country stamp needed.
+    // which is why this mode never needed per-country calibrating. No country stamp needed.
     const percentage = fillOpacityExpression(ActiveUnit.percentage);
-    expect(evaluate(percentage, { ...base, dataState: "value", normalized: 0 })).toBe(0.03);
-    expect(evaluate(percentage, { ...base, dataState: "value", normalized: 0.36 })).toBe(0.6);
-    expect(evaluate(percentage, { ...base, dataState: "value", normalized: 0.9 })).toBe(1);
+    const at = (normalized: number) =>
+      Number(evaluate(percentage, { ...base, dataState: "value", normalized }));
+
+    test("a real zero still draws at the 3% floor, not at nothing (B8)", () => {
+      expect(at(0)).toBeCloseTo(ZERO_OPACITY, 6);
+      // And is still distinguishable from a region that has not published at all.
+      expect(evaluate(percentage, { ...unpublished })).toBe(0);
+    });
+
+    test("it saturates at the ramp top and clamps above it", () => {
+      expect(at(PERCENT_RAMP_TOP)).toBeCloseTo(1, 6);
+      expect(at(0.9)).toBeCloseTo(1, 6);
+      // Observed values above 100% of capacity do occur — capacity registers lag — and must
+      // not overshoot into an invalid opacity.
+      expect(at(1.2)).toBeCloseTo(1, 6);
+    });
+
+    test("the midpoint is halfway up the ramp", () => {
+      expect(at(PERCENT_RAMP_TOP / 2)).toBeCloseTo((ZERO_OPACITY + 1) / 2, 6);
+    });
+
+    /**
+     * The point of the change. Under the old six bands these two regions painted identically,
+     * because both sat inside "0–10%" — which at 06:00 in August was every GB region at once,
+     * across a real 0–16% spread.
+     */
+    test("two nearby values are drawn differently, which banding could not do", () => {
+      expect(at(0.11)).not.toBeCloseTo(at(0.12), 6);
+      expect(at(0.02)).toBeGreaterThan(at(0.01));
+    });
+
+    test("it is monotonic across the whole domain", () => {
+      let previous = -Infinity;
+      for (let v = 0; v <= 1.2; v += 0.01) {
+        const value = at(v);
+        expect(value).toBeGreaterThanOrEqual(previous);
+        previous = value;
+      }
+    });
   });
 
   test("capacity mode is not gated on dataState — capacity is known regardless", () => {
