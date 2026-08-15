@@ -13,3 +13,7 @@ dist/**
 # commercial detail and meeting minutes — kept on disk for design rationale,
 # deliberately never committed.
 docs/feedback/
+
+# TypeScript incremental build state. Machine-local, rewritten by every typecheck,
+# and a permanent source of noise in `git status`.
+*.tsbuildinfo
