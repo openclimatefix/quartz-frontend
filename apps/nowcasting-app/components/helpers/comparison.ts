@@ -10,7 +10,7 @@
  * Today there is exactly one B: observed generation, which is what the existing delta view
  * compares against. "Forecast vs N-hour forecast" is the second preset over the same
  * mechanism and the full A-and-B picker is Delta v2 — deferred (contract OPEN 9), and it grows
- * in this list and in Track E's "Colour by" control, needing no new surface.
+ * in this list and in Track E's "Map shows" control, needing no new surface.
  */
 
 export type ComparisonId = "generation";
@@ -20,14 +20,26 @@ export type ComparisonSelection = ComparisonId | null;
 
 export type ComparisonPreset = {
   id: ComparisonId;
-  /** Names the B side, for the control that selects it. */
+  /**
+   * What the option is called in the "Map shows" control.
+   *
+   * Names the *encoding*, not the B side. It used to read "Generation", which composed with the
+   * group label into "Colour by: Generation" — i.e. colour regions by generation output, which
+   * is the one thing this option does not do. It colours them by the difference. (Brad,
+   * 2026-08-15. The group label moved to "Map shows" in the same pass: the control was never
+   * really about colour, it is about which data is on the map, and colour is only how.)
+   *
+   * With a second preset this becomes ambiguous — two options both called "Delta" — and the
+   * answer is either a suffix ("Delta vs generation") or one delta option with its B side
+   * chosen separately. That is Delta v2's problem; deferred with it, contract OPEN 9.
+   */
   label: string;
   /** What the comparison is, for the chart header's passive echo (§5). */
   title: string;
 };
 
 export const COMPARISON_PRESETS: readonly ComparisonPreset[] = [
-  { id: "generation", label: "Generation", title: "Forecast vs generation" }
+  { id: "generation", label: "Delta", title: "Forecast vs generation" }
 ];
 
 /** What the plain-forecast option is called wherever the presets are listed alongside it. */

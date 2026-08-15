@@ -23,13 +23,13 @@ import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDo
  *
  * Everything here answers "what does the map's colour mean, and what basemap am I looking at
  * under it" — contract §5's case for keeping this cluster off the display rail. But that is
- * four different questions (which basemap layer, what the colour encodes, what unit, what
+ * four different questions (which basemap layer, which data, what unit, what
  * grouping), plus the legend, and §6a flagged this corner as already at its limit *before*
  * the layer controls joined it. One panel does not have to mean one flat stack, so it splits
  * into two tiers:
  *
- * - **Always visible**: `MapLayerControls` (Clouds/PV + satellite channel), "Colour by" (which
- *   encoding), `UnitToggle` (%/MW/Capacity) and `ColorGuideBar` (the legend). The middle three
+ * - **Always visible**: "Map shows" (which encoding), `UnitToggle` (%/MW/Capacity),
+ *   `ColorGuideBar` (the legend) and `MapLayerControls` (Clouds/PV + satellite channel). The middle three
  *   are one conversation — select the encoding, pick the unit it's shown in, read what the
  *   current colours mean — and the unit toggle stays out of the collapsible tier deliberately:
  *   it changes the numbers the always-visible legend shows, so hiding it behind a disclosure
@@ -43,8 +43,15 @@ import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDo
  * describe *how the map is drawn* rather than *what the colour means*. That line is real, but
  * it was the wrong cut: clouds are the context a user reads the forecast *against*, so the
  * toggle belongs where they can reach it without opening anything — and it was a top-level
- * control before this panel existed. A consolidation must not demote what it absorbs. It sits
- * first, above the encoding, because it is the ground the rest is drawn on.
+ * control before this panel existed. A consolidation must not demote what it absorbs.
+ *
+ * **But it sits below the encoding block, not above it** (Brad, 2026-08-15). It first sat first,
+ * on the reasoning that the basemap is the ground the rest is drawn on — true, and it cost more
+ * than it bought. The layer controls are forecast-only, so switching to delta unmounted them and
+ * dropped everything beneath by their full height: the encoding options, the unit toggle and the
+ * legend all jumped upward, under a pointer that had just clicked one of them. Ordering by
+ * conceptual precedence is worth less than a panel whose controls stay where the user left them.
+ * Below the legend, the only thing the switch moves is the settings disclosure.
  *
  * Rejected: putting `AggregationLevelToggle` and `MapLayerControls` on the display rail
  * instead. That would satisfy §6's letter but not Brad's explicit ask — "into one panel" — and
@@ -83,20 +90,10 @@ const MapEncodingControls: FC = () => {
 
   return (
     <div className="flex flex-col gap-1.5 rounded-lg border border-white/10 bg-mapbox-black-700/95 p-2 text-white shadow-2xl">
-      {/* Satellite/PV layers are forecast-map concepts only — the delta map has no basemap fill
-          to toggle, so this mirrors `map.tsx`'s old `title === MAP_TITLE_FORECAST` gate,
-          expressed here since this panel is now the one place that knows which map is mounted
-          (`comparison === null` is the forecast map, contract §2). */}
-      {comparison === null && (
-        <>
-          <MapLayerControls />
-          <div className="border-b border-white/10" />
-        </>
-      )}
       <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
-        Colour by
+        Map shows
       </span>
-      <div className="flex gap-1" role="group" aria-label="Colour by">
+      <div className="flex gap-1" role="group" aria-label="Map shows">
         <ComparisonOption
           id={null}
           label={NO_COMPARISON_LABEL}
@@ -118,6 +115,21 @@ const MapEncodingControls: FC = () => {
           unit and an aggregation level — so it is simply never disabled here. */}
       <UnitToggle activeUnit={activeUnit} setActiveUnit={setActiveUnit} isLoading={false} />
       <ColorGuideBar comparison={comparison} unit={activeUnit} />
+
+      {/* Satellite/PV layers are forecast-map concepts only — the delta map has no basemap fill
+          to toggle, so this mirrors `map.tsx`'s old `title === MAP_TITLE_FORECAST` gate,
+          expressed here since this panel is now the one place that knows which map is mounted
+          (`comparison === null` is the forecast map, contract §2).
+
+          It sits *below* the encoding block rather than above it, so that switching to the delta
+          view — which unmounts it — cannot shove the encoding controls and legend upward under
+          the pointer. See the note on ordering above. */}
+      {comparison === null && (
+        <>
+          <div className="border-b border-white/10" />
+          <MapLayerControls />
+        </>
+      )}
 
       <button
         type="button"
