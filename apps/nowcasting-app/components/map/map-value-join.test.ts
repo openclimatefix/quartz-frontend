@@ -337,6 +337,51 @@ describe("buildMapFeatureStates against the recorded GB fixtures", () => {
 });
 
 /**
+ * The map popups (`pvLatestMap.tsx`, `deltaMap.tsx`) print `label` straight off feature state,
+ * so the registry's casing rule has to be applied here or the popup disagrees with the chart
+ * title over the same region — which is exactly what it did: "noord-brabant" hovered,
+ * "Noord-Brabant" charted. Nothing in the types can catch that, since both are strings.
+ */
+describe("feature-state labels carry the registry's casing rule", () => {
+  const PROVINCE_LEVEL = aggregationLevel("province");
+  const provinces = [
+    region("noord-brabant", { label: "noord-brabant", regionType: "province" }),
+    region("utrecht", { label: "utrecht", regionType: "province" })
+  ];
+
+  test("NL's provinces are title-cased, hyphenated compounds included", () => {
+    const states = buildMapFeatureStates(
+      PROVINCE_LEVEL,
+      {
+        regions: provinces,
+        forecast: series({ "noord-brabant": [1, 2, 3] }),
+        generation: undefined,
+        targetTime: TIMES[0],
+        timeNow: TIMES[2]
+      },
+      { country: "nl" }
+    );
+    expect(states.get("noord-brabant")!.label).toBe("Noord-Brabant");
+    expect(states.get("utrecht")!.label).toBe("Utrecht");
+  });
+
+  test("GB's GSP codes are left exactly as the API wrote them", () => {
+    const states = buildMapFeatureStates(
+      GSP_LEVEL,
+      {
+        regions: normaliseRegions(gbRegionsGsp as never),
+        forecast: normaliseForecastMatrix(gbGspForecastPeriod as never),
+        generation: undefined,
+        targetTime: normaliseForecastMatrix(gbGspForecastPeriod as never).times[20],
+        timeNow: normaliseForecastMatrix(gbGspForecastPeriod as never).times[47]
+      },
+      { country: "gb" }
+    );
+    expect(states.get(67)!.label).toBe("City Road");
+  });
+});
+
+/**
  * The three states have to be *visibly* three states, which lives in the paint expressions
  * rather than in the data. Mapbox's own expression evaluator is not reachable from jsdom, so
  * the handful of operators used here are evaluated directly — enough to prove that

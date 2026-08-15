@@ -6,7 +6,9 @@ import { regionSnapshotState } from "../../hooks/data";
 import type { RegionSnapshotState } from "../../hooks/data";
 import type { AggregationLevel } from "./aggregationLevels";
 import type { GeoJoinTransform } from "../../config/countries";
+import { getCountryConfig } from "../../config/countries";
 import { geoAliasesFor, isLegacyRegion } from "../../config/geo-aliases";
+import { formatRegionLabel } from "../../lib/domain/region-label";
 import type {
   Region,
   RegionSeries,
@@ -519,12 +521,23 @@ export const buildMapFeatureStates = (
     );
   }
 
+  // The map popups read `label` straight off feature state, so this is where the registry's
+  // casing rule has to land for them — the same `formatRegionLabel` the chart title uses
+  // (`gsp-pv-remix-chart/index.tsx`), so NL's `noord-brabant` reads "Noord-Brabant" in both.
+  // Derived levels are excluded above by construction: a group's label is its grouping-file
+  // name, already written, and title-casing it would give "Ukpn (East)".
+  const regionNameStyle = getCountryConfig(options.country)?.geo[level?.regionType ?? ""]
+    ?.regionNameStyle;
+
   const byFeatureId = new Map<string | number, MapFeatureState>();
   for (const region of inputs.regions ?? []) {
     if (isLegacyRegion(options.country, region.name)) continue;
     const value = byRegionName.get(region.name);
     if (!value) continue;
-    byFeatureId.set(featureIdFor(region), value);
+    byFeatureId.set(featureIdFor(region), {
+      ...value,
+      label: formatRegionLabel(value.label, regionNameStyle)
+    });
   }
   return byFeatureId;
 };
