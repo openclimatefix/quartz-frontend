@@ -12,9 +12,22 @@ racing each other over `.next`. Tests and typecheck are reliable under concurren
 
 ---
 
+## 0. Start here next session
+
+**Merge the forecast and delta maps into one** — see `docs/forecast-delta-merge.md`, written
+2026-08-15 to be picked up cold. It carries the plan, an intent-vs-accident classification of every
+difference between the two components, and a Delta v2 prep section recording how delta actually
+works today (notably: **the chart and the map compute different deltas under the same name**).
+
+The camera-reset half of that problem is already fixed (`d1dd82d`); the remount flash is what
+remains.
+
 ## 1. Blocking something else
 
-**The pre-warm cache is stale, API-side.** GB's per-GSP `generation/period` came back with
+**The pre-warm cache is stale, API-side.** *(Still reproducing 2026-08-15: GB per-GSP
+`generation/period` returned zero slots with `cache_updated_utc` ~20 hours old, while GB forecast
+and both NL endpoints were fresh within the hour. Brad refreshed the cache and it did not take. It
+is specifically that one cache.)* GB's per-GSP `generation/period` came back with
 `cache_updated_utc` roughly seven hours old, so no GB region had a computable delta at a recent
 cursor and the delta map drew GB uncoloured while NL filled normally. Scrubbing back ~2 hours made
 GB appear. **The client is behaving correctly** — the join, the normalisers, the observer parameter
@@ -120,6 +133,78 @@ zone before converting to UTC, and the jest suite silently ran in machine-local 
 
 **Trigger:** any feature that displays, counts down to, or aligns anything with a market deadline.
 Until then it changes nothing.
+
+## 5c. Re-validate the map thresholds once there is more than a week of data
+
+**Not blocking. Re-run when a season's worth of history is reachable.**
+
+Raised 2026-08-15 while re-placing the `%`-of-capacity bands. The proposed set
+(`[3, 10, 20, 30, 40, 50, 70]`, eight bands) beats the current `[10, 20, 35, 50, 70]` on every day
+tested — but that is **six days, four of them in a single August week**, plus one December day
+built from snapshots. "Robust across six days" is not "robust".
+
+**What is safe to rely on** (structural, sample-independent):
+- MW-as-fill correlates 0.93–1.00 with installed capacity at every daylight hour. That is a fact
+  about the capacity distribution, not about a day's weather.
+- Only the *first* threshold is load-bearing. Moving it from 3 to 5 doubles the December
+  bottom-band share (14% → 26%); everything above it can be rounded freely with no measurable cost.
+- Spatial spread is a property of the **weather regime, not the country** — NL's twelve provinces
+  spanned 2pp one day and 55pp the next.
+
+**What needs more data:** the threshold values themselves, and whether eight bands still earns its
+extra steps outside August. December's median is 6% of capacity against August's 35%, so the shape
+of the distribution moves enormously across the year and two seasons is a thin basis.
+
+**Why it did not get done now:** the dev API's retention is short — `period` returned nothing before
+roughly 13 Aug, and the December day had to be assembled from 26 individual `snapshot` calls at
+5 req/s (`scratchpad/pull-day-snapshots.mjs` does this and resumes after a token expiry).
+
+**The check:** pull a spread of days across all four seasons — prod history if it is reachable,
+otherwise re-run the snapshot builder each month — and re-run the comparison in
+`docs/feedback/FEEDBACK-MATRIX.md` §6b's companion analysis: bands used, largest single band, and
+top-band share at peak. **Watch the largest-band figure, not a flat/not-flat count** — an 80%
+threshold missed a 58% pile-up during this session and gave a false pass.
+
+**Trigger:** before the thresholds are treated as settled, or at the next seasonal turn, whichever
+comes first.
+
+## 5d. An "as at" time control — replay the data as it stood earlier
+
+**Idea, not a decision. Nothing depends on it; raised so it does not get lost.**                                                                                                                     
+                                                                                                                                                                                                     
+Raised 2026-08-15 (Brad). Today the cursor moves along the *target* axis: it picks which                                                                                                             
+half-hour of generation you are looking at, always as described by the **latest** forecast run.                                                                                                      
+There is no way to ask the opposite question — *what did we think at 09:00 this morning?* — which                                                                                                    
+means the UI can show what happened but not what anyone knew at the time.                                                                                                                            
+                                                                                                                                                                                                     
+**Why it is worth a thought:**                                                                                                                                                                       
+                                                                                                                                                                                                     
+- It is the missing half of the revision question the corpus keeps raising. David at NESO reports                                                                                                    
+"very large revisions of the forecasts as we progressed through today" and wants deltas against                                                                                                    
+the 8h, 4h and 24h-ahead forecasts (`docs/feedback/FEEDBACK-MATRIX.md` RS-8); Archy's "lo-fi                                                                                                       
+alert" was Peter messaging him that the forecast had moved overnight. Both are asking to see a                                                                                                     
+past state of the forecast, not a past target time.                                                                                                                                                
+- It is also how a miss gets defended. "The 11:45 run had it at 3 GW" is a different and more                                                                                                        
+useful statement than "it turned out to be 4 GW", and the control room's decisions fix at the                                                                                                      
+4-hours-ahead point, so the forecast *as it stood then* is the one they acted on.                                                                                                                  
+- The chart already holds the concept — `PAST_FORECAST`, and sites' N-hour-ahead horizon — so                                                                                                        
+this is partly surfacing something the data model understands and the UI does not expose.                                                                                                          
+                                                                                                                                                                                                     
+**What it is not:** not the existing scrubber with a different label. Two independent axes —                                                                                                         
+target time and run time — and conflating them is the easiest way to build something that looks                                                                                                      
+right and answers neither. Worth being explicit about which one a given control moves.                                                                                                               
+                                                                                                                                                                                                     
+**Open questions before any design:**                                                                                                                                                                
+                                                                                                                                                                                                     
+- Does the v1 API serve a forecast *by init time*, or only the latest run per target? If not, this                                                                                                   
+is an API ask first and a UI question second.                                                                                                                                                      
+- Does it apply to the map, the chart, or both? A per-run map is a much heavier data path than a                                                                                                     
+per-run national series.                                                                                                                                                                           
+- Does it interact with the country cadence work? GB publishes every 30 minutes, NL every 15, so                                                                                                     
+"as at 09:00" resolves to a different run per country.                                                                                                                                             
+                                                                                                                                                                                                     
+**Trigger:** revisit alongside Delta v2 (contract OPEN 9) — they are the same underlying axis, and                                                                                                   
+designing one without the other risks two controls that mean nearly the same thing.
 
 ## 6. Older open questions, still open
 
