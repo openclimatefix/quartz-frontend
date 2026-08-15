@@ -247,7 +247,28 @@ Four audiences, with different drivers (Brad): control-room forecast makers/vali
 lights-on operators, traders (a solid number, with a hint of how sure), and meteorologists/analysts
 (why is this happening, is it sensible).
 
-**Do not build a mode per persona.** Their differences are defaults, not structure — which split,
+**A fifth was added 2026-08-15: asset & flex optimisers.** Added from the user-research corpus
+rather than from instinct — three independent organisations kept asking for the same things and none
+of the four covered them. Habitat Energy (battery optimisation, 24/7 desk, DSO flex services), Axle
+Energy (consumer flex) and the UKPN-adjacent conversations; Field sits near them too. Their driver:
+*is my patch worth acting on, and when?* They are commercially motivated like a trader but spatially
+specific like an operator, which is why they read as outliers when filed under either.
+
+They matter because they are the group asking hardest for the two spatial features we keep deferring
+— **multi-select with summation** and **constraint boundaries** — and because they are the only
+audience for whom "my area" is a literal thing they own rather than a region they are curious about.
+Habitat: "have to think more holistically how to balance specific nodes and generation in small
+regions." Their use is *episodic*: they arrive with one question, answer it, and leave — neither the
+control room's ambient watch nor the meteorologist's investigation.
+
+Evidence and citations: `docs/feedback/FEEDBACK-MATRIX.md` §1 (untracked; named customers).
+
+**Do not build a mode per persona** — and adding a fifth does not change that. The corpus makes the
+ruling stronger, not weaker: Outlook trade GB as a whole and want no regional detail at all, while
+Habitat, NESO and Axle all want finer regional control. Both are true, and neither is a mode. What
+the fifth persona changes is *who a feature is designed for*, not how many surfaces we build.
+
+Their differences are defaults, not structure — which split,
 which lines, which horizon, which level. Persist them. `visibleLines` and dashboard mode are already
 cookie-persisted; that is the right instinct applied to two settings instead of the set. Personas are
 for testing the result, not for designing it.

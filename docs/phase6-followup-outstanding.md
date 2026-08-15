@@ -91,6 +91,36 @@ and each failed silently rather than loudly:
 The map layer was swept during Phase 6 Track F; the chart layer never was. A deliberate pass over
 `components/charts/` for those three would likely find what is left before a user does.
 
+## 5b. Verify before building on it — GB market auction times and BST
+
+**Not now. Do it before anything is built against market deadlines, and do not lose it.**
+
+Raised 2026-08-15 while adding the GB intraday market clock to the user-research work (see
+`docs/feedback/FEEDBACK-MATRIX.md` §6b, untracked). EPEX's Focus GB diagram labels every GB auction
+time "GMT", which invites storing them as fixed UTC constants. That reading is wrong, and wrong in
+the direction that fails silently for seven months of the year.
+
+**What is already established:** SDAC's gate closure is anchored to **12:00 CET**, not to a UTC
+instant — 11:00 GMT in winter, 11:00 BST in summer (12:00 CEST = 10:00 UTC). The UK and EU change
+clocks simultaneously at 01:00 UTC on the same dates (Directive 2000/84/EC), so the GB↔CET offset
+is a constant hour and a CET-anchored deadline sits at a **constant UK local time**. EPEX's "GMT"
+label is a winter snapshot. Store as `Europe/London`, convert at use.
+
+**What is not established, and is the actual check:** that reasoning is proven for SDAC only. The
+GB-only auctions — EPEX 30-min intraday 08:00 and 17:30, EPEX 60-min day-ahead 09:20, EPEX 30-min
+day-ahead 15:30 — and N2EX's 09:50 have no published DST statement either way. The constant offset
+means CET-anchoring and UK-local-anchoring give an identical answer; only UTC-anchoring would
+differ.
+
+**The check, when someone gets to it:** pull a published auction result timestamp from July and one
+from January and compare. Five minutes against real data, and it settles it definitively. Worth
+doing because this repo has form here — audit B2 was date helpers rounding in the viewer's local
+zone before converting to UTC, and the jest suite silently ran in machine-local time until
+`globalSetup` pinned it.
+
+**Trigger:** any feature that displays, counts down to, or aligns anything with a market deadline.
+Until then it changes nothing.
+
 ## 6. Older open questions, still open
 
 From the contract: **OPEN 8** region types across countries; **OPEN 9** the full A/B comparison
