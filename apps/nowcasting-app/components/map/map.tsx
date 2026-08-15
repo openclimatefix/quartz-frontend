@@ -36,6 +36,13 @@ const MAP_FRAME_GUTTER_PX = 40;
 /** The narrowest strip the countries may be squeezed into before padding is scaled back. */
 const MIN_FRAMED_WIDTH_PX = 240;
 
+/**
+ * The enabled-country set this session has already framed the camera for, or `null` before the
+ * first framing. Module-level so it survives a remount of the map component — see the framing
+ * effect in `Map` for why that matters.
+ */
+let framedFor: string | null = null;
+
 // Moved to env by Phase 5 Track E — this was a hardcoded credential in source. See
 // `.env.example` / `docs/phase5-track-e-notes.md`.
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
@@ -145,21 +152,37 @@ const Map: FC<IMap> = ({
    *
    * Keyed on the enabled set alone, so nothing else moves the camera: not focus, not a region
    * selection, not an aggregation-level change. Once framed, the view is the user's to pan.
+   *
+   * **`framedFor` is module state, not a ref, and that is the point** (2026-08-15). It was a
+   * `useRef`, which meant it died with the component — and `pages/index.tsx` swaps `PvLatestMap`
+   * for `DeltaMap` when the user selects a comparison, unmounting this map and building a new
+   * one. The fresh instance started at `null`, decided it had never framed anything, and threw
+   * away the user's pan and zoom on every switch between forecast and delta. The viewport itself
+   * was never lost: `lng`/`lat`/`zoom` are country-scoped global state and restore correctly;
+   * it was this effect overwriting them a moment later.
+   *
+   * "Have we already framed this enabled set?" is a fact about the *session*, not about a
+   * particular React instance, so it lives where a remount cannot reach it. It is deliberately
+   * not global state: nothing renders from it, and writing it in an effect would cost a render
+   * for something no one reads.
+   *
+   * When the two maps become one component this stops mattering for the forecast/delta switch —
+   * but it would still be wrong to lose framing across any other remount, so the fix stands on
+   * its own. See the merge write-up in `docs/phase6-followup-outstanding.md`.
    */
   const enabledCountries = useEnabledCountries();
   const enabledKey = enabledCountries.join(",");
-  const framedRef = useRef<string | null>(null);
   useEffect(() => {
     if (!map.current || !isMapReady) return;
-    if (framedRef.current === enabledKey) return;
+    if (framedFor === enabledKey) return;
 
     const boxes = enabledCountries
       .map((code) => getCountryConfig(code)?.map.bounds)
       .filter((box): box is [number, number, number, number] => box !== undefined);
     if (boxes.length === 0) return;
 
-    const isFirstFraming = framedRef.current === null;
-    framedRef.current = enabledKey;
+    const isFirstFraming = framedFor === null;
+    framedFor = enabledKey;
     const union = boxes.reduce((acc, box) => [
       Math.min(acc[0], box[0]),
       Math.min(acc[1], box[1]),
