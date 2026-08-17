@@ -40,8 +40,10 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className, activeUnit }) => {
   // screen with the toggle unchanged. That is what made the two views look like they disagreed
   // about Swansea North (29% of capacity and 137 MW are the same reading).
   //
-  // Capacity is deliberately folded in with MW rather than given a third behaviour: installed
-  // capacity has no delta, so there is nothing for that unit to mean here.
+  // Capacity cannot reach here: `setComparison` moves the active unit off it when a comparison
+  // is selected, and the toggle greys it out for as long as one is. The `=== percentage` test
+  // therefore falls back to MW only as a defensive default, not as a claim that capacity means
+  // megawatts — that fallback was the bug (a control reading "Capacity" over a megawatt map).
   const showPercentage = activeUnit === ActiveUnit.percentage;
 
   // The delta view is single-region-level only. Rather than reading the user's stored level

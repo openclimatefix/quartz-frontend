@@ -317,7 +317,8 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
   // The manifest slice the map's own values pipeline reads, so the legend cannot name a
   // stream the fill was not computed from. No extra request: see `useMapObserver`.
   const { label } = useMapObserver(country ? { country, source: "solar" } : null);
-  // Capacity has no delta, so it reads as megawatts — the same fold `deltaMap.tsx` makes.
+  // Capacity cannot reach here — `setComparison` moves off it and the toggle disables it — so
+  // the MW branch is a defensive default rather than a statement about what capacity means.
   const asPercentage = unit === ActiveUnit.percentage;
   const unitText = asPercentage ? "% of capacity" : "MW";
   // The edges the paint expression actually steps on, in the unit being shown, so the legend

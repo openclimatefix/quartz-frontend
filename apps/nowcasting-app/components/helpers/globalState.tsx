@@ -453,6 +453,23 @@ export const toggleCountryEnabled = (code: string): void => {
  * split, `isSitesChart`), so this is a plain `setGlobalState` again.
  */
 export const setComparison = (id: ComparisonSelection): void => {
+  // Installed capacity has no delta, so "Capacity" is not a unit a comparison can be shown in.
+  // It used to fall through to megawatts, which put the map back in the state that started this
+  // whole thread: a control reading one unit while the map painted another.
+  //
+  // Enforced here rather than in the toggle's click handler because this is the one chokepoint
+  // every comparison change goes through — a deep link, restored state or any future caller
+  // gets the invariant too, instead of it holding only for the path through the button.
+  //
+  // Percentage rather than megawatts: it is the delta scale that works for both countries (the
+  // MW buckets leave 96% of GB's GSPs in the neutral bucket — see `DELTA_PERCENTAGE_EDGES`).
+  //
+  // Deliberately not restored on the way back to the forecast view. `activeUnit` is one shared
+  // setting, and remembering what we switched away from means the unit can also change under
+  // the user when they return — Brad's call: not worth the extra state.
+  if (id !== null && getGlobalState("activeUnit") === ActiveUnit.capacity) {
+    setGlobalState("activeUnit", ActiveUnit.percentage);
+  }
   setGlobalState("comparison", id);
 };
 

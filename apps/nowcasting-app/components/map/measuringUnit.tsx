@@ -15,17 +15,40 @@ type ButtonProps<T> = {
   onToggle: (event: ReactMouseEvent<HTMLButtonElement>, value: T) => Promise<void>;
   text: string;
   value: T;
+  /** Not applicable in the current view. Greyed and inert, with `title` saying why. */
+  unavailable?: boolean;
+  /** Shown on hover when `unavailable` — a disabled control with no reason reads as broken. */
+  unavailableReason?: string;
 };
 
-const MapUIButton = <T,>({ id, active, isLoading, onToggle, text, value }: ButtonProps<T>) => {
+const MapUIButton = <T,>({
+  id,
+  active,
+  isLoading,
+  onToggle,
+  text,
+  value,
+  unavailable = false,
+  unavailableReason
+}: ButtonProps<T>) => {
   return (
     <button
       onClick={(event) => onToggle(event, value)}
-      disabled={isLoading}
+      disabled={isLoading || unavailable}
       id={id}
+      title={unavailable ? unavailableReason : undefined}
+      aria-disabled={unavailable || undefined}
       type="button"
-      className={`${buttonClasses}  ${
-        active ? "text-black bg-ocf-yellow" : "text-white bg-black"
+      // `unavailable` beats `active`: a unit the current view cannot show must never render as
+      // the selected one, even for the frame before the state settles. The hover highlight goes
+      // too — `buttonClasses` carries a `hover:bg-ocf-yellow` that would otherwise make an inert
+      // button look live.
+      className={`${buttonClasses} ${
+        unavailable
+          ? "cursor-not-allowed bg-black text-ocf-gray-800 hover:bg-black hover:text-ocf-gray-800"
+          : active
+          ? "text-black bg-ocf-yellow"
+          : "text-white bg-black"
       } ${isLoading ? "cursor-wait" : ""} border-r last:border-r-0`}
     >
       {text}
@@ -43,7 +66,29 @@ export const UnitToggle: FC<{
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
   isLoading: boolean;
-}> = ({ activeUnit, setActiveUnit, isLoading }) => {
+  /**
+   * Units the current view cannot express, greyed and inert rather than hidden.
+   *
+   * Hidden was the alternative and is worse here: this panel already orders itself so that
+   * switching to delta cannot shove controls upward under the pointer (see the note in
+   * `map-encoding-controls.tsx`), and dropping a third of this toggle would do exactly that to
+   * the legend below it. A greyed button also says "not for this view" where a missing one says
+   * nothing at all.
+   *
+   * The toggle only *renders* the rule; it does not enforce it. `setComparison` guarantees the
+   * active unit is never one of these, so this cannot be the only thing standing between the
+   * user and a map painted in a unit its own control denies.
+   */
+  unavailableUnits?: readonly ActiveUnit[];
+  /** Why those units are unavailable, for the disabled buttons' tooltip. */
+  unavailableReason?: string;
+}> = ({
+  activeUnit,
+  setActiveUnit,
+  isLoading,
+  unavailableUnits = [],
+  unavailableReason
+}) => {
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit
@@ -62,6 +107,8 @@ export const UnitToggle: FC<{
           onToggle={onToggleUnit}
           text={"%"}
           value={ActiveUnit.percentage}
+          unavailable={unavailableUnits.includes(ActiveUnit.percentage)}
+          unavailableReason={unavailableReason}
         />
         <MapUIButton<ActiveUnit>
           id={"UnitButtonMW"}
@@ -70,6 +117,8 @@ export const UnitToggle: FC<{
           onToggle={onToggleUnit}
           text={"MW"}
           value={ActiveUnit.MW}
+          unavailable={unavailableUnits.includes(ActiveUnit.MW)}
+          unavailableReason={unavailableReason}
         />
         <MapUIButton<ActiveUnit>
           id={"UnitButtonCapacity"}
@@ -78,6 +127,8 @@ export const UnitToggle: FC<{
           onToggle={onToggleUnit}
           text={"Capacity"}
           value={ActiveUnit.capacity}
+          unavailable={unavailableUnits.includes(ActiveUnit.capacity)}
+          unavailableReason={unavailableReason}
         />
       </div>
     </div>
