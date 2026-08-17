@@ -51,18 +51,23 @@ type SpeedControlProps = {
  * The 1x/2x/4x rate picker, stacked under the play button (`index.tsx` owns the stack, and
  * that stacking is what lets both the footer and `/sites` pick this up for free).
  *
- * Same width as the button above it (`w-7`) so the pair reads as one column, not two
- * differently-sized controls sharing a corner. It is secondary to the button and the scrub
- * track it sits under, so it is a row of bare text rather than another bordered icon block —
- * quiet, not competing. `aria-pressed` marks the active speed the same way the button marks
- * play/pause; `role="group"` plus its `aria-label` say what the buttons are choosing between,
- * since colour/weight alone would not reach assistive tech.
+ * It takes its natural width, and the column above it centres on that. It was pinned to the
+ * button's own `w-7` so the pair would read as one column — but three labels do not fit in 28px,
+ * so they simply overflowed the box and printed across the scrub track's tick labels beside it.
+ * A control cannot be narrower than its contents; what makes the pair read as one column is the
+ * centring, not a shared width.
+ *
+ * It is secondary to the button and to the track it sits under, so it is a row of bare text
+ * rather than another bordered icon block — quiet, not competing. `aria-pressed` marks the
+ * active speed the same way the button marks play/pause; `role="group"` plus its `aria-label`
+ * say what the buttons are choosing between, since colour and weight alone would not reach
+ * assistive tech.
  */
 export const SpeedControl: React.FC<SpeedControlProps> = ({ speed, onChange }) => (
   <div
     role="group"
     aria-label={`Playback speed: ${speed}x`}
-    className="mt-1 flex w-7 justify-between"
+    className="mt-1 flex items-center gap-0.5"
   >
     {SPEEDS.map((s) => (
       <button

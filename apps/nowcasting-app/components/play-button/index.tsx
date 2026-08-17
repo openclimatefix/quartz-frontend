@@ -117,7 +117,11 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
     // Grows downward only, off the button's own top edge — `cursor-readout.tsx`'s wrapper
     // aligns that edge with the scrub track's strip (`self-start`), and a row rather than a
     // column here would push the speed control out to the side and off that line.
-    <div className="flex flex-col">
+    //
+    // `items-center` because the speed row is the wider of the two: the column is as wide as
+    // that row, and the button centres over it. `w-max` stops the column being sized by the
+    // flex row it sits in and letting the speeds spill sideways over the track's tick labels.
+    <div className="flex w-max flex-col items-center">
       <Ui
         onClick={() => {
           isPlaying ? pause() : play();
