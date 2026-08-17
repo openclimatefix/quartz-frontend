@@ -345,11 +345,15 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   /**
    * The full ARIA slider keyboard, owned here while the track has focus.
    *
-   * Left/Right are also bound on `document` by `use-hot-key-control-chart`, which stands down
-   * for events originating in this control (the `data-cursor-scrubber` guard) so a press is not
-   * handled twice. Owning them here rather than leaving them to that hook is what gives the
-   * *delta* view arrow keys at all — its own call to the hook is commented out — and it means
-   * every key steps on the scale the handle is drawn against, so the ends agree.
+   * Left/Right are also bound on `document` by `use-cursor-hotkeys`, which stands down for
+   * events originating in this control (the `data-cursor-scrubber` guard) so a press is not
+   * handled twice. Owning them here is what gives the track the rest of the ARIA slider
+   * keyboard (Home/End/PageUp/PageDown), and it means every key steps on the scale the handle
+   * is drawn against.
+   *
+   * It used to carry a second justification — that the delta view had no arrow keys otherwise,
+   * since the hook was mounted per chart and that view's call was commented out. That is fixed
+   * at the source: the hook is mounted once by `dashboard-shell.tsx` and both views have it.
    */
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const current = scale;

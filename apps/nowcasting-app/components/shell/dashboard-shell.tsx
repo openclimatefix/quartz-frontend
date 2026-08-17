@@ -8,6 +8,8 @@ import FloatingChart from "./floating-chart";
 import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
 import { RAIL_WIDTH_PX } from "./geometry";
+import { useCursorRange } from "./use-cursor-range";
+import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
 
 /**
  * The dashboard shell — the map is the ground, everything else floats on it.
@@ -49,6 +51,18 @@ const DashboardShell: FC<{
 }> = ({ dashboardModeActive, comparisonActive, map, chart }) => {
   const [displayPanelOpen, setDisplayPanelOpen] = useState(false);
   const railOpen = displayPanelOpen && !dashboardModeActive;
+
+  // Left/Right walk the shared cursor. Mounted here rather than inside a chart, which is where
+  // it used to live (`pv-remix-chart.tsx`): the shortcut writes `selectedISOTime`, which is the
+  // whole shell's state, and hanging it off a pane meant the comparison swap took it away — the
+  // arrow keys worked in the forecast view and did nothing in the delta view. The shell is
+  // mounted for both, so this is the level the binding's lifetime should match.
+  //
+  // Limits come from `useCursorRange`, not from the chart's own first/last forecast point. That
+  // is the range `ScrubTrack` is drawn against, so the keyboard and the drag handle now agree
+  // about where the ends are; they could differ before. It costs no request — `CursorReadout`'s
+  // track already calls this hook and the two share the SWR entry.
+  useCursorHotkeys(useCursorRange()?.range);
 
   return (
     // `pt-16` reserves the header's height: `Header` positions itself absolutely, as it always

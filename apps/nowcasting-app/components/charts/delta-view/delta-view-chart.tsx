@@ -345,15 +345,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     (v) => v.timeUtc.slice(0, 16) === formatISODateString(selectedTimeSlot)
   );
 
-  // const chartLimits = useMemo(
-  //   () =>
-  //     nationalForecastData?.[0] && {
-  //       start: nationalForecastData[0].targetTime,
-  //       end: nationalForecastData[nationalForecastData.length - 1].targetTime
-  //     },
-  //   [nationalForecastData]
-  // );
-  // useHotKeyControlChart(chartLimits);
+  // The commented-out `chartLimits` / `useHotKeyControlChart` pair that sat here is gone — this
+  // view has arrow keys now, from `useCursorHotkeys` in `dashboard-shell.tsx`. Binding them per
+  // chart is what left this one without them in the first place.
 
   const chartData = useFormatChartData({
     forecastSeries: forecast.data,

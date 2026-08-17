@@ -88,7 +88,7 @@ const ChartResizeHandle: FC<GripProps & { axis?: ResizeAxis }> = ({
       tabIndex={axis === "both" ? 0 : undefined}
       aria-hidden={axis === "both" ? undefined : true}
       aria-label={grip.label}
-      // `use-hot-key-control-chart.tsx` runs a `document` keydown listener that steps the time
+      // `use-cursor-hotkeys.tsx` runs a `document` keydown listener that steps the time
       // cursor on Left/Right. It stands down for events originating inside anything marked as
       // handling the arrows itself; without this attribute, resizing the chart from the keyboard
       // would also walk the forecast time.

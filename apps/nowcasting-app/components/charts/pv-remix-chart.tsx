@@ -13,7 +13,6 @@ import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
 import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
-import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
 import { getTicks } from "../helpers/chartUtils";
@@ -162,16 +161,11 @@ const PvRemixChart: FC<{
     [observers, generation0.data, generation1.data]
   );
 
-  const chartLimits = useMemo(() => {
-    const values = forecastSeries?.values;
-    return (
-      values?.length && {
-        start: values[0].timeUtc,
-        end: values[values.length - 1].timeUtc
-      }
-    );
-  }, [forecastSeries]);
-  useHotKeyControlChart(chartLimits || undefined);
+  // The arrow-key cursor shortcut used to be bound here, clamped to this series' first and last
+  // point. It is `useCursorHotkeys` in `dashboard-shell.tsx` now — it writes shell state, and
+  // living here meant the delta view lost it on the chart swap. Its limits come from
+  // `useCursorRange`, the same window the scrub track uses, so `chartLimits` had no other reader
+  // and went with it.
 
   const chartData = useFormatChartData({
     forecastSeries,
