@@ -20,6 +20,7 @@ import { render, screen } from "@testing-library/react";
 
 import ColorGuideBar from "./color-guide-bar";
 import { ActiveUnit } from "./types";
+import { PERCENT_RAMP_TOP } from "./feature-state";
 
 let focused = "GB";
 let enabled: string[] = ["GB"];
@@ -117,9 +118,18 @@ describe("the legend's bands are the focused country's", () => {
       focused = "GB";
       enabled = ["GB"];
       currentLevel = level("gsp");
-      expect(rampTicks()).toEqual(["3", "10", "20", "30", "40", "50", "70%+"]);
+      // The final tick is `PERCENT_RAMP_TOP` itself, not an annotation, so it is derived here
+      // rather than written out — it moved 0.7 -> 0.8 on 2026-08-17 and will move again if the
+      // ramp is ever made seasonal or user-settable.
+      const top = `${Math.round(PERCENT_RAMP_TOP * 100)}%+`;
+      expect(rampTicks()).toEqual(["3", "10", "20", "30", "40", "50", top]);
     });
 
+    // Load-bearing, not incidental. A per-country ramp top was proposed on 2026-08-17 to stop
+    // NL clamping, and rejected because percentage is *normalised* — it exists so regions in
+    // different countries can be read against each other, and a per-country scale would paint
+    // the same capacity factor at two different opacities. This test is what fails if anyone
+    // tries it again; the ramp was widened for both countries at once instead.
     test("it is the same everywhere — it never needed calibrating", () => {
       focused = "NL";
       enabled = ["NL"];

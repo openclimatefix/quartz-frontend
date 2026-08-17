@@ -64,14 +64,47 @@ export const BAND_OPACITIES = [0.03, 0.2, 0.4, 0.6, 0.8, 1];
  * - **`ZERO_OPACITY` is the ramp's bottom stop**, so a region generating a real 0 still draws at
  *   3% rather than vanishing — audit B8's distinction, and the reason a night map reads as dark
  *   rather than empty. Brad's call to keep 3% rather than raise it.
- * - **The ramp saturates at `PERCENT_RAMP_TOP`**, matching the old top band, so anything at or
- *   above 70% of capacity is full strength. GB reaches this rarely and NL routinely; both are
- *   correct, and `interpolate` clamps beyond its last stop.
+ * - **The ramp saturates at `PERCENT_RAMP_TOP`**, so anything at or above it is full strength,
+ *   and `interpolate` clamps beyond its last stop.
  */
 export const ZERO_OPACITY = BAND_OPACITIES[0];
 
-/** Fraction of installed capacity at which the percentage ramp reaches full opacity. */
-export const PERCENT_RAMP_TOP = 0.7;
+/**
+ * Fraction of installed capacity at which the percentage ramp reaches full opacity.
+ *
+ * **One value for every country, deliberately.** Percentage is *normalised* — it exists so a
+ * region in Zeeland and a region in Devon can be read against each other — and a per-country top
+ * would make 50% of capacity paint at two different opacities depending on which side of the
+ * North Sea it fell on. That was proposed on 2026-08-17 (by analogy with `mapBands`, which *is*
+ * per country) and rejected: megawatts are absolute and region sizes differ 48×, so MW bands have
+ * no cross-country comparability to lose. This is the exact inverse case. Do not make it a
+ * registry field.
+ *
+ * A consequence worth expecting rather than correcting: with both countries in frame **NL reads
+ * systematically brighter than GB**, because its median capacity factor genuinely is higher (29%
+ * against 21%). That is the signal, not an artefact.
+ *
+ * **Raised 0.7 → 0.8 on 2026-08-17.** Measured over every daytime region-slot of 14–16 Aug:
+ *
+ * | top | GB clamps | GB p99 as % of ramp | NL clamps | NL p99 as % of ramp |
+ * |---|---|---|---|---|
+ * | 0.70 | 0.1% | 92% | **7.5%** | 114% |
+ * | 0.80 | 0.0% | 80% | 0.7% | 100% |
+ *
+ * At 0.7 NL clamped 7.5% of its daylight slots — hours around midday where every province
+ * rendered identical full opacity and all spatial variation was lost. GB was already well
+ * matched (p99 at 92% of the ramp; an earlier claim that GB's top third was "dead" was wrong,
+ * and confused "rarely clamps" with "unused"). The trade is deliberate and asymmetric: clamping
+ * *destroys* information, while the dimming GB pays for it (brightest regions at ~80% opacity
+ * rather than ~92%) merely rescales what is still all there.
+ *
+ * **Still an August fit.** GB's December median is 6% of capacity against August's 35%, so no
+ * single top serves both seasons — a winter map renders uniformly faint. Known and accepted
+ * (Brad, 2026-08-17): the next move is either a seasonal amendment or making this user-settable,
+ * and both are their own change. If it becomes user-settable it stays *one* setting, not one per
+ * country, for the reason above.
+ */
+export const PERCENT_RAMP_TOP = 0.8;
 
 /**
  * Reference values marked on the percentage legend, as fractions.
@@ -82,8 +115,13 @@ export const PERCENT_RAMP_TOP = 0.7;
  * along a ramp is not, and ticks give the eye somewhere to land. Chosen as round numbers because
  * a measured comparison found rounding free: only the lowest value is load-bearing (moving it
  * from 3% to 5% doubled December's bottom-of-scale crowding), and it is kept low for that reason.
+ *
+ * The **last entry is `PERCENT_RAMP_TOP` itself**, referenced rather than repeated: it is the one
+ * tick that is not an annotation but the end of the scale, and the legend places ticks at
+ * `fraction / PERCENT_RAMP_TOP`, so a literal here would silently drift off the end of the ramp
+ * the day the top moves. It did move (0.7 → 0.8) on 2026-08-17.
  */
-export const NORMALIZED_TICKS = [0.03, 0.1, 0.2, 0.3, 0.4, 0.5, 0.7];
+export const NORMALIZED_TICKS = [0.03, 0.1, 0.2, 0.3, 0.4, 0.5, PERCENT_RAMP_TOP];
 
 /**
  * Opacity for a feature whose country this build has no bands for.
