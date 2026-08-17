@@ -33,7 +33,8 @@ export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 //
 // STACK ORDER: every list here is ordered **bottom-most first** — the last entry
 // renders on top. This matters a lot, because each layer only contributes about
-// 0.42 effective alpha (texture alpha 180/255 x raster-opacity 0.6), so five
+// 0.42 effective alpha (texture alpha 180/255 x raster-opacity 0.6, the ramp's
+// peak — see CLOUD_FADE_START_ZOOM), so five
 // layers above something leave only (1-0.42)^5 ~= 7% of it visible. Anything
 // buried is effectively gone, and the stack averages out to flat grey. So the
 // crisp, high-contrast bands go last, and the flat ones go underneath.
@@ -136,6 +137,61 @@ export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
 const SAT_OPACITY = 0.6;
+
+/**
+ * Zooming *through* the clouds.
+ *
+ * SEVIRI resolves about 5 km per pixel over the UK. Web Mercator at 54°N is ~2,900 m/px at
+ * zoom 5, so the imagery is already being upsampled ~1.7× at GB's default framing and about
+ * 14× by zoom 8 — past a point it is not weather any more, it is large soft rectangles over
+ * the regions you zoomed in to read.
+ *
+ * So the cloud layer fades out as you zoom in, over 6.5 → 8.
+ *
+ * **The start is pinned to NL's default framing zoom** (`config/countries.ts`), and that is the
+ * binding constraint rather than a preference: NL frames at 6.5, so a band starting any lower
+ * would have NL users land on a view that is already half faded. GB frames at 5 and has room to
+ * spare. Sitting the start exactly on 6.5 means the ramp is still at full opacity there — the
+ * fade begins on the first push in past it, which is what makes it noticeable.
+ *
+ * The end at 8 is inside the GSP band (7 → 8.5), so the cloud is gone while GSP boundaries are
+ * still resolving rather than after they have. That ordering is the point (Brad, 2026-08-17):
+ * you should watch a good number of GSPs come into clarity *as* the cloud goes, instead of the
+ * cloud hanging around until it is one upsampled wisp over regions you are already reading.
+ *
+ * An earlier band was 7 → 8.5, exactly the GSP band. Tidier to describe and half a level too
+ * late in practice.
+ *
+ * One shared band rather than a per-country one because the camera is shared: with both
+ * countries enabled it frames their union, so "this country's framing zoom" is not a thing the
+ * camera has. That is also why the NL floor applies to everyone.
+ *
+ * Two mechanisms, doing different jobs:
+ *
+ * - the `interpolate` on `["zoom"]` is what makes it a *fade*. It is evaluated per frame by the
+ *   renderer, so it tracks a pinch or a scroll continuously — a JS zoom handler would only fire
+ *   at the end of the gesture and land as a pop;
+ * - `maxzoom` on the layer is what makes it *free*. Opacity 0 still costs a draw every frame,
+ *   which is the same reasoning the visibility comment below records, and at five stacked
+ *   composite layers that is worth avoiding. Mapbox stops drawing a layer at or above its
+ *   `maxzoom`, and since the ramp has already reached 0 at exactly that zoom, the cut is
+ *   invisible.
+ *
+ * Adjusting the feel is these two numbers and nothing else.
+ */
+export const CLOUD_FADE_START_ZOOM = 6.5;
+export const CLOUD_FADE_END_ZOOM = 8;
+
+const satOpacityExpression = (): mapboxgl.Expression => [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  CLOUD_FADE_START_ZOOM,
+  SAT_OPACITY,
+  CLOUD_FADE_END_ZOOM,
+  0
+];
+
 const SAT_TEXTURE_SIZE = 512;
 // Alpha of the brightest pixel in a decoded texture. Everything darker scales
 // down from here, so the effective ceiling matches the old flat value.
@@ -395,12 +451,18 @@ export function applyTifLayerToMap(
         id: layerId,
         type: "raster",
         source: sourceId,
+        // Zoomed in past the fade band the imagery is upsampled past usefulness, so stop
+        // drawing it. See `CLOUD_FADE_END_ZOOM` — the opacity ramp has already reached 0
+        // here, so this cuts nothing visible, it just stops paying for it.
+        maxzoom: CLOUD_FADE_END_ZOOM,
         // Hidden layers use layout visibility rather than zero opacity: Mapbox
         // skips a "none" layer entirely, whereas an opacity-0 layer is still drawn
         // every frame — which matters once a composite stacks several of them.
         layout: { visibility: "none" },
         paint: {
-          "raster-opacity": SAT_OPACITY,
+          // Not a flat value any more: fades out as the map zooms in. The ramp is a zoom
+          // expression rather than anything we drive, so it tracks a pinch continuously.
+          "raster-opacity": satOpacityExpression(),
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
           "raster-fade-duration": 0
