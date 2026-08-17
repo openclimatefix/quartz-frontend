@@ -346,7 +346,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalIntradayECMWFOnlyError) {
-    console.log(
+    console.warn(
       `ECMWF forecast data load error: ${JSON.stringify(nationalIntradayECMWFOnlyError)}`
     );
   }
@@ -363,7 +363,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalPvnetDayAheadError) {
-    console.log(
+    console.warn(
       `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetDayAheadError)}`
     );
   }
@@ -380,7 +380,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalPvnetIntradayError) {
-    console.log(
+    console.warn(
       `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
     );
   }
@@ -397,7 +397,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalMetOfficeOnlyError) {
-    console.log(
+    console.warn(
       `Met Office forecast data load error: ${JSON.stringify(nationalMetOfficeOnlyError)}`
     );
   }
@@ -414,7 +414,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalSatOnlyError) {
-    console.log(`Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`);
+    console.warn(`Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`);
   }
 
   const {
