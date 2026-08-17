@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 
 import useGlobalState, { setComparison } from "../helpers/globalState";
 import {
@@ -10,7 +10,6 @@ import { UnitToggle, AggregationLevelToggle } from "../map/measuringUnit";
 import { ActiveUnit } from "../map/types";
 import ColorGuideBar from "../map/color-guide-bar";
 import MapLayerControls from "../map/map-layer-controls";
-import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDown";
 
 /**
  * The one map control panel — Brad's ask, twice: "consolidate the map controls ... into one
@@ -27,17 +26,15 @@ import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDo
  * four different questions (which basemap layer, which data, what unit, what
  * grouping), plus the legend, and §6a flagged this corner as already at its limit *before*
  * the layer controls joined it. One panel does not have to mean one flat stack, so it splits
- * into two tiers:
+ * into two blocks, divided by a rule:
  *
- * - **Always visible**: "Map shows" (which encoding), `UnitToggle` (%/MW/Capacity),
- *   `ColorGuideBar` (the legend) and `MapLayerControls` (Clouds/PV + satellite channel). The middle three
- *   are one conversation — select the encoding, pick the unit it's shown in, read what the
- *   current colours mean — and the unit toggle stays out of the collapsible tier deliberately:
- *   it changes the numbers the always-visible legend shows, so hiding it behind a disclosure
- *   would hide the reason those numbers just changed.
- * - **Behind "More map settings"**: `AggregationLevelToggle` (GSP/DNO grouping) alone. It is
- *   the one control here that is genuinely set-once — which polygons the map is cut into —
- *   rather than something read or switched while interpreting a forecast.
+ * - **What the colour means**: "Map shows" (which encoding), `UnitToggle` (%/MW/Capacity) and
+ *   `ColorGuideBar` (the legend). These are one conversation, in order — select the encoding,
+ *   pick the unit it is shown in, read what the current colours mean — so they stack, and the
+ *   unit toggle sits directly above the legend whose numbers it changes.
+ * - **How the map is drawn**: `MapLayerControls` ("Layers") and `AggregationLevelToggle`
+ *   ("Granularity"), side by side. Each is only two or three controls wide, so a column apiece
+ *   costs one section's height rather than two.
  *
  * **Cloud cover is a flagship feature, not a setting.** The first version of this panel filed
  * `MapLayerControls` behind the disclosure alongside the grouping toggle, reasoning that both
@@ -52,15 +49,26 @@ import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDo
  * dropped everything beneath by their full height: the encoding options, the unit toggle and the
  * legend all jumped upward, under a pointer that had just clicked one of them. Ordering by
  * conceptual precedence is worth less than a panel whose controls stay where the user left them.
- * Below the legend, the only thing the switch moves is the settings disclosure.
+ * Below the legend it is the last thing in the panel, so there is nothing left for it to move.
  *
  * Rejected: putting `AggregationLevelToggle` and `MapLayerControls` on the display rail
  * instead. That would satisfy §6's letter but not Brad's explicit ask — "into one panel" — and
  * it would split one coherent "what/how the map draws" story across two pieces of chrome for
  * no gain, since the rail is about the *chart's* series and confidence bands.
  *
- * `settingsOpen` is local and not persisted: it is a disclosure, not a preference like
- * `visibleLines`.
+ * **The "More map settings" disclosure is gone** (Brad, 2026-08-17). It held exactly one
+ * control, `AggregationLevelToggle`, on the reasoning that which polygons the map is cut into
+ * is set once rather than read while interpreting a forecast. A disclosure hiding a single
+ * control is a click and an unlabelled chevron charged for nothing, and pairing it with the
+ * layer controls as a second column costs no height at all: the row is as tall as "Layers"
+ * was on its own.
+ *
+ * Note this puts granularity behind the same `comparison === null` gate the layer controls
+ * already had, so it is forecast-only where it used to be reachable in the delta view too.
+ * That follows the app's own intent rather than adding to it — `pages/index.tsx` force-snaps
+ * the level to the country's finest on entering delta, so the control was offering a choice
+ * the view had already made. If delta should keep it, the honest form is a disabled button
+ * with a reason, the way `UnitToggle` handles capacity — not a live control fighting an effect.
  */
 
 const OPTION_BASE = "flex-1 rounded px-2 py-1 text-xs font-semibold transition-colors";
@@ -87,7 +95,6 @@ const ComparisonOption: FC<{
 const MapEncodingControls: FC = () => {
   const [comparison] = useGlobalState("comparison");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-1.5 rounded-lg border border-white/10 bg-mapbox-black-700/95 p-2 text-white shadow-2xl">
@@ -144,28 +151,26 @@ const MapEncodingControls: FC = () => {
       {comparison === null && (
         <>
           <div className="border-b border-white/10" />
-          <MapLayerControls />
+          {/* Two columns rather than two stacked sections. Both answer "how is the map drawn"
+              rather than "what does its colour mean", they are each two or three controls wide,
+              and side by side they cost one section's height instead of two — which is what
+              paid for the disclosure going away. */}
+          <div className="flex items-start gap-3">
+            <div className="min-w-0 flex-1">
+              <MapLayerControls />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              {/* `MapLayerControls` carries its own "Layers" heading; this one is written here
+                  because `AggregationLevelToggle` is shared and has no business knowing which
+                  panel section it has been placed in. Same classes, so the two columns head
+                  identically. */}
+              <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+                Granularity
+              </span>
+              <AggregationLevelToggle isLoading={false} />
+            </div>
+          </div>
         </>
-      )}
-
-      <button
-        type="button"
-        onClick={() => setSettingsOpen((open) => !open)}
-        aria-expanded={settingsOpen}
-        aria-label="More map settings"
-        className="mt-0.5 flex items-center justify-between rounded px-1 py-1 text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600 hover:text-white border-t border-white/10 pt-1.5"
-      >
-        {/*More map settings*/}
-        <MdKeyboardArrowDown
-          size={14}
-          className={`transition-transform ${settingsOpen ? "rotate-180" : ""}`}
-        />
-      </button>
-
-      {settingsOpen && (
-        <div className="flex flex-col gap-1.5">
-          <AggregationLevelToggle isLoading={false} />
-        </div>
       )}
     </div>
   );

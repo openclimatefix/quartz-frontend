@@ -162,8 +162,11 @@ export const AggregationLevelToggle: FC<{ isLoading: boolean }> = ({ isLoading }
     console.log("sent event to Sentry: aggregation", regionType);
   };
 
+  // Left-aligned: it used to be pushed right, from when it sat alone on a full-width row of its
+  // own. It now shares a row with the layer controls as the "Granularity" column, and a column's
+  // contents begin at the column's edge.
   return (
-    <div className="flex justify-end mr-0">
+    <div className="flex justify-start">
       <div className="inline-block">
         {finestLevel && (
           <MapUIButton<string>
