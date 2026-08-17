@@ -270,6 +270,29 @@ export type CountryConfig = {
   map: MapDefaults;
   /** The map's opacity bands, in MW. See `MapBandsConfig`. */
   mapBands: MapBandsConfig;
+  /**
+   * Which generation observer the map paints against, by its manifest `name`.
+   *
+   * The map shows one instant, and every region in that instant must be read against the
+   * *same* observer or the frame is not comparable with itself — so this is one name per
+   * country, not a per-region preference.
+   *
+   * It exists because the map used to take `generationSources.data[0]` — "first in the
+   * manifest", which nobody chose and which happens to be `pvlive_in_day` (PV Live Estimated)
+   * for GB. That made a serving order into a data decision: adding a GB observer, or the API
+   * reordering its list, would silently repaint every delta on the map with no diff anywhere
+   * to explain it. NL has one observer, which is why it never bit.
+   *
+   * Naming it here does not make the choice *right* — GB's "most up-to-date actual" is
+   * sometimes Updated rather than Estimated, and the chart already resolves it that way
+   * (`docs/forecast-delta-merge.md` Part 2). It makes the choice *visible*, and it is what
+   * the legend and popup now name on screen, so the map can no longer be read as showing an
+   * actual it is not showing. Choosing per timestep is Delta v2's job.
+   *
+   * A name the manifest does not carry falls back to the first entry rather than sending an
+   * observer the API will 400 on — see `resolveMapObserver`.
+   */
+  mapObserver: string;
   /** Keyed by region type as the manifest spells it. */
   geo: Record<string, GeoLayerConfig>;
   /** Keyed by the synthetic region type name. Empty for countries with no groupings. */
@@ -325,6 +348,9 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       region: [50, 150, 250, 350, 450],
       grouped: [500, 1500, 2500, 3500, 4500]
     },
+    // PV Live Estimated — the in-day observer. This is what the map has always drawn (it was
+    // `[0]` of the manifest); naming it changes no pixels, only who decided it.
+    mapObserver: "pvlive_in_day",
     geo: {
       national: {
         url: "/geo/gb/national.json",
@@ -456,6 +482,10 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       // rather than inherited: see `MapBandsConfig`.
       grouped: null
     },
+    // NL's only observer, so this names what the fallback would have picked anyway. Stated
+    // rather than left to the fallback: a second NL observer should be a config decision, not
+    // a silent change of meaning the day the manifest grows one.
+    mapObserver: "ned_nl",
     geo: {
       national: {
         url: "/geo/nl/national.json",

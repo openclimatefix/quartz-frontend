@@ -73,6 +73,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     featureStates,
     geometry,
     capacityByCountry,
+    observerLabelByCountry,
     hasValues,
     isLoading,
     error,
@@ -135,6 +136,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   // silently report NL regions as a percentage of GB.
   const capacityByCountryRef = useRef(capacityByCountry);
   capacityByCountryRef.current = capacityByCountry;
+
+  // Same shape, same reason as capacity above: the popup names the observer its "actual" came
+  // from, and that is a per-country fact. Through a ref because the popup handler is built
+  // once, on the first effect run, and closes over whatever it can see at that moment.
+  const observerLabelByCountryRef = useRef(observerLabelByCountry);
+  observerLabelByCountryRef.current = observerLabelByCountry;
 
   // Toggle constraints visibility on map
   useEffect(() => {
@@ -257,6 +264,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             state.dataState === "value" ? ((state.normalized ?? 0) * 100).toFixed(0) : forecastText;
           const actualText = state.actual === null || state.actual === undefined ? "-" : "";
 
+          // Hoisted out of the capacity branch, which used to be the only thing that needed it:
+          // the observer label is per country too, so every unit needs to know whose region
+          // this is.
+          const featureCountry = String(properties?.[REGION_COUNTRY_PROPERTY] ?? "").toUpperCase();
+          // What the left-hand number actually is. Falls back to "Actual" only while the
+          // manifest is still in flight — never as a permanent name for it, which is the whole
+          // point of the change.
+          const actualLabel = observerLabelByCountryRef.current[featureCountry] ?? "Actual";
+
           let actualValue = "";
           let forecastValue = "";
           let unit = "";
@@ -272,9 +288,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             unit = "%";
           } else if (currentActiveUnit === ActiveUnit.capacity) {
             // This region's own country's national capacity, off the feature.
-            const featureCountry = String(
-              properties?.[REGION_COUNTRY_PROPERTY] ?? ""
-            ).toUpperCase();
             const nationalCapacity = capacityByCountryRef.current[featureCountry] ?? 0;
             actualValue =
               nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : "-";
@@ -282,7 +295,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             unit = "MW";
           }
 
-          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
+          // Was "Actual / Forecast", which named neither of GB's two observers and so let the
+          // in-day estimate read as "the actual". The heading is the stream's own label now.
+          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">${actualLabel} / Forecast</span>
               <div>
                 <span class="">${actualValue}</span>  /
                 <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">${unit}</span>

@@ -76,6 +76,8 @@ const featureState = (power: number): MapFeatureState => ({
   capacity: 100,
   actual: null,
   delta: 0,
+  deltaNormalized: 0,
+  deltaBucketNormalized: DELTA_BUCKET.ZERO,
   deltaBucket: 0,
   hasDelta: false,
   label: ""
@@ -99,6 +101,7 @@ jest.mock("./use-map-region-values", () => ({
   })
 }));
 
+import { DELTA_BUCKET } from "../../constant";
 import {
   useEnabledCountryMapData,
   type EnabledCountryMapData

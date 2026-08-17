@@ -4,9 +4,9 @@ import {
   useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
-  useGenerationSources,
   useRegions
 } from "../../hooks/data";
+import { useMapObserver } from "./map-observer";
 import { useMapGeometry } from "../../hooks/data/use-map-geometry";
 import { getCountryConfig } from "../../config/countries";
 import { isLegacyRegion } from "../../config/geo-aliases";
@@ -85,6 +85,14 @@ export type MapRegionValues = {
    * `grem_p`). Closing it needs data, not arithmetic — do not "fix" it by scaling here.
    */
   nationalCapacityMw: number;
+  /**
+   * The display name of the observer this country's `actual` (and therefore its delta) was
+   * read from — "PV Live Estimated" for GB. `undefined` until the manifest resolves.
+   *
+   * Carried out of the values pipeline rather than looked up again by the popup, so the label
+   * on screen cannot drift from the stream the numbers came from. See `map-observer.ts`.
+   */
+  observerLabel: string | undefined;
   isLoading: boolean;
   error: unknown;
 };
@@ -160,10 +168,14 @@ export const useMapRegionValues = (
   // *enabled* country rather than only the focused one.
   //
   // So name it, from the manifest, never from a constant — and hold the request until it is
-  // known rather than letting the default fire and fail. `useGenerationSources` is a slice of
-  // the `/countries` response the header already has, so this costs no extra request.
-  const generationSources = useGenerationSources(scope);
-  const observer = generationSources.data?.[0]?.name;
+  // known rather than letting the default fire and fail.
+  //
+  // *Which* of the manifest's observers used to be `[0]`, i.e. serving order. It is now the
+  // registry's `mapObserver`, resolved against the manifest by `useMapObserver`, which also
+  // hands back the label the legend and popup put on screen. Same observer for GB as before
+  // (PV Live Estimated); the difference is that something chose it and something says so.
+  const mapObserver = useMapObserver(scope);
+  const observer = mapObserver.observer?.name;
   const generation = useGenerationPeriod(observer ? scope : null, { ...window, observer });
 
   // Geometry (and, for a derived level, its grouping file) is fetched rather than bundled
@@ -217,13 +229,14 @@ export const useMapRegionValues = (
     coverage,
     hasValues: coverage.published > 0,
     nationalCapacityMw,
-    // `generationSources` counts: until the manifest names this country's observer the
-    // generation request is deliberately not made, and without this the map would report
-    // itself loaded while still missing every observed value.
+    observerLabel: mapObserver.label,
+    // `mapObserver` counts: until the manifest names this country's observer the generation
+    // request is deliberately not made, and without this the map would report itself loaded
+    // while still missing every observed value.
     isLoading:
       regions.isLoading ||
       forecast.isLoading ||
-      generationSources.isLoading ||
+      mapObserver.isLoading ||
       generation.isLoading ||
       geo.isLoading,
     error: forecast.error ?? generation.error ?? regions.error ?? geo.error

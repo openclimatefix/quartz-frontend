@@ -72,6 +72,8 @@ import useMapRegionValues from "./use-map-region-values";
  */
 export type CountryStatus = {
   nationalCapacityMw: number;
+  /** Whose observed generation this country's values were read against — see `map-observer.ts`. */
+  observerLabel: string | undefined;
   hasValues: boolean;
   isLoading: boolean;
   error: unknown;
@@ -80,6 +82,7 @@ export type CountryStatus = {
 
 const EMPTY_STATUS: CountryStatus = {
   nationalCapacityMw: 0,
+  observerLabel: undefined,
   hasValues: false,
   isLoading: false,
   error: undefined,
@@ -99,6 +102,12 @@ export type EnabledCountryMapData = {
   featureStates: Map<string | number, MapFeatureState>;
   /** Installed capacity per country code, for the "% of national" popup. */
   capacityByCountry: Record<string, number>;
+  /**
+   * The observed-generation stream each country's values were read against, per country code,
+   * for the popup's "PV Live Estimated / Forecast" heading. `undefined` for a country whose
+   * manifest has not resolved yet.
+   */
+  observerLabelByCountry: Record<string, string | undefined>;
   /** True while ANY enabled country is still loading. */
   isLoading: boolean;
   /**
@@ -168,12 +177,20 @@ const CountryMapLayer: React.FC<LoaderProps> = ({
   const status = useMemo<CountryStatus>(
     () => ({
       nationalCapacityMw: values.nationalCapacityMw,
+      observerLabel: values.observerLabel,
       hasValues: values.hasValues,
       isLoading: values.isLoading,
       error: values.error,
       coverage
     }),
-    [values.nationalCapacityMw, values.hasValues, values.isLoading, values.error, coverage]
+    [
+      values.nationalCapacityMw,
+      values.observerLabel,
+      values.hasValues,
+      values.isLoading,
+      values.error,
+      coverage
+    ]
   );
 
   useEffect(() => onGeometry(country, geometry), [country, geometry, onGeometry]);
@@ -267,6 +284,12 @@ export const useEnabledCountryMapData = (
     return {
       capacityByCountry: Object.fromEntries(
         codes.map((code, index) => [code.toUpperCase(), statuses[index].nationalCapacityMw])
+      ),
+      // Keyed the same way as `capacityByCountry` and for the same reason: the popup reads one
+      // hovered feature, which carries its own country, and GB and NL can be in frame at once
+      // on different observers. A single app-wide label would be wrong for one of them.
+      observerLabelByCountry: Object.fromEntries(
+        codes.map((code, index) => [code.toUpperCase(), statuses[index].observerLabel])
       ),
       isLoading: statuses.some((entry) => entry.isLoading),
       hasValues: statuses.some((entry) => entry.hasValues),
