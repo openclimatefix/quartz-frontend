@@ -17,7 +17,6 @@ import type { AggregationLevel } from "./aggregationLevels";
 import type { Region } from "../../lib/domain/types";
 import { it } from "@jest/globals";
 
-
 // =========================================================================================
 // buildMapGeometry — pure since Phase 5
 // =========================================================================================

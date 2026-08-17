@@ -78,10 +78,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className, activeUnit }) => {
   const fillColor = useMemo(() => deltaFillColorExpression(showPercentage), [showPercentage]);
   // Built with the same flag as the colour: the two step on the same bucket field, and mixing
   // them would draw one scale's hue at the other scale's strength.
-  const fillOpacity = useMemo(
-    () => deltaFillOpacityExpression(showPercentage),
-    [showPercentage]
-  );
+  const fillOpacity = useMemo(() => deltaFillOpacityExpression(showPercentage), [showPercentage]);
 
   const appliedGeometryRef = useRef<FeatureCollection | null>(null);
   const appliedStatesRef = useRef<Map<string | number, MapFeatureState> | null>(null);

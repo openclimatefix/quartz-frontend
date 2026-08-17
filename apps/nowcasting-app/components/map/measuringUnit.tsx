@@ -82,13 +82,7 @@ export const UnitToggle: FC<{
   unavailableUnits?: readonly ActiveUnit[];
   /** Why those units are unavailable, for the disabled buttons' tooltip. */
   unavailableReason?: string;
-}> = ({
-  activeUnit,
-  setActiveUnit,
-  isLoading,
-  unavailableUnits = [],
-  unavailableReason
-}) => {
+}> = ({ activeUnit, setActiveUnit, isLoading, unavailableUnits = [], unavailableReason }) => {
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit

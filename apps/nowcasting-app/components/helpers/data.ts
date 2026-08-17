@@ -324,7 +324,9 @@ export const buildRegionValues = ({
       delta,
       deltaNormalized,
       deltaBucket: hasDelta ? getDeltaBucket(delta) : DELTA_BUCKET.ZERO,
-      deltaBucketNormalized: hasDelta ? getDeltaBucketNormalized(deltaNormalized) : DELTA_BUCKET.ZERO,
+      deltaBucketNormalized: hasDelta
+        ? getDeltaBucketNormalized(deltaNormalized)
+        : DELTA_BUCKET.ZERO,
       hasDelta,
       label: region.label
     });
@@ -393,9 +395,7 @@ export const rollUpRegionValues = (
       deltaNormalized: hasDelta && capacity > 0 ? delta / capacity : 0,
       deltaBucket: hasDelta ? getDeltaBucket(delta) : DELTA_BUCKET.ZERO,
       deltaBucketNormalized:
-        hasDelta && capacity > 0
-          ? getDeltaBucketNormalized(delta / capacity)
-          : DELTA_BUCKET.ZERO,
+        hasDelta && capacity > 0 ? getDeltaBucketNormalized(delta / capacity) : DELTA_BUCKET.ZERO,
       hasDelta,
       label: groupName
     });

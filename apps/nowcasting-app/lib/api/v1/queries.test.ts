@@ -137,10 +137,7 @@ describe("forecast", () => {
   test("an explicit start wins over the default", () => {
     // The property a selectable time-window control depends on: pass a window in and it is
     // used, untouched. The default only fills a gap.
-    const descriptor = forecast(
-      { ...scopes.GB, region: "1" },
-      { start: "2024-01-01T00:00:00Z" }
-    );
+    const descriptor = forecast({ ...scopes.GB, region: "1" }, { start: "2024-01-01T00:00:00Z" });
     expect(descriptor.params.query?.start_utc).toBe("2024-01-01T00:00:00Z");
   });
 

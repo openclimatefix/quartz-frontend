@@ -141,9 +141,9 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       // are the same partition of the same regions. They share `buildRegionValues`'s output
       // precisely so they cannot disagree; letting the panel stay on megawatts while the map
       // moved to percentages would have reintroduced that by the back door.
-      const deltaBucket = (asPercentage
-        ? value.deltaBucketNormalized
-        : value.deltaBucket) as DELTA_BUCKET;
+      const deltaBucket = (
+        asPercentage ? value.deltaBucketNormalized : value.deltaBucket
+      ) as DELTA_BUCKET;
       // Off the value join now, rather than recomputed here from `delta / capacity` — one
       // definition, and the panel's percentage and the map's cannot drift apart.
       const deltaNormalized = value.deltaNormalized;
