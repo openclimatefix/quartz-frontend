@@ -1,7 +1,7 @@
 import mapboxgl, { Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as Sentry from "@sentry/nextjs";
-import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 import { IMap, MAP_TITLE_FORECAST } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState, {
@@ -30,11 +30,7 @@ import {
 import { addMinutesToISODate } from "../helpers/utils";
 import { useEnabledCountries } from "../../hooks/data/use-countries";
 import { getCountryConfig } from "../../config/countries";
-
-/** Breathing room between a framed country and whatever chrome sits beside it. */
-const MAP_FRAME_GUTTER_PX = 40;
-/** The narrowest strip the countries may be squeezed into before padding is scaled back. */
-const MIN_FRAMED_WIDTH_PX = 240;
+import { FRAME_PADDING_PX, unionBounds, type Bounds } from "./frame-countries";
 
 /**
  * The enabled-country set this session has already framed the camera for, or `null` before the
@@ -172,67 +168,43 @@ const Map: FC<IMap> = ({
    */
   const enabledCountries = useEnabledCountries();
   const enabledKey = enabledCountries.join(",");
+
+  const frameToBounds = useCallback((bounds: Bounds, duration: number) => {
+    map.current?.fitBounds(
+      [
+        [bounds[0], bounds[1]],
+        [bounds[2], bounds[3]]
+      ],
+      { padding: FRAME_PADDING_PX, duration }
+    );
+  }, []);
+
+  /**
+   * The framing the "Reset Zoom" button performs. Held in a ref because that button is built
+   * once, inside the map-init effect, so anything it closes over is frozen at mount — which is
+   * precisely how it came to fly to a stale centre and zoom in the first place. A ref is read at
+   * click time, so it always frames the set that is enabled *now*.
+   */
+  const resetFramingRef = useRef<() => void>(() => {});
+  resetFramingRef.current = () => {
+    const union = unionBounds(enabledCountries);
+    if (union) frameToBounds(union, 1500);
+  };
+
   useEffect(() => {
     if (!map.current || !isMapReady) return;
     if (framedFor === enabledKey) return;
 
-    const boxes = enabledCountries
-      .map((code) => getCountryConfig(code)?.map.bounds)
-      .filter((box): box is [number, number, number, number] => box !== undefined);
-    if (boxes.length === 0) return;
+    const union = unionBounds(enabledCountries);
+    if (!union) return;
 
     const isFirstFraming = framedFor === null;
     framedFor = enabledKey;
-    const union = boxes.reduce((acc, box) => [
-      Math.min(acc[0], box[0]),
-      Math.min(acc[1], box[1]),
-      Math.max(acc[2], box[2]),
-      Math.max(acc[3], box[3])
-    ]);
-    // Frame the countries in the *visible* map, not the whole canvas. The floating chart and the
-    // control panel cover the left and right of the stage respectively, so centring on the canvas
-    // pushed GB under the chart and left the right-hand side empty. Padding each side by what
-    // actually covers it centres the countries in the gap between them instead.
-    //
-    // Only their widths are read, which is why the chart moving from the bottom edge to the top
-    // did not change this: both panes span enough of the stage's height that the horizontal gap
-    // between them is the framing constraint either way.
-    //
-    // Measured rather than derived from `CHART_SPLIT`: the chart's size is the user's since the
-    // drag-resize landed, so there is no constant left to read. This runs only when the enabled
-    // set changes, so one layout read costs nothing. A missing element (the sites route, an
-    // early frame) simply contributes no padding.
-    const canvas = map.current.getContainer().getBoundingClientRect();
-    const occlusion = (selector: string): number => {
-      const box = document.querySelector(selector)?.getBoundingClientRect();
-      if (!box || box.width === 0) return 0;
-      return Math.round(box.width + MAP_FRAME_GUTTER_PX);
-    };
-    const left = occlusion('[aria-label="Chart"]');
-    const right = occlusion('[aria-label="Map controls"]');
-    // Never let padding swallow the viewport: Mapbox throws if padding exceeds the canvas, and
-    // a narrow window with a full-width chart can genuinely ask for that.
-    const horizontalBudget = Math.max(0, canvas.width - MIN_FRAMED_WIDTH_PX);
-    const scale = left + right > horizontalBudget ? horizontalBudget / (left + right || 1) : 1;
 
-    map.current.fitBounds(
-      [
-        [union[0], union[1]],
-        [union[2], union[3]]
-      ],
-      {
-        padding: {
-          top: MAP_FRAME_GUTTER_PX,
-          bottom: MAP_FRAME_GUTTER_PX,
-          left: Math.round(left * scale),
-          right: Math.round(right * scale)
-        },
-        // The first framing is the initial view and should not animate in; later ones are a
-        // response to the user toggling a country, where the movement explains what changed.
-        duration: isFirstFraming ? 0 : 700
-      }
-    );
-  }, [enabledKey, enabledCountries, isMapReady]);
+    // The first framing is the initial view and should not animate in; later ones are a response
+    // to the user toggling a country, where the movement is what explains the change.
+    frameToBounds(union, isFirstFraming ? 0 : 700);
+  }, [enabledKey, enabledCountries, isMapReady, frameToBounds]);
   const resetButtonDiv = useRef<HTMLDivElement | null>(null);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
@@ -495,15 +467,11 @@ const Map: FC<IMap> = ({
             div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
             div.style.setProperty("display", "none");
             div.innerHTML = `<button title="Reset Zoom" style="padding:7px;">${ResetIcon()}</button>`;
+            // The same framing the enabled set gets on load, not a remembered centre and zoom.
+            // Read through a ref so it reflects the countries enabled *now* — this closure is
+            // built once, at map init, and everything captured here is frozen at that moment.
             div.onclick = () => {
-              m.flyTo({
-                center: [lng, lat],
-                zoom: zoom,
-                pitch: 0,
-                bearing: 0,
-                duration: 1500,
-                essential: true
-              });
+              resetFramingRef.current();
               div.style.setProperty("display", "none");
             };
             resetButtonDiv.current = div;
