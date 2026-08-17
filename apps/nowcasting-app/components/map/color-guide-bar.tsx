@@ -336,7 +336,7 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
           Until the manifest resolves, say the unit and no more rather than guessing a stream —
           an unnamed delta is exactly what this replaced.
         */}
-        {label ? `${unitText} · ${label} − forecast` : unitText}
+        {`${label} − forecast`}
       </span>
       {/*
         One `role="img"` with the whole scale in its label, rather than nine cells a screen
