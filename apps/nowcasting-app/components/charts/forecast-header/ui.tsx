@@ -199,7 +199,10 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       {/* The chart's country sits with the title because it qualifies it: these are GB's
           national numbers, not the app's. It is also the only country control on this half
           of the layout — the header owns which countries are *drawn*. */}
-      <div className="m-auto ml-5 flex items-center gap-2">
+      {/* `ml-3` rather than the old `ml-5` so the track's gap to the panel edge reads the same
+          on the left as above and below it. Top and bottom are equal to each other for free —
+          `m-auto` centres the group — so this is the one knob that sets all three. */}
+      <div className="m-auto ml-3 flex items-center gap-2">
         <ChartCountryPicker />
         <span className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black">
           National
