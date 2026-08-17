@@ -4,9 +4,14 @@ import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { useAggregationLevels, useCurrentAggregationLevel } from "../../hooks/data";
 import { defaultLevelOf } from "../helpers/aggregationLevels";
 import * as Sentry from "@sentry/nextjs";
-
-const buttonClasses =
-  "relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold hover:bg-ocf-yellow hover:text-mapbox-black-700 border-gray-600";
+import {
+  CONTROL_BUTTON_ACTIVE,
+  CONTROL_BUTTON_BASE,
+  CONTROL_BUTTON_GROW,
+  CONTROL_BUTTON_IDLE,
+  CONTROL_BUTTON_UNAVAILABLE,
+  CONTROL_ROW
+} from "./control-button";
 
 type ButtonProps<T> = {
   id: string;
@@ -19,6 +24,8 @@ type ButtonProps<T> = {
   unavailable?: boolean;
   /** Shown on hover when `unavailable` — a disabled control with no reason reads as broken. */
   unavailableReason?: string;
+  /** Share the group's width equally, for a group that spans the panel rather than a column. */
+  grow?: boolean;
 };
 
 const MapUIButton = <T,>({
@@ -29,7 +36,8 @@ const MapUIButton = <T,>({
   text,
   value,
   unavailable = false,
-  unavailableReason
+  unavailableReason,
+  grow = false
 }: ButtonProps<T>) => {
   return (
     <button
@@ -40,16 +48,14 @@ const MapUIButton = <T,>({
       aria-disabled={unavailable || undefined}
       type="button"
       // `unavailable` beats `active`: a unit the current view cannot show must never render as
-      // the selected one, even for the frame before the state settles. The hover highlight goes
-      // too — `buttonClasses` carries a `hover:bg-ocf-yellow` that would otherwise make an inert
-      // button look live.
-      className={`${buttonClasses} ${
+      // the selected one, even for the frame before the state settles.
+      className={`${CONTROL_BUTTON_BASE} ${grow ? CONTROL_BUTTON_GROW : ""} ${
         unavailable
-          ? "cursor-not-allowed bg-black text-ocf-gray-800 hover:bg-black hover:text-ocf-gray-800"
+          ? CONTROL_BUTTON_UNAVAILABLE
           : active
-          ? "text-black bg-ocf-yellow"
-          : "text-white bg-black"
-      } ${isLoading ? "cursor-wait" : ""} border-r last:border-r-0`}
+          ? CONTROL_BUTTON_ACTIVE
+          : CONTROL_BUTTON_IDLE
+      } ${isLoading ? "cursor-wait" : ""}`}
     >
       {text}
     </button>
@@ -91,40 +97,43 @@ export const UnitToggle: FC<{
     setActiveUnit(unit);
   };
 
+  // Spread across the panel rather than huddled at its right edge: this sits directly above the
+  // legend it re-scales, and a full-width row of three reads as one control with three settings.
   return (
-    <div className="flex justify-end mr-0">
-      <div className="inline-block">
-        <MapUIButton<ActiveUnit>
-          id={"UnitButtonPercentage"}
-          active={activeUnit === ActiveUnit.percentage}
-          isLoading={isLoading}
-          onToggle={onToggleUnit}
-          text={"%"}
-          value={ActiveUnit.percentage}
-          unavailable={unavailableUnits.includes(ActiveUnit.percentage)}
-          unavailableReason={unavailableReason}
-        />
-        <MapUIButton<ActiveUnit>
-          id={"UnitButtonMW"}
-          active={activeUnit === ActiveUnit.MW}
-          isLoading={isLoading}
-          onToggle={onToggleUnit}
-          text={"MW"}
-          value={ActiveUnit.MW}
-          unavailable={unavailableUnits.includes(ActiveUnit.MW)}
-          unavailableReason={unavailableReason}
-        />
-        <MapUIButton<ActiveUnit>
-          id={"UnitButtonCapacity"}
-          active={activeUnit === ActiveUnit.capacity}
-          isLoading={isLoading}
-          onToggle={onToggleUnit}
-          text={"Capacity"}
-          value={ActiveUnit.capacity}
-          unavailable={unavailableUnits.includes(ActiveUnit.capacity)}
-          unavailableReason={unavailableReason}
-        />
-      </div>
+    <div className={CONTROL_ROW}>
+      <MapUIButton<ActiveUnit>
+        grow
+        id={"UnitButtonPercentage"}
+        active={activeUnit === ActiveUnit.percentage}
+        isLoading={isLoading}
+        onToggle={onToggleUnit}
+        text={"%"}
+        value={ActiveUnit.percentage}
+        unavailable={unavailableUnits.includes(ActiveUnit.percentage)}
+        unavailableReason={unavailableReason}
+      />
+      <MapUIButton<ActiveUnit>
+        grow
+        id={"UnitButtonMW"}
+        active={activeUnit === ActiveUnit.MW}
+        isLoading={isLoading}
+        onToggle={onToggleUnit}
+        text={"MW"}
+        value={ActiveUnit.MW}
+        unavailable={unavailableUnits.includes(ActiveUnit.MW)}
+        unavailableReason={unavailableReason}
+      />
+      <MapUIButton<ActiveUnit>
+        grow
+        id={"UnitButtonCapacity"}
+        active={activeUnit === ActiveUnit.capacity}
+        isLoading={isLoading}
+        onToggle={onToggleUnit}
+        text={"Capacity"}
+        value={ActiveUnit.capacity}
+        unavailable={unavailableUnits.includes(ActiveUnit.capacity)}
+        unavailableReason={unavailableReason}
+      />
     </div>
   );
 };
@@ -162,49 +171,47 @@ export const AggregationLevelToggle: FC<{ isLoading: boolean }> = ({ isLoading }
     console.log("sent event to Sentry: aggregation", regionType);
   };
 
-  // Left-aligned: it used to be pushed right, from when it sat alone on a full-width row of its
-  // own. It now shares a row with the layer controls as the "Granularity" column, and a column's
-  // contents begin at the column's edge.
+  // Left-aligned and tight: it used to be pushed right and full-width, from when it sat alone on
+  // a row of its own. It now shares a row with the layer controls as the "Granularity" column, so
+  // its buttons stay their own width and start at the column's edge.
   return (
-    <div className="flex justify-start">
-      <div className="inline-block">
-        {finestLevel && (
-          <MapUIButton<string>
-            id={"GroupButtonGSP"}
-            active={currentLevel?.regionType === finestLevel.regionType}
-            isLoading={isLoading}
-            onToggle={onToggleAggregation}
-            text={finestLevel.label}
-            value={finestLevel.regionType}
-          />
-        )}
-        {/*<MapUIButton<string>*/}
-        {/*  id={"GroupButtonZones"}*/}
-        {/*  active={currentLevel?.regionType === "zone"}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  onToggle={onToggleAggregation}*/}
-        {/*  text={"NG Zones"}*/}
-        {/*  value={"zone"}*/}
-        {/*/>*/}
-        {dnoLevel && (
-          <MapUIButton<string>
-            id={"GroupButtonZones"}
-            active={currentLevel?.regionType === dnoLevel.regionType}
-            isLoading={isLoading}
-            onToggle={onToggleAggregation}
-            text={dnoLevel.label}
-            value={dnoLevel.regionType}
-          />
-        )}
-        {/*<MapUIButton<string>*/}
-        {/*  id={"GroupButtonZones"}*/}
-        {/*  active={currentLevel?.regionType === "national"}*/}
-        {/*  isLoading={isLoading}*/}
-        {/*  onToggle={onToggleAggregation}*/}
-        {/*  text={"National"}*/}
-        {/*  value={"national"}*/}
-        {/*/>*/}
-      </div>
+    <div className={`${CONTROL_ROW} flex-wrap`}>
+      {finestLevel && (
+        <MapUIButton<string>
+          id={"GroupButtonGSP"}
+          active={currentLevel?.regionType === finestLevel.regionType}
+          isLoading={isLoading}
+          onToggle={onToggleAggregation}
+          text={finestLevel.label}
+          value={finestLevel.regionType}
+        />
+      )}
+      {/*<MapUIButton<string>*/}
+      {/*  id={"GroupButtonZones"}*/}
+      {/*  active={currentLevel?.regionType === "zone"}*/}
+      {/*  isLoading={isLoading}*/}
+      {/*  onToggle={onToggleAggregation}*/}
+      {/*  text={"NG Zones"}*/}
+      {/*  value={"zone"}*/}
+      {/*/>*/}
+      {dnoLevel && (
+        <MapUIButton<string>
+          id={"GroupButtonZones"}
+          active={currentLevel?.regionType === dnoLevel.regionType}
+          isLoading={isLoading}
+          onToggle={onToggleAggregation}
+          text={dnoLevel.label}
+          value={dnoLevel.regionType}
+        />
+      )}
+      {/*<MapUIButton<string>*/}
+      {/*  id={"GroupButtonZones"}*/}
+      {/*  active={currentLevel?.regionType === "national"}*/}
+      {/*  isLoading={isLoading}*/}
+      {/*  onToggle={onToggleAggregation}*/}
+      {/*  text={"National"}*/}
+      {/*  value={"national"}*/}
+      {/*/>*/}
     </div>
   );
 };

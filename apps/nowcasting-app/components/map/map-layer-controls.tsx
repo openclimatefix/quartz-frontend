@@ -1,5 +1,11 @@
 import { FC } from "react";
 
+import {
+  CONTROL_BUTTON_ACTIVE,
+  CONTROL_BUTTON_BASE,
+  CONTROL_BUTTON_IDLE,
+  CONTROL_ROW
+} from "./control-button";
 import useGlobalState from "../helpers/globalState";
 import {
   SATELLITE_CHANNELS,
@@ -42,7 +48,7 @@ const MapLayerControls: FC = () => {
       <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
         Layers
       </span>
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={`${CONTROL_ROW} flex-wrap`}>
         <button
           type="button"
           onClick={() => {
@@ -50,10 +56,9 @@ const MapLayerControls: FC = () => {
             setShowCloudLayer(!showCloudLayer);
             if (turningOff) setShowPvLayer(true);
           }}
-          className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-            showCloudLayer
-              ? "text-black bg-ocf-yellow"
-              : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
+          aria-pressed={showCloudLayer}
+          className={`${CONTROL_BUTTON_BASE} ${
+            showCloudLayer ? CONTROL_BUTTON_ACTIVE : CONTROL_BUTTON_IDLE
           }`}
         >
           {isSatelliteLoading && (
@@ -85,10 +90,9 @@ const MapLayerControls: FC = () => {
           type="button"
           title="Toggle the yellow PV forecast overlay so clouds are easier to see"
           onClick={() => setShowPvLayer((v) => !v)}
-          className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-            showPvLayer
-              ? "text-black bg-ocf-yellow"
-              : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
+          aria-pressed={showPvLayer}
+          className={`${CONTROL_BUTTON_BASE} ${
+            showPvLayer ? CONTROL_BUTTON_ACTIVE : CONTROL_BUTTON_IDLE
           }`}
         >
           PV
@@ -100,7 +104,7 @@ const MapLayerControls: FC = () => {
           value={activeChannel}
           onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
           disabled={!!satelliteError}
-          className="w-full bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full cursor-pointer rounded border-none bg-black px-2 py-1 text-xs font-semibold text-white outline-none disabled:cursor-not-allowed disabled:opacity-70"
         >
           {satelliteError ? (
             <option value={activeChannel}>{satelliteError}</option>

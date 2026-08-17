@@ -9,6 +9,13 @@ import {
 import { UnitToggle, AggregationLevelToggle } from "../map/measuringUnit";
 import { ActiveUnit } from "../map/types";
 import ColorGuideBar from "../map/color-guide-bar";
+import {
+  CONTROL_BUTTON_ACTIVE,
+  CONTROL_BUTTON_BASE,
+  CONTROL_BUTTON_GROW,
+  CONTROL_BUTTON_IDLE,
+  CONTROL_ROW
+} from "../map/control-button";
 import MapLayerControls from "../map/map-layer-controls";
 
 /**
@@ -71,10 +78,6 @@ import MapLayerControls from "../map/map-layer-controls";
  * with a reason, the way `UnitToggle` handles capacity — not a live control fighting an effect.
  */
 
-const OPTION_BASE = "flex-1 rounded px-2 py-1 text-xs font-semibold transition-colors";
-const OPTION_ACTIVE = "bg-ocf-yellow text-black";
-const OPTION_IDLE = "bg-mapbox-black text-ocf-gray-400 hover:text-white";
-
 const ComparisonOption: FC<{
   id: ComparisonSelection;
   label: string;
@@ -86,7 +89,9 @@ const ComparisonOption: FC<{
     aria-pressed={active}
     title={hint}
     onClick={() => setComparison(id)}
-    className={`${OPTION_BASE} ${active ? OPTION_ACTIVE : OPTION_IDLE}`}
+    className={`${CONTROL_BUTTON_BASE} ${CONTROL_BUTTON_GROW} ${
+      active ? CONTROL_BUTTON_ACTIVE : CONTROL_BUTTON_IDLE
+    }`}
   >
     {label}
   </button>
@@ -101,7 +106,7 @@ const MapEncodingControls: FC = () => {
       <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
         Map shows
       </span>
-      <div className="flex gap-1" role="group" aria-label="Map shows">
+      <div className={CONTROL_ROW} role="group" aria-label="Map shows">
         <ComparisonOption
           id={null}
           label={NO_COMPARISON_LABEL}
