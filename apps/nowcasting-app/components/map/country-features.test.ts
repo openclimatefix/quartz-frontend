@@ -10,6 +10,7 @@ import { describe, expect, test } from "@jest/globals";
 import type { FeatureCollection } from "geojson";
 
 import type { MapFeatureState } from "../helpers/data";
+import { DELTA_BUCKET } from "../../constant";
 import {
   FEATURE_KEY_PROPERTY,
   REGION_COUNTRY_PROPERTY,
@@ -39,6 +40,8 @@ const featureState = (over: Partial<MapFeatureState> = {}): MapFeatureState => (
   capacity: 100,
   actual: null,
   delta: 0,
+  deltaNormalized: 0,
+  deltaBucketNormalized: DELTA_BUCKET.ZERO,
   deltaBucket: 0,
   hasDelta: false,
   label: "",

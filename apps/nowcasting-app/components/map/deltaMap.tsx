@@ -7,8 +7,13 @@ import useGlobalState from "../helpers/globalState";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import { FeatureCollection } from "geojson";
 import useEnabledCountryMapData from "./use-enabled-country-map-data";
-import { PV_SOURCE_ID, applyFeatureStates, deltaFillColorExpression } from "./feature-state";
-import { FEATURE_KEY_PROPERTY } from "./country-features";
+import {
+  PV_SOURCE_ID,
+  applyFeatureStates,
+  deltaFillColorExpression,
+  deltaFillOpacityExpression
+} from "./feature-state";
+import { FEATURE_KEY_PROPERTY, REGION_COUNTRY_PROPERTY } from "./country-features";
 import CountryCoverageBanner from "./country-coverage-banner";
 import type { MapFeatureState } from "../helpers/data";
 
@@ -26,8 +31,18 @@ type DeltaMapProps = {
  */
 const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
-const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
+const DeltaMap: React.FC<DeltaMapProps> = ({ className, activeUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
+
+  // `activeUnit` was declared in this component's props, passed by `pages/index.tsx` and then
+  // dropped on the floor — the toggle read "%" while the map painted and reported megawatts, so
+  // switching between the forecast and delta views silently changed the units of the numbers on
+  // screen with the toggle unchanged. That is what made the two views look like they disagreed
+  // about Swansea North (29% of capacity and 137 MW are the same reading).
+  //
+  // Capacity is deliberately folded in with MW rather than given a third behaviour: installed
+  // capacity has no delta, so there is nothing for that unit to mean here.
+  const showPercentage = activeUnit === ActiveUnit.percentage;
 
   // The delta view is single-region-level only. Rather than reading the user's stored level
   // (which `pages/index.tsx` forces to the finest one on entering this view anyway), take
@@ -35,10 +50,36 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
   // the same rule `defaultLevelOf` encodes for the initial state, so the two cannot drift,
   // and it removes this file's dependence on `pages/index.tsx` doing the forcing. That is
   // what `finestLevel` asks the fan-out for, per country.
-  const { featureStates, geometry, hasValues, isLoading, error, loaders, countryStatus } =
-    useEnabledCountryMapData(selectedISOTime, { finestLevel: true });
+  const {
+    featureStates,
+    geometry,
+    observerLabelByCountry,
+    hasValues,
+    isLoading,
+    error,
+    loaders,
+    countryStatus
+  } = useEnabledCountryMapData(selectedISOTime, { finestLevel: true });
 
-  const fillColor = useMemo(() => deltaFillColorExpression(), []);
+  // The delta's B side, named. The whole fill on this map is `forecast − actual`, and until
+  // now nothing on screen or in the popup said which observed stream that "actual" is — for GB
+  // it is PV Live Estimated, never Updated. Per country because the popup reads one hovered
+  // feature and both countries can be in frame. Through a ref for the same reason as
+  // `pvLatestMap.tsx`: the handler below is built once.
+  const observerLabelByCountryRef = useRef(observerLabelByCountry);
+  observerLabelByCountryRef.current = observerLabelByCountry;
+  // The popup handler below is built once, on the first effect run, so the unit reaches it the
+  // same way the observer labels do.
+  const showPercentageRef = useRef(showPercentage);
+  showPercentageRef.current = showPercentage;
+
+  const fillColor = useMemo(() => deltaFillColorExpression(showPercentage), [showPercentage]);
+  // Built with the same flag as the colour: the two step on the same bucket field, and mixing
+  // them would draw one scale's hue at the other scale's strength.
+  const fillOpacity = useMemo(
+    () => deltaFillOpacityExpression(showPercentage),
+    [showPercentage]
+  );
 
   const appliedGeometryRef = useRef<FeatureCollection | null>(null);
   const appliedStatesRef = useRef<Map<string | number, MapFeatureState> | null>(null);
@@ -86,7 +127,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
         layout: { visibility: "visible" },
         paint: {
           "fill-color": fillColor,
-          "fill-opacity": 0.7
+          "fill-opacity": fillOpacity
         }
       });
       appliedPaintRef.current = fillColor;
@@ -121,16 +162,38 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
 
         // No delta is a different statement from a delta of zero: a future slot, or a region
         // whose forecast or generation has not published, has nothing to compare.
+        // Reported in whichever unit the toggle is on, and only that one — showing both would
+        // be the safer-looking choice and the wrong one, since the point of the unit control is
+        // that the user has said which question they are asking.
+        const asPercentage = showPercentageRef.current;
+        const deltaValue = asPercentage ? (state.deltaNormalized ?? 0) * 100 : state.delta ?? 0;
         const deltaSection = !state.hasDelta
           ? `<span class="text-mapbox-black-300">no delta yet</span>`
           : `<span class="font-bold">${
-              (state.delta ?? 0) > 0
-                ? `<span class="up-arrow"></span>`
-                : `<span class="down-arrow"></span>`
+              deltaValue > 0 ? `<span class="up-arrow"></span>` : `<span class="down-arrow"></span>`
             }</span>
               <span class="mr-1 ${
-                (state.delta ?? 0) > 0 ? "text-ocf-delta-900" : "text-ocf-delta-100"
-              }">${(state.delta ?? 0).toFixed(1)}</span><small class="text-xs">MW</small>`;
+                deltaValue > 0 ? "text-ocf-delta-900" : "text-ocf-delta-100"
+              }">${deltaValue.toFixed(1)}</span><small class="text-xs">${
+              asPercentage ? "% of capacity" : "MW"
+            }</small>`;
+
+        // Which actual the delta is measured against, and in which direction. Only drawn once
+        // the manifest has resolved it — an unnamed delta is what this map already showed, so
+        // falling back to a guess would be worse than briefly showing nothing.
+        //
+        // The order matters and is easy to get backwards (it was, on first writing): the value
+        // is `generationMw - forecastMw` (`helpers/data.ts`), so **positive means the actual
+        // came in above the forecast** — an under-forecast. Stated in the popup as the
+        // subtraction itself rather than as "vs", because "forecast vs actual" does not say
+        // which way a `+` points and the colour ramp cannot say it either.
+        const featureCountry = String(
+          feature.properties?.[REGION_COUNTRY_PROPERTY] ?? ""
+        ).toUpperCase();
+        const observerLabel = observerLabelByCountryRef.current[featureCountry];
+        const observerSection = observerLabel
+          ? `<div class="mt-1 text-2xs uppercase tracking-wide text-mapbox-black-300">${observerLabel} &minus; forecast</div>`
+          : "";
 
         const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between mb-1">
@@ -140,6 +203,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
             <div class="text-ocf-yellow">${state.label || ""}</div>
             <div class="">${deltaSection}</div>
           </div>
+          ${observerSection}
         </div>`;
 
         popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map);
@@ -150,9 +214,12 @@ const DeltaMap: React.FC<DeltaMapProps> = ({ className }) => {
         popup.remove();
       });
     } else if (appliedPaintRef.current !== fillColor) {
-      // The `Map` wrapper re-invokes this on every render; the delta ramp only ever changes
-      // if the bucket thresholds do, so guard it rather than re-validating the style each tick.
+      // The `Map` wrapper re-invokes this on every render, so guard rather than re-validating
+      // the style each tick. What now changes is the *unit*: both expressions are rebuilt
+      // together when it does, and both must be pushed together — setting only the colour would
+      // leave percentage hues drawn at megawatt strengths until something else forced a repaint.
       map.setPaintProperty("latestPV-forecast", "fill-color", fillColor);
+      map.setPaintProperty("latestPV-forecast", "fill-opacity", fillOpacity);
       appliedPaintRef.current = fillColor;
     }
 

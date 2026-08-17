@@ -1,7 +1,12 @@
 import axios from "axios";
 import { DateTime, Settings } from "luxon";
 import { DISPLAY_LOCALE } from "../../lib/time/display";
-import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import {
+  DELTA_BUCKET,
+  DELTA_PERCENTAGE_EDGES,
+  getDeltaBucketKeys,
+  MAX_NATIONAL_GENERATION_MW
+} from "../../constant";
 import {
   Bucket,
   CombinedSitesData,
@@ -430,6 +435,32 @@ export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
     }
   }
   return DELTA_BUCKET.ZERO;
+};
+
+/**
+ * The same nine buckets, stepped on **delta as a fraction of installed capacity**.
+ *
+ * `DELTA_BUCKET`'s members are ordinals as far as anything downstream is concerned — the paint
+ * expression steps on them, the delta panel groups by them — and only `getDeltaBucket` above
+ * treats their *values* as megawatt thresholds. So percentage mode needs a second bucketer, not
+ * a second set of buckets: same nine outputs, same colours, same `step` expression, different
+ * quantity and different edges (`DELTA_PERCENTAGE_EDGES`, and see there for why).
+ *
+ * Boundary behaviour matches `getDeltaBucket` exactly: a magnitude *at* an edge belongs to the
+ * outer bucket (`|d| >= 2%` leaves neutral), and everything below the first edge is `ZERO`.
+ *
+ * `capacity <= 0` cannot produce a fraction, so callers pass `0` and land in `ZERO`. That is
+ * the honest answer — a region with no registered capacity has no percentage error — and it is
+ * distinct from "no delta", which `hasDelta` carries separately and which paints as nothing.
+ */
+export const getDeltaBucketNormalized: (fraction: number) => DELTA_BUCKET = (fraction) => {
+  const steps = DELTA_PERCENTAGE_EDGES.filter((edge) => Math.abs(fraction) >= edge).length;
+  if (steps === 0) return DELTA_BUCKET.ZERO;
+  const ladder =
+    fraction < 0
+      ? [DELTA_BUCKET.NEG1, DELTA_BUCKET.NEG2, DELTA_BUCKET.NEG3, DELTA_BUCKET.NEG4]
+      : [DELTA_BUCKET.POS1, DELTA_BUCKET.POS2, DELTA_BUCKET.POS3, DELTA_BUCKET.POS4];
+  return ladder[steps - 1];
 };
 
 export const createBucketObject: (

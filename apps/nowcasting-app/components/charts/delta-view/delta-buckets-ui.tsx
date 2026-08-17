@@ -2,7 +2,8 @@ import React, { Dispatch, SetStateAction } from "react";
 import { useState } from "react";
 import { theme } from "../../../tailwind.config";
 import useGlobalState from "../../helpers/globalState";
-import { DELTA_BUCKET } from "../../../constant";
+import { DELTA_BUCKET, deltaBucketEdge } from "../../../constant";
+import { ActiveUnit } from "../../map/types";
 import { Bucket, GspDeltaValue } from "../../types";
 import { createBucketObject } from "../../helpers/utils";
 
@@ -22,6 +23,10 @@ const BucketItem: React.FC<Bucket> = ({
     borderColor === "border-white" ? "border-ocf-gray-800" : borderColor
   }`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
+  const [activeUnit] = useGlobalState("activeUnit");
+  // Capacity has no delta, so it labels as megawatts — the same fold the map and the deltas
+  // hook make.
+  const asPercentage = activeUnit === ActiveUnit.percentage;
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
     if (isSelected) {
@@ -44,8 +49,19 @@ const BucketItem: React.FC<Bucket> = ({
           onClick={toggleBucketSelection}
         >
           <span className="text-xl font-semibold leading-tight">{quantity}</span>
+          {/*
+            The edge in whichever unit the map is painting, from the shared lookup — this was
+            `${text} MW`, which was true only while the buckets were megawatts. `text` is the
+            bucket's enum value, i.e. its ordinal, so it stops being a megawatt figure the
+            moment percentage mode uses the same nine cells for capacity fractions.
+          */}
           <span className="flex text-xs">
-            {text === DELTA_BUCKET.ZERO.toString() ? `-/+` : `${text} MW`}
+            {text === DELTA_BUCKET.ZERO.toString()
+              ? `-/+`
+              : `${deltaBucketEdge(
+                  DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET],
+                  asPercentage
+                )}${asPercentage ? "%" : " MW"}`}
           </span>
         </button>
       </div>

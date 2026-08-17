@@ -73,6 +73,88 @@ export enum DELTA_BUCKET {
 }
 export const getDeltaBucketKeys = () => Object.keys(DELTA_BUCKET).filter((k) => isNaN(Number(k)));
 
+/**
+ * The delta scale in **fractions of installed capacity**, for percentage mode.
+ *
+ * `DELTA_BUCKET` above is fixed megawatts, and fixed megawatts cannot serve two countries — or,
+ * as it turns out, one. Measured over 14–16 Aug 2026, every daytime region-slot in both
+ * countries, against the current ±25…±100 MW edges:
+ *
+ * | | neutral bucket | outer buckets |
+ * |---|---|---|
+ * | GB (338 GSPs) | **96%** | 0.4% |
+ * | NL (12 provinces) | 20% | **45.5%** |
+ *
+ * The GB delta map is 96% grey because 200 of 338 GSPs have less *total installed capacity*
+ * than the ±25 MW first edge — they cannot leave the neutral bucket by any physically possible
+ * error. NL fails the opposite way: nearly half its slots pin to the outer buckets, so the
+ * extremes stop meaning "extreme". One constant, both failure modes, and no megawatt number
+ * exists that fixes both. (This also answers §4 of `phase6-followup-outstanding.md`: Dan's
+ * instinct that ±100 is wrong is right, but ±80 is the same mistake at a different value.)
+ *
+ * As a share of capacity the two countries almost agree — median |delta| is 3.2% for GB and
+ * 5.1% for NL — which is what makes a *single* percentage scale possible. These edges put GB at
+ * 38% neutral / 5.0% outer and NL at 27% / 7.5%, with all nine buckets populated in both.
+ *
+ * Chosen round and roughly doubling rather than fitted to the percentiles, because the sample is
+ * three days of one season. **GB and NL only** — a third country should be checked against this,
+ * not assumed onto it.
+ *
+ * **Widened from ±2/5/10/20% on 2026-08-16** (Brad, on seeing it live: "we're showing a little
+ * too much deviation ... it's a regional forecast of weather, so there's going to be some
+ * swing"). The first set was fitted to make all nine buckets busy, which is the wrong target: a
+ * regional solar forecast has an irreducible noise floor, and colouring it makes ordinary
+ * weather look like error. These edges put GB at 63% neutral / 1.0% outer and NL at 49% / 4.8%.
+ * Paired with `DELTA_BUCKET_OPACITIES` below, which is the other half of the same fix.
+ */
+export const DELTA_PERCENTAGE_EDGES = [0.05, 0.1, 0.2, 0.35] as const;
+
+/**
+ * `fill-opacity` per bucket, from the first step outward. The neutral bucket is not here — it
+ * paints transparent.
+ *
+ * Delta used to draw at a flat `0.7` on the reasoning that hue already carries both sign and
+ * magnitude, so opacity was free. It is not free: at a constant opacity a region 5% off its
+ * capacity is painted exactly as solidly as one 35% off, so the map reads as uniformly alarmed
+ * and the eye cannot rank what it is seeing without going to the legend. The sequential map has
+ * always known this — its ramp runs from 3% to full so small values recede.
+ *
+ * The spread is deliberately gentle (0.35→0.85, not 0.15→1). Brad's steer was "less severe":
+ * the first bucket must still read as *present* — it is a real difference and often the
+ * interesting one — just quieter than the extremes. Ranking, not suppression.
+ */
+export const DELTA_BUCKET_OPACITIES = [0.35, 0.52, 0.68, 0.85] as const;
+
+/** The nine buckets in scale order, cold to hot. The order the ordinals actually mean. */
+export const DELTA_BUCKET_ORDER: DELTA_BUCKET[] = [
+  DELTA_BUCKET.NEG4,
+  DELTA_BUCKET.NEG3,
+  DELTA_BUCKET.NEG2,
+  DELTA_BUCKET.NEG1,
+  DELTA_BUCKET.ZERO,
+  DELTA_BUCKET.POS1,
+  DELTA_BUCKET.POS2,
+  DELTA_BUCKET.POS3,
+  DELTA_BUCKET.POS4
+];
+
+/**
+ * The numeric edge a bucket represents, in the unit being displayed.
+ *
+ * Three surfaces label these buckets — the map legend, the map popup and the delta panel's
+ * count tiles — and before this they each knew that a bucket's *enum value* was its megawatt
+ * edge. That stops being true in percentage mode, where the enum is a bare ordinal, so the
+ * lookup lives here once rather than as three copies that can disagree about the same cell.
+ */
+export const deltaBucketEdge = (bucket: DELTA_BUCKET, asPercentage: boolean): number => {
+  if (!asPercentage) return Number(bucket);
+  const index = DELTA_BUCKET_ORDER.indexOf(bucket);
+  if (index === 4 || index === -1) return 0;
+  return index < 4
+    ? -DELTA_PERCENTAGE_EDGES[3 - index] * 100
+    : DELTA_PERCENTAGE_EDGES[index - 5] * 100;
+};
+
 export const N_HOUR_FORECAST_OPTIONS = [1, 2, 4, 8];
 
 export const P_LEVEL_OPTIONS: [number, number][] = [

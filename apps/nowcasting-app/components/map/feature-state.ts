@@ -1,7 +1,7 @@
 import type { Expression } from "mapbox-gl";
 
 import { COUNTRY_CONFIG, type MapBandThresholds } from "../../config/countries";
-import { DELTA_BUCKET } from "../../constant";
+import { DELTA_BUCKET, DELTA_BUCKET_OPACITIES } from "../../constant";
 import { theme } from "../../tailwind.config";
 import type { MapFeatureState } from "../helpers/data";
 import { REGION_COUNTRY_PROPERTY } from "./country-features";
@@ -254,15 +254,22 @@ const delta = theme.extend.colors["ocf-delta"];
  *
  * `hasDelta` is false for a future slot and for a region where either side is missing; those
  * are drawn as nothing rather than as a delta of zero, which is what the v0 code showed.
+ *
+ * `normalized` switches which of the two pre-computed buckets is read — percentage mode steps
+ * on `deltaBucketNormalized`, everything else on the megawatt `deltaBucket`. The steps, the
+ * colours and the transparent middle are identical either way, because `DELTA_BUCKET`'s members
+ * are ordinals here and only the *bucketer* knows they mean megawatts. Switching the unit is
+ * therefore one `setPaintProperty` against feature state that is already on every feature — no
+ * refetch, no value rebuild. See `DELTA_PERCENTAGE_EDGES` for why the second scale exists.
  */
-export const deltaFillColorExpression = (): Expression =>
+export const deltaFillColorExpression = (normalized = false): Expression =>
   [
     "case",
     ["!=", ["feature-state", "hasDelta"], true],
     "transparent",
     [
       "step",
-      ["coalesce", ["feature-state", "deltaBucket"], 0],
+      ["coalesce", ["feature-state", normalized ? "deltaBucketNormalized" : "deltaBucket"], 0],
       delta[100],
       DELTA_BUCKET.NEG4,
       delta[200],
@@ -281,6 +288,40 @@ export const deltaFillColorExpression = (): Expression =>
       DELTA_BUCKET.POS4,
       delta[900]
     ]
+  ] as unknown as Expression;
+
+/**
+ * `fill-opacity` for the delta layer: magnitude, so the eye can rank without the legend.
+ *
+ * Steps on the same bucket the colour does — which means it steps on `deltaBucketNormalized` in
+ * percentage mode, and the two must be built with the same `normalized` flag or a region draws
+ * one scale's hue at the other scale's strength.
+ *
+ * The neutral bucket is `0`: a difference below the first edge is ordinary forecast noise and
+ * draws as nothing, exactly as a region with no delta does. Those two look the same on purpose —
+ * neither is a finding — and the popup still distinguishes them ("no delta yet" vs a figure).
+ */
+export const deltaFillOpacityExpression = (normalized = false): Expression =>
+  [
+    "step",
+    ["coalesce", ["feature-state", normalized ? "deltaBucketNormalized" : "deltaBucket"], 0],
+    DELTA_BUCKET_OPACITIES[3],
+    DELTA_BUCKET.NEG3,
+    DELTA_BUCKET_OPACITIES[2],
+    DELTA_BUCKET.NEG2,
+    DELTA_BUCKET_OPACITIES[1],
+    DELTA_BUCKET.NEG1,
+    DELTA_BUCKET_OPACITIES[0],
+    DELTA_BUCKET.ZERO,
+    0,
+    DELTA_BUCKET.POS1,
+    DELTA_BUCKET_OPACITIES[0],
+    DELTA_BUCKET.POS2,
+    DELTA_BUCKET_OPACITIES[1],
+    DELTA_BUCKET.POS3,
+    DELTA_BUCKET_OPACITIES[2],
+    DELTA_BUCKET.POS4,
+    DELTA_BUCKET_OPACITIES[3]
   ] as unknown as Expression;
 
 /** Shallow equality over a feature state's own keys — all values are primitives. */

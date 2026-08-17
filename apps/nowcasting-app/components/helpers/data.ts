@@ -1,6 +1,6 @@
 import { FeatureCollection } from "geojson";
 import { DateTime } from "luxon";
-import { getDeltaBucket } from "./utils";
+import { getDeltaBucket, getDeltaBucketNormalized } from "./utils";
 import { DELTA_BUCKET } from "../../constant";
 import { regionSnapshotState } from "../../hooks/data";
 import type { RegionSnapshotState } from "../../hooks/data";
@@ -34,48 +34,12 @@ import type {
  * path is named here any more — deliberately, so the bundle cannot regress by accident.
  */
 
-/**
- * Rounds a DateTime down to the 6-hour boundary at or before it (00:00, 06:00, 12:00, 18:00 UTC).
- * Idempotent on a boundary.
- */
-const floorToSixHoursUtc = (dt: DateTime<true>): DateTime<true> => {
-  const utc = dt.toUTC();
-  return utc.startOf("hour").minus({ hours: utc.hour % 6 }) as DateTime<true>;
-};
-
-/**
- * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
- *
- * Two days prior to now, rounded *down* to the nearest 6-hour interval (00:00, 06:00, 12:00,
- * 18:00) in UTC, returned as an ISO-8601 UTC string.
- *
- * B2: this used to round in the *viewer's* local timezone before converting to UTC, so a viewer
- * in Los Angeles or Sydney asked the API for a different window than a viewer in the UK for the
- * same instant. The API works entirely in UTC, so the rounding does too now, and every viewer
- * gets the same window.
- *
- * @returns {string} The earliest forecast timestamp in UTC as an ISO-8601 string.
- *
- * @example
- * // Assuming the current time is 2025-12-07T14:45:00Z:
- * const result = getEarliestForecastTimestamp();
- * console.log(result); // Output: "2025-12-05T12:00:00.000Z"
- */
-export const getEarliestForecastTimestamp = (): string => {
-  return floorToSixHoursUtc(DateTime.now().toUTC().minus({ days: 2 })).toISO();
-};
-
 /*
- * `getFurthestForecastTimestamp` used to live here — now +1 day, ceiled to a 6-hour boundary.
- * Deleted in Phase 4 wave 4 along with `ceilToSixHoursUtc`, its only caller.
- *
- * Nothing should pin the END of a forecast window. The horizon is a per-country fact — GB
- * publishes 36 hours ahead, NL 48 — so a single constant truncates somebody, and this one
- * truncated everybody: `+1 day` was inherited verbatim from v0, where the variable was even
- * named `twoDaysFromNowLocal` while adding one day. B2 fixed its broken round-up and its
- * local-timezone rounding but left the horizon alone, so it shipped clipping 6–12h off GB and
- * 18–24h off NL. Take whatever the API has: omit `end_utc` and let the documented default
- * (+48h on `/regions/{region}/forecast`, +2 days on the `period` endpoints) apply.
+ * `getEarliestForecastTimestamp` and `floorToSixHoursUtc` used to live here. Moved to
+ * `lib/api/v1/series-window.ts` on 2026-08-17: the window is applied by the query layer now,
+ * so every region time-series gets it whether or not the caller remembers to ask, and the one
+ * consumer that needs the *value* (the scrub track's left edge) reads it from the same place
+ * the requests do. This file is the value pipeline; it had no business owning an API default.
  */
 
 // =========================================================================================
@@ -118,7 +82,24 @@ export type MapFeatureState = {
   actual: number | null;
   /** Observed minus forecast, in MW. `0` when no delta is computable — see `hasDelta`. */
   delta: number;
+  /**
+   * The same delta as a fraction of installed capacity, signed. `0` when there is no delta or
+   * no capacity to divide by.
+   *
+   * Carried alongside the MW figure rather than derived at the point of use because the map
+   * reads it through a Mapbox expression, and expressions read one flat key at a time.
+   */
+  deltaNormalized: number;
+  /** The nine-step bucket of `delta`, on the fixed MW edges. */
   deltaBucket: number;
+  /**
+   * The nine-step bucket of `deltaNormalized`, on `DELTA_PERCENTAGE_EDGES`.
+   *
+   * Both are precomputed and both are pushed to every feature, so switching the unit repaints
+   * from feature state that is already there — no refetch, no value rebuild, and no chance of
+   * the two units disagreeing about which region is extreme.
+   */
+  deltaBucketNormalized: number;
   /** False when the delta is not computable (future slot, or either side missing). */
   hasDelta: boolean;
   /** Human label — `Region.label` ("City Road"), never the raw `citr_1`. */
@@ -274,7 +255,9 @@ const EMPTY_VALUE: MapFeatureState = {
   capacity: 0,
   actual: null,
   delta: 0,
+  deltaNormalized: 0,
   deltaBucket: DELTA_BUCKET.ZERO,
+  deltaBucketNormalized: DELTA_BUCKET.ZERO,
   hasDelta: false,
   label: ""
 };
@@ -326,6 +309,9 @@ export const buildRegionValues = ({
     // and heavily-clipped reading. B8's bug class again.
     const hasDelta = !isFutureSlot && forecastMw !== null && generationMw !== null;
     const delta = hasDelta ? generationMw! - forecastMw! : 0;
+    // Against this region's *own* capacity — the whole point of the percentage scale. A GSP
+    // with no registered capacity yields 0 and buckets neutral; see `getDeltaBucketNormalized`.
+    const deltaNormalized = hasDelta && capacityMw > 0 ? delta / capacityMw : 0;
 
     values.set(name, {
       featureId: name,
@@ -336,7 +322,9 @@ export const buildRegionValues = ({
       capacity: capacityMw,
       actual: generationMw,
       delta,
+      deltaNormalized,
       deltaBucket: hasDelta ? getDeltaBucket(delta) : DELTA_BUCKET.ZERO,
+      deltaBucketNormalized: hasDelta ? getDeltaBucketNormalized(deltaNormalized) : DELTA_BUCKET.ZERO,
       hasDelta,
       label: region.label
     });
@@ -400,7 +388,14 @@ export const rollUpRegionValues = (
       capacity,
       actual,
       delta,
+      // The group's summed delta over the group's summed capacity — not an average of its
+      // members' percentages, which would weight a 5 MW GSP the same as a 500 MW one.
+      deltaNormalized: hasDelta && capacity > 0 ? delta / capacity : 0,
       deltaBucket: hasDelta ? getDeltaBucket(delta) : DELTA_BUCKET.ZERO,
+      deltaBucketNormalized:
+        hasDelta && capacity > 0
+          ? getDeltaBucketNormalized(delta / capacity)
+          : DELTA_BUCKET.ZERO,
       hasDelta,
       label: groupName
     });

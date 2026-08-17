@@ -4,7 +4,6 @@ import {
   useFocusedCountry,
   useForecastPeriod,
   useGenerationPeriod,
-  useGenerationSources,
   useRegions
 } from "../../../hooks/data";
 import { useCurrentAggregationLevel } from "../../../hooks/data/use-aggregation-levels";
@@ -16,6 +15,8 @@ import useGlobalState from "../../helpers/globalState";
 import { buildRegionBridge, buildRegionValues } from "../../helpers/data";
 import { slotForInstant } from "../../../lib/time/cursor";
 import { DELTA_BUCKET } from "../../../constant";
+import { useMapObserver } from "../../map/map-observer";
+import { ActiveUnit } from "../../map/types";
 import { GspDeltaValue } from "../../types";
 
 const SOURCE = "solar";
@@ -99,9 +100,19 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
   // param to `pvlive_in_day`, which is GB's, so an unnamed request works by luck for GB and
   // 400s for NL ("Observer 'pvlive_in_day' is not available for NL solar"). Hold the request
   // until the manifest names it rather than firing one that is known to fail.
-  const generationSources = useGenerationSources(scope);
-  const observer = generationSources.data?.[0]?.name;
+  //
+  // Through `useMapObserver`, not `generationSources.data[0]` as this used to: the panel sits
+  // beside the delta map and must be reading the *same* observed stream, and "first in the
+  // manifest" is not a promise the two would keep. Same resolver, same country registry field.
+  const mapObserver = useMapObserver(scope);
+  const observer = mapObserver.observer?.name;
   const generation = useGenerationPeriod(observer ? scope : null, { ...window, observer });
+
+  // The map paints percentage-of-capacity buckets when the unit toggle says so; the panel
+  // groups by the same buckets and must follow, or its counts describe a different scale from
+  // the colours next to them. Capacity folds in with MW — installed capacity has no delta.
+  const [activeUnit] = useGlobalState("activeUnit");
+  const asPercentage = activeUnit === ActiveUnit.percentage;
 
   const gspDeltas = useMemo(() => {
     const bridge = buildRegionBridge(regions.data);
@@ -125,8 +136,16 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       const gspId = bridge.gspIdFor(regionName);
       const regionId = gspId === undefined ? regionName : String(gspId);
 
-      const deltaBucket = value.deltaBucket as DELTA_BUCKET;
-      const deltaNormalized = value.capacity > 0 ? value.delta / value.capacity : 0;
+      // Whichever bucketing the map is painting, so the panel's counts and the map's colours
+      // are the same partition of the same regions. They share `buildRegionValues`'s output
+      // precisely so they cannot disagree; letting the panel stay on megawatts while the map
+      // moved to percentages would have reintroduced that by the back door.
+      const deltaBucket = (asPercentage
+        ? value.deltaBucketNormalized
+        : value.deltaBucket) as DELTA_BUCKET;
+      // Off the value join now, rather than recomputed here from `delta / capacity` — one
+      // definition, and the panel's percentage and the map's cannot drift apart.
+      const deltaNormalized = value.deltaNormalized;
       const forecastMw = value.power;
       const currentYield = value.actual ?? 0;
 
@@ -147,7 +166,7 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       });
     });
     return result;
-  }, [regions.data, forecast.data, generation.data, targetTime, timeNow]);
+  }, [regions.data, forecast.data, generation.data, targetTime, timeNow, asPercentage]);
 
   return {
     gspDeltas,

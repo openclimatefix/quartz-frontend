@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { DELTA_BUCKET, getDeltaBucketKeys } from "../../constant";
+import { DELTA_BUCKET, DELTA_BUCKET_OPACITIES, deltaBucketEdge } from "../../constant";
 import { useCurrentAggregationLevel } from "../../hooks/data";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data/use-countries";
 import { ComparisonSelection } from "../helpers/comparison";
@@ -13,6 +13,7 @@ import {
   PERCENT_RAMP_TOP,
   ZERO_OPACITY
 } from "./feature-state";
+import { useMapObserver } from "./map-observer";
 import { ActiveUnit } from "./types";
 
 type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
@@ -82,7 +83,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
   return (
     <div>
       {comparison ? (
-        <DeltaBands />
+        <DeltaBands country={focusedCountry} unit={unit} />
       ) : (
         <SequentialBands
           unit={unit}
@@ -225,65 +226,179 @@ const SequentialBands: React.FC<{
   );
 };
 
-const DeltaBands: React.FC = () => {
-  const deltaKeys = getDeltaBucketKeys();
+/**
+ * The nine delta buckets, in scale order: the Tailwind background and text colour for each.
+ *
+ * Was a nine-arm `switch` inside the render, matching each `getDeltaBucketKeys()` entry against
+ * `deltaKeys[n]` to recover the index it already had. Same colours, same order — the shape is
+ * now a table because the row's sizing (below) has to reason about how many cells there are.
+ * The `opacity` each arm also computed was dead: the backgrounds are solid `ocf-delta` steps,
+ * not opacity ramps like the sequential pills, and nothing ever read it.
+ */
+const DELTA_STEPS: { value: DELTA_BUCKET; background: string; text: string }[] = [
+  { value: DELTA_BUCKET.NEG4, background: "bg-ocf-delta-100", text: "text-black" },
+  { value: DELTA_BUCKET.NEG3, background: "bg-ocf-delta-200", text: "text-black" },
+  { value: DELTA_BUCKET.NEG2, background: "bg-ocf-delta-300", text: "text-black" },
+  { value: DELTA_BUCKET.NEG1, background: "bg-ocf-delta-400", text: "text-ocf-gray-300" },
+  { value: DELTA_BUCKET.ZERO, background: "bg-ocf-delta-500", text: "text-ocf-gray-300" },
+  { value: DELTA_BUCKET.POS1, background: "bg-ocf-delta-600", text: "text-ocf-gray-300" },
+  { value: DELTA_BUCKET.POS2, background: "bg-ocf-delta-700", text: "text-black" },
+  { value: DELTA_BUCKET.POS3, background: "bg-ocf-delta-800", text: "text-black" },
+  { value: DELTA_BUCKET.POS4, background: "bg-ocf-delta-900", text: "text-black" }
+];
+
+/**
+ * The same nine cells labelled with `DELTA_PERCENTAGE_EDGES` instead of megawatts.
+ *
+ * Built from the edges rather than written out, so the legend cannot drift from the scale
+ * `getDeltaBucketNormalized` actually steps on. The colours are positional and shared with the
+ * megawatt row above — only the numbers change with the unit, because only the numbers do.
+ */
+/**
+ * The nine legend cells' opacities, mirroring `DELTA_BUCKET_OPACITIES` outward from the middle.
+ *
+ * The neutral cell is `0.45` rather than the map's `0` — on the map "no meaningful difference"
+ * is correctly drawn as nothing, but a legend cell that renders as nothing is not a legend, it
+ * is a gap. It stays the faintest cell in the row, which is the property that matters.
+ */
+const DELTA_CELL_OPACITIES = [
+  ...[...DELTA_BUCKET_OPACITIES].reverse(),
+  0.45,
+  ...DELTA_BUCKET_OPACITIES
+];
+
+const DELTA_PERCENTAGE_STEPS = DELTA_STEPS.map((step) => ({
+  ...step,
+  value: deltaBucketEdge(step.value, true)
+}));
+
+/**
+ * The diverging legend: nine buckets on one row, and the observer they are measured against.
+ *
+ * ## Why it says what it is measured against
+ *
+ * The whole fill on the delta map is `forecast − actual`, and "actual" is one specific
+ * observed stream — for GB, PV Live *Estimated*, never *Updated*, because the values pipeline
+ * takes a single observer (see `map-observer.ts`). Nothing on screen said so, which let a
+ * legend that carefully explains its colours sit above a map whose quantity was unnamed. The
+ * sequential legend already carries a conditional attribution line for the same class of
+ * problem — `{country} bands`, when more than one country is enabled — and this is that
+ * argument on a different axis, so it reuses the styling exactly.
+ *
+ * It is unconditional here, where the country line is conditional, because the ambiguity is
+ * not situational: there is no configuration in which "delta" alone tells you the B side.
+ *
+ * ## Why one row
+ *
+ * Brad, 2026-08-16: get them on one line with smaller type and padding, and fall back to a
+ * continuous ramp only if that does not fit. It fits, in the dock's ~244px usable width
+ * (`MAP_CONTROL_WIDTH_PX` 260, less the panel's `p-2`), where the previous `text-sm`/`px-3`
+ * pills needed roughly three wrapped rows.
+ *
+ * Three things paid for the fit, and all three are also improvements. The constraint they were
+ * all paying is that these are equal `flex-1` cells, so the **widest** cell sets the width of
+ * every cell and anything shaved off the widest is multiplied by nine:
+ *
+ * - **The signs moved to the ends of the row.** See the note on the glyphs below — the single
+ *   biggest win, and the reason the cells have padding at all.
+ * - **The unit moved to the caption.** It was a `" MW"` span inside the `+100` cell, which
+ *   made the widest cell wider still and put the row's unit inside one arbitrary bucket.
+ * - **The per-cell border went.** The sequential pills need theirs because they are one hue at
+ *   six opacities — without a border, adjacent bands merge. The delta steps are nine distinct
+ *   hues, so the borders were separating things that were already separate, and losing them
+ *   lets the row read closer to the continuous scale it represents.
+ *
+ * Kept discrete rather than ramped, deliberately: the paint expression *is* a `step` over nine
+ * buckets, so a smooth gradient would describe a map that does not exist. (It would also
+ * expose that `ocf-delta` is not monotonic in lightness — 800 is brighter than 900 — which is
+ * Delta v2's palette work, not this change's.)
+ */
+const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, unit }) => {
+  // The manifest slice the map's own values pipeline reads, so the legend cannot name a
+  // stream the fill was not computed from. No extra request: see `useMapObserver`.
+  const { label } = useMapObserver(country ? { country, source: "solar" } : null);
+  // Capacity has no delta, so it reads as megawatts — the same fold `deltaMap.tsx` makes.
+  const asPercentage = unit === ActiveUnit.percentage;
+  const unitText = asPercentage ? "% of capacity" : "MW";
+  // The edges the paint expression actually steps on, in the unit being shown, so the legend
+  // and the fill cannot describe different scales.
+  const steps = asPercentage ? DELTA_PERCENTAGE_STEPS : DELTA_STEPS;
   return (
-    <div className="flex bg-mapbox-black-700">
-      <div className="flex flex-wrap gap-1 h-full font-bold relative items-end text-sm">
-        {deltaKeys.map((value) => {
-          let background = "";
-          let opacity = 0;
-          let textColor = "";
-          let text = 0;
-          switch (value) {
-            case deltaKeys[0]:
-              background = "bg-ocf-delta-100";
-              (opacity = 3), (textColor = "text-black"), (text = DELTA_BUCKET.NEG4);
-              break;
-            case deltaKeys[1]:
-              (background = "bg-ocf-delta-200"), (opacity = 20), (textColor = "text-black");
-              text = DELTA_BUCKET.NEG3;
-              break;
-            case deltaKeys[2]:
-              (background = "bg-ocf-delta-300"), (opacity = 40), (textColor = "text-black");
-              text = DELTA_BUCKET.NEG2;
-              break;
-            case deltaKeys[3]:
-              (background = "bg-ocf-delta-400"), (opacity = 60), (textColor = "text-ocf-gray-300");
-              text = DELTA_BUCKET.NEG1;
-              break;
-            case deltaKeys[4]:
-              (background = "bg-ocf-delta-500"), (opacity = 80), (textColor = "text-ocf-gray-300");
-              text = DELTA_BUCKET.ZERO;
-              break;
-            case deltaKeys[5]:
-              (background = "bg-ocf-delta-600"), (opacity = 100), (textColor = "text-ocf-gray-300");
-              text = DELTA_BUCKET.POS1;
-              break;
-            case deltaKeys[6]:
-              (background = "bg-ocf-delta-700"), (opacity = 100), (textColor = "text-black");
-              text = DELTA_BUCKET.POS2;
-              break;
-            case deltaKeys[7]:
-              (background = "bg-ocf-delta-800"), (opacity = 100), (textColor = "text-black");
-              text = DELTA_BUCKET.POS3;
-              break;
-            case deltaKeys[8]:
-              (background = "bg-ocf-delta-900"), (opacity = 100), (textColor = "text-black");
-              text = DELTA_BUCKET.POS4;
-              break;
-          }
-          return (
+    <div className="flex flex-col bg-mapbox-black-700">
+      <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+        {/*
+          The subtraction, not "vs". `delta` is `generationMw - forecastMw`, so a `+` means the
+          actual came in *above* the forecast — and "MW vs PV Live Estimated" does not say that,
+          while the ramp (cold on the left, hot on the right) cannot say it either. Writing the
+          operands in order is the only form that fixes the direction on screen.
+
+          Until the manifest resolves, say the unit and no more rather than guessing a stream —
+          an unnamed delta is exactly what this replaced.
+        */}
+        {label ? `${unitText} · ${label} − forecast` : unitText}
+      </span>
+      {/*
+        One `role="img"` with the whole scale in its label, rather than nine cells a screen
+        reader would read as bare numbers. It has to be here rather than on the cells: the
+        magnitudes below are deliberately unsigned, so read out individually they would say
+        "100, 75, 50 … 100" with the direction — the entire point of a diverging scale —
+        missing.
+      */}
+      <div
+        role="img"
+        aria-label={`Delta colour scale, minus ${Math.abs(steps[0].value)} to plus ${
+          steps[steps.length - 1].value
+        } ${unitText}${
+          label ? `, ${label} minus forecast; positive means actual above forecast` : ""
+        }`}
+        className="flex items-center gap-1 text-2xs font-bold text-ocf-gray-600 dash:text-base"
+      >
+        {/*
+          The sign, twice, instead of nine times. With equal `flex-1` cells the *widest* cell
+          sets the width of every cell, so `+100` at ~23.5px in a ~25px cell was what made the
+          row cramped — and per-cell signs are redundant anyway on a scale that is symmetric
+          about a labelled `0` and already runs cold-to-hot left-to-right. Hoisting them to the
+          ends is the one piece of information the row genuinely needs, stated once at each end.
+
+          The two glyphs cost ~22px including their gaps and give back ~26px across the cells,
+          so the row is marginally narrower *and* each cell holds a 3-character number in ~23px
+          — enough that the horizontal padding, dropped to make `+100` fit, comes back.
+
+          U+2212 MINUS, not a hyphen: it is the same width and weight as the `+` opposite it,
+          where a hyphen sits high and short and makes the two ends look mismatched.
+        */}
+        <span aria-hidden>−</span>
+        {/*
+          `flex-wrap` matters only in `dash:`. The dock is a fixed `MAP_CONTROL_WIDTH_PX` in
+          every mode, so the dashboard's larger type cannot fit nine cells across it however
+          they are sized; there `flex-none` returns them to content width and lets them wrap as
+          they did before. One row is a normal-size claim, not a universal one — better than
+          holding the line by leaving a wall display at 10px.
+        */}
+        <div className="flex flex-1 flex-wrap gap-[2px] items-end tabular-nums">
+          {steps.map(({ value, background, text }, index) => (
             <div
               key={value}
-              className={`rounded border border-ocf-black-100 px-3 py-[1px] ${background} text-xs md:text-sm dash:text-xl dash:tracking-wide whitespace-nowrap ${textColor}`}
+              className={`flex-1 rounded-sm px-[2px] py-[1px] text-center dash:flex-none dash:px-2 dash:py-[2px] whitespace-nowrap ${background} ${text}`}
+              /*
+                The same magnitude ramp the fill draws (`deltaFillOpacityExpression`), so the
+                legend keeps describing the map now that strength carries meaning as well as
+                hue. Inline rather than a `bg-…/${n}` utility because these are computed and
+                Tailwind cannot see them to generate the class.
+
+                Position, not value: the row is symmetric, so cell `index` maps onto the
+                opacity ladder from the outside in and back out. The neutral cell keeps a floor
+                of its own — it paints transparent on the map, but a legend cell has to be
+                visible to be read as the "no meaningful difference" step.
+              */
+              style={{ opacity: DELTA_CELL_OPACITIES[index] }}
             >
-              {text > 0 ? "+" : ""}
-              {text}
-              <span className="text-xs font-normal">{text === DELTA_BUCKET.POS4 && " MW"}</span>
+              {/* Magnitude only — the sign is on the row, and `0` has neither. */}
+              {Math.abs(value)}
             </div>
-          );
-        })}
+          ))}
+        </div>
+        <span aria-hidden>+</span>
       </div>
     </div>
   );

@@ -10,6 +10,8 @@ const state = (overrides: Partial<MapFeatureState> = {}): MapFeatureState => ({
   capacity: 100,
   actual: null,
   delta: 0,
+  deltaNormalized: 0,
+  deltaBucketNormalized: DELTA_BUCKET.ZERO,
   deltaBucket: DELTA_BUCKET.ZERO,
   hasDelta: false,
   label: "region",
