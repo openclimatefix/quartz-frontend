@@ -9,6 +9,7 @@ import {
   cursorCadenceMinutes,
   isOnCadence,
   nextSlot,
+  periodForInstant,
   slotForInstant,
   slotLabellingFor,
   snapDownToCadence,
@@ -166,7 +167,8 @@ describe("nextSlot / cursorNow — 'now' is the slot currently filling", () => {
 
 describe("slotForInstant — the cursor resolved to one country's grid", () => {
   it("resolves the contract's worked example", () => {
-    // A cursor at 16:15 UTC: NL publishes it, GB's containing slot is 16:30.
+    // A cursor at 16:15 UTC: NL publishes it, GB's containing slot is 16:30. An on-grid instant
+    // is the same answer under either labelling, which is why this case survived the flip.
     expect(slotForInstant("2026-08-10T16:15:00.000Z", "NL")).toBe("2026-08-10T16:15:00.000Z");
     expect(slotForInstant("2026-08-10T16:15:00.000Z", "GB")).toBe("2026-08-10T16:30:00.000Z");
   });
@@ -180,12 +182,19 @@ describe("slotForInstant — the cursor resolved to one country's grid", () => {
     expect(slotForInstant("2026-08-10T16:30:00.000Z", "GB")).toBe("2026-08-10T16:30:00.000Z");
   });
 
-  it("floors instead for a country that labels period-start", () => {
+  it("floors for NL, which the provider confirmed labels period-start", () => {
+    // 16:07 sits inside the period *starting* 16:00. Under GB's convention the same instant
+    // would resolve to 16:15 — one whole slot later, and indistinguishable on screen, which is
+    // why this is pinned rather than left to the registry to be read carefully.
+    expect(slotForInstant("2026-08-10T16:07:00.000Z", "NL")).toBe("2026-08-10T16:00:00.000Z");
+  });
+
+  it("ceilings the same instant if the registry says that country labels period-end", () => {
+    // The field is the whole mechanism: nothing else decides the direction.
     const original = COUNTRY_CONFIG.NL.slotLabelling;
-    COUNTRY_CONFIG.NL.slotLabelling = "period-start";
+    COUNTRY_CONFIG.NL.slotLabelling = "period-end";
     try {
-      // 16:07 sits inside the period *starting* 16:00.
-      expect(slotForInstant("2026-08-10T16:07:00.000Z", "NL")).toBe("2026-08-10T16:00:00.000Z");
+      expect(slotForInstant("2026-08-10T16:07:00.000Z", "NL")).toBe("2026-08-10T16:15:00.000Z");
     } finally {
       COUNTRY_CONFIG.NL.slotLabelling = original;
     }
@@ -193,6 +202,113 @@ describe("slotForInstant — the cursor resolved to one country's grid", () => {
 
   it("falls back to a 30-minute period-end grid for an unconfigured country", () => {
     expect(slotForInstant("2026-08-10T16:15:00.000Z", "DE")).toBe("2026-08-10T16:30:00.000Z");
+  });
+});
+
+describe("periodForInstant — the span a slot covers, not the label it goes by", () => {
+  it("puts the label at the end for GB and at the start for NL", () => {
+    // Both slots below are labelled 16:00 and they share only that instant: GB's runs up to it,
+    // NL's runs on from it. That is the fact the footer exists to state, and the reason a bare
+    // label cannot state it.
+    expect(periodForInstant("2026-08-10T15:45:00.000Z", "GB")).toEqual({
+      start: "2026-08-10T15:30:00.000Z",
+      end: "2026-08-10T16:00:00.000Z"
+    });
+    expect(periodForInstant("2026-08-10T16:05:00.000Z", "NL")).toEqual({
+      start: "2026-08-10T16:00:00.000Z",
+      end: "2026-08-10T16:15:00.000Z"
+    });
+  });
+
+  it("contains the instant it was asked about, on the grid and off it", () => {
+    // The property the footer leans on: every row's period contains the cursor, so the span's
+    // length states the cadence and no separate lag column is needed to say so.
+    const contains = (instant: string, country: string) => {
+      const { start, end } = periodForInstant(instant, country);
+      const ms = new Date(instant).getTime();
+      return new Date(start).getTime() <= ms && ms <= new Date(end).getTime();
+    };
+    for (const instant of [
+      "2026-08-10T16:00:00.000Z",
+      "2026-08-10T16:07:30.000Z",
+      "2026-08-10T16:15:00.000Z",
+      "2026-08-10T16:29:59.999Z"
+    ]) {
+      expect(`${instant} GB:${contains(instant, "GB")}`).toBe(`${instant} GB:true`);
+      expect(`${instant} NL:${contains(instant, "NL")}`).toBe(`${instant} NL:true`);
+    }
+  });
+
+  it("spans exactly one cadence, whichever end carries the label", () => {
+    const lengthMinutes = (instant: string, country: string) => {
+      const { start, end } = periodForInstant(instant, country);
+      return (new Date(end).getTime() - new Date(start).getTime()) / 60_000;
+    };
+    expect(lengthMinutes("2026-08-10T16:05:00.000Z", "GB")).toBe(30);
+    expect(lengthMinutes("2026-08-10T16:05:00.000Z", "NL")).toBe(15);
+    expect(lengthMinutes("2026-08-10T16:05:00.000Z", "DE")).toBe(FALLBACK_CADENCE_MINUTES);
+  });
+
+  it("follows the registry field rather than a baked-in direction", () => {
+    const original = COUNTRY_CONFIG.NL.slotLabelling;
+    COUNTRY_CONFIG.NL.slotLabelling = "period-end";
+    try {
+      expect(periodForInstant("2026-08-10T16:05:00.000Z", "NL")).toEqual({
+        start: "2026-08-10T16:00:00.000Z",
+        end: "2026-08-10T16:15:00.000Z"
+      });
+    } finally {
+      COUNTRY_CONFIG.NL.slotLabelling = original;
+    }
+  });
+
+  it("keeps the span a whole cadence across spring-forward in both zones", () => {
+    // 2026-03-29T01:00Z: London 01:00->02:00 BST and Amsterdam 02:00->03:00 CEST, at the same
+    // instant. A local-time span would come out an hour long here; the grid is in UTC, so it
+    // does not — and the *rendered* wall clock jumps the hour, which is the honest reading.
+    const gb = periodForInstant("2026-03-29T00:50:00.000Z", "GB");
+    expect(gb).toEqual({ start: "2026-03-29T00:30:00.000Z", end: "2026-03-29T01:00:00.000Z" });
+    const asLocal = (iso: string, zone: string) =>
+      DateTime.fromISO(iso, { zone: "utc" }).setZone(zone).toFormat("HH:mm");
+    // 00:30 UTC is 00:30 GMT; 01:00 UTC is 02:00 BST — half an hour that reads as ninety minutes.
+    expect(`${asLocal(gb.start, "Europe/London")}-${asLocal(gb.end, "Europe/London")}`).toBe(
+      "00:30-02:00"
+    );
+
+    const nl = periodForInstant("2026-03-29T00:50:00.000Z", "NL");
+    expect(nl).toEqual({ start: "2026-03-29T00:45:00.000Z", end: "2026-03-29T01:00:00.000Z" });
+    expect(`${asLocal(nl.start, "Europe/Amsterdam")}-${asLocal(nl.end, "Europe/Amsterdam")}`).toBe(
+      "01:45-03:00"
+    );
+  });
+
+  it("does not repeat or skip a period across the autumn ambiguous hour", () => {
+    // 2026-10-25T01:00Z: both zones fall back. Each UTC period exists exactly once either side.
+    expect(periodForInstant("2026-10-25T00:50:00.000Z", "GB")).toEqual({
+      start: "2026-10-25T00:30:00.000Z",
+      end: "2026-10-25T01:00:00.000Z"
+    });
+    expect(periodForInstant("2026-10-25T01:20:00.000Z", "GB")).toEqual({
+      start: "2026-10-25T01:00:00.000Z",
+      end: "2026-10-25T01:30:00.000Z"
+    });
+    expect(periodForInstant("2026-10-25T01:20:00.000Z", "NL")).toEqual({
+      start: "2026-10-25T01:15:00.000Z",
+      end: "2026-10-25T01:30:00.000Z"
+    });
+  });
+
+  it("is unaffected by the viewer's zone", () => {
+    Settings.defaultZone = "Asia/Kolkata"; // UTC+05:30 — a half-hour offset, so a local-time
+    try {
+      // grid would land the boundaries on :00/:30 of a different clock entirely.
+      expect(periodForInstant("2026-08-10T15:45:00.000Z", "GB")).toEqual({
+        start: "2026-08-10T15:30:00.000Z",
+        end: "2026-08-10T16:00:00.000Z"
+      });
+    } finally {
+      Settings.defaultZone = "system";
+    }
   });
 });
 
@@ -204,7 +320,8 @@ describe("DST", () => {
     // 2026-03-29T01:00Z: GB 01:00->02:00 BST, NL 02:00->03:00 CEST.
     expect(slotForInstant("2026-03-29T00:59:00.000Z", "GB")).toBe("2026-03-29T01:00:00.000Z");
     expect(slotForInstant("2026-03-29T01:01:00.000Z", "GB")).toBe("2026-03-29T01:30:00.000Z");
-    expect(slotForInstant("2026-03-29T01:01:00.000Z", "NL")).toBe("2026-03-29T01:15:00.000Z");
+    // NL floors, so 01:01 is inside the period *starting* 01:00 UTC.
+    expect(slotForInstant("2026-03-29T01:01:00.000Z", "NL")).toBe("2026-03-29T01:00:00.000Z");
   });
 
   it("does not repeat or skip a slot across the autumn ambiguous hour", () => {

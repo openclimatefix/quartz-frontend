@@ -1,12 +1,13 @@
 /**
  * The footer's readout — Phase 6 followup, Track N.
  *
- * The pure resolution arithmetic (ceiling vs floor, DST, lag) is pinned in `lib/time/cursor.ts`'s
- * own tests; what this file pins is the plumbing this track changed: the axis reads in the
- * *focused* country's local time rather than a fixed UTC constant, that zone and the cursor's
- * cadence move together on a focus change (so the track's grain and its labels never disagree
- * about which country they are describing), and the focused country stops appearing twice —
- * once as the primary reading, once more in the per-country list it used to share with everyone.
+ * The pure resolution arithmetic (ceiling vs floor, span ends, DST) is pinned in
+ * `lib/time/cursor.ts`'s own tests; what this file pins is what reaches the screen: the axis
+ * reads in the *focused* country's local time rather than a fixed UTC constant, that zone and
+ * the cursor's cadence move together on a focus change (so the track's grain and its labels
+ * never disagree about which country they are describing), and — since the NL labelling flip —
+ * every country row states the **period** it is showing rather than a bare timestamp, which is
+ * the only form in which GB's period-end and NL's period-start can be read off one column.
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import React from "react";
@@ -73,64 +74,75 @@ describe("the zone follows focus", () => {
     // "utc" is a row label in the stack now, not a suffix in a sentence — and the word
     // "Cursor" is gone: the footer *is* the cursor, so naming it explained nothing.
     expect(screen.getByText("utc")).toBeInTheDocument();
-    // UTC has no cell in the grid column — it is the cursor's instant, not a publisher.
+    // One instant, not a span: UTC is the cursor's canonical value, not a publisher's period.
     expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
     expect(screen.queryByText(/Cursor/)).not.toBeInTheDocument();
   });
 });
 
 /**
- * The grid column: every row states its own cadence, and the focused row's *is* the grain.
+ * Every country row states the period it is showing, in that country's own zone.
  *
- * Three properties make the column coherent rather than merely compact, and each is pinned
- * below: the grain is stated at its source (the focused row) and moves with focus; a row only
- * swaps its cadence for an offset when it is genuinely off-grid; and the focused row can never
- * do so, because the cursor's grid is by definition its own cadence.
+ * This is the app's one place where the two labelling conventions appear side by side, and the
+ * cases below are the ones that would look plausible if the flip were wrong: GB's span *ends*
+ * at its label, NL's *starts* at it, and a cursor sitting between GB's slots does not move GB's
+ * period off the cursor.
  */
-describe("the grid column", () => {
+describe("the period each row is showing", () => {
   // A country's code appears twice on screen — once as this stack's row label and once in the
   // track's tethered tag — so rows are found by their own title rather than by their code.
-  const row = (code: string) => screen.getByTitle(new RegExp(`^${code} published slot`));
+  const row = (code: string) => screen.getByTitle(new RegExp(`^${code} published period`));
 
-  test("the focused row states the grain; UTC has no cell in this column", () => {
+  test("GB focused: GB's span ends at its label, NL's starts at its own", () => {
     setEnabledCountries(["GB", "NL"]);
     render(<CursorReadout />);
-    // GB focused, so the cursor steps in 30s and GB's row is where that is said.
-    expect(row("GB")).toHaveTextContent("GB13:0030m");
+    // Cursor 12:00 UTC. GB's slot is 12:00 UTC (13:00 BST) covering 12:30–13:00 local; NL's is
+    // 12:00 UTC (14:00 CEST) covering 14:00–14:15 local. Same UTC label, spans that touch at a
+    // point and share nothing else — which is the fact the row exists to state.
+    expect(row("GB")).toHaveTextContent("GB12:30–13:00");
+    expect(row("NL")).toHaveTextContent("NL14:00–14:15");
     expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
   });
 
-  test("the grain follows focus, because the grid is the focused country's cadence", () => {
+  test("NL focused: the periods are unchanged, because focus is not a convention", () => {
     setEnabledCountries(["GB", "NL"]);
     setFocusedCountry("NL");
     render(<CursorReadout />);
-    expect(row("NL")).toHaveTextContent("NL14:0015m");
+    expect(row("GB")).toHaveTextContent("GB12:30–13:00");
+    expect(row("NL")).toHaveTextContent("NL14:00–14:15");
   });
 
-  test("a resting row shows its own cadence, which is what makes the column predictive", () => {
-    // 12:00 sits on GB's 30-minute grid and on NL's 15-minute one, so nothing diverges. Both
-    // rows still carry a number: NL's 15 is smaller than the focused 30, which is exactly why
-    // NL can never drift off this grid.
-    setEnabledCountries(["GB", "NL"]);
-    setFocusedCountry("GB");
-    render(<CursorReadout />);
-    expect(row("GB")).toHaveTextContent("GB13:0030m");
-    expect(row("NL")).toHaveTextContent("NL14:0015m");
-  });
-
-  test("a country coarser than the cursor grid swaps its cadence for the offset", () => {
+  test("a cursor between GB's slots still lands inside GB's stated period", () => {
     setEnabledCountries(["GB", "NL"]);
     setFocusedCountry("NL");
-    // A cursor on a :15 is on NL's 15-minute grid but not on GB's 30-minute one — the only
-    // arrangement that produces an offset: GB rounds up to 12:30 UTC, a quarter hour ahead.
+    // 12:15 UTC is on NL's 15-minute grid, not GB's 30-minute one. The old readout said "+15m"
+    // here; the period says the same thing better — 13:00–13:30 BST contains 13:15, so the row
+    // is visibly about the cursor's own instant rather than one a quarter hour away.
     setGlobalState("selectedISOTime", "2026-08-11T12:15:00.000Z");
     render(<CursorReadout />);
+    expect(row("GB")).toHaveTextContent("GB13:00–13:30");
+    expect(row("NL")).toHaveTextContent("NL14:15–14:30");
+  });
 
-    // GB reads its own slot (12:30 UTC = 13:30 BST) and declares the gap in place of its 30m.
-    expect(row("GB")).toHaveTextContent("GB13:30+15m");
+  test("the cadence and lag column is gone, not merely emptied", () => {
+    setEnabledCountries(["GB", "NL"]);
+    setFocusedCountry("NL");
+    setGlobalState("selectedISOTime", "2026-08-11T12:15:00.000Z");
+    render(<CursorReadout />);
+    // The two spellings that column ever used. Both facts are now carried by the span itself:
+    // its length is the cadence, and it contains the cursor by construction.
+    expect(row("GB")).not.toHaveTextContent("+15m");
     expect(row("GB")).not.toHaveTextContent("30m");
-    // NL is focused, so it is on the grid by definition — always its cadence, never an offset.
-    expect(row("NL")).toHaveTextContent("NL14:1515m");
+    expect(row("NL")).not.toHaveTextContent("15m");
+  });
+
+  test("the title says which end the country's own timestamp names", () => {
+    setEnabledCountries(["GB", "NL"]);
+    render(<CursorReadout />);
+    // The span cannot show which end carries the label — that is the one part of the convention
+    // that has to be said in words, so it is said on hover rather than not at all.
+    expect(row("GB")).toHaveAttribute("title", expect.stringContaining("label the end"));
+    expect(row("NL")).toHaveAttribute("title", expect.stringContaining("label the start"));
   });
 });
 
@@ -151,7 +163,7 @@ describe("the zone stack", () => {
     // Counted by row, not by text: the focused country's code appears again in the track's
     // tethered tag, which is a different thing in a different place.
     const codes = screen
-      .getAllByTitle(/published slot/)
+      .getAllByTitle(/published period/)
       .map((node) => node.firstElementChild?.textContent);
     expect(codes).toEqual(["GB", "NL"]);
   });
@@ -161,7 +173,7 @@ describe("the zone stack", () => {
     setFocusedCountry("GB");
     const view = render(<CursorReadout />);
     const order = () =>
-      screen.getAllByTitle(/published slot/).map((node) => node.firstElementChild?.textContent);
+      screen.getAllByTitle(/published period/).map((node) => node.firstElementChild?.textContent);
     expect(order()).toEqual(["GB", "NL"]);
 
     act(() => setFocusedCountry("NL"));
@@ -176,7 +188,7 @@ describe("the zone stack", () => {
     // Scoped to the stack: the focused country's code also appears in the track's tethered
     // tag, so a bare `getByText` matches twice.
     const codeIn = (code: string) =>
-      screen.getByTitle(new RegExp(`^${code} published slot`)).firstElementChild;
+      screen.getByTitle(new RegExp(`^${code} published period`)).firstElementChild;
     expect(codeIn("NL")).toHaveClass("text-ocf-yellow");
     expect(codeIn("GB")).not.toHaveClass("text-ocf-yellow");
   });
@@ -189,7 +201,7 @@ describe("the zone stack", () => {
     setFocusedCountry("NL");
     render(<CursorReadout />);
     const order = screen
-      .getAllByTitle(/published slot/)
+      .getAllByTitle(/published period/)
       .map((node) => node.firstElementChild?.textContent);
     expect(order).toEqual(["GB", "NL"]);
   });

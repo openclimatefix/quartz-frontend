@@ -309,6 +309,12 @@ export type CountryConfig = {
    */
   nationalChartSeries: ForecastSeriesConfig[];
   overlays: OverlayConfig[];
+  /**
+   * Who publishes the observed generation, for attribution in the "how to read this" (i).
+   * `null` where no public attribution has been confirmed — the (i) then states the country's
+   * period convention without naming a source, rather than borrowing another country's.
+   */
+  publisher: { name: string; url: string } | null;
   /** Seasonal norm dataset, or `null` where one has not been produced. */
   seasonalNorms: string | null;
   /** Auth0 role id granting this country; the country claim is derived from these. */
@@ -436,6 +442,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       }
     ],
     overlays: [{ id: "constraints", url: "/geo/gb/ng-constraints.json", label: "Constraints" }],
+    publisher: { name: "PV_Live", url: "https://www.solar.sheffield.ac.uk/pvlive/" },
     seasonalNorms: "/data/gb/national-metrics.json",
     auth0Role: "GB_ROLE_ID"
   },
@@ -444,12 +451,13 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     timezone: "Europe/Amsterdam",
     locale: "nl-NL",
     cadenceMinutes: 15,
-    // **UNCONFIRMED** — assumed to match GB because that is what the old single-cadence code
-    // did everywhere, so this is the no-change answer rather than a finding. Nobody has
-    // confirmed that NED publishes period-end, and if it publishes period-start every NL
-    // lookup is one 15-minute slot out: plausible on screen, wrong. Flip this one field when
-    // it is confirmed either way — that is the whole change.
-    slotLabelling: "period-end",
+    // **Confirmed** by the data provider (NED, via Peter): NL timestamps label the *start* of
+    // their period, the opposite of GB. NL's 16:00 covers 16:00–16:15; GB's 16:00 covers
+    // 15:30–16:00. This field was previously assumed to match GB, which was the no-change
+    // answer rather than a finding, and made every NL lookup one 15-minute slot late —
+    // plausible on screen, wrong. `lib/time/cursor.ts` turns the field into floor-vs-ceiling,
+    // so flipping it here is the whole change.
+    slotLabelling: "period-start",
     // Centred on the manifest's NL centroid (52.13, 5.29) at a zoom that fits the whole
     // country — NL is roughly a quarter of GB's span, hence the tighter default.
     map: {
@@ -514,6 +522,10 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // comparison lines GB has; add them here when they do.
     nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "Current" }],
     overlays: [],
+    // NED publishes NL's generation (it is the source of the period-start convention above),
+    // but no public attribution page has been confirmed for it — so the (i) states NL's
+    // convention without a link rather than inventing one.
+    publisher: null,
     seasonalNorms: null,
     auth0Role: "NL_ROLE_ID"
   }

@@ -18,27 +18,32 @@ import { getCountryConfig, SlotLabelling } from "../../config/countries";
  *      an instant that is real for nobody.
  *   2. **Each country resolves the cursor to its own slot**, by the labelling rule below.
  *
- * ### Why the resolution is a ceiling and not "nearest"
+ * ### Why the resolution is a ceiling or a floor, and never "nearest"
  *
- * A timestamp labels the **end** of the period it covers: a GB slot labelled 16:00 covers
- * 15:30–16:00. So the slot containing an instant is the next label at or after it —
+ * A timestamp names one end of the period it covers, and *which* end is a per-country
+ * convention. GB follows PV Live and labels the **end**: its 16:00 covers 15:30–16:00, so the
+ * slot containing an instant is the next label at or after it. NL's provider (NED) labels the
+ * **start**: its 16:00 covers 16:00–16:15, so the containing slot is the last label at or
+ * before it —
  *
  * ```
  * cursor ------> 16:15 UTC
- *   GB  30-min   16:30 slot  (covers 16:00-16:30)
- *   NL  15-min   16:15 slot  (covers 16:00-16:15)
+ *   GB  30-min   16:30 slot  (covers 16:00-16:30)  period-end   -> ceiling
+ *   NL  15-min   16:15 slot  (covers 16:15-16:30)  period-start -> floor
  * ```
  *
- * — and "nearest", which is what anyone reaches for by default, is wrong by up to half a
- * period in a way that still looks entirely plausible on screen. The invariant was only ever
- * written down in user-facing copy (`ChartInfo.tsx`, the legend's `i` tooltip); it is written
- * here because this is the code that depends on it.
+ * Either way the answer is the slot whose period *contains* the cursor. "Nearest", which is
+ * what anyone reaches for by default, is wrong by up to half a period in a way that still looks
+ * entirely plausible on screen. The invariant was only ever written down in user-facing copy
+ * (`ChartInfo.tsx`, the legend's `i` tooltip); it is written here because this is the code that
+ * depends on it.
  *
  * It has not bitten before because the old slider stepped through `times_utc` exactly, so no
  * rounding ever happened. A cursor shared across two cadences is what makes it live.
  *
- * Whether a country labels period-end is a per-country fact, not a universal one, so it is a
- * registry field (`CountryConfig.slotLabelling`) rather than an assumption baked in here.
+ * Which end a country labels is a per-country fact, not a universal one, so it is a registry
+ * field (`CountryConfig.slotLabelling`) rather than an assumption baked in here. NL's value was
+ * an assumption until the provider confirmed period-start; see `config/countries.ts`.
  *
  * ### Why the grid is anchored in UTC
  *
@@ -207,4 +212,38 @@ export const slotForInstant = (instant: Instant, country: string | null | undefi
   const cadence = cadenceMinutesFor(country);
   const direction = slotLabellingFor(country) === "period-start" ? "down" : "up";
   return toCursorString(roundToCadence(instant, cadence, direction));
+};
+
+/** The two ends of a published period, as cursor-spelled UTC instants. */
+export type Period = { start: string; end: string };
+
+/**
+ * The **span** a country's slot covers, rather than the label it goes by.
+ *
+ * `slotForInstant` answers "which value do I look up"; this answers "what stretch of time is
+ * that value about". They are the same fact said from opposite ends, and the second one is what
+ * the footer states out loud: with GB labelling period-end and NL period-start, two rows
+ * carrying the same digits describe periods that barely overlap. A label alone cannot show
+ * that; a span can, and it does so without the reader having to know the convention first —
+ * which is the point, because the convention is the part nobody knows.
+ *
+ * Both ends are UTC instants. Rendering them in a country's own zone is the caller's job (and
+ * only ever a formatting step), so no local-time arithmetic happens here — the span is a
+ * fixed number of milliseconds wherever it is read, including across a DST transition, because
+ * the grid is anchored in UTC. See "Why the grid is anchored in UTC" above.
+ *
+ * By construction the returned span contains the instant asked about, so the length of the span
+ * *is* the country's cadence and the reader never needs it stated separately.
+ */
+export const periodForInstant = (instant: Instant, country: string | null | undefined): Period => {
+  const labelsStart = slotLabellingFor(country) === "period-start";
+  const slot = slotForInstant(instant, country);
+  const step = cadenceMinutesFor(country) * MS_PER_MINUTE;
+  const slotMs = DateTime.fromISO(slot, { zone: "utc" }).toMillis();
+  // The label is one end; the other is a whole cadence away, on the side the label is *not*.
+  const other = toCursorString(
+    DateTime.fromMillis(labelsStart ? slotMs + step : slotMs - step, { zone: "utc" })
+  );
+
+  return labelsStart ? { start: slot, end: other } : { start: other, end: slot };
 };
