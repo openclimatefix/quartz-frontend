@@ -43,9 +43,12 @@ accident by definition. That holds up against the code:
 
 **Genuinely intentional — keep:**
 
-- **Fixed `fill-opacity: 0.7` on delta.** Delta encodes sign *and* magnitude in hue via
-  `deltaBucket`, so opacity is free. The forecast map spends opacity on magnitude because its hue
-  is fixed. Real difference, correct.
+- ~~**Fixed `fill-opacity: 0.7` on delta.** Delta encodes sign *and* magnitude in hue via
+  `deltaBucket`, so opacity is free.~~ **Overturned 2026-08-16.** Opacity was not free: hue
+  distinguishes buckets but does not *rank* them at a glance, so a flat 0.7 painted a 5% miss as
+  solidly as a 35% one and the map read as uniformly alarmed. Delta now spends opacity on
+  magnitude too (`DELTA_BUCKET_OPACITIES`), same as the forecast map. Do not restore the flat
+  value — see the delta colour scale section below.
 - **"Capacity" as a unit.** Installed capacity has no delta. Genuinely inapplicable.
 
 **Accident — port them, they cost almost nothing once the component is one:**
@@ -86,6 +89,10 @@ satellite machinery, delete `deltaMap.tsx`. Estimate: a focused couple of hours.
 - **The popup.** Forecast shows capacity / actual / forecast; delta shows the difference. On one
   map the honest answer is probably one popup carrying all of it, rather than two that each hide
   half. That is a small design decision, not a mechanical port.
+  **Partly settled already** (2026-08-16): both popups now name the observer, and both read it
+  from the same per-country `observerLabelByCountry` off the fan-out — so merging them is a
+  matter of choosing which figures to show, not of reconciling two different ideas of what the
+  "actual" is.
 
 ---
 
@@ -101,7 +108,7 @@ This is the most important thing in this document.
 | | A side (forecast) | B side (actual) |
 |---|---|---|
 | **Chart** (`getDelta`, `use-format-chart-data.tsx:92`) | `PAST_FORECAST` — the forecast *as it was made*, not the current one | `GENERATION_UPDATED` if present, else `GENERATION`, else falls back to `FORECAST − N_HOUR_FORECAST` |
-| **Map** (`buildRegionValues`, `helpers/data.ts`) | the **current** forecast series | whatever `useGenerationSources` lists **first** — `pvlive_in_day`, i.e. *PV Live Estimated*, always |
+| **Map** (`buildRegionValues`, `helpers/data.ts`) | the **current** forecast series | the country registry's `mapObserver` — `pvlive_in_day`, i.e. *PV Live Estimated*, for GB |
 
 So the chart answers "how wrong was the forecast we published at the time, against the best actual
 we now have", and the map answers "how far is today's forecast from the in-day estimate". Those are
@@ -120,8 +127,37 @@ behaviour. The map does not do it.
 | `pvlive_in_day` | **PV Live Estimated** |
 | `pvlive_day_after` | **PV Live Updated** |
 
-The map takes `[0]` — so "first in the manifest" is doing load-bearing work that nobody chose.
-NL has one observer (`ned_nl`), which is why this has never bitten.
+The map used to take `[0]` — "first in the manifest" doing load-bearing work that nobody chose.
+NL has one observer (`ned_nl`), which is why it never bit.
+
+**Fixed 2026-08-16, as far as it can be fixed without v2.** `components/map/map-observer.ts` is
+now the single decision point: `resolveMapObserver` reads `mapObserver` from the country
+registry (GB `pvlive_in_day`, NL `ned_nl`) and falls back to `[0]` only when the configured name
+is absent from the manifest — where the alternative is a 400 and a blank map. Same observer as
+before for both countries, so **no pixel moved**; what changed is that something chose it, and
+that the choice is now on screen:
+
+- the forecast popup's heading is `PV Live Estimated / Forecast`, not `Actual / Forecast`
+- the delta popup carries a `PV Live Estimated − forecast` caption
+- the delta legend's caption reads `MW · PV Live Estimated − forecast`
+
+**The direction is `generationMw - forecastMw`** (`helpers/data.ts`), i.e. **positive means the
+actual came in above the forecast** — an under-forecast. Both captions were written the other way
+round on 2026-08-16 and corrected the same day, which is the argument for stating the subtraction
+rather than "forecast vs actual": "vs" does not fix a direction, and the cold-to-hot ramp cannot
+fix it either, so the sign was unreadable from anywhere on screen.
+
+The label travels out of the values pipeline with the observer (`MapRegionValues.observerLabel`
+→ `CountryStatus` → `observerLabelByCountry`), keyed per country, so the name on screen cannot
+drift from the stream the numbers came from and GB/NL in one frame each name their own.
+
+This deliberately does **not** make the map show "the best actual at this slot". That is v2's
+requirement 1 below, and the reasoning for leaving it: switching to a hybrid silently would have
+turned a wrong-but-consistent map into a right-but-unaccountable one, since nothing on screen
+could have told the user which stream a given slot resolved to. Naming it first is what makes
+the hybrid checkable when it lands. Note also that on the map — one timestep, not a series — the
+hybrid must resolve **per frame, not per region**, or a single frame paints some regions against
+Updated and others against Estimated and is not comparable with itself.
 
 ### What Delta v2 needs to support (Brad, 2026-08-15)
 
@@ -170,13 +206,57 @@ There is direct user evidence: Cobblestone, Jul 2024 (FB-045) — *"the colour s
 can be worked with as the delta screen with the purple and yellow lines are not very intuitive
 right off the bat"*.
 
+The legend for these was slimmed to a single row on 2026-08-16 (`DeltaBands`) — nine equal
+`flex-1` cells at `text-2xs`, down from ~three wrapped rows of `text-sm` pills, with the signs
+hoisted to a single `−` and `+` flanking the row and the magnitudes left bare inside it. That
+last part is what made it fit comfortably rather than barely: the cells are equal-width, so the
+widest one sizes all nine, and `+100` was costing every cell ~6px it did not need. It stays
+**discrete** rather than becoming a gradient like the percentage ramp, for two reasons: the paint
+expression is a `step` over nine buckets, so a smooth ramp would describe a map that does not
+exist; and a gradient would make the non-monotonic lightness below visible as a bulge. If v2
+fixes the palette, converting this to a `PercentRamp`-shaped continuous bar becomes a real
+option — Brad's preference order was one line first, ramp as the fallback.
+
 **Brad's steer for now:** a standard cold-to-hot diverging range with a neutral greyish middle. He
 may supply a specific scheme when v2 starts; until then assume that shape and keep the neutral
 genuinely neutral, so "no meaningful difference" reads as absence rather than as a colour.
 
-Also unresolved from the earlier followup: the bucket thresholds are ±100 and Dan suggested ±80
-(§4 of `phase6-followup-outstanding.md`). Worth folding into the same pass — and worth checking
-against real data first, the same way the percentage bands were, rather than picking by eye.
+**The ±80-vs-±100 question (§4 of `phase6-followup-outstanding.md`) is answered and closed:
+neither.** Measured 2026-08-16 over every daytime region-slot of 14–16 Aug, both countries, live
+API:
+
+| against the ±25…±100 MW edges | neutral bucket | outer buckets |
+|---|---|---|
+| GB, 338 GSPs (n=22,525) | **96%** | 0.4% |
+| NL, 12 provinces (n=1,570) | 20% | **45.5%** |
+
+GB's delta map is 96% grey because 200 of 338 GSPs have less installed capacity than the ±25 MW
+first edge — they cannot leave neutral by any physically possible error. NL pins nearly half its
+slots to the extremes. Dan's instinct that ±100 is wrong is right; ±80 is the same mistake at a
+different value, because no fixed megawatt scale survives a 48× capacity spread within GB, let
+alone across two countries.
+
+Median |delta| as a share of capacity is **3.2% for GB and 5.1% for NL** — close enough that one
+percentage scale serves both. Shipped 2026-08-16 as the percentage half of the unit toggle; the
+megawatt edges are untouched and still selected by MW mode.
+
+**Settled at ±5/10/20/35%** (`DELTA_PERCENTAGE_EDGES`) — GB 63% neutral / 1.0% outer, NL 49% /
+4.8%. The first cut was ±2/5/10/20%, fitted to keep all nine buckets busy, and that is the wrong
+target: Brad on seeing it live — *"we're showing a little too much deviation ... it's a regional
+forecast of weather, so there's going to be some swing ... I don't want to feel like it's more
+extreme than it either is, or needs to be visually."* A regional solar forecast has an
+irreducible noise floor and colouring it makes ordinary weather look like error.
+
+**The other half of that fix is `DELTA_BUCKET_OPACITIES` (0.35 → 0.85).** Delta drew at a flat
+`0.7` on the reasoning recorded in §"Intent vs accident" above — hue carries sign *and* magnitude,
+so opacity is free. That reasoning is wrong and this supersedes it: at constant opacity a region
+5% off its capacity paints exactly as solidly as one 35% off, so the map reads as uniformly
+alarmed and the eye cannot rank anything without going to the legend. Opacity now steps with the
+bucket, gently (Brad: "less severe ramp") so the first step still reads as present. The legend
+cells carry the same ramp inline, or it would stop describing the map.
+
+**Caveat: three days, one season.** Re-derive before trusting it in winter, and check a third
+country against it rather than assuming it on.
 
 ---
 
