@@ -10,7 +10,6 @@ import useGlobalState, {
 import { slotForInstant, snapToCadence } from "../../../lib/time/cursor";
 import useFormatChartData from "../use-format-chart-data";
 import { calculateChartYMax, formatISODateString } from "../../helpers/utils";
-import { getEarliestForecastTimestamp } from "../../helpers/data";
 import GspPvRemixChart from "../gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
@@ -297,10 +296,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   // because the forecast horizon is a per-country fact (GB 36h, NL 48h) and any end we pin
   // truncates one of them. Not taken from `gspWindow`, which is now empty: the `period`
   // endpoints default to the window they are pre-warmed on and are asked for nothing.
-  const nationalWindow = useMemo(() => ({ start: getEarliestForecastTimestamp() }), []);
 
   const forecast = useNationalForecast(scope, {
-    ...nationalWindow,
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
   });
 
@@ -312,11 +309,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   );
 
   const generation0 = useNationalGeneration(observers[0] === undefined ? null : scope, {
-    ...nationalWindow,
     observer: observers[0]
   });
   const generation1 = useNationalGeneration(observers[1] === undefined ? null : scope, {
-    ...nationalWindow,
     observer: observers[1]
   });
   const generationResults = [generation0, generation1];
@@ -332,7 +327,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   const nHourHorizonMinutes = showNHourView ? nHourForecast * 60 : undefined;
   const nHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
-    ...nationalWindow,
     horizonMinutes: nHourHorizonMinutes
   });
 
@@ -344,8 +338,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     periodWindow: gspWindow,
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined,
     observers,
-    nHourHorizonMinutes,
-    nationalWindow
+    nHourHorizonMinutes
   });
 
   const hasGspPvInitialForSelectedTime = generation0.data?.values.some(

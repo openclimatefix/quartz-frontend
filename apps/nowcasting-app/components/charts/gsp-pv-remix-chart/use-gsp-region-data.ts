@@ -88,6 +88,10 @@ export const useGspRegionData = (
       ? { country, source: SOURCE, regionType: GSP_REGION_TYPE, region: region.name }
       : null;
 
+  // No window: `queries.forecast`/`queries.generation` apply the shared history default for
+  // every region time-series (`lib/api/v1/series-window.ts`). This path used to pass `{}` and
+  // get the endpoint's own now-→-+48h default, which is why the selected-GSP chart drew no
+  // forecast history while its PV Live line had a day of it.
   const forecastResult = useRegionForecast(scope, {});
   const nHourResult = useRegionForecast(nHour.show ? scope : null, {
     horizonMinutes: nHour.horizonMinutes

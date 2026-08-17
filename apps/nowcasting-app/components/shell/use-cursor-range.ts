@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { NATIONAL_REGION_TYPE, useFocusedCountry, useNationalForecast } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
-import { getEarliestForecastTimestamp } from "../helpers/data";
+import { defaultSeriesStart } from "../../lib/api/v1/series-window";
 import { deriveDaylightWindows, type CursorRange, type DaylightWindow } from "./scrub-scale";
 
 /**
@@ -26,13 +26,15 @@ import { deriveDaylightWindows, type CursorRange, type DaylightWindow } from "./
  *   there;
  * - the window pins `start` only. The end is the API's default (+48h), deliberately: pinning it
  *   is what silently clipped GB's horizon from 48h to ~26h before Phase 4 (see the note in
- *   `components/helpers/data.ts`), and a scrub track that stops 22 hours short of the forecast
+ *   `lib/api/v1/series-window.ts`), and a scrub track that stops 22 hours short of the forecast
  *   would look completely reasonable.
  *
- * `getEarliestForecastTimestamp()` floors to a 6-hour boundary, so this and the chart compute
- * the same string for any pair of mounts inside the same 6-hour block — which, since both are
- * memoised on mount and the shell mounts them together, is every session. If they ever did
- * diverge the cost is one extra cached request, not a wrong range.
+ * The start is `defaultSeriesStart()` — the same value the query layer now applies to every
+ * region time-series (`lib/api/v1/series-window.ts`). It is passed explicitly rather than left
+ * to that default because this hook *also* needs the value itself, to place the left edge of the
+ * scrub track: the track and the fetched window have to be the same window, and reading both
+ * from one function is what guarantees it. It floors to a 6-hour boundary, so the SWR key is
+ * stable across scrub ticks and this shares a cache entry with the chart.
  *
  * Returns `null` until values arrive. The caller draws an inert track rather than guessing a
  * horizon; there is no defensible default for "how far ahead does this country forecast".
@@ -60,7 +62,7 @@ export const useCursorRange = (): CursorRangeData | null => {
   const primarySeries = countryConfig?.nationalChartSeries?.[0];
   // Memoised on mount for the same reason the chart memoises it: the value moves every 6 hours
   // and an unstable SWR key would refetch the whole window on every scrub tick.
-  const start = useMemo(() => getEarliestForecastTimestamp(), []);
+  const start = useMemo(() => defaultSeriesStart(), []);
 
   const forecast = useNationalForecast(primarySeries ? scope : null, {
     start,

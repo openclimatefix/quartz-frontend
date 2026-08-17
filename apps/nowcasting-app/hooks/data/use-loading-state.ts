@@ -66,8 +66,6 @@ export type NationalLoadingQueries = {
   observers?: string[];
   /** Lead time for the N-hour forecast row. Omit to drop the row. */
   nHourHorizonMinutes?: number;
-  /** Window shared by the national forecast/generation series, if the views pin one. */
-  nationalWindow?: Pick<ForecastWindow, "start" | "end">;
 };
 
 const timeSeriesHasData = (result: DataResult<TimeSeries>): boolean =>
@@ -92,24 +90,20 @@ export const useLoadingState = (
     periodWindow = {},
     model,
     observers = [],
-    nHourHorizonMinutes,
-    nationalWindow = {}
+    nHourHorizonMinutes
   } = options;
 
   // Every hook is called unconditionally — a query that is not wanted is disabled by passing
   // a null scope, which is how the rules of hooks are honoured while the row count varies by
   // country. A disabled query reports isLoading: false, so it never blocks the indicator.
-  const nationalForecast = useNationalForecast(scope, { ...nationalWindow, model });
+  const nationalForecast = useNationalForecast(scope, { model });
   const nationalNHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
-    ...nationalWindow,
     horizonMinutes: nHourHorizonMinutes
   });
   const generationEstimate = useNationalGeneration(observers[0] === undefined ? null : scope, {
-    ...nationalWindow,
     observer: observers[0]
   });
   const generationUpdated = useNationalGeneration(observers[1] === undefined ? null : scope, {
-    ...nationalWindow,
     observer: observers[1]
   });
   const forecastPeriod = useForecastPeriod(regionScope, periodWindow);

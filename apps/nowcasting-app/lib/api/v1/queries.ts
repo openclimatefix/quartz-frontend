@@ -1,6 +1,7 @@
 import type { paths } from "./schema";
 import type { Scope } from "../../domain/types";
 import { toUtcInstant } from "../../domain/time";
+import { resolveSeriesWindow, type SeriesWindow } from "./series-window";
 
 // Pure Scope -> request descriptor. No fetching, no React, no business rules about which
 // window to request (the caller supplies it) — Phase 4's hooks build on top of this.
@@ -114,6 +115,19 @@ export const region = ({
   params: { path: { country, source, region: regionName } }
 });
 
+/**
+ * `start_utc`/`end_utc` for a **region time-series** request, with the shared history default
+ * applied. See `series-window.ts` for what it defaults and why the `period` endpoints below
+ * deliberately do not use it.
+ */
+const seriesQuery = (window: SeriesWindow) => {
+  const resolved = resolveSeriesWindow(window);
+  return {
+    start_utc: optionalUtcInstant(resolved.start),
+    end_utc: optionalUtcInstant(resolved.end)
+  };
+};
+
 // ---- Forecasts --------------------------------------------------------------------------
 
 export type ForecastWindow = {
@@ -132,9 +146,12 @@ export const forecast = (
   path: "/{country}/{source}/regions/{region}/forecast",
   params: {
     path: { country, source, region: regionName },
+    // `resolveSeriesWindow`, not the raw window: this endpoint defaults to **now → +48h**
+    // server-side, so a caller passing nothing gets a forecast with no history. Defaulting here
+    // rather than at each call site is what stops that being rediscovered — see
+    // `series-window.ts`. An explicit `start` from the caller still wins.
     query: omitUndefined({
-      start_utc: optionalUtcInstant(window.start),
-      end_utc: optionalUtcInstant(window.end),
+      ...seriesQuery(window),
       creation_limit_utc: optionalUtcInstant(window.creationLimit),
       horizon_minutes: window.horizonMinutes,
       model: window.model
@@ -175,6 +192,14 @@ export const forecastSnapshot = (
   }
 });
 
+/**
+ * The `period` endpoints' window.
+ *
+ * **Deliberately not `SeriesWindow`, and deliberately not run through `resolveSeriesWindow`.**
+ * These are served entirely from a cache pre-warmed on the API's own default window (±2 days,
+ * one key per region), so sending our own start risks missing the warm path as well as
+ * truncating the horizon. Every caller passes `{}` on purpose; see `use-map-region-values.ts`.
+ */
 export type PeriodWindow = {
   start?: Date | string;
   end?: Date | string;
@@ -217,10 +242,12 @@ export const generation = (
   path: "/{country}/{source}/regions/{region}/generation",
   params: {
     path: { country, source, region: regionName },
+    // Same default, different server behaviour to correct for: this endpoint returns the last
+    // 24h when given no `start`, where the forecast endpoint returns no past at all. One
+    // resolver so the two series a chart plots together cover the same stretch of time.
     query: omitUndefined({
       observer: window.observer,
-      start_utc: optionalUtcInstant(window.start),
-      end_utc: optionalUtcInstant(window.end)
+      ...seriesQuery(window)
     })
   }
 });

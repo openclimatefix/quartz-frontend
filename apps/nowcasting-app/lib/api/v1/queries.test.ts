@@ -3,6 +3,9 @@ import { join } from "path";
 
 import { describe, expect, test } from "@jest/globals";
 
+import { defaultSeriesStart } from "./series-window";
+import { toUtcInstant } from "../../domain/time";
+
 import {
   forecast,
   forecastLastUpdated,
@@ -115,9 +118,37 @@ describe("forecast", () => {
     });
   });
 
-  test("omits every optional when none are supplied", () => {
+  test("supplies the shared history start when none is given, and nothing else", () => {
+    // Changed 2026-08-16: this used to assert `{}`. The endpoint's own default is now → +48h,
+    // i.e. no past at all, so "omit everything" meant every caller that forgot to pin a start
+    // silently got a series with no history — which is exactly what happened to the
+    // selected-GSP chart. The default lives in `series-window.ts` now and is applied here.
     const descriptor = forecast({ ...scopes.GB, region: "1" });
-    expect(descriptor.params.query).toEqual({});
+    expect(descriptor.params.query).toEqual({ start_utc: toUtcInstant(defaultSeriesStart()) });
+  });
+
+  test("the default start is on a 6-hour UTC boundary, so the cache key survives scrubbing", () => {
+    // Not cosmetic: an unfloored "now minus two days" changes on every render and refetches
+    // every series on every tick of the scrubber.
+    const startUtc = forecast({ ...scopes.GB, region: "1" }).params.query?.start_utc as string;
+    expect(startUtc).toMatch(/T(00|06|12|18):00:00Z$/);
+  });
+
+  test("an explicit start wins over the default", () => {
+    // The property a selectable time-window control depends on: pass a window in and it is
+    // used, untouched. The default only fills a gap.
+    const descriptor = forecast(
+      { ...scopes.GB, region: "1" },
+      { start: "2024-01-01T00:00:00Z" }
+    );
+    expect(descriptor.params.query?.start_utc).toBe("2024-01-01T00:00:00Z");
+  });
+
+  test("the period endpoints are deliberately left unwindowed", () => {
+    // They are served from a cache pre-warmed on the API's own default window, so pinning our
+    // own start risks missing the warm path as well as truncating. If this ever starts sending
+    // a start_utc, the map's requests have quietly left the warm path.
+    expect(forecastPeriod(scopes.GB).params.query).toEqual({ region_type: scopes.GB.regionType });
   });
 
   test("a +01:00 offset and the equivalent Z instant normalise to the same param string", () => {

@@ -27,7 +27,6 @@ import {
 } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
-import { getEarliestForecastTimestamp } from "../helpers/data";
 
 /**
  * The `ChartData` keys the observed-generation lines are written under, in manifest observer
@@ -73,14 +72,10 @@ const PvRemixChart: FC<{
     ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
     : null;
 
-  // Only `start` is pinned. `/regions/{region}/forecast` defaults its window to **now → +48h**
-  // and `/generation` to the **last 24h**, so without a start the chart has no past at all.
-  // The END is deliberately left to the API: its default is +48h for the forecast and "now"
-  // for generation, both of which are what the chart wants. Pinning it to
-  // `getFurthestForecastTimestamp()` (now +1 day, i.e. +24–30h) is what the sub-national views
-  // do, and doing the same here silently CLIPPED the forward horizon from 48h to ~26h.
-  // Floored to a 6-hour boundary, so the SWR key is stable across scrub ticks.
-  const nationalWindow = useMemo(() => ({ start: getEarliestForecastTimestamp() }), []);
+  // The window is no longer pinned here. `queries.forecast`/`queries.generation` apply the
+  // shared history default to every region time-series, so this chart and the sub-national ones
+  // cover the same stretch of past by construction rather than by each remembering to ask.
+  // See `lib/api/v1/series-window.ts` — including why the END is still never pinned.
 
   // A slot with no configured series is disabled; a configured one asks for its model, or for
   // no `model` parameter at all when the country wants the region type's default.
@@ -88,14 +83,14 @@ const PvRemixChart: FC<{
   const slotModel = (index: number) =>
     seriesConfig[index] ? forecastSeriesModel(seriesConfig[index]) : undefined;
 
-  const forecast0 = useNationalForecast(slotScope(0), { ...nationalWindow, model: slotModel(0) });
-  const forecast1 = useNationalForecast(slotScope(1), { ...nationalWindow, model: slotModel(1) });
-  const forecast2 = useNationalForecast(slotScope(2), { ...nationalWindow, model: slotModel(2) });
-  const forecast3 = useNationalForecast(slotScope(3), { ...nationalWindow, model: slotModel(3) });
-  const forecast4 = useNationalForecast(slotScope(4), { ...nationalWindow, model: slotModel(4) });
-  const forecast5 = useNationalForecast(slotScope(5), { ...nationalWindow, model: slotModel(5) });
-  const forecast6 = useNationalForecast(slotScope(6), { ...nationalWindow, model: slotModel(6) });
-  const forecast7 = useNationalForecast(slotScope(7), { ...nationalWindow, model: slotModel(7) });
+  const forecast0 = useNationalForecast(slotScope(0), { model: slotModel(0) });
+  const forecast1 = useNationalForecast(slotScope(1), { model: slotModel(1) });
+  const forecast2 = useNationalForecast(slotScope(2), { model: slotModel(2) });
+  const forecast3 = useNationalForecast(slotScope(3), { model: slotModel(3) });
+  const forecast4 = useNationalForecast(slotScope(4), { model: slotModel(4) });
+  const forecast5 = useNationalForecast(slotScope(5), { model: slotModel(5) });
+  const forecast6 = useNationalForecast(slotScope(6), { model: slotModel(6) });
+  const forecast7 = useNationalForecast(slotScope(7), { model: slotModel(7) });
   const forecastResults = [
     forecast0,
     forecast1,
@@ -117,18 +112,15 @@ const PvRemixChart: FC<{
   );
 
   const generation0 = useNationalGeneration(observers[0] === undefined ? null : scope, {
-    ...nationalWindow,
     observer: observers[0]
   });
   const generation1 = useNationalGeneration(observers[1] === undefined ? null : scope, {
-    ...nationalWindow,
     observer: observers[1]
   });
   const generationResults = [generation0, generation1];
 
   const nHourHorizonMinutes = showNHourView ? nHourForecast * 60 : undefined;
   const nHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
-    ...nationalWindow,
     horizonMinutes: nHourHorizonMinutes
   });
 
@@ -139,8 +131,7 @@ const PvRemixChart: FC<{
     scope: slotScope(0),
     model: slotModel(0),
     observers,
-    nHourHorizonMinutes,
-    nationalWindow
+    nHourHorizonMinutes
   });
 
   const forecastSeries = forecast0.data;
