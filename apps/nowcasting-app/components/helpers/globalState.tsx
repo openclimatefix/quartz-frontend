@@ -61,6 +61,9 @@ export function getCursorNow(offsetMinutes = 0): string {
  * The country-dependent half lives in `CountryKeyedState` (see `countryState.ts`) and is
  * reached through `useCountryState` rather than `useGlobalState`.
  */
+/** The play button's step rate — a multiplier on the base 1-second-per-slot interval. */
+export type PlaybackSpeed = 1 | 2 | 4;
+
 export type FlatGlobalStateType = {
   /**
    * The country that owns the chart, the capacity figure, the level selector and the
@@ -109,6 +112,12 @@ export type FlatGlobalStateType = {
   sortBy: SORT_BY;
   autoZoom: boolean;
   isPlaying: boolean;
+  /**
+   * The play button's speed, shared so its footer instance and `/sites`'s agree. Not
+   * persisted — like `isPlaying`, it describes playback in progress rather than a durable
+   * preference, and resetting to 1x on reload is the less surprising default.
+   */
+  playbackSpeed: PlaybackSpeed;
   globalChartIsZooming: boolean;
   globalChartIsZoomed: boolean;
   globalZoomArea: { x1: string; x2: string };
@@ -213,6 +222,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     maps: [],
     autoZoom: true,
     isPlaying: false,
+    playbackSpeed: 1,
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },

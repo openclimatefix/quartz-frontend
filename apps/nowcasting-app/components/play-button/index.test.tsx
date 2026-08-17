@@ -12,7 +12,8 @@ import { afterEach, beforeEach, describe, expect, test } from "@jest/globals";
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
-import { getGlobalState, setGlobalState } from "../helpers/globalState";
+import { getCursorCadenceMinutes, getGlobalState, setGlobalState } from "../helpers/globalState";
+import { addMinutesToISODate } from "../helpers/utils";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlayButton from "./index";
 
@@ -34,6 +35,7 @@ beforeEach(() => {
   setGlobalState("isPlaying", false);
   setGlobalState("intervals", []);
   setGlobalState("selectedISOTime", START);
+  setGlobalState("playbackSpeed", 1);
 });
 
 afterEach(() => {
@@ -44,6 +46,7 @@ afterEach(() => {
   );
   setGlobalState("intervals", []);
   setGlobalState("isPlaying", false);
+  setGlobalState("playbackSpeed", 1);
 });
 
 describe("starting playback stops following", () => {
@@ -101,5 +104,124 @@ describe("returning to now stops playback", () => {
     });
 
     expect(getGlobalState("isPlaying")).toBe(false);
+  });
+});
+
+/**
+ * Speed control (1x/2x/4x). `FAR_END` is far enough past `START` that no test in this block
+ * comes near the wrap-to-`startTime` case covered above — these are purely about the interval's
+ * *period*, not its stride or its range.
+ */
+describe("speed control", () => {
+  const FAR_END = addMinutesToISODate(START, 600);
+
+  // Mirrors the component's own stepping (`getCursorCadenceMinutes()`), so the expected value
+  // is derived the same way the cursor actually moves rather than a hardcoded slot count.
+  const stepped = (from: string, ticks: number): string => {
+    let time = from;
+    for (let i = 0; i < ticks; i++) {
+      time = addMinutesToISODate(time, getCursorCadenceMinutes());
+    }
+    return time;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    // Still-mounted from the test above (RTL's own cleanup runs after this) — wrapped in `act`
+    // so resetting shared state here doesn't warn about an update outside it.
+    act(() => {
+      (getGlobalState("intervals") as ReturnType<typeof setInterval>[]).forEach((id) =>
+        clearInterval(id)
+      );
+      setGlobalState("intervals", []);
+      setGlobalState("isPlaying", false);
+      setGlobalState("playbackSpeed", 1);
+    });
+    jest.useRealTimers();
+  });
+
+  test.each([
+    [1, 1],
+    [2, 2],
+    [4, 4]
+  ])("%dx ticks the cursor %d time(s) per second", (speed, expectedTicks) => {
+    render(<PlayButton startTime={START} endTime={FAR_END} />);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: `${speed}x` }));
+      fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    });
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(getGlobalState("selectedISOTime")).toBe(stepped(START, expectedTicks));
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Pause" }));
+    });
+  });
+
+  test("changing speed mid-playback restarts the interval at the new rate immediately", () => {
+    render(<PlayButton startTime={START} endTime={FAR_END} />);
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    });
+    act(() => {
+      // One 1x tick.
+      jest.advanceTimersByTime(1000);
+    });
+    const afterFirstTick = getGlobalState("selectedISOTime");
+    expect(afterFirstTick).toBe(stepped(START, 1));
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "4x" }));
+    });
+    act(() => {
+      // If the old 1000ms interval were still running unchanged, this would produce one more
+      // tick, not four — this is what actually distinguishes "restarted" from "left alone".
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(getGlobalState("selectedISOTime")).toBe(stepped(afterFirstTick, 4));
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Pause" }));
+    });
+  });
+
+  test("changing speed while paused does not move the cursor or start playback", () => {
+    render(<PlayButton startTime={START} endTime={FAR_END} />);
+    const before = getGlobalState("selectedISOTime");
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "2x" }));
+    });
+
+    expect(getGlobalState("selectedISOTime")).toBe(before);
+    expect(getGlobalState("isPlaying")).toBe(false);
+
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+    expect(getGlobalState("selectedISOTime")).toBe(before);
+  });
+
+  test("the active speed is the only one marked pressed", () => {
+    render(<PlayButton startTime={START} endTime={FAR_END} />);
+
+    expect(screen.getByRole("button", { name: "1x" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "2x" })).toHaveAttribute("aria-pressed", "false");
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "2x" }));
+    });
+
+    expect(screen.getByRole("button", { name: "1x" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "2x" })).toHaveAttribute("aria-pressed", "true");
   });
 });

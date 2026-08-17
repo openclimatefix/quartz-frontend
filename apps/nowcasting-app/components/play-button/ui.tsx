@@ -1,4 +1,5 @@
 import React from "react";
+import { PlaybackSpeed } from "../helpers/globalState";
 
 type UiProps = {
   onClick: () => void;
@@ -38,5 +39,46 @@ const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
     </button>
   );
 };
+
+const SPEEDS: PlaybackSpeed[] = [1, 2, 4];
+
+type SpeedControlProps = {
+  speed: PlaybackSpeed;
+  onChange: (speed: PlaybackSpeed) => void;
+};
+
+/**
+ * The 1x/2x/4x rate picker, stacked under the play button (`index.tsx` owns the stack, and
+ * that stacking is what lets both the footer and `/sites` pick this up for free).
+ *
+ * Same width as the button above it (`w-7`) so the pair reads as one column, not two
+ * differently-sized controls sharing a corner. It is secondary to the button and the scrub
+ * track it sits under, so it is a row of bare text rather than another bordered icon block —
+ * quiet, not competing. `aria-pressed` marks the active speed the same way the button marks
+ * play/pause; `role="group"` plus its `aria-label` say what the buttons are choosing between,
+ * since colour/weight alone would not reach assistive tech.
+ */
+export const SpeedControl: React.FC<SpeedControlProps> = ({ speed, onChange }) => (
+  <div
+    role="group"
+    aria-label={`Playback speed: ${speed}x`}
+    className="mt-1 flex w-7 justify-between"
+  >
+    {SPEEDS.map((s) => (
+      <button
+        key={s}
+        type="button"
+        onClick={() => onChange(s)}
+        aria-pressed={speed === s}
+        title={`Play at ${s}x speed`}
+        className={`rounded-sm px-0.5 text-2xs leading-none transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow ${
+          speed === s ? "text-ocf-yellow" : "text-ocf-gray-700 hover:text-ocf-gray-400"
+        }`}
+      >
+        {s}x
+      </button>
+    ))}
+  </div>
+);
 
 export default Ui;
