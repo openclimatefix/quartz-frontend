@@ -5,6 +5,8 @@ import Cookies from "cookies";
 import * as Sentry from "@sentry/nextjs";
 
 import Layout from "../components/layout/layout";
+import ClientOnly from "../components/shell/client-only";
+import BootScreen from "../components/shell/boot-screen";
 import DashboardShell from "../components/shell/dashboard-shell";
 import { PvLatestMap } from "../components/map";
 import PvRemixChart from "../components/charts/pv-remix-chart";
@@ -95,14 +97,20 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   }, [combinedDashboardModeActive]);
 
   return (
-    <Layout>
-      <DashboardShell
-        dashboardModeActive={combinedDashboardModeActive}
-        comparisonActive={!!comparison}
-        map={<PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />}
-        chart={comparison ? <DeltaViewChart /> : <PvRemixChart />}
-      />
-    </Layout>
+    // Not server-rendered. The country state is seeded from a cookie the server cannot read, so
+    // server HTML and the first client render disagreed about the enabled set and hydration
+    // failed — see `client-only.tsx` for the full account. React was already discarding the
+    // server's markup for this page; this stops it being produced in the first place.
+    <ClientOnly fallback={<BootScreen />}>
+      <Layout>
+        <DashboardShell
+          dashboardModeActive={combinedDashboardModeActive}
+          comparisonActive={!!comparison}
+          map={<PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />}
+          chart={comparison ? <DeltaViewChart /> : <PvRemixChart />}
+        />
+      </Layout>
+    </ClientOnly>
   );
 }
 

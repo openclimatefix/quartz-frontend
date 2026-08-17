@@ -7,6 +7,8 @@ import { MdKeyboardArrowLeft } from "@react-icons/all-files/md/MdKeyboardArrowLe
 import { MdKeyboardArrowRight } from "@react-icons/all-files/md/MdKeyboardArrowRight";
 
 import Layout from "../components/layout/layout";
+import ClientOnly from "../components/shell/client-only";
+import BootScreen from "../components/shell/boot-screen";
 import Header from "../components/layout/header";
 import DeprecatedDomainNotice from "../components/layout/deprecated-domain-notice";
 import SitesMap from "../components/map/sitesMap";
@@ -79,58 +81,62 @@ export default function Sites({ dashboardModeServer }: { dashboardModeServer: st
   const closedWidth = "50%";
 
   return (
-    <Layout>
-      <div
-        className={`h-full relative pt-16${
-          combinedDashboardModeActive ? " @container dashboard-mode" : ""
-        }`}
-      >
-        <Header />
+    // Client-only for the same reason as the dashboard: this route renders the same `Header`,
+    // and so the same cookie-seeded country state the server cannot see. See `client-only.tsx`.
+    <ClientOnly fallback={<BootScreen />}>
+      <Layout>
         <div
-          id="map-container"
-          className="relative float-right h-full"
-          style={{ width: closedWidth }}
+          className={`h-full relative pt-16${
+            combinedDashboardModeActive ? " @container dashboard-mode" : ""
+          }`}
         >
-          <SitesMap
-            sitesData={sitesData}
-            aggregatedSitesData={aggregatedSitesData}
-            sitesErrors={sitesErrors}
-            activeUnit={activeUnit}
-            setActiveUnit={setActiveUnit}
-          />
-        </div>
+          <Header />
+          <div
+            id="map-container"
+            className="relative float-right h-full"
+            style={{ width: closedWidth }}
+          >
+            <SitesMap
+              sitesData={sitesData}
+              aggregatedSitesData={aggregatedSitesData}
+              sitesErrors={sitesErrors}
+              activeUnit={activeUnit}
+              setActiveUnit={setActiveUnit}
+            />
+          </div>
 
-        {/* The minimal equivalent of `components/side-layout` — just the positioning and the
+          {/* The minimal equivalent of `components/side-layout` — just the positioning and the
               expand handle sites actually uses, not the info tooltip (SideLayout already hides
               that one for the Solar Sites view) or anything else D is reshaping. */}
-        <div
-          className="h-full pt-16 absolute top-0 left-0 z-20"
-          style={{ width: isChartOpen ? "90%" : closedWidth }}
-        >
-          <div className="focus:outline-none h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20">
-            <div className="min-h-full max-h-full flex flex-col">
-              <SolarSiteChart
-                combinedSitesData={sitesData}
-                aggregatedSitesData={aggregatedSitesData}
-              />
+          <div
+            className="h-full pt-16 absolute top-0 left-0 z-20"
+            style={{ width: isChartOpen ? "90%" : closedWidth }}
+          >
+            <div className="focus:outline-none h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20">
+              <div className="min-h-full max-h-full flex flex-col">
+                <SolarSiteChart
+                  combinedSitesData={sitesData}
+                  aggregatedSitesData={aggregatedSitesData}
+                />
+              </div>
+            </div>
+            <div className="absolute bottom-12 -right-4 h-10 z-20">
+              <button
+                className="items-center w-8 h-8 text-lg text-black bg-amber-400 hover:bg-amber-400 focus:bg-amber-400"
+                onClick={() => setIsChartOpen((open) => !open)}
+              >
+                {isChartOpen ? (
+                  <MdKeyboardArrowLeft size={32} className="m-auto" />
+                ) : (
+                  <MdKeyboardArrowRight size={32} className="m-auto" />
+                )}
+              </button>
             </div>
           </div>
-          <div className="absolute bottom-12 -right-4 h-10 z-20">
-            <button
-              className="items-center w-8 h-8 text-lg text-black bg-amber-400 hover:bg-amber-400 focus:bg-amber-400"
-              onClick={() => setIsChartOpen((open) => !open)}
-            >
-              {isChartOpen ? (
-                <MdKeyboardArrowLeft size={32} className="m-auto" />
-              ) : (
-                <MdKeyboardArrowRight size={32} className="m-auto" />
-              )}
-            </button>
-          </div>
+          <DeprecatedDomainNotice />
         </div>
-        <DeprecatedDomainNotice />
-      </div>
-    </Layout>
+      </Layout>
+    </ClientOnly>
   );
 }
 
