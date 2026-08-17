@@ -268,3 +268,44 @@ country against it rather than assuming it on.
   threshold re-validation
 - `docs/feedback/FEEDBACK-MATRIX.md` (untracked) — RS-5 satellite overlay, RS-8 revisions,
   FB-024/FB-045 the delta quotes above
+
+---
+
+## Part 3 — open, as of 2026-08-17
+
+Findings from the session that shipped the percentage delta. Neither is started; both are
+recorded because the evidence cost a live API pull and would otherwise be lost.
+
+### GB's MW bands are the worst remaining map defect
+
+Measured over every daytime region-slot of 14–16 Aug, live API, at each region's own daily peak
+and across all non-zero slots:
+
+| region-slots by band | palest | b1 | b2 | b3 | b4 | top |
+|---|---|---|---|---|---|---|
+| GB GSPs (n=28,643) | **25,490 (89%)** | 2,355 | 546 | 210 | 42 | **0** |
+| NL provinces (n=2,614) | 1,039 (40%) | 1,151 | 298 | 105 | 21 | **0** |
+
+**257 of 337 GSPs never leave the palest band even at their own daily peak**, and the top band is
+reached by nothing in either country. The cause is GB's capacity distribution: median GSP 13 MW,
+max 654 MW, a 48.5× spread, against bands of [50, 150, 250, 350, 450].
+
+Note NL's are the *healthier* set — worth knowing, because the session opened on the assumption
+that NL's bands were the broken ones and the data says otherwise.
+
+The real question is whether MW mode earns its place at all now that percentage is a continuous
+ramp and delta has its own percentage scale. Re-deriving GB's thresholds from actual *values*
+(rather than from capacity, which is how the current set was built) is the smaller alternative.
+
+### The percentage ramp is an August fit
+
+`PERCENT_RAMP_TOP` is 0.8, chosen to stop NL clamping. GB's December median is 6% of capacity
+against August's 35%, so a winter map renders uniformly faint. Brad, 2026-08-17: amend
+seasonally, or make it user-settable. **If it becomes settable it stays one shared value, not one
+per country** — the reasoning is at the constant in `feature-state.ts`.
+
+### Unresolved: which mode was NL in
+
+The session started from "the NL bands look all wrong". Two candidate defects were found and it
+was never established which was being looked at: the percentage ramp clamping (now fixed) or the
+MW bands (above, untouched). If NL still looks wrong in MW mode, the bands are the live issue.
