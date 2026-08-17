@@ -38,7 +38,7 @@ type CountryCoverageBannerProps = {
  * identical to "the map is broken".
  *
  * Lives in `Map`'s `controlOverlay` slot (top-left, `pointer-events-auto` inside a
- * `pointer-events-none` wrapper) — the slot `deltaMap`/`pvLatestMap` already reserve and have
+ * `pointer-events-none` wrapper) — the slot `pvLatestMap` already reserves and has
  * passed `() => null` to since Wave 4, when the per-map time readout that used to live there
  * moved to the shell's cursor readout. Reusing it rather than adding a second absolutely
  * positioned layer.

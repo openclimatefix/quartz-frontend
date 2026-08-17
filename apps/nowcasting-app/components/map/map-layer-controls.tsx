@@ -32,10 +32,10 @@ import {
  * so this component can show the spinner and the error text without `map.tsx` rendering
  * anything itself.
  *
- * Forecast-only, same as before: the delta map has no satellite/PV fill to toggle.
- * `map-encoding-controls.tsx` mounts this only when `comparison` is null — the condition that
- * replaces `map.tsx`'s old `title === MAP_TITLE_FORECAST` check, expressed at the one place
- * that now knows which map is showing.
+ * Both fills, not just the forecast one. This was forecast-only while `deltaMap.tsx` existed —
+ * a second Mapbox instance with no satellite layers and no fill worth hiding. One instance
+ * repaints now, so "Clouds" and "PV" describe the map rather than the encoding, and the PV
+ * button hides whichever fill is drawn (the layer ids are the same either way).
  */
 const MapLayerControls: FC = () => {
   const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
@@ -87,7 +87,9 @@ const MapLayerControls: FC = () => {
 
         <button
           type="button"
-          title="Toggle the yellow PV forecast overlay so clouds are easier to see"
+          // Not "the yellow overlay" any more: the same button hides the delta fill when a
+          // comparison is selected, and that one is not yellow.
+          title="Toggle the region fill so clouds are easier to see"
           onClick={() => setShowPvLayer((v) => !v)}
           aria-pressed={showPvLayer}
           className={`${CONTROL_BUTTON_BASE} ${

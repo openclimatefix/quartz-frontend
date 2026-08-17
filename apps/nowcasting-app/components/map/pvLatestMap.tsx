@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState }
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map } from "./";
-import { ActiveUnit, MAP_TITLE_FORECAST } from "./types";
+import { ActiveUnit, MAP_TITLE_MAIN } from "./types";
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
@@ -22,6 +22,8 @@ import useEnabledCountryMapData from "./use-enabled-country-map-data";
 import {
   PV_SOURCE_ID,
   applyFeatureStates,
+  deltaFillColorExpression,
+  deltaFillOpacityExpression,
   fillColorExpression,
   fillOpacityExpression
 } from "./feature-state";
@@ -53,11 +55,33 @@ type PvLatestMapProps = {
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
+/**
+ * The dashboard's map — forecast fill or delta fill, one Mapbox instance either way.
+ *
+ * `deltaMap.tsx` used to be a second component, swapped in by `pages/index.tsx` when a
+ * comparison was selected. Each owned its own `<Map>`, so every switch constructed a
+ * `new mapboxgl.Map`: the GL context, the source, the parsed boundary geometry and any decoded
+ * satellite frames were torn down and rebuilt, which is the flash Brad described. They were
+ * never two maps — they agreed on the data hook, the source id, all three layer ids and the
+ * fact that both already updated paint through `setPaintProperty`. They were one map with two
+ * paint configurations, split by history.
+ *
+ * So `comparison` selects the paint expressions and adds a line to the popup, and nothing else
+ * about the instance changes. What the merge buys beyond the flash is everything the delta view
+ * was missing by accident rather than by intent (contract §2 says delta "differs by *what the
+ * map's fill encodes*", which makes the rest accident by definition): clouds, the constraints
+ * overlay, the PV fill toggle and a free aggregation level all now work in both modes, because
+ * they belong to the instance rather than to the encoding.
+ */
 const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const country = useFocusedCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
+  // The one thing that differs between the two modes. `null` is the forecast fill; any preset
+  // is the delta fill (contract §2).
+  const [comparison] = useGlobalState("comparison");
+  const isDelta = comparison !== null;
 
   const showConstraintsRef = useRef(showConstraints);
   useEffect(() => {
@@ -125,7 +149,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
   useEffect(() => {
     // Add unit to map container so that it can be accessed by popup in the map event listeners
-    const map: HTMLDivElement | null = document.querySelector(`#Map-${MAP_TITLE_FORECAST}`);
+    const map: HTMLDivElement | null = document.querySelector(`#Map-${MAP_TITLE_MAIN}`);
     if (map) {
       setActiveUnitOnMap(map, activeUnit);
     }
@@ -142,6 +166,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   // once, on the first effect run, and closes over whatever it can see at that moment.
   const observerLabelByCountryRef = useRef(observerLabelByCountry);
   observerLabelByCountryRef.current = observerLabelByCountry;
+
+  // Same reason again: the popup handler is registered once, on the effect run that creates the
+  // fill layer, so which mode is showing has to reach it through a ref rather than a closure.
+  // The unit does not need one — it is read off the container's data attribute at hover time
+  // (`getActiveUnitFromMap`), which is what that attribute exists for.
+  const isDeltaRef = useRef(isDelta);
+  isDeltaRef.current = isDelta;
 
   // Toggle constraints visibility on map
   useEffect(() => {
@@ -161,12 +192,34 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     }
   }, [showConstraints]);
 
-  // The ten-times MW bands belong to the client-side rollups (GB's DNO / NG zone). That is a
-  // branch on the level's *kind*, not on its name — and since each drawn country is on its
-  // own level it is now a per-FEATURE fact rather than a per-map one, carried as feature
+  // The two paint configurations, as one memo.
+  //
+  // Forecast: the ten-times MW bands belong to the client-side rollups (GB's DNO / NG zone).
+  // That is a branch on the level's *kind*, not on its name — and since each drawn country is
+  // on its own level it is a per-FEATURE fact rather than a per-map one, carried as feature
   // state and read inside the expression. See `feature-state.ts`.
-  const fillOpacity = useMemo(() => fillOpacityExpression(activeUnit), [activeUnit]);
-  const fillColor = useMemo(() => fillColorExpression(activeUnit), [activeUnit]);
+  //
+  // Delta: the sequential ramp becomes a diverging one, and both expressions step on the same
+  // bucket field, so they are built from one flag and must be pushed together — setting only
+  // the colour would draw percentage hues at megawatt strengths.
+  //
+  // One object rather than two values so `appliedPaintRef` has a single identity to compare:
+  // with a second axis (the mode) feeding the same two expressions, guarding on the opacity
+  // alone would have missed any change that moved the colour and not the opacity.
+  const paint = useMemo(() => {
+    if (isDelta) {
+      // Capacity cannot reach here — `setComparison` moves the active unit off it when a
+      // comparison is selected, and `UnitToggle` greys it out for as long as one is. The
+      // `=== percentage` test therefore falls back to MW as a defensive default, not as a
+      // claim that capacity means megawatts.
+      const normalized = activeUnit === ActiveUnit.percentage;
+      return {
+        color: deltaFillColorExpression(normalized),
+        opacity: deltaFillOpacityExpression(normalized)
+      };
+    }
+    return { color: fillColorExpression(activeUnit), opacity: fillOpacityExpression(activeUnit) };
+  }, [isDelta, activeUnit]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -229,11 +282,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
         source: PV_SOURCE_ID,
         layout: { visibility: "visible" },
         paint: {
-          "fill-color": fillColor,
-          "fill-opacity": fillOpacity
+          "fill-color": paint.color,
+          "fill-opacity": paint.opacity
         }
       });
-      appliedPaintRef.current = fillOpacity;
+      appliedPaintRef.current = paint;
 
       // Also add map event listeners but only the first time
       const popupFunction = throttle(
@@ -307,6 +360,51 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             <div><span>${actualValue}</span> <span class="text-2xs text-mapbox-black-300">%</span></div>`;
           }
 
+          // The delta line, in delta mode only.
+          //
+          // One popup rather than two — the merged map has one hover target, and the old delta
+          // popup showed *only* the difference, so reading a delta meant knowing neither number
+          // it was the difference of. This is the forecast popup plus a line, which is why the
+          // forecast mode is unchanged: the difference is only worth a row when the user has
+          // asked to see differences.
+          //
+          // No delta is a different statement from a delta of zero: a future slot, or a region
+          // whose forecast or observed value has not published, has nothing to compare.
+          // Reported in whichever unit the toggle is on, and only that one — showing both would
+          // be the safer-looking choice and the wrong one, since the point of the unit control
+          // is that the user has said which question they are asking.
+          let deltaSection = "";
+          if (isDeltaRef.current) {
+            const asPercentage = currentActiveUnit === ActiveUnit.percentage;
+            const deltaValue = asPercentage ? (state.deltaNormalized ?? 0) * 100 : state.delta ?? 0;
+            const deltaBody = !state.hasDelta
+              ? `<span class="text-mapbox-black-300">no delta yet</span>`
+              : `<span class="font-bold">${
+                  deltaValue > 0
+                    ? `<span class="up-arrow"></span>`
+                    : `<span class="down-arrow"></span>`
+                }</span>
+                <span class="mr-1 ${
+                  deltaValue > 0 ? "text-ocf-delta-900" : "text-ocf-delta-100"
+                }">${deltaValue.toFixed(1)}</span><small class="text-xs">${
+                  asPercentage ? "% of capacity" : "MW"
+                }</small>`;
+
+            // Which observed stream the delta is measured against, and in which direction. The
+            // order matters and is easy to get backwards (it was, on first writing): the value
+            // is `generationMw - forecastMw` (`helpers/data.ts`), so **positive means the actual
+            // came in above the forecast** — an under-forecast. Stated as the subtraction itself
+            // rather than as "vs", because "forecast vs actual" does not say which way a `+`
+            // points and the colour ramp cannot say it either.
+            const deltaCaption = observerLabelByCountryRef.current[featureCountry]
+              ? `${observerLabelByCountryRef.current[featureCountry]} &minus; forecast`
+              : "Difference";
+            deltaSection = `<div class="mt-1 flex items-center justify-between gap-3 border-t border-white/10 pt-1 text-xs">
+            <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">${deltaCaption}</span>
+            <div>${deltaBody}</div>
+          </div>`;
+          }
+
           const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
           <div class="flex justify-between gap-3 items-center mb-1">
             <div class="text-sm font-semibold">${state.label || ""}</div>
@@ -324,6 +422,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
               ${actualAndForecastSection}
             </div>
           </div>
+          ${deltaSection}
         </div>`;
 
           // Populate the popup and set its coordinates
@@ -356,13 +455,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           appliedStatesRef.current = statesRef.current;
         }
       });
-    } else if (appliedPaintRef.current !== fillOpacity) {
-      // Only when the unit or the aggregation band changed. The `Map` wrapper re-invokes this
-      // on every render, so an unguarded pair of `setPaintProperty` calls would re-validate
-      // the style on every scrub tick for no reason.
-      map.setPaintProperty("latestPV-forecast", "fill-color", fillColor);
-      map.setPaintProperty("latestPV-forecast", "fill-opacity", fillOpacity);
-      appliedPaintRef.current = fillOpacity;
+    } else if (appliedPaintRef.current !== paint) {
+      // Only when the unit or the encoding changed. The `Map` wrapper re-invokes this on every
+      // render, so an unguarded pair of `setPaintProperty` calls would re-validate the style on
+      // every scrub tick for no reason.
+      //
+      // **This is the whole of switching between forecast and delta.** Two `setPaintProperty`
+      // calls against layers that already exist, over a source that is never touched — no new
+      // GL context, no re-parsed geometry, no re-decoded satellite frames, and the user's pan
+      // and zoom left exactly where they were.
+      map.setPaintProperty("latestPV-forecast", "fill-color", paint.color);
+      map.setPaintProperty("latestPV-forecast", "fill-opacity", paint.opacity);
+      appliedPaintRef.current = paint;
     }
 
     const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
@@ -544,10 +648,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             // duplicate. Reused (Phase 6 followup, Track M) for the per-country coverage
             // banner — quiet unless an enabled country has nothing published at this instant,
             // or nothing at all.
+            //
+            // The metric follows the encoding: a country can have a published forecast and
+            // still have no computable delta, and on the delta fill "no delta" is the common
+            // reading rather than the exception, so the banner has to be answering about the
+            // quantity actually on screen.
             controlOverlay={() => (
-              <CountryCoverageBanner countryStatus={countryStatus} metric="value" />
+              <CountryCoverageBanner
+                countryStatus={countryStatus}
+                metric={isDelta ? "delta" : "value"}
+              />
             )}
-            title={MAP_TITLE_FORECAST}
+            title={MAP_TITLE_MAIN}
           ></Map>
         </>
       }

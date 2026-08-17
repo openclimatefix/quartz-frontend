@@ -2,7 +2,7 @@ import mapboxgl, { Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as Sentry from "@sentry/nextjs";
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
-import { IMap, MAP_TITLE_FORECAST } from "./types";
+import { IMap, MAP_TITLE_MAIN } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
 import useGlobalState, {
   useCountryState,
@@ -43,7 +43,8 @@ let framedFor: string | null = null;
 // `.env.example` / `docs/phase5-track-e-notes.md`.
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
 
-// Yellow PV/GSP forecast fill layers added by pvLatestMap/deltaMap that can obscure the cloud layer
+// The region fill layers added by `pvLatestMap.tsx` that can obscure the cloud layer. Their ids
+// are unchanged by the delta merge: one set of layers, repainted, is what the merge is.
 const PV_LAYER_IDS = [
   "latestPV-forecast",
   "latestPV-forecast-borders",
@@ -150,8 +151,8 @@ const Map: FC<IMap> = ({
    * selection, not an aggregation-level change. Once framed, the view is the user's to pan.
    *
    * **`framedFor` is module state, not a ref, and that is the point** (2026-08-15). It was a
-   * `useRef`, which meant it died with the component — and `pages/index.tsx` swaps `PvLatestMap`
-   * for `DeltaMap` when the user selects a comparison, unmounting this map and building a new
+   * `useRef`, which meant it died with the component — and `pages/index.tsx` used to swap
+   * `PvLatestMap` for `DeltaMap` on selecting a comparison, unmounting this map and building a new
    * one. The fresh instance started at `null`, decided it had never framed anything, and threw
    * away the user's pan and zoom on every switch between forecast and delta. The viewport itself
    * was never lost: `lng`/`lat`/`zoom` are country-scoped global state and restore correctly;
@@ -162,9 +163,9 @@ const Map: FC<IMap> = ({
    * not global state: nothing renders from it, and writing it in an effect would cost a render
    * for something no one reads.
    *
-   * When the two maps become one component this stops mattering for the forecast/delta switch —
-   * but it would still be wrong to lose framing across any other remount, so the fix stands on
-   * its own. See the merge write-up in `docs/phase6-followup-outstanding.md`.
+   * The forecast/delta swap that exposed it is gone (the two maps are one component now), so
+   * that particular remount can no longer happen — but it would still be wrong to lose framing
+   * across any other remount, so the fix stands on its own.
    */
   const enabledCountries = useEnabledCountries();
   const enabledKey = enabledCountries.join(",");
@@ -363,7 +364,12 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     // Nothing satellite-related runs until the user actually enables clouds, so a
     // visitor who never turns the layer on pays no satellite requests at all.
-    if (title !== MAP_TITLE_FORECAST || !showCloudLayer || !isMapReady || !selectedISOTime) return;
+    // The gate is `MAIN`, not "the forecast view": clouds are the dominant driver of forecast
+    // error, so they are if anything *more* useful under the delta fill than under the forecast
+    // one (FB-020, NESO — "attribute a change in forecast to a thickening or thinning of the
+    // cloud cover in a particular area", a delta-shaped question). What it still excludes is
+    // `sitesMap`, which has no satellite layers to drive.
+    if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady || !selectedISOTime) return;
     let cancelled = false;
     (async () => {
       // Load the frame the user is actually looking at first, then warm the

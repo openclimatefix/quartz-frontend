@@ -339,7 +339,7 @@ describe("buildMapFeatureStates against the recorded GB fixtures", () => {
 });
 
 /**
- * The map popups (`pvLatestMap.tsx`, `deltaMap.tsx`) print `label` straight off feature state,
+ * The map popup (`pvLatestMap.tsx`) prints `label` straight off feature state,
  * so the registry's casing rule has to be applied here or the popup disagrees with the chart
  * title over the same region — which is exactly what it did: "noord-brabant" hovered,
  * "Noord-Brabant" charted. Nothing in the types can catch that, since both are strings.

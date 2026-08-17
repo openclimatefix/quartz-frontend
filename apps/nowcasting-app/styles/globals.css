@@ -15,18 +15,18 @@
   @apply inline-flex items-center justify-center px-4 py-2 border border-ocf-gray-700 rounded-full shadow-sm text-sm font-medium text-ocf-gray-700 bg-transparent hover:text-ocf-yellow hover:border-ocf-yellow focus:outline-none;
 }
 
-.pv-map a.mapboxgl-ctrl-logo, .delta-map a.mapboxgl-ctrl-logo {
+.pv-map a.mapboxgl-ctrl-logo {
   margin-left: 0.5rem;
 }
 
-.pv-map .mapboxgl-popup-content, .delta-map .mapboxgl-popup-content {
+.pv-map .mapboxgl-popup-content {
   background: rgba(0,0,0,0.75);
   color: white;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem 0.5rem 0 0.5rem;
 }
 
-.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip, .delta-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
+.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
   border-top-color: rgba(0,0,0,0.5);
 }
 

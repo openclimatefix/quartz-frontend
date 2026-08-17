@@ -67,7 +67,7 @@ import useMapRegionValues from "./use-map-region-values";
  *
  * `coverage` is the per-cursor legibility fact (Phase 6 followup, Track M) — computed once per
  * country here, alongside the same values pipeline that already builds `hasValues`, rather than
- * `deltaMap`/`pvLatestMap` each re-deriving it from the merged, namespaced feature-state map.
+ * `pvLatestMap` re-deriving it from the merged, namespaced feature-state map.
  * See `country-coverage.ts` for what it distinguishes and why.
  */
 export type CountryStatus = {

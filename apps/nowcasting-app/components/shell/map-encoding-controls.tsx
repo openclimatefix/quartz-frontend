@@ -52,11 +52,13 @@ import MapLayerControls, { SatelliteChannelSelect } from "../map/map-layer-contr
  *
  * **But it sits below the encoding block, not above it** (Brad, 2026-08-15). It first sat first,
  * on the reasoning that the basemap is the ground the rest is drawn on — true, and it cost more
- * than it bought. The layer controls are forecast-only, so switching to delta unmounted them and
- * dropped everything beneath by their full height: the encoding options, the unit toggle and the
- * legend all jumped upward, under a pointer that had just clicked one of them. Ordering by
- * conceptual precedence is worth less than a panel whose controls stay where the user left them.
- * Below the legend it is the last thing in the panel, so there is nothing left for it to move.
+ * than it bought. The layer controls were forecast-only then, so switching to delta unmounted
+ * them and dropped everything beneath by their full height: the encoding options, the unit toggle
+ * and the legend all jumped upward, under a pointer that had just clicked one of them. Ordering
+ * by conceptual precedence is worth less than a panel whose controls stay where the user left
+ * them. Nothing unmounts any more (the map merge made the layer controls apply to both fills),
+ * so that argument is spent — but the reading order it produced is right on its own terms, and
+ * a panel that has stopped moving is not one to start rearranging.
  *
  * Rejected: putting `AggregationLevelToggle` and `MapLayerControls` on the display rail
  * instead. That would satisfy §6's letter but not Brad's explicit ask — "into one panel" — and
@@ -70,12 +72,12 @@ import MapLayerControls, { SatelliteChannelSelect } from "../map/map-layer-contr
  * layer controls as a second column costs no height at all: the row is as tall as "Layers"
  * was on its own.
  *
- * Note this puts granularity behind the same `comparison === null` gate the layer controls
- * already had, so it is forecast-only where it used to be reachable in the delta view too.
- * That follows the app's own intent rather than adding to it — `pages/index.tsx` force-snaps
- * the level to the country's finest on entering delta, so the control was offering a choice
- * the view had already made. If delta should keep it, the honest form is a disabled button
- * with a reason, the way `UnitToggle` handles capacity — not a live control fighting an effect.
+ * Pairing granularity with the layer controls briefly put it behind their `comparison === null`
+ * gate, making it forecast-only, on the grounds that `pages/index.tsx` force-snapped the level
+ * on entering delta and so the control was offering a choice the view had already made. Both
+ * halves of that are gone: the force-snap was a description of `deltaMap`'s limits rather than a
+ * rule (the rollups compute a DNO-level delta and always have), and there is no gate left to
+ * inherit. Granularity is live in both modes.
  */
 
 const ComparisonOption: FC<{
@@ -145,43 +147,49 @@ const MapEncodingControls: FC = () => {
       />
       <ColorGuideBar comparison={comparison} unit={activeUnit} />
 
-      {/* Satellite/PV layers are forecast-map concepts only — the delta map has no basemap fill
-          to toggle, so this mirrors `map.tsx`'s old `title === MAP_TITLE_FORECAST` gate,
-          expressed here since this panel is now the one place that knows which map is mounted
-          (`comparison === null` is the forecast map, contract §2).
+      {/* No longer gated on `comparison === null`. This block was forecast-only because the two
+          views were two Mapbox instances and only one of them carried satellite layers or a
+          togglable fill; with one instance repainting (`pvLatestMap.tsx`), both belong to the
+          map rather than to the encoding.
 
-          It sits *below* the encoding block rather than above it, so that switching to the delta
-          view — which unmounts it — cannot shove the encoding controls and legend upward under
-          the pointer. See the note on ordering above. */}
-      {comparison === null && (
-        <>
-          <div className="border-b border-white/10" />
-          {/* A two-column grid rather than a flex row, so the satellite channel picker can
-              span both. Grid is what makes that possible without nesting: `MapLayerControls`
-              and the granularity group take a column each, and `SatelliteChannelSelect` is a
-              third grid child carrying its own `col-span-2`.
+          That is a gain in both directions. Clouds are the dominant driver of forecast error, so
+          they are most useful under the delta fill (FB-020, NESO: attribute a forecast change to
+          thickening or thinning cloud over an area — a delta-shaped question that was only
+          answerable on the view that could not answer it). And granularity was never really
+          forecast-only either: `rollUpRegionValues` has always accumulated delta across group
+          members, so a DNO-level delta was computed and never offered. `pages/index.tsx` no
+          longer force-snaps the level, so this is a live control rather than one fighting an
+          effect.
 
-              Both groups answer "how is the map drawn" rather than "what does its colour mean",
-              and each is two or three buttons wide, so a column apiece costs one section's
-              height instead of two — which is what paid for the disclosure going away. */}
-          <div className="grid grid-cols-2 items-start gap-x-3 gap-y-1.5">
-            <MapLayerControls />
-            <div className="flex min-w-0 flex-col gap-1.5">
-              {/* `MapLayerControls` carries its own "Layers" heading; this one is written here
-                  because `AggregationLevelToggle` is shared and has no business knowing which
-                  panel section it has been placed in. Same classes, so the two columns head
-                  identically. */}
-              <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
-                Granularity
-              </span>
-              <AggregationLevelToggle isLoading={false} />
-            </div>
-            {/* Full width, and absent entirely when the cloud layer is off — it renders `null`
-                rather than an empty cell, so no gap is left behind. */}
-            <SatelliteChannelSelect />
-          </div>
-        </>
-      )}
+          It stays *below* the encoding block. Nothing unmounts here any more, so the original
+          reason (switching views shoving the legend upward under the pointer) is spent — but the
+          reading order it gives, "what the colour means" then "how the map is drawn", is the
+          right one on its own. */}
+      <div className="border-b border-white/10" />
+      {/* A two-column grid rather than a flex row, so the satellite channel picker can
+          span both. Grid is what makes that possible without nesting: `MapLayerControls`
+          and the granularity group take a column each, and `SatelliteChannelSelect` is a
+          third grid child carrying its own `col-span-2`.
+
+          Both groups answer "how is the map drawn" rather than "what does its colour mean",
+          and each is two or three buttons wide, so a column apiece costs one section's
+          height instead of two — which is what paid for the disclosure going away. */}
+      <div className="grid grid-cols-2 items-start gap-x-3 gap-y-1.5">
+        <MapLayerControls />
+        <div className="flex min-w-0 flex-col gap-1.5">
+          {/* `MapLayerControls` carries its own "Layers" heading; this one is written here
+              because `AggregationLevelToggle` is shared and has no business knowing which
+              panel section it has been placed in. Same classes, so the two columns head
+              identically. */}
+          <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+            Granularity
+          </span>
+          <AggregationLevelToggle isLoading={false} />
+        </div>
+        {/* Full width, and absent entirely when the cloud layer is off — it renders `null`
+            rather than an empty cell, so no gap is left behind. */}
+        <SatelliteChannelSelect />
+      </div>
     </div>
   );
 };

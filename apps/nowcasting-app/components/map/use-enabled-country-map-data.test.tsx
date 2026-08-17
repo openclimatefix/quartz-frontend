@@ -111,7 +111,7 @@ import {
  * The loaders must actually be rendered — they are the per-country hook instances, and a
  * harness that only *called* the hook would report an empty map forever. That is the same
  * mistake a map component would make by dropping `loaders` from one of its render arms, which
- * is why both `pvLatestMap` and `deltaMap` render them outside their loading/failure branches.
+ * is why `pvLatestMap` renders them outside its loading/failure branches.
  */
 let latest: EnabledCountryMapData;
 const Harness: React.FC<{ cursorTime: string }> = ({ cursorTime }) => {

@@ -8,7 +8,39 @@ came out of the same investigation and would otherwise be lost.
 
 ---
 
-## Part 1 — the merge
+## Part 1 — the merge ✅ **done 2026-08-17**
+
+`deltaMap.tsx` is deleted. `pvLatestMap.tsx` reads `comparison` itself and switching between
+forecast and delta is now two `setPaintProperty` calls against layers that already exist — no new
+GL context, no re-parsed geometry, no re-decoded satellite frames, no lost pan.
+
+What shipped beyond the mechanical port, and the decisions behind it:
+
+- **Clouds, constraints and the PV fill toggle work on delta.** They belong to the instance, not
+  to the encoding. `map.tsx`'s satellite gate is now `title !== MAP_TITLE_MAIN` (it still excludes
+  `sitesMap`), and `map-encoding-controls.tsx` lost its `comparison === null` wrapper.
+- **Granularity is live in both modes** (Brad chose this over a disabled-with-reason control).
+  `pages/index.tsx`'s force-snap effect is gone entirely, and the selection-clearing that rode
+  along with it went too — it only fired because the snap was about to move the level out from
+  under the selected region.
+- **One popup, superset shape** (Brad's choice of the three offered). Forecast mode is unchanged;
+  delta mode is that same popup plus a bordered delta row carrying the `<observer> − forecast`
+  caption. The old delta popup showed only the difference, so reading it meant knowing neither
+  number it was the difference of.
+- **`MAP_TITLE_DELTA` is gone; `MAP_TITLE_FORECAST` became `MAP_TITLE_MAIN`** — one instance
+  should not be named after one of the two things it draws. `#Map-MAIN` is the DOM id now.
+- **The loading gates reconciled toward `pvLatestMap`'s**: the debounced spinner overlay, not
+  delta's full-pane `LoadStateMap`. Delta's `isLoading && !hasValues` arm was the older shape and
+  replacing the pane is exactly what the merge exists to stop doing.
+- The satellite fetch loop is **not** idle in delta mode — deliberately, since clouds are ported.
+  The "silent fetch loop behind an invisible layer" risk below never arises: nothing satellite-
+  related runs until `showCloudLayer` is on, in either mode.
+
+Verified green: 1281 tests / 60 suites, typecheck clean, no new lint. **Not yet checked against
+prod** — the popup's delta row, the delta fill under clouds, and DNO/zone-level delta are the
+three things to look at live.
+
+The rest of this part is kept as the reasoning, not as work outstanding.
 
 ### The problem
 

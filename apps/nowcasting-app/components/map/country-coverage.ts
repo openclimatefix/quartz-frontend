@@ -17,7 +17,7 @@ import type { MapFeatureState } from "../helpers/data";
  *  - **`no-forecast`** — the values pipeline resolved and delivered NOTHING at all, over the
  *    whole fetched window (`MapRegionValues.hasValues` false). This is a country-wide gap:
  *    every region, every timestamp. It usually means a request failed for this country alone
- *    (which the top-level `error`/`hasValues` gate in `deltaMap`/`pvLatestMap` will not catch,
+ *    (which the top-level `error`/`hasValues` gate in `pvLatestMap` will not catch,
  *    since that gate is OR'd across every enabled country — one country's 503 must not blank
  *    a map that is drawing another country perfectly well).
  *  - **`no-data`** — the pipeline delivered values somewhere in the fetched window, but no
@@ -39,7 +39,7 @@ export type CountryCoverageFacts = {
   /**
    * Whether at least one of this country's regions carries the fact this map cares about AT
    * THE CURRENT CURSOR instant: a published forecast value for `pvLatestMap`
-   * (`dataState === "value"`), or a computable delta for `deltaMap` (`hasDelta`).
+   * (`dataState === "value"`), or a computable delta when the delta fill is drawn (`hasDelta`).
    */
   anyAtCursor: boolean;
 };
@@ -51,7 +51,7 @@ export const decideCountryCoverage = ({
   anyAtCursor
 }: CountryCoverageFacts): CountryCoverageState => {
   // Loading is checked first and gated on `!hasValues`, matching the convention the top-level
-  // `error && !hasValues` / `isLoading && !hasValues` gates in deltaMap/pvLatestMap already
+  // `error && !hasValues` / `isLoading && !hasValues` gates in pvLatestMap already
   // use: once anything has arrived, a background refetch is not "loading" any more, it is
   // just data that might update.
   if (isLoading && !hasValues) return "loading";

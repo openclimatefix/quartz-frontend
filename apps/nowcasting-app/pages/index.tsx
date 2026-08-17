@@ -7,13 +7,10 @@ import * as Sentry from "@sentry/nextjs";
 import Layout from "../components/layout/layout";
 import DashboardShell from "../components/shell/dashboard-shell";
 import { PvLatestMap } from "../components/map";
-import DeltaMap from "../components/map/deltaMap";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
-import useGlobalState, { useCountryState } from "../components/helpers/globalState";
-import { useAggregationLevels } from "../hooks/data";
-import { defaultLevelOf } from "../components/helpers/aggregationLevels";
+import useGlobalState from "../components/helpers/globalState";
 import {
   CookieStorageKeys,
   setArraySettingInCookieStorage
@@ -27,13 +24,18 @@ import {
  * owns the arrangement (contract §3, §4, §6). What is left is genuinely page-level: which pair
  * of panes is mounted, Sentry identity, and the cookie-persisted settings.
  *
- * **One map and one chart, chosen by the comparison state.** The three `hidden`-class views are
+ * **One map, and one chart chosen by the comparison state.** The three `hidden`-class views are
  * gone: Solar Sites moved to `/sites` (§2, Track C) and Delta stopped being a view at all — it
- * is the "vs generation" comparison preset, and the pair below is what that preset selects.
+ * is a comparison preset, and the chart below is what that preset selects.
  * Because nothing is mounted-but-hidden any more, no map is ever alive at the wrong size — the
  * two `use-map-chrome` effects that compensated for that went with Track D's shell (Wave 2).
  * What was left — resizing the live map when dashboard mode changes its box — is inlined below
  * (Wave 4): a single effect with one call site does not earn a hook of its own.
+ *
+ * **The map no longer swaps.** `DeltaMap` used to be mounted here in place of `PvLatestMap` on
+ * a comparison, which tore down and rebuilt the whole Mapbox instance — the flash. `PvLatestMap`
+ * reads `comparison` itself now and repaints; see its own doc comment. The chart genuinely is
+ * two components (different series, different axes) and still swaps.
  */
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
@@ -42,14 +44,6 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const { user, isLoading, error } = useUser();
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [nationalAggregationLevel, setNationalAggregationLevel] = useCountryState(
-    "nationalAggregationLevel"
-  );
-  const [, setClickedGspId] = useCountryState("clickedGspId");
-  // A comparison is drawn on the country's finest non-derived level — GB's `gsp`, NL's
-  // `province` — the same rule `defaultAggregationLevel` uses for the state's initial value
-  // (Phase 5 seam 1; was hardcoded `NationalAggregation.GSP`).
-  const finestLevel = defaultLevelOf(useAggregationLevels());
 
   // Local state used to set initial state on server side render, then updated by global state
   const [combinedDashboardModeActive, setCombinedDashboardModeActive] = useState(
@@ -63,20 +57,20 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     setArraySettingInCookieStorage(CookieStorageKeys.VISIBLE_LINES, visibleLines);
   }, [visibleLines]);
 
-  // On a comparison change, unset the clicked region if the aggregation is not the finest
-  // level, and snap the level to it when a comparison is turned on. Keyed on `comparison`
-  // rather than on `view`, which is the same effect it always was — the delta view was
-  // reachable only by the switch this state replaced.
-  useEffect(() => {
-    if (finestLevel && nationalAggregationLevel !== finestLevel.regionType) {
-      setClickedGspId(undefined);
-    }
-    if (comparison && finestLevel) {
-      setNationalAggregationLevel(finestLevel.regionType);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [comparison]);
-
+  // The comparison change used to snap the aggregation level to the country's finest and clear
+  // any selected region. Both are gone with the map merge.
+  //
+  // The snap existed because `deltaMap` declared itself "single-region-level only" — but the
+  // reason it gave was that this page forced the level anyway, which is a description of the
+  // behaviour dressed as a rule. `rollUpRegionValues` already accumulates `delta` and `hasDelta`
+  // across group members and buckets the result, so a DNO-level delta has been computed all
+  // along and simply never offered. The granularity control is live in both modes now
+  // (`map-encoding-controls.tsx`), so a control fighting an effect is no longer a risk worth
+  // the effect: the level is the user's, whatever the fill encodes.
+  //
+  // Clearing the selection went with it — it only ever fired because the snap was about to move
+  // the level out from under the selected region. Nothing moves the level on a comparison
+  // change now, so nothing needs to invalidate the selection either.
   useEffect(() => {
     if (user && !isLoading && !error) {
       Sentry.setUser({
@@ -105,13 +99,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
       <DashboardShell
         dashboardModeActive={combinedDashboardModeActive}
         comparisonActive={!!comparison}
-        map={
-          comparison ? (
-            <DeltaMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />
-          ) : (
-            <PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />
-          )
-        }
+        map={<PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />}
         chart={comparison ? <DeltaViewChart /> : <PvRemixChart />}
       />
     </Layout>
