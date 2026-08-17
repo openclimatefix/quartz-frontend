@@ -16,7 +16,8 @@ import {
 
 /**
  * The forecast map's own basemap layer toggles — Clouds (satellite) and the yellow PV forecast
- * fill — plus the channel/composite picker for whichever satellite view is active.
+ * fill. The channel/composite picker that goes with them is `SatelliteChannelSelect` below,
+ * exported separately because it spans the panel's full width where these take half of it.
  *
  * Moved out of `map.tsx` by the Phase 6 followup (Track I), which consolidates every map
  * control into the one top-right panel Brad asked for twice ("consolidate the map controls
@@ -38,13 +39,11 @@ import {
  */
 const MapLayerControls: FC = () => {
   const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
-  const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
   const [showPvLayer, setShowPvLayer] = useGlobalState("showPvLayer");
-  const [satelliteError] = useGlobalState("satelliteError");
   const [isSatelliteLoading] = useGlobalState("isSatelliteLoading");
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-1.5">
       <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
         Layers
       </span>
@@ -98,37 +97,60 @@ const MapLayerControls: FC = () => {
           PV
         </button>
       </div>
-
-      {showCloudLayer && (
-        <select
-          value={activeChannel}
-          onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
-          disabled={!!satelliteError}
-          className="w-full cursor-pointer rounded border-none bg-black px-2 py-1 text-xs font-semibold text-white outline-none disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {satelliteError ? (
-            <option value={activeChannel}>{satelliteError}</option>
-          ) : (
-            <>
-              <optgroup label="Composites">
-                {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </optgroup>
-              <optgroup label="Individual bands">
-                {SATELLITE_CHANNELS.map((ch) => (
-                  <option key={ch} value={ch}>
-                    {SATELLITE_CHANNEL_LABELS[ch]}
-                  </option>
-                ))}
-              </optgroup>
-            </>
-          )}
-        </select>
-      )}
     </div>
+  );
+};
+
+/**
+ * The satellite channel/composite picker, exported separately from the layer buttons above it.
+ *
+ * It is a full-width control living beside a half-width one. Inside `MapLayerControls` it was
+ * confined to the "Layers" column and its longer option labels were clipped — "Couldn't load
+ * satellite" ran straight off the edge, which is exactly the case where the text matters most.
+ * Split out, the panel can span it across both columns underneath them (see
+ * `map-encoding-controls.tsx`), and the two button groups keep their half each.
+ *
+ * It renders nothing when the cloud layer is off, so it never leaves an empty row behind. That
+ * is why it reads `showCloudLayer` itself rather than taking it as a prop: as a direct child of
+ * the panel's grid, being absent has to mean *no grid item*, not an item that happens to be
+ * empty.
+ */
+export const SatelliteChannelSelect: FC = () => {
+  const [showCloudLayer] = useGlobalState("showCloudLayer");
+  const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
+  const [satelliteError] = useGlobalState("satelliteError");
+
+  if (!showCloudLayer) return null;
+
+  return (
+    <select
+      value={activeChannel}
+      onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
+      disabled={!!satelliteError}
+      aria-label="Satellite channel"
+      className="col-span-2 w-full cursor-pointer rounded border-none bg-black px-2 py-1 text-xs font-semibold text-white outline-none disabled:cursor-not-allowed disabled:opacity-70"
+    >
+      {satelliteError ? (
+        <option value={activeChannel}>{satelliteError}</option>
+      ) : (
+        <>
+          <optgroup label="Composites">
+            {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Individual bands">
+            {SATELLITE_CHANNELS.map((ch) => (
+              <option key={ch} value={ch}>
+                {SATELLITE_CHANNEL_LABELS[ch]}
+              </option>
+            ))}
+          </optgroup>
+        </>
+      )}
+    </select>
   );
 };
 

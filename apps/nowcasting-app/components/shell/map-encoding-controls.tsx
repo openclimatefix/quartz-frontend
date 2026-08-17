@@ -16,7 +16,7 @@ import {
   CONTROL_BUTTON_IDLE,
   CONTROL_ROW
 } from "../map/control-button";
-import MapLayerControls from "../map/map-layer-controls";
+import MapLayerControls, { SatelliteChannelSelect } from "../map/map-layer-controls";
 
 /**
  * The one map control panel — Brad's ask, twice: "consolidate the map controls ... into one
@@ -156,15 +156,17 @@ const MapEncodingControls: FC = () => {
       {comparison === null && (
         <>
           <div className="border-b border-white/10" />
-          {/* Two columns rather than two stacked sections. Both answer "how is the map drawn"
-              rather than "what does its colour mean", they are each two or three controls wide,
-              and side by side they cost one section's height instead of two — which is what
-              paid for the disclosure going away. */}
-          <div className="flex items-start gap-3">
-            <div className="min-w-0 flex-1">
-              <MapLayerControls />
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          {/* A two-column grid rather than a flex row, so the satellite channel picker can
+              span both. Grid is what makes that possible without nesting: `MapLayerControls`
+              and the granularity group take a column each, and `SatelliteChannelSelect` is a
+              third grid child carrying its own `col-span-2`.
+
+              Both groups answer "how is the map drawn" rather than "what does its colour mean",
+              and each is two or three buttons wide, so a column apiece costs one section's
+              height instead of two — which is what paid for the disclosure going away. */}
+          <div className="grid grid-cols-2 items-start gap-x-3 gap-y-1.5">
+            <MapLayerControls />
+            <div className="flex min-w-0 flex-col gap-1.5">
               {/* `MapLayerControls` carries its own "Layers" heading; this one is written here
                   because `AggregationLevelToggle` is shared and has no business knowing which
                   panel section it has been placed in. Same classes, so the two columns head
@@ -174,6 +176,9 @@ const MapEncodingControls: FC = () => {
               </span>
               <AggregationLevelToggle isLoading={false} />
             </div>
+            {/* Full width, and absent entirely when the cloud layer is off — it renders `null`
+                rather than an empty cell, so no gap is left behind. */}
+            <SatelliteChannelSelect />
           </div>
         </>
       )}
