@@ -7,6 +7,7 @@ import {
   NO_COMPARISON_LABEL
 } from "../helpers/comparison";
 import { UnitToggle, AggregationLevelToggle } from "../map/measuringUnit";
+import { ActiveUnit } from "../map/types";
 import ColorGuideBar from "../map/color-guide-bar";
 import MapLayerControls from "../map/map-layer-controls";
 import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDown";
@@ -106,14 +107,30 @@ const MapEncodingControls: FC = () => {
             id={preset.id}
             label={preset.label}
             active={comparison === preset.id}
-            hint={`Colour regions by the difference — ${preset.title.toLowerCase()}`}
+            // The title is optional, so the qualifying clause is too — otherwise a
+            // preset without one leaves a trailing em dash pointing at nothing.
+            hint={
+              preset.title
+                ? `Colour regions by the difference — ${preset.title.toLowerCase()}`
+                : "Colour regions by the difference"
+            }
           />
         ))}
       </div>
       {/* The unit control's own loading gate was the map's fetch state, which the dock does not
           have and should not learn. Nothing it does is unsafe mid-fetch — it writes a display
           unit and an aggregation level — so it is simply never disabled here. */}
-      <UnitToggle activeUnit={activeUnit} setActiveUnit={setActiveUnit} isLoading={false} />
+      {/* Installed capacity has no delta, so the unit is greyed rather than quietly showing
+          megawatts under a control that reads "Capacity". `setComparison` has already moved the
+          active unit off it by the time this renders — this states the rule, it does not
+          enforce it. */}
+      <UnitToggle
+        activeUnit={activeUnit}
+        setActiveUnit={setActiveUnit}
+        isLoading={false}
+        unavailableUnits={comparison === null ? [] : [ActiveUnit.capacity]}
+        unavailableReason="Installed capacity has no delta"
+      />
       <ColorGuideBar comparison={comparison} unit={activeUnit} />
 
       {/* Satellite/PV layers are forecast-map concepts only — the delta map has no basemap fill
@@ -135,9 +152,10 @@ const MapEncodingControls: FC = () => {
         type="button"
         onClick={() => setSettingsOpen((open) => !open)}
         aria-expanded={settingsOpen}
+        aria-label="More map settings"
         className="mt-0.5 flex items-center justify-between rounded px-1 py-1 text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600 hover:text-white border-t border-white/10 pt-1.5"
       >
-        More map settings
+        {/*More map settings*/}
         <MdKeyboardArrowDown
           size={14}
           className={`transition-transform ${settingsOpen ? "rotate-180" : ""}`}

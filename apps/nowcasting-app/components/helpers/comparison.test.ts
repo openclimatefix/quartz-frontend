@@ -44,8 +44,12 @@ describe("setComparison", () => {
 });
 
 describe("the chart header's echo", () => {
-  test("names the comparison when one is active, and the chart otherwise", () => {
+  test("names the plain forecast, and echoes nothing for a preset with no title", () => {
+    // The Delta preset's title was emptied on 2026-08-17 — with one preset the echo restated
+    // what the "Map shows" control already said, and cost header space to do it. Empty is a
+    // legal value meaning "no echo": `ComparisonEcho` renders null rather than a blank span,
+    // which in a flex row would still hold its gap open.
     expect(comparisonTitle(null)).toBe("National forecast");
-    expect(comparisonTitle("generation")).toBe("Forecast vs generation");
+    expect(comparisonTitle("generation")).toBe("");
   });
 });

@@ -34,12 +34,20 @@ export type ComparisonPreset = {
    * chosen separately. That is Delta v2's problem; deferred with it, contract OPEN 9.
    */
   label: string;
-  /** What the comparison is, for the chart header's passive echo (§5). */
+  /**
+   * What the comparison is, for the chart header's passive echo (§5).
+   *
+   * **May be empty**, which means "no echo" — the header renders nothing rather than a blank
+   * span, and the "Map shows" tooltip drops its qualifying clause. Emptied for the one preset
+   * on 2026-08-17: with a single Delta option the echo restated what the control already said
+   * and cost header space to do it. A second preset almost certainly wants one back, since two
+   * options both labelled "Delta" is exactly the ambiguity noted above.
+   */
   title: string;
 };
 
 export const COMPARISON_PRESETS: readonly ComparisonPreset[] = [
-  { id: "generation", label: "Delta", title: "Forecast vs generation" }
+  { id: "generation", label: "Delta", title: "" }
 ];
 
 /** What the plain-forecast option is called wherever the presets are listed alongside it. */

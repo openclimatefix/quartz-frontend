@@ -170,9 +170,14 @@ type ForecastHeaderProps = {
 const ComparisonEcho: React.FC = () => {
   const [comparison] = useGlobalState("comparison");
   if (!comparison) return null;
+  // An empty title means the preset has nothing worth echoing (Brad, 2026-08-17: the titles
+  // "were taking up unnecessary space"). Render nothing rather than an empty span — the header
+  // is a flex row, so a blank child still holds its gap open and the space is not reclaimed.
+  const title = comparisonTitle(comparison);
+  if (!title) return null;
   return (
     <span className="text-ocf-gray-400 text-xs md:text-sm dash:text-lg" data-test="comparison-echo">
-      {comparisonTitle(comparison)}
+      {title}
     </span>
   );
 };
