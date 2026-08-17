@@ -4,6 +4,7 @@ import { ChartInfo } from "../../../ChartInfo";
 import { InfoIcon } from "../../icons/icons";
 import Tooltip from "../../tooltip";
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
+import { useFocusedCountry } from "../../../hooks/data";
 
 /**
  * "How to read this dashboard" — the (i).
@@ -29,6 +30,7 @@ import { useCountryFormatting } from "../../../hooks/data/use-country-format";
  */
 const DataInfoButton: React.FC = () => {
   const { timezone } = useCountryFormatting();
+  const focusedCountry = useFocusedCountry();
   const { pathname } = useRouter();
   if (pathname !== "/") return null;
 
@@ -36,7 +38,9 @@ const DataInfoButton: React.FC = () => {
     <Tooltip
       tip={
         <div className="w-64 rounded-md text-left">
-          <ChartInfo timezone={timezone} />
+          {/* The focused country, so the period convention stated here is the one governing
+              the numbers on screen — GB closes its periods, NL opens them. */}
+          <ChartInfo timezone={timezone} country={focusedCountry} />
         </div>
       }
       // Opens down and to the left. The header is the top edge of the page, so there is nothing
