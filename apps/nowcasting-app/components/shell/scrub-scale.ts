@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-import { Instant, snapDownToCadence, snapToCadence } from "../../lib/time/cursor";
+import { Instant, periodForInstant, snapDownToCadence, snapToCadence } from "../../lib/time/cursor";
 
 /**
  * The scrub track's arithmetic — pixels ↔ instants, and nothing else.
@@ -114,41 +114,58 @@ export const scrubScale = (
  * fetches for the range, never a separate request or an astronomical calculation. Track O.
  *
  * **Daylight is exactly "forecast > 0"**, the honest proxy the brief asked for — not sunrise,
- * not sunset, just whatever the focused country's own forecast says. Points label the *end* of
- * their period (Track B), so a run of positive values covers the span from the point *before*
- * the run started (its period's start) to the last positive point (that period's own end):
+ * not sunset, just whatever the focused country's own forecast says. A run of positive values
+ * covers from the start of the first positive point's period to the end of the last one's:
  *
  * ```
  * powerMw   0    0    12   40   55   20   0    0
  * timeUtc   t0   t1   t2   t3   t4   t5   t6   t7
- *                     └────── window: t1 to t5 ──────┘
+ *                     └────── window: t2's period start to t5's period end ──────┘
  * ```
+ *
+ * **Which end of its period a point labels is a per-country fact**, so each point's span comes
+ * from `periodForInstant` rather than from its neighbours' positions in the array. This used to
+ * read the *previous* array element to find where a run began, which silently encoded GB's
+ * period-end convention: correct while every country labelled period-end, and one slot early at
+ * both edges of every window the moment NL was confirmed as period-start. Asking the registry
+ * costs a lookup and cannot be wrong for the next country either.
+ *
+ * Two things fall out of no longer walking neighbours, both improvements rather than
+ * concessions: a lone positive point now yields the one period it actually covers instead of
+ * nothing, and a series with gaps no longer assumes its array positions are contiguous in time.
  *
  * **A `null` or non-positive value breaks a run.** A gap in the data reads as "no known
  * daylight here", not as darkness and not as an assumed continuation across whatever the gap
  * covers — the same caution `RegionSnapshot`'s three-way absent/null/zero split takes elsewhere
  * in this app, applied to a single series instead of a region set.
  */
-export const deriveDaylightWindows = (values: readonly DaylightPoint[]): DaylightWindow[] => {
+export const deriveDaylightWindows = (
+  values: readonly DaylightPoint[],
+  country: string | null | undefined
+): DaylightWindow[] => {
   const windows: DaylightWindow[] = [];
-  let runStart: number | null = null;
+  let startMs: number | null = null;
+  let endMs: number | null = null;
 
-  for (let index = 1; index < values.length; index++) {
-    const previousMs = msOf(values[index - 1].timeUtc);
-    const isDaylight = (values[index].powerMw ?? 0) > 0;
+  const close = () => {
+    if (startMs !== null && endMs !== null) windows.push({ startMs, endMs });
+    startMs = null;
+    endMs = null;
+  };
 
-    if (isDaylight) {
-      if (runStart === null) runStart = previousMs;
-    } else if (runStart !== null) {
-      windows.push({ startMs: runStart, endMs: previousMs });
-      runStart = null;
+  for (const point of values) {
+    if ((point.powerMw ?? 0) > 0) {
+      const period = periodForInstant(point.timeUtc, country);
+      if (startMs === null) startMs = msOf(period.start);
+      // Every positive point extends the run to its own period's end, so the window closes on
+      // the last one rather than on wherever the loop happened to notice the run had stopped.
+      endMs = msOf(period.end);
+    } else {
+      close();
     }
   }
 
-  if (runStart !== null) {
-    windows.push({ startMs: runStart, endMs: msOf(values[values.length - 1].timeUtc) });
-  }
-
+  close();
   return windows;
 };
 

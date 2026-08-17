@@ -75,8 +75,14 @@ export const useCursorRange = (): CursorRangeData | null => {
     const first = values[0]?.timeUtc;
     const last = values[values.length - 1]?.timeUtc;
     if (!first || !last) return null;
-    return { range: { start: first, end: last }, daylight: deriveDaylightWindows(values) };
-  }, [forecast.data]);
+    // The country is what tells the windows which end of its period each point labels — GB's
+    // points close their period, NL's open it. Passing the focused country rather than letting
+    // the derivation assume is what keeps the shading honest for both.
+    return {
+      range: { start: first, end: last },
+      daylight: deriveDaylightWindows(values, focusedCountry)
+    };
+  }, [forecast.data, focusedCountry]);
 };
 
 export default useCursorRange;

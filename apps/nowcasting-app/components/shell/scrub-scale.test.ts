@@ -246,7 +246,7 @@ describe("deriving daylight windows from a forecast series", () => {
       point("2026-08-10T06:30:00.000Z", 0),
       point("2026-08-10T07:00:00.000Z", 0)
     ];
-    expect(deriveDaylightWindows(values)).toEqual([
+    expect(deriveDaylightWindows(values, "GB")).toEqual([
       {
         startMs: Date.parse("2026-08-10T04:30:00.000Z"),
         endMs: Date.parse("2026-08-10T06:00:00.000Z")
@@ -260,7 +260,7 @@ describe("deriving daylight windows from a forecast series", () => {
       point("2026-08-10T00:30:00.000Z", 0),
       point("2026-08-10T01:00:00.000Z", 0)
     ];
-    expect(deriveDaylightWindows(values)).toEqual([]);
+    expect(deriveDaylightWindows(values, "GB")).toEqual([]);
   });
 
   it("a run still open at the series' end closes at the last point", () => {
@@ -269,7 +269,7 @@ describe("deriving daylight windows from a forecast series", () => {
       point("2026-08-10T17:30:00.000Z", 10),
       point("2026-08-10T18:00:00.000Z", 5)
     ];
-    expect(deriveDaylightWindows(values)).toEqual([
+    expect(deriveDaylightWindows(values, "GB")).toEqual([
       {
         startMs: Date.parse("2026-08-10T17:00:00.000Z"),
         endMs: Date.parse("2026-08-10T18:00:00.000Z")
@@ -287,7 +287,7 @@ describe("deriving daylight windows from a forecast series", () => {
       point("2026-08-10T07:30:00.000Z", 15), // run 2 opens at 07:00
       point("2026-08-10T08:00:00.000Z", 8) // run 2 closes at 08:00
     ];
-    expect(deriveDaylightWindows(values)).toEqual([
+    expect(deriveDaylightWindows(values, "GB")).toEqual([
       {
         startMs: Date.parse("2026-08-10T05:00:00.000Z"),
         endMs: Date.parse("2026-08-10T06:00:00.000Z")
@@ -299,9 +299,39 @@ describe("deriving daylight windows from a forecast series", () => {
     ]);
   });
 
-  it("fewer than two points cannot make a window", () => {
-    expect(deriveDaylightWindows([])).toEqual([]);
-    expect(deriveDaylightWindows([point("2026-08-10T05:00:00.000Z", 40)])).toEqual([]);
+  it("an empty series has no windows", () => {
+    expect(deriveDaylightWindows([], "GB")).toEqual([]);
+  });
+
+  // This used to yield nothing: the derivation walked *neighbours* to find where a period
+  // began, so a run with no point before it could not open. A point's span now comes from
+  // `periodForInstant`, which knows the span without being shown the point next door.
+  it("a lone positive point covers the one period it is the label for", () => {
+    expect(deriveDaylightWindows([point("2026-08-10T05:00:00.000Z", 40)], "GB")).toEqual([
+      {
+        startMs: Date.parse("2026-08-10T04:30:00.000Z"),
+        endMs: Date.parse("2026-08-10T05:00:00.000Z")
+      }
+    ]);
+  });
+
+  // The discriminating case for the whole change. NL labels period-*start* on a 15-minute
+  // cadence, so the same positives that would open a GB window at 05:00 open an NL one at
+  // 05:15 and close it at 05:45. Under the old neighbour-walking rule this came out as
+  // 05:00-05:30 — one slot early at *both* ends, and entirely plausible on screen.
+  it("a period-start country's window sits on its own periods, not GB's", () => {
+    const values = [
+      point("2026-08-10T05:00:00.000Z", 0),
+      point("2026-08-10T05:15:00.000Z", 10),
+      point("2026-08-10T05:30:00.000Z", 20),
+      point("2026-08-10T05:45:00.000Z", 0)
+    ];
+    expect(deriveDaylightWindows(values, "NL")).toEqual([
+      {
+        startMs: Date.parse("2026-08-10T05:15:00.000Z"),
+        endMs: Date.parse("2026-08-10T05:45:00.000Z")
+      }
+    ]);
   });
 });
 
