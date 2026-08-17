@@ -9,7 +9,12 @@
 import { describe, expect, test } from "@jest/globals";
 
 import { COUNTRY_CONFIG } from "../../config/countries";
-import { FRAME_PADDING_PX, unionBounds } from "./frame-countries";
+import {
+  FRAME_PADDING_PX,
+  MIN_FRAMED_WIDTH_PX,
+  framePadding,
+  unionBounds
+} from "./frame-countries";
 
 describe("unionBounds", () => {
   test("one country frames exactly its own bounds", () => {
@@ -43,11 +48,44 @@ describe("unionBounds", () => {
     expect(unionBounds([])).toBeNull();
     expect(unionBounds(["ZZ"])).toBeNull();
   });
+});
 
-  // Symmetric on purpose: the union of the countries in play is taller than it is wide, so the
-  // fit is limited by height and side padding only costs zoom. See the note in the module.
-  test("the padding is one number, so every side gets the same", () => {
-    expect(typeof FRAME_PADDING_PX).toBe("number");
-    expect(FRAME_PADDING_PX).toBeGreaterThan(0);
+describe("framePadding", () => {
+  const CANVAS = 1200;
+
+  // The chart is a wide opaque panel over the left of the stage. Framing on the whole canvas
+  // centres the countries underneath it; padding by its width centres them in the gap it leaves.
+  test("pads the left by the chart's width plus a gutter", () => {
+    expect(framePadding(400, CANVAS)).toEqual({
+      top: FRAME_PADDING_PX,
+      bottom: FRAME_PADDING_PX,
+      left: 400 + FRAME_PADDING_PX,
+      right: FRAME_PADDING_PX
+    });
+  });
+
+  // The control panel sits top-right, and nothing lands under it that pushing the fit would
+  // rescue — paying for it in zoom made the countries smaller for no gain.
+  test("does not compensate for the right-hand control panel", () => {
+    expect(framePadding(400, CANVAS).right).toBe(FRAME_PADDING_PX);
+  });
+
+  // The sites route has no chart, and neither does an early frame before layout.
+  test("no chart on the page means a plain gutter, not a guess", () => {
+    expect(framePadding(0, CANVAS).left).toBe(FRAME_PADDING_PX);
+  });
+
+  // Mapbox throws outright if padding exceeds the canvas, and a narrow window with a full-width
+  // chart genuinely asks for that. The countries keep a strip to be drawn in.
+  test("never lets the chart's padding swallow the viewport", () => {
+    const narrow = framePadding(900, 500);
+    expect(narrow.left + narrow.right).toBeLessThanOrEqual(500 - MIN_FRAMED_WIDTH_PX);
+    expect(narrow.left).toBeGreaterThanOrEqual(0);
+  });
+
+  test("a canvas narrower than the minimum strip still yields non-negative padding", () => {
+    const tiny = framePadding(900, 100);
+    expect(tiny.left).toBe(0);
+    expect(tiny.right).toBe(FRAME_PADDING_PX);
   });
 });

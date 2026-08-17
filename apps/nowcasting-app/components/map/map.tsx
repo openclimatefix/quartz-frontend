@@ -30,7 +30,7 @@ import {
 import { addMinutesToISODate } from "../helpers/utils";
 import { useEnabledCountries } from "../../hooks/data/use-countries";
 import { getCountryConfig } from "../../config/countries";
-import { FRAME_PADDING_PX, unionBounds, type Bounds } from "./frame-countries";
+import { framePadding, unionBounds, type Bounds } from "./frame-countries";
 
 /**
  * The enabled-country set this session has already framed the camera for, or `null` before the
@@ -170,12 +170,21 @@ const Map: FC<IMap> = ({
   const enabledKey = enabledCountries.join(",");
 
   const frameToBounds = useCallback((bounds: Bounds, duration: number) => {
-    map.current?.fitBounds(
+    if (!map.current) return;
+
+    // Read at call time, not at mount: the chart is drag-resizable, so its width is only known
+    // now. Both callers go through here, so the toggle framing and the reset button always
+    // compensate for the same chart — the disagreement between them was exactly this sum being
+    // computed in one place and not the other.
+    const canvas = map.current.getContainer().getBoundingClientRect();
+    const chart = document.querySelector('[aria-label="Chart"]')?.getBoundingClientRect();
+
+    map.current.fitBounds(
       [
         [bounds[0], bounds[1]],
         [bounds[2], bounds[3]]
       ],
-      { padding: FRAME_PADDING_PX, duration }
+      { padding: framePadding(chart?.width ?? 0, canvas.width), duration }
     );
   }, []);
 
