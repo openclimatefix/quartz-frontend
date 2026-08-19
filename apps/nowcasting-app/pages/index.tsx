@@ -213,7 +213,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalIntradayECMWFOnlyError) {
-    Sentry.captureMessage(
+    console.warn(
       `ECMWF forecast data load error: ${JSON.stringify(nationalIntradayECMWFOnlyError)}`
     );
   }
@@ -230,7 +230,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalPvnetDayAheadError) {
-    Sentry.captureMessage(
+    console.warn(
       `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetDayAheadError)}`
     );
   }
@@ -247,7 +247,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalPvnetIntradayError) {
-    Sentry.captureMessage(
+    console.warn(
       `PVNet day-ahead forecast data load error: ${JSON.stringify(nationalPvnetIntradayError)}`
     );
   }
@@ -264,7 +264,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalMetOfficeOnlyError) {
-    Sentry.captureMessage(
+    console.warn(
       `Met Office forecast data load error: ${JSON.stringify(nationalMetOfficeOnlyError)}`
     );
   }
@@ -281,9 +281,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
     }
   );
   if (nationalSatOnlyError) {
-    Sentry.captureMessage(
-      `Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`
-    );
+    console.warn(`Met Office forecast data load error: ${JSON.stringify(nationalSatOnlyError)}`);
   }
 
   const {
