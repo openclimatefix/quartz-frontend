@@ -2,11 +2,20 @@ import { fromArrayBuffer } from "geotiff";
 import { getAccessToken } from "../../lib/api/auth/token";
 import type { Scope } from "../../lib/domain/types";
 
-// The satellite view stays GB-only and on its v0 endpoint this phase (see API_PREFIX
-// below), but Phase 5 asks every peripheral to carry a Scope so the later v1 swap is a
-// change to one URL-building function, not a hunt through every caller. `map.tsx`'s calls
-// into this module predate that and aren't updated to pass one — the default below is
-// exactly what they get implicitly today, so behaviour is unchanged.
+// Phase 5 asks every peripheral to carry a Scope so a later endpoint swap is a change to one
+// URL-building function, not a hunt through every caller. `map.tsx`'s calls into this module
+// predate that and aren't updated to pass one — the default below is exactly what they get
+// implicitly today, so behaviour is unchanged.
+//
+// **The scope does not reach the request, and that is not an oversight.** `requestSatelliteTif`
+// sends a channel and a timestamp and nothing else: there is no country or bbox parameter, and
+// the drawn extent comes from the GeoTIFF's own `bounds_wgs84` metadata (see below). So this
+// module renders whatever the API serves and **is not GB-only** — an earlier version of this
+// comment said it was, and was wrong.
+//
+// What that means in practice: **coverage is an API-side crop.** Extending to a new country is a
+// change over there, not here, and it is invisible from this side until a region simply has no
+// imagery over it. Known live item: the crop needs extending before Germany goes live.
 export const DEFAULT_SATELLITE_SCOPE: Scope = {
   country: "GB",
   source: "solar",
@@ -128,6 +137,11 @@ export type TifLayerData = {
   bounds: [number, number, number, number];
 };
 
+// Satellite is on **neither v0 nor v1** — stripping `/v0` leaves the API root, so requests go to
+// an unversioned `/satellite/` route. An earlier comment described this as "its v0 endpoint",
+// which is wrong and matters: satellite is not waiting on a v1 migration, it sits outside the
+// versioning scheme entirely. Whether that is a deliberate exemption or an oversight is a
+// question for the API side, worth settling before EU satellite coverage is planned on top of it.
 const API_PREFIX =
   process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
 
