@@ -9,6 +9,7 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "pre-commit": "pre-commit run",
     "test": "jest",
     "test:watch": "jest --watch",

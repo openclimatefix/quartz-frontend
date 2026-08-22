@@ -2,8 +2,14 @@
 . "$(dirname "$0")/_/husky.sh"
 
 cd apps/nowcasting-app || exit
+
+# Runs first because it is the cheapest of the three and catches the most
+# fundamental breakage — a missing import or a bad type will fail every later
+# step anyway. Neither lint nor jest typechecks, so without this a page can
+# import a module that does not exist on the branch and still pass the hook.
+yarn typecheck
+
 yarn lint
 
 # Now only runs unit tests, Cypress tests are run in the CI pipeline on PRs
 yarn test
-
