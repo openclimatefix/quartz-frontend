@@ -1,0 +1,1 @@
+const noteNums={C:0,D:2,E:4,F:5,G:7,A:9,B:11},noteMods={b:-1,"#":1},nameToNum=name=>{if(Number(name))return name;let letter=name[0],pc=noteNums[letter.toUpperCase()],mod=name[1];pc+=noteMods[mod]||0;let octave,num=Array.from(name).pop();return octave=isNaN(num)?4:parseInt(num),pc+12*(octave+1)};export{nameToNum};

@@ -2,8 +2,9 @@
 node_modules/*
 node_modules
 .next/*
-# Anchored to the app root: this is meant for the large GeoJSON/fixture dir at `data/`.
-# Unanchored `**/data/*` also swallowed `hooks/data/*`, silently exempting the data hooks
-# from linting.
-/data/*
-/data/**/*
+**/data/*
+**/data/**/*
+
+# Vendored third-party source, kept byte-identical to upstream so it can be
+# diffed against a newer release. Prettier would reformat all of it.
+lib/vendor/
