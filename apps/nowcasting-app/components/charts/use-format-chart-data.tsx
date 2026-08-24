@@ -14,7 +14,6 @@ import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import nationalMetrics from "../../data/national_metrics.json";
 import { SeasonalMetrics } from "./gsp-pv-remix-chart/use-gsp-seasonal-metrics";
-import { getSettlementPeriodForDate } from "../helpers/chartUtils";
 import { getAvailablePLevels, getSettlementPeriodForDate } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
