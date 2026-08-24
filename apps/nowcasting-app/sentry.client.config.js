@@ -43,8 +43,11 @@ Sentry.init({
   // suppress known noisy/expected errors
   ignoreErrors: [
     /Failed to get access token/,
+    /Failed to get auth token/,
     /Hydration failed/,
-    /Failed to fetch/
+    /Failed to fetch/,
+    /NetworkError when attempting to fetch resource/,
+    /The operation was aborted/
   ],
 
   integrations: (integrations) => {
