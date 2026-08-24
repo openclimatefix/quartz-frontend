@@ -22,23 +22,19 @@ const WideCard: React.FC<CardProps> = ({
   energyTag,
   bgTheme,
   toggle,
-  textTheme,
+  textTheme
 }) => {
   const textClass = energyTag !== "Power" ? `text-5xl` : `text-5xl`;
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const isVisible = visibleLines.includes(energyTag);
-  const formatToggle = visibleLines.includes(energyTag)
-    ? `after:end-[-2px]`
-    : `after:start-[-2px]`;
+  const formatToggle = visibleLines.includes(energyTag) ? `after:end-[-2px]` : `after:start-[-2px]`;
   const formatBackground = !visibleLines.includes(energyTag)
     ? (bgTheme = `bg-ocf-grey-400`)
     : bgTheme == bgTheme;
 
   const toggleLineVisibility = () => {
     if (isVisible) {
-      const newVisibleLines = visibleLines.filter(
-        (line: string) => line !== energyTag
-      );
+      const newVisibleLines = visibleLines.filter((line: string) => line !== energyTag);
       if (newVisibleLines.length === 0) {
         setVisibleLines(energyTag === "Solar" ? ["Wind"] : ["Solar"]);
       } else {
@@ -61,9 +57,7 @@ const WideCard: React.FC<CardProps> = ({
     // add clock component here and pass the time as props
     <div className="self-stretch flex-col justify-start items-start flex">
       <div className="self-stretch justify-between items-end inline-flex mb-2">
-        <div
-          className={`${textClass} font-bold font-sans leading-10 ${actualGenerationColor}`}
-        >
+        <div className={`${textClass} font-bold font-sans leading-10 ${actualGenerationColor}`}>
           {actualGeneration}
         </div>
         <div className="justify-start items-center gap-2 flex">
@@ -82,14 +76,10 @@ const WideCard: React.FC<CardProps> = ({
         </div>
       </div>
       <div className="self-stretch justify-between items-start inline-flex">
-        <div
-          className={`w-[105px] ${textTheme} ${textClass} font-bold font-sans leading-[64px]`}
-        >
+        <div className={`w-[105px] ${textTheme} ${textClass} font-bold font-sans leading-[64px]`}>
           {currentForecast}
         </div>
-        <div
-          className={`${textTheme} ${textClass} font-bold font-sans leading-[64px]`}
-        >
+        <div className={`${textTheme} ${textClass} font-bold font-sans leading-[64px]`}>
           {nextForecast}
         </div>
       </div>

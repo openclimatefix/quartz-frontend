@@ -16,17 +16,13 @@ const HorizonInfo: FC = () => {
           <div>
             <b className="text-sm">Horizon 1.5h/3h</b>
             <p>The forecast made N hours before the target time. </p>
-            <p>
-              E.g. The 3 hour horizon forecast for 11am, was created at 8am the
-              same day.
-            </p>
+            <p>E.g. The 3 hour horizon forecast for 11am, was created at 8am the same day.</p>
           </div>
           <div>
             <b className="text-sm">Day Ahead</b>
             <p>Forecast at 9.00 IST the day before. </p>
             <p>
-              E.g. The forecast for 11am, or any time in a day, was created at
-              9am the day before.
+              E.g. The forecast for 11am, or any time in a day, was created at 9am the day before.
             </p>
           </div>
         </div>
@@ -41,15 +37,13 @@ const HorizonInfo: FC = () => {
 };
 
 const HorizonSelect: FC = () => {
-  const [forecastHorizon, setForecastHorizon] =
-    useGlobalState("forecastHorizon");
-  const [forecastHorizonMinutes, setForecastHorizonMinutes] = useGlobalState(
-    "forecastHorizonMinutes"
-  );
+  const [forecastHorizon, setForecastHorizon] = useGlobalState("forecastHorizon");
+  const [forecastHorizonMinutes, setForecastHorizonMinutes] =
+    useGlobalState("forecastHorizonMinutes");
   const forecastHorizonTypes: components["schemas"]["ForecastHorizon"][] = [
     "latest",
     "horizon",
-    "day_ahead",
+    "day_ahead"
   ];
   const forecastHorizonMinuteOptions = [90, 180];
 
@@ -59,13 +53,10 @@ const HorizonSelect: FC = () => {
         e.target.value as components["schemas"]["ForecastHorizon"]
       )
     ) {
-      setForecastHorizon(
-        e.target.value as components["schemas"]["ForecastHorizon"]
-      );
+      setForecastHorizon(e.target.value as components["schemas"]["ForecastHorizon"]);
     } else {
       if (e.target.value.includes("horizon")) {
-        const horizonValue =
-          e.target.selectedOptions[0].getAttribute("data-horizon-value");
+        const horizonValue = e.target.selectedOptions[0].getAttribute("data-horizon-value");
         if (!horizonValue) return console.error("No horizon value found");
 
         setForecastHorizon("horizon");
@@ -92,27 +83,22 @@ const HorizonSelect: FC = () => {
               case "latest":
               case "day_ahead":
                 return (
-                  <option
-                    key={`horizonOption-${forecastHorizonType}`}
-                    value={forecastHorizonType}
-                  >
+                  <option key={`horizonOption-${forecastHorizonType}`} value={forecastHorizonType}>
                     {forecastHorizonType.replace("_", " ")}
                   </option>
                 );
               case "horizon":
                 return (
                   <>
-                    {forecastHorizonMinuteOptions.map(
-                      (forecastHorizonMinuteOption) => (
-                        <option
-                          key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
-                          value={`${forecastHorizonType}-${forecastHorizonMinuteOption}`}
-                          data-horizon-value={forecastHorizonMinuteOption}
-                        >
-                          Horizon {Number(forecastHorizonMinuteOption) / 60}h
-                        </option>
-                      )
-                    )}
+                    {forecastHorizonMinuteOptions.map((forecastHorizonMinuteOption) => (
+                      <option
+                        key={`horizonMinuteOption-${forecastHorizonMinuteOption}`}
+                        value={`${forecastHorizonType}-${forecastHorizonMinuteOption}`}
+                        data-horizon-value={forecastHorizonMinuteOption}
+                      >
+                        Horizon {Number(forecastHorizonMinuteOption) / 60}h
+                      </option>
+                    ))}
                   </>
                 );
             }

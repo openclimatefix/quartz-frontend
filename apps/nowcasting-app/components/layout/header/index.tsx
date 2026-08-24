@@ -4,7 +4,7 @@ import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 import { Menu } from "@headlessui/react";
 import { getViewTitle, VIEWS } from "../../../constant";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
 import { CombinedData } from "../../types";
 
@@ -82,13 +82,15 @@ type HeaderProps = {
   setView: Dispatch<SetStateAction<VIEWS>>;
   isLoggedIn?: boolean;
   combinedData?: CombinedData | null;
+  children?: ReactNode;
 };
 
 const Header: React.FC<HeaderProps> = ({
   view,
   setView,
   isLoggedIn = true,
-  combinedData = null
+  combinedData = null,
+  children
 }) => {
   return (
     <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
@@ -151,6 +153,7 @@ const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2">
         <div className="py-1">
           {isLoggedIn && <ProfileDropDown view={view} combinedData={combinedData} />}
+          {children}
         </div>
       </div>
     </header>

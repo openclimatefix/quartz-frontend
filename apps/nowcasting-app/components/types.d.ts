@@ -70,8 +70,12 @@ type ForecastValue = {
   expectedPowerGenerationMegawatts: number;
   expectedPowerGenerationNormalized?: number | null;
   plevels?: {
-    plevel_10: number;
-    plevel_90: number;
+    plevel_2?: number;
+    plevel_10?: number;
+    plevel_25?: number;
+    plevel_75?: number;
+    plevel_90?: number;
+    plevel_98?: number;
   };
 };
 type ElexonForecastValue = {

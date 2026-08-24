@@ -1,8 +1,4 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import { Main } from "@/src/components/Main";
 
@@ -14,9 +10,9 @@ export default withPageAuthRequired(
           // With SSR, we usually want to set some default staleTime
           // above 0 to avoid refetching immediately on the client
           staleTime: 60 * 1000,
-          refetchInterval: 60 * 1000,
-        },
-      },
+          refetchInterval: 60 * 1000
+        }
+      }
     });
 
     return (
