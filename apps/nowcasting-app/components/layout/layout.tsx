@@ -1,10 +1,9 @@
 import Head from "next/head";
 import { Analytics } from "@vercel/analytics/next";
-import { API_PREFIX, getViewTitle } from "../../constant";
-import { useLoadDataFromApi } from "../hooks/useLoadDataFromApi";
-import { SolarStatus } from "../types";
+import { getViewTitle } from "../../constant";
+import { useProductStatuses } from "../hooks/useStatus";
 import useGlobalState from "../helpers/globalState";
-import { useEffect } from "react";
+import StatusBanner from "./StatusBanner";
 
 interface ILayout {
   children: React.ReactNode;
@@ -12,7 +11,11 @@ interface ILayout {
 }
 
 const Layout = ({ children }: ILayout) => {
-  const { data: solarStatus } = useLoadDataFromApi<SolarStatus>(`${API_PREFIX}/solar/GB/status`);
+  // Every product the user is entitled to, in one call. The banner is no longer scoped to
+  // the current view: an outage on a product the user is not looking at is still worth
+  // knowing about, and dropping the view dependency keeps this file out of the way of the
+  // Europe UI work, which replaces `view` with `isSitesChart` + `comparison`.
+  const statuses = useProductStatuses();
   const [view] = useGlobalState("view");
   const viewTitle = getViewTitle(view);
   const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
@@ -24,11 +27,7 @@ const Layout = ({ children }: ILayout) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex flex-col h-screen">
-        {!solarStatus || solarStatus?.status === "ok" ? null : (
-          <div className="blue text-white text-m px-4 py-2" style={{ backgroundColor: "#48B0DF" }}>
-            <p>{solarStatus?.message}</p>
-          </div>
-        )}
+        <StatusBanner statuses={statuses} />
         {children}
         <Analytics />
       </main>

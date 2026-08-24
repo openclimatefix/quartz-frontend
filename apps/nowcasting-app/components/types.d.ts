@@ -225,9 +225,42 @@ type GspDeltaValue = {
   deltaNormalized: string;
 };
 
-export type SolarStatus = {
-  status: string;
-  message: string;
+/**
+ * One product's status from the Status API (`GET /products`), spec v0.2.0.
+ *
+ * `ProductStatusValue` is `ok | info | warning | error | unknown`. `info` means a
+ * deliberate, non-degraded notice — planned maintenance, a heads-up — and is distinct from
+ * `unknown`, which means no signal at all. See `normaliseLevel` in
+ * components/hooks/useStatus.ts for how an unrecognised level is handled.
+ */
+export type StatusLevel = "ok" | "info" | "warning" | "error" | "unknown";
+
+export type ProductStatus = {
+  /** Product key, e.g. `"gb-solar"`. Permanent identifier. See config/statusProducts.ts. */
+  key: string;
+  /** The API's own display name, used as the label fallback for an unregistered product. */
+  name: string;
+  status: StatusLevel;
+  /** Nullable per the spec — a product can carry a status with nothing to say about it. */
+  message: string | null;
+  /** How the status was set, e.g. `"manual"`. */
+  source: string;
+  /**
+   * ISO-8601, nullable. Doubles as the incident identity for dismissal, which is why
+   * useDismissedStatuses needs a fallback for the null case rather than keying on it raw.
+   *
+   * Not to be confused with history's `setAt`: a status row is updated in place, whereas a
+   * history row records a status being set. The two names differ deliberately.
+   */
+  updatedAt: string | null;
+};
+
+export type ProductsResponse = {
+  /** Worst-of rollup across products. Unused today — each row is rendered on its own level. */
+  status: StatusLevel;
+  products: ProductStatus[];
+  /** Most recent `updatedAt` across products, or null when none has ever been stamped. */
+  lastUpdated: string | null;
 };
 
 export type Bucket = {
