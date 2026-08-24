@@ -8,8 +8,7 @@ import {
   NationalNHourData,
   PvRealData,
   SitesPvActual,
-  SitesPvForecast,
-  SolarStatus
+  SitesPvForecast
 } from "../types";
 import useSWR, { SWRConfiguration, SWRResponse } from "swr";
 import { axiosFetcherAuth, openapiFetcherAuth } from "../helpers/utils";
@@ -31,7 +30,6 @@ type APIResponseType =
   | AllSites
   | SitesPvForecast
   | SitesPvActual
-  | SolarStatus
   | FcAllResData
   | ResponseObjectMap<operations>;
 export const useLoadDataFromApi = <T extends APIResponseType>(
