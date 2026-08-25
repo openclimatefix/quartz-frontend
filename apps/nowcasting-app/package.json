@@ -10,6 +10,7 @@
     "build-storybook": "build-storybook",
     "lint": "next lint",
     "pre-commit": "pre-commit run",
+    "shape-areas": "node scripts/addShapeAreas.js",
     "test": "jest",
     "test:cypress": "cypress run --browser chrome"
   },

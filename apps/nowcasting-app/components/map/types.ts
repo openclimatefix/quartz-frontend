@@ -3,7 +3,8 @@ import { ReactNode } from "react";
 export enum ActiveUnit {
   MW = "MW",
   percentage = "%",
-  capacity = "Capacity"
+  capacity = "Capacity",
+  capacityDensity = "MW/km2"
 }
 
 export enum NationalAggregation {
@@ -20,6 +21,7 @@ export enum SelectedData {
   expectedPowerGenerationNormalizedRounded = "expectedPowerGenerationNormalizedRounded",
   actualPowerGenerationMegawatts = "actualPowerGenerationMegawatts",
   installedCapacityMw = "installedCapacityMw",
+  capacityMwPerKm2 = "capacityMwPerKm2",
   delta = "delta"
 }
 

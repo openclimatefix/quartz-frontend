@@ -72,6 +72,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         return SelectedData.expectedPowerGenerationNormalizedRounded;
       case ActiveUnit.capacity:
         return SelectedData.installedCapacityMw;
+      case ActiveUnit.capacityDensity:
+        return SelectedData.capacityMwPerKm2;
     }
   };
   const [selectedDataName, setSelectedDataName] = useState(
@@ -144,6 +146,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   const maxPower =
     nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
+  // Aggregated regions average out their density, so they need a lower ceiling than GSPs
+  const maxCapacityDensity = nationalAggregationLevel === NationalAggregation.GSP ? 1 : 0.2;
 
   const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
     "interpolate",
@@ -153,7 +157,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     0,
     0,
     // on value maximum the opacity will be 1
-    isNormalized ? 1 : maxPower,
+    selectedData === SelectedData.capacityMwPerKm2
+      ? maxCapacityDensity
+      : isNormalized
+      ? 1
+      : maxPower,
     1
   ];
 
@@ -288,6 +296,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
               ).toFixed(1) || "-";
             forecastValue = "-";
             unit = "MW";
+          } else if (currentActiveUnit === ActiveUnit.capacityDensity) {
+            actualValue = Number(properties?.[SelectedData.capacityMwPerKm2] || 0).toFixed(2);
+            forecastValue = "-";
+            unit = "MW/km²";
           }
 
           let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
@@ -298,6 +310,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           if (currentActiveUnit === ActiveUnit.capacity) {
             actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">% of National</span>
             <div><span>${actualValue}</span> <span class="text-2xs text-mapbox-black-300">%</span></div>`;
+          }
+          if (currentActiveUnit === ActiveUnit.capacityDensity) {
+            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity Density</span>
+            <div><span>${actualValue}</span> <span class="text-2xs text-mapbox-black-300">${unit}</span></div>`;
           }
 
           const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
