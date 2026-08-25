@@ -125,8 +125,24 @@ const SEVERITY_ORDER: Record<StatusLevel, number> = {
 
 export const severityRank = (level: StatusLevel): number => SEVERITY_ORDER[level];
 
+/**
+ * The runtime list of levels, derived rather than spelled out a second time.
+ *
+ * `StatusLevel` is a type, so there is nothing in types.d.ts to read at runtime. But
+ * `SEVERITY_ORDER` above is typed `Record<StatusLevel, number>`, which the compiler already
+ * refuses to let you leave incomplete — so its keys are a list that cannot go stale. A
+ * hand-maintained array could: add a level to `StatusLevel`, forget the array, and every
+ * product on the new level normalises to `unknown` with nothing failing to warn you.
+ */
+export const KNOWN_LEVELS = Object.keys(SEVERITY_ORDER) as StatusLevel[];
+
 export const productOrder = (key: string): number =>
   isKnownProduct(key) ? STATUS_PRODUCTS[key].order : Number.MAX_SAFE_INTEGER;
 
+/**
+ * `fallback` is defence in depth, not a live path: `useProductStatuses` drops products the
+ * registry does not know, so every key reaching the banner is registered and the fallback
+ * never fires today. It stays so a future caller that does not filter still renders a name.
+ */
 export const productLabel = (key: string, fallback: string): string =>
   isKnownProduct(key) ? STATUS_PRODUCTS[key].label : fallback;

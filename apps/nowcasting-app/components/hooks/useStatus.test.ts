@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@jest/globals";
-import { normaliseLevel } from "./useStatus";
+import { normaliseLevel, normaliseMessage } from "./useStatus";
 
 describe("normaliseLevel", () => {
   test("passes through every level the API spec publishes", () => {
@@ -25,5 +25,23 @@ describe("normaliseLevel", () => {
     expect(normaliseLevel(undefined)).toBe("unknown");
     expect(normaliseLevel(null)).toBe("unknown");
     expect(normaliseLevel(3)).toBe("unknown");
+  });
+});
+
+describe("normaliseMessage", () => {
+  test("trims a string message", () => {
+    expect(normaliseMessage("  Forecast delayed  ")).toBe("Forecast delayed");
+    expect(normaliseMessage("")).toBe("");
+  });
+
+  test("returns empty string for anything that is not a string", () => {
+    // The point is that none of these throw. `.trim()` on a non-string would take down the
+    // whole render, since this runs in a hook body — one malformed field would blank the app
+    // rather than drop one banner row. An empty message means the row is not drawn.
+    expect(normaliseMessage(null)).toBe("");
+    expect(normaliseMessage(undefined)).toBe("");
+    expect(normaliseMessage(42)).toBe("");
+    expect(normaliseMessage({ text: "nope" })).toBe("");
+    expect(normaliseMessage(["nope"])).toBe("");
   });
 });

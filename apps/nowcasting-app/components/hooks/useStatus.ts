@@ -2,6 +2,7 @@ import useSWR from "swr";
 import { ProductStatus, ProductsResponse, StatusLevel } from "../types";
 import { axiosFetcher } from "../helpers/utils";
 import {
+  KNOWN_LEVELS,
   entitledStatusProducts,
   isKnownProduct,
   productOrder,
@@ -32,8 +33,6 @@ const STATUS_URL = process.env.NEXT_PUBLIC_STATUS_URL;
  */
 const STATUS_REFRESH_INTERVAL_MS = 60_000;
 
-const KNOWN_LEVELS: StatusLevel[] = ["ok", "info", "warning", "error", "unknown"];
-
 /**
  * Anything the API sends that we do not recognise becomes `unknown`.
  *
@@ -49,10 +48,21 @@ export const normaliseLevel = (level: unknown): StatusLevel => {
   return (KNOWN_LEVELS as string[]).includes(trimmed) ? (trimmed as StatusLevel) : "unknown";
 };
 
+/**
+ * Anything that is not a string becomes `""` — same reasoning as `normaliseLevel` above.
+ *
+ * `ProductStatus.message` is typed `string | null`, but that is an assertion about an HTTP
+ * response, not a guarantee about one. A number or an object arriving here would make
+ * `.trim()` throw, and this runs in a hook body, so the throw takes the whole render down —
+ * a malformed field on one product would blank the app rather than drop one banner row.
+ */
+export const normaliseMessage = (message: unknown): string =>
+  typeof message === "string" ? message.trim() : "";
+
 const normaliseProduct = (product: ProductStatus): ProductStatus => ({
   ...product,
   status: normaliseLevel(product.status),
-  message: product.message?.trim() ?? ""
+  message: normaliseMessage(product.message)
 });
 
 /**
