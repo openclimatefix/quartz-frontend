@@ -2,11 +2,10 @@
   "ENWL": {
     "file": "ENWL.json",
     "dnoName": "ENWL",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       37,
-      56,
       148,
       166,
       194,
@@ -17,21 +16,21 @@
       249,
       269,
       273,
-      305
-    ],
-    "gspIdsMissingMetrics": [
+      305,
       328,
       329,
       331,
-      332
+      332,
+      351
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 527.507
+    "snapshotCapacityUsedMw": 848.737
   },
   "NGED (East Midlands)": {
     "file": "NGED_East_Midlands.json",
     "dnoName": "NGED (East Midlands)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       23,
@@ -45,6 +44,7 @@
       142,
       243,
       256,
+      273,
       274,
       298,
       302,
@@ -52,12 +52,12 @@
     ],
     "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 3768.154
+    "snapshotCapacityUsedMw": 3814.844
   },
   "NGED (Midlands)": {
     "file": "NGED_Midlands.json",
     "dnoName": "NGED (Midlands)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       26,
@@ -86,14 +86,13 @@
   "NGED (South Wales)": {
     "file": "NGED_South_Wales.json",
     "dnoName": "NGED (South Wales)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       3,
       7,
       26,
       55,
-      151,
       196,
       227,
       238,
@@ -108,7 +107,7 @@
   "NGED (South West)": {
     "file": "NGED_South_West.json",
     "dnoName": "NGED (South West)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       1,
@@ -120,19 +119,19 @@
       155,
       181,
       199,
-      283
-    ],
-    "gspIdsMissingMetrics": [
+      283,
+      319,
       347,
       348
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 3057.769
+    "snapshotCapacityUsedMw": 3460.302
   },
   "NPG (Northern Electric)": {
     "file": "NPG_Northern_Electric.json",
     "dnoName": "NPG (Northern Electric)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       27,
@@ -152,18 +151,17 @@
       275,
       276,
       294,
-      301
-    ],
-    "gspIdsMissingMetrics": [
+      301,
       328
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 975.937
+    "snapshotCapacityUsedMw": 1090.05
   },
   "NPG (Yorkshire Electric)": {
     "file": "NPG_Yorkshire_Electric.json",
     "dnoName": "NPG (Yorkshire Electric)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       36,
@@ -196,7 +194,7 @@
   "SPEN (SP Distribution)": {
     "file": "SPEN_SP_Distribution.json",
     "dnoName": "SPEN (SP Distribution)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       14,
@@ -277,26 +275,25 @@
       285,
       303,
       304,
-      306
-    ],
-    "gspIdsMissingMetrics": [
+      306,
       337
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 637.056
+    "snapshotCapacityUsedMw": 638.814
   },
   "SPEN (SP MANWEB)": {
     "file": "SPEN_SP_MANWEB.json",
     "dnoName": "SPEN (SP MANWEB)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       25,
       54,
       60,
       72,
-      122,
       126,
+      151,
       165,
       182,
       186,
@@ -304,16 +301,17 @@
       240,
       281,
       292,
-      316
+      316,
+      351
     ],
     "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 1554.165
+    "snapshotCapacityUsedMw": 1581.129
   },
   "SSE": {
     "file": "SSE.json",
     "dnoName": "SSE",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       2,
@@ -348,6 +346,7 @@
       125,
       127,
       138,
+      147,
       154,
       168,
       173,
@@ -373,26 +372,26 @@
       288,
       293,
       311,
-      313
+      313,
+      333,
+      335,
+      336
     ],
     "gspIdsMissingMetrics": [
       87,
       92,
       239,
-      333,
-      335,
-      336
+      349
     ],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 357.493
+    "snapshotCapacityUsedMw": 378.773
   },
   "SSE (Southern)": {
     "file": "SSE_Southern.json",
     "dnoName": "SSE (Southern)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
-      4,
       32,
       64,
       100,
@@ -404,24 +403,24 @@
       199,
       202,
       211,
-      216
-    ],
-    "gspIdsMissingMetrics": [
+      216,
       319,
       324,
       325,
       343,
       344,
       345,
-      346
+      346,
+      350
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 2671.886
+    "snapshotCapacityUsedMw": 3859.034
   },
   "UKPN (East)": {
     "file": "UKPN_East.json",
     "dnoName": "UKPN (East)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       9,
@@ -444,20 +443,19 @@
       299,
       300,
       314,
-      317
-    ],
-    "gspIdsMissingMetrics": [
+      317,
       320,
       322,
       341
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 4335.549
+    "snapshotCapacityUsedMw": 4371.851
   },
   "UKPN (London)": {
     "file": "UKPN_London.json",
     "dnoName": "UKPN (London)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       19,
@@ -468,9 +466,7 @@
       189,
       209,
       246,
-      266
-    ],
-    "gspIdsMissingMetrics": [
+      266,
       318,
       321,
       322,
@@ -483,32 +479,34 @@
       341,
       342
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 140.222
+    "snapshotCapacityUsedMw": 254.544
   },
   "UKPN (South)": {
     "file": "UKPN_South.json",
     "dnoName": "UKPN (South)",
-    "generatedAt": "2026-06-08T12:03:58.413Z",
+    "generatedAt": "2026-08-25T11:18:09.648Z",
     "capacitiesFile": "gsp_metadata_26-06-05.json",
     "gspIdsUsed": [
       20,
       30,
       65,
+      150,
       164,
       174,
       180,
+      187,
       188,
       210,
       212,
       258,
-      315
-    ],
-    "gspIdsMissingMetrics": [
+      315,
       323,
       334
     ],
+    "gspIdsMissingMetrics": [],
     "gspIdsMissingCapacity": [],
-    "snapshotCapacityUsedMw": 977.578
+    "snapshotCapacityUsedMw": 1237.25
   }
 }
