@@ -16,6 +16,7 @@ import nationalMetrics from "../../data/national_metrics.json";
 import { getAvailablePLevels, getSettlementPeriodForDate } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
+const MOCK_HORIZON_SLOTS = 72;
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -90,6 +91,82 @@ const getSeasonalMetricsForDate = (date: DateTime<Valid> | DateTime<Invalid>) =>
   return seasonalMetrics;
 };
 
+// Shared by the real per-point loop below and mockValuesGenerator, so both sources of chart
+// points get identical settlement-period + seasonal-mean/bound fields from one place.
+const applySeasonalFields = (
+  point: ChartData,
+  date: DateTime<Valid> | DateTime<Invalid>,
+  settlementPeriod: number
+) => {
+  const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
+  point.SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
+  point.SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
+  for (const boundPair of seasonalBounds) {
+    for (const [index, bound] of Object.entries(boundPair)) {
+      if (bound) {
+        point[`SEASONAL_${index as SeasonalQuantile}`] =
+          bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
+      }
+    }
+    point[
+      `SEASONAL_BOUND_${Object.keys(boundPair).join(
+        "_"
+      )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
+    ] = Object.values(boundPair).map((bound) =>
+      bound ? bound[settlementPeriod - 1] * NATIONAL_CAPACITY : 0
+    );
+  }
+};
+
+// Fabricates MOCK_HORIZON_SLOTS of teaser forecast data past "now", anchored to the last real
+// point's own deviation from the seasonal mean and its own p-level band proportions — not
+// arbitrary values. Mutates chartMap in place; a no-op past the seasonal loop's dependencies.
+const mockValuesGenerator = (
+  chartMap: Record<string, ChartData>,
+  timeNow: string,
+  pLevels: [number, number][]
+) => {
+  const lastReal = Object.values(chartMap)
+    .filter((p) => p.formattedDate <= timeNow && p.SEASONAL_MEAN && p.PAST_FORECAST !== undefined)
+    .sort((a, b) => b.formattedDate.localeCompare(a.formattedDate))[0];
+  // Ratio, not a flat offset, so the curve tapers to 0 at dawn/dusk exactly where the seasonal
+  // mean does, instead of getting cut off at a still-elevated value.
+  const scale = lastReal?.SEASONAL_MEAN ? lastReal.PAST_FORECAST! / lastReal.SEASONAL_MEAN : 1;
+
+  let cursor = DateTime.fromISO(timeNow + ":00.000Z", { zone: "utc" });
+  for (let i = 0; i < MOCK_HORIZON_SLOTS; i++) {
+    cursor = cursor.plus({ minutes: 30 });
+    const key = cursor.toISO() as string;
+    const settlementPeriod = getSettlementPeriodForDate(cursor);
+    const point: ChartData = {
+      formattedDate: formatISODateString(key),
+      SETTLEMENT_PERIOD: settlementPeriod
+    };
+    applySeasonalFields(point, cursor, settlementPeriod);
+    // Always keep the slot (even at night, at 0) so the x-axis stays evenly spaced like real
+    // data does — real forecasts have an actual ~0 entry every 30 minutes, not a missing one.
+    point.FORECAST = point.SEASONAL_MEAN! * scale;
+    point.PROBABILISTIC_UPPER_BOUND = point.FORECAST;
+    for (const [lower, upper] of pLevels) {
+      const rangeKey = getPLevelRangeKey(lower, upper);
+      // The seasonal bound is climatological day-to-day spread, not forecast uncertainty, so it
+      // isn't used here — reuse the real band's own last width-to-forecast ratio instead.
+      const lastRange = lastReal?.[rangeKey] as number[] | undefined;
+      const ratio =
+        lastRange && lastReal!.PAST_FORECAST
+          ? (lastRange[1] - lastRange[0]) / 2 / lastReal!.PAST_FORECAST!
+          : 0.1;
+      const halfWidth = point.FORECAST * ratio;
+      point[rangeKey] = [Math.max(0, point.FORECAST - halfWidth), point.FORECAST + halfWidth];
+      point.PROBABILISTIC_UPPER_BOUND = Math.max(
+        point.PROBABILISTIC_UPPER_BOUND,
+        point.FORECAST + halfWidth
+      );
+    }
+    chartMap[key] = point;
+  }
+};
+
 const useFormatChartData = ({
   forecastData,
   nationalIntradayECMWFOnlyData,
@@ -103,7 +180,8 @@ const useFormatChartData = ({
   pvRealDayInData,
   timeTrigger,
   delta = false,
-  gsp = false
+  gsp = false,
+  appendTeaserForecast = false
 }: {
   forecastData?: ForecastData;
   nationalIntradayECMWFOnlyData?: ForecastData;
@@ -118,6 +196,7 @@ const useFormatChartData = ({
   timeTrigger?: string;
   delta?: boolean;
   gsp?: boolean;
+  appendTeaserForecast?: boolean;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
@@ -222,30 +301,7 @@ const useFormatChartData = ({
         const date = DateTime.fromISO(key).toUTC();
         const settlementPeriod = getSettlementPeriodForDate(date);
         chartMap[key].SETTLEMENT_PERIOD = settlementPeriod;
-        if (!gsp) {
-          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date);
-
-          chartMap[key].SEASONAL_MEAN = seasonalMean[settlementPeriod - 1] * NATIONAL_CAPACITY;
-          chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
-          for (const boundPair of seasonalBounds) {
-            for (const [index, bound] of Object.entries(boundPair)) {
-              if (bound) {
-                chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
-                  bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
-              }
-            }
-            chartMap[key][
-              `SEASONAL_BOUND_${Object.keys(boundPair).join(
-                "_"
-              )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
-            ] = Object.values(boundPair).map((bound) => {
-              if (bound) {
-                return bound[settlementPeriod - 1] * NATIONAL_CAPACITY;
-              }
-              return 0;
-            });
-          }
-        }
+        if (!gsp) applySeasonalFields(chartMap[key], date, settlementPeriod);
       }
 
       if (fourHourData) {
@@ -257,6 +313,10 @@ const useFormatChartData = ({
           )
         );
       }
+      if (appendTeaserForecast) {
+        mockValuesGenerator(chartMap, timeNow, pLevels);
+      }
+
       if (delta) {
         for (const chartDatum in chartMap) {
           if (typeof chartMap[chartDatum] === "object") {
@@ -282,7 +342,8 @@ const useFormatChartData = ({
     nationalPvnetDayAhead,
     nationalPvnetIntraday,
     probabilisticRangeData,
-    pLevels
+    pLevels,
+    appendTeaserForecast
   ]);
 
   return data;

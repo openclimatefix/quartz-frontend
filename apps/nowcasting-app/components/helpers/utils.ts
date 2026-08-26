@@ -22,6 +22,7 @@ import createClient from "openapi-fetch";
 import { paths } from "../../types/quartz-api";
 import { PathsWithMethod } from "openapi-typescript-helpers";
 import { ChartData } from "../charts/remix-line";
+import { setGlobalState } from "./globalState";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
@@ -418,6 +419,7 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
       throw new Error(`Failed to get access token (${response.status}): ${text}`);
     }
     const { accessToken, trialExpired } = await response.json();
+    setGlobalState("isTrialExpired", !!trialExpired);
 
     const res = await axios(url as string, {
       headers: { Authorization: `Bearer ${accessToken}` }
@@ -425,7 +427,10 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
 
     if (trialExpired && Array.isArray(res.data)) {
       const now = new Date();
-      return res.data.filter((d: any) => !d?.targetTime || new Date(d.targetTime) <= now);
+      return res.data.filter((d: any) => {
+        const time = d?.targetTime ?? d?.datetimeUtc;
+        return !time || new Date(time) <= now;
+      });
     }
     return res.data;
   } catch (err: any) {
