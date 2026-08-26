@@ -1,0 +1,28 @@
+version: 2
+percy:
+  useSystemProxy: false
+  skipBaseBuild: false
+snapshot:
+  widths:
+    - 1280
+  minHeight: 720
+  percyCSS: ""
+  enableJavaScript: false
+  cliEnableJavaScript: true
+  disableShadowDOM: false
+  forceShadowAsLightDOM: false
+  responsiveSnapshotCapture: false
+  ignoreCanvasSerializationErrors: false
+discovery:
+  allowedHostnames: []
+  disallowedHostnames: []
+  networkIdleTimeout: 100
+  scrollToBottom: false
+  captureMockedServiceWorker: false
+  retry: false
+  launchOptions:
+    closeBrowser: true
+upload:
+  files: "**/*.{png,jpg,jpeg}"
+  ignore: ""
+  stripExtensions: false

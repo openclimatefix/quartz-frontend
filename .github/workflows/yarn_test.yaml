@@ -38,6 +38,7 @@ jobs:
         yarn test --clear-cache --coverage --coverageDirectory=../..
     - name: Run cypress tests
       # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
+      id: cypress
       uses: cypress-io/github-action@v6
       with:
         # Starts web server for E2E tests - replace with your own server invocation
@@ -49,30 +50,48 @@ jobs:
         record: true
 #        parallel: true # Runs test in parallel using settings above
         config: chromeWebSecurity=false
-        browser: chrome
-env:
-  AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
-  AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
-  AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
-  AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
-  AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
-  AUTH0_ISSUER_BASE_URL: ${{ secrets.AUTH0_ISSUER_BASE_URL }}
-  AUTH0_SCOPE: ${{ secrets.AUTH0_SCOPE }}
-  AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
-  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-  CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
-  GITHUB_TOKEN: ${{ secrets.CYPRESS_GITHUB_TOKEN }}
-  NEXT_PUBLIC_API_PREFIX: ${{ secrets.NEXT_PUBLIC_API_PREFIX }}
-  NEXT_PUBLIC_SITES_API_PREFIX: ${{ secrets.NEXT_PUBLIC_SITES_API_PREFIX }}
-  NEXT_PUBLIC_AUTH0_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_AUDIENCE }}
-  NEXT_PUBLIC_AUTH0_API_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_API_AUDIENCE }}
-  NEXT_PUBLIC_AUTH0_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_AUTH0_CLIENT_ID }}
-  NEXT_PUBLIC_AUTH0_DOMAIN: ${{ secrets.NEXT_PUBLIC_AUTH0_DOMAIN }}
-  NEXT_PUBLIC_AUTH0_PASSWORD: ${{ secrets.NEXT_PUBLIC_AUTH0_PASSWORD }}
-  NEXT_PUBLIC_AUTH0_SCOPE: ${{ secrets.NEXT_PUBLIC_AUTH0_SCOPE }}
-  NEXT_PUBLIC_AUTH0_USERNAME: ${{ secrets.NEXT_PUBLIC_AUTH0_USERNAME }}
-  NEXT_PUBLIC_4H_VIEW: 'true'
-  NEXT_PUBLIC_CI: 'true'
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        browser: electron
+      env:
+        AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+        AUTH0_BASE_URL: ${{ secrets.AUTH0_BASE_URL }}
+        AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+        AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+        AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+        AUTH0_ISSUER_BASE_URL: ${{ secrets.AUTH0_ISSUER_BASE_URL }}
+        AUTH0_SCOPE: ${{ secrets.AUTH0_SCOPE }}
+        AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
+        GITHUB_TOKEN: ${{ secrets.CYPRESS_GITHUB_TOKEN }}
+        NEXT_PUBLIC_API_PREFIX: ${{ secrets.NEXT_PUBLIC_API_PREFIX }}
+        NEXT_PUBLIC_SITES_API_PREFIX: ${{ secrets.NEXT_PUBLIC_SITES_API_PREFIX }}
+        NEXT_PUBLIC_AUTH0_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_AUDIENCE }}
+        NEXT_PUBLIC_AUTH0_API_AUDIENCE: ${{ secrets.NEXT_PUBLIC_AUTH0_API_AUDIENCE }}
+        NEXT_PUBLIC_AUTH0_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_AUTH0_CLIENT_ID }}
+        NEXT_PUBLIC_AUTH0_DOMAIN: ${{ secrets.NEXT_PUBLIC_AUTH0_DOMAIN }}
+        NEXT_PUBLIC_AUTH0_PASSWORD: ${{ secrets.NEXT_PUBLIC_AUTH0_PASSWORD }}
+        NEXT_PUBLIC_AUTH0_SCOPE: ${{ secrets.NEXT_PUBLIC_AUTH0_SCOPE }}
+        NEXT_PUBLIC_AUTH0_USERNAME: ${{ secrets.NEXT_PUBLIC_AUTH0_USERNAME }}
+        NEXT_PUBLIC_4H_VIEW: 'true'
+        NEXT_PUBLIC_CI: 'false'
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
+    - name: Upload snapshot diffs
+      if: always() && steps.cypress.outcome == 'failure'
+      uses: actions/upload-artifact@v4
+      with:
+        name: cypress-snapshot-diffs
+        path: apps/nowcasting-app/cypress/snapshots/**/__diff_output__/*.png
 
+    - name: Comment diff link on PR
+      if: always() && steps.cypress.outcome == 'failure'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+          await github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `### ❌ Snapshot diff\nDownload **cypress-snapshot-diffs** from [this run's artifacts](${runUrl}) to view the diff images.`
+          });

@@ -1,0 +1,18 @@
+{
+  "site_list": [
+    {
+      "client_site_id": 0,
+      "client_site_name": "Rough Grounds Farm Campsite",
+      "orientation": 220,
+      "tilt": 30,
+      "latitude": 51.707351,
+      "longitude": -1.692379,
+      "inverter_capacity_kw": 3.84,
+      "module_capacity_kw": 3.84,
+      "site_uuid": "2a55864c-25c3-4c68-8630-636cdeffea9e",
+      "capacity_kw": 3.84,
+      "dno": "{\"dno_id\": \"20\", \"name\": \"_H\", \"long_name\": \"SSE (Southern)\"}",
+      "gsp": "{\"gsp_id\": \"202\", \"name\": \"Minety\"}"
+    }
+  ]
+}

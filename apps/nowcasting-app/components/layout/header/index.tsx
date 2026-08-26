@@ -27,6 +27,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
   view,
   setViewFunc
 }) => {
+  const dataCy = view ? `${view.toLowerCase().replace(/\s+/g, "-")}-tab` : undefined;
   const computedClasses = classNames(
     className || "",
     disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
@@ -52,6 +53,7 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
     return (
       <Menu.Item>
         <a
+          data-cy={dataCy}
           className={classNames(computedClasses, textColorClasses)}
           onClick={() => {
             if (!disabled) setViewFunc(view);

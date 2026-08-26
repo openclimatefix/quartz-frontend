@@ -25,10 +25,17 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div
+        className="fixed inset-0 z-40 bg-black/40"
+        data-cy="settings-modal-backdrop"
+        onClick={onClose}
+      />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div className="w-full max-w-[25rem] rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
+        <div
+          data-cy="settings-modal"
+          className="w-full max-w-[25rem] rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]"
+        >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/35 px-4 py-2">
             <h2 className="font-semibold text-white">Settings</h2>
@@ -45,7 +52,11 @@ export const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
           <div className="px-4 py-3">
             <h3 className="mb-2 text-sm text-left font-semibold text-white/70">P-levels</h3>
             {P_LEVEL_OPTIONS.map(([lower, upper]) => (
-              <div key={lower} className="flex items-center gap-3">
+              <div
+                key={lower}
+                data-cy={`p-level-toggle-${lower}-${upper}`}
+                className="flex items-center gap-3"
+              >
                 <div className="-ml-2">
                   <Toggle
                     onClick={() => toggle([lower, upper])}

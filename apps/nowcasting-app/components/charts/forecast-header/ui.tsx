@@ -18,11 +18,11 @@ export const ForecastHeadlineFigure: React.FC<{
   }`;
   return (
     <div
-      data-test="pvlive-ocf-headline-figure"
+      data-cy="forecast-header-large-text"
       className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
     >
       <div className="flex flex-1 self-center items-center justify-center">
-        <div className={`flex items-center ${textSizeClasses}`}>
+        <div data-cy="forecast-header-text" className={`flex items-center ${textSizeClasses}`}>
           <ForecastLabel
             position={"middle"}
             tip={
@@ -108,7 +108,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
 }) => {
   return (
     <div
-      data-test="forecast-label-tooltip"
+      data-cy="forecast-label-tooltip"
       className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
     >
       <ForecastLabel
@@ -165,7 +165,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
 }) => {
   return (
     <div
-      data-test="national-chart-header"
+      data-cy="national-chart-header"
       className="flex flex-initial content-between bg-ocf-gray-800 h-auto mb-4"
     >
       <div className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black m-auto ml-5 flex justify-evenly">
