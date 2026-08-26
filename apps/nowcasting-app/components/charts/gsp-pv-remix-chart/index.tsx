@@ -8,6 +8,7 @@ import {
 } from "../../helpers/utils";
 import ForecastHeaderGSP from "./forecast-header-gsp";
 import useGetGspData from "./use-get-gsp-data";
+import useGspSeasonalMetrics from "./use-gsp-seasonal-metrics";
 import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
 import Spinner from "../../icons/spinner";
 import { ForecastValue } from "../../types";
@@ -49,6 +50,11 @@ const GspPvRemixChart: FC<{
   const gspInstalledCapacity =
     gspLocationInfo?.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0) || 0;
   const gspName = gspLocationInfo?.[0]?.regionName;
+  const gspSeasonalMetrics = useGspSeasonalMetrics(
+    gspLocationInfo,
+    nationalAggregationLevel,
+    selectedRegions[0]
+  );
   const chartData = useFormatChartData({
     forecastData: gspForecastDataOneGSP,
     fourHourData: gspNHourData,
@@ -56,7 +62,11 @@ const GspPvRemixChart: FC<{
     pvRealDayAfterData: pvRealDataAfter,
     timeTrigger: selectedTime,
     delta: deltaView,
-    gsp: true
+    gsp: true,
+    // Use the capacity of only the GSPs that actually have metrics, so a
+    // selection containing "new" GSPs (no metrics yet) still scales correctly.
+    seasonalMetrics: gspSeasonalMetrics?.metrics ?? null,
+    seasonalCapacity: gspSeasonalMetrics?.capacity
   });
   const now30min = formatISODateString(get30MinNow());
   const dataMissing =

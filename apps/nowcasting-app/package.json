@@ -11,7 +11,10 @@
     "lint": "next lint",
     "pre-commit": "pre-commit run",
     "test": "jest",
-    "test:cypress": "cypress run --browser chrome"
+    "test:cypress": "cypress run --browser chrome",
+    "sanitize-gsp-metrics": "node scripts/sanitize-gsp-metrics.mjs",
+    "generate-dno-metrics": "node scripts/generate-dno-metrics.mjs",
+    "prep-metrics": "yarn sanitize-gsp-metrics && yarn generate-dno-metrics"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",
