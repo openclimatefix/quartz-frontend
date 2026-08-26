@@ -410,10 +410,6 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
         Sentry.captureException(parseErr, { tags: { error: "get_token_parse_failure" } });
         return {};
       });
-      if (body.error === "trial_expired") {
-        Router.push(`/expired${body.email ? `?email=${encodeURIComponent(body.email)}` : ""}`);
-        throw new Error("trial_expired");
-      }
       if (body.error === "access_denied") {
         Router.push(`/auth/denied?error_description=${encodeURIComponent(body.message)}`);
         throw new Error("access_denied");
