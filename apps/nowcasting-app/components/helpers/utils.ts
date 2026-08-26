@@ -417,11 +417,16 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
       const text = body.message || response.statusText;
       throw new Error(`Failed to get access token (${response.status}): ${text}`);
     }
-    const { accessToken } = await response.json();
+    const { accessToken, trialExpired } = await response.json();
 
     const res = await axios(url as string, {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
+
+    if (trialExpired && Array.isArray(res.data)) {
+      const now = new Date();
+      return res.data.filter((d: any) => !d?.targetTime || new Date(d.targetTime) <= now);
+    }
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;

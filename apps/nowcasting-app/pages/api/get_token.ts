@@ -1,4 +1,4 @@
-import { getAccessToken, withApiAuthRequired } from "@auth0/nextjs-auth0";
+import { getAccessToken, getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
@@ -19,7 +19,10 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
       }
       try {
         const accessToken = await getAccessToken(req, res);
-        res.status(200).json(accessToken);
+        const session = await getSession(req, res);
+        const trialEndsAt = session?.user?.trial_ends_at;
+        const trialExpired = !!trialEndsAt && new Date(trialEndsAt) < new Date();
+        res.status(200).json({ ...accessToken, trialExpired });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
           return res.status(403).json({ error: "access_denied", message: error.message });
