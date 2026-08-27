@@ -261,7 +261,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [loadingState] = useGlobalState("loadingState");
-  const [isTrialExpired] = useGlobalState("isTrialExpired");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const selectedTimeHalfHourSlot = get30MinSlot(new Date(convertToLocaleDateString(selectedTime)));
@@ -305,7 +305,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
     pvRealDayAfterData,
     timeTrigger: selectedTime,
     delta: true,
-    appendTeaserForecast: isTrialExpired
+    appendTeaserForecast: !!trialExpiredAt
   });
 
   const yMax = useMemo(() => {
@@ -375,6 +375,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className, combinedData, combinedErro
               yTicks={getTicks(yMax, Y_MAX_TICKS)}
               visibleLines={visibleLines}
               deltaView={true}
+              trialExpiredAt={trialExpiredAt}
             />
           </div>
         </div>

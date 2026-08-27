@@ -93,7 +93,7 @@ export type GlobalStateType = {
   showCloudLayer: boolean;
   activeChannel: ChannelSelection;
   showPvLayer: boolean;
-  isTrialExpired: boolean;
+  trialExpiredAt: string;
 };
 
 const DEFAULT_P_LEVELS: [number, number][] = [[10, 90]];
@@ -159,7 +159,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showCloudLayer: false,
     activeChannel: "COMPOSITE_VISIBLE",
     showPvLayer: true,
-    isTrialExpired: false
+    trialExpiredAt: ""
   });
 
 export default useGlobalState;

@@ -134,6 +134,7 @@ type RemixLineProps = {
   deltaView?: boolean;
   deltaYMaxOverride?: number;
   yTicks?: number[];
+  trialExpiredAt?: string;
 };
 const CustomizedLabel: FC<any> = ({
   value,
@@ -192,7 +193,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   zoomEnabled = true,
   deltaView = false,
   deltaYMaxOverride,
-  yTicks
+  yTicks,
+  trialExpiredAt = ""
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
@@ -327,6 +329,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
   console.log("chartData", data);
   console.log("DELTA", deltaView);
 
+  const activeData = zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData;
+  // Blur starts 1h before "now" so the gradient's transparent ramp-in happens over the tail of
+  // the real data and the mock region proper is already fully blurred.
+  const blurStart = new Date(new Date(currentTime + ":00Z").getTime() - 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 16);
+  const teaserFraction = trialExpiredAt
+    ? activeData.filter((d) => d.formattedDate > blurStart).length / (activeData.length || 1)
+    : 0;
+
   return (
     <div style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
@@ -341,13 +353,64 @@ const RemixLine: React.FC<RemixLineProps> = ({
           </button>
         </div>
       )}
+      {teaserFraction > 0 && (
+        // Covers the plotted graph area only: full height from the frame top down to bottom-12
+        // (48px), which keeps the x-axis tick times and date row underneath sharp; the 60px
+        // right inset clears the delta view's right y-axis.
+        // pointer-events-auto (not -none) is deliberate: this needs to swallow hover/tooltip,
+        // click-to-select and zoom-drag over the teaser region, not just look blurred while
+        // staying interactive. Percentage-based width and gradient masks keep it responsive at
+        // any chart size.
+        <div
+          className={`absolute top-0 bottom-12 z-20 flex items-center justify-center pointer-events-auto ${
+            deltaView ? "right-[60px]" : "right-0"
+          }`}
+          style={{ width: `calc(${teaserFraction * 100}% - 16px)` }}
+        >
+          {/* Two gradient-masked backdrop layers: the blur fades in from fully transparent at
+              the left boundary (no hard edge against the real data) and deepens rightward. */}
+          <div
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{
+              maskImage: "linear-gradient(to right, transparent, black 20%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent, black 20%)"
+            }}
+          />
+          <div
+            className="absolute inset-0 backdrop-blur-md"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 15%, black 50%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 15%, black 50%)"
+            }}
+          />
+          <div className="relative flex flex-col items-center gap-3 px-4 text-center">
+            <p className="text-sm font-light text-white max-w-xs">
+              Your trial ended on{" "}
+              <span className="font-medium">
+                {new Date(trialExpiredAt).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric"
+                })}
+              </span>
+              . Forecasts beyond now are no longer available.
+            </p>
+            <a
+              href="mailto:support@quartz.solar?subject=Subscription%20request"
+              className="text-sm py-2 px-4 font-medium bg-ocf-yellow hover:bg-ocf-yellow-600 text-black transition-all duration-200 rounded-full"
+            >
+              Subscribe to get more &nbsp;→
+            </a>
+          </div>
+        </div>
+      )}
       <div className="absolute inset-0">
         <ResponsiveContainer debounce={100}>
           <ComposedChart
             className="select-none"
             width={500}
             height={400}
-            data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
+            data={activeData}
             margin={{
               top: 20,
               right: rightChartMargin,
@@ -803,6 +866,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             )}
             <Tooltip
+              wrapperStyle={{ zIndex: 30 }}
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))

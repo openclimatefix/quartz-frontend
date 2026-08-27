@@ -80,7 +80,7 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
   return (
     <div
       className={`absolute -top-4 right-2 flex items-center h-9 ${
-        isLoadingData || hasErrors ? "z-40" : "z-0"
+        isLoadingData || hasErrors ? "z-40" : "z-30"
       }`}
     >
       <div

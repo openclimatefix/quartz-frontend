@@ -418,8 +418,8 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
       const text = body.message || response.statusText;
       throw new Error(`Failed to get access token (${response.status}): ${text}`);
     }
-    const { accessToken, trialExpired } = await response.json();
-    setGlobalState("isTrialExpired", !!trialExpired);
+    const { accessToken, trialExpired, trialEndsAt } = await response.json();
+    setGlobalState("trialExpiredAt", trialExpired ? trialEndsAt : "");
 
     const res = await axios(url as string, {
       headers: { Authorization: `Bearer ${accessToken}` }

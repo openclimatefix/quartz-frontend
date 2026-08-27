@@ -22,7 +22,7 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
         const session = await getSession(req, res);
         const trialEndsAt = session?.user?.trial_ends_at;
         const trialExpired = !!trialEndsAt && new Date(trialEndsAt) < new Date();
-        res.status(200).json({ ...accessToken, trialExpired });
+        res.status(200).json({ ...accessToken, trialExpired, trialEndsAt });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
           return res.status(403).json({ error: "access_denied", message: error.message });

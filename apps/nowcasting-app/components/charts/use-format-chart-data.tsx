@@ -16,7 +16,7 @@ import nationalMetrics from "../../data/national_metrics.json";
 import { getAvailablePLevels, getSettlementPeriodForDate } from "../helpers/chartUtils";
 
 const NATIONAL_CAPACITY = 21504.629;
-const MOCK_HORIZON_SLOTS = 72;
+const MOCK_HORIZON_SLOTS = 72; // 36h of half-hourly slots
 
 //separate paste forecast from future forecast (ie: after selectedTime)
 const getForecastChartData = (
@@ -118,24 +118,36 @@ const applySeasonalFields = (
   }
 };
 
-// Fabricates MOCK_HORIZON_SLOTS of teaser forecast data past "now", anchored to the last real
-// point's own deviation from the seasonal mean and its own p-level band proportions — not
-// arbitrary values. Mutates chartMap in place; a no-op past the seasonal loop's dependencies.
+// Fabricates MOCK_HORIZON_SLOTS of teaser forecast data past "now" for trial-expired users,
+// whose real future values are stripped at the fetch layer (see axiosFetcherAuth). The shape
+// comes from the seasonal climatology, scaled to the day's own peak so it continues the real
+// curve rather than jumping to an arbitrary value. Mutates chartMap in place.
 const mockValuesGenerator = (
   chartMap: Record<string, ChartData>,
   timeNow: string,
   pLevels: [number, number][]
 ) => {
-  const lastReal = Object.values(chartMap)
-    .filter((p) => p.formattedDate <= timeNow && p.SEASONAL_MEAN && p.PAST_FORECAST !== undefined)
-    .sort((a, b) => b.formattedDate.localeCompare(a.formattedDate))[0];
-  // Ratio, not a flat offset, so the curve tapers to 0 at dawn/dusk exactly where the seasonal
-  // mean does, instead of getting cut off at a still-elevated value.
-  const scale = lastReal?.SEASONAL_MEAN ? lastReal.PAST_FORECAST! / lastReal.SEASONAL_MEAN : 1;
+  const peak = Object.values(chartMap)
+    .filter((p) => p.formattedDate <= timeNow && p.SEASONAL_MEAN && p.PAST_FORECAST)
+    .sort((a, b) => b.PAST_FORECAST! - a.PAST_FORECAST!)[0];
+  if (!peak) return;
 
+  const peakForecast = peak.PAST_FORECAST!;
+  // Ratio, not a flat offset, so the curve tapers to 0 at dawn/dusk exactly where the seasonal
+  // mean does instead of being cut off at a still-elevated value.
+  const scale = peakForecast / peak.SEASONAL_MEAN!;
+  const bands = pLevels.flatMap(([lower, upper]) => {
+    const key = getPLevelRangeKey(lower, upper);
+    const range = peak[key];
+    return range ? [{ key, ratio: (range[1] - range[0]) / 2 / peakForecast }] : [];
+  });
+  const widestRatio = Math.max(0, ...bands.map((b) => b.ratio));
+
+  // The first point sits exactly on the "now" slot: truncation removes the real entry there
+  // (it's a future slot), and the LIVE/timeOfInterest reference lines target that category on
+  // the x-axis — with no data point at it they silently don't render at all.
   let cursor = DateTime.fromISO(timeNow + ":00.000Z", { zone: "utc" });
   for (let i = 0; i < MOCK_HORIZON_SLOTS; i++) {
-    cursor = cursor.plus({ minutes: 30 });
     const key = cursor.toISO() as string;
     const settlementPeriod = getSettlementPeriodForDate(cursor);
     const point: ChartData = {
@@ -143,27 +155,17 @@ const mockValuesGenerator = (
       SETTLEMENT_PERIOD: settlementPeriod
     };
     applySeasonalFields(point, cursor, settlementPeriod);
-    // Always keep the slot (even at night, at 0) so the x-axis stays evenly spaced like real
-    // data does — real forecasts have an actual ~0 entry every 30 minutes, not a missing one.
-    point.FORECAST = point.SEASONAL_MEAN! * scale;
-    point.PROBABILISTIC_UPPER_BOUND = point.FORECAST;
-    for (const [lower, upper] of pLevels) {
-      const rangeKey = getPLevelRangeKey(lower, upper);
-      // The seasonal bound is climatological day-to-day spread, not forecast uncertainty, so it
-      // isn't used here — reuse the real band's own last width-to-forecast ratio instead.
-      const lastRange = lastReal?.[rangeKey] as number[] | undefined;
-      const ratio =
-        lastRange && lastReal!.PAST_FORECAST
-          ? (lastRange[1] - lastRange[0]) / 2 / lastReal!.PAST_FORECAST!
-          : 0.1;
-      const halfWidth = point.FORECAST * ratio;
-      point[rangeKey] = [Math.max(0, point.FORECAST - halfWidth), point.FORECAST + halfWidth];
-      point.PROBABILISTIC_UPPER_BOUND = Math.max(
-        point.PROBABILISTIC_UPPER_BOUND,
-        point.FORECAST + halfWidth
-      );
+    const forecast = point.SEASONAL_MEAN! * scale;
+    point.FORECAST = forecast;
+    if (i === 0) point.PAST_FORECAST = forecast;
+    point.PROBABILISTIC_UPPER_BOUND = forecast * (1 + widestRatio);
+    for (const { key: rangeKey, ratio } of bands) {
+      const halfWidth = forecast * ratio;
+      point[rangeKey] = [Math.max(0, forecast - halfWidth), forecast + halfWidth];
     }
+
     chartMap[key] = point;
+    cursor = cursor.plus({ minutes: 30 });
   }
 };
 
