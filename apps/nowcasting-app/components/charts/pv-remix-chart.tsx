@@ -30,6 +30,7 @@ const PvRemixChart: FC<{
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   const [loadingState] = useGlobalState("loadingState");
   const [globalZoomArea] = useGlobalState("globalZoomArea");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
 
   const {
     nationalForecastData,
@@ -76,7 +77,8 @@ const PvRemixChart: FC<{
     fourHourData: nationalNHourData,
     pvRealDayInData,
     pvRealDayAfterData,
-    timeTrigger: selectedTime
+    timeTrigger: selectedTime,
+    appendTeaserForecast: !!trialExpiredAt
   });
 
   const yMax = useMemo(() => {
@@ -131,6 +133,7 @@ const PvRemixChart: FC<{
               yMax={yMax}
               visibleLines={visibleLines}
               yTicks={getTicks(yMax, Y_MAX_TICKS)}
+              trialExpiredAt={trialExpiredAt}
             />
           </div>
         </div>

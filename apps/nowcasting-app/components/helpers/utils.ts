@@ -22,6 +22,7 @@ import createClient from "openapi-fetch";
 import { paths } from "../../types/quartz-api";
 import { PathsWithMethod } from "openapi-typescript-helpers";
 import { ChartData } from "../charts/remix-line";
+import { setGlobalState } from "./globalState";
 
 export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
 
@@ -410,10 +411,6 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
         Sentry.captureException(parseErr, { tags: { error: "get_token_parse_failure" } });
         return {};
       });
-      if (body.error === "trial_expired") {
-        Router.push(`/expired${body.email ? `?email=${encodeURIComponent(body.email)}` : ""}`);
-        throw new Error("trial_expired");
-      }
       if (body.error === "access_denied") {
         Router.push(`/auth/denied?error_description=${encodeURIComponent(body.message)}`);
         throw new Error("access_denied");
@@ -421,11 +418,20 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
       const text = body.message || response.statusText;
       throw new Error(`Failed to get access token (${response.status}): ${text}`);
     }
-    const { accessToken } = await response.json();
+    const { accessToken, trialExpired, trialEndsAt } = await response.json();
+    setGlobalState("trialExpiredAt", trialExpired ? trialEndsAt : "");
 
     const res = await axios(url as string, {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
+
+    if (trialExpired && Array.isArray(res.data)) {
+      const now = new Date();
+      return res.data.filter((d: any) => {
+        const time = d?.targetTime ?? d?.datetimeUtc;
+        return !time || new Date(time) <= now;
+      });
+    }
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
