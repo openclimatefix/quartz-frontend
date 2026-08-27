@@ -11,7 +11,10 @@ export const SATELLITE_CHANNELS = [
   "IR_120",
   "IR_134",
   "WV_062",
-  "WV_073"
+  "WV_073",
+  "VISIBLE_COMPOSITE",
+  "INFRARED_COMPOSITE",
+  "WATER_VAPOUR_COMPOSITE"
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
@@ -106,7 +109,10 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_120: "Infrared 12.0µm",
   IR_134: "Infrared 13.4µm",
   WV_062: "Water Vapour 6.2µm",
-  WV_073: "Water Vapour 7.3µm"
+  WV_073: "Water Vapour 7.3µm",
+  VISIBLE_COMPOSITE: "Visible Composite - Backend Test",
+  INFRARED_COMPOSITE: "Infrared Composite - Backend Test",
+  WATER_VAPOUR_COMPOSITE: "Water Vapour Composite - Backend Test"
 };
 
 export type TifLayerData = {
