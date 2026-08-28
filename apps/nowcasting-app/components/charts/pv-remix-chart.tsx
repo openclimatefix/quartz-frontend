@@ -1,6 +1,7 @@
 import { FC, useEffect, useMemo } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
+import ChartLegend from "./chart-legend";
 import useGlobalState, {
   useCountryState,
   getCursorCadenceMinutes,
@@ -219,7 +220,7 @@ const PvRemixChart: FC<{
   return (
     <>
       <div className={`flex flex-col flex-auto ${className || ""}`}>
-        <div className="flex flex-col flex-1 dash:h-auto">
+        <div className="flex flex-1 flex-col p-2 dash:h-auto">
           <ForecastHeader
             forecastSeries={forecastSeries}
             generationSeries={generation0.data}
@@ -232,7 +233,9 @@ const PvRemixChart: FC<{
               <Spinner></Spinner>
             </div>
           )}
-          <div className="flex-1 relative">
+          {/* The plot well: dark space cut into the card, so the chart reads as the thing
+              you look *into* and the header as the surface it is cut from. */}
+          <div className="relative flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
             <DataLoadingChartStatus loadingState={loadingState} />
             <RemixLine
               resetTime={resetTime}
@@ -261,6 +264,11 @@ const PvRemixChart: FC<{
             ></GspPvRemixChart>
           </div>
         )}
+        {/* Below the well, not inside it: the key describes the plot rather than sitting on
+              it, and it is where most charting libraries put one. */}
+        <div className="flex px-2 pb-2 dash:h-auto">
+          <ChartLegend generationKeys={GENERATION_CHART_KEYS} />
+        </div>
       </div>
     </>
   );

@@ -304,27 +304,44 @@ describe("observers are per country and there may be exactly one", () => {
 // so the equivalent "series list drives legend rows" coverage belongs over there rather than
 // rebuilt against a component this file does not render. What is worth pinning here is the
 // negative: the chart itself renders no legend text at all any more.
-describe("the chart no longer carries its own legend", () => {
-  test("GB: none of the old chart-legend labels render inside the chart", async () => {
+describe("the chart's own key", () => {
+  // Track G deleted `ChartLegend` and this block asserted its absence. The key is back
+  // (`chart-legend.tsx`), so what is worth pinning has moved: it names *drawn* series only, and
+  // it is inert. Both are the properties that stop it becoming the display rail drawn twice.
+  test("GB: it names the drawn series and not the ones switched off", async () => {
     const view = renderChart();
     await settled(view, 6);
     await waitFor(() => {
       rerender(view);
-      expect(screen.queryAllByText("PV Live Estimated")).toHaveLength(0);
+      expect(screen.queryAllByText("PV Live Estimated")).toHaveLength(1);
     });
 
+    // Configured for GB but absent from the default `visibleLines`, so the chart does not draw
+    // them and the key must not name them.
     for (const label of ["ECMWF-only", "Met Office-only", "Satellite-only"]) {
       expect(screen.queryAllByText(label)).toHaveLength(0);
     }
   });
 
-  test("NL: same — no legend labels render inside the chart", async () => {
+  test("GB: the key is inert — it holds no controls", async () => {
+    const view = renderChart();
+    await settled(view, 6);
+    await waitFor(() => {
+      rerender(view);
+      expect(screen.queryByLabelText("Chart series")).not.toBeNull();
+    });
+
+    const legend = screen.getByLabelText("Chart series");
+    expect(legend.querySelectorAll("button, input, [role='button']")).toHaveLength(0);
+  });
+
+  test("NL: the key follows the country's own series", async () => {
     setGlobalState("focusedCountry", "NL");
     const view = renderChart();
     await settled(view, 2);
     await waitFor(() => {
       rerender(view);
-      expect(screen.queryAllByText("NED NL Initial")).toHaveLength(0);
+      expect(screen.queryAllByText("NED NL Initial")).toHaveLength(1);
     });
   });
 });

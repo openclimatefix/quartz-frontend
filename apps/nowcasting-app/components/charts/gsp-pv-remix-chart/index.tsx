@@ -287,7 +287,7 @@ const GspPvRemixChart: FC<{
 
   return (
     <>
-      <div className="flex-initial">
+      <div className="flex-initial px-2 ">
         <ForecastHeaderGSP
           onClose={close}
           title={title}
@@ -301,18 +301,19 @@ const GspPvRemixChart: FC<{
           deltaView={deltaView}
           titleTooltipText={selectedGSPNames}
         >
-          <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-ocf-yellow-500">
+          <span className="text-lg font-medium leading-none text-solar md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
             {Math.round(forecastAtSelectedTimeMw)}
           </span>
 
-          <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-white">
+          <span className="text-lg font-medium leading-none text-content md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
             {" "}
             / {gspInstalledCapacity}
           </span>
-          <span className="text-xs dash:text-2xl text-ocf-gray-300"> MW</span>
+          <span className="text-xs dash:text-2xl text-content"> MW</span>
         </ForecastHeaderGSP>
       </div>
-      <div className="flex-1 relative">
+      {/* Same well as the national chart — see `pv-remix-chart.tsx`. */}
+      <div className="relative mx-2 mb-2 flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
         {!!dataMissing && (
           <div className="h-full absolute flex pb-7 items-center justify-center inset-0 z-30">
             <Spinner />
