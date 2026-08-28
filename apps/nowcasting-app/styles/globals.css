@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import "./tokens.css";
 @import "./toastify.css";
 
 .recharts-surface {
@@ -8,11 +9,11 @@
 }
 
 .btn {
-  @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-mapbox-black bg-ocf-yellow hover:bg-ocf-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ocf-delta-500;
+  @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-content bg-surface-raised ring-1 ring-inset ring-edge hover:bg-interactive hover:text-content-on-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-interactive;
 }
 
 .btn.btn-outline {
-  @apply inline-flex items-center justify-center px-4 py-2 border border-ocf-gray-700 rounded-full shadow-sm text-sm font-medium text-ocf-gray-700 bg-transparent hover:text-ocf-yellow hover:border-ocf-yellow focus:outline-none;
+  @apply inline-flex items-center justify-center px-4 py-2 border border-content-muted rounded-full shadow-sm text-sm font-medium text-content-muted bg-transparent hover:text-interactive hover:border-interactive focus:outline-none;
 }
 
 .pv-map a.mapboxgl-ctrl-logo {
@@ -20,21 +21,111 @@
 }
 
 .pv-map .mapboxgl-popup-content {
-  background: rgba(0,0,0,0.75);
+  background: rgba(0, 0, 0, 0.75);
   color: white;
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem 0.5rem 0 0.5rem;
 }
 
 .pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
-  border-top-color: rgba(0,0,0,0.5);
+  border-top-color: rgba(0, 0, 0, 0.5);
 }
 
 .mapboxgl-canvas {
   outline: none;
 }
 
-.up-arrow, .down-arrow {
+/* ---- Mapbox's own chrome -------------------------------------------------------------
+ * The zoom pair, the reset-framing button `map.tsx` adds to the same group, and the
+ * attribution. Mapbox ships all three light — on a near-black basemap they were the brightest
+ * things on the map, which is backwards for chrome you touch twice a session.
+ *
+ * `!important` and the doubled class are not decoration. `mapbox-gl.css` is imported from
+ * `map.tsx`, so Next injects it as component CSS *after* `globals.css`, and Mapbox's own
+ * selectors are three classes deep — without both, its rules win and the glyphs stay grey.
+ */
+.pv-map .mapboxgl-ctrl-group {
+  background: rgb(var(--surface));
+  border: 1px solid rgb(var(--border-subtle) / 0.11);
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.pv-map .mapboxgl-ctrl-group button {
+  background-color: transparent;
+  color: rgb(var(--interactive));
+  transition: background-color 120ms ease;
+}
+
+/* Hover lifts the ground and leaves the orange alone — same rule as every other control. */
+.pv-map .mapboxgl-ctrl-group button:hover {
+  background-color: rgb(var(--surface-raised));
+}
+
+.pv-map .mapboxgl-ctrl-group button + button {
+  border-top: 1px solid rgb(var(--border-subtle) / 0.11);
+}
+
+.pv-map .mapboxgl-ctrl-group button:disabled .mapboxgl-ctrl-icon {
+  opacity: 0.3;
+}
+
+/* The zoom glyphs are `background-image` data URIs with Mapbox's dark fill baked in, so `color`
+ * cannot reach them and a filter would only approximate the hue. Replaced outright — a plus and
+ * a minus are cheap to draw. `%23` is `#`, escaped for the data URI. */
+.pv-map .mapboxgl-ctrl-group button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%23FF4901' d='M13.5 9.5h2v4h4v2h-4v4h-2v-4h-4v-2h4z'/%3E%3C/svg%3E") !important;
+}
+
+.pv-map .mapboxgl-ctrl-group button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%23FF4901' d='M9.5 13.5h10v2h-10z'/%3E%3C/svg%3E") !important;
+}
+
+/* The reset button is ours (`ResetIcon`), inline SVG on `currentColor`, so it inherits the
+ * button colour above and only needs a size — it ships without one. */
+.pv-map .mapboxgl-ctrl-group button svg {
+  width: 14px;
+  height: 14px;
+  fill: rgb(var(--interactive)) !important;
+  color: rgb(var(--interactive)) !important;
+}
+
+.pv-map .mapboxgl-ctrl-group button svg path {
+  fill: rgb(var(--interactive)) !important;
+}
+
+/* Attribution. Mapbox's own bar is a translucent white block with a rounded corner, which on
+ * this basemap is a bright card stuck to the bottom edge. No card at all: the text sits
+ * directly on the map at the muted weight, which is where an attribution belongs. It stays
+ * legible — that is a Mapbox terms requirement, not a preference — but it stops being an
+ * object. The logo alongside it keeps Mapbox's own mark untouched. */
+.pv-map .mapboxgl-ctrl-attrib {
+  background: none !important;
+  padding: 0 5px;
+}
+
+.pv-map .mapboxgl-ctrl-attrib.mapboxgl-compact {
+  min-height: 0;
+  border-radius: 0;
+}
+
+.pv-map .mapboxgl-ctrl-attrib-inner,
+.pv-map .mapboxgl-ctrl-attrib a {
+  color: rgb(var(--content-muted));
+  font-size: 10px;
+}
+
+.pv-map .mapboxgl-ctrl-attrib a:hover {
+  color: rgb(var(--content));
+  text-decoration: underline;
+}
+
+.pv-map .mapboxgl-ctrl-attrib-button {
+  display: none;
+}
+
+.up-arrow,
+.down-arrow {
   content: "";
   display: inline-block;
   height: 0;
@@ -45,12 +136,12 @@
 
 .up-arrow {
   border-width: 0 0.4rem 0.7rem;
-  border-bottom-color: theme('colors.ocf-delta.900');
+  border-bottom-color: theme("colors.ocf-delta.900");
 }
 
 .down-arrow {
   border-width: 0.7rem 0.4rem 0;
-  border-top-color: theme('colors.ocf-delta.100');
+  border-top-color: theme("colors.ocf-delta.100");
 }
 
 .chart-data-loading-message:hover .chart-data-loading-endpoints {
@@ -72,13 +163,13 @@
 }
 
 .toggle {
-  @apply inline-flex items-center relative w-4 h-2 rounded-full bg-ocf-yellow
-  border border-ocf-yellow/0 transition-all duration-100 ease-in-out delay-0 cursor-pointer
+  @apply inline-flex items-center relative w-4 h-2 rounded-full bg-interactive
+  border border-interactive/0 transition-all duration-100 ease-in-out delay-0 cursor-pointer
   bg-opacity-25 checked:bg-opacity-100 after:-ml-0.5 checked:after:ml-0 checked:after:-mr-1
-  checked:bg-none checked:text-ocf-yellow
+  checked:bg-none checked:text-interactive
   focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus:ring-transparent
   after:will-change-transform after:transition-all after:duration-200 after:ease-in-out after:inline-flex
-  after:content-[''] after:bg-white after:border-ocf-gray-300 after:border after:rounded-full after:h-2 after:w-2
+  after:content-[''] after:bg-white after:border-content after:border after:rounded-full after:h-2 after:w-2
   checked:after:translate-x-full checked:after:border-white;
 }
 
@@ -93,7 +184,7 @@
   height: 100%;
   padding: 0.25em 0.5em 0.25em 0.5em;
   background: transparent;
-  border: 1px solid #FF9736;
+  border: 1px solid #ff9736;
   border-radius: 0.25rem;
   cursor: pointer;
 }
@@ -130,7 +221,7 @@
 /* Works on Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: theme(colors.mapbox-black.700) theme(colors.mapbox-black.600);
+  scrollbar-color: theme(colors.surface.raised) theme(colors.surface.panel);
 }
 
 /* Works on Chrome, Edge, and Safari */
@@ -139,11 +230,11 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: theme(colors.mapbox-black.600);
+  background: theme(colors.surface.panel);
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: theme(colors.mapbox-black.700);
+  background-color: theme(colors.surface.raised);
   border-radius: 20px;
-  border: 3px solid theme(colors.mapbox-black.600);
+  border: 3px solid theme(colors.surface.panel);
 }

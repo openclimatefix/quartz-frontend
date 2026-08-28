@@ -1,0 +1,157 @@
+/*
+ * Colour tokens — see `docs/colour-rationalisation.md`.
+ *
+ * Three layers, each with one job:
+ *
+ *   1. BRAND     raw values from Brand Guidelines 2025. Never referenced by a component.
+ *   2. ROLES     what a colour is *for*. Themed — the `.theme-light` block below is the
+ *                whole of light mode.
+ *   3. DATA      series and scale colours. Deliberately NOT here: they live as literal
+ *                hex in `tailwind.config.js`, because Mapbox and Recharts read them
+ *                through `theme.extend.colors` at runtime and cannot resolve a CSS
+ *                variable. They also must not drift between light and dark — they encode
+ *                values, not surfaces.
+ *
+ * Dark is the default. Light is opt-in via `.theme-light` on <html>.
+ *
+ * Values are space-separated RGB channels, not hex, so Tailwind's `/opacity`
+ * modifier works on every role — `bg-surface-panel/80`, `border-edge/40`. The
+ * config wraps them as `rgb(var(--x) / <alpha-value>)`.
+ */
+
+:root {
+  /* ---- 1. Brand (Guidelines 2025, p4) ---------------------------------- */
+  --ocf-brand-orange: 255 73 1;
+  --ocf-brand-orange-light: 255 143 115;
+  --ocf-black-1: 41 43 43;
+  --ocf-black-2: 12 13 13;
+  --ocf-white: 255 255 255;
+  --ocf-grey-1: 255 251 245; /* "oat" — the website's paper */
+  --ocf-grey-2: 240 236 232;
+  --ocf-grey-3: 217 208 202;
+
+  /* ---- 1b. The neutral ramps ------------------------------------------- *
+   * The brand ships two blacks and three greys and nothing in between, which is not enough
+   * steps for nested panels and wells. These fill the gaps.
+   *
+   * They are interpolated along the brand's *own* line rather than invented: both brand
+   * blacks sit at exactly H=180 (a faint cool cast) and the greys at H=24–36 (warm), so the
+   * palette is a temperature gradient, not one neutral. `ink-1`/`ink-4` reproduce Black 2 and
+   * Black 1 exactly, and `paper-1`/`-2`/`-4` reproduce Grey 1/2/3 exactly — the derived stops
+   * are the ones between.
+   *
+   * Private to this file. Components never name an ink or a paper; they name a role below.
+   */
+  --ocf-ink-0: 6 7 7; /* L 2.5% */
+  --ocf-ink-1: var(--ocf-black-2); /* L 4.9%  — Black 2 */
+  --ocf-ink-2: 20 21 21; /* L 8%    */
+  --ocf-ink-3: 30 32 32; /* L 12%   — the missing step */
+  --ocf-ink-4: var(--ocf-black-1); /* L 16.5% — Black 1 */
+  --ocf-ink-5: 52 55 55; /* L 21%   */
+  --ocf-ink-6: 65 68 68; /* L 26%   */
+
+  --ocf-paper-0: var(--ocf-white);
+  --ocf-paper-1: var(--ocf-grey-1); /* L 98%   — Grey 1, "oat" */
+  --ocf-paper-2: var(--ocf-grey-2); /* L 92.5% — Grey 2 */
+  --ocf-paper-3: 228 221 216; /* L 87%   — the missing step */
+  --ocf-paper-4: var(--ocf-grey-3); /* L 82.2% — Grey 3 */
+
+  /* ---- 2. Roles — dark (default) --------------------------------------- *
+   * Depth order, deepest first: inset < DEFAULT / sunken < inner < panel < raised.
+   *
+   * The whole panel stack sits one step lower than it first did. Popovers have to be the
+   * topmost layer — a tooltip on `surface` was the app's darkest thing floating above its
+   * lightest, the same weight inversion the control trays had — and lifting them meant either
+   * making everything above them brighter or moving everything else down. Down keeps the
+   * contrast (each layer is still exactly one ink step from its neighbour) and keeps the
+   * dashboard dark, which is what it is for.
+   *
+   * It also puts both brand blacks back to work at the two ends of the stack: Black 2 is the
+   * floor and Black 1 is the lifted layer, with the derived steps in between.
+   *
+   * `sunken` lands on the floor and is currently unclaimed — the ink ramp has run out below
+   * `inner` the way paper runs out below Grey 3 in the light block. If something needs that
+   * step, the ramp extends rather than a value gets invented.
+   */
+  --surface-inset: var(--ocf-ink-0); /* deepest recess — "not applicable", and modal scrims */
+  --surface: var(--ocf-ink-1); /* the floor: the page behind the map — Black 2 */
+  --surface-sunken: var(--ocf-ink-1); /* unclaimed; the ramp has bottomed out, see below */
+  --surface-inner: var(--ocf-ink-2); /* a recess cut into a panel: plot well, control trays */
+  --surface-panel: var(--ocf-ink-3); /* floats above the map: cards, dock, rail, scrub bar */
+  --surface-raised: var(
+    --ocf-ink-4
+  ); /* lifted above a panel: popovers, hover, the selected control — Black 1 */
+
+  --content: var(--ocf-white);
+  --content-secondary: 200 200 200;
+  --content-muted: 169 169 169;
+
+  --border-subtle: 255 251 245;
+  --border-strong: 255 251 245;
+
+  /* Interactive. Under option (a) this is the *only* job orange has: "you can act on
+   * this". It never appears as a data series inside the dashboard. */
+  --interactive: var(--ocf-brand-orange);
+  --interactive-hover: var(--ocf-brand-orange-light);
+
+  /* Text sitting on --interactive or on a solar/wind fill. Dark in both themes, because
+   * the fill it sits on is the same colour in both themes. */
+  --content-on-accent: var(--ocf-black-2);
+
+  /* The plot interior. The chart is a panel cut into a card, and in dark that recess runs
+   * ink-3 with the night bands a half-step deeper at ink-2. Light cannot mirror that by
+   * borrowing `surface-sunken`/`surface-inner` — those land on the same paper — so the plot
+   * names its own three steps and each theme fills them from its own end of the ramp.
+   *
+   * `band-a` is the night half of the day/night banding and must be the deeper of the two;
+   * `band-b` sits level with the base, so the banding reads as one alternating tone rather
+   * than two. Both are painted at 0.3 alpha over the base by `remix-line`. */
+  --plot-base: var(--ocf-ink-2);
+  --plot-band-a: var(--ocf-ink-1);
+  --plot-band-b: var(--ocf-ink-2);
+
+  /* Status lamps. Warn is Visualisation Orange, deliberately NOT brand orange — brand
+   * orange means "interactive" and a warning lamp is not a control. */
+  --status-ok: 23 229 143;
+  --status-warn: 250 160 86;
+  --status-alert: 239 68 68;
+
+  /* Selection is a comparison between siblings, so it is carried by contrast plus a hairline
+   * edge, not by a saturated fill. Orange stays the accent but only as the edge — a selected
+   * control reads as "this one" without shouting as loudly as a button you can press. */
+  --selected: var(--ocf-white);
+  --selected-edge: var(--ocf-brand-orange);
+  /* How loud the selection edge is. This is the knob: 1 is a full-strength orange outline,
+   * 0 removes the accent entirely and lets the neutral fill carry selection on its own. */
+  --selected-edge-alpha: 0;
+}
+
+.theme-light {
+  /* The light end has fewer steps to give — the brand stops at Grey 3, where the dark end
+   * can keep going down. `sunken` and `inner` land on the same paper as a result; if light
+   * mode needs them apart, the ramp extends below Grey 3 rather than inventing a value. */
+  --surface-inset: var(--ocf-paper-4);
+  --surface: var(--ocf-paper-1);
+  --surface-sunken: var(--ocf-paper-3);
+  --surface-inner: var(--ocf-paper-3);
+  --surface-panel: var(--ocf-paper-2);
+  --surface-raised: var(--ocf-paper-0);
+
+  --content: 26 25 24;
+  --content-secondary: 74 69 65;
+  --content-muted: 124 116 109;
+
+  --border-subtle: 12 13 13;
+  --border-strong: 12 13 13;
+
+  --interactive-hover: 224 61 0;
+  --selected: 26 25 24;
+
+  /* Oat for the plot floor, Grey 3 for the night bands. The card around it is Grey 2, so
+   * the well is *lighter* than the card here where in dark it is darker — paper runs out
+   * below Grey 3, and a plot area you read fine detail on wants to be the brightest thing
+   * on the page rather than the dimmest. */
+  --plot-base: var(--ocf-paper-1);
+  --plot-band-a: var(--ocf-paper-4);
+  --plot-band-b: var(--ocf-paper-1);
+}
