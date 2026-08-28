@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chart legend options</title>
+<style>
+  :root {
+    --shell: #101111;
+    --panel: #1d1e1e;
+    --panel-2: #262727;
+    --rail: #343332;
+    --line: rgba(255,255,255,.10);
+    --text: #f5f5f5;
+    --dim: #ACACAC;
+    --dimmer: #747474;
+    --yellow: #FFD053;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--shell); color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 24px 96px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; }
+  .sub { color: var(--dim); margin: 0 0 4px; max-width: 70ch; }
+  .scenario {
+    margin: 20px 0 0; padding: 12px 14px; border: 1px solid var(--line);
+    border-left: 3px solid var(--yellow); border-radius: 6px; background: var(--panel);
+    color: var(--dim); font-size: 13px; max-width: 80ch;
+  }
+  .scenario b { color: var(--text); font-weight: 600; }
+
+  /* controls */
+  .controls {
+    position: sticky; top: 0; z-index: 30; margin: 24px 0 8px; padding: 12px 0;
+    background: linear-gradient(var(--shell) 78%, transparent);
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  .ctrl {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); border-radius: 999px;
+    padding: 6px 13px 6px 10px; font-size: 12px; color: var(--dim);
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+    user-select: none;
+  }
+  .ctrl:hover { color: var(--text); border-color: rgba(255,255,255,.25); }
+  .ctrl input { display: none; }
+  .pip { width: 26px; height: 14px; border-radius: 999px; background: #4a4a4a; position: relative; flex: none; transition: background .15s; }
+  .pip::after { content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px; border-radius: 50%; background: #cfcfcf; transition: transform .15s, background .15s; }
+  .ctrl input:checked + .pip { background: var(--yellow); }
+  .ctrl input:checked + .pip::after { transform: translateX(12px); background: #14120E; }
+  .ctrl input:checked ~ span { color: var(--text); }
+  .hint { color: var(--dimmer); font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  /* option cards */
+  .opt { margin: 40px 0 0; }
+  .opt-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .opt-head h2 { font-size: 17px; margin: 0; font-weight: 700; }
+  .tag { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); }
+  .tag.rec { border-color: var(--yellow); color: var(--yellow); }
+  .opt-note { color: var(--dim); font-size: 13px; margin: 0 0 14px; max-width: 78ch; }
+  .verdict { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; font-size: 12.5px; }
+  .verdict div { flex: 1 1 260px; color: var(--dim); }
+  .verdict b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 2px; }
+  .verdict .for b { color: #7ad6a1; }
+  .verdict .against b { color: #f0876a; }
+
+  /* the fake app */
+  .stage { display: flex; gap: 0; align-items: stretch; }
+  .stage.narrow .app { max-width: 560px; }
+  .app {
+    flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--panel); overflow: hidden; display: flex; flex-direction: column;
+    position: relative;
+  }
+  /* chart header, mirrors forecast-header */
+  .chdr { display: flex; align-items: center; gap: 14px; padding: 9px 12px 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .cpick { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; font-size: 11px; font-weight: 700; letter-spacing: .05em; }
+  .cpick span { padding: 3px 8px; color: var(--dimmer); }
+  .cpick span.on { background: var(--yellow); color: #14120E; }
+  .title { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .figs { margin-left: auto; display: flex; gap: 16px; align-items: baseline; font-variant-numeric: tabular-nums; }
+  .fig { font-size: 12px; color: var(--dimmer); }
+  .fig b { color: var(--text); font-size: 15px; font-weight: 700; margin-right: 3px; }
+  .fig .t { color: var(--dim); }
+
+  .plotwrap { position: relative; }
+  svg.plot { display: block; width: 100%; height: auto; }
+  .xaxis { display: flex; justify-content: space-between; padding: 2px 12px 8px; font-size: 10px; color: var(--dimmer); font-variant-numeric: tabular-nums; }
+
+  /* legend chips (A / B / D) */
+  .key { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .05em; font-weight: 700; color: #d8d8d8; white-space: nowrap; }
+  .sw { width: 18px; height: 0; border-top-width: 2.5px; border-top-style: solid; flex: none; }
+  .sw.dash { border-top-style: dashed; }
+  .sw.area { height: 9px; border-top: none; border-radius: 2px; opacity: .35; }
+  .keyrow-a { padding: 6px 12px 7px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.02); }
+
+  /* B tray */
+  .tray { border-top: 1px solid var(--line); background: rgba(255,255,255,.03); }
+  .tray-head { display: flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); cursor: pointer; font-weight: 700; }
+  .tray-body { padding: 0 12px 8px; }
+  .chipB {
+    position: absolute; right: 10px; bottom: 34px; z-index: 5;
+    display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+    font-size: 10px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700;
+    color: var(--dim); background: rgba(20,20,20,.9); border: 1px solid var(--line);
+    border-radius: 4px; padding: 3px 8px;
+  }
+  .chipB:hover { color: var(--text); }
+
+  /* rail (E) */
+  .rail { width: 208px; flex: none; border: 1px solid var(--line); border-left: none; background: var(--rail); padding: 10px 12px; }
+  .rail h4 { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--dimmer); margin: 0 0 8px; font-weight: 700; }
+  .railrow { display: flex; align-items: center; gap: 7px; padding: 3px 0; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+  .railrow .lbl { flex: 1; }
+  .railrow.off .lbl { color: var(--dimmer); font-weight: 500; }
+  .tg { width: 22px; height: 12px; border-radius: 999px; background: #555; position: relative; flex: none; }
+  .tg::after { content:""; position: absolute; top: 2px; left: 2px; width: 8px; height: 8px; border-radius: 50%; background: #bbb; }
+  .tg.on { background: var(--yellow); }
+  .tg.on::after { transform: translateX(10px); background: #14120E; }
+  .railtab { width: 22px; flex: none; border: 1px solid var(--line); border-left: none; border-radius: 0 8px 8px 0; background: var(--rail); color: var(--dimmer); display: flex; align-items: flex-start; justify-content: center; padding-top: 12px; font-size: 11px; }
+
+  /* C direct labels rendered in svg */
+  .cursor-note { position: absolute; font-size: 10px; color: var(--dimmer); }
+  .footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--dim); font-size: 13px; }
+  .footer h3 { color: var(--text); font-size: 15px; margin: 0 0 8px; }
+  .footer li { margin-bottom: 6px; }
+  code { background: var(--panel-2); padding: 1px 5px; border-radius: 3px; font-size: 12px; color: #e8d9a8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Chart legend — the five options, drawn</h1>
+  <p class="sub">Each option below is the same chart, same data, same moment. Only the key treatment changes. Everything names <em>drawn series only</em>, as the doc argues.</p>
+
+  <div class="scenario">
+    <b>Scenario:</b> GB focused, forecast view (no comparison), cursor at Tue 12:00, default series on — Current, 4&nbsp;Hour, PV&nbsp;Live Estimated, PV&nbsp;Live Updated, Seasonal mean. Five entries. This is what a new user actually sees.
+  </div>
+
+  <div class="controls">
+    <label class="ctrl"><input type="checkbox" id="nine"><span class="pip"></span><span>Nine entries (worst case)</span></label>
+    <label class="ctrl"><input type="checkbox" id="narrow"><span class="pip"></span><span>Narrow chart</span></label>
+    <label class="ctrl"><input type="checkbox" id="dash"><span class="pip"></span><span>Dashboard mode</span></label>
+    <span class="hint">Toggles apply to every option at once, so you can compare like for like.</span>
+  </div>
+
+  <div id="options"></div>
+
+  <div class="footer">
+    <h3>The three open questions, as you'd have to answer them</h3>
+    <ul>
+      <li><b>Dashboard mode</b> — flip the toggle above. A/B/D vanish with the rail; C keeps its labels because they're part of the plot, not chrome. That asymmetry is the strongest argument C has.</li>
+      <li><b>Clickable chips?</b> — the mock draws them inert. Toggle <em>Nine entries</em> to see what "clickable" would have to grow into.</li>
+      <li><b>Delta view</b> — not drawn here; its series set is smaller, so A costs it proportionally more chart height.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// Series definitions — colours lifted from remix-line.tsx / tailwind.config.js
+// ---------------------------------------------------------------------------
+const SERIES = [
+  { key: "FORECAST",         label: "Current",           color: "#FFD053", style: "solid",  w: 2.4, base: 1.00, off:  0.00, always: true },
+  { key: "N_HOUR",           label: "4 Hour",            color: "#FF9736", style: "dash",   w: 2.0, base: 0.94, off:  0.03, always: true },
+  { key: "GENERATION",       label: "PV Live Estimated", color: "#FFFFFF", style: "dash",   w: 1.6, base: 1.03, off: -0.02, always: true, cutoff: 0.30 },
+  { key: "GENERATION_UPD",   label: "PV Live Updated",   color: "#FFFFFF", style: "solid",  w: 2.0, base: 1.00, off:  0.00, always: true, cutoff: 0.28 },
+  { key: "SEASONAL_MEAN",    label: "Seasonal mean",     color: "#ffdfd1", style: "solid",  w: 1.8, base: 0.72, off:  0.00, always: true },
+  { key: "SEASONAL_BOUNDS",  label: "Seasonal quantiles",color: "#ffdfd1", style: "area",   w: 0,   base: 0.72, off:  0.00 },
+  { key: "ECMWF",            label: "ECMWF only",        color: "#70C2B6", style: "solid",  w: 2.0, base: 0.88, off:  0.06 },
+  { key: "MET_OFFICE",       label: "Met Office only",   color: "#B9D532", style: "solid",  w: 2.0, base: 1.09, off: -0.04 },
+  { key: "SAT",              label: "Satellite only",    color: "#FFF1CD", style: "solid",  w: 1.6, base: 0.96, off:  0.09 }
+];
+
+const W = 900, H = 250, PAD = { l: 34, r: 14, t: 12, b: 8 };
+const N = 96; // half-hourly, two days
+
+// A solar day: two humps, dead flat overnight. Deliberately piles the lines up at zero,
+// which is the collision case option C has to survive.
+function curve(s, seed) {
+  const pts = [];
+  for (let i = 0; i < N; i++) {
+    const hour = (i / N) * 48;             // 0..48h
+    const dayPhase = ((hour % 24) - 6) / 12; // 0 at 06:00, 1 at 18:00
+    let v = 0;
+    if (dayPhase > 0 && dayPhase < 1) {
+      v = Math.sin(dayPhase * Math.PI);
+      v = Math.pow(v, 1.35);
+      // cloud wobble, per-series so lines separate in daylight only
+      v *= 1 + 0.10 * Math.sin(hour * 1.7 + seed * 2.1) + 0.05 * Math.sin(hour * 3.3 + seed);
+      const dayScale = hour < 24 ? 1.0 : 0.86;   // day two a bit hazier
+      v *= dayScale;
+    }
+    const spread = v > 0.02 ? s.off * v * 2.2 : 0;   // divergence scales with output
+    pts.push(Math.max(0, (v * s.base + spread)) * 9.4);
+  }
+  return pts;
+}
+
+const x = i => PAD.l + (i / (N - 1)) * (W - PAD.l - PAD.r);
+const y = v => PAD.t + (1 - v / 11.5) * (H - PAD.t - PAD.b);
+const path = pts => pts.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
+
+const CURSOR = 24; // Tue 12:00 in this grid (index = hour * 2)
+const NOW = 27;    // "now" sits just past the cursor, ~Tue 13:30
+
+function seriesFor(nine) {
+  return SERIES.filter(s => nine ? true : s.always);
+}
+
+function plotSVG(list, opts = {}) {
+  const { directLabels = false } = opts;
+  let g = "";
+  // grid + y labels
+  for (let v = 0; v <= 10; v += 2.5) {
+    g += `<line x1="${PAD.l}" x2="${W - PAD.r}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.07)" stroke-width="1"/>`;
+    g += `<text x="${PAD.l - 6}" y="${y(v) + 3}" fill="#747474" font-size="9" text-anchor="end">${v}</text>`;
+  }
+  // night shading
+  [[0, 12], [36, 60], [84, 95]].forEach(([a, b]) => {
+    g += `<rect x="${x(a)}" y="${PAD.t}" width="${x(b) - x(a)}" height="${H - PAD.t - PAD.b}" fill="rgba(0,0,0,.22)"/>`;
+  });
+
+  const drawn = [];
+  list.forEach((s, idx) => {
+    const pts = curve(s, idx + 1);
+    if (s.style === "area") {
+      const up = pts.map(v => v * 1.34), dn = pts.map(v => v * 0.66);
+      const d = up.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ")
+        + " " + dn.map((v, i) => "L" + x(N - 1 - i).toFixed(1) + " " + y(dn[N - 1 - i]).toFixed(1)).join(" ") + " Z";
+      g += `<path d="${d}" fill="${s.color}" opacity=".16"/>`;
+      return;
+    }
+    // observers stop at "now"
+    const end = s.cutoff ? Math.floor(N * s.cutoff) : N - 1;
+    const cut = pts.slice(0, end + 1);
+    g += `<path d="${path(cut)}" fill="none" stroke="${s.color}" stroke-width="${s.w}"`
+      + (s.style === "dash" ? ` stroke-dasharray="5 4"` : ``) + ` stroke-linejoin="round"/>`;
+    drawn.push({ s, endIdx: end, endVal: cut[end] });
+  });
+
+  // "now" line
+  g += `<line x1="${x(NOW)}" x2="${x(NOW)}" y1="${PAD.t}" y2="${H - PAD.b}" stroke="#fff" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>`;
+  // cursor
+  g += `<line x1="${x(CURSOR)}" x2="${x(CURSOR)}" y1="${PAD.t}" y2="${H - PAD.b}" stroke="#fff" stroke-width="1.5" opacity=".8"/>`;
+  g += `<rect x="${x(CURSOR) - 24}" y="${PAD.t}" width="48" height="16" fill="#fff"/>`;
+  g += `<text x="${x(CURSOR)}" y="${PAD.t + 12}" fill="#14120E" font-size="10" font-weight="700" text-anchor="middle">12:00</text>`;
+
+  if (directLabels) g += directLabelLayer(drawn);
+
+  const vb = directLabels ? `0 0 ${W + 128} ${H}` : `0 0 ${W} ${H}`;
+  return `<svg class="plot" viewBox="${vb}" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+}
+
+// Option C: label each line where that line actually ends — forecasts at the right edge,
+// observers at "now" — then nudge apart only labels that are horizontally near each other.
+function directLabelLayer(drawn) {
+  const MIN = 13, NEAR = 110;
+  let items = drawn.map(d => ({
+    label: d.s.label, color: d.s.color,
+    ax: x(d.endIdx), ay: y(d.endVal), ty: y(d.endVal)
+  })).sort((a, b) => a.ty - b.ty);
+
+  for (let pass = 0; pass < 80; pass++) {
+    for (let i = 1; i < items.length; i++) {
+      const a = items[i - 1], b = items[i];
+      if (Math.abs(a.ax - b.ax) > NEAR) continue;   // far apart horizontally, no collision
+      const gap = b.ty - a.ty;
+      if (gap < MIN) { const push = (MIN - gap) / 2; a.ty -= push; b.ty += push; }
+    }
+    items.forEach(it => { it.ty = Math.min(Math.max(it.ty, PAD.t + 20), H - PAD.b - 4); });
+  }
+
+  let g = "";
+  items.forEach(it => {
+    const lx = it.ax + 5, tx = lx + 12;
+    if (Math.abs(it.ty - it.ay) > 2) {
+      g += `<path d="M${it.ax} ${it.ay} L${lx + 2} ${it.ty}" stroke="${it.color}" stroke-width="1" opacity=".45" fill="none"/>`;
+    }
+    g += `<line x1="${lx}" x2="${lx + 9}" y1="${it.ty}" y2="${it.ty}" stroke="${it.color}" stroke-width="2.5"/>`;
+    g += `<text x="${tx}" y="${it.ty + 3.5}" fill="${it.color}" font-size="10" font-weight="700" letter-spacing=".5">${it.label.toUpperCase()}</text>`;
+  });
+  return g;
+}
+
+function chips(list) {
+  return `<div class="key">` + list.map(s => {
+    const cls = s.style === "area" ? "sw area" : (s.style === "dash" ? "sw dash" : "sw");
+    const st = s.style === "area" ? `background:${s.color}` : `border-top-color:${s.color}`;
+    return `<span class="chip"><span class="${cls}" style="${st}"></span>${s.label}</span>`;
+  }).join("") + `</div>`;
+}
+
+function header() {
+  return `<div class="chdr">
+    <div class="cpick"><span class="on">GB</span><span>NL</span></div>
+    <div class="title">National</div>
+    <div class="figs">
+      <div class="fig"><b>8.4</b>/ 9.1 GW <span class="t">&nbsp;12:00</span></div>
+      <div class="fig"><b>9.1</b>GW <span class="t">&nbsp;12:30</span></div>
+    </div>
+  </div>`;
+}
+const xaxis = `<div class="xaxis"><span>Tue 00:00</span><span>Tue 06:00</span><span>Tue 12:00</span><span>Tue 18:00</span><span>Wed 00:00</span><span>Wed 06:00</span><span>Wed 12:00</span><span>Wed 18:00</span></div>`;
+
+// ---------------------------------------------------------------------------
+const OPTIONS = [
+  {
+    id: "A", title: "A — a strip in the chart header", tag: "recommended in the doc", rec: true,
+    note: "One row of swatch+label chips, in the chart's own header under the title and figures. Always there, nothing to learn, nothing to remember.",
+    for: "Always there, no interaction to learn, no state to remember. Reads as part of the instrument.",
+    against: "Costs a permanent row of chart height (~18px), and at nine entries on a narrow chart it wraps to two rows — worst case exactly when the plot area is smallest.",
+    render: (list, st) => `<div class="stage${st.narrow ? " narrow" : ""}"><div class="app">
+      ${header()}
+      ${st.dash ? "" : `<div class="keyrow-a">${chips(list)}</div>`}
+      <div class="plotwrap">${plotSVG(list)}</div>${xaxis}
+    </div>${railTab(st)}</div>`
+  },
+  {
+    id: "B", title: "B — a collapsible tray on the bottom edge", tag: "",
+    note: "Same content, but it collapses to a single ▸ Key chip in the corner, remembered in a cookie. Click the tray header or the chip in the mock to see both states.",
+    for: "Literally answers the ask — there until dismissed, then gone to a 40px chip.",
+    against: "A second collapsible thing on a screen that already has a collapsible rail and a resizable chart. Three disclosure mechanisms is a lot of vocabulary for one screen.",
+    render: (list, st, state) => {
+      const open = state.bOpen !== false && !st.dash;
+      return `<div class="stage${st.narrow ? " narrow" : ""}"><div class="app">
+        ${header()}
+        <div class="plotwrap">${plotSVG(list)}
+          ${open ? "" : `<span class="chipB" data-act="bOpen">&#9656; Key</span>`}
+        </div>
+        ${open ? `<div class="tray"><div class="tray-head" data-act="bClose">&#9662; Key</div><div class="tray-body">${chips(list)}</div></div>` : ""}
+        ${xaxis}
+      </div>${railTab(st)}</div>`;
+    }
+  },
+  {
+    id: "C", title: "C — direct labels on the lines", tag: "best dataviz answer",
+    note: "No legend at all. Each series is named at its right-hand end, in the series colour, on the plot. The leader lines show the nudging the real implementation would need — turn on nine entries to see how hard it has to work.",
+    for: "Abolishes the lookup rather than housing it, costs zero chrome, and scales down automatically — a hidden line has no label. Survives dashboard mode.",
+    against: "Collision avoidance is the whole job. GB's lines converge at zero overnight and the right edge is the widest spread. Also fights the hover tooltip for the same pixels.",
+    render: (list, st) => `<div class="stage${st.narrow ? " narrow" : ""}"><div class="app">
+      ${header()}
+      <div class="plotwrap">${plotSVG(list, { directLabels: true })}</div>${xaxis}
+    </div>${railTab(st)}</div>`
+  },
+  {
+    id: "D", title: "D — expanded first, then it gets out of the way", tag: "A + behaviour",
+    note: "Option A, but the row auto-collapses to a chip after the first scrub/drag/toggle or ~10s, remembered thereafter. Press Replay to watch it happen.",
+    for: "The closest reading of \"starts off there so I know what things are\" — teaches once, then stops charging you for it.",
+    against: "Chrome that moves on its own is what users report as \"it disappeared and I don't know why\". On a wall display it would collapse for nobody and stay collapsed.",
+    render: (list, st, state) => {
+      const shown = state.dShown !== false && !st.dash;
+      return `<div class="stage${st.narrow ? " narrow" : ""}"><div class="app">
+        ${header()}
+        ${shown ? `<div class="keyrow-a" style="transition:opacity .4s">${chips(list)}</div>` : ""}
+        <div class="plotwrap">${plotSVG(list)}
+          ${shown ? "" : `<span class="chipB" style="bottom:auto;top:8px" data-act="dReplay">&#9656; Key</span>`}
+        </div>${xaxis}
+      </div>${railTab(st)}</div>
+      <div style="margin-top:8px"><span class="ctrl" data-act="dReplay" style="cursor:pointer"><span class="pip" style="background:#4a4a4a"></span><span>Replay first-visit behaviour</span></span></div>`;
+    }
+  },
+  {
+    id: "E", title: "E — just open the rail by default", tag: "the honest baseline",
+    note: "Zero new code: flip displayPanelOpen to start true. Note it shows all nine as controls including the ones that are off, and takes permanent horizontal space away from the plot.",
+    for: "Free, today.",
+    against: "Costs permanent horizontal space, shows all nine entries as controls including the off ones, and is explicitly not what was asked for.",
+    render: (list, st) => {
+      const on = new Set(list.map(s => s.key));
+      const rows = SERIES.map(s => `<div class="railrow${on.has(s.key) ? "" : " off"}">
+        <span class="${s.style === "area" ? "sw area" : (s.style === "dash" ? "sw dash" : "sw")}" style="${s.style === "area" ? `background:${s.color}` : `border-top-color:${s.color}`}"></span>
+        <span class="lbl">${s.label}</span><span class="tg${on.has(s.key) ? " on" : ""}"></span></div>`).join("");
+      return `<div class="stage${st.narrow ? " narrow" : ""}"><div class="app">
+        ${header()}
+        <div class="plotwrap">${plotSVG(list)}</div>${xaxis}
+      </div>${st.dash ? railTab(st) : `<div class="rail"><h4>Display</h4>${rows}</div>`}</div>`;
+    }
+  }
+];
+
+function railTab(st) {
+  return st.dash ? "" : `<div class="railtab">&#8249;</div>`;
+}
+
+const state = { bOpen: true, dShown: true };
+let dTimer = null;
+
+function render() {
+  const st = {
+    nine: document.getElementById("nine").checked,
+    narrow: document.getElementById("narrow").checked,
+    dash: document.getElementById("dash").checked
+  };
+  const list = seriesFor(st.nine);
+  document.getElementById("options").innerHTML = OPTIONS.map(o => `
+    <section class="opt">
+      <div class="opt-head"><h2>${o.title}</h2>${o.tag ? `<span class="tag${o.rec ? " rec" : ""}">${o.tag}</span>` : ""}</div>
+      <p class="opt-note">${o.note}</p>
+      ${o.render(list, st, state)}
+      <div class="verdict">
+        <div class="for"><b>For</b>${o.for}</div>
+        <div class="against"><b>Against</b>${o.against}</div>
+      </div>
+    </section>`).join("");
+}
+
+document.addEventListener("change", e => {
+  if (e.target.closest(".controls")) render();
+});
+document.addEventListener("click", e => {
+  const act = e.target.closest("[data-act]");
+  if (!act) return;
+  const a = act.dataset.act;
+  if (a === "bOpen") state.bOpen = true;
+  if (a === "bClose") state.bOpen = false;
+  if (a === "dReplay") {
+    state.dShown = true;
+    clearTimeout(dTimer);
+    dTimer = setTimeout(() => { state.dShown = false; render(); }, 3500);
+  }
+  render();
+});
+
+render();
+// Option D demonstrates itself once on load.
+dTimer = setTimeout(() => { state.dShown = false; render(); }, 6000);
+</script>
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Orange / yellow options</title>
+<style>
+  @font-face {
+    font-family: "Matter XH"; font-weight: 300; font-style: normal; font-display: swap;
+    src: url("../../apps/nowcasting-app/fonts/MatterXHLight.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Matter XH"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("../../apps/nowcasting-app/fonts/MatterXHRegular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Matter XH"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("../../apps/nowcasting-app/fonts/MatterXHMedium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Matter Semi Mono"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("../../apps/nowcasting-app/fonts/MatterSemiMonoRegular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Matter Semi Mono"; font-weight: 500; font-style: normal; font-display: swap;
+    src: url("../../apps/nowcasting-app/fonts/MatterSemiMonoMedium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Pangram Sans"; font-weight: 400; font-style: normal; font-display: swap;
+    src: url("../../apps/nowcasting-app/fonts/PPPangramSansRounded-CompactRegular.woff2") format("woff2");
+  }
+
+  :root {
+    /* Brand — Guidelines 2025 p4 */
+    --brand-orange: #FF4901;
+    --brand-orange-light: #FF8F73;
+    --black-1: #292B2B;
+    --black-2: #0C0D0D;
+    --grey-1: #FFFBF5;
+    --grey-2: #F0ECE8;
+    --grey-3: #D9D0CA;
+
+    /* Visualisation — p6. Solar + wind per Brad, 2026-08-26 */
+    --vis-yellow: #FFD480;
+    --vis-yellow-light: #FFE9BC;
+    --vis-sky: #65B0C9;
+    --vis-sky-light: #A3D6E0;
+
+    /* Derived dark neutrals — the gap the brand does not fill. Warm-tinted to
+       sit with the warm light greys rather than reading as a different product. */
+    --dark-raised: #343332;
+    --dark-line: rgba(255, 251, 245, .11);
+    --dark-text: #FBF8F4;
+    --dark-dim: #B4AEA8;
+    --dark-dimmer: #7C7671;
+
+    --page: #131414;
+    --card: #1B1C1C;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--dark-text);
+    font-family: "Matter XH", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size: 14px; line-height: 1.55; font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 40px 24px 120px; }
+
+  h1 { font-size: 30px; font-weight: 400; margin: 0 0 8px; letter-spacing: -.01em; }
+  .lede { color: var(--dark-dim); margin: 0 0 24px; max-width: 74ch; }
+  h2 {
+    font-size: 19px; font-weight: 500; margin: 0 0 4px; letter-spacing: -.005em;
+    display: flex; align-items: baseline; gap: 10px;
+  }
+  h2 .tag {
+    font-family: "Matter Semi Mono", ui-monospace, monospace; font-size: 10px;
+    text-transform: uppercase; letter-spacing: .09em; padding: 3px 8px; border-radius: 999px;
+    background: rgba(255,251,245,.08); color: var(--dark-dim); font-weight: 400;
+  }
+  h2 .tag.rec { background: rgba(255,73,1,.16); color: var(--brand-orange-light); }
+  h3 {
+    font-family: "Matter Semi Mono", ui-monospace, monospace;
+    font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--dark-dimmer); margin: 0 0 10px;
+  }
+
+  .scenario {
+    margin: 0 0 34px; padding: 13px 15px; border: 1px solid var(--dark-line);
+    border-left: 3px solid var(--vis-yellow); border-radius: 7px; background: var(--card);
+    color: var(--dark-dim); font-size: 13.5px;
+  }
+  .scenario b { color: var(--dark-text); font-weight: 500; }
+
+  .opt { margin: 0 0 52px; }
+  .opt > p.why { color: var(--dark-dim); margin: 0 0 16px; max-width: 78ch; }
+  .opt > p.why b { color: var(--dark-text); font-weight: 500; }
+
+  /* ---- the app fragment ---- */
+  .app {
+    border: 1px solid var(--dark-line); border-radius: 10px; overflow: hidden;
+    background: var(--black-2);
+  }
+  .topbar {
+    height: 52px; background: var(--black-2); display: flex; align-items: center;
+    padding: 0 14px; gap: 22px; border-bottom: 1px solid var(--dark-line);
+  }
+  .logo {
+    font-family: "Matter Semi Mono", monospace; font-weight: 500; font-size: 12px;
+    letter-spacing: .04em; color: var(--brand-orange); white-space: nowrap;
+  }
+  .nav { display: flex; gap: 20px; font-size: 12.5px; color: var(--dark-dim); }
+  .nav .cur { position: relative; color: var(--dark-text); }
+  .nav .cur::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -17px; height: 2px;
+    background: var(--nav-accent, var(--brand-orange));
+  }
+  .topbar .spacer { flex: 1; }
+  .toggle {
+    display: flex; border: 1px solid var(--dark-line); border-radius: 6px; overflow: hidden;
+    font-family: "Matter Semi Mono", monospace; font-size: 10.5px; letter-spacing: .05em;
+  }
+  .toggle span { padding: 5px 11px; color: var(--dark-dim); }
+  .toggle span.on { background: var(--toggle-accent, var(--brand-orange)); color: var(--toggle-fg, var(--black-2)); font-weight: 500; }
+  .avatar {
+    width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center;
+    background: var(--avatar-bg, var(--brand-orange)); color: var(--avatar-fg, var(--black-2));
+    font-size: 11px; font-weight: 500;
+  }
+
+  .body { display: grid; grid-template-columns: 224px 1fr; }
+  .rail { background: var(--black-1); padding: 14px; border-right: 1px solid var(--dark-line); }
+
+  .kpi { margin-bottom: 13px; }
+  .kpi .lbl {
+    font-family: "Matter Semi Mono", monospace; font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--dark-dimmer);
+  }
+  .kpi .val {
+    font-family: "Pangram Sans", ui-sans-serif, sans-serif; font-size: 30px; line-height: 1.08;
+    letter-spacing: -.015em;
+  }
+  .kpi .val .u { font-size: 13px; color: var(--dark-dim); margin-left: 3px; letter-spacing: 0; }
+  .kpi.solar .val { color: var(--vis-yellow); }
+  .kpi.wind .val { color: var(--vis-sky); }
+  .kpi.plain .val { color: var(--dark-text); }
+
+  .btn {
+    display: inline-block; padding: 6px 13px; border-radius: 6px; font-size: 12.5px;
+    font-weight: 500; cursor: default;
+    background: var(--btn-bg, var(--brand-orange)); color: var(--btn-fg, var(--black-2));
+  }
+  .btn.ghost {
+    background: transparent; color: var(--btn-bg, var(--brand-orange));
+    border: 1px solid var(--btn-bg, var(--brand-orange));
+  }
+  a.lnk { color: var(--btn-bg, var(--brand-orange)); text-decoration: none; font-size: 12.5px; border-bottom: 1px solid currentColor; }
+
+  .main { padding: 15px 17px 18px; }
+  .charthead { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .charthead .t { font-size: 14px; font-weight: 500; }
+  .charthead .spacer { flex: 1; }
+
+  .legend { display: flex; gap: 15px; font-size: 11.5px; color: var(--dark-dim); flex-wrap: wrap; }
+  .legend i { display: inline-block; width: 13px; height: 3px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+
+  .maprow { display: flex; align-items: center; gap: 13px; margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--dark-line); }
+  .ramp { display: flex; }
+  .ramp b { display: block; width: 21px; height: 11px; }
+  .ramp b:first-child { border-radius: 2px 0 0 2px; }
+  .ramp b:last-child { border-radius: 0 2px 2px 0; }
+  .rampcap { font-family: "Matter Semi Mono", monospace; font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--dark-dimmer); }
+
+  .note {
+    margin-top: 13px; font-size: 12.5px; color: var(--dark-dim);
+    display: flex; gap: 9px; align-items: flex-start;
+  }
+  .note .k {
+    flex: none; font-family: "Matter Semi Mono", monospace; font-size: 9.5px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--dark-dimmer); padding-top: 2px; width: 68px;
+  }
+
+  /* ---- light mode strip ---- */
+  .light {
+    --dark-text: #1A1918; --dark-dim: #6B645E; --dark-dimmer: #948C85;
+    --dark-line: rgba(12,13,13,.13); --black-2: var(--grey-1); --black-1: var(--grey-2);
+  }
+  .light .app { background: var(--grey-1); }
+  .light .topbar, .light .rail { background: var(--grey-1); }
+  .light .rail { background: var(--grey-2); }
+
+  table.vals { border-collapse: collapse; font-size: 12.5px; margin-top: 6px; }
+  table.vals td { padding: 3px 14px 3px 0; color: var(--dark-dim); }
+  table.vals td.h { font-family: "Matter Semi Mono", monospace; font-size: 11px; color: var(--dark-text); }
+  table.vals i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Orange / yellow — three ways</h1>
+  <p class="lede">
+    Same fragment three times, changing only what wears Brand Orange <code>#FF4901</code>.
+    Solar is Visualisation Yellow <code>#FFD480</code> and wind is Visualisation Sky Blue
+    <code>#65B0C9</code> throughout, per your call. Type is real Matter&nbsp;XH / Semi&nbsp;Mono /
+    Pangram Sans, capped at Medium — so this also shows the de-faux-bolded weights.
+  </p>
+
+  <div class="scenario">
+    <b>Scenario:</b> GB, Tuesday 12:00, forecast view, no comparison. Solar is past its
+    morning climb and near peak; the 4-hour-ahead figure is for 16:00, so it is <em>lower</em>,
+    not higher. Wind is steady through the afternoon. Same five series as the legend mock —
+    Current, 4&nbsp;Hour, PV&nbsp;Live Estimated, PV&nbsp;Live Updated, Seasonal mean.
+    <table class="vals">
+      <tr><td class="h">Solar now</td><td><i style="background:#FFD480"></i>4,820 MW</td>
+          <td class="h">Solar 16:00</td><td>2,310 MW</td></tr>
+      <tr><td class="h">Wind now</td><td><i style="background:#65B0C9"></i>8,430 MW</td>
+          <td class="h">PV Live est.</td><td>4,760 MW</td></tr>
+    </table>
+  </div>
+
+  <!-- ============================ OPTION A ============================ -->
+  <div class="opt">
+    <h2>A — orange is interactive, and nothing else <span class="tag rec">my pick</span></h2>
+    <p class="why">
+      Orange never appears as data. It means one thing everywhere: <b>you can act on this</b> —
+      current nav, the country toggle, buttons, links, focus. Series colour comes entirely from
+      the visualisation family. Since you've said the electric Data palette is for standalone
+      comparison charts, <b>this collision simply doesn't arise inside the dashboard</b>.
+    </p>
+    <div class="app">
+      <div class="topbar">
+        <span class="logo">&lt;&gt;&lt;&lt; OPEN CLIMATE FIX</span>
+        <nav class="nav"><span class="cur">Forecast</span><span>Solar Sites</span><span>Docs</span></nav>
+        <span class="spacer"></span>
+        <span class="toggle"><span class="on">GB</span><span>NL</span></span>
+        <span class="avatar">BF</span>
+      </div>
+      <div class="body">
+        <div class="rail">
+          <h3>Now · 12:00</h3>
+          <div class="kpi solar"><div class="lbl">Solar</div><div class="val">4,820<span class="u">MW</span></div></div>
+          <div class="kpi wind"><div class="lbl">Wind</div><div class="val">8,430<span class="u">MW</span></div></div>
+          <div class="kpi plain"><div class="lbl">Solar 16:00</div><div class="val">2,310<span class="u">MW</span></div></div>
+          <div style="margin-top:16px"><span class="btn">Export CSV</span></div>
+          <div style="margin-top:9px"><a class="lnk" href="#">Data sources</a></div>
+        </div>
+        <div class="main">
+          <div class="charthead">
+            <span class="t">GB solar generation</span>
+            <span class="spacer"></span>
+            <span class="btn ghost">Add comparison</span>
+          </div>
+          <svg viewBox="0 0 700 190" width="100%" height="190" role="img" aria-label="Solar and wind, Tuesday">
+            <g stroke="rgba(255,251,245,.07)" stroke-width="1">
+              <line x1="0" y1="40" x2="700" y2="40"/><line x1="0" y1="80" x2="700" y2="80"/>
+              <line x1="0" y1="120" x2="700" y2="120"/><line x1="0" y1="160" x2="700" y2="160"/>
+            </g>
+            <path d="M0 170 C90 168 130 120 200 66 C250 30 290 22 340 26 C400 31 440 62 500 108 C560 152 620 168 700 172"
+                  fill="none" stroke="#FFE9BC" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+            <path d="M0 172 C90 170 132 124 202 72 C252 36 292 30 342 33 C402 39 442 70 502 114 C562 156 622 171 700 175"
+                  fill="none" stroke="#FFD480" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M0 96 C90 92 150 100 220 94 C300 87 360 99 430 93 C510 86 600 95 700 90"
+                  fill="none" stroke="#65B0C9" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="342" y1="8" x2="342" y2="182" stroke="#FF4901" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle cx="342" cy="33" r="4" fill="#FF4901"/>
+          </svg>
+          <div class="legend">
+            <span><i style="background:#FFD480"></i>Solar actual</span>
+            <span><i style="background:#FFE9BC"></i>Solar forecast</span>
+            <span><i style="background:#65B0C9"></i>Wind actual</span>
+            <span><i style="background:#FF4901"></i>Cursor · 12:00</span>
+          </div>
+          <div class="maprow">
+            <span class="rampcap">Map · MW per GSP</span>
+            <span class="ramp">
+              <b style="background:rgba(255,212,128,.03)"></b><b style="background:rgba(255,212,128,.15)"></b>
+              <b style="background:rgba(255,212,128,.3)"></b><b style="background:rgba(255,212,128,.5)"></b>
+              <b style="background:rgba(255,212,128,.7)"></b><b style="background:rgba(255,212,128,1)"></b>
+            </span>
+            <span class="rampcap">0 → 480</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><span class="k">Watch</span><span>
+      The cursor line is orange — arguably that <em>is</em> a data mark. It reads as a control here
+      because you drag it, but it is the one place A blurs. Alternative is a neutral white cursor.
+    </span></div>
+  </div>
+
+  <!-- ============================ OPTION B ============================ -->
+  <div class="opt">
+    <h2>B — yellow stays interactive, orange is data-only <span class="tag">safest</span></h2>
+    <p class="why">
+      What the app does today, with orange held back for standalone comparison charts.
+      Nothing to relearn, and no risk of a wrong signal. But solar yellow and "clickable" yellow
+      are <b>the same colour doing two jobs</b>, which is the ambiguity you were trying to
+      escape — and the brand refresh buys you nothing on screen.
+    </p>
+    <div class="app" style="--nav-accent:#FFD480; --toggle-accent:#FFD480; --avatar-bg:#FFD480; --btn-bg:#FFD480;">
+      <div class="topbar">
+        <span class="logo">&lt;&gt;&lt;&lt; OPEN CLIMATE FIX</span>
+        <nav class="nav"><span class="cur">Forecast</span><span>Solar Sites</span><span>Docs</span></nav>
+        <span class="spacer"></span>
+        <span class="toggle"><span class="on">GB</span><span>NL</span></span>
+        <span class="avatar">BF</span>
+      </div>
+      <div class="body">
+        <div class="rail">
+          <h3>Now · 12:00</h3>
+          <div class="kpi solar"><div class="lbl">Solar</div><div class="val">4,820<span class="u">MW</span></div></div>
+          <div class="kpi wind"><div class="lbl">Wind</div><div class="val">8,430<span class="u">MW</span></div></div>
+          <div class="kpi plain"><div class="lbl">Solar 16:00</div><div class="val">2,310<span class="u">MW</span></div></div>
+          <div style="margin-top:16px"><span class="btn">Export CSV</span></div>
+          <div style="margin-top:9px"><a class="lnk" href="#">Data sources</a></div>
+        </div>
+        <div class="main">
+          <div class="charthead">
+            <span class="t">GB solar generation</span>
+            <span class="spacer"></span>
+            <span class="btn ghost">Add comparison</span>
+          </div>
+          <svg viewBox="0 0 700 190" width="100%" height="190" role="img" aria-label="Solar and wind, Tuesday">
+            <g stroke="rgba(255,251,245,.07)" stroke-width="1">
+              <line x1="0" y1="40" x2="700" y2="40"/><line x1="0" y1="80" x2="700" y2="80"/>
+              <line x1="0" y1="120" x2="700" y2="120"/><line x1="0" y1="160" x2="700" y2="160"/>
+            </g>
+            <path d="M0 170 C90 168 130 120 200 66 C250 30 290 22 340 26 C400 31 440 62 500 108 C560 152 620 168 700 172"
+                  fill="none" stroke="#FFE9BC" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+            <path d="M0 172 C90 170 132 124 202 72 C252 36 292 30 342 33 C402 39 442 70 502 114 C562 156 622 171 700 175"
+                  fill="none" stroke="#FFD480" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M0 96 C90 92 150 100 220 94 C300 87 360 99 430 93 C510 86 600 95 700 90"
+                  fill="none" stroke="#65B0C9" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="342" y1="8" x2="342" y2="182" stroke="#FBF8F4" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle cx="342" cy="33" r="4" fill="#FBF8F4"/>
+          </svg>
+          <div class="legend">
+            <span><i style="background:#FFD480"></i>Solar actual</span>
+            <span><i style="background:#FFE9BC"></i>Solar forecast</span>
+            <span><i style="background:#65B0C9"></i>Wind actual</span>
+            <span><i style="background:#FBF8F4"></i>Cursor · 12:00</span>
+          </div>
+          <div class="maprow">
+            <span class="rampcap">Map · MW per GSP</span>
+            <span class="ramp">
+              <b style="background:rgba(255,212,128,.03)"></b><b style="background:rgba(255,212,128,.15)"></b>
+              <b style="background:rgba(255,212,128,.3)"></b><b style="background:rgba(255,212,128,.5)"></b>
+              <b style="background:rgba(255,212,128,.7)"></b><b style="background:rgba(255,212,128,1)"></b>
+            </span>
+            <span class="rampcap">0 → 480</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><span class="k">Watch</span><span>
+      Look at the sidebar: the Solar figure and the Export button are now the same yellow, one a
+      reading and one a control. That is the confusion in miniature.
+    </span></div>
+  </div>
+
+  <!-- ============================ OPTION C ============================ -->
+  <div class="opt">
+    <h2>C — orange in the chrome, orange as a series inside the chart <span class="tag">most expressive</span></h2>
+    <p class="why">
+      Chrome is orange; inside the chart canvas orange is free to be a series — here, the
+      comparison you just added. The argument is that a chart is a bounded context with its own
+      legend. The risk is that <b>the boundary is invisible</b> once the chart fills the screen,
+      and it is a rule that gets harder to hold as the app grows.
+    </p>
+    <div class="app">
+      <div class="topbar">
+        <span class="logo">&lt;&gt;&lt;&lt; OPEN CLIMATE FIX</span>
+        <nav class="nav"><span class="cur">Forecast</span><span>Solar Sites</span><span>Docs</span></nav>
+        <span class="spacer"></span>
+        <span class="toggle"><span class="on">GB</span><span>NL</span></span>
+        <span class="avatar">BF</span>
+      </div>
+      <div class="body">
+        <div class="rail">
+          <h3>Now · 12:00</h3>
+          <div class="kpi solar"><div class="lbl">Solar</div><div class="val">4,820<span class="u">MW</span></div></div>
+          <div class="kpi wind"><div class="lbl">Wind</div><div class="val">8,430<span class="u">MW</span></div></div>
+          <div class="kpi plain"><div class="lbl">Solar 16:00</div><div class="val">2,310<span class="u">MW</span></div></div>
+          <div style="margin-top:16px"><span class="btn">Export CSV</span></div>
+          <div style="margin-top:9px"><a class="lnk" href="#">Data sources</a></div>
+        </div>
+        <div class="main">
+          <div class="charthead">
+            <span class="t">GB solar generation</span>
+            <span class="spacer"></span>
+            <span class="btn ghost">Comparison on</span>
+          </div>
+          <svg viewBox="0 0 700 190" width="100%" height="190" role="img" aria-label="Solar, wind and a third-party comparison">
+            <g stroke="rgba(255,251,245,.07)" stroke-width="1">
+              <line x1="0" y1="40" x2="700" y2="40"/><line x1="0" y1="80" x2="700" y2="80"/>
+              <line x1="0" y1="120" x2="700" y2="120"/><line x1="0" y1="160" x2="700" y2="160"/>
+            </g>
+            <path d="M0 170 C90 168 130 120 200 66 C250 30 290 22 340 26 C400 31 440 62 500 108 C560 152 620 168 700 172"
+                  fill="none" stroke="#FFE9BC" stroke-width="5" stroke-linecap="round" opacity=".85"/>
+            <path d="M0 172 C90 170 132 124 202 72 C252 36 292 30 342 33 C402 39 442 70 502 114 C562 156 622 171 700 175"
+                  fill="none" stroke="#FFD480" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M0 166 C90 163 134 116 204 60 C254 24 294 18 344 22 C404 28 444 56 504 102 C564 146 624 164 700 168"
+                  fill="none" stroke="#FF4901" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="6 4"/>
+            <path d="M0 96 C90 92 150 100 220 94 C300 87 360 99 430 93 C510 86 600 95 700 90"
+                  fill="none" stroke="#65B0C9" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="342" y1="8" x2="342" y2="182" stroke="#FBF8F4" stroke-width="1.5" stroke-dasharray="3 3"/>
+          </svg>
+          <div class="legend">
+            <span><i style="background:#FFD480"></i>Solar actual</span>
+            <span><i style="background:#FFE9BC"></i>Solar forecast</span>
+            <span><i style="background:#FF4901"></i>Third-party forecast</span>
+            <span><i style="background:#65B0C9"></i>Wind actual</span>
+          </div>
+          <div class="maprow">
+            <span class="rampcap">Map · MW per GSP</span>
+            <span class="ramp">
+              <b style="background:rgba(255,212,128,.03)"></b><b style="background:rgba(255,212,128,.15)"></b>
+              <b style="background:rgba(255,212,128,.3)"></b><b style="background:rgba(255,212,128,.5)"></b>
+              <b style="background:rgba(255,212,128,.7)"></b><b style="background:rgba(255,212,128,1)"></b>
+            </span>
+            <span class="rampcap">0 → 480</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><span class="k">Watch</span><span>
+      The orange dashed line and the orange "Comparison on" button are inches apart and mean
+      completely different things. Whether that reads as rich or as sloppy is the whole question.
+    </span></div>
+  </div>
+
+  <!-- ============================ LIGHT ============================ -->
+  <div class="opt light">
+    <h2>A, in light mode <span class="tag">what gives</span></h2>
+    <p class="why">
+      Same option A, on Grey&nbsp;1 <code>#FFFBF5</code> / Grey&nbsp;2 <code>#F0ECE8</code>. Two
+      things give in the switch, and they're worth seeing now rather than discovering later:
+      <b>solar yellow nearly vanishes on a warm near-white ground</b>, and orange gets
+      <em>louder</em>, not quieter. The yellow needs a darker partner for light mode, which is
+      the first real argument for the "commercial" saturated palette you floated.
+    </p>
+    <div class="app">
+      <div class="topbar">
+        <span class="logo">&lt;&gt;&lt;&lt; OPEN CLIMATE FIX</span>
+        <nav class="nav"><span class="cur">Forecast</span><span>Solar Sites</span><span>Docs</span></nav>
+        <span class="spacer"></span>
+        <span class="toggle"><span class="on">GB</span><span>NL</span></span>
+        <span class="avatar" style="--avatar-fg:#FFFBF5">BF</span>
+      </div>
+      <div class="body">
+        <div class="rail">
+          <h3>Now · 12:00</h3>
+          <div class="kpi solar"><div class="lbl">Solar</div><div class="val">4,820<span class="u">MW</span></div></div>
+          <div class="kpi wind"><div class="lbl">Wind</div><div class="val">8,430<span class="u">MW</span></div></div>
+          <div class="kpi plain"><div class="lbl">Solar 16:00</div><div class="val">2,310<span class="u">MW</span></div></div>
+          <div style="margin-top:16px"><span class="btn" style="--btn-fg:#FFFBF5">Export CSV</span></div>
+          <div style="margin-top:9px"><a class="lnk" href="#">Data sources</a></div>
+        </div>
+        <div class="main">
+          <div class="charthead">
+            <span class="t">GB solar generation</span>
+            <span class="spacer"></span>
+            <span class="btn ghost">Add comparison</span>
+          </div>
+          <svg viewBox="0 0 700 190" width="100%" height="190" role="img" aria-label="Solar and wind in light mode">
+            <g stroke="rgba(12,13,13,.09)" stroke-width="1">
+              <line x1="0" y1="40" x2="700" y2="40"/><line x1="0" y1="80" x2="700" y2="80"/>
+              <line x1="0" y1="120" x2="700" y2="120"/><line x1="0" y1="160" x2="700" y2="160"/>
+            </g>
+            <path d="M0 170 C90 168 130 120 200 66 C250 30 290 22 340 26 C400 31 440 62 500 108 C560 152 620 168 700 172"
+                  fill="none" stroke="#FFE9BC" stroke-width="5" stroke-linecap="round"/>
+            <path d="M0 172 C90 170 132 124 202 72 C252 36 292 30 342 33 C402 39 442 70 502 114 C562 156 622 171 700 175"
+                  fill="none" stroke="#FFD480" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M0 96 C90 92 150 100 220 94 C300 87 360 99 430 93 C510 86 600 95 700 90"
+                  fill="none" stroke="#65B0C9" stroke-width="2.2" stroke-linecap="round"/>
+            <line x1="342" y1="8" x2="342" y2="182" stroke="#FF4901" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle cx="342" cy="33" r="4" fill="#FF4901"/>
+          </svg>
+          <div class="legend">
+            <span><i style="background:#FFD480"></i>Solar actual</span>
+            <span><i style="background:#FFE9BC"></i>Solar forecast</span>
+            <span><i style="background:#65B0C9"></i>Wind actual</span>
+            <span><i style="background:#FF4901"></i>Cursor · 12:00</span>
+          </div>
+          <div class="maprow">
+            <span class="rampcap">Map · MW per GSP</span>
+            <span class="ramp">
+              <b style="background:rgba(255,212,128,.05)"></b><b style="background:rgba(255,212,128,.25)"></b>
+              <b style="background:rgba(255,212,128,.45)"></b><b style="background:rgba(255,212,128,.65)"></b>
+              <b style="background:rgba(255,212,128,.82)"></b><b style="background:rgba(255,212,128,1)"></b>
+            </span>
+            <span class="rampcap">0 → 480</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><span class="k">Watch</span><span>
+      The solar forecast band and the map's low bands are close to invisible. In dark mode the
+      same colours sat comfortably. This is the constraint that should shape the palette.
+    </span></div>
+  </div>
+
+</div>
+</body>
+</html>
