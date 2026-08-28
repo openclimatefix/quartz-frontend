@@ -249,6 +249,15 @@ export type SlotLabelling = "period-end" | "period-start";
 export type CountryConfig = {
   /** ISO code as the API spells it, uppercase. Matches `CountryCapability.code`. */
   code: string;
+  /**
+   * The country's name in full, for headings that name what you are looking at. The chart
+   * header used to say "National", which is true of every country and so identifies none —
+   * and it sat next to a country picker doing the identifying instead.
+   *
+   * Config rather than a lookup in a component, per the no-country-branching rule at the top
+   * of this file.
+   */
+  displayName: string;
   /** IANA zone. Replaces the `Europe/London` hardcoded through every date helper. */
   timezone: string;
   /**
@@ -330,6 +339,7 @@ export type CountryConfig = {
 export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
   GB: {
     code: "GB",
+    displayName: "Great Britain",
     timezone: "Europe/London",
     locale: "en-GB",
     cadenceMinutes: 30,
@@ -420,7 +430,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         key: "INTRADAY_ECMWF_ONLY",
         model: "pvnet_ecmwf",
         label: "ECMWF-only",
-        legend: { iconClasses: "text-ocf-teal-500", tooltipInputs: ["ECMWF"] }
+        legend: { iconClasses: "text-series-ecmwf", tooltipInputs: ["ECMWF"] }
       },
       // `pvnet_day_ahead` and `pvnet_intraday` used to sit here, carried over from v0's six.
       // Neither had a `legend` block (so the rail never offered them) and neither had a `<Line>`
@@ -432,13 +442,13 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         key: "MET_OFFICE_ONLY",
         model: "pvnet_ukv",
         label: "Met Office-only",
-        legend: { iconClasses: "text-metOffice", tooltipInputs: ["MET_OFFICE"] }
+        legend: { iconClasses: "text-series-metOffice", tooltipInputs: ["MET_OFFICE"] }
       },
       {
         key: "SAT_ONLY",
         model: "pvnet_sat",
         label: "Satellite-only",
-        legend: { iconClasses: "text-ocf-yellow-200", tooltipInputs: ["SAT"] }
+        legend: { iconClasses: "text-series-satellite", tooltipInputs: ["SAT"] }
       }
     ],
     overlays: [{ id: "constraints", url: "/geo/gb/ng-constraints.json", label: "Constraints" }],
@@ -448,6 +458,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
   },
   NL: {
     code: "NL",
+    displayName: "Netherlands",
     timezone: "Europe/Amsterdam",
     locale: "nl-NL",
     cadenceMinutes: 15,

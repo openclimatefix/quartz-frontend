@@ -1,10 +1,11 @@
 import { theme } from "../../../tailwind.config";
 import { ClockIcon } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
-import ChartCountryPicker from "../country-picker";
 import useGlobalState from "../../helpers/globalState";
+import { useFocusedCountry } from "../../../hooks/data";
+import { getCountryConfig } from "../../../config/countries";
 import { comparisonTitle } from "../../helpers/comparison";
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const yellow = theme.extend.colors.solar.DEFAULT;
 
 export const ForecastHeadlineFigure: React.FC<{
   tip: string;
@@ -14,15 +15,17 @@ export const ForecastHeadlineFigure: React.FC<{
   gsp?: boolean;
   children?: React.ReactNode;
 }> = ({ tip, color = yellow, time, unit = "GW", gsp = false, children }) => {
-  const textSizeClasses = `font-semibold md:text-xl text-lg leading-none text-${color} pr-0.5 ${
+  // Slimmed: the ramp topped out at text-6xl, which made the two readings the loudest thing
+  // on the page and pushed the chart itself down. One step down across the board.
+  const textSizeClasses = `font-mono tracking-normal text-base md:text-lg leading-none text-${color} pr-0.5 ${
     gsp
-      ? "dash:2xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl"
-      : "dash:3xl:text-6xl dash:xl:text-5xl lg:text-3xl"
+      ? "dash:2xl:text-4xl dash:xl:text-3xl xl:text-2xl lg:text-xl"
+      : "dash:3xl:text-4xl dash:xl:text-3xl lg:text-2xl"
   }`;
   return (
     <div
       data-test="pvlive-ocf-headline-figure"
-      className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
+      className="m-auto flex items-center justify-between gap-3 py-0.5 dash:py-1"
     >
       <div className="flex flex-1 self-center items-center justify-center">
         <div className={`flex items-center ${textSizeClasses}`}>
@@ -39,19 +42,19 @@ export const ForecastHeadlineFigure: React.FC<{
           <div
             className={`${
               gsp ? "dash:3xl:gap-0" : "dash:3xl:gap-1"
-            } flex flex-col dash:xl:gap-0 gap-1 items-start justify-center dash:xl:justify-between dash:justify-center pl-2`}
+            } flex flex-col dash:xl:gap-0 gap-0.5 items-start justify-center dash:xl:justify-between dash:justify-center pl-2`}
           >
-            <div className="flex items-center text-white">
+            <div className="flex items-center text-content">
               {time && (
                 <>
-                  <ClockIcon />
-                  <p className="text-xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
+                  <ClockIcon className="h-3" />
+                  <p className="font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
                     {time}
                   </p>
                 </>
               )}
             </div>
-            <span className="text-xs dash:text-sm dash:xl:text-base text-ocf-gray-300 font-normal dash:leading-none leading-none">
+            <span className="text-2xs dash:text-sm dash:xl:text-base text-content font-normal dash:leading-none leading-none">
               {unit}
             </span>
           </div>
@@ -70,7 +73,7 @@ export const ForecastWithActualPV: React.FC<{
   sites?: boolean;
 }> = ({ forecast, pv, time, tip, color = yellow, sites = false }) => {
   return (
-    <div className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between">
+    <div className="m-auto flex items-center justify-between gap-3 py-0.5 dash:py-1">
       <div className="dash:order-2">
         <ForecastLabel
           tip={
@@ -81,18 +84,18 @@ export const ForecastWithActualPV: React.FC<{
         >
           <div
             // className={`text-lg font-semibold leading-none text-center text-${color}`}
-            className={`flex text-xl xl:text-2xl items-center dash:text-6xl font-semibold leading-none mt-0.5 text-center text-${color}`}
+            className={`flex font-mono tabular-nums text-xl xl:text-2xl items-center dash:text-6xl leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
-            <span className="text-black">{pv}</span>
-            <span className="text-ocf-gray-300 px-0.5"> / </span>
+            <span className="text-content-on-accent">{pv}</span>
+            <span className="text-content px-0.5"> / </span>
             {forecast}
             <div className="flex flex-col items-start pl-2">
-              <div className="flex items-center text-white">
+              <div className="flex items-center text-content">
                 <ClockIcon />
-                <p className="text-xs dash:text-xl ml-0.5">{time}</p>
+                <p className="font-mono tabular-nums text-xs dash:text-xl ml-0.5">{time}</p>
               </div>
-              <span className="text-xs dash:text-lg text-ocf-gray-300 font-normal">
+              <span className="text-xs dash:text-lg text-content font-normal">
                 {sites ? "KW" : "GW"}
               </span>
             </div>
@@ -112,7 +115,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
   return (
     <div
       data-test="forecast-label-tooltip"
-      className="flex gap-3 items-center m-auto h-10 dash:h-14 justify-between"
+      className="m-auto flex items-center justify-between gap-3 py-0.5 dash:py-1"
     >
       <ForecastLabel
         className="dash:order-2"
@@ -125,23 +128,23 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
         <div>
           <p
             // className={`text-lg font-semibold leading-none text-center text-${color}`}
-            className={`flex text-lg dash:text-6xl font-semibold leading-none mt-0.5 text-center text-${color}`}
+            className={`flex font-mono tabular-nums text-lg dash:text-6xl leading-none mt-0.5 text-center text-${color}`}
             style={{ color: color }}
           >
             {pv}
             <div className="flex flex-col  items-start pl-2">
-              <div className="items-center text-white hidden dash:flex">
+              <div className="items-center text-content hidden dash:flex">
                 <ClockIcon />
-                <p className="dash:text-xl ml-0.5">{time}</p>
+                <p className="font-mono tabular-nums dash:text-xl ml-0.5">{time}</p>
               </div>
-              <span className="text-xs dash:text-lg text-ocf-gray-300 font-normal"> GW</span>
+              <span className="text-xs dash:text-lg text-content font-normal"> GW</span>
             </div>
           </p>
         </div>
       </ForecastLabel>
       <div className="flex items-center dash:hidden -ml-[2px]">
         <ClockIcon />
-        <p className="text-xs dash:text-base ml-0.5">{time}</p>
+        <p className="font-mono tabular-nums text-xs dash:text-base ml-0.5">{time}</p>
       </div>
     </div>
   );
@@ -176,7 +179,7 @@ const ComparisonEcho: React.FC = () => {
   const title = comparisonTitle(comparison);
   if (!title) return null;
   return (
-    <span className="text-ocf-gray-400 text-xs md:text-sm dash:text-lg" data-test="comparison-echo">
+    <span className="text-content text-xs md:text-sm dash:text-lg" data-test="comparison-echo">
       {title}
     </span>
   );
@@ -191,33 +194,29 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   pvTimeOnly,
   forecastNextTimeOnly
 }) => {
+  const focusedCountry = useFocusedCountry();
+  // Falls back to the code rather than to "National": if the registry has no entry the code is
+  // at least true, where a generic word would quietly identify nothing.
+  const countryName = getCountryConfig(focusedCountry)?.displayName ?? focusedCountry;
   return (
     <div
       data-test="national-chart-header"
-      className="flex flex-initial content-between bg-ocf-gray-800 h-auto mb-4"
+      className="mx-2 mb-1.5 flex flex-initial content-between rounded-md"
     >
-      {/* The chart's country sits with the title because it qualifies it: these are GB's
-          national numbers, not the app's. It is also the only country control on this half
-          of the layout — the header owns which countries are *drawn*. */}
-      {/* `ml-3` rather than the old `ml-5` so the track's gap to the panel edge reads the same
-          on the left as above and below it. Top and bottom are equal to each other for free —
-          `m-auto` centres the group — so this is the one knob that sets all three. */}
-      <div className="m-auto ml-3 flex items-center gap-2">
-        <ChartCountryPicker />
-        <span className="text-white dash:3xl:text-5xl dash:2xl:text-4xl dash:xl:text-3xl dash:tracking-wide lg:text-2xl md:text-lg text-base font-black">
-          National
+      {/* The title names the country outright. It used to read "National" beside a country
+          picker — a word true of every country, so the picker was doing the identifying and
+          the heading was decoration. The picker moved out; the name moved in. */}
+      <div className="mx-auto my-0 ml-0 flex items-center gap-2">
+        <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
+          {countryName}
         </span>
         <ComparisonEcho />
       </div>
-      <div className="flex justify-between flex-2 my-2 dash:3xl:my-3 px-2 lg:px-4 3xl:px-6">
-        <div className="pr-4 lg:pr-4 3xl:pr-6">
-          <ForecastHeadlineFigure
-            tip={`PV Live / OCF Forecast`}
-            time={pvTimeOnly}
-            color="ocf-yellow"
-          >
-            <span className="text-black">{actualPV}</span>
-            <span className="text-ocf-gray-300 mx-1"> / </span>
+      <div className="flex flex-2 justify-between">
+        <div className="pr-3 lg:pr-4">
+          <ForecastHeadlineFigure tip={`PV Live / OCF Forecast`} time={pvTimeOnly} color="solar">
+            <span className="text-solar-light">{actualPV}</span>
+            <span className="text-content mx-1"> / </span>
             {forecastPV}
           </ForecastHeadlineFigure>
         </div>
@@ -225,7 +224,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastHeadlineFigure
             tip={`Next OCF Forecast`}
             time={forecastNextTimeOnly}
-            color="ocf-yellow"
+            color="solar"
           >
             {forecastNextPV}
           </ForecastHeadlineFigure>
