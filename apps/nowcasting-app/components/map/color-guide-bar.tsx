@@ -109,7 +109,7 @@ const PercentRamp: React.FC = () => {
   return (
     <div className="flex w-full min-w-[10rem] max-w-[16rem] flex-col dash:max-w-[24rem]">
       <div
-        className="relative h-4 w-full rounded border border-ocf-black-600 dash:h-6"
+        className="relative h-4 w-full rounded border border-content-on-accent dash:h-6"
         style={{
           backgroundImage: `linear-gradient(to right, rgba(255,208,83,${ZERO_OPACITY}), rgba(255,208,83,1))`
         }}
@@ -117,12 +117,12 @@ const PercentRamp: React.FC = () => {
         {NORMALIZED_TICKS.map((fraction) => (
           <span
             key={fraction}
-            className="absolute top-0 bottom-0 w-px bg-white/50"
+            className="absolute top-0 bottom-0 w-px bg-content/50"
             style={{ left: `${Math.min(100, (fraction / PERCENT_RAMP_TOP) * 100)}%` }}
           />
         ))}
       </div>
-      <div className="relative mt-0.5 h-3 text-2xs text-ocf-gray-600 dash:h-4 dash:text-xs">
+      <div className="relative mt-0.5 h-3 font-mono text-2xs text-content-secondary dash:h-4 dash:text-xs">
         {NORMALIZED_TICKS.map((fraction, index) => (
           <span
             key={fraction}
@@ -143,11 +143,11 @@ const bandPills = (labels: string[]) =>
   labels.map((value, index) => ({
     value,
     // The same array the paint expression steps to, as a Tailwind opacity suffix. 0.03 * 100
-    // is 3.0000000000000004 in floating point and `bg-ocf-yellow/3.0000000000000004` is not a
+    // is 3.0000000000000004 in floating point and `bg-solar/3.0000000000000004` is not a
     // class, hence the round.
     opacity: Math.round(BAND_OPACITIES[index] * 100),
     // The top three bands are dark enough to need dark text on them.
-    textColor: index < 3 ? "ocf-gray-300" : "black"
+    textColor: index < 3 ? "content" : "content-on-accent"
   }));
 
 const SequentialBands: React.FC<{
@@ -187,9 +187,9 @@ const SequentialBands: React.FC<{
     // Positioning only: this used to anchor itself to the map's bottom-left corner
     // (`absolute bottom-12 left-0 ml-12 z-20`), which is where the floating chart now sits. It
     // lays out in normal flow inside the map control dock instead. Bands and colours untouched.
-    <div className="flex flex-col bg-mapbox-black-700">
+    <div className="flex flex-col">
       {attributed && (
-        <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+        <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-secondary">
           {country} bands
         </span>
       )}
@@ -202,18 +202,20 @@ const SequentialBands: React.FC<{
         without the "GB bands" attribution line above it, and at any wrap count — this also
         covers `DeltaBands` below, whose nine buckets wrap the same way.
       */}
-      <div className="flex flex-wrap gap-1 text-xs h-full text-ocf-black-600 font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
+      <div className="flex flex-wrap gap-1 font-mono tabular-nums text-xs h-full text-content-on-accent font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
         {unit === ActiveUnit.percentage && <PercentRamp />}
         {values?.map((value, index) => (
           <div
             key={value.value}
-            className={`rounded border border-ocf-black-600 px-3 py-[1px] dash:px-4 dash:py-[2px] bg-ocf-yellow/${value.opacity} whitespace-nowrap text-${value.textColor}`}
+            className={`rounded border border-content-on-accent px-3 py-[1px] dash:px-4 dash:py-[2px] bg-solar/${value.opacity} whitespace-nowrap text-${value.textColor}`}
           >
             {value.value}
             {index === 0 && (
               <span
                 className={`font-normal ${
-                  value.textColor === "black" ? "text-ocf-black-500" : "text-ocf-gray-600"
+                  value.textColor === "content-on-accent"
+                    ? "text-surface"
+                    : "text-content-secondary"
                 } text-xs ml-1`}
               >
                 {unitText}
@@ -236,15 +238,15 @@ const SequentialBands: React.FC<{
  * not opacity ramps like the sequential pills, and nothing ever read it.
  */
 const DELTA_STEPS: { value: DELTA_BUCKET; background: string; text: string }[] = [
-  { value: DELTA_BUCKET.NEG4, background: "bg-ocf-delta-100", text: "text-black" },
-  { value: DELTA_BUCKET.NEG3, background: "bg-ocf-delta-200", text: "text-black" },
-  { value: DELTA_BUCKET.NEG2, background: "bg-ocf-delta-300", text: "text-black" },
-  { value: DELTA_BUCKET.NEG1, background: "bg-ocf-delta-400", text: "text-ocf-gray-300" },
-  { value: DELTA_BUCKET.ZERO, background: "bg-ocf-delta-500", text: "text-ocf-gray-300" },
-  { value: DELTA_BUCKET.POS1, background: "bg-ocf-delta-600", text: "text-ocf-gray-300" },
-  { value: DELTA_BUCKET.POS2, background: "bg-ocf-delta-700", text: "text-black" },
-  { value: DELTA_BUCKET.POS3, background: "bg-ocf-delta-800", text: "text-black" },
-  { value: DELTA_BUCKET.POS4, background: "bg-ocf-delta-900", text: "text-black" }
+  { value: DELTA_BUCKET.NEG4, background: "bg-ocf-delta-100", text: "text-content-on-accent" },
+  { value: DELTA_BUCKET.NEG3, background: "bg-ocf-delta-200", text: "text-content-on-accent" },
+  { value: DELTA_BUCKET.NEG2, background: "bg-ocf-delta-300", text: "text-content-on-accent" },
+  { value: DELTA_BUCKET.NEG1, background: "bg-ocf-delta-400", text: "text-content" },
+  { value: DELTA_BUCKET.ZERO, background: "bg-ocf-delta-500", text: "text-content" },
+  { value: DELTA_BUCKET.POS1, background: "bg-ocf-delta-600", text: "text-content" },
+  { value: DELTA_BUCKET.POS2, background: "bg-ocf-delta-700", text: "text-content-on-accent" },
+  { value: DELTA_BUCKET.POS3, background: "bg-ocf-delta-800", text: "text-content-on-accent" },
+  { value: DELTA_BUCKET.POS4, background: "bg-ocf-delta-900", text: "text-content-on-accent" }
 ];
 
 /**
@@ -325,8 +327,8 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
   // and the fill cannot describe different scales.
   const steps = asPercentage ? DELTA_PERCENTAGE_STEPS : DELTA_STEPS;
   return (
-    <div className="flex flex-col bg-mapbox-black-700">
-      <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+    <div className="flex flex-col bg-surface-raised">
+      <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-secondary">
         {/*
           The subtraction, not "vs". `delta` is `generationMw - forecastMw`, so a `+` means the
           actual came in *above* the forecast — and "MW vs PV Live Estimated" does not say that,
@@ -352,7 +354,7 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
         } ${unitText}${
           label ? `, ${label} minus forecast; positive means actual above forecast` : ""
         }`}
-        className="flex items-center gap-1 text-2xs font-bold text-ocf-gray-600 dash:text-base"
+        className="flex items-center gap-1 font-mono text-2xs font-bold text-content-secondary dash:text-base"
       >
         {/*
           The sign, twice, instead of nine times. With equal `flex-1` cells the *widest* cell

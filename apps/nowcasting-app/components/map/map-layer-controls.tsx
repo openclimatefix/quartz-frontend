@@ -1,10 +1,14 @@
 import { FC } from "react";
 
 import {
-  CONTROL_BUTTON_ACTIVE,
   CONTROL_BUTTON_BASE,
-  CONTROL_BUTTON_IDLE,
-  CONTROL_ROW
+  CONTROL_BUTTON_OFF,
+  CONTROL_BUTTON_ON,
+  CONTROL_LAMP_BASE,
+  CONTROL_LAMP_BUSY,
+  CONTROL_LAMP_OFF,
+  CONTROL_LAMP_ON,
+  CONTROL_ROW_MULTI
 } from "./control-button";
 import useGlobalState from "../helpers/globalState";
 import {
@@ -37,6 +41,19 @@ import {
  * repaints now, so "Clouds" and "PV" describe the map rather than the encoding, and the PV
  * button hides whichever fill is drawn (the layer ids are the same either way).
  */
+/**
+ * `aria-hidden`: the button already carries `aria-pressed`, which says the same thing in the
+ * one place a screen reader looks. A second announcement of the same state is noise.
+ */
+const Lamp: FC<{ on: boolean; busy?: boolean }> = ({ on, busy = false }) => (
+  <span
+    aria-hidden
+    className={`${CONTROL_LAMP_BASE} ${
+      busy ? CONTROL_LAMP_BUSY : on ? CONTROL_LAMP_ON : CONTROL_LAMP_OFF
+    }`}
+  />
+);
+
 const MapLayerControls: FC = () => {
   const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
   const [showPvLayer, setShowPvLayer] = useGlobalState("showPvLayer");
@@ -44,10 +61,10 @@ const MapLayerControls: FC = () => {
 
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+      <span className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
         Layers
       </span>
-      <div className={`${CONTROL_ROW} flex-wrap`}>
+      <div className={`${CONTROL_ROW_MULTI} flex-wrap`}>
         <button
           type="button"
           onClick={() => {
@@ -56,32 +73,11 @@ const MapLayerControls: FC = () => {
             if (turningOff) setShowPvLayer(true);
           }}
           aria-pressed={showCloudLayer}
-          className={`${CONTROL_BUTTON_BASE} ${
-            showCloudLayer ? CONTROL_BUTTON_ACTIVE : CONTROL_BUTTON_IDLE
+          className={`${CONTROL_BUTTON_BASE} py-1.5 gap-1 ${
+            showCloudLayer ? CONTROL_BUTTON_ON : CONTROL_BUTTON_OFF
           }`}
         >
-          {isSatelliteLoading && (
-            <svg
-              className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
-            </svg>
-          )}
+          <Lamp on={showCloudLayer} busy={isSatelliteLoading} />
           Clouds
         </button>
 
@@ -92,10 +88,11 @@ const MapLayerControls: FC = () => {
           title="Toggle the region fill so clouds are easier to see"
           onClick={() => setShowPvLayer((v) => !v)}
           aria-pressed={showPvLayer}
-          className={`${CONTROL_BUTTON_BASE} ${
-            showPvLayer ? CONTROL_BUTTON_ACTIVE : CONTROL_BUTTON_IDLE
+          className={`${CONTROL_BUTTON_BASE} py-1.5 gap-1 ${
+            showPvLayer ? CONTROL_BUTTON_ON : CONTROL_BUTTON_OFF
           }`}
         >
+          <Lamp on={showPvLayer} />
           PV
         </button>
       </div>
@@ -130,7 +127,7 @@ export const SatelliteChannelSelect: FC = () => {
       onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
       disabled={!!satelliteError}
       aria-label="Satellite channel"
-      className="col-span-2 w-full cursor-pointer rounded border-none bg-black px-2 py-1 text-xs font-semibold text-white outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      className="col-span-5 w-full cursor-pointer rounded border-none bg-surface-inner px-2 py-1 text-xs font-semibold text-content outline-none disabled:cursor-not-allowed disabled:opacity-70"
     >
       {satelliteError ? (
         <option value={activeChannel}>{satelliteError}</option>

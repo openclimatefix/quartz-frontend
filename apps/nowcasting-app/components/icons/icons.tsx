@@ -78,13 +78,20 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
     <path
       strokeWidth={0.5}
       d="M20.030 5.030l-1.061-1.061-6.97 6.97-6.97-6.97-1.061 1.061 6.97 6.97-6.97 6.97 1.061 1.061 6.97-6.97 6.97 6.97 1.061-1.061-6.97-6.97 6.97-6.97z"
-      fill="white"
+      fill="currentColor"
     />
   </svg>
 );
 
 export const ClockIcon: React.FC<IconProps> = ({ className }) => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    width="14"
+    height="14"
+    className={className}
+    viewBox="0 0 14 14"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
       d="M7 12.3743C9.96813 12.3743 12.3743 9.96813 12.3743 7C12.3743 4.03187 9.96813 1.62573 7 1.62573C4.03187 1.62573 1.62573 4.03187 1.62573 7C1.62573 9.96813 4.03187 12.3743 7 12.3743Z"
       stroke="currentColor"
@@ -232,7 +239,7 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
 
 export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    className={`animate-spin fill-white ${props.className}`}
+    className={`animate-spin fill-content ${props.className}`}
     width={24}
     height={24}
     fill="none"
@@ -260,7 +267,7 @@ export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
 
 export const SpinnerTextInline = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    className={`animate-spin fill-white ${props.className}`}
+    className={`animate-spin fill-content ${props.className}`}
     width={14}
     height={14}
     fill="none"
@@ -294,7 +301,7 @@ export const SpinnerTextInlineSmall = (
       height={10}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`animate-spin fill-white ${props.className}`}
+      className={`animate-spin fill-content ${props.className}`}
     >
       <circle
         cx={5}
@@ -406,7 +413,7 @@ export const DownloadIcon: React.FC<IconProps> = ({ className }) => (
 );
 
 export const ResetIcon = () => {
-  return `<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+  return `<svg fill="currentColor" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
     <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
     <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
     <g id="SVGRepo_iconCarrier">

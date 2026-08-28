@@ -104,9 +104,9 @@ const MapEncodingControls: FC = () => {
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border border-white/10 bg-mapbox-black-700/95 p-2 text-white shadow-2xl">
-      <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
-        Map shows
+    <div className="flex flex-col gap-1.5 rounded-lg border border-content/10 bg-surface-panel/95 p-2 text-content shadow-2xl">
+      <span className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
+        PV Forecast Map
       </span>
       <div className={CONTROL_ROW} role="group" aria-label="Map shows">
         <ComparisonOption
@@ -165,23 +165,26 @@ const MapEncodingControls: FC = () => {
           reason (switching views shoving the legend upward under the pointer) is spent — but the
           reading order it gives, "what the colour means" then "how the map is drawn", is the
           right one on its own. */}
-      <div className="border-b border-white/10" />
-      {/* A two-column grid rather than a flex row, so the satellite channel picker can
-          span both. Grid is what makes that possible without nesting: `MapLayerControls`
-          and the granularity group take a column each, and `SatelliteChannelSelect` is a
-          third grid child carrying its own `col-span-2`.
+      <div className="border-b border-content/10" />
+      {/* A grid rather than a flex row, so the satellite channel picker can span the lot.
+          Five columns split 3/2, not two split evenly: the Layers buttons each carry a 10px
+          on/off lamp and an even half (116px) no longer holds them, while Granularity is two
+          three-letter buttons that never needed the room. `SatelliteChannelSelect` is a third
+          grid child carrying its own `col-span-5`.
 
           Both groups answer "how is the map drawn" rather than "what does its colour mean",
           and each is two or three buttons wide, so a column apiece costs one section's
           height instead of two — which is what paid for the disclosure going away. */}
-      <div className="grid grid-cols-2 items-start gap-x-3 gap-y-1.5">
-        <MapLayerControls />
-        <div className="flex min-w-0 flex-col gap-1.5">
+      <div className="grid grid-cols-5 items-start gap-x-3 gap-y-1.5">
+        <div className="col-span-3 min-w-0">
+          <MapLayerControls />
+        </div>
+        <div className="col-span-2 flex min-w-0 flex-col gap-1.5">
           {/* `MapLayerControls` carries its own "Layers" heading; this one is written here
               because `AggregationLevelToggle` is shared and has no business knowing which
               panel section it has been placed in. Same classes, so the two columns head
               identically. */}
-          <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+          <span className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
             Granularity
           </span>
           <AggregationLevelToggle isLoading={false} />

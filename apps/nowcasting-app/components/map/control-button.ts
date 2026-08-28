@@ -26,23 +26,103 @@
 
 /** Geometry and type. Every button in the panel starts here. */
 export const CONTROL_BUTTON_BASE =
-  "inline-flex items-center justify-center rounded px-2 py-1 text-xs font-semibold transition-colors";
+  "inline-flex items-center justify-center rounded-md px-2 py-1 text-xs font-semibold transition-colors";
 
-/** Selected. The one place the brand yellow appears on a control in this panel. */
-export const CONTROL_BUTTON_ACTIVE = "bg-ocf-yellow text-black";
+/**
+ * Selected. Carried by weight rather than hue: the selected button is the only one in the row
+ * with a ground, and it is the lightest thing there.
+ *
+ * This replaced a fill-versus-fill arrangement where idle buttons sat on `surface-sunken` —
+ * darker than the panel behind them — so the *unselected* buttons read as the heavier objects
+ * and selection was working against the visual weight rather than with it. An orange edge was
+ * tried first and had the same problem: a hairline cannot outweigh a solid block.
+ */
+export const CONTROL_BUTTON_ACTIVE =
+  "bg-surface-raised text-selected ring-1 ring-inset ring-selected-edge";
 
-/** Selectable, not selected. */
-export const CONTROL_BUTTON_IDLE = "bg-mapbox-black text-ocf-gray-400 hover:text-white";
+/**
+ * Selectable, not selected. Sits *in* the group's well rather than on top of it, so it still
+ * reads as a button — going fully transparent lost the affordance — while staying below the
+ * selected one. One step above the tray (ink-4 in ink-3), one below the selected (ink-5).
+ */
+export const CONTROL_BUTTON_IDLE =
+  "bg-surface-panel text-content-muted hover:bg-surface-raised hover:text-content";
 
 /**
  * Not applicable in the current view — inert, and never the selected style even for the frame
  * before state settles. The hover highlight goes too, or an inert button looks live.
  */
 export const CONTROL_BUTTON_UNAVAILABLE =
-  "cursor-not-allowed bg-black text-ocf-gray-800 hover:text-ocf-gray-800";
+  "cursor-not-allowed bg-surface-inset text-surface-panel hover:text-surface-panel";
 
 /** Share the row's width equally. For groups that span the panel, not the half-column ones. */
 export const CONTROL_BUTTON_GROW = "flex-1";
 
-/** The row a group of these sits in — the gap that replaced `border-r` dividers. */
-export const CONTROL_ROW = "flex items-center gap-1";
+/**
+ * SINGLE-SELECT row. A well: a sunken tray the idle buttons belong to and the selected one
+ * lifts out of. The tray is what says "these are the options, pick one" — the shape carries the
+ * exclusivity, which is what lets selection be a matter of depth rather than hue.
+ *
+ * The tray is `surface-inner`, the same step as the chart's plot well, because it is the same
+ * idea: a recess cut into a Black 1 panel. It used to be `surface` — Black 2, three steps down
+ * from the panel around it, where the chart only drops one — which is what made the dock read
+ * as punched through where the chart reads as cut into.
+ *
+ * Used by Forecast/Delta, %/MW/Capacity and GSP/DNO.
+ */
+export const CONTROL_ROW =
+  "flex items-center gap-0.5 rounded-md bg-surface-inner p-0.5 shadow-well";
+
+/**
+ * MULTI-SELECT row. No tray, because there is no "one of these" to enclose — each button is an
+ * independent switch and keeps its own outline whether on or off. See
+ * `docs/phase6-track-a-notes.md`: independent toggles and single-select are different controls
+ * and must not look alike, or a layer toggle reads as though turning one on turns another off.
+ *
+ * Used by the Clouds/PV layer toggles.
+ */
+export const CONTROL_ROW_MULTI = "flex items-center gap-1";
+
+/**
+ * The lamp on a multi-select button — the same device as the header's country toggle, and for
+ * the same reason: a switch has to say what it is *not* doing as loudly as what it is. Fill and
+ * outline alone leave "off" reading as "not currently chosen", which is a single-select idea.
+ *
+ * Both states keep a lamp in the same place, so the eye tracks one thing changing rather than an
+ * ornament appearing and vanishing. Off is a black disc — visible against the panel, plainly
+ * unlit. On is the same disc filled with `content`, the light grey the label is already in.
+ *
+ * 10px with a 2px ring, matching `country-toggle.tsx`: at 8px the ring reads as a smudge rather
+ * than as a lamp with an off position.
+ *
+ * Grayscale on purpose. Orange means "you can act on this" and every one of these is actionable
+ * whichever way it is pointing, so colour here would be saying something the state does not.
+ */
+export const CONTROL_LAMP_BASE =
+  "h-2.5 w-2.5 shrink-0 rounded-full border-2 border-content-on-accent transition-colors";
+export const CONTROL_LAMP_ON = "bg-content";
+export const CONTROL_LAMP_OFF = "bg-content-on-accent";
+/**
+ * Working. The lamp pulses rather than a spinner sitting beside the label — the dock column is
+ * 116px and a 14px spinner plus its margin is 20px the row does not have, so the separate
+ * spinner wrapped the row exactly when something was happening. One indicator, three states.
+ */
+export const CONTROL_LAMP_BUSY = "bg-content motion-safe:animate-beat";
+
+/**
+ * On, in a multi-select. Filled and outlined — a switch that is up.
+ *
+ * The ring is the same in both states: it draws the switch's body, and the lamp above says which
+ * way it is pointing. `content-on-accent` (Black 2) rather than a bare `black`, so it stays a
+ * role and follows the theme.
+ *
+ * 2px, matching the lamp's own ring — the switch and its lamp are drawn with one pen. At 1px a
+ * dark ring on a dark panel read thinner than the hard tone step that bounds a single-select
+ * tray, so the two controls looked differently defined when they should look equally so.
+ */
+export const CONTROL_BUTTON_ON =
+  "bg-surface-raised text-content ring-2 ring-inset ring-content-on-accent";
+
+/** Off, in a multi-select. Outlined but unfilled — the same switch, down. */
+export const CONTROL_BUTTON_OFF =
+  "bg-transparent text-content-muted ring-2 ring-inset ring-content-on-accent hover:bg-surface-raised/40 hover:text-content";
