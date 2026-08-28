@@ -19,27 +19,33 @@ import {
   dateToZonedDateTimeString,
   formatISODateStringHumanNumbersOnly,
   getRoundedTickBoundary,
-  prettyPrintChartAxisLabelDate,
-  prettyPrintDayLabelWithDate
+  prettyPrintChartAxisLabelDate
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
 import { DELTA_BUCKET } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
+import { useTokens } from "../helpers/colour";
 import { selectAxisTicks, TickDensity } from "../../lib/time/ticks";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-const orange = theme.extend.colors["ocf-orange"].DEFAULT;
-const ecmwfOnly = theme.extend.colors["ocf-teal"]["500"];
-const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
-const satOnly = theme.extend.colors["ocf-yellow"]["200"];
+const yellow = theme.extend.colors.solar.DEFAULT;
+const orange = theme.extend.colors.series.nHour;
+const ecmwfOnly = theme.extend.colors.series.ecmwf;
+const metOfficeOnly = theme.extend.colors.series.metOffice;
+const satOnly = theme.extend.colors.series.satellite;
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
-const seasonal = "#ffdfd1";
+const seasonal = theme.extend.colors.series.seasonal;
 const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
 const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+
+// Matter SemiMono is the brand's face for values. Recharts writes its ticks and axis labels
+// as SVG attributes rather than classed elements, so they cannot take `font-mono` and name
+// the variable directly instead. Everything numeric in the chart chrome — axes, tooltip
+// figures, the cursor pill — uses it, so the chart agrees with the readouts around it.
+const MONO = "var(--font-matter-semi-mono)";
 // Target combined opacity for overlapping p-level bands, independent of band count.
 const P_LEVEL_BAND_COMBINED_OPACITY = 0.4;
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
@@ -107,8 +113,10 @@ const toolTiplabels: Record<string, string> = {
 };
 
 const toolTipColors: Record<string, string> = {
-  GENERATION_UPDATED: "white",
-  GENERATION: "white",
+  // The actual is the lighter half of the solar pair — same hue as the forecast it is
+  // being compared against, which is the brand's "mono-coloured comparative graph".
+  GENERATION_UPDATED: theme.extend.colors.solar.light,
+  GENERATION: theme.extend.colors.solar.light,
   FORECAST: yellow,
   PAST_FORECAST: yellow,
   INTRADAY_ECMWF_ONLY: ecmwfOnly,
@@ -137,19 +145,43 @@ type RemixLineProps = {
   deltaYMaxOverride?: number;
   yTicks?: number[];
 };
+/**
+ * The handle on a reference line — the draggable cursor's time, and the LIVE marker you click to
+ * return to now.
+ *
+ * Both are **controls**, so they wear the interactive orange. They used to wear `solar`, which
+ * says "this is the PV forecast" about a thing that is not data at all — the loose end
+ * `docs/colour-rationalisation.md` leaves open under "one honest wrinkle in (a)". Settled here in
+ * favour of treating them as controls, which is what they are.
+ *
+ * Two states, one escalation, no second colour:
+ * One appearance, no states: a dark body, an orange edge, orange lettering. 5.8:1 against the
+ * plot well, comfortably WCAG AA.
+ *
+ * It briefly carried an "on the live instant" variant — first as an orange fill, then as white
+ * lettering. Both are gone. The fill was far too heavy a block at this size and could not be
+ * lightened out of it (dark-on-orange fails AA below about 88% opacity, which is not a visible
+ * reduction), and the white variant was too quiet to be worth the second rule. Nothing was lost:
+ * the LIVE marker hides itself when the cursor reaches it, and the footer's pulsing dot carries
+ * following-mode, so the chip was saying a third time what two other things already said.
+ *
+ * The body is `surface`, not black-black: on a `#141515` plot well a true black chip has no edge
+ * of its own, and the orange hairline is what gives it one.
+ */
 const CustomizedLabel: FC<any> = ({
   value,
   offset,
   viewBox: { x },
   className,
   solidLine,
-  onClick
+  onClick,
+  onGrab
 }) => {
-  const yy = -9;
+  const yy = 10;
   return (
     <g>
       <line
-        stroke="white"
+        className={solidLine ? "stroke-interactive" : "stroke-content"}
         strokeWidth={solidLine ? "2" : "1"}
         strokeDasharray={solidLine ? "" : "3 3"}
         fill="none"
@@ -159,9 +191,48 @@ const CustomizedLabel: FC<any> = ({
         x2={x}
         y2={yy}
       ></line>
-      <g className={`fill-white ${className || ""}`} onClick={onClick}>
-        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
+      {/*
+        Recharts binds click, mousedown, mousemove and mouseup on the chart itself — mousedown
+        opens a zoom selection and mouseup commits `setTimeOfInterest` to wherever the pointer
+        was. A label handler alone therefore lost every race: LIVE's `resetTime` ran and was
+        immediately overwritten by the chart's own mouseup. So the group stops the pointer here
+        rather than trying to out-order it.
+      */}
+      <g
+        className={className || ""}
+        style={{ pointerEvents: "all" }}
+        onMouseDown={(e) => {
+          if (!onClick && !onGrab) return;
+          e.stopPropagation();
+          onGrab?.();
+        }}
+        onMouseUp={(e) => {
+          if (!onClick && !onGrab) return;
+          e.stopPropagation();
+        }}
+        onClick={(e) => {
+          if (!onClick) return;
+          e.stopPropagation();
+          onClick();
+        }}
+      >
+        <rect
+          x={x - 20}
+          y={yy}
+          width="40"
+          height="20"
+          rx="4"
+          offset={offset}
+          className="fill-surface stroke-interactive"
+          strokeWidth="1"
+        ></rect>
+        <text
+          x={x}
+          y={yy + 14}
+          className="fill-interactive font-mono font-medium tabular-nums text-xs"
+          id="time-now"
+          textAnchor="middle"
+        >
           {value}
         </text>
       </g>
@@ -173,9 +244,15 @@ const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLin
   const yy = -9;
   return (
     <g>
-      <g className={`fill-white ${className || ""}`} onClick={onClick}>
+      <g className={`fill-content ${className || ""}`} onClick={onClick}>
         <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
+        <text
+          x={x}
+          y={yy + 15}
+          className="fill-surface font-mono tabular-nums text-xs"
+          id="time-now"
+          textAnchor="middle"
+        >
           {value}
         </text>
       </g>
@@ -198,6 +275,26 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
+  // Plot furniture resolved from the role tokens rather than imported as literals, so the
+  // chart's own surfaces follow the theme the way the rest of the app does. Fallbacks are the
+  // dark values — the default theme — so the server render matches and nothing flashes.
+  // Dark values as the fallbacks — dark is the default theme, so the server render and the
+  // first client frame match it and nothing flashes. Recharts takes these as attribute values,
+  // so they must be real colours: a `rgb(var(--x) / <alpha-value>)` template is invalid CSS and
+  // is dropped without an error.
+  const plot = useTokens({
+    bandA: { name: "--plot-band-a", alpha: 0.3, fallback: "rgb(12 13 13 / 0.3)" },
+    bandB: { name: "--plot-band-b", alpha: 0.3, fallback: "rgb(20 21 21 / 0.3)" },
+    stroke: { name: "--content", alpha: 0.1, fallback: "rgb(255 255 255 / 0.1)" },
+    // Axis ticks, axis labels and the reference lines. Chrome, not data — so it follows the
+    // theme rather than sitting at a fixed white.
+    axis: { name: "--content", alpha: 1, fallback: "rgb(255 255 255)" },
+    // The cursor's own line. Orange because the cursor is a *control* — the same brand orange
+    // the scrub handle in the footer wears, so the two read as one object in two places. The
+    // LIVE line stays neutral: it marks a place rather than being something you drag.
+    cursor: { name: "--interactive", alpha: 1, fallback: "rgb(255 73 1)" }
+  });
+
   const [showNHourView] = useGlobalState("showNHourView");
   const [isSitesChart] = useGlobalState("isSitesChart");
   const [largeScreenMode] = useGlobalState("dashboardMode");
@@ -205,6 +302,44 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // which is the cursor, so the two have to be rounded the same way. The helper this replaced
   // read `getMinutes()` off a local-zone `Date`, which also only worked by cancellation.
   const currentTime = getCursorNow().slice(0, 16);
+
+  /**
+   * Dragging the cursor pill.
+   *
+   * The position comes from Recharts' own `activeLabel` on the chart's `onMouseMove` rather
+   * than from pixel maths: the x axis is a *category* scale, so there is no scale to invert —
+   * `activeLabel` is already the nearest category, which is the snapping behaviour wanted.
+   *
+   * A ref beside the state because the chart's handlers are closures Recharts re-invokes at
+   * pointer rate; reading the state there would read the value from the render that installed
+   * them. The state is only there to drive the cursor style.
+   */
+  const [draggingCursor, setDraggingCursor] = useState(false);
+  const draggingCursorRef = useRef(false);
+  const beginCursorDrag = () => {
+    draggingCursorRef.current = true;
+    setDraggingCursor(true);
+  };
+  // On `window`, not on the chart: releasing outside the plot is the common case at the ends of
+  // the range, and a drag that never ends leaves every later mousemove moving the cursor.
+  useEffect(() => {
+    if (!draggingCursor) return;
+    const end = () => {
+      draggingCursorRef.current = false;
+      setDraggingCursor(false);
+    };
+    window.addEventListener("mouseup", end);
+    return () => window.removeEventListener("mouseup", end);
+  }, [draggingCursor]);
+
+  const commitCursor = (activeLabel?: string) => {
+    if (!activeLabel || !setTimeOfInterest) return;
+    setTimeOfInterest(
+      isSitesChart
+        ? new Date(Number(activeLabel))?.toISOString() || new Date().toISOString()
+        : activeLabel
+    );
+  };
   // Deliberately NOT given the country's zone, unlike the display helpers below.
   //
   // This value is not shown to anyone: it is turned into epoch millis and matched against the
@@ -334,11 +469,42 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const ticks = offsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
-  const timeOffsets = [-10, 13, 37, 61];
-  const timeTicks = timeOffsets.map((o) => {
-    return new Date(now).setHours(o, 0, 0, 0);
-  });
 
+  /**
+   * Axis labels, in the footer's format: `ccc HH:mm` on the first tick of each day, bare
+   * `HH:mm` on the rest.
+   *
+   * This replaces a second axis (`x-axis-3`) that printed the date on its own row beneath the
+   * times. That row cost ~18px of plot height and, because it was a separate tick set at a
+   * different interval, it repeated a date once per group — "Thu 27" twice, "Today" twice. One
+   * row cannot repeat a day, because the day is only printed when it changes.
+   *
+   * Built as a lookup rather than computed inside the formatter: "has the day changed" is a
+   * property of a tick's *position in the sequence*, and Recharts calls the formatter per tick
+   * with no reliable ordering guarantee.
+   */
+  const axisTickLabels = useMemo(() => {
+    const source: (string | number)[] | undefined = isSitesChart ? ticks : categoryTicks;
+    const labels: Record<string, string> = {};
+    if (!source) return labels;
+    let previousDay = "";
+    for (const value of source) {
+      const dt = (
+        typeof value === "number"
+          ? DateTime.fromMillis(value)
+          : DateTime.fromISO(value, { zone: "utc", setZone: true })
+      )
+        .setZone(timezone)
+        .setLocale(locale);
+      if (!dt.isValid) continue;
+      const day = dt.toFormat("yyyy-LL-dd");
+      const showDay = day !== previousDay;
+      previousDay = day;
+      labels[String(value)] = dt.toFormat(showDay ? "ccc HH:mm" : "HH:mm");
+    }
+    return labels;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSitesChart, ticks.join(","), categoryTicks?.join(","), timezone, locale]);
   //get Y axis boundary
 
   const yMaxZoom_Levels = [
@@ -387,7 +553,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
   }) => {
     return (
       <g transform={`translate(${x},${y})`}>
-        <text className="fill-white text-xs text-right" x={0} y={0} dy={3} textAnchor={"start"}>
+        <text
+          className="fill-content font-mono tabular-nums text-xs text-right"
+          x={0}
+          y={0}
+          dy={3}
+          textAnchor={"start"}
+        >
           {`${payload.value > 0 ? "+" : ""}${prettyPrintYNumberWithCommas(payload.value)}`}
         </text>
       </g>
@@ -419,7 +591,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             type="button"
             onClick={handleZoomOut}
             style={{ position: "relative", top: "0", left: "20" }}
-            className="flex font-bold items-center p-1.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+            className="flex font-bold items-center p-1.5 border-surface-panel text-content bg-surface-panel hover:bg-content-muted focus:z-10 focus:text-content h-auto"
           >
             <ZoomOutIcon className="w-8 h-8" />
           </button>
@@ -435,10 +607,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
             margin={{
               top: 20,
               right: rightChartMargin,
-              bottom: -10,
+              bottom: -4,
               left: 16
             }}
             onClick={(e?: { activeLabel?: string }) => {
+              if (draggingCursorRef.current) return;
               if (globalIsZooming) return;
 
               if (setTimeOfInterest && e?.activeLabel) {
@@ -450,6 +623,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
             onMouseDown={(e?: { activeLabel?: string }) => {
+              if (draggingCursorRef.current) return;
               if (!zoomEnabled) return;
               setTemporaryZoomArea(globalZoomArea);
               setGlobalIsZooming(true);
@@ -459,6 +633,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
             onMouseMove={(e?: { activeLabel?: string }) => {
+              // Before the zoom guard: the cursor is draggable whether or not zoom is enabled.
+              if (draggingCursorRef.current) {
+                commitCursor(e?.activeLabel);
+                return;
+              }
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -468,6 +647,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
             onMouseUp={(e?: { activeLabel?: string }) => {
+              if (draggingCursorRef.current) return;
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -491,7 +671,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
           >
-            <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
+            <CartesianGrid
+              verticalFill={[plot.bandA, plot.bandB]}
+              // Alpha lives in the token requests above, not here: a blanket fillOpacity
+              // composites the bands against whatever is behind them, so the value you set is
+              // never the value you see.
+              fillOpacity={1}
+              stroke={plot.stroke}
+              strokeOpacity={1}
+            />
             {/* The tick formatters are wrapped rather than passed by reference because recharts
                 calls them with (value, index), and index would land in the timezone argument
                 these helpers take. The wrapper is what makes passing the country's zone here
@@ -500,10 +688,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis"}
-              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
+              tickFormatter={(x) =>
+                axisTickLabels[String(x)] ?? prettyPrintChartAxisLabelDate(x, timezone, locale)
+              }
               scale={isSitesChart ? "time" : "auto"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
               tickLine={true}
+              // The labels used to sit tight under the rule because a second row carried the
+              // date below them and closed the gap. With that row gone they were the last thing
+              // on the axis and read as crowding it. `height` grows with the margin so the extra
+              // space is inside the axis box rather than clipped off the bottom of it.
+              tickMargin={8}
+              height={34}
               type={isSitesChart ? "number" : "category"}
               ticks={isSitesChart ? ticks : categoryTicks}
               domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
@@ -515,7 +711,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               xAxisId={"x-axis-2"}
               tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
               scale={isSitesChart ? "time" : "auto"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
               tickLine={true}
               type={isSitesChart ? "number" : "category"}
               ticks={isSitesChart ? ticks : categoryTicks}
@@ -525,29 +721,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               padding="no-gap"
               hide={true}
             />
-            <XAxis
-              dataKey="formattedDate"
-              xAxisId={"x-axis-3"}
-              tickFormatter={(x) => prettyPrintDayLabelWithDate(x, timezone, locale)}
-              scale={isSitesChart ? "time" : "auto"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
-              tickLine={false}
-              type={isSitesChart ? "number" : "category"}
-              ticks={isSitesChart ? timeTicks : undefined}
-              domain={isSitesChart ? [timeTicks[0], timeTicks[timeTicks.length - 1]] : undefined}
-              interval={isSitesChart ? undefined : 47}
-              orientation="bottom"
-              axisLine={false}
-              tickMargin={-12}
-              hide={false}
-            />
 
             <YAxis
               tickFormatter={
                 isSitesChart ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
               }
               yAxisId={"y-axis"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
               tickLine={false}
               ticks={yTicks}
               domain={globalIsZoomed && !isSitesChart ? [0, Number(zoomYMax * 1.1)] : [0, yMax]}
@@ -555,8 +735,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 value: isSitesChart ? "Generation (KW)" : "Generation (MW)",
                 angle: 270,
                 position: "outsideLeft",
-                fill: "white",
-                style: { fontSize: "12px" },
+                fill: plot.axis,
+                style: { fontSize: "10px", fontFamily: MONO },
                 offset: 0,
                 dx: -26,
                 dy: 0
@@ -580,8 +760,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     value: `Delta (MW)`,
                     angle: 90,
                     position: "insideRight",
-                    fill: "white",
-                    style: { fontSize: "11px" },
+                    fill: plot.axis,
+                    style: { fontSize: "10px", fontFamily: MONO },
                     offset: 0,
                     dx: deltaLabelOffset,
                     dy: 29
@@ -593,7 +773,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   yAxisId={"delta"}
                   xAxisId={"x-axis"}
                   y={0}
-                  stroke="white"
+                  stroke={plot.axis}
                   strokeWidth={0.1}
                 />
               </>
@@ -601,7 +781,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <ReferenceLine
               x={isSitesChart ? new Date(currentTime + ":00.000Z").getTime() : currentTime}
-              stroke="white"
+              stroke={plot.axis}
               strokeWidth={currentTime === timeOfInterest ? 2 : 1}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
@@ -610,7 +790,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               className={currentTime !== timeOfInterest ? "" : "hidden"}
               label={
                 <CustomizedLabel
-                  className={`fill-amber-400 cursor-pointer text-sm`}
+                  className="cursor-pointer z-30 text-sm"
                   value={"LIVE"}
                   onClick={resetTime}
                 />
@@ -619,14 +799,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
 
             <ReferenceLine
               x={isSitesChart ? new Date(localeTimeOfInterest).getTime() : timeOfInterest}
-              stroke="white"
+              stroke={plot.cursor}
               strokeWidth={2}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
               scale={isSitesChart ? "time" : "auto"}
               label={
                 <CustomizedLabel
-                  className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
+                  className={`text-sm ${draggingCursor ? "cursor-grabbing" : "cursor-grab"}`}
+                  onGrab={beginCursorDrag}
                   value={prettyPrintChartAxisLabelDate(timeOfInterest, timezone, locale)}
                   solidLine={true}
                 ></CustomizedLabel>
@@ -655,7 +836,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   strokeDasharray="5 5"
                   strokeDashoffset={3}
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 2}
+                  strokeWidth={largeScreenMode ? 4 : 1}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
@@ -667,7 +848,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 2}
+                  strokeWidth={largeScreenMode ? 4 : 1}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
@@ -701,7 +882,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={seasonal}
               fill="transparent"
               fillOpacity={50}
-              strokeWidth={largeScreenMode ? 3 : 2}
+              strokeWidth={largeScreenMode ? 3 : 1}
               hide={!visibleLines.includes("SEASONAL_MEAN")}
               isAnimationActive={false}
             />
@@ -716,8 +897,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     dot={false}
                     xAxisId={"x-axis"}
                     yAxisId={"y-axis"}
-                    stroke={"#ffdfd1"}
-                    fill={"#ffdfd1"}
+                    stroke={seasonal}
+                    fill={seasonal}
                     fillOpacity={
                       (1 /
                         (Number(boundPair[1].replace("P", "")) -
@@ -740,7 +921,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={ecmwfOnly} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
               isAnimationActive={false}
             />
@@ -754,7 +935,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={ecmwfOnly} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
               isAnimationActive={false}
             />
@@ -767,7 +948,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={satOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
@@ -781,7 +962,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={satOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
@@ -794,7 +975,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={metOfficeOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("MET_OFFICE_ONLY")}
               isAnimationActive={false}
             />
@@ -808,7 +989,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={metOfficeOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("MET_OFFICE_ONLY")}
               isAnimationActive={false}
             />
@@ -818,7 +999,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               dot={false}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
-              stroke="black"
+              stroke={toolTipColors.GENERATION}
               strokeWidth={largeScreenMode ? 4 : 2}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
@@ -827,8 +1008,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="GENERATION_UPDATED"
-              strokeWidth={largeScreenMode ? 4 : 2}
-              stroke="black"
+              strokeWidth={largeScreenMode ? 4 : 1}
+              stroke={toolTipColors.GENERATION_UPDATED}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               dot={false}
@@ -845,7 +1026,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
@@ -859,7 +1040,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
@@ -867,8 +1048,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
               <ReferenceArea
                 x1={globalZoomArea?.x1}
                 x2={globalZoomArea?.x2}
-                fill="#FFD053"
-                fillOpacity={0.3}
+                className="fill-interactive"
+                fillOpacity={0.2}
                 xAxisId={"x-axis"}
                 yAxisId={"y-axis"}
               />
@@ -903,7 +1084,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <li key={level} className="font-sans text-2xs" style={{ color: yellow }}>
                     <div className="flex justify-between">
                       <div>{`OCF P${level}`}:</div>
-                      <div className="ml-4">{prettyPrintYNumberWithCommas(String(value), 1)}</div>
+                      <div className="ml-4 font-mono tabular-nums">
+                        {prettyPrintYNumberWithCommas(String(value), 1)}
+                      </div>
                     </div>
                   </li>
                 );
@@ -911,10 +1094,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const lowerRows = pLevelRows.filter(([level]) => level < 50).map(pLevelRow);
 
                 return (
-                  <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
+                  <div className="px-3 py-2 bg-surface-raised bg-opacity-80 shadow">
                     <ul className="">
-                      <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
-                        <div className="pr-3">
+                      <li className={`flex justify-between pb-2 text-xs text-content font-sans`}>
+                        <div className="pr-3 font-mono tabular-nums">
                           {formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale)}
                         </div>
                         <div>{isSitesChart ? "KW" : "MW"}</div>
@@ -987,7 +1170,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                                   className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
                                 >
                                   <div>{title}:</div>
-                                  <div className={`font-sans ml-4`}>
+                                  <div className={`font-mono tabular-nums ml-4`}>
                                     {(showNHourView || key !== "DELTA") && sign}
                                     {computedValue}{" "}
                                   </div>
