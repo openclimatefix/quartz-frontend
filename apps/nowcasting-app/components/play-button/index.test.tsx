@@ -125,6 +125,23 @@ describe("speed control", () => {
     return time;
   };
 
+  // The rate is one cycling chip now (1x → 2x → 4x → 1x), so a speed is reached by clicking it
+  // the right number of times rather than by naming a button. `SPEEDS.indexOf` is the same order
+  // the component cycles in, so this stays honest if the set changes.
+  const SPEED_ORDER = [1, 2, 4];
+  const speedChip = () => screen.getByRole("button", { name: /Playback speed/ });
+  const setSpeed = (target: number) => {
+    // One click per `act`, re-reading the speed each time. `fireEvent` flushes on its own, but
+    // only outside an enclosing `act` — batched, the component would still hold the old speed
+    // and the second click would cycle from the same place.
+    let guard = SPEED_ORDER.length + 1;
+    while (Number(getGlobalState("playbackSpeed")) !== target && guard-- > 0) {
+      act(() => {
+        fireEvent.click(speedChip());
+      });
+    }
+  };
+
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -150,8 +167,8 @@ describe("speed control", () => {
   ])("%dx ticks the cursor %d time(s) per second", (speed, expectedTicks) => {
     render(<PlayButton startTime={START} endTime={FAR_END} />);
 
+    setSpeed(speed);
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: `${speed}x` }));
       fireEvent.click(screen.getByRole("button", { name: "Play" }));
     });
     act(() => {
@@ -178,9 +195,7 @@ describe("speed control", () => {
     const afterFirstTick = getGlobalState("selectedISOTime");
     expect(afterFirstTick).toBe(stepped(START, 1));
 
-    act(() => {
-      fireEvent.click(screen.getByRole("button", { name: "4x" }));
-    });
+    setSpeed(4);
     act(() => {
       // If the old 1000ms interval were still running unchanged, this would produce one more
       // tick, not four — this is what actually distinguishes "restarted" from "left alone".
@@ -198,9 +213,7 @@ describe("speed control", () => {
     render(<PlayButton startTime={START} endTime={FAR_END} />);
     const before = getGlobalState("selectedISOTime");
 
-    act(() => {
-      fireEvent.click(screen.getByRole("button", { name: "2x" }));
-    });
+    setSpeed(2);
 
     expect(getGlobalState("selectedISOTime")).toBe(before);
     expect(getGlobalState("isPlaying")).toBe(false);
@@ -211,17 +224,30 @@ describe("speed control", () => {
     expect(getGlobalState("selectedISOTime")).toBe(before);
   });
 
-  test("the active speed is the only one marked pressed", () => {
+  // The chip shows only the active speed, so "which one is selected" is now carried by the
+  // label itself rather than by `aria-pressed` across a set. What has to hold is that the chip
+  // reads the current speed and that clicking advances to the next one, wrapping.
+  test("the chip shows the active speed and cycles through the set", () => {
     render(<PlayButton startTime={START} endTime={FAR_END} />);
 
-    expect(screen.getByRole("button", { name: "1x" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "2x" })).toHaveAttribute("aria-pressed", "false");
+    expect(speedChip()).toHaveTextContent("1x");
 
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: "2x" }));
+      fireEvent.click(speedChip());
     });
+    expect(speedChip()).toHaveTextContent("2x");
+    expect(getGlobalState("playbackSpeed")).toBe(2);
 
-    expect(screen.getByRole("button", { name: "1x" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: "2x" })).toHaveAttribute("aria-pressed", "true");
+    act(() => {
+      fireEvent.click(speedChip());
+    });
+    expect(speedChip()).toHaveTextContent("4x");
+
+    // Wraps rather than sticking at the top of the set.
+    act(() => {
+      fireEvent.click(speedChip());
+    });
+    expect(speedChip()).toHaveTextContent("1x");
+    expect(getGlobalState("playbackSpeed")).toBe(1);
   });
 });

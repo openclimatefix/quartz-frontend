@@ -7,7 +7,12 @@ import { getCountryConfig, sortCountryCodes } from "../../config/countries";
 // rather than the label it goes by, and the two ends come from one call so they cannot disagree
 // about which period they bound. Nothing here rounds anything — see `lib/time/cursor.ts`.
 import { periodForInstant, slotLabellingFor } from "../../lib/time/cursor";
-import { DEFAULT_LOCALE, DEFAULT_TIMEZONE, formatISODateStringAsZonedTime } from "../helpers/utils";
+import {
+  DEFAULT_LOCALE,
+  DEFAULT_TIMEZONE,
+  formatISODateStringAsZonedDate,
+  formatISODateStringAsZonedTime
+} from "../helpers/utils";
 import PlayButton from "../play-button";
 import ScrubTrack from "./scrub-track";
 import useCursorRange from "./use-cursor-range";
@@ -130,7 +135,7 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
           Focus is weight and colour only — the row never moves. */}
       <span
         className={`w-5 shrink-0 font-bold uppercase tracking-wider ${
-          focused ? "text-ocf-yellow" : "text-ocf-gray-600"
+          focused ? "text-selected" : "text-content-secondary"
         }`}
       >
         {code}
@@ -140,8 +145,8 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
           a 15-minute one when focus moves — holds exactly the same box. The column is read
           vertically; nothing in it may shift sideways at the moment it changes. */}
       <span
-        className={`w-[4.5rem] shrink-0 tabular-nums ${
-          focused ? "text-white" : "text-ocf-gray-400"
+        className={`w-[4.5rem] shrink-0 font-mono tabular-nums ${
+          focused ? "text-content" : "text-content"
         }`}
       >
         {span}
@@ -160,6 +165,16 @@ const CursorReadout: FC = () => {
 
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
   const utc = formatISODateStringAsZonedTime(selectedISOTime, "UTC");
+  // The cursor's date, which nothing else on screen states: the chart axis names a weekday, the
+  // tag and the pill name a time, and none of them say which day you are on once you have
+  // scrubbed a few days out. It heads the stack rather than joining it — read once and then
+  // ignored, which is what a date is for, and it costs no width because the stack's rows are
+  // already wider than it.
+  //
+  // In the *focused* country's zone, because that is the zone the chart's axis and the cursor's
+  // grid follow. Near midnight the enabled countries are genuinely on different dates, so the
+  // zone is named in the title rather than left as an assumption.
+  const cursorDate = formatISODateStringAsZonedDate(selectedISOTime, focusedZone, DEFAULT_LOCALE);
 
   /**
    * The stack runs in the registry's order — the same order the header toggle and the chart's
@@ -175,9 +190,14 @@ const CursorReadout: FC = () => {
   const zoneOrder = sortCountryCodes(enabledCountries, (code) => code);
 
   return (
+    // A control panel docked to the bottom edge, not page furniture: it holds the scrub track,
+    // playback and the zone stack, so it belongs to the same Black 1 family as the chart card,
+    // the map dock and the display rail. It was Black 2 on the reasoning that a full-bleed band
+    // is the page — but with the header carrying no fill, this is the only band, and what it
+    // *contains* is a better guide to its depth than how wide it happens to be.
     <footer
       aria-label="Time cursor"
-      className="flex flex-none items-center gap-3 border-t border-white/10 bg-black px-4 py-2 text-xs text-ocf-gray-300"
+      className="relative z-30 flex flex-none items-center gap-3 border-t border-edge bg-surface-panel px-4 py-2 text-xs text-content"
     >
       {/*
        * A stack of zones, not a sentence about the cursor.
@@ -195,13 +215,19 @@ const CursorReadout: FC = () => {
        * and tabular, so nothing reflows as the cursor steps and the periods change under it.
        */}
       <div className="flex flex-none flex-col justify-center gap-px leading-none">
-        <span className="flex items-baseline gap-1.5 text-2xs text-ocf-gray-600">
+        <span
+          className="pb-0.5 font-mono text-2xs font-bold uppercase tracking-wider text-content"
+          title={`Cursor date in ${focusedCountry}'s timezone (${focusedZone})`}
+        >
+          {cursorDate}
+        </span>
+        <span className="flex items-baseline gap-1.5 text-2xs text-content-secondary">
           <span className="w-5 shrink-0 font-bold uppercase tracking-wider">utc</span>
           {/* One instant, not a span, and deliberately narrower than the rows below it: UTC is
               the cursor's canonical value rather than any publisher's period, so it has no start
               and end to state. It sits at the same left edge as every span below, which is what
               lets the eye check each period against it. */}
-          <span className="w-10 shrink-0 tabular-nums">{utc}</span>
+          <span className="w-10 shrink-0 font-mono tabular-nums">{utc}</span>
         </span>
         {zoneOrder.map((code) => (
           <CountrySlot

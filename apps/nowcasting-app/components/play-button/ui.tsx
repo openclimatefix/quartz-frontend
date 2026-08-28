@@ -25,7 +25,17 @@ const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
       aria-pressed={isPlaying}
       aria-label={isPlaying ? "Pause" : "Play"}
       title={isPlaying ? "Pause playback" : "Play through the window"}
-      className="flex h-7 w-7 flex-none items-center justify-center rounded border border-white/10 text-ocf-yellow transition-colors hover:border-white/20 hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow"
+      // The same body every other button in the app wears — see `CONTROL_BUTTON_OFF` in
+      // `map/control-button.ts`: transparent, a 2px `content-on-accent` ring, and a hover that
+      // lifts the ground rather than touching the colour. Written out rather than imported
+      // because the one thing that differs is the part that matters, and it would have to be
+      // overridden anyway: the glyph stays orange, because this is a control and orange is what
+      // a control is.
+      //
+      // It had a brand-orange border, which made it the only outlined-in-orange object on a
+      // screen where orange marks the cursor family — the handle, the pill, NOW. A border is
+      // the body of the button, not a statement about it.
+      className="flex h-7 w-7 flex-none items-center justify-center rounded bg-transparent text-interactive ring-2 ring-inset ring-content-on-accent transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-interactive"
     >
       {isPlaying ? (
         <svg width="14" height="14" viewBox="7 6 10 12" fill="none" aria-hidden="true">
@@ -48,42 +58,35 @@ type SpeedControlProps = {
 };
 
 /**
- * The 1x/2x/4x rate picker, stacked under the play button (`index.tsx` owns the stack, and
- * that stacking is what lets both the footer and `/sites` pick this up for free).
+ * The playback rate, as one cycling chip: it shows the speed you are playing at, and clicking it
+ * moves to the next one — 1x → 2x → 4x → 1x.
  *
- * It takes its natural width, and the column above it centres on that. It was pinned to the
- * button's own `w-7` so the pair would read as one column — but three labels do not fit in 28px,
- * so they simply overflowed the box and printed across the scrub track's tick labels beside it.
- * A control cannot be narrower than its contents; what makes the pair read as one column is the
- * centring, not a shared width.
+ * It was three buttons side by side. Two problems with that at this size: three labels do not
+ * fit the play button's own 28px column, so the row set its own width and pushed the pair out of
+ * alignment with the tick labels beside it; and two of the three were always inert, which is a
+ * lot of permanent chrome for a setting almost nobody changes. A cycling chip is one target that
+ * is always live and always exactly as wide as one label.
  *
- * It is secondary to the button and to the track it sits under, so it is a row of bare text
- * rather than another bordered icon block — quiet, not competing. `aria-pressed` marks the
- * active speed the same way the button marks play/pause; `role="group"` plus its `aria-label`
- * say what the buttons are choosing between, since colour and weight alone would not reach
- * assistive tech.
+ * The trade is discoverability — you cannot see the other speeds without clicking. That is the
+ * right trade here: the set is three values on an obvious scale, the title and `aria-label` both
+ * name the next one, and the cost of a wrong click is one more click.
+ *
+ * `mt-1` puts it on the tick-label row: the play button is `h-7` (28px) and `TrackTicks` opens
+ * with its own `pt-1`, so the two baselines meet.
  */
-export const SpeedControl: React.FC<SpeedControlProps> = ({ speed, onChange }) => (
-  <div
-    role="group"
-    aria-label={`Playback speed: ${speed}x`}
-    className="mt-1 flex items-center gap-0.5"
-  >
-    {SPEEDS.map((s) => (
-      <button
-        key={s}
-        type="button"
-        onClick={() => onChange(s)}
-        aria-pressed={speed === s}
-        title={`Play at ${s}x speed`}
-        className={`rounded-sm px-0.5 text-2xs leading-none transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow ${
-          speed === s ? "text-ocf-yellow" : "text-ocf-gray-700 hover:text-ocf-gray-400"
-        }`}
-      >
-        {s}x
-      </button>
-    ))}
-  </div>
-);
+export const SpeedControl: React.FC<SpeedControlProps> = ({ speed, onChange }) => {
+  const next = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length];
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(next)}
+      title={`Playing at ${speed}x — click for ${next}x`}
+      aria-label={`Playback speed: ${speed}x. Click for ${next}x`}
+      className="mt-1 rounded-sm px-1 text-2xs leading-none text-content-muted transition-colors hover:text-content focus:outline-none focus-visible:ring-1 focus-visible:ring-interactive"
+    >
+      {speed}x
+    </button>
+  );
+};
 
 export default Ui;

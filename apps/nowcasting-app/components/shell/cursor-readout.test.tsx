@@ -189,8 +189,8 @@ describe("the zone stack", () => {
     // tag, so a bare `getByText` matches twice.
     const codeIn = (code: string) =>
       screen.getByTitle(new RegExp(`^${code} published period`)).firstElementChild;
-    expect(codeIn("NL")).toHaveClass("text-ocf-yellow");
-    expect(codeIn("GB")).not.toHaveClass("text-ocf-yellow");
+    expect(codeIn("NL")).toHaveClass("text-selected");
+    expect(codeIn("GB")).not.toHaveClass("text-selected");
   });
 
   test("runs in registry order, not in the order countries were enabled", () => {
