@@ -38,8 +38,8 @@ import { RAIL_WIDTH_PX } from "./geometry";
  */
 
 const RailGroup: FC<{ title: string; children: ReactNode }> = ({ title, children }) => (
-  <div className="border-t border-white/10 px-3 py-3 first:border-t-0">
-    <span className="mb-2 block text-2xs font-semibold uppercase tracking-wider text-ocf-gray-600">
+  <div className="border-t border-content/10 px-3 py-3 first:border-t-0">
+    <span className="mb-2 block text-2xs font-semibold uppercase tracking-wider text-content-secondary">
       {title}
     </span>
     {children}
@@ -52,8 +52,8 @@ const RailRow: FC<{ label: string; on: boolean; onToggle: () => void }> = ({
   onToggle
 }) => (
   <div className="flex items-center justify-between py-1 text-sm">
-    <button type="button" onClick={onToggle} className="flex-1 text-left text-ocf-gray-300">
-      <span className={on ? "text-white" : undefined}>{label}</span>
+    <button type="button" onClick={onToggle} className="flex-1 text-left text-content">
+      <span className={on ? "text-content" : undefined}>{label}</span>
     </button>
     <Toggle onClick={onToggle} visible={on} />
   </div>
@@ -112,15 +112,10 @@ const SeriesToggles: FC = () => {
 
   return (
     <div className="flex flex-col">
-      <LegendItem
-        iconClasses="text-ocf-yellow"
-        symbolStyle="both"
-        label="Current"
-        dataKey="FORECAST"
-      />
+      <LegendItem iconClasses="text-solar" symbolStyle="both" label="Current" dataKey="FORECAST" />
       {showNHourView && (
         <LegendItem
-          iconClasses="text-ocf-orange"
+          iconClasses="text-series-nHour"
           symbolStyle="both"
           label={`${nHourForecast} hour`}
           dataKey="N_HOUR_FORECAST"
@@ -143,15 +138,19 @@ const SeriesToggles: FC = () => {
         .map((source, index) => (
           <LegendItem
             key={`rail-${GENERATION_CHART_KEYS[index]}`}
-            iconClasses="text-ocf-black"
+            iconClasses="text-solar-light"
             symbolStyle={index === 0 ? "dashed" : undefined}
             label={source.label}
             dataKey={GENERATION_CHART_KEYS[index]}
           />
         ))}
-      <LegendItem iconClasses="text-[#ffdfd1]" label="Seasonal mean" dataKey="SEASONAL_MEAN" />
       <LegendItem
-        iconClasses="text-[#ffdfd1]"
+        iconClasses="text-series-seasonal"
+        label="Seasonal mean"
+        dataKey="SEASONAL_MEAN"
+      />
+      <LegendItem
+        iconClasses="text-series-seasonal"
         symbolStyle="area"
         label="Seasonal quantiles"
         dataKey="SEASONAL_BOUNDS"
@@ -179,7 +178,7 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
   <aside
     aria-label="Display settings"
     aria-hidden={!open}
-    className="absolute inset-y-0 right-0 z-20 flex flex-col border-l border-white/10 bg-mapbox-black-500 text-white transition-transform duration-300"
+    className="absolute bottom-0 top-14 right-0 z-20 flex flex-col border-l border-content/10 bg-surface-panel text-content transition-transform duration-300"
     style={{ width: RAIL_WIDTH_PX, transform: open ? undefined : "translateX(100%)" }}
   >
     {/* The handle rides on the rail rather than sitting in the shell, so one transform moves
@@ -190,15 +189,13 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
       aria-label={open ? "Hide display settings" : "Show display settings"}
       title={open ? "Hide display settings" : "Show display settings"}
       onClick={onToggle}
-      className="absolute -left-8 top-3 flex h-8 w-8 items-center justify-center rounded-l border border-r-0 border-white/10 bg-mapbox-black-500 text-ocf-gray-300 hover:text-white"
+      className="absolute -left-8 top-3 flex h-8 w-8 items-center justify-center rounded-l border border-r-0 border-content/10 bg-surface-panel text-content hover:text-content"
     >
       {open ? <MdKeyboardArrowRight size={22} /> : <MdKeyboardArrowLeft size={22} />}
     </button>
-    <div className="flex flex-none items-baseline justify-between border-b border-white/10 px-3 py-3">
-      <span className="text-2xs font-semibold uppercase tracking-wider text-ocf-gray-400">
-        Display
-      </span>
-      <span className="text-2xs text-ocf-gray-600">how it&rsquo;s drawn</span>
+    <div className="flex flex-none items-baseline justify-between border-b border-content/10 px-3 py-3">
+      <span className="text-2xs font-semibold uppercase tracking-wider text-content">Display</span>
+      <span className="text-2xs text-content-secondary">how it&rsquo;s drawn</span>
     </div>
     <div className="flex-1 overflow-y-auto pb-4">
       <RailGroup title="Confidence">

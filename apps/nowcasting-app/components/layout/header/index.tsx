@@ -35,8 +35,10 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({ url, text, className, disabled 
   const { pathname } = useRouter();
   const computedClasses = classNames(
     className || "",
-    disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
-    "flex px-1 sm:px-4 py-2 font-semibold text-xs sm:text-sm"
+    disabled
+      ? "text-content-muted cursor-not-allowed"
+      : "cursor-pointer hover:text-interactive-hover",
+    "flex mx-1 sm:mx-4 py-1 font-semibold text-xs sm:text-sm border-interactive"
   );
 
   // Denotes external link for styling
@@ -62,7 +64,9 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({ url, text, className, disabled 
           aria-current={isCurrent ? "page" : undefined}
           className={classNames(
             computedClasses,
-            isCurrent || active ? "text-ocf-yellow" : "text-white"
+            isCurrent || active
+              ? "text-selected border-b-2 border-selected-edge"
+              : "text-content-muted"
           )}
         >
           {text}
@@ -79,43 +83,47 @@ type HeaderProps = {
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
   return (
-    <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
+    <header className="h-14 text-content text-right sm:px-4 flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
         <a
-          className="flex h-8 self-center w-auto"
-          target="_blank"
-          href="https://quartz.solar/"
-          rel="noreferrer"
-        >
-          <img src="/QUARTZSOLAR_LOGO_ICON.svg" alt="quartz_logo" className="h-8 w-auto" />
-        </a>
-      </div>
-      <div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">
-        <a
-          className="flex h-6 w-auto"
+          className="flex h-6 self-center w-auto"
           target="_blank"
           href="https://quartz.solar/"
           rel="noreferrer"
         >
           <img
-            src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"
-            alt="quartz_logo"
-            className="h-8 w-auto"
+            src="/OCF-Orange-logomark.svg"
+            alt="ocf_logo"
+            // Neutral at rest so the mark is not competing with the data, brand orange on hover.
+            // A filter rather than a second asset: one file, and the colour stays the brand's.
+            className="h-6 w-auto"
+            // className="h-6 w-auto grayscale brightness-150 transition duration-150 hover:grayscale-0 hover:brightness-100"
           />
         </a>
-        <div className="mr-[6px] flex items-center">
-          <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>
-          <OCFlogo />
-        </div>
       </div>
-      <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">
-        {isLoggedIn && (
-          <Menu>
-            <HeaderLink url="/" text="Forecast" />
-            <HeaderLink url="/sites" text="Solar Sites" />
-          </Menu>
-        )}
-      </div>
+      {/*<div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">*/}
+      {/*  <a*/}
+      {/*    className="flex h-6 w-auto"*/}
+      {/*    target="_blank"*/}
+      {/*    href="https://quartz.solar/"*/}
+      {/*    rel="noreferrer"*/}
+      {/*  >*/}
+      {/*    <img*/}
+      {/*      src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"*/}
+      {/*      alt="quartz_logo"*/}
+      {/*      className="h-8 w-auto"*/}
+      {/*    />*/}
+      {/*  </a>*/}
+      {/*  <div className="mr-[6px] flex items-center">*/}
+      {/*    <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>*/}
+      {/*    <OCFlogo />*/}
+      {/*  </div>*/}
+      {/*</div>*/}
+      {/* The Forecast/Solar Sites switcher is gone (Brad, 2026-08-27): Sites serves a different
+          set of users from the dashboard's regulars, so a permanent two-item nav spent header
+          width on a destination most viewers never want. `/sites` still routes — it is reached
+          by URL rather than advertised. Restore the two `HeaderLink`s here if that changes. */}
+      <div className="grow" />
       <div className="flex items-center gap-2">
         {isLoggedIn && <CountryToggle />}
         {isLoggedIn && <DataInfoButton />}

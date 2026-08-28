@@ -7,7 +7,7 @@ import DisplayPanel from "./display-panel";
 import FloatingChart from "./floating-chart";
 import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
-import { RAIL_WIDTH_PX } from "./geometry";
+import { RAIL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
 import { useCursorRange } from "./use-cursor-range";
 import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
 
@@ -65,10 +65,13 @@ const DashboardShell: FC<{
   useCursorHotkeys(useCursorRange()?.range);
 
   return (
-    // `pt-16` reserves the header's height: `Header` positions itself absolutely, as it always
-    // has, so that the pages which are not this one keep laying out unchanged.
+    // No `pt-14` any more: the header carries no fill, so the map runs edge to edge behind it
+    // and the header's four controls float over the floor the way the control dock does. The
+    // things that must NOT go under it inset themselves instead — the floating layer and the
+    // display rail, both `top-14` below. `Header` still positions itself absolutely, so the
+    // pages which are not this one keep laying out unchanged.
     <div
-      className={`relative flex min-h-0 flex-1 flex-col pt-16${
+      className={`relative flex min-h-0 flex-1 flex-col${
         dashboardModeActive ? " @container dashboard-mode" : ""
       }`}
     >
@@ -83,8 +86,11 @@ const DashboardShell: FC<{
         <div className="absolute inset-0">{map}</div>
 
         <div
-          className="pointer-events-none absolute inset-y-0 left-0 transition-[right] duration-300"
-          style={{ right: railOpen ? RAIL_WIDTH_PX : 0 }}
+          className="pointer-events-none absolute bottom-0 top-14 left-0 transition-[right] duration-300"
+          style={{
+            right: railOpen ? RAIL_WIDTH_PX : 0,
+            top: `calc(3.5rem - ${STAGE_GUTTER_PX}px)`
+          }}
         >
           <FloatingChart comparisonActive={comparisonActive}>{chart}</FloatingChart>
           <MapControlDock>
