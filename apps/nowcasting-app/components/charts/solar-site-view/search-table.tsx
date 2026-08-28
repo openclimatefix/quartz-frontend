@@ -87,7 +87,7 @@ const SitesTable: React.FC<Site> = ({ dno, region, inverter_capacity_kw }) => {
     <>
       <div className="">
         <div
-          className="sticky flex flex-row bg-ocf-sites-100
+          className="sticky flex flex-row bg-surface-raised
             justify-between"
         >
           <div>
@@ -122,39 +122,39 @@ const SitesTable: React.FC<Site> = ({ dno, region, inverter_capacity_kw }) => {
                 <div key={item.dno} className="flex flex-col bg-ocf-delta-950 ">
                   <div className="flex flex-row justify-between text-sm">
                     <div className="ml-10 w-80">
-                      <div className="py-3 text-white font-bold text-sm">{item.dno}</div>
+                      <div className="py-3 text-content font-bold text-sm">{item.dno}</div>
                     </div>
 
                     <div className="flex flex-row">
                       <div
-                        className="text-white w-32
+                        className="text-content w-32
                          justify-center py-3 font-bold flex flex-row text-sm"
                       >
                         <p>
                           {item.percentage}
-                          <span className="ocf-gray-400 text-xs">%</span>
+                          <span className="text-content text-xs">%</span>
                         </p>
                         <span className="pl-2">
                           <ThinDownArrow />
                         </span>
                       </div>
-                      <div className="flex flex-row text-white justify-start w-32 py-3 font-bold text-sm">
-                        <span className="fill-white pr-1">
+                      <div className="flex flex-row text-content justify-start w-32 py-3 font-bold text-sm">
+                        <span className="fill-content pr-1">
                           {item.delta > 0 ? <SitesUpArrow /> : <SitesDownArrow />}
                         </span>
                         <p>{item.delta}</p>
-                        <span className="text-ocf-gray-400 text-xs font-thin pt-1 ">MW</span>
+                        <span className="text-content text-xs font-thin pt-1 ">MW</span>
                       </div>
-                      <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
+                      <div className="flex text-content font-bold w-32 justify-center py-3 pr-10 text-sm">
                         {item.actualGeneration}/{item.installedCapacity}
-                        <span className="text-ocf-gray-400 text-xs font-thin pt-1">MW</span>
+                        <span className="text-content text-xs font-thin pt-1">MW</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-end justify-end flex-row-reverse bg-ocf-delta-950 mb-0.5">
-                  <div className="bg-ocf-yellow h-2.5" style={{ width: `2px` }}></div>
-                  <div className="bg-ocf-yellow h-1" style={{ width: `${item.percentage}%` }}></div>
+                  <div className="bg-solar h-2.5" style={{ width: `2px` }}></div>
+                  <div className="bg-solar h-1" style={{ width: `${item.percentage}%` }}></div>
                 </div>
               </>
             );

@@ -35,21 +35,21 @@ const LogoutPage: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="bg-mapbox-black min-h-screen w-full mx-auto flex flex-col items-center">
+      <main className="bg-surface-sunken min-h-screen w-full mx-auto flex flex-col items-center">
         <Header isLoggedIn={false} />
-        <div className="flex-1 flex flex-col items-center justify-center mt-16 px-4 py-4 max-w-7xl sm:px-6 lg:px-8 mx-auto sm:py-24 text-white">
+        <div className="flex-1 flex flex-col items-center justify-center mt-16 px-4 py-4 max-w-7xl sm:px-6 lg:px-8 mx-auto sm:py-24 text-content">
           <div className="text-center">
-            <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-ocf-gray-500 sm:text-5xl">
+            <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-content-secondary sm:text-5xl">
               See you next time.
             </h1>
-            <p className="mt-2 text-lg text-ocf-gray-700">You have successfully logged out.</p>
+            <p className="mt-2 text-lg text-content-muted">You have successfully logged out.</p>
             <div className="mt-4 cursor-pointer">
               <Link href="/" className="text-xs font-medium hover:cursor-pointer">
                 <button
                   type="submit"
                   name="action"
                   value="default"
-                  className="text-sm self-center my-3 p-3 font-medium hover:cursor-pointer bg-ocf-gray-500 hover:bg-ocf-yellow-600 active:bg-ocf-yellow-600 text-black transition-all duration-200 py-2 px-4 rounded-full"
+                  className="text-sm self-center my-3 p-3 font-medium hover:cursor-pointer bg-content-secondary hover:bg-interactive-hover active:bg-interactive-hover text-content-on-accent transition-all duration-200 py-2 px-4 rounded-full"
                 >
                   Log back in.<span aria-hidden="true"> &rarr;</span>
                 </button>
@@ -58,13 +58,10 @@ const LogoutPage: NextPage = () => {
           </div>
 
           <div className="mt-16">
-            <h2 className="text-sm font-semibold tracking-wide text-ocf-gray-500 uppercase">
+            <h2 className="text-sm font-semibold tracking-wide text-content-secondary uppercase">
               Popular pages
             </h2>
-            <ul
-              role="list"
-              className="mt-4 border-t border-b border-gray-200 divide-y divide-gray-200"
-            >
+            <ul role="list" className="mt-4 border-t border-b border-edge divide-y divide-edge">
               {links.map((link, linkIdx) => (
                 <li key={linkIdx} className="relative flex items-start py-6 space-x-4">
                   <div className="flex-shrink-0">
@@ -73,7 +70,7 @@ const LogoutPage: NextPage = () => {
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-medium text-ocf-gray-500">
+                    <h3 className="text-base font-medium text-content-secondary">
                       <span className="rounded-sm focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-danube-500">
                         <a href={link.url} className="focus:outline-none">
                           <span className="absolute inset-0" aria-hidden="true" />
@@ -81,10 +78,10 @@ const LogoutPage: NextPage = () => {
                         </a>
                       </span>
                     </h3>
-                    <p className="text-base text-ocf-gray-700">{link.description}</p>
+                    <p className="text-base text-content-muted">{link.description}</p>
                   </div>
                   <div className="self-center flex-shrink-0 pl-6">
-                    <ChevronRightIcon className="w-5 h-5 text-gray-400" aria-hidden="true" />
+                    <ChevronRightIcon className="w-5 h-5 text-content-muted" aria-hidden="true" />
                   </div>
                 </li>
               ))}

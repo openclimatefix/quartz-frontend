@@ -20,7 +20,7 @@ const StatusBanner = ({ isSitesChart, solarStatus, sitesStatus }: StatusBannerPr
   }
 
   return (
-    <div className="bg-mapbox-black text-ocf-gray-600 text-center px-4 py-2">
+    <div className="bg-surface-sunken text-content-secondary text-center px-4 py-2">
       <p>⚠️&nbsp;{solarStatus?.message}</p>
     </div>
   );

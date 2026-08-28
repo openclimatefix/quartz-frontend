@@ -24,7 +24,7 @@ import { ActiveUnit } from "./types";
  */
 export const PV_SOURCE_ID = "latestPV";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const yellow = theme.extend.colors.solar.DEFAULT;
 
 /**
  * A region that is in the payload but reported nothing. Deliberately not the same as a

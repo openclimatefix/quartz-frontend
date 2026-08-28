@@ -87,18 +87,18 @@ export const CSVDownloadModal: React.FC<Props> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-surface-inset/40" onClick={onClose} />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div className="w-full max-w-[25rem] max-h-[85vh] overflow-y-auto rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
+        <div className="w-full max-w-[25rem] max-h-[85vh] overflow-y-auto rounded-2xl border border-content/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between border-b border-white/35 bg-[#1d1e20] px-4 py-2">
-            <h2 className="font-semibold text-white">Select Data for Download</h2>
+          <div className="sticky top-0 flex items-center justify-between border-b border-content/35 bg-[#1d1e20] px-4 py-2">
+            <h2 className="font-semibold text-content">Select Data for Download</h2>
             <button
               type="button"
               aria-label="Close download modal"
               onClick={onClose}
-              className="leading-none opacity-70 hover:opacity-100"
+              className="leading-none text-content opacity-70 hover:opacity-100"
             >
               <CloseButtonIcon />
             </button>
@@ -110,7 +110,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
               <div className="-ml-2">
                 <Toggle onClick={toggleAll} visible={allSelected} />
               </div>
-              <span className="text-sm font-medium text-white/65">Select All</span>
+              <span className="text-sm font-medium text-content/65">Select All</span>
             </div>
 
             {/* Column rows */}
@@ -126,7 +126,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
                   </div>
                   <span
                     className={`text-sm ${
-                      isDisabled ? "font-medium text-white/35" : "font-semibold text-white"
+                      isDisabled ? "font-medium text-content/35" : "font-semibold text-content"
                     }`}
                   >
                     {col.label}
@@ -143,8 +143,8 @@ export const CSVDownloadModal: React.FC<Props> = ({
               disabled={!selected.length}
               className={`h-11 w-full rounded-[10px] text-sm font-semibold tracking-[0.01em] transition-colors ${
                 selected.length
-                  ? "bg-ocf-yellow text-black hover:brightness-95"
-                  : "bg-ocf-yellow/30 text-black/40 cursor-not-allowed"
+                  ? "bg-surface-raised text-content ring-1 ring-inset ring-edge hover:bg-interactive hover:text-content-on-accent"
+                  : "bg-surface-raised/40 text-content-muted/50 cursor-not-allowed"
               }`}
             >
               Download CSV

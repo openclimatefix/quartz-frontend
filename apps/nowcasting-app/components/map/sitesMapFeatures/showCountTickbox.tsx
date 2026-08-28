@@ -13,11 +13,11 @@ const ShowSiteCount: React.FC<{ showCount?: boolean }> = () => {
         onClick={toggleCount}
         type="checkbox"
         value=""
-        className="ring-none border-2 bg-black text-black"
+        className="ring-none border-2 bg-surface-inset text-content-on-accent"
       ></input>
-      <label className="ml-2 text-base text-white font-medium">Show Site Count</label>
+      <label className="ml-2 text-base text-content font-medium">Show Site Count</label>
       {showSiteCount && (
-        <div className="absolute top-14 right-10 right flex items-center mb-4 text-white">
+        <div className="absolute top-14 right-10 right flex items-center mb-4 text-content">
           Showing site count.
         </div>
       )}

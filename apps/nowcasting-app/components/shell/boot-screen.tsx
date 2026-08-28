@@ -15,7 +15,7 @@ import Spinner from "../icons/spinner";
 const BootScreen: FC = () => (
   // No `role="status"` here: `Spinner` already carries one, and nesting two live regions makes
   // a screen reader announce the same thing twice.
-  <div className="flex h-screen w-full items-center justify-center bg-mapbox-black-900">
+  <div className="flex h-screen w-full items-center justify-center bg-surface-sunken">
     <Spinner />
   </div>
 );

@@ -208,15 +208,15 @@ describe("createBucketObject — labels, colours and quantity", () => {
   });
 
   test.each([
-    [DELTA_BUCKET.NEG4, "bg-ocf-delta-100", "border-ocf-delta-100", "text-black"],
-    [DELTA_BUCKET.NEG3, "bg-ocf-delta-200", "border-ocf-delta-200", "text-black"],
-    [DELTA_BUCKET.NEG2, "bg-ocf-delta-300", "border-ocf-delta-300", "text-black"],
-    [DELTA_BUCKET.NEG1, "bg-ocf-delta-400", "border-ocf-delta-400", "text-white"],
-    [DELTA_BUCKET.ZERO, "bg-ocf-delta-500", "border-white", "text-white"],
-    [DELTA_BUCKET.POS1, "bg-ocf-delta-600", "border-ocf-delta-600", "text-white"],
-    [DELTA_BUCKET.POS2, "bg-ocf-delta-700", "border-ocf-delta-700", "text-black"],
-    [DELTA_BUCKET.POS3, "bg-ocf-delta-800", "border-ocf-delta-800", "text-black"],
-    [DELTA_BUCKET.POS4, "bg-ocf-delta-900", "border-ocf-delta-900", "text-black"]
+    [DELTA_BUCKET.NEG4, "bg-ocf-delta-100", "border-ocf-delta-100", "text-content-on-accent"],
+    [DELTA_BUCKET.NEG3, "bg-ocf-delta-200", "border-ocf-delta-200", "text-content-on-accent"],
+    [DELTA_BUCKET.NEG2, "bg-ocf-delta-300", "border-ocf-delta-300", "text-content-on-accent"],
+    [DELTA_BUCKET.NEG1, "bg-ocf-delta-400", "border-ocf-delta-400", "text-content"],
+    [DELTA_BUCKET.ZERO, "bg-ocf-delta-500", "border-content", "text-content"],
+    [DELTA_BUCKET.POS1, "bg-ocf-delta-600", "border-ocf-delta-600", "text-content"],
+    [DELTA_BUCKET.POS2, "bg-ocf-delta-700", "border-ocf-delta-700", "text-content-on-accent"],
+    [DELTA_BUCKET.POS3, "bg-ocf-delta-800", "border-ocf-delta-800", "text-content-on-accent"],
+    [DELTA_BUCKET.POS4, "bg-ocf-delta-900", "border-ocf-delta-900", "text-content-on-accent"]
   ])("bucket %p uses %s / %s / %s", (bucket, bg, border, textColor) => {
     const result = createBucketObject(bucket, []);
     expect(result.bucketColor).toBe(bg);
@@ -225,7 +225,7 @@ describe("createBucketObject — labels, colours and quantity", () => {
   });
 
   test("ZERO is the only bucket whose border colour is not its background colour", () => {
-    expect(createBucketObject(DELTA_BUCKET.ZERO, []).borderColor).toBe("border-white");
+    expect(createBucketObject(DELTA_BUCKET.ZERO, []).borderColor).toBe("border-content");
   });
 
   test("an unknown bucket value silently falls through to the ZERO styling with 0/0 bounds", () => {

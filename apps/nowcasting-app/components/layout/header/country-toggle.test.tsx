@@ -301,9 +301,9 @@ describe("the status disc", () => {
   test("the disc is filled when lit and a hollow ring when off", async () => {
     await renderPair();
 
-    expect(discFor("GB")?.className).toContain("bg-ocf-yellow");
-    expect(discFor("GB")?.className).toContain("border-black");
-    expect(discFor("NL")?.className).toContain("border-ocf-gray-900");
+    expect(discFor("GB")?.className).toContain("bg-status-ok");
+    expect(discFor("GB")?.className).toContain("border-content-on-accent");
+    expect(discFor("NL")?.className).toContain("border-surface-raised");
     expect(discFor("NL")?.className).not.toContain("bg-");
   });
 
@@ -328,7 +328,7 @@ describe("a country with something wrong (driven by mocking the status hook)", (
     renderToggle();
     await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
 
-    expect(discFor("GB")?.className).toContain("bg-red-500");
+    expect(discFor("GB")?.className).toContain("bg-status-alert");
   });
 
   test("an off country shows no status colour, however bad the status", async () => {
@@ -338,7 +338,7 @@ describe("a country with something wrong (driven by mocking the status hook)", (
     renderToggle();
     await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
 
-    expect(discFor("NL")?.className).not.toContain("bg-red-500");
+    expect(discFor("NL")?.className).not.toContain("bg-status-alert");
     expect(statusFor("NL")).toBeNull();
   });
 
@@ -377,6 +377,6 @@ describe("a country with something wrong (driven by mocking the status hook)", (
     await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
 
     expect(statusFor("NL")).toBeNull();
-    expect(discFor("NL")?.className).not.toContain("bg-red-500");
+    expect(discFor("NL")?.className).not.toContain("bg-status-alert");
   });
 });

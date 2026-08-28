@@ -184,6 +184,7 @@ export const AggregationLevelToggle: FC<{ isLoading: boolean }> = ({ isLoading }
           onToggle={onToggleAggregation}
           text={finestLevel.label}
           value={finestLevel.regionType}
+          grow={true}
         />
       )}
       {/*<MapUIButton<string>*/}
@@ -202,6 +203,7 @@ export const AggregationLevelToggle: FC<{ isLoading: boolean }> = ({ isLoading }
           onToggle={onToggleAggregation}
           text={dnoLevel.label}
           value={dnoLevel.regionType}
+          grow={true}
         />
       )}
       {/*<MapUIButton<string>*/}

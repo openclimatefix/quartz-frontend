@@ -51,7 +51,7 @@ const DataInfoButton: React.FC = () => {
         type="button"
         aria-label="How to read this data"
         title="How to read this data"
-        className="flex h-8 w-8 items-center justify-center rounded-full text-ocf-gray-300 hover:text-ocf-yellow focus-visible:text-ocf-yellow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-content hover:text-interactive focus-visible:text-interactive focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-interactive"
       >
         <InfoIcon />
       </button>

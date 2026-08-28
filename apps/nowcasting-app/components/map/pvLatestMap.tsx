@@ -350,14 +350,14 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
           // Was "Actual / Forecast", which named neither of GB's two observers and so let the
           // in-day estimate read as "the actual". The heading is the stream's own label now.
-          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">${actualLabel} / Forecast</span>
+          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">${actualLabel} / Forecast</span>
               <div>
                 <span class="">${actualValue}</span>  /
-                <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">${unit}</span>
+                <span class="text-solar">${forecastValue}</span>  <span class="text-2xs text-content-muted">${unit}</span>
               </div>`;
           if (currentActiveUnit === ActiveUnit.capacity) {
-            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">% of National</span>
-            <div><span>${actualValue}</span> <span class="text-2xs text-mapbox-black-300">%</span></div>`;
+            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">% of National</span>
+            <div><span>${actualValue}</span> <span class="text-2xs text-content-muted">%</span></div>`;
           }
 
           // The delta line, in delta mode only.
@@ -378,7 +378,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             const asPercentage = currentActiveUnit === ActiveUnit.percentage;
             const deltaValue = asPercentage ? (state.deltaNormalized ?? 0) * 100 : state.delta ?? 0;
             const deltaBody = !state.hasDelta
-              ? `<span class="text-mapbox-black-300">no delta yet</span>`
+              ? `<span class="text-content-muted">no delta yet</span>`
               : `<span class="font-bold">${
                   deltaValue > 0
                     ? `<span class="up-arrow"></span>`
@@ -399,24 +399,24 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             const deltaCaption = observerLabelByCountryRef.current[featureCountry]
               ? `${observerLabelByCountryRef.current[featureCountry]} &minus; forecast`
               : "Difference";
-            deltaSection = `<div class="mt-1 flex items-center justify-between gap-3 border-t border-white/10 pt-1 text-xs">
-            <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">${deltaCaption}</span>
+            deltaSection = `<div class="mt-1 flex items-center justify-between gap-3 border-t border-content/10 pt-1 text-xs">
+            <span class="text-2xs uppercase tracking-wide text-content-muted">${deltaCaption}</span>
             <div>${deltaBody}</div>
           </div>`;
           }
 
-          const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          const popupContent = `<div class="flex flex-col min-w-[16rem] text-content">
           <div class="flex justify-between gap-3 items-center mb-1">
             <div class="text-sm font-semibold">${state.label || ""}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.GSPs || ""}</div>
+            <div class="text-xs text-content-muted">${properties?.GSPs || ""}</div>
           </div>
           <div class="flex justify-between items-center">
 
             <div class="flex flex-col text-xs">
-              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
+              <span class="text-2xs uppercase tracking-wide text-content-muted">Capacity</span>
               <div><span>${capacity.toFixed(
                 0
-              )}</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
+              )}</span> <span class="text-2xs text-content-muted">MW</span></div>
             </div>
             <div class="flex flex-col text-xs items-end">
               ${actualAndForecastSection}

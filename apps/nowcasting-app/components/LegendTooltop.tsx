@@ -35,7 +35,7 @@ const LegendTooltip: React.FC<LegendTooltipProps> = ({
           )} hidden z-[100] w-max max-w-64 mt-6 group-hover:flex flex-wrap`}
         >
           <span
-            className={`flex top-0 text-center mb-0 mt-2 text-xs px-3 py-1 leading-snug bg-mapbox-black bg-opacity-95 rounded-lg text-white drop-shadow-lg`}
+            className={`flex top-0 text-center mb-0 mt-2 text-xs px-3 py-1 leading-snug bg-surface-raised bg-opacity-95 rounded-lg text-content drop-shadow-lg`}
           >
             {tip}
           </span>

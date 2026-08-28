@@ -16,7 +16,7 @@
 export const RAIL_WIDTH_PX = 256;
 
 /** Breathing room between a floating pane and the edges of the inset it lives in. */
-export const STAGE_GUTTER_PX = 10;
+export const STAGE_GUTTER_PX = 8;
 
 /** Width the map control cluster is laid out around — see `map-control-dock.tsx`. */
 export const MAP_CONTROL_WIDTH_PX = 260;

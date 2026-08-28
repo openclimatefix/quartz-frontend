@@ -32,7 +32,7 @@ const ForecastLabel: React.FC<ForecastLabelProps> = ({
         )} hidden w-auto mt-6 group-hover:flex flex-wrap`}
       >
         <span
-          className={`relative flex top-0 text-center mb-0 mt-2 text-xs px-3 py-1 leading-snug bg-mapbox-black bg-opacity-90 rounded-lg text-white drop-shadow-lg`}
+          className={`relative flex top-0 text-center mb-0 mt-2 text-xs px-3 py-1 leading-snug bg-surface-raised bg-opacity-90 rounded-lg text-content drop-shadow-lg`}
         >
           {tip}
         </span>

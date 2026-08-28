@@ -83,21 +83,21 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
       }`}
     >
       <div
-        className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-mapbox-black  ${
+        className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-surface-sunken  ${
           isLoadingData || hasErrors
             ? "pr-2 pl-1.5"
-            : "bg-mapbox-black-600 px-1.5 fade-out pointer-events-none select-none"
+            : "bg-surface-raised px-1.5 fade-out pointer-events-none select-none"
         }`}
       >
         {isLoadingData && <SpinnerTextInline className="mr-2" />}
         {hasErrors && !isLoadingData && (
-          <CrossInlineSmall title={"Error"} className="mr-2 text-red-500" />
+          <CrossInlineSmall title={"Error"} className="mr-2 text-status-alert" />
         )}
-        <div className="text-sm text-ocf-gray-500">
+        <div className="text-sm text-content-secondary">
           {isLoadingData || hasErrors ? message : "Data up-to-date"}
         </div>
         <div className="chart-data-loading-endpoints hidden absolute top-full min-w-fit right-0 items-center text-2xs pt-1">
-          <div className="py-1.5 px-2 bg-mapbox-black rounded-sm">
+          <div className="py-1.5 px-2 bg-surface-sunken rounded-sm">
             {!!endpointsArray.length &&
               endpointsArray.map(([key, val]) => {
                 if (!endpointStates) return null;

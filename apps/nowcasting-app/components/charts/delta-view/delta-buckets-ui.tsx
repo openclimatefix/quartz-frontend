@@ -20,7 +20,7 @@ const BucketItem: React.FC<Bucket> = ({
 }) => {
   const selectedClass = `${borderColor}`;
   const unselectedClass = `bg-opacity-0 ${
-    borderColor === "border-white" ? "border-ocf-gray-800" : borderColor
+    borderColor === "border-content" ? "border-surface-panel" : borderColor
   }`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const [activeUnit] = useGlobalState("activeUnit");
@@ -102,7 +102,7 @@ const DeltaBuckets: React.FC<{
 
   return (
     <>
-      <div className="sticky top-0 bg-mapbox-black-500 z-10 mx-3 pb-1 flex justify-center gap-1 lg:gap-3">
+      <div className="sticky top-0 bg-surface-panel z-10 mx-3 pb-1 flex justify-center gap-1 lg:gap-3">
         {buckets.map((bucket) => {
           return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
         })}

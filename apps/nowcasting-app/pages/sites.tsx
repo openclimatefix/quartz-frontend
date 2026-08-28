@@ -112,7 +112,7 @@ export default function Sites({ dashboardModeServer }: { dashboardModeServer: st
             className="h-full pt-16 absolute top-0 left-0 z-20"
             style={{ width: isChartOpen ? "90%" : closedWidth }}
           >
-            <div className="focus:outline-none h-full text-white justify-between flex flex-col bg-mapbox-black-500 z-20">
+            <div className="focus:outline-none h-full text-content justify-between flex flex-col bg-surface-panel z-20">
               <div className="min-h-full max-h-full flex flex-col">
                 <SolarSiteChart
                   combinedSitesData={sitesData}
@@ -122,7 +122,7 @@ export default function Sites({ dashboardModeServer }: { dashboardModeServer: st
             </div>
             <div className="absolute bottom-12 -right-4 h-10 z-20">
               <button
-                className="items-center w-8 h-8 text-lg text-black bg-amber-400 hover:bg-amber-400 focus:bg-amber-400"
+                className="items-center w-8 h-8 text-lg text-content-on-accent bg-solar hover:bg-solar focus:bg-solar"
                 onClick={() => setIsChartOpen((open) => !open)}
               >
                 {isChartOpen ? (

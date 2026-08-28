@@ -31,29 +31,29 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="bg-mapbox-black min-h-screen flex flex-col">
+      <div className="bg-surface-sunken min-h-screen flex flex-col">
         <Header isLoggedIn={false} />
         <main className="w-full px-4 mx-auto max-w-lg sm:px-6 lg:px-8 flex-1 flex flex-col items-center justify-center">
-          <div className="max-w-xl py-16 mx-auto sm:py-24 text-center gap-6 flex flex-col mt-2 text-lg text-white">
+          <div className="max-w-xl py-16 mx-auto sm:py-24 text-center gap-6 flex flex-col mt-2 text-lg text-content">
             {isEmailVerification ? (
               <>
-                <h1 className="text-4xl font-extrabold tracking-tight text-ocf-gray-500 sm:text-5xl">
+                <h1 className="text-4xl font-extrabold tracking-tight text-content-secondary sm:text-5xl">
                   Nearly there.
                 </h1>
                 <p className="font-light">Please check your email for a verification link.</p>
                 {hasVisited && (
-                  <p className="mt-3 bg-ocf-yellow/25 text-xs p-4 rounded-md leading-relaxed">
+                  <p className="mt-3 bg-interactive/25 text-xs p-4 rounded-md leading-relaxed">
                     Hmm, it seems like you haven&apos;t verified your email address yet. <br />
                     Please check your inbox for a verification link.
                   </p>
                 )}
                 <Link
                   href={`/`}
-                  className="text-sm self-center my-3 py-2 px-4 font-medium hover:cursor-pointer bg-ocf-gray-500 hover:bg-ocf-yellow-600 active:bg-ocf-yellow-600 text-black transition-all duration-200 rounded-full"
+                  className="text-sm self-center my-3 py-2 px-4 font-medium hover:cursor-pointer bg-content-secondary hover:bg-interactive-hover active:bg-interactive-hover text-content-on-accent transition-all duration-200 rounded-full"
                 >
                   I&apos;ve verified, continue<span aria-hidden="true"> &rarr;</span>
                 </Link>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-content-muted">
                   If you think this is a mistake, please contact the Quartz Solar team at{" "}
                   <a
                     href="mailto:support@quartz.solar"
@@ -66,13 +66,13 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
               </>
             ) : (
               <>
-                <h1 className="text-4xl font-extrabold tracking-tight text-ocf-gray-500 sm:text-5xl">
+                <h1 className="text-4xl font-extrabold tracking-tight text-content-secondary sm:text-5xl">
                   Access denied.
                 </h1>
                 <p className="font-light">
                   Your account does not currently have access to Quartz Solar.
                 </p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-content-muted">
                   If you think this is a mistake, please contact us at{" "}
                   <a
                     href="mailto:support@quartz.solar"
@@ -84,7 +84,7 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
                 </p>
                 <Link
                   href="/api/auth/logout?redirectToLogin=true"
-                  className="text-sm self-center my-3 py-2 px-4 font-medium hover:cursor-pointer bg-ocf-gray-500 hover:bg-ocf-yellow-600 active:bg-ocf-yellow-600 text-black transition-all duration-200 rounded-full"
+                  className="text-sm self-center my-3 py-2 px-4 font-medium hover:cursor-pointer bg-content-secondary hover:bg-interactive-hover active:bg-interactive-hover text-content-on-accent transition-all duration-200 rounded-full"
                 >
                   Sign out<span aria-hidden="true"> &rarr;</span>
                 </Link>

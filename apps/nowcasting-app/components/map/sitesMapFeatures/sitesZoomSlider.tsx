@@ -23,7 +23,7 @@ const AggregationButton: React.FC<AggregationLevelProps> = ({
 }) => {
   const computedClasses = classNames(
     className || "",
-    "text-white",
+    "text-content",
     "flex px-4 py-2 mt-0 font-semibold text-sm"
   );
   const isCurrentAggregation = currentAggregation === aggregation;
@@ -33,12 +33,12 @@ const AggregationButton: React.FC<AggregationLevelProps> = ({
         <div
           className={classNames(
             computedClasses,
-            "text-ocf-yellow-500 cursor-pointer flex items-center gap-3 justify-between",
+            "text-content-muted hover:text-interactive transition-colors cursor-pointer flex items-center gap-3 justify-between",
             isCurrentAggregation
-              ? `ease-in duration-100 text-ocf-yellow-500 text-sm border-b-2 border-ocf-yellow-600 bg-ocf-black-900${
+              ? `ease-in duration-100 text-interactive text-sm border-b-2 border-interactive-hover bg-surface-inset${
                   autoSetting ? "" : " border-l-4"
                 }`
-              : "bg-ocf-delta-950 opacity-30 text-white hover:opacity-75 hover:bg-opacity-25 hover:bg-ocf-black-900"
+              : "bg-ocf-delta-950 opacity-30 text-content hover:opacity-75 hover:bg-opacity-25 hover:bg-surface-inset"
           )}
           onClick={() => setAggregationFunc(aggregation)}
         >
@@ -101,15 +101,15 @@ const Slider: React.FC<SliderProps> = ({ aggregation, setAggregation }) => {
   return (
     <>
       <div className="absolute top-0 m-4 bg-transparent flex flex-col right-0 ml-12 z-20 min-w-48">
-        <div className="py-1 px-3 text-white font-bold text-center text-base bg-ocf-black-800">
+        <div className="py-1 px-3 text-content font-bold text-center text-base bg-surface-inset">
           Aggregation Level
         </div>
         <div className="flex flex-col justify-between">
           <a
-            className={`flex items-center justify-between gap-1 px-4 py-2 font-semibold ease-in border-b-2 border-ocf-black-300 duration-100 text-sm cursor-pointer ${
+            className={`flex items-center justify-between gap-1 px-4 py-2 font-semibold ease-in border-b-2 border-content-muted duration-100 text-sm cursor-pointer ${
               autoZoom
-                ? "text-white border-l-4 border-l-ocf-yellow-600 bg-ocf-black-900"
-                : "bg-ocf-delta-950 opacity-30 text-white hover:opacity-100 hover:bg-opacity-25 hover:bg-ocf-black-900"
+                ? "text-content border-l-4 border-l-interactive-hover bg-surface-inset"
+                : "bg-ocf-delta-950 opacity-30 text-content hover:opacity-100 hover:bg-opacity-25 hover:bg-surface-inset"
             }`}
             onClick={() => setAutoZoom(true)}
           >

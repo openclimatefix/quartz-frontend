@@ -18,7 +18,7 @@ const LegendItem: FC<{
   const isVisible = useMemo(() => visibleLines.includes(dataKey), [visibleLines, dataKey]);
 
   const labelClasses = `block sometimes-bold w-auto uppercase pl-1${
-    mounted && isVisible ? " font-extrabold dash:font-semibold" : " text-ocf-gray-700"
+    mounted && isVisible ? " font-extrabold dash:font-semibold" : " text-content-muted"
   }`;
 
   const toggleLineVisibility = () => {

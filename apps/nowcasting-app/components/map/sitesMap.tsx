@@ -31,7 +31,7 @@ import Slider from "./sitesMapFeatures/sitesZoomSlider";
 import { safelyUpdateMapData } from "../helpers/mapUtils";
 import dynamic from "next/dynamic";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
+const yellow = theme.extend.colors.solar.DEFAULT;
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type SitesMapProps = {
@@ -436,7 +436,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
             "case",
             ["boolean", ["get", "selected"], false],
             theme.extend.colors["ocf-orange"].DEFAULT || "#FFAC5F",
-            theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c"
+            theme.extend.colors.solar.DEFAULT || "#f9d71c"
           ],
           "circle-stroke-width": 1,
           "circle-opacity": 0
@@ -455,7 +455,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
     //   // Copy coordinates array.
     //   const properties = e.features?.[0].properties;
     //
-    //   const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
+    //   const popupContent = `<div class="flex flex-col min-w-[16rem] bg-surface-raised text-content">
     //     <span class="text-lg">${site.label}</span>
     //   </div>`;
     //
@@ -506,7 +506,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
             "case",
             ["boolean", ["get", "selected"], false],
             theme.extend.colors["ocf-orange"].DEFAULT || "#FFAC5F",
-            theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c"
+            theme.extend.colors.solar.DEFAULT || "#f9d71c"
           ],
           "circle-opacity": 0.8
         }

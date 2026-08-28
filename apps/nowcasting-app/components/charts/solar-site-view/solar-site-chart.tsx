@@ -215,18 +215,18 @@ const SolarSiteChart: FC<{
       <div className={`h-full flex ${className}`}>
         <div className="flex-1 flex flex-col justify-center items-center p-32">
           <div className={"flex-initial flex flex-col"}>
-            <h2 className="text-ocf-gray-300 text-4xl pb-6">Welcome to Site View.</h2>
-            <p className="text-ocf-gray-300 text-lg pb-3 font-semibold tracking-wide">
+            <h2 className="text-content text-4xl pb-6">Welcome to Site View.</h2>
+            <p className="text-content text-lg pb-3 font-semibold tracking-wide">
               It looks like you don&apos;t currently have any sites.
             </p>
             {/* TODO: add func. to create sites from UI */}
-            {/*<p className="text-ocf-gray-300 text-base pb-6">*/}
+            {/*<p className="text-content text-base pb-6">*/}
             {/*  To add a site, you can use the &quot;+&quot; button in the top left corner.*/}
             {/*</p>*/}
-            <p className="text-ocf-gray-300 text-base pb-6">
+            <p className="text-content text-base pb-6">
               To add a site, you can use our{" "}
               <Link
-                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
                 href={"https://api.quartz.solar/docs"}
               >
@@ -234,7 +234,7 @@ const SolarSiteChart: FC<{
               </Link>{" "}
               or our{" "}
               <Link
-                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
                 href={"https://api.quartz.solar/swagger"}
               >
@@ -242,12 +242,12 @@ const SolarSiteChart: FC<{
               </Link>
               .
             </p>
-            <blockquote className={"border-l-2 border-ocf-gray pl-3"}>
-              <p className="text-ocf-gray-300 text-base py-1">
+            <blockquote className={"border-l-2 border-content-secondary pl-3"}>
+              <p className="text-content text-base py-1">
                 If you think you should have sites here, have any questions or need some further
                 information, please get in touch at{" "}
                 <a
-                  className={"underline underline-offset-4 decoration-ocf-yellow"}
+                  className={"underline underline-offset-4 decoration-solar"}
                   href="mailto:quartz.support@openclimatefix.org"
                 >
                   quartz.support@openclimatefix.org
@@ -268,8 +268,8 @@ const SolarSiteChart: FC<{
     <div className={`flex flex-col flex-1 ${className || ""}`}>
       <div className="flex-1 flex flex-col">
         <div className="flex flex-col flex-1 relative">
-          <div className="flex content-between bg-ocf-gray-800 mb-4">
-            <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
+          <div className="flex content-between bg-surface-panel mb-4">
+            <div className="flex-1 justify-start text-content lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
               All Sites
             </div>
             <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
@@ -277,11 +277,11 @@ const SolarSiteChart: FC<{
                 <ForecastHeadlineFigure
                   tip={`PV Actual / OCF Forecast`}
                   time={allSitesChartDateTime}
-                  color="ocf-yellow"
+                  color="solar"
                   unit={"KW"}
                 >
-                  <span className="text-black">{nationalPVActual?.toFixed(1)}</span>
-                  <span className="text-ocf-gray-300 mx-1"> / </span>
+                  <span className="text-content-on-accent">{nationalPVActual?.toFixed(1)}</span>
+                  <span className="text-content mx-1"> / </span>
                   {nationalPVExpected?.toFixed(1)}
                 </ForecastHeadlineFigure>
               </div>
@@ -290,7 +290,7 @@ const SolarSiteChart: FC<{
                 {/*  pv={forecastNextPV}*/}
                 {/*  time={`${forecastNextTimeOnly}`}*/}
                 {/*  tip={`Next OCF Forecast`}*/}
-                {/*  color="ocf-yellow"*/}
+                {/*  color="solar"*/}
                 {/*/>*/}
               </div>
             </div>
@@ -324,16 +324,16 @@ const SolarSiteChart: FC<{
               <ForecastHeadlineFigure
                 tip={`PV Actual / OCF Forecast`}
                 time={allSitesChartDateTime}
-                color="ocf-yellow"
+                color="solar"
                 unit={"KW"}
               >
-                <span className="text-black">
+                <span className="text-content-on-accent">
                   {getTotalPvActualGenerationForGroup(
                     selectedSiteData.map((site) => site.site_uuid),
                     selectedTime
                   ).toFixed(1) || "0"}
                 </span>
-                <span className="text-ocf-gray-300 mx-1"> / </span>
+                <span className="text-content mx-1"> / </span>
                 {getTotalPvForecastGenerationForGroup(
                   selectedSiteData.map((site) => site.site_uuid),
                   selectedTime
@@ -386,17 +386,17 @@ const SolarSiteChart: FC<{
           />
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 z-10 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 bg-mapbox-black-500 overflow-y-visible">
+      <div className="absolute bottom-0 left-0 right-0 z-10 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-content py-3 bg-surface-panel overflow-y-visible">
         <div
           className={`flex flex-col lg:flex-row flex-initial gap-x-6 justify-around max-w-2xl overflow-x-auto`}
         >
           <LegendItem
-            iconClasses={"text-ocf-black"}
+            iconClasses={"text-surface"}
             label={"PV Actual"}
             dataKey={`GENERATION_UPDATED`}
           />
           <LegendItem
-            iconClasses={"text-ocf-yellow"}
+            iconClasses={"text-solar"}
             symbolStyle={"both"}
             label={"OCF Forecast"}
             dataKey={`FORECAST`}

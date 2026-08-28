@@ -52,23 +52,24 @@ import type { CountryListing } from "../../../lib/domain/types";
 const PILL_BASE = "inline-flex items-center gap-1.5";
 
 const SEGMENT_BASE =
-  "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white";
+  "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-content";
 /**
  * Lit: the brand yellow held back with opacity rather than swapped for a different token, so the
  * header's black shows through and dims it. The headroom that gives up is what the lamp spends —
  * a bright disc needs a ground to be bright *against*, and yellow at full strength left none.
  * One colour, two strengths; the opacity is the knob if it wants to be lighter or darker.
  */
-const SEGMENT_ON = "bg-ocf-yellow/70 text-black";
+const SEGMENT_ON = "bg-surface-raised text-selected ring-1 ring-inset ring-selected-edge";
 /** Dark: no fill of its own, so the segment is the header's own black and reads as a gap. */
-const SEGMENT_OFF = "bg-transparent text-ocf-gray-800 hover:bg-mapbox-black-700 hover:text-white";
-const SEGMENT_UNAVAILABLE = "bg-transparent text-mapbox-black-600 cursor-not-allowed";
+const SEGMENT_OFF =
+  "bg-transparent text-content-muted hover:bg-surface-raised/40 hover:text-content";
+const SEGMENT_UNAVAILABLE = "bg-transparent text-surface-raised cursor-not-allowed";
 
 /**
  * The lamp: lit countries carry a filled disc, dark ones a hollow ring in the same place, so
  * the eye tracks one lamp changing state rather than an ornament appearing and vanishing.
  *
- * The lit disc is full-strength `ocf-yellow` against a segment holding the same yellow at 70%,
+ * The lit disc is full-strength `interactive` against a segment holding the same colour at 70%,
  * which is what makes it read as *lit* rather than merely present — the segment deliberately
  * gives up the headroom for it. The black outline is what stops the two strengths of one colour
  * blurring into each other at this size.
@@ -82,15 +83,15 @@ const SEGMENT_UNAVAILABLE = "bg-transparent text-mapbox-black-600 cursor-not-all
  */
 const DISC_BASE = "h-2.5 w-2.5 shrink-0 rounded-full border-2 transition-colors";
 /** Lit and nothing to report — full-strength yellow against the segment's held-back yellow. */
-const DISC_OK_ON = "border-black bg-ocf-yellow";
+const DISC_OK_ON = "border-content-on-accent bg-status-ok";
 /**
  * Dark, and nothing to report. Status never tints an off country: it is not being drawn, so
  * reporting on its pipeline would be answering a question nobody asked.
  */
-const DISC_OFF = "border-ocf-gray-900";
-const DISC_UNAVAILABLE = "border-mapbox-black-600";
+const DISC_OFF = "border-surface-raised";
+const DISC_UNAVAILABLE = "border-surface-raised";
 /**
- * The lamp in a colour that is not yellow. `ocf-orange` rather than `ocf-dusty-orange` for the
+ * The lamp in a colour that is not the interactive orange. `status-warn` (Visualisation Orange) for the
  * warning: dusty (`#FFAC5F`) is a slightly different yellow, and a warning that has to be
  * compared against the lamp beside it to be noticed is not a warning. There is no red token in
  * the palette; `red-500` follows the precedent in `DataLoadingChartStatus.tsx`.
@@ -98,8 +99,8 @@ const DISC_UNAVAILABLE = "border-mapbox-black-600";
  * Same black outline as the ok lamp, because only the fill is carrying the difference.
  */
 const DISC_STATUS: Record<"warning" | "error", string> = {
-  warning: "border-black bg-ocf-orange",
-  error: "border-black bg-red-500"
+  warning: "border-content-on-accent bg-status-warn",
+  error: "border-content-on-accent bg-status-alert"
 };
 
 /**
@@ -207,7 +208,7 @@ const CountryOption: React.FC<{
           id={statusId}
           role="tooltip"
           data-test={`country-status-${country.code}`}
-          className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden w-max max-w-xs -translate-x-1/2 rounded bg-mapbox-black-900 px-2 py-1 text-xs font-normal text-ocf-gray-400 ring-1 ring-inset ring-mapbox-black-700 group-hover:block"
+          className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden w-max max-w-xs -translate-x-1/2 rounded bg-surface-sunken px-2 py-1 text-xs font-normal text-content ring-1 ring-inset ring-surface-raised group-hover:block"
         >
           {status.message}
         </span>
@@ -218,7 +219,7 @@ const CountryOption: React.FC<{
 
 /** A country named with no choice attached, for the states where a choice would be a lie. */
 const CountryLabel: React.FC<{ code: string; title: string }> = ({ code, title }) => (
-  <span title={title} className={`${PILL_BASE} px-2 py-0.5 text-sm font-bold text-ocf-gray-400`}>
+  <span title={title} className={`${PILL_BASE} px-2 py-0.5 text-sm font-bold text-content`}>
     {code}
   </span>
 );

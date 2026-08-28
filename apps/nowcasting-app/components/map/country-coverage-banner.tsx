@@ -68,7 +68,7 @@ const CountryCoverageBanner: React.FC<CountryCoverageBannerProps> = ({ countrySt
         <div
           key={code}
           title={REASON_TITLE[state](code)}
-          className="rounded bg-mapbox-black-700/80 px-2 py-1 text-2xs font-semibold uppercase tracking-wide text-ocf-gray-600 shadow"
+          className="rounded bg-surface-raised/80 px-2 py-1 text-2xs font-semibold uppercase tracking-wide text-content-secondary shadow"
         >
           {code} · {REASON_TEXT[state]}
         </div>

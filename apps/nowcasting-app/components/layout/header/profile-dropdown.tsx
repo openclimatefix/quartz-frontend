@@ -125,7 +125,7 @@ const ProfileDropDown = () => {
     <>
       <Menu as="div" className="relative z-20 ml-3">
         <div>
-          <Menu.Button className="flex text-sm bg-white rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">
+          <Menu.Button className="flex text-sm bg-surface-raised rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">
             <span className="sr-only">Open user menu</span>
             <img className="w-8 h-8" src={(user && user.picture) || ""} alt="" />
           </Menu.Button>
@@ -139,13 +139,13 @@ const ProfileDropDown = () => {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 top-12 w-52 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute right-0 top-12 w-52 py-1 origin-top-right bg-surface-raised rounded-md shadow-lg ring-1 ring-edge focus:outline-none">
             <Menu.Item>
               {({ active }) => (
                 <div
                   className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                    active ? "bg-surface-panel" : "",
+                    "flex items-end justify-end px-4 py-2 text-sm text-content-secondary relative"
                   )}
                 >
                   {showNHourView && (
@@ -156,7 +156,7 @@ const ProfileDropDown = () => {
                   <button
                     id={"UserMenu-NhViewBtn"}
                     onClick={toggle4hView}
-                    className="ml-1 text-sm  font-medium text-ocf-black-600"
+                    className="ml-1 text-sm  font-medium text-content"
                   >
                     {`N-hour forecast`}
                   </button>
@@ -167,8 +167,8 @@ const ProfileDropDown = () => {
               {({ active }) => (
                 <div
                   className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                    active ? "bg-surface-panel" : "",
+                    "flex items-end justify-end px-4 py-2 text-sm text-content-secondary relative"
                   )}
                 >
                   {dashboardMode && (
@@ -182,7 +182,7 @@ const ProfileDropDown = () => {
                       e.preventDefault();
                       toggleDashboardMode();
                     }}
-                    className="ml-1 text-sm font-medium text-ocf-black-600"
+                    className="ml-1 text-sm font-medium text-content"
                   >
                     {`Dashboard mode`}
                   </button>
@@ -195,19 +195,19 @@ const ProfileDropDown = () => {
 
             {canDownloadCsv && (
               <>
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-edge" />
                 <Menu.Item>
                   {({ active }) => (
                     <div
                       className={classNames(
-                        active ? "bg-gray-100" : "",
-                        "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                        active ? "bg-surface-panel" : "",
+                        "flex items-end justify-end px-4 py-2 text-sm text-content-secondary relative"
                       )}
                     >
                       <button
                         id={"UserMenu-DownloadCsvBtn"}
                         onClick={() => setShowDownloadModal(true)}
-                        className="ml-1 text-sm font-medium text-ocf-black-600"
+                        className="ml-1 text-sm font-medium text-content"
                       >
                         {`Download CSV...`}
                       </button>
@@ -217,10 +217,10 @@ const ProfileDropDown = () => {
               </>
             )}
 
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-edge" />
 
             <Menu.Item>
-              <div className="px-4 pt-3 text-ocf-black-600 text-right">
+              <div className="px-4 pt-3 text-content text-right">
                 <a
                   id={"UserMenu-DocumentationBtn"}
                   href="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
@@ -231,7 +231,7 @@ const ProfileDropDown = () => {
               </div>
             </Menu.Item>
             <Menu.Item>
-              <div className="px-4 pt-3 text-ocf-black-600 text-right">
+              <div className="px-4 pt-3 text-content text-right">
                 <Tooltip
                   tip={
                     <div
@@ -260,7 +260,7 @@ const ProfileDropDown = () => {
               </div>
             </Menu.Item>
             <Menu.Item>
-              <div className="px-4 py-3 text-ocf-black-600 text-right">
+              <div className="px-4 py-3 text-content text-right">
                 <a
                   id={"UserMenu-FeedbackBtn"}
                   href="https://docs.google.com/forms/d/e/1FAIpQLSf08XJPFwsNHxYiHUTV4g9CHWQzxAn0gSiAXXFkaI_3wjpNWw/viewform"
@@ -273,19 +273,19 @@ const ProfileDropDown = () => {
               </div>
             </Menu.Item>
 
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-edge" />
 
             <div className="px-4 pt-3">
               <p
                 id={"UserMenu-Version"}
-                className="text-xs font-medium text-ocf-black-300 truncate"
+                className="text-xs font-medium text-content-muted truncate"
               >
                 Version {version}
               </p>
             </div>
-            <div id={"UserMenu-SignedInText"} className="px-4 py-3 border-b border-gray-300">
-              <p className="text-xs text-ocf-black-300">Signed in as</p>
-              <p className="text-xs font-medium text-ocf-black-300 truncate">
+            <div id={"UserMenu-SignedInText"} className="px-4 py-3 border-b border-edge">
+              <p className="text-xs text-content-muted">Signed in as</p>
+              <p className="text-xs font-medium text-content-muted truncate">
                 {user && user.email}
               </p>
             </div>
@@ -294,8 +294,8 @@ const ProfileDropDown = () => {
               {({ active }) => (
                 <div
                   className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "block px-4 py-2 text-sm text-ocf-black-600"
+                    active ? "bg-surface-panel" : "",
+                    "block px-4 py-2 text-sm text-content"
                   )}
                 >
                   <Link href="/api/auth/logout" legacyBehavior>

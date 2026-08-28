@@ -194,6 +194,27 @@ export const formatISODateStringAsZonedTime = (
 };
 
 /**
+ * The calendar date of an instant, in a given zone — `Thu 28 Aug`.
+ *
+ * The zone argument is not a nicety: near midnight the same instant is two different dates in
+ * GB and NL, so a date shown without one is a claim nobody can check. Every caller says which
+ * zone it means, and says so in the UI too.
+ *
+ * Returns the marker string rather than throwing, matching the tick formatters: this feeds a
+ * caption, and a caption is never worth a blank screen.
+ */
+export const formatISODateStringAsZonedDate = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  if (!date) return INVALID_TIME;
+  const dt = parseISOInViewerZone(date).setZone(timezone).setLocale(locale);
+  if (!dt.isValid) return INVALID_TIME;
+  return dt.toFormat("ccc d LLL");
+};
+
+/**
  * Shifts the instant by the target zone's offset and then serialises it with a "Z" that is a lie
  * everywhere except UTC, so downstream `new Date()` parsing reads the *wall clock* back. Kept as
  * is because several chart call sites depend on exactly that; the timezone defaults to the
@@ -469,8 +490,8 @@ export const createBucketObject: (
 ) => Bucket = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDeltaValue[]) => {
   let bucketColor = "bg-ocf-delta-500";
   let borderColor = "border-ocf-delta-500";
-  let textColor = "text-white";
-  let altTextColor = "text-ocf-gray-800";
+  let textColor = "text-content";
+  let altTextColor = "text-surface-panel";
   let text = deltaBucket.toString();
   let quantity = deltaGroup.length;
   let dataKey = DELTA_BUCKET[deltaBucket];
@@ -481,7 +502,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG4:
       bucketColor = "bg-ocf-delta-100";
       borderColor = "border-ocf-delta-100";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-100";
       lowerBound = -3000;
       upperBound = deltaBucket;
@@ -489,7 +510,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG3:
       bucketColor = "bg-ocf-delta-200";
       borderColor = "border-ocf-delta-200";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-200";
       lowerBound = DELTA_BUCKET.NEG4;
       upperBound = deltaBucket;
@@ -497,7 +518,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG2:
       bucketColor = "bg-ocf-delta-300";
       borderColor = "border-ocf-delta-300";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-300";
       lowerBound = DELTA_BUCKET.NEG3;
       upperBound = deltaBucket;
@@ -505,23 +526,23 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG1:
       bucketColor = "bg-ocf-delta-400";
       borderColor = "border-ocf-delta-400";
-      textColor = "text-white";
+      textColor = "text-content";
       altTextColor = "text-ocf-delta-400";
       lowerBound = DELTA_BUCKET.NEG2;
       upperBound = deltaBucket;
       break;
     case DELTA_BUCKET.ZERO:
       bucketColor = "bg-ocf-delta-500";
-      borderColor = "border-white";
-      textColor = "text-white";
-      altTextColor = "text-ocf-gray-800";
+      borderColor = "border-content";
+      textColor = "text-content";
+      altTextColor = "text-surface-panel";
       lowerBound = DELTA_BUCKET.NEG1;
       upperBound = DELTA_BUCKET.POS1;
       break;
     case DELTA_BUCKET.POS1:
       bucketColor = "bg-ocf-delta-600";
       borderColor = "border-ocf-delta-600";
-      textColor = "text-white";
+      textColor = "text-content";
       altTextColor = "text-ocf-delta-600";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS2;
@@ -529,7 +550,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.POS2:
       bucketColor = "bg-ocf-delta-700";
       borderColor = "border-ocf-delta-700";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-700";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS3;
@@ -537,7 +558,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.POS3:
       bucketColor = "bg-ocf-delta-800";
       borderColor = "border-ocf-delta-800";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-800";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS4;
@@ -545,7 +566,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.POS4:
       bucketColor = "bg-ocf-delta-900";
       borderColor = "border-ocf-delta-900";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-900";
       lowerBound = deltaBucket;
       upperBound = 3000;

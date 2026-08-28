@@ -27,7 +27,7 @@ import { formatISODateString } from "../../helpers/utils";
 const TableHeader: React.FC<{ text: string }> = ({ text }) => {
   return (
     <div
-      className="sticky top-0 z-10 flex flex-row bg-ocf-sites-100
+      className="sticky top-0 z-10 flex flex-row bg-surface-raised
             justify-between"
     >
       <div className="ml-10 w-80">
@@ -37,12 +37,12 @@ const TableHeader: React.FC<{ text: string }> = ({ text }) => {
       </div>
       <div className="flex flex-row">
         <div
-          className="text-white w-32
+          className="text-content w-32
                          justify-start py-3 pr-10 font-bold flex flex-row text-sm"
         >
           <p>Capacity</p>
         </div>
-        <div className="flex text-white font-bold w-32 justify-start py-3 pr-10 text-sm">
+        <div className="flex text-content font-bold w-32 justify-start py-3 pr-10 text-sm">
           <p>KW</p>
         </div>
       </div>
@@ -73,9 +73,9 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
     return b.label - a.label;
   };
 
-  const unselectedSiteClass = `transition duration-200 ease-out hover:ease-in hover:bg-ocf-gray-700 cursor-pointer`;
+  const unselectedSiteClass = `transition duration-200 ease-out hover:ease-in hover:bg-content-muted cursor-pointer`;
 
-  const selectedSiteClass = `bg-ocf-gray-800 cursor-pointer`;
+  const selectedSiteClass = `bg-surface-panel cursor-pointer`;
 
   return (
     <>
@@ -87,8 +87,8 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
               <div
                 className={`${
                   clickedSiteGroupId === site.id
-                    ? "bg-ocf-gray-800 text"
-                    : "bg-ocf-delta-950 transition duration-200 ease-out hover:bg-ocf-gray-700 hover:ease-in"
+                    ? "bg-surface-panel text"
+                    : "bg-ocf-delta-950 transition duration-200 ease-out hover:bg-content-muted hover:ease-in"
                 } mb-0.5 bg-ocf-delta-950 cursor-pointer relative  w-full 
             `}
                 onClick={() => setClickedSiteGroupId(site.id)}
@@ -96,28 +96,28 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                 <div key={site.label} className={`flex flex-col`}>
                   <div className="flex flex-row justify-between text-sm">
                     <div className="ml-10 w-80">
-                      <div className="py-3 text-white font-bold text-sm">{site.label}</div>
+                      <div className="py-3 text-content font-bold text-sm">{site.label}</div>
                     </div>
                     <div className="flex flex-row">
                       <div
-                        className="text-white w-32
+                        className="text-content w-32
                          justify-center py-3 pr-10 font-bold flex flex-row text-sm"
                       >
                         <p>
-                          <span className={!!site.actualPV ? "text-white" : "text-ocf-yellow"}>
+                          <span className={!!site.actualPV ? "text-content" : "text-solar"}>
                             {Number(site.aggregatedYield).toFixed()}
                           </span>
-                          <span className="ocf-gray-400 text-xs">%</span>
+                          <span className="text-content text-xs">%</span>
                         </p>
                       </div>
-                      <div className="flex text-white font-bold w-32 justify-center py-3 pr-10 text-sm">
-                        <span className={`pr-1${site.actualPV ? "" : " text-ocf-yellow"}`}>
+                      <div className="flex text-content font-bold w-32 justify-center py-3 pr-10 text-sm">
+                        <span className={`pr-1${site.actualPV ? "" : " text-solar"}`}>
                           {Number(mostAccurateGeneration).toFixed(
                             mostAccurateGeneration < 10 ? 1 : 0
                           )}
                         </span>{" "}
                         / {Number(site.capacity).toFixed()}
-                        <span className="text-ocf-gray-400 text-xs font-thin pt-1 pl-0.5">KW</span>
+                        <span className="text-content text-xs font-thin pt-1 pl-0.5">KW</span>
                       </div>
                     </div>
                   </div>
@@ -127,13 +127,11 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
                "
                 >
                   <div
-                    className={`${
-                      clickedSiteGroupId === site.id ? "h-2" : "h-2"
-                    } bg-ocf-yellow-500`}
+                    className={`${clickedSiteGroupId === site.id ? "h-2" : "h-2"} bg-solar`}
                     style={{ width: `3px` }}
                   ></div>
                   <div
-                    className={`h-1 bg-ocf-yellow-500`}
+                    className={`h-1 bg-solar`}
                     style={{
                       width: `${Number(site.aggregatedYield).toFixed()}%`
                     }}

@@ -9,7 +9,7 @@ export const DeltaHeaderBlock: React.FC<{
   deltaValue: string;
   unit?: "MW" | "GW";
 }> = ({ deltaValue, unit = "GW" }) => {
-  let deltaColor = `ocf-gray-900`;
+  let deltaColor = `surface-raised`;
   let deltaNumberInMW = Number(deltaValue);
   if (unit === "GW") {
     deltaNumberInMW = Number(deltaValue) * 1000;
@@ -27,7 +27,7 @@ export const DeltaHeaderBlock: React.FC<{
   } else if (DELTA_BUCKET.NEG2 <= deltaNumberInMW && deltaNumberInMW < DELTA_BUCKET.NEG1) {
     deltaColor = `ocf-delta-400`;
   } else if (DELTA_BUCKET.NEG1 <= deltaNumberInMW && deltaNumberInMW < DELTA_BUCKET.POS1) {
-    deltaColor = `ocf-gray-900`;
+    deltaColor = `surface-raised`;
   } else if (DELTA_BUCKET.POS1 <= deltaNumberInMW && deltaNumberInMW < DELTA_BUCKET.POS2) {
     deltaColor = `ocf-delta-600`;
   } else if (DELTA_BUCKET.POS2 <= deltaNumberInMW && deltaNumberInMW < DELTA_BUCKET.POS3) {
@@ -43,7 +43,7 @@ export const DeltaHeaderBlock: React.FC<{
 
   return (
     <div
-      className={`bg-${deltaColor} flex flex-col justify-around pl-3 pr-3 py-2 text-left text-ocf-black uppercase`}
+      className={`bg-${deltaColor} flex flex-col justify-around pl-3 pr-3 py-2 text-left text-surface uppercase`}
       style={{ background: deltaColor }}
     >
       <div className="flex">
@@ -58,7 +58,7 @@ export const DeltaHeaderBlock: React.FC<{
           </div>
           <div className="dash:text-sm text-xs flex items-start mx-0.5 dash:pr-2 dash:mx-1 gap-1 justify-between w-full">
             <p className="leading-none tracking-wider mt-px">Delta</p>
-            <p className="leading-none text-ocf-black font-normal mt-px">{unit}</p>
+            <p className="leading-none text-surface font-normal mt-px">{unit}</p>
           </div>
         </div>
       </div>

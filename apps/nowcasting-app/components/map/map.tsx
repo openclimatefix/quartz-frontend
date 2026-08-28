@@ -527,10 +527,10 @@ const Map: FC<IMap> = ({
 
   if (!webGlSupported) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-ocf-black-500 p-6 text-center">
+      <div className="flex h-full w-full items-center justify-center bg-surface p-6 text-center">
         <div>
-          <h3 className="text-lg font-semibold text-ocf-yellow">Map Unavailable</h3>
-          <p className="mt-2 text-sm text-ocf-gray-600">
+          <h3 className="text-lg font-semibold text-status-alert">Map Unavailable</h3>
+          <p className="mt-2 text-sm text-content-secondary">
             Your browser does not support WebGL, which is required to display the map. <br />
             Please update your browser or use the latest version of Chrome.
           </p>
@@ -540,7 +540,7 @@ const Map: FC<IMap> = ({
   }
 
   return (
-    <div className="relative h-full overflow-hidden bg-ocf-gray-900">
+    <div className="relative h-full overflow-hidden bg-surface-raised">
       {/* The Clouds/PV layer toggles and the satellite channel select used to render here —
           moved to `map-layer-controls.tsx`, mounted inside the consolidated top-right panel
           (Phase 6 followup, Track I). This component keeps the fetch/decode pipeline, since it

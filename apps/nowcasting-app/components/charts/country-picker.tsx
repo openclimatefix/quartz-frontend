@@ -51,10 +51,10 @@ const CODE_SIZE =
 const SLIDE_CHOSEN = 200;
 const SLIDE_HANDED = 420;
 
-const TRACK_BASE = "relative isolate inline-grid -my-1 rounded bg-ocf-gray-900 align-middle";
-const CELL_BASE = `${CODE_SIZE} relative z-10 px-2 py-0.5 font-bold leading-tight rounded transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white`;
-const CELL_FOCUSED = "text-black";
-const CELL_AVAILABLE = "text-ocf-gray-300 hover:text-white";
+const TRACK_BASE = "relative isolate inline-grid -my-1 rounded bg-surface-raised align-middle";
+const CELL_BASE = `${CODE_SIZE} relative z-10 px-2 py-0.5 font-bold leading-tight rounded transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-content`;
+const CELL_FOCUSED = "text-content-on-accent";
+const CELL_AVAILABLE = "text-content hover:text-content";
 
 /**
  * Where the current focus came from, and therefore how fast the thumb should travel.
@@ -181,7 +181,7 @@ const ChartCountryPicker: React.FC = () => {
       <span
         aria-hidden="true"
         data-test="chart-country-thumb"
-        className="absolute inset-y-0 left-0 z-0 rounded bg-ocf-yellow motion-safe:transition-transform motion-safe:ease-out"
+        className="absolute inset-y-0 left-0 z-0 rounded bg-surface-raised ring-1 ring-inset ring-selected-edge motion-safe:transition-transform motion-safe:ease-out"
         style={{
           width: `${100 / codes.length}%`,
           transform: `translateX(${Math.max(focusedIndex, 0) * 100}%)`,

@@ -32,21 +32,21 @@ const GRIP: Record<ResizeAxis, { className: string; label: string; title: string
       // below stay invisible until hovered — three permanent grips would read as chrome
       // drawn around the chart.
       glyph:
-        "h-2.5 w-2.5 rounded-sm border-b-2 border-r-2 border-white/60 group-hover:border-ocf-yellow group-focus-visible:border-ocf-yellow"
+        "h-2.5 w-2.5 rounded-sm border-b-2 border-r-2 border-content/60 group-hover:border-interactive group-focus-visible:border-interactive"
     },
     x: {
       className: "-right-1 top-4 bottom-6 w-2 cursor-ew-resize rounded-full",
       label: "Resize chart panel width. Left and right arrow keys resize, Enter resets.",
       title: "Drag to resize width. Double-click to reset.",
       glyph:
-        "h-8 w-0.5 rounded-full bg-white/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+        "h-8 w-0.5 rounded-full bg-content/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
     },
     y: {
       className: "-bottom-1 left-4 right-6 h-2 cursor-ns-resize rounded-full",
       label: "Resize chart panel height. Up and down arrow keys resize, Enter resets.",
       title: "Drag to resize height. Double-click to reset.",
       glyph:
-        "h-0.5 w-8 rounded-full bg-white/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+        "h-0.5 w-8 rounded-full bg-content/40 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
     }
   };
 
@@ -93,7 +93,7 @@ const ChartResizeHandle: FC<GripProps & { axis?: ResizeAxis }> = ({
       // handling the arrows itself; without this attribute, resizing the chart from the keyboard
       // would also walk the forecast time.
       data-arrow-keys-handled
-      className={`group absolute z-20 flex touch-none items-center justify-center outline-none focus-visible:ring-1 focus-visible:ring-ocf-yellow ${grip.className}`}
+      className={`group absolute z-20 flex touch-none items-center justify-center outline-none focus-visible:ring-1 focus-visible:ring-interactive ${grip.className}`}
       {...handlers}
       title={grip.title}
     >

@@ -119,7 +119,7 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
     >
       <section
         aria-label="Chart"
-        className="flex h-full w-full flex-col overflow-hidden rounded-lg border border-white/10 bg-mapbox-black-500 text-white shadow-2xl focus:outline-none"
+        className="flex h-full w-full flex-col overflow-hidden rounded-lg border border-content/10 bg-surface-panel text-content shadow-2xl focus:outline-none"
       >
         {children}
       </section>

@@ -14,16 +14,16 @@ const LegendTooltipContent = ({
   inputs: DataInput[];
   extraText?: ReactNode;
 }) => (
-  <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-ocf-gray-300 py-1">
+  <div className="flex flex-col justify-center items-start gap-0.5 text-xs text-content py-1">
     {!!extraText && (
       <>
-        <div className="flex self-stretch text-left justify-between items-center gap-2 mb-2 text-xs text-ocf-gray-300">
+        <div className="flex self-stretch text-left justify-between items-center gap-2 mb-2 text-xs text-content">
           {extraText}
         </div>
         <hr />
       </>
     )}
-    <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-ocf-gray-300">
+    <div className="flex self-stretch justify-between items-center gap-2 text-2xs tracking-widest mb-1 uppercase font-light text-content">
       <span>Data Inputs:</span>
     </div>
     {Object.entries(DataInputNames).map(([key, name]) => {
@@ -31,7 +31,7 @@ const LegendTooltipContent = ({
       return (
         <div
           key={`Input_${key}`}
-          className="flex self-stretch justify-between items-center gap-2 text-xs text-ocf-gray-300"
+          className="flex self-stretch justify-between items-center gap-2 text-xs text-content"
         >
           <span>{name}</span>
           {included ? (

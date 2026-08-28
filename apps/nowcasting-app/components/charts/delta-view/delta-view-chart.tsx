@@ -85,8 +85,8 @@ const GspDeltaColumn: FC<{
               dataKey = "-1";
               break;
             case DELTA_BUCKET.ZERO:
-              bucketColor = "border-white border-opacity-40";
-              progressLineColor = "bg-white bg-opacity-40";
+              bucketColor = "border-content border-opacity-40";
+              progressLineColor = "bg-content bg-opacity-40";
               dataKey = "0";
               break;
             case DELTA_BUCKET.POS1:
@@ -133,7 +133,7 @@ const GspDeltaColumn: FC<{
 
           const deltaRowClasses = `bg-ocf-delta-950`;
 
-          const selectedDeltaRowClasses = `bg-ocf-gray-800 items-end`;
+          const selectedDeltaRowClasses = `bg-surface-panel items-end`;
 
           if (!bucketIsSelected) {
             return null;
@@ -141,12 +141,12 @@ const GspDeltaColumn: FC<{
 
           return (
             <div
-              className={`mb-0.5 border-mapbox-black-600 border ${
+              className={`mb-0.5 border-surface-raised border ${
                 isSelectedGsp ? selectedDeltaRowClasses : deltaRowClasses
               } ${
                 negative ? "rounded-l" : "rounded-r"
               } box-content cursor-pointer relative flex w-full transition duration-200 ease-out 
-              hover:bg-ocf-gray-900 hover:ease-in`}
+              hover:bg-surface-raised hover:ease-in`}
               key={`gspCol${gspDelta.regionId}`}
               onClick={() => setSelectedMapRegionIds([gspDelta.regionId])}
             >
@@ -209,13 +209,10 @@ const GspDeltaColumn: FC<{
                   >
                     <div className="flex flex-1 items-end justify-end text-right font-semibold">
                       <div>
-                        <span className={"text-black"}>
+                        <span className={"text-content-on-accent"}>
                           {Number(gspDelta.currentYield).toFixed(0)}
                         </span>{" "}
-                        /{" "}
-                        <span className="text-ocf-yellow">
-                          {Number(gspDelta.forecast).toFixed(0)}
-                        </span>{" "}
+                        / <span className="text-solar">{Number(gspDelta.forecast).toFixed(0)}</span>{" "}
                         <span className={`opacity-80 text-2xs font-thin`}>MW</span>
                       </div>
                     </div>
@@ -230,7 +227,7 @@ const GspDeltaColumn: FC<{
                   }`}
                 >
                   <div
-                    className={`${isSelectedGsp ? `h-1.5` : `h-1`} bg-ocf-gray-800`}
+                    className={`${isSelectedGsp ? `h-1.5` : `h-1`} bg-surface-panel`}
                     style={{ width: `2px` }}
                   ></div>
                   <div
@@ -246,9 +243,9 @@ const GspDeltaColumn: FC<{
         {!hasRows && (
           <div className={`${negative ? "pr-1.5" : "pl-1.5"}`}>
             <div
-              className={`flex flex-col flex-1 items-center justify-center border-dashed border border-ocf-gray-400 rounded-md p-6`}
+              className={`flex flex-col flex-1 items-center justify-center border-dashed border border-content rounded-md p-6`}
             >
-              <span className="text-sm text-center text-ocf-gray-400">
+              <span className="text-sm text-center text-content">
                 No {negative ? "negative" : "positive"} GSP deltas <br />
                 for current filters
               </span>
@@ -492,7 +489,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
         >
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
           {!hasGspPvInitialForSelectedTime && (
-            <div className="flex flex-1 m-3 p-4 font-thin tracking-wide border border-dashed border-ocf-gray-600 rounded-md justify-center items-center text-center text-ocf-gray-600">
+            <div className="flex flex-1 m-3 p-4 font-thin tracking-wide border border-dashed border-content-secondary rounded-md justify-center items-center text-center text-content-secondary">
               [ Delta values not available until PV Live output available ]
             </div>
           )}
