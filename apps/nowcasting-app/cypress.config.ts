@@ -18,7 +18,9 @@ export default defineConfig({
   },
   chromeWebSecurity: false,
   // ...rest of the Cypress project config
-  projectId: process.env.CYPRESS_PROJECT_ID,
+  // Cypress Cloud projectId - must be set via CYPRESS_PROJECT_ID environment variable
+  // TODO: Maintainers need to add this to GitHub Secrets
+  projectId: process.env.CYPRESS_PROJECT_ID || "PLACEHOLDER_CYPRESS_PROJECT_ID",
 
   e2e: {
     setupNodeEvents(on, config) {
