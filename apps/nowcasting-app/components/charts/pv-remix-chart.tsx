@@ -7,7 +7,7 @@ import useGlobalState, {
   getCursorCadenceMinutes,
   getCursorNow
 } from "../helpers/globalState";
-import { snapToCadence } from "../../lib/time/cursor";
+import { slotForInstant, snapToCadence } from "../../lib/time/cursor";
 import useFormatChartData, { type ChartSeriesInput } from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
@@ -59,10 +59,19 @@ const PvRemixChart: FC<{
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
-  const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
+  const cursorInstant = formatISODateString(selectedISOTime || new Date().toISOString());
 
   const focusedCountry = useFocusedCountry();
   const countryConfig = getCountryConfig(focusedCountry);
+
+  // The cursor is one instant; this chart reads one country. Playback can step it finer than
+  // the focused country publishes (see `playbackStrideMinutes`), which leaves instants this
+  // chart's series have no point at — so resolve the instant to *this* country's slot before
+  // anything looks it up or draws at it. `delta-view-chart.tsx` already does the same, for the
+  // same reason.
+  // `formatISODateString` because the chart's category keys are the trimmed
+  // `yyyy-MM-ddTHH:mm` form; `slotForInstant` hands back a full ISO instant.
+  const selectedTime = formatISODateString(slotForInstant(cursorInstant, focusedCountry));
   const seriesConfig = useMemo(
     () => (countryConfig?.nationalChartSeries ?? []).slice(0, MAX_FORECAST_SERIES),
     [countryConfig]

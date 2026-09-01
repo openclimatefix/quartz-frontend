@@ -156,6 +156,26 @@ export const slotLabellingFor = (country: string | null | undefined): SlotLabell
 export const cursorCadenceMinutes = (country: string | null | undefined): number =>
   cadenceMinutesFor(country);
 
+/**
+ * The stride playback walks the cursor by: the **finest** cadence across the countries drawn.
+ *
+ * Deliberately not `cursorCadenceMinutes`, which keys on focus. That rule exists because a
+ * cursor you are *aiming* must move the thing you are reading on every step — with GB focused
+ * and a 15-minute grid, half the steps changed nothing on the GB map and the scrub read as
+ * broken (Brad, 2026-08-13). Nobody aims during playback: it runs on its own, and the
+ * complaint reverses — a 30-minute stride makes NL's 15-minute data play at half its
+ * resolution because GB happens to be focused.
+ *
+ * So the two cases get the two different answers, which is only safe because every consumer
+ * resolves its own slot from the instant (`slotForInstant`) rather than demanding an exact
+ * match. `PlayButton` snaps the cursor back onto the focused grid when playback stops, so
+ * stepping by hand resumes on the coarse grid it expects.
+ */
+export const playbackStrideMinutes = (countries: readonly string[]): number =>
+  countries.length === 0
+    ? FALLBACK_CADENCE_MINUTES
+    : Math.min(...countries.map((country) => cadenceMinutesFor(country)));
+
 /** Whether an instant already sits on a cadence grid. */
 export const isOnCadence = (instant: Instant, cadenceMinutes: number): boolean =>
   toUtc(instant).toMillis() % (cadenceMinutes * MS_PER_MINUTE) === 0;

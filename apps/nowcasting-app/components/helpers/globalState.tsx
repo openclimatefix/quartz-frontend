@@ -13,8 +13,13 @@ import { ActiveUnit } from "../map/types";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
 import { ComparisonSelection } from "./comparison";
-import { ChartMode, ChartSplitPercent } from "../shell/geometry";
-import { cursorCadenceMinutes, cursorNow, snapToCadence } from "../../lib/time/cursor";
+import { CHART_SPLIT, ChartMode, ChartSplitPercent } from "../shell/geometry";
+import {
+  cursorCadenceMinutes,
+  cursorNow,
+  playbackStrideMinutes,
+  snapToCadence
+} from "../../lib/time/cursor";
 import {
   CountryKeyedState,
   CountryScopedKey,
@@ -39,6 +44,19 @@ import {
  */
 export const getCursorCadenceMinutes = (): number =>
   cursorCadenceMinutes(getGlobalState("focusedCountry"));
+
+/**
+ * The playback stride — the finest cadence across the *enabled* set, not the focused country's.
+ * See `playbackStrideMinutes` for why the two questions get different answers.
+ */
+export const getPlaybackStrideMinutes = (): number =>
+  playbackStrideMinutes(getGlobalState("enabledCountries"));
+
+/** Put the cursor back on the focused country's grid. Called when playback stops. */
+export const snapCursorToFocusedGrid = (): void => {
+  const selected = getGlobalState("selectedISOTime");
+  if (selected) setGlobalState("selectedISOTime", snapToCadence(selected, getCursorCadenceMinutes()));
+};
 
 /**
  * Now, on the cursor grid — the slot currently filling.
@@ -486,10 +504,24 @@ export const setComparison = (id: ComparisonSelection): void => {
 /**
  * Store, or clear, a mode's floating-chart size override.
  *
+ * **Width is shared across modes; height is per mode.** Opening the regional chart is a change
+ * of *content*, not of how wide you want the panel — the width you dragged is a standing answer
+ * to "how much of the stage does the chart get", and having it jump when a region is selected
+ * and jump back when it is cleared reads as the panel resizing itself under the pointer. Height
+ * genuinely is per mode: a second chart stacked underneath needs room the single one does not.
+ *
+ * So a commit writes its height to its own mode and its width to every mode, seeding any mode
+ * that has never been sized with its own `CHART_SPLIT` height. That keeps the stored shape
+ * exactly as it was — one entry per mode — with the sharing done at the write rather than by a
+ * second, separately-persisted value that could fall out of step with it.
+ *
  * `split: null` clears the mode's entry rather than storing it — the reset affordance
  * (`chart-resize-handle.tsx`'s double-click/Enter) returns a mode to its `CHART_SPLIT` seed by
  * removing the override rather than writing the seed's numbers back as an override, so a later
- * change to the seed in `geometry.ts` still reaches a user who has reset.
+ * change to the seed in `geometry.ts` still reaches a user who has reset. Because width is
+ * shared, a reset also hands the other modes this mode's seed width: resetting has to mean the
+ * same thing everywhere the shared value is read, or one mode would keep a width the mode you
+ * reset from has just disowned.
  *
  * Persisted alongside `visibleLines` and `dashboardMode` — same cookie-plus-state pattern, so
  * "state and cookie can never be written apart" holds here too.
@@ -501,19 +533,23 @@ export const setChartSplitOverride = (
 ): void => {
   const previous = getGlobalState("chartSplitOverrides");
   const next = { ...previous };
+  const sharedWidth = split ? split.width : CHART_SPLIT[mode].width;
+
   if (split) {
     next[mode] = split;
   } else {
     delete next[mode];
   }
+
+  for (const other of Object.keys(CHART_SPLIT) as ChartMode[]) {
+    if (other === mode) continue;
+    const existing = next[other];
+    // A mode nobody has sized yet keeps its own seed height and adopts the shared width, which
+    // is the whole point: the first drag in any mode decides the width for all of them.
+    next[other] = { width: sharedWidth, height: existing?.height ?? CHART_SPLIT[other].height };
+  }
+
   setGlobalState("chartSplitOverrides", next);
-  // `persist: false` is the in-drag frame — state moves, the cookie does not. A resize fires
-  // one of these per animation frame, and `Cookies.set` is a `JSON.stringify` plus a
-  // synchronous `document.cookie` write, so persisting each frame put ~60 cookie-jar writes a
-  // second on the critical path of a direct manipulation. Only the size the gesture *ends* on
-  // is worth remembering, and `use-resizable-chart-split` guarantees a `transient: false` call
-  // at the end of every gesture — so "state and cookie can never be written apart" still holds
-  // for every value a reload could observe.
   if (persist) setSettingInCookieStorage(CookieStorageKeys.CHART_SPLIT_OVERRIDES, next);
 };
 

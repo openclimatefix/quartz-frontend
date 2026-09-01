@@ -1,5 +1,8 @@
 import React, { useRef, useEffect } from "react";
-import useGlobalState, { getCursorCadenceMinutes } from "../helpers/globalState";
+import useGlobalState, {
+  getPlaybackStrideMinutes,
+  snapCursorToFocusedGrid
+} from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
 import Ui, { SpeedControl } from "./ui";
@@ -50,16 +53,21 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
       if (formatISODateString(selectedISOTime || "") === formatISODateString(endTime)) {
         return startTime;
       }
-      // Step the cursor by one slot on its own grid, not by a hardcoded half hour — on a
-      // 15-minute grid that stride skipped every other published value. Speed changes the
-      // period between ticks, never this stride.
-      return addMinutesToISODate(selectedISOTime || "", getCursorCadenceMinutes());
+      // Step by the *finest* cadence across the countries drawn, not the focused country's —
+      // playback is the one case where nobody is aiming at a step, so a coarse focus must not
+      // play a fine country at half its resolution. See `playbackStrideMinutes`. Speed changes
+      // the period between ticks, never this stride.
+      return addMinutesToISODate(selectedISOTime || "", getPlaybackStrideMinutes());
     });
   };
 
   const pause = () => {
     clearInterval(intervalRef.current);
     setIsPlaying(false);
+    // Playback may have left the cursor between the focused country's slots. Stepping by hand
+    // expects that grid — the arrow keys and the scrub handle both move on it — so hand it back
+    // on the way out rather than leaving the next manual step to start from an odd instant.
+    snapCursorToFocusedGrid();
   };
 
   const play = () => {

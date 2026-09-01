@@ -10,6 +10,7 @@ import {
   isOnCadence,
   nextSlot,
   periodForInstant,
+  playbackStrideMinutes,
   slotForInstant,
   slotLabellingFor,
   snapDownToCadence,
@@ -60,6 +61,22 @@ describe("cursorCadenceMinutes", () => {
     expect(cursorCadenceMinutes("XX")).toBe(FALLBACK_CADENCE_MINUTES);
     expect(cursorCadenceMinutes(null)).toBe(FALLBACK_CADENCE_MINUTES);
     expect(cursorCadenceMinutes(undefined)).toBe(FALLBACK_CADENCE_MINUTES);
+  });
+});
+
+describe("playbackStrideMinutes — the one place focus does not decide the grid", () => {
+  it("takes the finest cadence across the drawn set, not the focused country's", () => {
+    // The opposite rule to `cursorCadenceMinutes`, and deliberately so: nobody is aiming at a
+    // step during playback, so the reason focus wins there does not apply, while playing NL's
+    // 15-minute data at 30 minutes because GB happens to be focused loses real resolution.
+    expect(playbackStrideMinutes(["GB", "NL"])).toBe(15);
+    expect(playbackStrideMinutes(["NL", "GB"])).toBe(15);
+    expect(playbackStrideMinutes(["GB"])).toBe(30);
+  });
+
+  it("falls back on an empty set or an unconfigured country", () => {
+    expect(playbackStrideMinutes([])).toBe(FALLBACK_CADENCE_MINUTES);
+    expect(playbackStrideMinutes(["XX"])).toBe(FALLBACK_CADENCE_MINUTES);
   });
 });
 
