@@ -72,6 +72,12 @@ const PvRemixChart: FC<{
   // `formatISODateString` because the chart's category keys are the trimmed
   // `yyyy-MM-ddTHH:mm` form; `slotForInstant` hands back a full ISO instant.
   const selectedTime = formatISODateString(slotForInstant(cursorInstant, focusedCountry));
+
+  // `timeNow` is a cursor value — a period start under the one shared rule — while the chart's
+  // x axis is keyed on this country's own labels. Resolve it the same way the cursor is, or the
+  // LIVE line sits a whole period early on a period-end country and matches no category at all.
+  const liveSlot = formatISODateString(slotForInstant(timeNow, focusedCountry));
+
   const seriesConfig = useMemo(
     () => (countryConfig?.nationalChartSeries ?? []).slice(0, MAX_FORECAST_SERIES),
     [countryConfig]
@@ -248,7 +254,7 @@ const PvRemixChart: FC<{
             <DataLoadingChartStatus loadingState={loadingState} />
             <RemixLine
               resetTime={resetTime}
-              timeNow={formatISODateString(timeNow)}
+              timeNow={liveSlot}
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
@@ -267,7 +273,7 @@ const PvRemixChart: FC<{
               setTimeOfInterest={setSelectedTime}
               selectedTime={selectedTime}
               selectedRegions={selectedRegions}
-              timeNow={formatISODateString(timeNow)}
+              timeNow={liveSlot}
               resetTime={resetTime}
               visibleLines={visibleLines}
             ></GspPvRemixChart>

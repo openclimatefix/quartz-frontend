@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
-import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
+import { cursorCadenceMinutes, periodForInstant, slotForInstant } from "../../lib/time/cursor";
 import {
   middayInstants,
   midnightInstants,
@@ -433,11 +433,15 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   // nothing here does offset arithmetic of its own. This recomputes on every pointer move
   // exactly as `cursorFraction` does — it is cheap string formatting, not a measurement, so it
   // costs nothing extra beyond the render the handle's own movement already causes.
-  const focusedLocal = formatISODateStringAsZonedTime(
-    slotForInstant(cursor, focusedCountry),
+  // The **period**, not the instant. A single time on this chip made the reader supply the
+  // country's labelling convention to know what it covered — GB's 13:00 is the half hour before
+  // it, NL's the quarter after — which is precisely the thing nobody knows. A range says it.
+  const focusedPeriod = periodForInstant(cursor, focusedCountry);
+  const focusedLocal = `${formatISODateStringAsZonedTime(
+    focusedPeriod.start,
     zone,
     DEFAULT_LOCALE
-  );
+  )}–${formatISODateStringAsZonedTime(focusedPeriod.end, zone, DEFAULT_LOCALE)}`;
   // Centred on the handle in the middle of the track, re-anchored flush to whichever edge it is
   // near so the label clamps inside the track's box instead of overflowing or clipping.
   const labelTranslate =

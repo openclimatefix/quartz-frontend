@@ -277,6 +277,12 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   // wrong clock and at a hardcoded half hour. `slotForInstant` is the same answer stated once.
   const selectedTimeSlot = slotForInstant(selectedTime, focusedCountry);
 
+  // `timeNow` is a cursor value — a period start under the one shared rule — while the chart's
+  // x axis is keyed on this country's own labels. Resolve it the same way the cursor is, or the
+  // LIVE line sits a whole period early on a period-end country and matches no category at all.
+  const liveSlot = formatISODateString(slotForInstant(timeNow, focusedCountry));
+
+
   const { gspDeltas, scope: gspScope, window: gspWindow } = useGspDeltas(selectedTime);
 
   const countryConfig = getCountryConfig(focusedCountry);
@@ -455,7 +461,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
             <RemixLine
               resetTime={resetTime}
-              timeNow={formatISODateString(timeNow)}
+              timeNow={liveSlot}
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
@@ -475,7 +481,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
               setTimeOfInterest={setSelectedTime}
               selectedTime={selectedTime}
               selectedRegions={selectedRegions}
-              timeNow={formatISODateString(timeNow)}
+              timeNow={liveSlot}
               resetTime={resetTime}
               visibleLines={visibleLines}
               deltaView={true}

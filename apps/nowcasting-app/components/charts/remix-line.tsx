@@ -22,6 +22,8 @@ import {
   prettyPrintChartAxisLabelDate
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
+import { useFocusedCountry } from "../../hooks/data/use-countries";
+import { periodForLabel } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
 import { DELTA_BUCKET } from "../../constant";
@@ -177,6 +179,7 @@ const CustomizedLabel: FC<any> = ({
   onGrab
 }) => {
   const yy = 10;
+  const pillWidth = Math.max(40, String(value ?? "").length * 7.2 + 14);
   return (
     <g>
       <line
@@ -215,10 +218,15 @@ const CustomizedLabel: FC<any> = ({
           onClick();
         }}
       >
+        {/* Sized from the text rather than a constant 40. The pill used to hold one time
+            ("10:00"); it now holds a period ("09:30–10:00"), and a fixed rect either clipped the
+            span or left a hole around a short label. 7.2px is the advance width of Matter Semi
+            Mono at `text-xs` — it is a monospace face, so a character count is an exact
+            measurement here, not an estimate. */}
         <rect
-          x={x - 20}
+          x={x - pillWidth / 2}
           y={yy}
-          width="40"
+          width={pillWidth}
           height="20"
           rx="4"
           offset={offset}
@@ -365,6 +373,28 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [pLevels] = useGlobalState("pLevels");
   const { timezone, locale } = useCountryFormatting();
+
+  /**
+   * The cursor names a *period*, not an instant — GB's 10:00 is the half hour that ended then,
+   * NL's is the quarter hour that starts there. The line the user drags stays on the label,
+   * because that is the value they are picking; the band behind it is the span that label is
+   * about, which is the part the convention hides.
+   *
+   * `periodForLabel`, **not** `periodForInstant`: what arrives here is already resolved to this
+   * country's published label (`pv-remix-chart` runs the cursor through `slotForInstant` before
+   * anything is drawn or looked up). Asking the cursor question about a label returns the period
+   * *after* the right one on a period-end country — which is how the chart and the scrub bar
+   * came to draw two different windows for one cursor.
+   *
+   * Both ends come back as cursor strings, which is exactly the axis' category key format, so
+   * they address the axis directly. That only works because a period boundary is always a point
+   * this country publishes — the band is one cadence wide by construction.
+   */
+  const focusedCountry = useFocusedCountry();
+  const cursorPeriod = useMemo(
+    () => (isSitesChart ? null : periodForLabel(timeOfInterest, focusedCountry)),
+    [isSitesChart, timeOfInterest, focusedCountry]
+  );
 
   /**
    * The x axis's tick labels — 6-hourly (00:00/06:00/12:00/18:00) with room, midnight/midday
@@ -797,6 +827,25 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             />
 
+            {/* The period the cursor names, drawn behind its own line. Low alpha and no stroke:
+                it is context for the line, not a second mark competing with it, and it sits over
+                the series rather than under them because reference elements render after the
+                plot — at this alpha the curves read through it unchanged. */}
+            {cursorPeriod && (
+              <ReferenceArea
+                x1={cursorPeriod.start}
+                x2={cursorPeriod.end}
+                yAxisId={"y-axis"}
+                xAxisId={"x-axis"}
+                fill={plot.cursor}
+                fillOpacity={0.22}
+                stroke={plot.cursor}
+                strokeOpacity={0.45}
+                strokeWidth={1}
+                ifOverflow="hidden"
+              />
+            )}
+
             <ReferenceLine
               x={isSitesChart ? new Date(localeTimeOfInterest).getTime() : timeOfInterest}
               stroke={plot.cursor}
@@ -808,7 +857,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 <CustomizedLabel
                   className={`text-sm ${draggingCursor ? "cursor-grabbing" : "cursor-grab"}`}
                   onGrab={beginCursorDrag}
-                  value={prettyPrintChartAxisLabelDate(timeOfInterest, timezone, locale)}
+                  // The *period*, not the instant. Which side of the label the span sits on is
+                  // the country's own convention (GB labels the end of its half hour, NL the
+                  // start of its quarter) and this is where that stops being invisible.
+                  value={
+                    cursorPeriod
+                      ? `${prettyPrintChartAxisLabelDate(
+                          cursorPeriod.start,
+                          timezone,
+                          locale
+                        )}–${prettyPrintChartAxisLabelDate(cursorPeriod.end, timezone, locale)}`
+                      : prettyPrintChartAxisLabelDate(timeOfInterest, timezone, locale)
+                  }
                   solidLine={true}
                 ></CustomizedLabel>
               }
