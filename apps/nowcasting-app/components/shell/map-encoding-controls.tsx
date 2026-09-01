@@ -104,7 +104,7 @@ const MapEncodingControls: FC = () => {
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
 
   return (
-    <div className="flex flex-col gap-1.5 rounded-lg border border-content/10 bg-surface-panel/95 p-2 text-content shadow-2xl">
+    <div className="flex shrink-0 flex-col gap-1.5 rounded-lg border border-content/10 bg-surface-panel/95 p-2 text-content shadow-2xl">
       <span className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
         PV Forecast Map
       </span>

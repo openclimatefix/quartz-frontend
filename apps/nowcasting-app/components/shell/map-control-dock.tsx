@@ -3,7 +3,7 @@ import { FC, ReactNode } from "react";
 import { MAP_CONTROL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
 
 /**
- * Where the map's own controls live — the whole of them, now. Track G moved this dock
+ * The right-hand control column — the map's own controls, and the display panel under them. Track G moved this dock
  * top-right and stacked it below `map.tsx`'s own Clouds/PV layer-toggle row, because `map.tsx`
  * was off-limits to that track. The Phase 6 followup (Track I) finishes it: those buttons
  * moved out of `map.tsx` into `map-layer-controls.tsx`, which mounts *inside*
@@ -43,15 +43,20 @@ import { MAP_CONTROL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
  */
 const MapControlDock: FC<{ children: ReactNode }> = ({ children }) => (
   <div
-    // Labelled because it is a group of controls, and because `map.tsx` finds it by this label
-    // to work out how much of the map's right-hand side is covered when it frames the enabled
-    // countries. A rename here changes what the camera sees as occluded.
+    // Labelled because it is a group of controls. An older comment here claimed `map.tsx`
+    // finds the dock by this label to work out what the camera frames around; it does not —
+    // `map.tsx` measures the chart (`[aria-label="Chart"]`) and nothing else.
     role="group"
     aria-label="Map controls"
-    className="pointer-events-auto absolute z-[15] flex flex-col gap-2"
+    // Bounded top and bottom, so a child can be told how much room is left rather than
+    // guessing — which is what lets the display panel scroll its own body instead of running
+    // off the stage. The column is therefore full-height whether or not anything fills it, so
+    // it must not swallow map drags: the box is inert and each card in it is not.
+    className="pointer-events-none absolute z-[15] flex flex-col gap-2 [&>*]:pointer-events-auto"
     style={{
       right: STAGE_GUTTER_PX,
       top: STAGE_GUTTER_PX,
+      bottom: STAGE_GUTTER_PX,
       width: MAP_CONTROL_WIDTH_PX
     }}
   >

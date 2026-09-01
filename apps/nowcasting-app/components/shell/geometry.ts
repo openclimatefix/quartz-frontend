@@ -1,19 +1,20 @@
 /**
  * The shell's edge space, in one place.
  *
- * Contract §6 names a hard constraint: the display rail and the floating chart compete for
- * edge space, and the chart must know the rail exists rather than being pushed behind it with
- * `z-index` afterwards. The shell answers that *structurally* — everything that floats over
- * the map is rendered inside a positioning layer whose right edge is the rail's left edge
- * (`DashboardShell`'s "chrome inset"), so a floating pane cannot reach the rail's space at
- * all. There is nothing to police, and the OPEN 5 drag/resize (`floating-chart.tsx`,
- * `use-resizable-chart-split.ts`) is bounded by the same box.
+ * Contract §6 names a hard constraint: the display controls and the floating chart compete for
+ * edge space, and the chart must know they exist rather than being pushed behind them with
+ * `z-index` afterwards. The shell answers that *structurally* — everything that floats over the
+ * map is rendered inside one positioning layer (`DashboardShell`'s "chrome inset"), and the
+ * chart's width is capped short of the right-hand control column (`maxChartWidthPx` below).
+ * The display panel lives in that column too, so one cap covers both and the OPEN 5
+ * drag/resize (`floating-chart.tsx`, `use-resizable-chart-split.ts`) is bounded by it.
+ *
+ * `RAIL_WIDTH_PX` used to live here, for when the display panel was a 256px rail down the
+ * right edge that the inset was narrowed to meet. It shares the dock's column now, so the
+ * inset is a fixed box and opening the panel resizes nothing.
  *
  * The numbers come from the settled prototype, `docs/prototypes/phase6-chrome.html`.
  */
-
-/** Width of the display rail when it is open. */
-export const RAIL_WIDTH_PX = 256;
 
 /** Breathing room between a floating pane and the edges of the inset it lives in. */
 export const STAGE_GUTTER_PX = 8;

@@ -7,7 +7,7 @@ import DisplayPanel from "./display-panel";
 import FloatingChart from "./floating-chart";
 import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
-import { RAIL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
+import { STAGE_GUTTER_PX } from "./geometry";
 import { useCursorRange } from "./use-cursor-range";
 import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
 
@@ -25,21 +25,22 @@ import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
  * ```
  *  header            navigation — what you are looking at (§6)
  *  stage             the map, full bleed, with the chrome inset over it
- *    └ chrome inset  everything that floats: the chart, the map control dock
- *    └ display rail  how it is drawn (§6), overlaying the map's right edge
+ *    └ chrome inset  everything that floats: the chart, and the right-hand control column
+ *                    (map controls, then the display panel — see `map-control-dock.tsx`)
  *  cursor readout    the shared cursor, shell chrome rather than chart-internal (§4)
  * ```
  *
- * **The chrome inset is the whole answer to §6's first hard constraint.** The rail and the
- * floating chart compete for edge space; rather than letting them overlap and sorting it out
- * with `z-index`, the inset's right edge *is* the rail's left edge, so a floating pane has no
- * way to reach the rail's column. That holds for the drag override when it lands (OPEN 5) —
- * the drag is bounded by the same box — and it is why neither the chart nor the dock takes a
- * rail-width prop.
+ * **§6's first hard constraint — the display panel and the chart competing for edge space — is
+ * now answered by one rule instead of two.** The panel used to be a 256px rail down the right
+ * edge, and the inset's right edge was pulled in to meet it so that a floating pane could not
+ * reach its column. That worked, and it meant opening the panel resized the chart. The panel
+ * has moved into the control dock's column, which the chart was already capped short of
+ * (`geometry.ts`'s `maxChartWidthPx`), so the inset is a fixed box again and opening the panel
+ * moves nothing.
  *
- * §6's second constraint is derived rather than reacted to: dashboard mode collapses the rail
- * to nothing, and because `railOpen` is a `&&` and not an effect, there is no state to fall out
- * of step. What dashboard mode does *not* do here is hide the header — the account menu is the
+ * §6's second constraint is derived rather than reacted to: dashboard mode renders no display
+ * panel at all, and because that is a `&&` and not an effect, there is no state to fall out of
+ * step. What dashboard mode does *not* do here is hide the header — the account menu is the
  * only way back out of dashboard mode, and the prototype's separate exit affordance is out of
  * scope for this track.
  */
@@ -50,7 +51,6 @@ const DashboardShell: FC<{
   chart: ReactNode;
 }> = ({ dashboardModeActive, comparisonActive, map, chart }) => {
   const [displayPanelOpen, setDisplayPanelOpen] = useState(false);
-  const railOpen = displayPanelOpen && !dashboardModeActive;
 
   // Left/Right walk the shared cursor. Mounted here rather than inside a chart, which is where
   // it used to live (`pv-remix-chart.tsx`): the shortcut writes `selectedISOTime`, which is the
@@ -77,28 +77,28 @@ const DashboardShell: FC<{
     >
       <Header />
 
-      {/* `overflow-hidden` is structural, not cosmetic. `DisplayPanel` parks itself off-stage
-          with `translateX(100%)` when closed, and the resize handle and rail toggle hang outside
-          their own boxes — all of which widen the document and give the page a horizontal
-          scrollbar unless the stage clips them. Clipping here rather than on `body` keeps the
+      {/* `overflow-hidden` is structural, not cosmetic: the chart's resize handle hangs
+          outside its own box, which widens the document and gives the page a horizontal
+          scrollbar unless the stage clips it. Clipping here rather than on `body` keeps the
           fix next to the thing that overflows. */}
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <div className="absolute inset-0">{map}</div>
 
         <div
-          className="pointer-events-none absolute bottom-0 top-14 left-0 transition-[right] duration-300"
-          style={{
-            right: railOpen ? RAIL_WIDTH_PX : 0,
-            top: `calc(3.5rem - ${STAGE_GUTTER_PX}px)`
-          }}
+          className="pointer-events-none absolute inset-x-0 bottom-0"
+          style={{ top: `calc(3.5rem - ${STAGE_GUTTER_PX}px)` }}
         >
           <FloatingChart comparisonActive={comparisonActive}>{chart}</FloatingChart>
           <MapControlDock>
             <MapEncodingControls />
+            {!dashboardModeActive && (
+              <DisplayPanel
+                open={displayPanelOpen}
+                onToggle={() => setDisplayPanelOpen((open) => !open)}
+              />
+            )}
           </MapControlDock>
         </div>
-
-        <DisplayPanel open={railOpen} onToggle={() => setDisplayPanelOpen((open) => !open)} />
       </div>
 
       <CursorReadout />
