@@ -74,6 +74,12 @@ export const MIN_CHART_HEIGHT_PX = 220;
  * not treat them as exclusive), so it gets its own smaller bump rather than being ignored or
  * summed unbounded.
  *
+ * **Width does not vary by mode in practice.** All four entries still name one, because a mode
+ * with no override has to render at *some* width, but `setChartSplitOverride` shares whatever
+ * width the user drags across every mode: opening the regional chart changes what the panel
+ * contains, not how much of the stage you want it to have. Only the heights below are really
+ * per mode, and they are the reason the table exists.
+ *
  * **This is a seed, not a live default.** Brad was explicit that mode-based scaling must not
  * keep resizing the panel under the user's hands once they have sized a mode themselves — "it
  * feels quite uncontrolled from a user perspective." So a mode's entry here is only ever read

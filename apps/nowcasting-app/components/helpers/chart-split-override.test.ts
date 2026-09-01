@@ -1,20 +1,22 @@
 /**
  * `setChartSplitOverride` — the write half of the floating chart's per-mode resize (OPEN 5).
  *
- * `geometry.test.ts` covers the pure lookup (`resolveChartSplit`, seeding, per-mode isolation).
- * This pins the global-state side: a mode's override lands under its own key without disturbing
- * another mode's, and clearing one (the reset affordance) removes the entry rather than writing
- * the seed's numbers back — see the doc comment on `setChartSplitOverride` for why that
- * distinction matters.
+ * `geometry.test.ts` covers the pure lookup (`resolveChartSplit`, seeding). This pins the
+ * global-state side, and the rule that makes it more than a per-mode `Record` write: **width is
+ * shared across modes, height is per mode**, so a commit reaches every mode's width and only
+ * its own mode's height. Clearing one (the reset affordance) removes the entry rather than
+ * writing the seed's numbers back — see the doc comment on `setChartSplitOverride`.
  */
 import { afterEach, describe, expect, test } from "@jest/globals";
 
-import { getGlobalState, setChartSplitOverride } from "./globalState";
+import { getGlobalState, setChartSplitOverride, setGlobalState } from "./globalState";
 import { CookieStorageKeys, getSettingFromCookieStorage } from "./cookieStorage";
+import { CHART_SPLIT } from "../shell/geometry";
 
 afterEach(() => {
-  setChartSplitOverride("plain", null);
-  setChartSplitOverride("comparing", null);
+  // Reset every mode, not two: a single commit now seeds all four, so clearing a subset leaves
+  // the rest behind and the next test starts dirty.
+  setGlobalState("chartSplitOverrides", {});
 });
 
 describe("setChartSplitOverride", () => {
@@ -28,21 +30,44 @@ describe("setChartSplitOverride", () => {
     expect(getGlobalState("chartSplitOverrides").plain).toEqual({ width: 60, height: 70 });
   });
 
-  test("sizing one mode leaves another mode's override untouched", () => {
+  test("a width dragged in one mode becomes every mode's width", () => {
+    setChartSplitOverride("plain", { width: 60, height: 70 });
+
+    const stored = getGlobalState("chartSplitOverrides");
+    expect(stored.plain).toEqual({ width: 60, height: 70 });
+    expect(stored.comparing?.width).toBe(60);
+    expect(stored.selected?.width).toBe(60);
+    expect(stored.comparingSelected?.width).toBe(60);
+  });
+
+  test("a mode that has never been sized keeps its own seed height", () => {
+    setChartSplitOverride("plain", { width: 60, height: 70 });
+
+    // Selecting a region still gets the taller panel it seeds with — only the width travelled.
+    expect(getGlobalState("chartSplitOverrides").selected).toEqual({
+      width: 60,
+      height: CHART_SPLIT.selected.height
+    });
+  });
+
+  test("sizing one mode leaves another mode's height untouched", () => {
     setChartSplitOverride("plain", { width: 60, height: 70 });
     setChartSplitOverride("comparing", { width: 35, height: 50 });
 
-    expect(getGlobalState("chartSplitOverrides")).toEqual({
-      plain: { width: 60, height: 70 },
-      comparing: { width: 35, height: 50 }
-    });
+    const stored = getGlobalState("chartSplitOverrides");
+    expect(stored.plain).toEqual({ width: 35, height: 70 });
+    expect(stored.comparing).toEqual({ width: 35, height: 50 });
   });
 
   test("resetting a mode (null) removes its entry rather than storing the seed", () => {
     setChartSplitOverride("plain", { width: 60, height: 70 });
     setChartSplitOverride("plain", null);
 
-    expect(getGlobalState("chartSplitOverrides")).not.toHaveProperty("plain");
+    const stored = getGlobalState("chartSplitOverrides");
+    expect(stored).not.toHaveProperty("plain");
+    // The shared width goes back to the reset mode's seed everywhere, or another mode would
+    // keep a width the mode you reset from has just disowned.
+    expect(stored.comparing?.width).toBe(CHART_SPLIT.plain.width);
   });
 });
 
@@ -73,8 +98,8 @@ describe("persistence during a drag", () => {
     setChartSplitOverride("plain", { width: 62, height: 72 });
 
     expect(getGlobalState("chartSplitOverrides").plain).toEqual({ width: 62, height: 72 });
-    expect(getSettingFromCookieStorage(CookieStorageKeys.CHART_SPLIT_OVERRIDES)).toEqual({
-      plain: { width: 62, height: 72 }
-    });
+    expect(getSettingFromCookieStorage(CookieStorageKeys.CHART_SPLIT_OVERRIDES)).toEqual(
+      getGlobalState("chartSplitOverrides")
+    );
   });
 });
