@@ -94,36 +94,56 @@ describe("selectAxisTicks — the space decision", () => {
     expect(result.ticks).toHaveLength(9);
   });
 
-  it("picks midnight/midday when the space is clearly too narrow", () => {
-    const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: gaps * 20 });
+  it("picks midnight/midday when 6-hourly is too tight but 12-hourly is not", () => {
+    // 40px between six-hourly labels, 80px between midday/midnight ones — the middle rung.
+    const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: gaps * 40 });
     expect(result.density).toBe("midday-midnight");
     expect(result.ticks).toHaveLength(5);
   });
 
-  it("starts narrow rather than dense when nothing has been measured yet", () => {
+  it("falls all the way to one label a day when even 12-hourly will not fit", () => {
+    const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: gaps * 20 });
+    expect(result.density).toBe("midnight-only");
+    expect(result.ticks).toHaveLength(3);
+  });
+
+  it("starts at the sparsest rung when nothing has been measured yet", () => {
     const result = selectAxisTicks({ startMs: START, endMs: END, zone: "UTC", widthPx: 0 });
-    expect(result.density).toBe("midday-midnight");
+    expect(result.density).toBe("midnight-only");
+  });
+
+  it("holds midnight-only through a resize that does not clear the wide threshold", () => {
+    // Its own spacing is comfortable, but stepping *up* to midday/midnight has to clear 76px of
+    // that density's spacing — at 35px six-hourly it is 70px, so the sparse rung keeps it.
+    const result = selectAxisTicks({
+      startMs: START,
+      endMs: END,
+      zone: "UTC",
+      widthPx: gaps * 35,
+      previousDensity: "midnight-only"
+    });
+    expect(result.density).toBe("midnight-only");
   });
 
   it("has hysteresis at the boundary: a resize that only just crosses the narrow threshold does not flip back on the next tiny change", () => {
-    // Starting six-hourly, drop spacing just below the narrow threshold (44px) — should flip.
+    // Starting six-hourly, drop spacing just below the narrow threshold (56px) — should flip.
     const narrowed = selectAxisTicks({
       startMs: START,
       endMs: END,
       zone: "UTC",
-      widthPx: gaps * 43,
+      widthPx: gaps * 55,
       previousDensity: "six-hourly"
     });
     expect(narrowed.density).toBe("midday-midnight");
 
     // Now widen back to just above the narrow threshold but still below the wide threshold
-    // (60px): a bare `>=` would flip straight back to six-hourly here. The hysteresis band must
+    // (76px): a bare `>=` would flip straight back to six-hourly here. The hysteresis band must
     // hold it at midday-midnight.
     const stillNarrow = selectAxisTicks({
       startMs: START,
       endMs: END,
       zone: "UTC",
-      widthPx: gaps * 50,
+      widthPx: gaps * 65,
       previousDensity: narrowed.density
     });
     expect(stillNarrow.density).toBe("midday-midnight");
@@ -133,7 +153,7 @@ describe("selectAxisTicks — the space decision", () => {
       startMs: START,
       endMs: END,
       zone: "UTC",
-      widthPx: gaps * 61,
+      widthPx: gaps * 77,
       previousDensity: stillNarrow.density
     });
     expect(widened.density).toBe("six-hourly");
@@ -144,7 +164,7 @@ describe("selectAxisTicks — the space decision", () => {
       startMs: START,
       endMs: END,
       zone: "UTC",
-      widthPx: gaps * 50, // between the two thresholds
+      widthPx: gaps * 65, // between the two thresholds
       previousDensity: "six-hourly"
     });
     expect(stillWide.density).toBe("six-hourly");

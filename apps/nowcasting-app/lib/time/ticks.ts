@@ -26,7 +26,7 @@ import { DateTime } from "luxon";
  *    sees the numbers, not where they came from.
  */
 
-export type TickDensity = "six-hourly" | "midday-midnight";
+export type TickDensity = "six-hourly" | "midday-midnight" | "midnight-only";
 
 export type AxisTickSelection = {
   density: TickDensity;
@@ -37,21 +37,35 @@ export type AxisTickSelection = {
 /** Local-clock hours labelled at each density. */
 const HOURS_BY_DENSITY: Record<TickDensity, number[]> = {
   "six-hourly": [0, 6, 12, 18],
-  "midday-midnight": [0, 12]
+  "midday-midnight": [0, 12],
+  "midnight-only": [0]
 };
 
 /**
- * Below this many pixels between adjacent 6-hourly labels they start to crowd a "HH:mm"-style
- * label plus breathing room, so we fall back to midnight/midday.
+ * Densest first. The ladder is walked in this order and the first density with room wins, so
+ * adding a step is one entry here and one in the table above.
  */
-const NARROW_THRESHOLD_PX = 44;
+const DENSITY_LADDER: TickDensity[] = ["six-hourly", "midday-midnight", "midnight-only"];
+
+/**
+ * Below this many pixels between adjacent 6-hourly labels they start to crowd, so we fall back
+ * to midnight/midday.
+ *
+ * Sized to the *widest* label, not the average one. Only the first tick of each day carries the
+ * day name — "Mon 00:00" against a bare "06:00" — and adjacent labels are centred on their
+ * ticks, so the space two of them need is half of each plus a gap. At 10px Matter Semi Mono
+ * that is roughly 54px and 30px of text, i.e. 42px of label with nothing between them. The old
+ * 44px threshold was measuring the bare times only and let a day-prefixed label run into its
+ * neighbour before anything collapsed, which is what "Mon 00:0006:00" was.
+ */
+const NARROW_THRESHOLD_PX = 56;
 
 /**
  * Space has to climb past this wider threshold before switching back up to 6-hourly. The gap
  * between the two is the hysteresis band: a resize has to cross a real amount of pixels, not a
  * rounding error, before the density flips either way.
  */
-const WIDE_THRESHOLD_PX = 60;
+const WIDE_THRESHOLD_PX = 76;
 
 /**
  * The local-calendar instants for a density, within [startMs, endMs].
@@ -119,18 +133,29 @@ export const middayInstants = (startMs: number, endMs: number, zone: string): nu
   walkDays(startMs, endMs, zone, [12]);
 
 /**
- * The Schmitt trigger: which density to use next, given the space available for 6-hourly ticks
- * and the density last rendered.
+ * The Schmitt trigger, walked down a ladder: take the densest set of ticks that has room.
  *
- * With no prior density (first render) the wide threshold applies, so an unmeasured or
- * first-paint width — which reads as 0px — starts narrow rather than flashing a dense label set
- * it may not have room for.
+ * Each rung is measured on *its own* spacing rather than the six-hourly one, because the whole
+ * question is how far apart that density's own labels would sit. The hysteresis is in which
+ * threshold applies: a density already on screen only has to clear the narrow one, while moving
+ * to a different density has to clear the wider one. So a resize hovering on a boundary keeps
+ * what it has instead of relabelling every frame, in either direction and at every rung.
+ *
+ * With no prior density (first render) every rung sees the wide threshold, so an unmeasured or
+ * first-paint width — which reads as 0px — starts at the sparsest rung rather than flashing a
+ * dense label set it may not have room for.
  */
-const chooseDensity = (spacingPx: number, previous: TickDensity | null): TickDensity => {
-  if (previous === "six-hourly") {
-    return spacingPx < NARROW_THRESHOLD_PX ? "midday-midnight" : "six-hourly";
+const chooseDensity = (
+  spacingFor: (density: TickDensity) => number,
+  previous: TickDensity | null
+): TickDensity => {
+  for (const density of DENSITY_LADDER) {
+    const threshold = previous === density ? NARROW_THRESHOLD_PX : WIDE_THRESHOLD_PX;
+    if (spacingFor(density) >= threshold) return density;
   }
-  return spacingPx >= WIDE_THRESHOLD_PX ? "six-hourly" : "midday-midnight";
+  // The last rung is the floor: one label a day is the sparsest an axis can be and still be a
+  // time axis, so below this there is nothing left to drop.
+  return DENSITY_LADDER[DENSITY_LADDER.length - 1];
 };
 
 /**
@@ -150,11 +175,15 @@ export const selectAxisTicks = (input: {
 }): AxisTickSelection => {
   const { startMs, endMs, zone, widthPx, previousDensity = null } = input;
 
-  const sixHourly = tickInstants(startMs, endMs, zone, "six-hourly");
-  const gaps = Math.max(1, sixHourly.length - 1);
-  const spacingPx = Number.isFinite(widthPx) && widthPx > 0 ? widthPx / gaps : 0;
+  const ticksByDensity = new Map<TickDensity, number[]>(
+    DENSITY_LADDER.map((density) => [density, tickInstants(startMs, endMs, zone, density)])
+  );
+  const spacingFor = (density: TickDensity): number => {
+    const gaps = Math.max(1, (ticksByDensity.get(density)?.length ?? 0) - 1);
+    return Number.isFinite(widthPx) && widthPx > 0 ? widthPx / gaps : 0;
+  };
 
-  const density = chooseDensity(spacingPx, previousDensity);
-  const ticks = density === "six-hourly" ? sixHourly : tickInstants(startMs, endMs, zone, density);
+  const density = chooseDensity(spacingFor, previousDensity);
+  const ticks = ticksByDensity.get(density) ?? [];
   return { density, ticks };
 };
