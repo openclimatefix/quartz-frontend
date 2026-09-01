@@ -7,6 +7,7 @@ import { cursorCadenceMinutes, slotForInstant } from "../../lib/time/cursor";
 import {
   middayInstants,
   midnightInstants,
+  quarterDayInstants,
   selectAxisTicks,
   TickDensity
 } from "../../lib/time/ticks";
@@ -82,6 +83,9 @@ import {
  * 3b. midday ticks — `middayInstants`, the same density-independent walk. Half a hairline's
  *    height, vertically centred and dimmer: midday divides a day, midnight separates two, and
  *    the mark says which it is without needing a label;
+ * 3c. 06:00/18:00 ticks — `quarterDayInstants`, midday's height and a step dimmer. Height is
+ *    spent on the midnight/not-midnight distinction only; below that the daylight banding
+ *    behind the marks already tells them apart.
  * 4. the handle;
  * 5. NOW, drawn last so it is never covered.
  *
@@ -225,6 +229,13 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   const middayFractions = useMemo(() => {
     if (!scale) return [];
     return middayInstants(scale.startMs, scale.endMs, zone).map((ms) => fractionForMs(ms, scale));
+  }, [scale, zone]);
+
+  const quarterDayFractions = useMemo(() => {
+    if (!scale) return [];
+    return quarterDayInstants(scale.startMs, scale.endMs, zone).map((ms) =>
+      fractionForMs(ms, scale)
+    );
   }, [scale, zone]);
 
   const daylightBands = useMemo(() => {
@@ -534,6 +545,18 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
               <div
                 key={fraction}
                 className="pointer-events-none absolute top-1.5 h-2 w-px bg-content/10"
+                style={{ left: `${fraction * 100}%` }}
+              />
+            ))}
+            {/* Layer 3c: 06:00 and 18:00. Midday's height, one step dimmer. Height is spent on
+            the midnight/not-midnight distinction alone — these two sit near the daylight band's
+            own edges, so the ground behind them separates them from midday without a third
+            height saying it again. Only those two hours: midnight and midday have their own
+            marks, and a 6-hourly walk including them would stack two weights on one instant. */}
+            {quarterDayFractions.map((fraction) => (
+              <div
+                key={fraction}
+                className="pointer-events-none absolute top-1.5 h-2 w-px bg-content/[0.07]"
                 style={{ left: `${fraction * 100}%` }}
               />
             ))}

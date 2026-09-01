@@ -133,6 +133,17 @@ export const middayInstants = (startMs: number, endMs: number, zone: string): nu
   walkDays(startMs, endMs, zone, [12]);
 
 /**
+ * 06:00 and 18:00 — the quarter-day marks, on the same terms as `midnightInstants` and
+ * `middayInstants`. Deliberately *only* those two hours: midnight and midday are already drawn
+ * by their own walks, and a set that repeated them would stack two marks of different weights
+ * on one instant.
+ *
+ * Weakest of the three on the scrub track, below midday, which is below midnight.
+ */
+export const quarterDayInstants = (startMs: number, endMs: number, zone: string): number[] =>
+  walkDays(startMs, endMs, zone, [6, 18]);
+
+/**
  * The Schmitt trigger, walked down a ladder: take the densest set of ticks that has room.
  *
  * Each rung is measured on *its own* spacing rather than the six-hourly one, because the whole
