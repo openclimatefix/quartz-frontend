@@ -149,24 +149,23 @@ type RemixLineProps = {
  * The handle on a reference line — the draggable cursor's time, and the LIVE marker you click to
  * return to now.
  *
- * Both are **controls**, so they wear the interactive orange. They used to wear `solar`, which
+ * Both are **controls**, so they wear `--interactive`. They used to wear `solar`, which
  * says "this is the PV forecast" about a thing that is not data at all — the loose end
  * `docs/colour-rationalisation.md` leaves open under "one honest wrinkle in (a)". Settled here in
  * favour of treating them as controls, which is what they are.
  *
  * Two states, one escalation, no second colour:
- * One appearance, no states: a dark body, an orange edge, orange lettering. 5.8:1 against the
- * plot well, comfortably WCAG AA.
+ * One appearance, no states: a dark body, an oat edge, oat lettering, comfortably WCAG AA
+ * against the plot well.
  *
- * It briefly carried an "on the live instant" variant — first as an orange fill, then as white
- * lettering. Both are gone. The fill was far too heavy a block at this size and could not be
- * lightened out of it (dark-on-orange fails AA below about 88% opacity, which is not a visible
- * reduction), and the white variant was too quiet to be worth the second rule. Nothing was lost:
+ * It briefly carried an "on the live instant" variant — first as a filled chip, then as white
+ * lettering. Both are gone. The fill was far too heavy a block at this size, and the white
+ * variant was too quiet to be worth the second rule. Nothing was lost:
  * the LIVE marker hides itself when the cursor reaches it, and the footer's pulsing dot carries
  * following-mode, so the chip was saying a third time what two other things already said.
  *
  * The body is `surface`, not black-black: on a `#141515` plot well a true black chip has no edge
- * of its own, and the orange hairline is what gives it one.
+ * of its own, and the hairline is what gives it one.
  */
 const CustomizedLabel: FC<any> = ({
   value,
@@ -289,10 +288,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
     // Axis ticks, axis labels and the reference lines. Chrome, not data — so it follows the
     // theme rather than sitting at a fixed white.
     axis: { name: "--content", alpha: 1, fallback: "rgb(255 255 255)" },
-    // The cursor's own line. Orange because the cursor is a *control* — the same brand orange
-    // the scrub handle in the footer wears, so the two read as one object in two places. The
-    // LIVE line stays neutral: it marks a place rather than being something you drag.
-    cursor: { name: "--interactive", alpha: 1, fallback: "rgb(255 73 1)" }
+    // The cursor's own line, in the interactive colour — the same token the pill around it and
+    // the scrub handle wear, so the three read as one object. That token is oat now, which is
+    // close to the LIVE line's white; the two are told apart by solid-versus-dashed and by the
+    // pill, which is how they were told apart before the orange went anyway.
+    cursor: { name: "--interactive", alpha: 1, fallback: "rgb(255 251 245)" }
   });
 
   const [showNHourView] = useGlobalState("showNHourView");

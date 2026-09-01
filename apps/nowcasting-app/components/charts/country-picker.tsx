@@ -181,7 +181,7 @@ const ChartCountryPicker: React.FC = () => {
       <span
         aria-hidden="true"
         data-test="chart-country-thumb"
-        className="absolute inset-y-0 left-0 z-0 rounded bg-surface-raised ring-1 ring-inset ring-selected-edge motion-safe:transition-transform motion-safe:ease-out"
+        className="absolute inset-y-0 left-0 z-0 rounded bg-selected motion-safe:transition-transform motion-safe:ease-out"
         style={{
           width: `${100 / codes.length}%`,
           transform: `translateX(${Math.max(focusedIndex, 0) * 100}%)`,

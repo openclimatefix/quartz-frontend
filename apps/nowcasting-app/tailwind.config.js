@@ -48,7 +48,7 @@ const COMMERCIAL = {
 };
 
 /** "vis" | "commercial" — the one knob. */
-const PALETTE = "commercial";
+const PALETTE = "vis";
 const DATA = PALETTE === "commercial" ? COMMERCIAL : VISUALISATION;
 
 /* ---- The Data family (Guidelines p7–p8). -----------------------------------

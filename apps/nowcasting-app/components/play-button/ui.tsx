@@ -29,12 +29,11 @@ const Ui: React.FC<UiProps> = ({ onClick, isPlaying }) => {
       // `map/control-button.ts`: transparent, a 2px `content-on-accent` ring, and a hover that
       // lifts the ground rather than touching the colour. Written out rather than imported
       // because the one thing that differs is the part that matters, and it would have to be
-      // overridden anyway: the glyph stays orange, because this is a control and orange is what
-      // a control is.
+      // overridden anyway: the glyph stays `--interactive`, because this is a control.
       //
-      // It had a brand-orange border, which made it the only outlined-in-orange object on a
-      // screen where orange marks the cursor family — the handle, the pill, NOW. A border is
-      // the body of the button, not a statement about it.
+      // It had a brand-orange border, which made it the only outlined-in-accent object on a
+      // screen where the accent marks the cursor family — the handle, the pill, NOW. A border
+      // is the body of the button, not a statement about it.
       className="flex h-7 w-7 flex-none items-center justify-center rounded bg-transparent text-interactive ring-2 ring-inset ring-content-on-accent transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-interactive"
     >
       {isPlaying ? (

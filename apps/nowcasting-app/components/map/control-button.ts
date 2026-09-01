@@ -30,15 +30,23 @@ export const CONTROL_BUTTON_BASE =
 
 /**
  * Selected. Carried by weight rather than hue: the selected button is the only one in the row
- * with a ground, and it is the lightest thing there.
+ * with a ground, and it is the lightest thing there — now by inverting outright, an oat fill
+ * with dark lettering.
  *
- * This replaced a fill-versus-fill arrangement where idle buttons sat on `surface-sunken` —
- * darker than the panel behind them — so the *unselected* buttons read as the heavier objects
- * and selection was working against the visual weight rather than with it. An orange edge was
- * tried first and had the same problem: a hairline cannot outweigh a solid block.
+ * The ladder up to it went `surface-raised` with an oat hairline, one tone step above the idle
+ * buttons. With the accent gone neutral that step was the *whole* of selection, and a step in a
+ * ramp whose neighbours are also steps in the same ramp is not enough to pick a button out of a
+ * row of four. Inverting is the strongest thing a single neutral can do, and it is unambiguous
+ * at a glance across the room, which is what the dashboard mode is for.
+ *
+ * No ring: an oat hairline around an oat ground draws nothing. The fill *is* the edge.
+ *
+ * This also replaced, earlier, a fill-versus-fill arrangement where idle buttons sat on
+ * `surface-sunken` — darker than the panel behind them — so the *unselected* buttons read as
+ * the heavier objects. An orange edge was tried first and had the same problem: a hairline
+ * cannot outweigh a solid block.
  */
-export const CONTROL_BUTTON_ACTIVE =
-  "bg-surface-raised text-selected ring-1 ring-inset ring-selected-edge";
+export const CONTROL_BUTTON_ACTIVE = "bg-selected text-content-on-accent";
 
 /**
  * Selectable, not selected. Sits *in* the group's well rather than on top of it, so it still
@@ -98,16 +106,19 @@ export const CONTROL_ROW_MULTI = "flex items-center gap-1";
  * Grayscale on purpose. Orange means "you can act on this" and every one of these is actionable
  * whichever way it is pointing, so colour here would be saying something the state does not.
  */
-export const CONTROL_LAMP_BASE =
-  "h-2.5 w-2.5 shrink-0 rounded-full border-2 border-content-on-accent transition-colors";
-export const CONTROL_LAMP_ON = "bg-content";
-export const CONTROL_LAMP_OFF = "bg-content-on-accent";
+// The border colour lives on the states, not here: the two states now sit on different grounds
+// (oat when on, the panel when off), so one border colour cannot serve both.
+export const CONTROL_LAMP_BASE = "h-2.5 w-2.5 shrink-0 rounded-full border-2 transition-colors";
+/** Lit: a light fill inside the dark ring. */
+export const CONTROL_LAMP_ON = "border-content-on-accent bg-content";
+/** Unlit: the same ring, dark all the way through. */
+export const CONTROL_LAMP_OFF = "border-content-on-accent bg-content-on-accent";
 /**
  * Working. The lamp pulses rather than a spinner sitting beside the label — the dock column is
  * 116px and a 14px spinner plus its margin is 20px the row does not have, so the separate
  * spinner wrapped the row exactly when something was happening. One indicator, three states.
  */
-export const CONTROL_LAMP_BUSY = "bg-content motion-safe:animate-beat";
+export const CONTROL_LAMP_BUSY = "border-content-on-accent bg-content motion-safe:animate-beat";
 
 /**
  * On, in a multi-select. Filled and outlined — a switch that is up.
@@ -121,7 +132,7 @@ export const CONTROL_LAMP_BUSY = "bg-content motion-safe:animate-beat";
  * tray, so the two controls looked differently defined when they should look equally so.
  */
 export const CONTROL_BUTTON_ON =
-  "bg-surface-raised text-content ring-2 ring-inset ring-content-on-accent";
+  "bg-selected text-content-on-accent ring-2 ring-inset ring-content-on-accent";
 
 /** Off, in a multi-select. Outlined but unfilled — the same switch, down. */
 export const CONTROL_BUTTON_OFF =

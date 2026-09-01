@@ -543,11 +543,11 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
             // Wider, rounded and ringed rather than a hairline rule: it is a control, and it was
             // reading as one more vertical line among the midnight hairlines and the now mark.
             //
-            // Orange at rest, not on hover: this and the chart's cursor pill are two renderings
-            // of one value, and they only teach that by looking like one object. Grey until
-            // touched made the handle the odd one out — the chart's line is orange the whole
-            // time, because it is the same control. Hover and focus go to the lighter orange,
-            // which is the app's standard interactive escalation.
+            // Full strength at rest, not on hover: this and the chart's cursor pill are two
+            // renderings of one value, and they only teach that by looking like one object. Dim
+            // until touched made the handle the odd one out — the chart's line is drawn the whole
+            // time, because it is the same control. Hover and focus escalate to
+            // `--interactive-hover`, which is the app's standard step.
             className="pointer-events-none z-20 absolute -top-[3px] h-[26px] w-[5px] -translate-x-1/2 rounded-full bg-interactive shadow-[0_0_0_1.5px_rgba(0,0,0,0.7)]"
             style={{ left: `${cursorFraction * 100}%` }}
           />
@@ -569,8 +569,8 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
             <span className="font-mono text-xs font-semibold leading-none text-interactive">
               {focusedLocal}
             </span>
-            {/* The live dot: state, on the thing that moves. Orange, like the lettering it sits
-              beside — white read as a separate object rather than part of the chip. Small and
+            {/* The live dot: state, on the thing that moves. The same colour as the lettering it
+              sits beside, so it reads as part of the chip rather than a separate object. Small and
               never a fill, because red is not in this palette and a filled chip would say
               "alert" where this only says "following".
 
@@ -621,7 +621,7 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
                   //
                   // Called "now" and not "live": the mark is a *place*, and clicking it means
                   // "take me there". Whether the cursor is *following* that place is a mode, and
-                  // the orange dot on the tethered tag is what says so — one label cannot honestly
+                  // the pulsing dot on the tethered tag is what says so — one label cannot honestly
                   // do both jobs, which is what this one was trying to do.
                   className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded border border-interactive bg-surface px-1 py-px text-[9px] font-semibold uppercase leading-none tracking-wider text-interactive transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-interactive`}
                 >

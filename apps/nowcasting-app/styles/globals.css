@@ -57,7 +57,7 @@
   transition: background-color 120ms ease;
 }
 
-/* Hover lifts the ground and leaves the orange alone — same rule as every other control. */
+/* Hover lifts the ground and leaves the glyph alone — same rule as every other control. */
 .pv-map .mapboxgl-ctrl-group button:hover {
   background-color: rgb(var(--surface-raised));
 }
@@ -72,13 +72,17 @@
 
 /* The zoom glyphs are `background-image` data URIs with Mapbox's dark fill baked in, so `color`
  * cannot reach them and a filter would only approximate the hue. Replaced outright — a plus and
- * a minus are cheap to draw. `%23` is `#`, escaped for the data URI. */
+ * a minus are cheap to draw. `%23` is `#`, escaped for the data URI.
+ *
+ * `#FFFBF5` is oat, hand-copied from `--interactive`: a data URI cannot read a CSS variable, so
+ * these two literals have to be edited by hand whenever the interactive colour moves. Nothing
+ * will report them missed. */
 .pv-map .mapboxgl-ctrl-group button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%23FF4901' d='M13.5 9.5h2v4h4v2h-4v4h-2v-4h-4v-2h4z'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%23FFFBF5' d='M13.5 9.5h2v4h4v2h-4v4h-2v-4h-4v-2h4z'/%3E%3C/svg%3E") !important;
 }
 
 .pv-map .mapboxgl-ctrl-group button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%23FF4901' d='M9.5 13.5h10v2h-10z'/%3E%3C/svg%3E") !important;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 29 29'%3E%3Cpath fill='%23FFFBF5' d='M9.5 13.5h10v2h-10z'/%3E%3C/svg%3E") !important;
 }
 
 /* The reset button is ours (`ResetIcon`), inline SVG on `currentColor`, so it inherits the

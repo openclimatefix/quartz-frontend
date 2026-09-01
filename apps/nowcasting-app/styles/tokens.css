@@ -89,10 +89,24 @@
   --border-subtle: 255 251 245;
   --border-strong: 255 251 245;
 
-  /* Interactive. Under option (a) this is the *only* job orange has: "you can act on
-   * this". It never appears as a data series inside the dashboard. */
-  --interactive: var(--ocf-brand-orange);
-  --interactive-hover: var(--ocf-brand-orange-light);
+  /* Interactive. Orange no longer does this job (design meeting, 2026-09-01): brand orange is
+   * relegated to the logo, and "you can act on this" is carried in a neutral hue.
+   *
+   * The neutral has to work without a hue to lean on, so the states are split across two
+   * channels rather than one:
+   *
+   *   rest      oat foreground on whatever surface the control sits on
+   *   hover     the *ground* lifts one step (`hover:bg-surface-raised`) and the foreground
+   *             goes to white — brightness on both, so it reads at a glance
+   *   selected  the fill inverts: an oat ground with `--content-on-accent` text, which is
+   *             the strongest move a single neutral has
+   *   disabled  `--content-muted`, which is the only state that goes *down*
+   *
+   * Oat rather than white at rest matters: `--content` is pure white, so a control that
+   * rested at white would be the same value as body text and carry no signal at all. One
+   * step down at rest is what leaves hover somewhere to go. */
+  --interactive: var(--ocf-grey-1); /* "oat" — Grey 1, the website's paper */
+  --interactive-hover: var(--ocf-white);
 
   /* Text sitting on --interactive or on a solar/wind fill. Dark in both themes, because
    * the fill it sits on is the same colour in both themes. */
@@ -117,13 +131,20 @@
   --status-alert: 239 68 68;
 
   /* Selection is a comparison between siblings, so it is carried by contrast plus a hairline
-   * edge, not by a saturated fill. Orange stays the accent but only as the edge — a selected
-   * control reads as "this one" without shouting as loudly as a button you can press. */
-  --selected: var(--ocf-white);
-  --selected-edge: var(--ocf-brand-orange);
-  /* How loud the selection edge is. This is the knob: 1 is a full-strength orange outline,
-   * 0 removes the accent entirely and lets the neutral fill carry selection on its own. */
-  --selected-edge-alpha: 0;
+   * edge, and where the control is a button in a tray, by inverting the fill outright.
+   *
+   * `--selected` is oat, and it is deliberately one token doing both jobs: it is the ground of a
+   * selected button (with `--content-on-accent` on top) and the foreground where selection has
+   * no ground to fill — the current nav item, the focused country code. Same colour, whichever
+   * side of the contrast it is on.
+   *
+   * The edge used to be brand orange with the alpha turned down to 0 — an accent that was
+   * switched off, which left the whole of selection resting on a text-colour step. */
+  --selected: var(--ocf-grey-1);
+  --selected-edge: var(--ocf-grey-1);
+  /* How loud the selection edge is. Still the knob: 1 is a full-strength oat rule, 0 removes
+   * the edge entirely and lets the fill carry selection on its own. */
+  --selected-edge-alpha: 1;
 }
 
 .theme-light {
@@ -144,8 +165,12 @@
   --border-subtle: 12 13 13;
   --border-strong: 12 13 13;
 
-  --interactive-hover: 224 61 0;
+  /* The same two-channel scheme, run from the other end of the ramp: ink at rest, darker on
+   * hover, and the ground still lifts. Oat cannot cross over — it is the paper here. */
+  --interactive: var(--ocf-ink-4);
+  --interactive-hover: var(--ocf-ink-1);
   --selected: 26 25 24;
+  --selected-edge: var(--ocf-ink-1);
 
   /* Oat for the plot floor, Grey 3 for the night bands. The card around it is Grey 2, so
    * the well is *lighter* than the card here where in dark it is darker — paper runs out
