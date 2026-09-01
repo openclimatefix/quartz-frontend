@@ -1,17 +1,71 @@
 # Colour rationalisation — nowcasting-app
 
-Status: **implemented, in progress, uncommitted.** Started 2026-08-26, handed off 2026-08-27.
-66 files changed, plus `styles/tokens.css`, `components/helpers/colour.ts`, `components/dev/`
-and `fonts/` as new files. 1281 tests pass, typecheck clean, app compiles. Nothing committed.
+Status: **implemented and committed.** Started 2026-08-26; committed 2026-08-28 as nine
+commits on `spike/ocf-reskin`, which is a strict fast-forward of `epic/adaptive-eu-ui` (nine
+ahead, nothing behind) and is not pushed. 1282 tests pass, typecheck and lint clean.
 
 Brad is designing by eye against a running dev server and iterating; this document is the
 state of play, not a finished spec.
+
+**Direction, 2026-08-28.** The app is heading for a unified OCF Europe dashboard, so the OCF
+colours stay. Returning to Quartz branding is kept as a change of values — see *Quartz mode*
+below — instead of a second branch to maintain. The epic branch has no role tokens at all
+(its components name `bg-ocf-yellow`, `text-black`), so there was never a non-colour subset to
+extract: the behavioural work is expressed through the token layer.
+
+**Direction, 2026-09-01 — option (a) is off; orange retires to the logo.** Design meeting
+outcome: brand orange no longer means "interactive", and may not appear in the dashboard at
+all. It survives on the logomark, and even that is a candidate for a hover-only treatment.
+The interactive colour is Grey 1 ("oat", `#FFFBF5`) — the website's paper — and the states
+that orange used to separate are now separated in one neutral hue. See *Neutral interactive
+states* below. This supersedes the option (a) recommendation in the decision record, which is
+kept for the reasoning, not the answer.
+
+## Neutral interactive states
+
+A single neutral has to do what a hue was doing, so the states run on two channels instead of
+one:
+
+| state | foreground | ground |
+| --- | --- | --- |
+| rest | oat (`--interactive`) | whatever surface it sits on |
+| hover | white (`--interactive-hover`) | lifts one step, `surface-raised` |
+| selected | `--content-on-accent` (dark) | inverts to an oat fill, `bg-selected` |
+| disabled | `--content-muted` | unchanged |
+
+Two things that fall out of it:
+
+- **Rest is oat, not white, on purpose.** `--content` is pure white, so a control resting at
+  white would be the same value as body text and carry no signal. One step down at rest is
+  what leaves hover somewhere to go.
+- **Selection inverts rather than stepping.** `CONTROL_BUTTON_ACTIVE` was `surface-raised`
+  plus a hairline — one tone step above the idle buttons. Once the accent went neutral that
+  step was the *whole* of selection, and a step in a ramp whose neighbours are steps in the
+  same ramp does not pick a button out of a row of four. The selected button is oat with dark
+  lettering, and carries no ring: an oat hairline around an oat ground draws nothing.
+- **`--selected` is one token doing both jobs** — the ground of a selected button, and the
+  foreground where selection has no ground to fill (the current nav item, the focused country
+  code). Same oat, whichever side of the contrast it is on.
+- **`--selected-edge-alpha` went from 0 to 1.** The edge was orange with its alpha turned off,
+  which left the nav item's underline invisible. A neutral edge is not loud enough to need
+  dimming, so it is on.
+- **Multi-select does not invert.** The Clouds/PV switches keep `surface-raised` plus a lamp.
+  Filling on selection is a single-select idea, and `docs/phase6-track-a-notes.md` is explicit
+  that the two controls must not look alike.
+
+Light mode runs the same scheme from the other end of the ramp: ink-4 at rest, ink-1 on hover,
+and the ground still lifts. Oat cannot cross over — it is the paper there.
+
+Still orange, and deliberately: the logomark, and `--ocf-brand-orange` itself, which stays at
+the true brand `#FF4901` in the brand layer whatever the roles above it do. `--status-warn` is
+Visualisation Orange and always was a different colour for a different job.
 
 ## Read this first if you are picking it up
 
 1. **The token layer is the API.** Components name roles (`bg-surface-panel`, `text-content`,
    `text-solar`) and never a hex or a ramp step. `styles/tokens.css` is the only place raw
-   values live. Do not reintroduce palette classes.
+   values live. Do not reintroduce palette classes. This rule is also what keeps *Quartz
+   mode* a four-file job.
 2. **Three kinds of colour, and they behave differently.** Roles are themed CSS variables.
    Data colours (`solar`, `wind`, `series`, `plot`) are literal hex in `tailwind.config.js`
    because Mapbox and Recharts read them as values at runtime and must not drift between
@@ -44,13 +98,52 @@ state of play, not a finished spec.
 - `useTokens` — resolves role tokens for Mapbox/Recharts and re-reads on theme change via a
   MutationObserver on `<html>`. This is the mechanism light mode needs for the chart.
 
+**Done since the 2026-08-27 handoff**
+
+- **The surface ladder moved down one step**: floor ink-1 (Black 2), recess ink-2, floating
+  panel ink-3, lifted/popover ink-4 (Black 1). Popovers had to become the topmost layer, and
+  going down keeps each layer one ink step from its neighbour while keeping the dashboard
+  dark. Only `tokens.css` changed — no component knew.
+- **The header stopped being a surface**, and the Forecast/Solar Sites nav went with it.
+  `/sites` still routes; it is reached by URL. The scrub bar joined the control vocabulary as
+  a Black 1 band, so header, dock, chart and footer share one depth language.
+- **Wells are flat.** `WELL = "flat"` drops the inset shadow; the tone step and the
+  `border-edge` hairline carry the recess. `"lit"` is still there if the modelled version is
+  wanted back.
+- **`COMMERCIAL` is the live palette.** Solar is `#F6C155`. `VISUALISATION` sits beside it and
+  the switch is one constant, `PALETTE`.
+- **The electric Data palette is in the config** as `data-*` (`data-blue`, `data-purple`, …),
+  for the single-source series it was reserved for.
+- **The chart has a legend again** — `components/charts/chart-legend.tsx`, mounted below both
+  charts whether or not the regional one is open. Inert, drawn-series-only, no toggles.
+  Option A from `docs/chart-legend-options.md`.
+- **Axes are Matter Semi Mono at 10px** in the footer's tick format, naming the day only when
+  it changes. The second axis row went and the plot took the height.
+- **The chart cursor became a control**: orange, drawn as the same object as the scrub handle,
+  and draggable. It reads Recharts' `activeLabel` instead of inverting a scale — the axis is
+  categorical, so there is none — which snaps it to settlement periods for free. Its label
+  group stops pointer events at source, because Recharts binds mousedown/move/up on the chart
+  itself and no handler ordering wins against that.
+- **Multi-select buttons carry a grayscale on/off lamp**, the header country toggle's device
+  at the same 10px with a 2px ring, matched to the single-select tray's edge weight.
+  `CONTROL_LAMP_BUSY` and the footer's live dot share a `beat` keyframe that fades to 5%,
+  where Tailwind's `animate-pulse` stops at 50% and reads as a wobble.
+- **Mapbox chrome** is black with orange glyphs, and the attribution has no card at all.
+- **The footer names the selected date** (`formatISODateStringAsZonedDate`), which the new
+  shell had dropped. The timezone-lock idea from the same conversation is parked — Brad: "I'm
+  not sold on it yet so not investing build time." Whenever it is built: a locked zone must be
+  a display transform over the instant, never a change to how a country resolves its own
+  settlement period (GB labels period-end, NL period-start).
+- **The plot has its own role tokens** (`--plot-base`, `--plot-band-a`, `--plot-band-b`), so
+  light mode can give it paper instead of borrowing a surface role that is one value in light.
+
 **Provisional — Brad has said these may move**
 
-- Solar `#FFD480` and wind `#65B0C9` (Visualisation family). May become a bespoke saturated
-  "commercial" palette; see the open problem below.
-- Selection style, and how much orange survives. Currently: neutral fill plus an orange edge
-  whose loudness is one knob, `--selected-edge-alpha`.
-- The chart's three-step nesting (card ink-4, header ink-3, plot well ink-2).
+- The series palette. `COMMERCIAL` is in use and `VISUALISATION` is one constant away. Neither
+  changes the open problem below: the family gives five hues for seven series either way.
+- Selection style. Orange is out (2026-09-01); selection is now a neutral fill plus an oat
+  edge, whose loudness is still one knob, `--selected-edge-alpha`.
+- The chart's nesting, now card ink-3 with the plot well at ink-2.
 
 ## Settled rules
 
@@ -67,6 +160,48 @@ state of play, not a finished spec.
   chosen one lifted out (`CONTROL_ROW`); multi-select is independent outlined switches
   (`CONTROL_ROW_MULTI`). See `docs/phase6-track-a-notes.md`.
 - **Data colours are never themed.** They encode values.
+
+## Quartz mode — flipping the branding back
+
+Quartz branding can be restored without unpicking anything above, because the token layer
+makes the brand a set of values instead of a property of components. Four files:
+
+- `styles/tokens.css` — `--ocf-brand-orange` and `--ocf-brand-orange-light`. Everything
+  interactive follows from those two, `--selected-edge` included.
+- `tailwind.config.js` — a `QUARTZ` entry beside `VISUALISATION`/`COMMERCIAL`, and `PALETTE`
+  pointed at it.
+- `pages/_app.tsx` and `pages/_document.tsx` — Inter and Source Code Pro back from Google
+  Fonts. Point `--font-matter-semi-mono` at Source Code Pro and the mono axes survive intact.
+- `components/layout/header/index.tsx` — `QUARTZSOLAR_LOGO_ICON.svg`.
+
+The neutral ramps stay put. They are OCF's two blacks with the gaps interpolated, but they
+read as ordinary dark greys and the depth ladder is built on their even steps, so swapping
+them costs the panel stack and buys nothing.
+
+**Five things the flip will not do by itself.**
+
+1. **The orange/yellow separation has to be re-decided.** Less urgent since 2026-09-01 — the
+   interactive colour is a neutral, so nothing in the chrome is competing with a series hue at
+   all, and a Quartz flip that keeps it neutral inherits that. It only comes back if Quartz
+   yellow is made interactive again: make yellow interactive and
+   the chart cursor is the same hue as the solar series — the ambiguity the orange decision
+   removed. Quartz's own palette offers a way out: `ocf-orange` `#FF9736` is defined and used
+   by nothing on `epic/adaptive-eu-ui`, so it is free to claim as the accent, and it keeps the
+   hue separation while staying Quartz-native.
+2. **Font metrics are baked into numbers.** The chart cursor's pill is a hard
+   `<rect width="40">` sized to Matter's digits, and the dock's 116px column and the axis tick
+   spacing were judged by eye against the same face. Source Code Pro has different advance
+   widths, so all three want re-checking.
+3. **The Mapbox zoom glyphs cannot follow a token.** They are data-URI SVGs in `globals.css`
+   with the interactive colour written into the fill (`#FFFBF5` since 2026-09-01), because
+   Mapbox's own stylesheet is injected after
+   ours and wins on `currentColor`. Two literals, and nothing will report them missed.
+4. **Series assignments are a judgement, not a mapping.** `PALETTE` flips in one line, but
+   which series took which hue was decided by eye against the commercial set, and those
+   choices do not automatically read right in another family.
+5. **The cost stays this low only while everything names roles.** Items 2 and 3 are both
+   places where something escaped the token layer. A raw hex inside a component is the thing
+   to catch in review — each one turns a four-file flip into a hunt.
 
 ## The open problem
 
@@ -103,6 +238,16 @@ vanish on oat, because they were designed for editorial pages, not a dense dashb
   but nothing uses it. Neither is dead; both are waiting.
 - `font-serif` has zero uses and Source Code Pro is no longer loaded; `serif` is still in the
   config.
+- **The Mapbox zoom glyphs are literal `#FFFBF5`** (oat, hand-copied from `--interactive`)
+  and cannot follow the theme — Quartz mode,
+  item 3. They are the only colour in the app outside the token layer by necessity.
+- **`--surface-sunken` has no consumers.** It sits on the floor because the ink ramp has
+  bottomed out below `inner`, the way paper runs out below Grey 3 in the light block. If
+  something needs that step, extend the ramp instead of inventing a value.
+- **Dead code awaiting a decision**: `components/charts/LegendTooltipContent.tsx` and
+  `components/LegendTooltop.tsx` have no callers, and neither has `prettyPrintDayLabelWithDate`
+  in `utils.ts` (which is still tested). `ForecastHeaderGSP` declares a `children` prop it
+  never renders.
 
 ## Watch out for
 
@@ -229,15 +374,21 @@ colours for visualisation). But there is a genuine collision to resolve before w
   series colour inside chart canvases, on the grounds that a chart is a bounded context.
   Most expressive, highest risk of confusing people — and hardest to hold the line on later.
 
-**Recommendation: (a).** Once the Data palette is reserved for standalone comparisons, orange
+**Recommendation at the time: (a)** — superseded 2026-09-01, see the top of this document.
+Orange turned out to be too loud for the job at dashboard density; the reasoning below is why
+it was not (b) or (c), which still stands. Once the Data palette is reserved for standalone comparisons, orange
 has no job left inside the dashboard except "you can act on this" — so give it that job
 exclusively and it becomes the most useful colour in the app. (c) only pays off if in-app charts
 regularly carry a third-party series; if that becomes common, revisit. Mocked in
 `docs/mocks/colour-orange-yellow-options.html`.
 
 One honest wrinkle in (a): the chart cursor. It is orange in the mock because you drag it, but
-it is also a mark on the data. Either accept it as a control, or make it neutral white — worth
-deciding by eye.
+it is also a mark on the data. **Resolved 2026-08-28 for the control reading**, and then made
+true by making it draggable, so the colour describes what the thing does. The chart pill and
+the footer scrub handle were unified into one appearance at the same time — dark body, a
+`--interactive` border and lettering, with a dot on the `beat` keyframe — and both are
+draggable, so the rule does not depend on which one you happen to grab. The colour under all
+three went oat on 2026-09-01; the unification is what mattered and it is unaffected.
 
 Related, smaller: Solar is currently `#FFD053`; brand Visualisation Yellow is `#FFD480`.
 Close but visibly lighter and less saturated. Adopting the brand value is a real, if subtle,
@@ -295,7 +446,8 @@ one family instead of two arbitrary colours.
 
 ## What was done
 
-All of the below is in the working tree, uncommitted.
+The first pass, 2026-08-26/27. All of it is in commits 1–2 of the nine (`feat(theme)` and
+`refactor(ui)`); *Where it got to* covers what followed.
 
 - **Font weights capped at 500.** Matter XH has no face above Medium; 78 call sites were
   faux-bolding. hairline/thin raised from 100/200 to 300 for the same reason.
