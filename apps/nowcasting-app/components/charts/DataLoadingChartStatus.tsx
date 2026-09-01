@@ -77,27 +77,32 @@ const EndpointStatusList = <K extends NationalEndpointStates | SitesEndpointStat
     return !!val?.error;
   });
   return (
+    // Inside the plot well, not hanging above it. It used to sit at `-top-4`, from when the
+    // chart had no chrome of its own to collide with; the well clips its own overflow now, so
+    // the chip was being cut in half by the card header above it. Top-right of the well is the
+    // one corner no series reaches on a solar curve, and it is out of the cursor's way.
     <div
-      className={`absolute -top-4 right-2 flex items-center h-9 ${
+      className={`pointer-events-none absolute right-2 top-2 flex items-center ${
         isLoadingData || hasErrors ? "z-40" : "z-0"
       }`}
     >
+      {/* The dock's card, at chip scale: the same ground, hairline and shadow the map controls
+          and the display panel wear, so a transient status reads as app chrome rather than as
+          something drawn on the data. */}
       <div
-        className={`chart-data-loading-message flex flex-row relative h-6 cursor-default justify-between items-center rounded-sm bg-surface-sunken  ${
-          isLoadingData || hasErrors
-            ? "pr-2 pl-1.5"
-            : "bg-surface-raised px-1.5 fade-out pointer-events-none select-none"
+        className={`chart-data-loading-message pointer-events-auto relative flex cursor-default flex-row items-center justify-between gap-1.5 rounded-md border border-content/10 bg-surface-panel/95 px-2 py-1 shadow-2xl ${
+          isLoadingData || hasErrors ? "" : "fade-out pointer-events-none select-none"
         }`}
       >
-        {isLoadingData && <SpinnerTextInline className="mr-2" />}
+        {isLoadingData && <SpinnerTextInline />}
         {hasErrors && !isLoadingData && (
-          <CrossInlineSmall title={"Error"} className="mr-2 text-status-alert" />
+          <CrossInlineSmall title={"Error"} className="text-status-alert" />
         )}
-        <div className="text-sm text-content-secondary">
+        <div className="text-2xs font-semibold uppercase tracking-wider text-content-secondary">
           {isLoadingData || hasErrors ? message : "Data up-to-date"}
         </div>
         <div className="chart-data-loading-endpoints hidden absolute top-full min-w-fit right-0 items-center text-2xs pt-1">
-          <div className="py-1.5 px-2 bg-surface-sunken rounded-sm">
+          <div className="rounded-md border border-content/10 bg-surface-panel/95 px-2 py-1.5 shadow-2xl">
             {!!endpointsArray.length &&
               endpointsArray.map(([key, val]) => {
                 if (!endpointStates) return null;
