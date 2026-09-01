@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { Menu } from "@headlessui/react";
 import { ReactNode } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
+import useSyncEnabledCountries from "../../../hooks/data/use-sync-enabled-countries";
 
 /**
  * The top nav — "what you are looking at", and only that (contract §6).
@@ -82,6 +83,11 @@ type HeaderProps = {
 };
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
+  // Temporary scaffolding (see the hook's own doc comment): keeps the enabled set at "every
+  // entitled, configured country" until a sidebar control can shrink it on purpose. Mounted
+  // here because the header renders on every page.
+  useSyncEnabledCountries();
+
   return (
     <header className="h-14 text-content text-right sm:px-4 flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">

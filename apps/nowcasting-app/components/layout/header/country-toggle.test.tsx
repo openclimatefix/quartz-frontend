@@ -1,16 +1,18 @@
 /**
- * The header country control — which countries are drawn on the map.
+ * The header country control — which country the chart is focused on.
  *
- * Since Phase 6 this is a plain multi-select and nothing more: *focused* (which country the
- * chart reads) moved to the chart header, so the property most worth pinning here is the
- * negative one — enabling a country must not silently move the chart.
+ * Since Phase 6, and since focus took over this control from the enabled set, this is a
+ * plain radio group and nothing more: the *enabled* set (which countries draw on the map)
+ * is scaffolded to "every entitled, configured country" by `useSyncEnabledCountries` until a
+ * sidebar control owns it for real, and this control's whole job is naming the one country
+ * the chart, the headline figures and the level selector follow.
  *
  * Two older properties still matter. First, an unentitled country must be *shown and
  * unclickable* — `/countries` returns every country the API serves so a prospect can see
  * what exists, and hiding them would defeat that. Second, the states where there is no real
  * choice (manifest loading, manifest failed, one country) must not render a half-drawn
- * toggle: the app still works in all of them, because the enabled set comes from the cookie
- * rather than the manifest.
+ * control: the app still works in all of them, because focus comes from the cookie rather
+ * than the manifest.
  *
  * Newest is the status lamp. Its rendering is unreachable in production today, because
  * `useCountryStatus` is a stub — so the non-ok cases are driven here by mocking the hook, and
@@ -67,12 +69,7 @@ import { COUNTRY_CLAIM_KEY } from "../../../lib/api/auth/entitlement";
 import { resetTokenCache } from "../../../lib/api/auth/token";
 import { CookieStorageKeys } from "../../helpers/cookieStorage";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
-import {
-  getGlobalState,
-  setEnabledCountries,
-  setFocusedCountry,
-  setGlobalState
-} from "../../helpers/globalState";
+import { getGlobalState, setGlobalState } from "../../helpers/globalState";
 import CountryToggle from "./country-toggle";
 
 const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
@@ -109,84 +106,87 @@ const renderToggle = () =>
     </SWRConfig>
   );
 
-const options = () => screen.getAllByRole("button").map((b) => b.textContent);
+const options = () => screen.getAllByRole("radio").map((b) => b.textContent);
 
 describe("with the manifest loaded", () => {
   test("renders one option per manifest country", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
     expect(options()).toEqual(["GB", "NL"]);
   });
 
-  // `aria-pressed` is the enabled state, and it is the *only* state this control carries.
-  // Focus moved to the chart header in Phase 6, so nothing here should reflect it.
-  test("reports which countries are drawn, and nothing about focus", async () => {
+  test("the focused country is checked, and nothing else is", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    expect(screen.getByRole("button", { name: "GB" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "NL" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: "GB" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("radio", { name: "GB" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "NL" })).toHaveAttribute("aria-checked", "false");
   });
 
-  test("enabling a country adds it to the map and persists, without moving focus", async () => {
-    // The point of the split: "draw this" and "read this" are two gestures in two places.
+  test("clicking a country focuses it and persists the choice", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: "NL" }));
+    fireEvent.click(screen.getByRole("radio", { name: "NL" }));
 
-    expect(getGlobalState("enabledCountries")).toEqual(["GB", "NL"]);
-    expect(getGlobalState("focusedCountry")).toBe("GB");
-    expect(Cookies.get(CookieStorageKeys.ENABLED_COUNTRIES)).toBe(JSON.stringify(["GB", "NL"]));
+    expect(getGlobalState("focusedCountry")).toBe("NL");
+    expect(Cookies.get(CookieStorageKeys.COUNTRY)).toBe(JSON.stringify("NL"));
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "NL" })).toHaveAttribute("aria-pressed", "true")
+      expect(screen.getByRole("radio", { name: "NL" })).toHaveAttribute("aria-checked", "true")
     );
   });
 
-  test("disabling an unfocused country leaves focus alone", async () => {
+  test("the roving tabindex sits on the focused country", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
-    setEnabledCountries(["GB", "NL"]);
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: "NL" }));
+    expect(screen.getByRole("radio", { name: "GB" })).toHaveAttribute("tabIndex", "0");
+    expect(screen.getByRole("radio", { name: "NL" })).toHaveAttribute("tabIndex", "-1");
+  });
 
-    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
+  test("ArrowRight moves focus to the next country and wraps", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
+
+    fireEvent.keyDown(screen.getByRole("radiogroup", { name: "Focused country" }), {
+      key: "ArrowRight"
+    });
+    expect(getGlobalState("focusedCountry")).toBe("NL");
+
+    fireEvent.keyDown(screen.getByRole("radiogroup", { name: "Focused country" }), {
+      key: "ArrowRight"
+    });
     expect(getGlobalState("focusedCountry")).toBe("GB");
   });
 
-  // The one case where this control touches focus, and it is the invariant rather than a
-  // choice: the chart cannot be reading a country that is not drawn.
-  test("disabling the focused country hands focus to what is left", async () => {
+  test("ArrowLeft moves focus to the previous country and wraps", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
-    setEnabledCountries(["GB", "NL"]);
-    setFocusedCountry("NL");
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole("button", { name: "NL" }));
-
-    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
-    expect(getGlobalState("focusedCountry")).toBe("GB");
+    fireEvent.keyDown(screen.getByRole("radiogroup", { name: "Focused country" }), {
+      key: "ArrowLeft"
+    });
+    expect(getGlobalState("focusedCountry")).toBe("NL");
   });
 
-  // An empty set is a blank map with no way back. `setEnabledCountries` refuses it too; the
-  // point here is that the button does not pretend otherwise.
-  test("the last enabled country is not clickable", async () => {
-    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
+  test("arrow keys skip an unselectable country rather than landing on it", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    expect(screen.getByRole("button", { name: "GB" })).toBeDisabled();
-
-    fireEvent.click(screen.getByRole("button", { name: "GB" }));
-    expect(getGlobalState("enabledCountries")).toEqual(["GB"]);
+    // Only GB is selectable, so ArrowRight has nowhere to go and focus stays put.
+    fireEvent.keyDown(screen.getByRole("radiogroup", { name: "Focused country" }), {
+      key: "ArrowRight"
+    });
+    expect(getGlobalState("focusedCountry")).toBe("GB");
   });
 
   // Shown-but-disabled is the deliberate design: a prospect should be able to see that NL
@@ -194,9 +194,9 @@ describe("with the manifest loaded", () => {
   test("an unentitled country is listed but disabled and unselectable", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    const nl = screen.getByRole("button", { name: "NL" });
+    const nl = screen.getByRole("radio", { name: "NL" });
     expect(nl).toBeDisabled();
 
     // React DOM does not invoke handlers for mouse events on disabled form controls, so
@@ -211,11 +211,11 @@ describe("with the manifest loaded", () => {
   test("with no entitlement at all, every country renders disabled", async () => {
     mockUser = { email: "someone@example.test" };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
     expect(options()).toEqual(["GB", "NL"]);
     for (const code of ["GB", "NL"]) {
-      expect(screen.getByRole("button", { name: code })).toBeDisabled();
+      expect(screen.getByRole("radio", { name: code })).toBeDisabled();
     }
   });
 
@@ -239,9 +239,9 @@ describe("with the manifest loaded", () => {
     );
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "DE"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "DE" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "DE" })).toBeInTheDocument());
 
-    expect(screen.getByRole("button", { name: "DE" })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: "DE" })).toBeDisabled();
   });
 });
 
@@ -252,7 +252,7 @@ describe("states with no real choice", () => {
 
     expect(screen.getByRole("group", { name: "Countries" })).toHaveAttribute("aria-busy", "true");
     expect(screen.getByText("GB")).toBeInTheDocument();
-    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(screen.queryAllByRole("radio")).toHaveLength(0);
   });
 
   test("a failed manifest still names the focused country, with no false choices", async () => {
@@ -260,12 +260,12 @@ describe("states with no real choice", () => {
     renderToggle();
 
     await waitFor(() => expect(screen.getByText("GB")).toBeInTheDocument());
-    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(screen.queryAllByRole("radio")).toHaveLength(0);
   });
 
-  // One option is not a choice, and a lone highlighted button reads as a toggle that has lost
-  // its other half.
-  test("a single-country manifest renders a label, not a one-sided toggle", async () => {
+  // One option is not a choice, and a lone checked radio reads as a group that has lost its
+  // other members.
+  test("a single-country manifest renders a label, not a one-sided radio group", async () => {
     server.use(
       http.get(COUNTRIES_URL, () => HttpResponse.json([(countriesFixture as unknown[])[0]]))
     );
@@ -273,38 +273,34 @@ describe("states with no real choice", () => {
     renderToggle();
 
     await waitFor(() => expect(screen.getByText("GB")).toBeInTheDocument());
-    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(screen.queryAllByRole("radio")).toHaveLength(0);
   });
 });
 
-// The disc is what stops this reading as a segmented control: a segmented control has nothing
-// to say about the options you did not pick, so a lamp that holds its place while dark is the
-// structural difference, not a decoration on top of one.
+// The disc is a status mark now, not a lamp. It used to sit on every segment and carry two
+// things at once — "this country is on the map" and "its pipeline is healthy" — and the first
+// is not a question the control asks any more. So: a dot means something is wrong.
 describe("the status disc", () => {
   const renderPair = async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
   };
 
-  test("every country carries a disc, on or off", async () => {
+  test("a healthy country carries no disc at all, focused or not", async () => {
     await renderPair();
 
-    // GB is enabled, NL is not — and both have one.
-    expect(discFor("GB")).not.toBeNull();
-    expect(discFor("NL")).not.toBeNull();
+    expect(discFor("GB")).toBeNull();
+    expect(discFor("NL")).toBeNull();
   });
 
-  // Lit fills with full-strength yellow against a segment holding the same yellow at 70%, with
-  // a black outline keeping the two strengths apart. Dark is a hollow ring in the same place —
-  // one lamp changing state, not an ornament appearing and vanishing.
-  test("the disc is filled when lit and a hollow ring when off", async () => {
-    await renderPair();
+  test("an unselectable country carries no disc, because it is not drawn", async () => {
+    mockStatuses = { NL: { level: "error", message: "Forecast is 3 hours late" } };
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    expect(discFor("GB")?.className).toContain("bg-status-ok");
-    expect(discFor("GB")?.className).toContain("border-content-on-accent");
-    expect(discFor("NL")?.className).toContain("border-surface-raised");
-    expect(discFor("NL")?.className).not.toContain("bg-");
+    expect(discFor("NL")).toBeNull();
   });
 
   test("the segments sit inside one bonded pill rather than floating free", async () => {
@@ -312,8 +308,8 @@ describe("the status disc", () => {
 
     const pill = document.querySelector('[data-test="country-pill"]');
     expect(pill).not.toBeNull();
-    expect(pill?.contains(screen.getByRole("button", { name: "GB" }))).toBe(true);
-    expect(pill?.contains(screen.getByRole("button", { name: "NL" }))).toBe(true);
+    expect(pill?.contains(screen.getByRole("radio", { name: "GB" }))).toBe(true);
+    expect(pill?.contains(screen.getByRole("radio", { name: "NL" }))).toBe(true);
   });
 });
 
@@ -322,44 +318,45 @@ describe("the status disc", () => {
 describe("a country with something wrong (driven by mocking the status hook)", () => {
   const LATE = { level: "error", message: "Forecast is 3 hours late" };
 
-  test("a lit country's disc takes the status colour", async () => {
+  test("a focused country's disc takes the status colour", async () => {
     mockStatuses = { GB: LATE };
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
     expect(discFor("GB")?.className).toContain("bg-status-alert");
   });
 
-  test("an off country shows no status colour, however bad the status", async () => {
-    // NL is not drawn, so its pipeline health is not a fact about anything on screen.
+  test("an unfocused but selectable country still takes the status colour", async () => {
+    // NL is drawn on the map even though GB is focused, so its pipeline health is a fact
+    // about something on screen.
     mockStatuses = { NL: LATE };
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    expect(discFor("NL")?.className).not.toContain("bg-status-alert");
-    expect(statusFor("NL")).toBeNull();
+    expect(discFor("NL")?.className).toContain("bg-status-alert");
+    expect(statusFor("NL")).not.toBeNull();
   });
 
   test("an ok country offers no status affordance at all", async () => {
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
     // No tooltip to hover, and nothing describing the button — hovering is never a dead end.
     expect(statusFor("GB")).toBeNull();
-    expect(screen.getByRole("button", { name: "GB" })).not.toHaveAttribute("aria-describedby");
-    expect(screen.getByRole("button", { name: "GB" }).className).not.toContain("cursor-help");
+    expect(screen.getByRole("radio", { name: "GB" })).not.toHaveAttribute("aria-describedby");
+    expect(screen.getByRole("radio", { name: "GB" }).className).not.toContain("cursor-help");
   });
 
   test("a non-ok country gets a hover affordance and reaches assistive tech in words", async () => {
     mockStatuses = { GB: LATE };
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "NL"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
-    const gb = screen.getByRole("button", { name: "GB" });
+    const gb = screen.getByRole("radio", { name: "GB" });
     expect(gb.className).toContain("cursor-help");
 
     // The message is a *description*, not part of the name: the reader still says "GB".
@@ -374,9 +371,9 @@ describe("a country with something wrong (driven by mocking the status hook)", (
     mockStatuses = { NL: LATE };
     mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("button", { name: "NL" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeInTheDocument());
 
     expect(statusFor("NL")).toBeNull();
-    expect(discFor("NL")?.className).not.toContain("bg-status-alert");
+    expect(discFor("NL")).toBeNull();
   });
 });

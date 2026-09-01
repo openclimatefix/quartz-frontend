@@ -1,46 +1,36 @@
 import React from "react";
 
-import { toggleCountryEnabled } from "../../helpers/globalState";
+import { setFocusedCountry } from "../../helpers/globalState";
 import { sortCountryCodes } from "../../../config/countries";
-import { useCountries, useEnabledCountries } from "../../../hooks/data/use-countries";
+import { useCountries, useFocusedCountry } from "../../../hooks/data/use-countries";
 import { useCountryStatus } from "../../../hooks/data/use-country-status";
 import type { CountryStatus } from "../../../hooks/data/use-country-status";
+import {
+  CONTROL_BUTTON_ACTIVE,
+  CONTROL_BUTTON_BASE,
+  CONTROL_BUTTON_IDLE,
+  CONTROL_BUTTON_UNAVAILABLE,
+  CONTROL_ROW
+} from "../../map/control-button";
 import type { CountryListing } from "../../../lib/domain/types";
 
-// Which countries draw on the map. A multi-select, and nothing else.
+// Which country the header sends to the chart. A radio group, one country at a time.
 //
 // Phase 6 split "which country" in two (`docs/phase6-layout-contract.md` §1): *enabled* is a
-// set and belongs to the map, *focused* is one country and belongs to the chart. This
-// control owns the first half only. Focus is picked in the chart header, next to the numbers
-// it governs — see `components/charts/country-picker.tsx` — because that is where the choice
-// has a visible effect, and putting both in the header made one gesture quietly do two
-// things.
+// set and belongs to the map, *focused* is one country and belongs to the chart. This control
+// used to own the enabled half — a bank of independent switches — but the enable/disable UI
+// is moving to a sidebar and has not landed yet. Until it does, the enabled set is simply
+// every entitled and configured country, kept in sync by `useSyncEnabledCountries`, and this
+// control's whole job is focus: which one country the chart, the headline figures and the
+// level selector follow. That makes it one-of-N, the same grammar as the chart's own picker
+// (`components/charts/country-picker.tsx`, which this borrows its keyboard handling from) —
+// that component has no importers right now and is dead code, kept only as the reference this
+// one is copying from.
 //
 // `/countries` returns every country the API serves, by design, so prospects can see what
 // exists before a subscription completes — which is why an unentitled country is rendered
-// *disabled* rather than hidden. This is the one place entitlement gates a write: the
-// enabled set is persisted, so it must never come to hold a country the user cannot see.
-//
-// ## Why this is a bank of switches and the chart's control is not
-//
-// The chart's picker is one-of-N and says so structurally: a single thumb sliding along a
-// shared track, which cannot express "both". This one is a *set*, so it must not borrow any
-// of that vocabulary — **no thumb, no travel, nothing that slides.** The two controls used to
-// be the same segmented row of yellow-on-black codes while meaning opposite things, and
-// whichever a user met first taught them a grammar the other one broke.
-//
-// Two things carry "bank of switches" here. On and off are separately designed rather than two
-// shades of the same fill: a lit segment holds the brand yellow, and a dark one has no fill at
-// all, dropping into the header's black so it reads as *switched off* rather than as merely
-// not-currently-chosen. And every segment keeps a status disc in the same place in both states —
-// a lamp that stays put whether lit or dark is the one thing a segmented control never has,
-// because a segmented control has nothing to say about the options you did not pick.
-//
-// What used to be a third thing — a bonded pill, drawn as a dark trough with a ring around it —
-// is gone. It was the strongest cue of all, and it was cueing the wrong control: a rounded,
-// filled, outlined container of country codes is precisely what the chart's track is. Two of
-// them on one screen read as one control in two places, whatever the contents did. The segments
-// carry the grouping on their own now, by sitting together and by sharing a design.
+// *disabled* rather than hidden. Entitlement and configuration are the only reasons a country
+// is unselectable here; nothing about the enabled set is decided in this file any more.
 
 /**
  * Layout only — no ground, no edge. See the note above on why the container went.
@@ -49,65 +39,62 @@ import type { CountryListing } from "../../../lib/domain/types";
  * part them slightly. With nothing enclosing them, separately switchable things need visibly
  * separate hit targets, or two adjacent lit segments merge back into one bar of yellow.
  */
-const PILL_BASE = "inline-flex items-center gap-1.5";
+/**
+ * The control is a single-select, so it is drawn with the app's single-select vocabulary —
+ * `CONTROL_ROW` and the `CONTROL_BUTTON_*` set from `components/map/control-button.ts`, the same
+ * objects the map dock's Forecast/Delta and GSP/DNO rows are made of. It used to be a bank of
+ * rounded switches with a status lamp on every segment, which was the right drawing of the
+ * question it used to ask ("which countries are on the map?") and is the wrong drawing of the
+ * one it asks now.
+ *
+ * Nothing here is header-specific. A country picker and a unit picker are the same kind of
+ * control, and the header is not a reason for a second appearance.
+ */
+// `surface-inset` overrides the tray's own `surface-inner`. The dock's trays are cut into a
+// panel one step above them, which is what makes the recess and therefore the gaps between
+// buttons visible; the header is the floor, so a tray at `surface-inner` sits *above* its
+// surroundings and the same structure disappears. Going a step below the header restores it.
+// `CONTROL_ROW` minus its ground. The dock's trays are cut into a panel one step above them,
+// which is what makes the recess — and therefore the gaps between buttons — visible; the header
+// is the floor, so the same tray sits *above* its surroundings and the structure disappears.
+// `surface-inset` puts it a step below the header instead. Written out rather than appended,
+// because two background utilities in one class string are resolved by stylesheet order, not by
+// the order they are written.
+const PILL_BASE = `${CONTROL_ROW.replace(
+  "bg-surface-inner",
+  "bg-surface-inset"
+)} align-middle`;
 
-const SEGMENT_BASE =
-  "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-content";
-/**
- * Lit: the brand yellow held back with opacity rather than swapped for a different token, so the
- * header's black shows through and dims it. The headroom that gives up is what the lamp spends —
- * a bright disc needs a ground to be bright *against*, and yellow at full strength left none.
- * One colour, two strengths; the opacity is the knob if it wants to be lighter or darker.
- */
-const SEGMENT_ON = "bg-surface-raised text-selected ring-1 ring-inset ring-selected-edge";
-/** Dark: no fill of its own, so the segment is the header's own black and reads as a gap. */
-const SEGMENT_OFF =
-  "bg-transparent text-content-muted hover:bg-surface-raised/40 hover:text-content";
-const SEGMENT_UNAVAILABLE = "bg-transparent text-surface-raised cursor-not-allowed";
+// `px-3`, replacing the dock's `px-2`: the dock's buttons are packed into a 260px column and
+// share their row with another group, where these are two or three codes with the whole header
+// around them and read as cramped at the same padding.
+const SEGMENT_BASE = `${CONTROL_BUTTON_BASE.replace(
+  "px-2",
+  "px-3"
+)} gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-content`;
+const SEGMENT_ON = CONTROL_BUTTON_ACTIVE;
+const SEGMENT_OFF = CONTROL_BUTTON_IDLE;
+const SEGMENT_UNAVAILABLE = `${CONTROL_BUTTON_UNAVAILABLE} pointer-events-none`;
 
 /**
- * The lamp: lit countries carry a filled disc, dark ones a hollow ring in the same place, so
- * the eye tracks one lamp changing state rather than an ornament appearing and vanishing.
+ * Status, and only status. The lamp that used to sit on every segment was carrying two things
+ * at once — "this country is switched on" and "its pipeline is healthy" — and the first of those
+ * is not a question any more. A country with nothing wrong now shows nothing, so a dot in the
+ * header always means something needs attention rather than being an ornament to scan past.
  *
- * The lit disc is full-strength `interactive` against a segment holding the same colour at 70%,
- * which is what makes it read as *lit* rather than merely present — the segment deliberately
- * gives up the headroom for it. The black outline is what stops the two strengths of one colour
- * blurring into each other at this size.
- *
- * Status keeps the same filled disc and only changes its colour, so a country with something
- * wrong is not a new shape to learn — it is the lamp you were already reading, in a colour that
- * is not yellow.
- *
- * 10px with a 2px ring: the ring is the whole of the off state, and at 1px on an 8px disc it
- * read as a smudge rather than as a lamp with an off position.
+ * 6px and no ring: it is a mark beside a label, not a switch with an off position.
  */
-const DISC_BASE = "h-2.5 w-2.5 shrink-0 rounded-full border-2 transition-colors";
-/** Lit and nothing to report — full-strength yellow against the segment's held-back yellow. */
-const DISC_OK_ON = "border-content-on-accent bg-status-ok";
-/**
- * Dark, and nothing to report. Status never tints an off country: it is not being drawn, so
- * reporting on its pipeline would be answering a question nobody asked.
- */
-const DISC_OFF = "border-surface-raised";
-const DISC_UNAVAILABLE = "border-surface-raised";
-/**
- * The lamp in a colour that is not the interactive orange. `status-warn` (Visualisation Orange) for the
- * warning: dusty (`#FFAC5F`) is a slightly different yellow, and a warning that has to be
- * compared against the lamp beside it to be noticed is not a warning. There is no red token in
- * the palette; `red-500` follows the precedent in `DataLoadingChartStatus.tsx`.
- *
- * Same black outline as the ok lamp, because only the fill is carrying the difference.
- */
+const DISC_BASE = "h-1.5 w-1.5 shrink-0 rounded-full";
 const DISC_STATUS: Record<"warning" | "error", string> = {
-  warning: "border-content-on-accent bg-status-warn",
-  error: "border-content-on-accent bg-status-alert"
+  warning: "bg-status-warn",
+  error: "bg-status-alert"
 };
 
 /**
- * A country can be chosen only if the user is entitled to it *and* this build has a
- * registry entry for it. Without an entry there are no boundaries to draw and no timezone
- * to render in, so selecting it would be a crash rather than a degraded view — the same
- * rule `useEntitledCountries` applies when fanning out.
+ * A country can be chosen only if the user is entitled to it *and* this build has a registry
+ * entry for it. Without an entry there are no boundaries to draw and no timezone to render in,
+ * so selecting it would be a crash rather than a degraded view — the same rule
+ * `useEntitledCountries` applies when fanning out.
  */
 const isSelectable = (country: CountryListing): boolean => country.entitled && country.configured;
 
@@ -115,74 +102,60 @@ const unselectableReason = (country: CountryListing): string =>
   country.configured ? "No access" : "Not available in this build";
 
 /**
- * The lamp. Filled when the country is lit, a hollow ring when it is not, and a colour other
- * than yellow only in the one combination where a colour means anything: lit *and* not ok.
- *
  * `aria-hidden` because colour is never the carrier — the tooltip beside it says the same
  * thing in words, and a disc announced on its own would only add noise.
  */
-const StatusDisc: React.FC<{
-  code: string;
-  enabled: boolean;
-  selectable: boolean;
-  status: CountryStatus;
-}> = ({ code, enabled, selectable, status }) => {
-  const state = !selectable
-    ? DISC_UNAVAILABLE
-    : !enabled
-    ? DISC_OFF
-    : status.level === "ok"
-    ? DISC_OK_ON
-    : DISC_STATUS[status.level];
+const StatusDisc: React.FC<{ code: string; level: "warning" | "error" }> = ({ code, level }) => (
+  <span
+    aria-hidden="true"
+    data-test={`country-disc-${code}`}
+    className={`${DISC_BASE} ${DISC_STATUS[level]}`}
+  />
+);
 
-  return (
-    <span
-      aria-hidden="true"
-      data-test={`country-disc-${code}`}
-      className={`${DISC_BASE} ${state}`}
-    />
-  );
-};
+/** A country named with no choice attached, for the states where a choice would be a lie. */
+const CountryLabel: React.FC<{ code: string; title: string }> = ({ code, title }) => (
+  <span title={title} className={`${CONTROL_BUTTON_BASE} text-content`}>
+    {code}
+  </span>
+);
 
 /**
- * One switch in the bank.
+ * One radio in the group.
  *
  * Rendered as a real `<button disabled>` rather than a styled `<div>` so an unentitled
  * country is unclickable, unfocusable and announced as disabled, rather than merely looking
- * greyed out. `aria-pressed` carries the enabled state — this is a set of independent
- * toggles, not a radio group, and that is the whole reason it looks nothing like the chart's
- * picker.
- *
- * The last enabled country is `disabled` too: an empty set is a blank map with no way back.
- * `setEnabledCountries` refuses it as well, but the button should not pretend otherwise.
+ * greyed out. `aria-checked` carries the focused state — this is a radio group, and `role`,
+ * `aria-checked` and roving `tabIndex` all say so, matching the chart's own picker.
  *
  * A status affordance only exists when there is a status. An ok country gets no tooltip, no
  * `cursor-help` and no description, so hovering it is never a dead end that promises an
  * explanation and then has none.
  */
-const CountryOption: React.FC<{
-  country: CountryListing;
-  enabled: boolean;
-  isLastEnabled: boolean;
-  onToggle: (code: string) => void;
-}> = ({ country, enabled, isLastEnabled, onToggle }) => {
+const CountryOption = React.forwardRef<
+  HTMLButtonElement,
+  {
+    country: CountryListing;
+    focused: boolean;
+    onChoose: (code: string) => void;
+  }
+>(({ country, focused, onChoose }, ref) => {
   const selectable = isSelectable(country);
   const status = useCountryStatus(country.code);
 
-  // Off countries are not drawn, so their pipeline health is not a fact about anything on
-  // screen. Suppressing it here rather than in the hook keeps the hook honest about the API.
-  const reportable = enabled && selectable && status.level !== "ok" && status.message !== null;
+  // An unselectable country is not drawn, so its pipeline health is not a fact about
+  // anything on screen. Suppressing it here rather than in the hook keeps the hook honest
+  // about the API.
+  const reportable = selectable && status.level !== "ok" && status.message !== null;
   const statusId = `country-status-${country.code}`;
 
-  const stateClasses = !selectable ? SEGMENT_UNAVAILABLE : enabled ? SEGMENT_ON : SEGMENT_OFF;
+  const stateClasses = !selectable ? SEGMENT_UNAVAILABLE : focused ? SEGMENT_ON : SEGMENT_OFF;
 
   const hint = !selectable
     ? unselectableReason(country)
-    : isLastEnabled
-    ? "The only country on the map"
-    : enabled
-    ? "Remove from the map"
-    : "Add to the map";
+    : focused
+    ? "shown in the chart"
+    : "show in the chart";
 
   // The tooltip is a *sibling* of the button rather than a child. Anything inside a button
   // joins its accessible name, so a message rendered in there would have a screen reader
@@ -192,15 +165,20 @@ const CountryOption: React.FC<{
   return (
     <span className="group relative inline-flex">
       <button
+        ref={ref}
         type="button"
-        disabled={!selectable || isLastEnabled}
-        aria-pressed={enabled}
+        role="radio"
+        disabled={!selectable}
+        aria-checked={focused}
+        tabIndex={focused ? 0 : -1}
         aria-describedby={reportable ? statusId : undefined}
         title={reportable ? `${country.name} — ${status.message}` : `${country.name} — ${hint}`}
-        onClick={() => onToggle(country.code)}
+        onClick={() => onChoose(country.code)}
         className={`${SEGMENT_BASE} ${stateClasses} ${reportable ? "cursor-help" : ""}`}
       >
-        <StatusDisc code={country.code} enabled={enabled} selectable={selectable} status={status} />
+        {reportable && status.level !== "ok" && (
+          <StatusDisc code={country.code} level={status.level} />
+        )}
         {country.code}
       </button>
       {reportable && (
@@ -215,27 +193,21 @@ const CountryOption: React.FC<{
       )}
     </span>
   );
-};
-
-/** A country named with no choice attached, for the states where a choice would be a lie. */
-const CountryLabel: React.FC<{ code: string; title: string }> = ({ code, title }) => (
-  <span title={title} className={`${PILL_BASE} px-2 py-0.5 text-sm font-bold text-content`}>
-    {code}
-  </span>
-);
+});
+CountryOption.displayName = "CountryOption";
 
 const CountryToggle: React.FC = () => {
   const { countries, isLoading, error } = useCountries();
-  const enabledCountries = useEnabledCountries();
+  const focusedCountry = useFocusedCountry();
 
   // The manifest is an hour-cached request that can also cold-start with a retryable 503.
-  // A momentarily empty control would read as "your countries went away", so both the
-  // in-flight and the failed case fall back to naming what is actually drawn. The app is
-  // fully usable in either: the enabled set comes from the cookie, not the manifest.
+  // A momentarily empty control would read as "your country went away", so both the
+  // in-flight and the failed case fall back to naming what is actually focused. The app is
+  // fully usable in either: focus comes from the cookie, not the manifest.
   if (isLoading) {
     return (
       <div className="flex items-center px-2" role="group" aria-label="Countries" aria-busy="true">
-        <CountryLabel code={enabledCountries.join(" ")} title="Loading countries" />
+        <CountryLabel code={focusedCountry} title="Loading countries" />
       </div>
     );
   }
@@ -243,13 +215,13 @@ const CountryToggle: React.FC = () => {
   if (error || countries.length === 0) {
     return (
       <div className="flex items-center px-2" role="group" aria-label="Countries">
-        <CountryLabel code={enabledCountries.join(" ")} title="Country list unavailable" />
+        <CountryLabel code={focusedCountry} title="Country list unavailable" />
       </div>
     );
   }
 
-  // One country is not a choice. Rendering a lone lit segment looks like a switch that has
-  // lost the rest of its bank; a plain label says the same thing without the affordance.
+  // One country is not a choice. Rendering a lone checked radio looks like a group that has
+  // lost the rest of its members; a plain label says the same thing without the affordance.
   if (countries.length === 1) {
     const only = countries[0];
     return (
@@ -259,21 +231,78 @@ const CountryToggle: React.FC = () => {
     );
   }
 
+  return <CountryRadioGroup countries={countries} focusedCountry={focusedCountry} />;
+};
+
+/**
+ * Registry order, not the manifest's — the same sequence the chart's country picker and the
+ * footer's zone stack use. See `sortCountryCodes` in `config/countries.ts`.
+ *
+ * Split out so arrow-key navigation has a stable, sorted list to step through — the same list
+ * that gets rendered, in the same order.
+ */
+const CountryRadioGroup: React.FC<{
+  countries: CountryListing[];
+  focusedCountry: string;
+}> = ({ countries, focusedCountry }) => {
+  const sorted = sortCountryCodes(countries, (country) => country.code);
+  const buttonRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const choose = (code: string) => setFocusedCountry(code);
+
+  /**
+   * Roving tabindex over a group that can contain disabled radios: `Left`/`Up` and
+   * `Right`/`Down` step to the next *selectable* country, wrapping, skipping over any
+   * unentitled or unconfigured ones in between rather than landing on something unclickable.
+   * Copied from `components/charts/country-picker.tsx`'s arrow handling, widened for the
+   * disabled case that control never has to deal with (it only ever lists countries already
+   * on the map).
+   */
+  const onKeyDown = (event: React.KeyboardEvent) => {
+    const step =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+        ? -1
+        : 0;
+    if (step === 0) return;
+
+    event.preventDefault();
+    const currentIndex = sorted.findIndex((country) => country.code === focusedCountry);
+    const startIndex = currentIndex < 0 ? 0 : currentIndex;
+
+    for (let offset = 1; offset <= sorted.length; offset++) {
+      const index = (((startIndex + step * offset) % sorted.length) + sorted.length) % sorted.length;
+      const next = sorted[index];
+      if (isSelectable(next)) {
+        choose(next.code);
+        buttonRefs.current[next.code]?.focus();
+        return;
+      }
+    }
+  };
+
   return (
     <div className="flex items-center px-2" role="group" aria-label="Countries">
       {/* One container, N segments — the pill grows with the country list rather than the
           segments being sized to a fixed track, which is what keeps 1 through 4 countries
           looking like the same object. */}
-      <div data-test="country-pill" className={PILL_BASE}>
-        {/* Registry order, not the manifest's — the same sequence the chart's country picker and
-            the footer's zone stack use. See `sortCountryCodes` in `config/countries.ts`. */}
-        {sortCountryCodes(countries, (country) => country.code).map((country) => (
+      <div
+        data-test="country-pill"
+        role="radiogroup"
+        aria-label="Focused country"
+        onKeyDown={onKeyDown}
+        className={PILL_BASE}
+      >
+        {sorted.map((country) => (
           <CountryOption
             key={country.code}
+            ref={(el) => {
+              buttonRefs.current[country.code] = el;
+            }}
             country={country}
-            enabled={enabledCountries.includes(country.code)}
-            isLastEnabled={enabledCountries.length === 1 && enabledCountries[0] === country.code}
-            onToggle={toggleCountryEnabled}
+            focused={country.code === focusedCountry}
+            onChoose={choose}
           />
         ))}
       </div>
