@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-import { Instant, periodForInstant, snapDownToCadence, snapToCadence } from "../../lib/time/cursor";
+import { Instant, periodForLabel, snapDownToCadence, snapToCadence } from "../../lib/time/cursor";
 
 /**
  * The scrub track's arithmetic — pixels ↔ instants, and nothing else.
@@ -124,7 +124,8 @@ export const scrubScale = (
  * ```
  *
  * **Which end of its period a point labels is a per-country fact**, so each point's span comes
- * from `periodForInstant` rather than from its neighbours' positions in the array. This used to
+ * from `periodForLabel` — the published-timestamp question, not the cursor one — rather than
+ * from its neighbours' positions in the array. This used to
  * read the *previous* array element to find where a run began, which silently encoded GB's
  * period-end convention: correct while every country labelled period-end, and one slot early at
  * both edges of every window the moment NL was confirmed as period-start. Asking the registry
@@ -155,7 +156,7 @@ export const deriveDaylightWindows = (
 
   for (const point of values) {
     if ((point.powerMw ?? 0) > 0) {
-      const period = periodForInstant(point.timeUtc, country);
+      const period = periodForLabel(point.timeUtc, country);
       if (startMs === null) startMs = msOf(period.start);
       // Every positive point extends the run to its own period's end, so the window closes on
       // the last one rather than on wherever the loop happened to notice the run had stopped.

@@ -80,8 +80,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 // citr_1 / gsp_id 67, the same fixture region `use-map-region-values.test.tsx` pins.
-const FIRST = gbGspForecastPeriod.times_utc[20]; // forecast 1538 kW, generation 1599 kW
-const SECOND = gbGspForecastPeriod.times_utc[21]; // forecast 1312 kW, generation 1575 kW
+//
+// The hook takes a **cursor instant**, not a published label, and GB labels period-end — so the
+// cursor that reads the value at `times_utc[20]` is the one starting a period earlier, at
+// `times_utc[19]`. Feeding a label straight in reads the *next* period's value, which is what
+// these constants used to do and what the shared tie-break made visible.
+const FIRST = gbGspForecastPeriod.times_utc[19]; // reads the 1538 kW forecast, 1599 kW generation
+const SECOND = gbGspForecastPeriod.times_utc[20]; // reads 1312 kW / 1575 kW
 
 const renderDeltas = (initialTime: string) =>
   renderHook(({ targetTime }: { targetTime: string }) => useGspDeltas(targetTime), {

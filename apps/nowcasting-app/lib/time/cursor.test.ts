@@ -156,26 +156,29 @@ describe("nextSlot / cursorNow — 'now' is the slot currently filling", () => {
     expect(nextSlot("2026-08-10T16:29:59.999Z", 30)).toBe("2026-08-10T16:30:00.000Z");
   });
 
-  it("gives a finer grid the slot it is actually filling", () => {
+  it("names the period currently filling by its start, on any grid", () => {
     at("2026-08-10T16:07:00.000Z");
-    expect(cursorNow(30)).toBe("2026-08-10T16:30:00.000Z");
-    expect(cursorNow(15)).toBe("2026-08-10T16:15:00.000Z");
+    // The same two periods the ceiling-strict version named — 16:00-16:30 and 16:00-16:15 —
+    // spelled at the start, because a cursor value is a period start now. `nextSlot` above is
+    // unchanged and still answers "the next *label*", which is a different question.
+    expect(cursorNow(30)).toBe("2026-08-10T16:00:00.000Z");
+    expect(cursorNow(15)).toBe("2026-08-10T16:00:00.000Z");
   });
 
   it("shifts by the offset before rounding", () => {
     at("2026-08-10T16:07:00.000Z");
-    expect(cursorNow(30, -60)).toBe("2026-08-10T15:30:00.000Z");
+    expect(cursorNow(30, -60)).toBe("2026-08-10T15:00:00.000Z");
     // The offset used to be applied by overflowing a `set({ minute })`; crossing an hour is
     // the case that spelling had to get right by luck.
-    expect(cursorNow(30, 60)).toBe("2026-08-10T17:30:00.000Z");
+    expect(cursorNow(30, 60)).toBe("2026-08-10T17:00:00.000Z");
   });
 
   it("is unaffected by the viewer's zone, including a half-hour offset", () => {
     at("2026-08-10T16:07:00.000Z");
     Settings.defaultZone = "Asia/Kolkata"; // UTC+05:30
     try {
-      expect(cursorNow(30)).toBe("2026-08-10T16:30:00.000Z");
-      expect(cursorNow(15)).toBe("2026-08-10T16:15:00.000Z");
+      expect(cursorNow(30)).toBe("2026-08-10T16:00:00.000Z");
+      expect(cursorNow(15)).toBe("2026-08-10T16:00:00.000Z");
     } finally {
       Settings.defaultZone = "system";
     }
@@ -184,19 +187,26 @@ describe("nextSlot / cursorNow — 'now' is the slot currently filling", () => {
 
 describe("slotForInstant — the cursor resolved to one country's grid", () => {
   it("resolves the contract's worked example", () => {
-    // A cursor at 16:15 UTC: NL publishes it, GB's containing slot is 16:30. An on-grid instant
-    // is the same answer under either labelling, which is why this case survived the flip.
+    // A cursor at 16:15 UTC: NL publishes it, GB's containing slot is 16:30 — the period
+    // 16:00-16:30, named by its end. Both countries are reading a period that *contains* the
+    // cursor, which is the whole point of choosing the period before naming it.
     expect(slotForInstant("2026-08-10T16:15:00.000Z", "NL")).toBe("2026-08-10T16:15:00.000Z");
     expect(slotForInstant("2026-08-10T16:15:00.000Z", "GB")).toBe("2026-08-10T16:30:00.000Z");
   });
 
-  it("is a ceiling, not a nearest — the case that looks plausible either way", () => {
-    // "Nearest" would give 16:00 here, which is a slot the cursor has already passed.
+  it("is not a nearest — the case that looks plausible either way", () => {
+    // "Nearest" would give 16:00 here, which is a period the cursor has already left.
     expect(slotForInstant("2026-08-10T16:01:00.000Z", "GB")).toBe("2026-08-10T16:30:00.000Z");
   });
 
-  it("leaves a country's own published instant untouched", () => {
-    expect(slotForInstant("2026-08-10T16:30:00.000Z", "GB")).toBe("2026-08-10T16:30:00.000Z");
+  it("takes the period *starting* at a boundary instant, not the one ending there", () => {
+    // The cross-country fix, pinned. A cursor value always sits on a boundary, so this case is
+    // every case in practice. GB used to answer 16:30 here — the period 16:00-16:30, which had
+    // just closed — while NL at the same instant answered 16:30 meaning 16:30-16:45. The two
+    // readings were adjacent and never overlapped. GB now reads 16:30-17:00, named 17:00, and
+    // NL's quarter hour nests inside it.
+    expect(slotForInstant("2026-08-10T16:30:00.000Z", "GB")).toBe("2026-08-10T17:00:00.000Z");
+    expect(slotForInstant("2026-08-10T16:30:00.000Z", "NL")).toBe("2026-08-10T16:30:00.000Z");
   });
 
   it("floors for NL, which the provider confirmed labels period-start", () => {

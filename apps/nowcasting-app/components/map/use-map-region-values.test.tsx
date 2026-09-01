@@ -113,9 +113,11 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>
 );
 
-const FIRST = gbGspForecastPeriod.times_utc[20];
-const SECOND = gbGspForecastPeriod.times_utc[21];
-const THIRD = gbGspForecastPeriod.times_utc[22];
+// Cursor instants, not published labels: GB labels period-end, so the cursor that reads the
+// value at `times_utc[n]` is the one starting a period earlier. See `periodStartForInstant`.
+const FIRST = gbGspForecastPeriod.times_utc[19];
+const SECOND = gbGspForecastPeriod.times_utc[20];
+const THIRD = gbGspForecastPeriod.times_utc[21];
 
 const renderMap = (initialTime: string) =>
   renderHook(

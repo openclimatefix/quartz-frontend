@@ -85,21 +85,24 @@ describe("the zone follows focus", () => {
  *
  * This is the app's one place where the two labelling conventions appear side by side, and the
  * cases below are the ones that would look plausible if the flip were wrong: GB's span *ends*
- * at its label, NL's *starts* at it, and a cursor sitting between GB's slots does not move GB's
- * period off the cursor.
+ * at its label, NL's *starts* at it — but both describe a period that *contains the cursor*,
+ * which is what makes the two rows comparable at all. A cursor sitting between GB's slots does
+ * not move GB's period off the cursor either.
  */
 describe("the period each row is showing", () => {
   // A country's code appears twice on screen — once as this stack's row label and once in the
   // track's tethered tag — so rows are found by their own title rather than by their code.
   const row = (code: string) => screen.getByTitle(new RegExp(`^${code} published period`));
 
-  test("GB focused: GB's span ends at its label, NL's starts at its own", () => {
+  test("GB focused: both rows describe the period the cursor is in, so they overlap", () => {
     setEnabledCountries(["GB", "NL"]);
     render(<CursorReadout />);
-    // Cursor 12:00 UTC. GB's slot is 12:00 UTC (13:00 BST) covering 12:30–13:00 local; NL's is
-    // 12:00 UTC (14:00 CEST) covering 14:00–14:15 local. Same UTC label, spans that touch at a
-    // point and share nothing else — which is the fact the row exists to state.
-    expect(row("GB")).toHaveTextContent("GB12:30–13:00");
+    // Cursor 12:00 UTC — the start of a period on both grids. GB reads 12:00–12:30 UTC
+    // (13:00–13:30 BST), NL 12:00–12:15 UTC (14:00–14:15 CEST): NL's quarter nests inside GB's
+    // half hour. Before the shared tie-break these two rows named *adjacent* periods that
+    // touched at a point and shared nothing, because each country resolved the boundary by its
+    // own labelling convention. The rows exist to compare two spans; they have to overlap.
+    expect(row("GB")).toHaveTextContent("GB13:00–13:30");
     expect(row("NL")).toHaveTextContent("NL14:00–14:15");
     expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
   });
@@ -108,7 +111,7 @@ describe("the period each row is showing", () => {
     setEnabledCountries(["GB", "NL"]);
     setFocusedCountry("NL");
     render(<CursorReadout />);
-    expect(row("GB")).toHaveTextContent("GB12:30–13:00");
+    expect(row("GB")).toHaveTextContent("GB13:00–13:30");
     expect(row("NL")).toHaveTextContent("NL14:00–14:15");
   });
 

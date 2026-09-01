@@ -15,7 +15,7 @@ import { getAvailablePLevels, getUtcHalfHourIndex } from "../helpers/chartUtils"
 import type { TimeSeries } from "../../lib/domain/types";
 import { useSeasonalNorms, type SeasonalNormsData } from "../../hooks/data/use-seasonal-norms";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
-import { cadenceMinutesFor, cursorNow } from "../../lib/time/cursor";
+import { cadenceMinutesFor, cursorNow, slotForInstant } from "../../lib/time/cursor";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -173,7 +173,8 @@ const useFormatChartData = ({
   // cursor's finest-enabled one. Enabling NL alongside GB puts the cursor on a 15-minute grid
   // that GB never publishes: the boundary row would then compare as past, and `FUTURE` would
   // start one slot late, which draws as a gap at "now".
-  const cadenceMinutes = cadenceMinutesFor(useFocusedCountry());
+  const focusedCountry = useFocusedCountry();
+  const cadenceMinutes = cadenceMinutesFor(focusedCountry);
 
   const data = useMemo(() => {
     // The row order of the output follows first-write order and is pinned by the
@@ -196,7 +197,12 @@ const useFormatChartData = ({
     const generationReady = generation.every((series) => !!series.points);
 
     if (primaryPoints && generationReady && timeTrigger) {
-      const timeNow = formatISODateString(cursorNow(cadenceMinutes));
+      // The split boundary is compared against *data keys*, which are this country's labels —
+      // so it has to be the label of the period currently filling, not the cursor instant that
+      // names it. `cursorNow` spells a period start now (one rule for every country, see
+      // `periodStartForInstant`); `slotForInstant` puts it back into the country's own naming.
+      // Without that step a period-end country splits one period early.
+      const timeNow = formatISODateString(slotForInstant(cursorNow(cadenceMinutes), focusedCountry));
       const chartMap: Record<string, ChartData> = {};
 
       const addDataToMap = (

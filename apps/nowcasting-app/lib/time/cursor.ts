@@ -210,28 +210,62 @@ export const nextSlot = (instant: Instant, cadenceMinutes: number): string =>
   toCursorString(roundToCadence(instant, cadenceMinutes, "up", true));
 
 /**
- * "Now" on a cadence grid: the slot currently filling, i.e. the next one strictly ahead.
+ * "Now" as a cursor value: the **start of the period currently filling**.
+ *
+ * A cursor value is always a period start (see `periodStartForInstant`), so this floors rather
+ * than taking the next slot strictly ahead. It names the same period the old ceiling-strict
+ * version did — at 09:14 on a 30-minute grid, the half hour that is filling — from the other
+ * end, which is the end every cursor value is now spelled at.
  *
  * `offsetMinutes` shifts the instant before rounding. The helper this replaces did the shift
  * with a `set({ minute })` that relied on Luxon normalising an out-of-range minute; `plus` is
  * the same thing said properly.
  */
 export const cursorNow = (cadenceMinutes: number, offsetMinutes = 0): string =>
-  nextSlot(DateTime.utc().plus({ minutes: offsetMinutes }), cadenceMinutes);
+  toCursorString(
+    roundToCadence(DateTime.utc().plus({ minutes: offsetMinutes }), cadenceMinutes, "down")
+  );
+
+/**
+ * The start of the period a cursor instant falls in, for a given country's cadence.
+ *
+ * **The tie-break, and the whole of the cross-country fix.** A cursor value sits exactly on a
+ * boundary, so "the period containing it" is ambiguous — and the two countries used to resolve
+ * that ambiguity in opposite directions: GB labels period-end so it ceilinged and took the
+ * period *ending* at the cursor, NL labels period-start so it floored and took the one
+ * *starting* there. Same instant, two adjacent periods, no overlap at all — two readings side
+ * by side in the footer that were never about the same stretch of time.
+ *
+ * One rule for everyone: the period that **starts** at or before the instant. The cursor reads
+ * forward, the way a scrubber does — you are at T, looking at what happens from T — and a finer
+ * country's period nests inside a coarser one's instead of sitting beside it.
+ *
+ * Labelling is applied *after* this, never instead of it: it decides what a period is called,
+ * not which period it is.
+ */
+export const periodStartForInstant = (
+  instant: Instant,
+  country: string | null | undefined
+): string => toCursorString(roundToCadence(instant, cadenceMinutesFor(country), "down"));
 
 /**
  * The slot a country published for a given cursor instant — **the resolution rule**.
  *
- * Ceiling for a country that labels period-end, floor for one that labels period-start;
- * either way the answer is the slot whose period *contains* the cursor. Call this at every
- * boundary where the shared cursor meets one country's data: the map's value lookup, the
- * chart's now-split, a region series index. Looking data up at the raw cursor instead is a
- * blank map the moment a finer country is enabled alongside a coarser one.
+ * The period is chosen first (`periodStartForInstant`, one rule for every country) and only then
+ * named the way that country names it: period-start countries by the start, period-end countries
+ * by the end, a cadence later. The order is the fix — resolving by labelling direction *instead*
+ * of choosing the period is what left GB and NL reading adjacent, non-overlapping spans.
+ *
+ * Call this at every boundary where the shared cursor meets one country's data: the map's value
+ * lookup, the chart's now-split, a region series index. Looking data up at the raw cursor
+ * instead is a blank map the moment a finer country is enabled alongside a coarser one.
  */
 export const slotForInstant = (instant: Instant, country: string | null | undefined): string => {
-  const cadence = cadenceMinutesFor(country);
-  const direction = slotLabellingFor(country) === "period-start" ? "down" : "up";
-  return toCursorString(roundToCadence(instant, cadence, direction));
+  const start = periodStartForInstant(instant, country);
+  if (slotLabellingFor(country) === "period-start") return start;
+  return toCursorString(
+    DateTime.fromISO(start, { zone: "utc" }).plus({ minutes: cadenceMinutesFor(country) })
+  );
 };
 
 /** The two ends of a published period, as cursor-spelled UTC instants. */
@@ -241,7 +275,7 @@ export type Period = { start: string; end: string };
  * The **span** a country's slot covers, rather than the label it goes by.
  *
  * `slotForInstant` answers "which value do I look up"; this answers "what stretch of time is
- * that value about". They are the same fact said from opposite ends, and the second one is what
+ * that value about". Both start from the same chosen period, so they cannot disagree, and the second one is what
  * the footer states out loud: with GB labelling period-end and NL period-start, two rows
  * carrying the same digits describe periods that barely overlap. A label alone cannot show
  * that; a span can, and it does so without the reader having to know the convention first —
@@ -255,15 +289,33 @@ export type Period = { start: string; end: string };
  * By construction the returned span contains the instant asked about, so the length of the span
  * *is* the country's cadence and the reader never needs it stated separately.
  */
-export const periodForInstant = (instant: Instant, country: string | null | undefined): Period => {
-  const labelsStart = slotLabellingFor(country) === "period-start";
-  const slot = slotForInstant(instant, country);
-  const step = cadenceMinutesFor(country) * MS_PER_MINUTE;
-  const slotMs = DateTime.fromISO(slot, { zone: "utc" }).toMillis();
-  // The label is one end; the other is a whole cadence away, on the side the label is *not*.
-  const other = toCursorString(
-    DateTime.fromMillis(labelsStart ? slotMs + step : slotMs - step, { zone: "utc" })
-  );
+/**
+ * The span a **published label** covers — the mirror of `periodForInstant`, and not the same
+ * question.
+ *
+ * `periodForInstant` takes a cursor value, which is always a period start under the one shared
+ * rule, and hands back the period beginning there. This takes a *timestamp the country
+ * published* — a point in a series, a key in the chart's data — and hands back the period that
+ * timestamp is the name of. For a period-start country the two agree; for a period-end country
+ * they are a whole cadence apart, because GB's 06:00 point is the half hour that *ended* at
+ * 06:00 while a cursor at 06:00 selects the one that starts there.
+ *
+ * Passing a data label to `periodForInstant` is the mistake this exists to prevent, and it is
+ * invisible on a period-start country — which is exactly how it got written the first time.
+ */
+export const periodForLabel = (label: Instant, country: string | null | undefined): Period => {
+  const cadence = cadenceMinutesFor(country);
+  const dt = toUtc(label);
+  if (slotLabellingFor(country) === "period-start") {
+    return { start: toCursorString(dt), end: toCursorString(dt.plus({ minutes: cadence })) };
+  }
+  return { start: toCursorString(dt.minus({ minutes: cadence })), end: toCursorString(dt) };
+};
 
-  return labelsStart ? { start: slot, end: other } : { start: other, end: slot };
+export const periodForInstant = (instant: Instant, country: string | null | undefined): Period => {
+  const start = periodStartForInstant(instant, country);
+  const end = toCursorString(
+    DateTime.fromISO(start, { zone: "utc" }).plus({ minutes: cadenceMinutesFor(country) })
+  );
+  return { start, end };
 };
