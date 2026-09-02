@@ -55,7 +55,8 @@ export const getPlaybackStrideMinutes = (): number =>
 /** Put the cursor back on the focused country's grid. Called when playback stops. */
 export const snapCursorToFocusedGrid = (): void => {
   const selected = getGlobalState("selectedISOTime");
-  if (selected) setGlobalState("selectedISOTime", snapToCadence(selected, getCursorCadenceMinutes()));
+  if (selected)
+    setGlobalState("selectedISOTime", snapToCadence(selected, getCursorCadenceMinutes()));
 };
 
 /**

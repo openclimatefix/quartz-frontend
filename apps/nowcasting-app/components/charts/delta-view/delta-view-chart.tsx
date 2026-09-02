@@ -282,7 +282,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   // LIVE line sits a whole period early on a period-end country and matches no category at all.
   const liveSlot = formatISODateString(slotForInstant(timeNow, focusedCountry));
 
-
   const { gspDeltas, scope: gspScope, window: gspWindow } = useGspDeltas(selectedTime);
 
   const countryConfig = getCountryConfig(focusedCountry);

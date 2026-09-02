@@ -60,10 +60,7 @@ import type { CountryListing } from "../../../lib/domain/types";
 // `surface-inset` puts it a step below the header instead. Written out rather than appended,
 // because two background utilities in one class string are resolved by stylesheet order, not by
 // the order they are written.
-const PILL_BASE = `${CONTROL_ROW.replace(
-  "bg-surface-inner",
-  "bg-surface-inset"
-)} align-middle`;
+const PILL_BASE = `${CONTROL_ROW.replace("bg-surface-inner", "bg-surface-inset")} align-middle`;
 
 // `px-3`, replacing the dock's `px-2`: the dock's buttons are packed into a 260px column and
 // share their row with another group, where these are two or three codes with the whole header
@@ -272,7 +269,8 @@ const CountryRadioGroup: React.FC<{
     const startIndex = currentIndex < 0 ? 0 : currentIndex;
 
     for (let offset = 1; offset <= sorted.length; offset++) {
-      const index = (((startIndex + step * offset) % sorted.length) + sorted.length) % sorted.length;
+      const index =
+        (((startIndex + step * offset) % sorted.length) + sorted.length) % sorted.length;
       const next = sorted[index];
       if (isSelectable(next)) {
         choose(next.code);

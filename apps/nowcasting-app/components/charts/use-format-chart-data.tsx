@@ -202,7 +202,9 @@ const useFormatChartData = ({
       // names it. `cursorNow` spells a period start now (one rule for every country, see
       // `periodStartForInstant`); `slotForInstant` puts it back into the country's own naming.
       // Without that step a period-end country splits one period early.
-      const timeNow = formatISODateString(slotForInstant(cursorNow(cadenceMinutes), focusedCountry));
+      const timeNow = formatISODateString(
+        slotForInstant(cursorNow(cadenceMinutes), focusedCountry)
+      );
       const chartMap: Record<string, ChartData> = {};
 
       const addDataToMap = (
