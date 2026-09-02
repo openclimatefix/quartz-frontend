@@ -11,10 +11,22 @@ export const ForecastHeadlineFigure: React.FC<{
   tip: string;
   color?: string;
   time?: string;
+  /**
+   * The period the figure covers, as [start, end] — stacked rather than written `17:00–17:30`.
+   *
+   * A reading here is an average over a settlement period, the same as everywhere else in the
+   * app, so the honest label is a range. Written inline it roughly doubles the width of a chip
+   * that sits between two large figures in a row that is already tight at `lg`. Stacked, it
+   * costs one short line of `text-2xs` and no width at all — the column is as wide as its
+   * widest time either way, because the face is monospace and both times are five characters.
+   *
+   * Overrides `time` when present; `time` stays for the sites view, which has no period model.
+   */
+  times?: [string, string];
   unit?: string;
   gsp?: boolean;
   children?: React.ReactNode;
-}> = ({ tip, color = yellow, time, unit = "GW", gsp = false, children }) => {
+}> = ({ tip, color = yellow, time, times, unit = "GW", gsp = false, children }) => {
   // Slimmed: the ramp topped out at text-6xl, which made the two readings the loudest thing
   // on the page and pushed the chart itself down. One step down across the board.
   const textSizeClasses = `font-mono tracking-normal text-base md:text-lg leading-none text-${color} pr-0.5 ${
@@ -44,19 +56,37 @@ export const ForecastHeadlineFigure: React.FC<{
               gsp ? "dash:3xl:gap-0" : "dash:3xl:gap-1"
             } flex flex-col dash:xl:gap-0 gap-0.5 items-start justify-center dash:xl:justify-between dash:justify-center pl-2`}
           >
-            <div className="flex items-center text-content">
-              {time && (
-                <>
-                  <ClockIcon className="h-3" />
-                  <p className="font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
-                    {time}
-                  </p>
-                </>
-              )}
-            </div>
-            <span className="text-2xs dash:text-sm dash:xl:text-base text-content font-normal dash:leading-none leading-none">
-              {unit}
-            </span>
+            {times ? (
+              /* Two rows, two columns: the clock and the unit share the left gutter, the two
+                 times share the right one. Aligning them that way is what makes the pair read
+                 as one span — a unit inline after the second time pushed it out of line with
+                 the first, and the eye lost the column. Monospace and tabular, so the two times
+                 are the same width and the grid needs no fixed sizes. */
+              <div className="grid grid-cols-[auto_auto] items-center gap-x-1 font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base leading-none dash:leading-none text-content">
+                <ClockIcon className="h-3" />
+                <span>{times[0]}</span>
+                <span className="font-sans font-normal">{unit}</span>
+                {/* Same weight as the start. Dimming the end read as two different kinds of
+                    value stacked, when they are two ends of one span. */}
+                <span>{times[1]}</span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center text-content">
+                  {time && (
+                    <>
+                      <ClockIcon className="h-3" />
+                      <p className="font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
+                        {time}
+                      </p>
+                    </>
+                  )}
+                </div>
+                <span className="text-2xs dash:text-sm dash:xl:text-base text-content font-normal dash:leading-none leading-none">
+                  {unit}
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -160,6 +190,9 @@ type ForecastHeaderProps = {
   // selectedTimeOnly: string;
   pvTimeOnly: string;
   forecastNextTimeOnly: string;
+  /** The periods those two instants name, stacked under the clock. See `ForecastHeadlineFigure`. */
+  pvTimeRange?: [string, string];
+  forecastNextTimeRange?: [string, string];
 };
 
 /**
@@ -192,7 +225,9 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   children,
   // selectedTimeOnly,
   pvTimeOnly,
-  forecastNextTimeOnly
+  forecastNextTimeOnly,
+  pvTimeRange,
+  forecastNextTimeRange
 }) => {
   const focusedCountry = useFocusedCountry();
   // Falls back to the code rather than to "National": if the registry has no entry the code is
@@ -214,7 +249,12 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       </div>
       <div className="flex flex-2 justify-between">
         <div className="pr-3 lg:pr-4">
-          <ForecastHeadlineFigure tip={`PV Live / OCF Forecast`} time={pvTimeOnly} color="solar">
+          <ForecastHeadlineFigure
+            tip={`PV Live / OCF Forecast`}
+            time={pvTimeOnly}
+            times={pvTimeRange}
+            color="solar"
+          >
             <span className="text-solar-light">{actualPV}</span>
             <span className="text-content mx-1"> / </span>
             {forecastPV}
@@ -224,6 +264,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           <ForecastHeadlineFigure
             tip={`Next OCF Forecast`}
             time={forecastNextTimeOnly}
+            times={forecastNextTimeRange}
             color="solar"
           >
             {forecastNextPV}

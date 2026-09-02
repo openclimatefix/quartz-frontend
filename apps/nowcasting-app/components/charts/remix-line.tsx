@@ -18,6 +18,7 @@ import {
   convertToLocaleDateString,
   dateToZonedDateTimeString,
   formatISODateString,
+  formatISODateStringAsZonedTime,
   formatISODateStringHumanNumbersOnly,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate
@@ -163,9 +164,13 @@ type RemixLineProps = {
  *
  * It briefly carried an "on the live instant" variant — first as a filled chip, then as white
  * lettering. Both are gone. The fill was far too heavy a block at this size, and the white
- * variant was too quiet to be worth the second rule. Nothing was lost:
- * the LIVE marker hides itself when the cursor reaches it, and the footer's pulsing dot carries
+ * variant was too quiet to be worth the second rule; the footer's pulsing dot carries
  * following-mode, so the chip was saying a third time what two other things already said.
+ *
+ * **LIVE no longer hides when the cursor reaches it.** It used to, because the cursor was a 2px
+ * line and two lines at one x is a mess. The cursor is a band now, so LIVE is a boundary drawn
+ * across it and there is nothing to collide with — and a marker that vanishes exactly when you
+ * arrive at it takes away the confirmation that you did.
  *
  * The body is `surface`, not black-black: on a `#141515` plot well a true black chip has no edge
  * of its own, and the hairline is what gives it one.
@@ -897,31 +902,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               </>
             )}
 
-            <ReferenceLine
-              x={isSitesChart ? new Date(currentTime + ":00.000Z").getTime() : currentTime}
-              stroke={plot.axis}
-              strokeWidth={currentTime === timeOfInterest ? 2 : 1}
-              yAxisId={"y-axis"}
-              xAxisId={"x-axis"}
-              scale={isSitesChart ? "time" : "auto"}
-              strokeDasharray="3 3"
-              className={currentTime !== timeOfInterest ? "" : "hidden"}
-              label={
-                <CustomizedLabel
-                  className="cursor-pointer z-30 text-sm"
-                  value={"LIVE"}
-                  onClick={resetTime}
-                />
-              }
-            />
-
             {/* The cursor carries no label and no grip. The period reads once, in the footer,
                 tethered to the scrub handle; the grip collided with the LIVE marker, both being
                 `--interactive` objects at the top of a reference line. Click-to-set-time
                 (`onClick`/`activeLabel` above) is untouched — that is the interaction layout
                 contract §4 protects — and dragging is the footer track's job. `beginCursorDrag`
                 and `draggingCursor` are unreachable now and come out if this holds up. */}
-            {/* MOCK (uncommitted): the cursor IS the period.
+            {/* The cursor IS the period.
                 The 2px line is gone and the band it used to sit inside carries the cursor on its
                 own, spanning the whole span the reading covers. A line says "this instant",
                 which is not what the cursor means — every value on this chart is an average over
@@ -932,7 +919,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 them, and the two dials are `fillOpacity` (the block) and `strokeOpacity` (its
                 edges). The edges are what stop it reading as a smudge — they are where the period
                 starts and stops, and at this width that is most of the information. */}
-            {/* MOCK (uncommitted): the period you are about to select. Under half the
+            {/* The period you are about to select. Under half the
                 selection's alpha and no edges — edges would make it a second definite mark, and
                 this one is provisional. Suppressed while it coincides with the selection, where
                 two stacked fills would read as a third, brighter state that means nothing. */}
@@ -975,6 +962,26 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 scale={isSitesChart ? "time" : "auto"}
               />
             )}
+
+            {/* LIVE is declared after both bands so it paints over them: reference elements
+                render in JSX order with no `z-index` to appeal to, and the bands were covering
+                the pill. A period is the ground a boundary is drawn across. */}
+            <ReferenceLine
+              x={isSitesChart ? new Date(currentTime + ":00.000Z").getTime() : currentTime}
+              stroke={plot.axis}
+              strokeWidth={1}
+              yAxisId={"y-axis"}
+              xAxisId={"x-axis"}
+              scale={isSitesChart ? "time" : "auto"}
+              strokeDasharray="3 3"
+              label={
+                <CustomizedLabel
+                  className="cursor-pointer z-30 text-sm"
+                  value={"LIVE"}
+                  onClick={resetTime}
+                />
+              }
+            />
 
             {deltaView && (
               <Bar
@@ -1232,6 +1239,24 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   formattedDate = dateToZonedDateTimeString(date, timezone, locale);
                 }
 
+                // The heading is the *span* the row's values cover, not the instant the country
+                // happens to name it by — the same reading the cursor band draws and the footer
+                // spells out. `periodForLabel`, not `periodForInstant`: `formattedDate` is a
+                // published data key, and asking the cursor question about a label returns the
+                // period after the right one on a period-end country (`lib/time/cursor.ts`).
+                // Date on the start only; a period never spans two dates, so repeating it would
+                // double the width of the heading to say nothing.
+                const tooltipPeriod = isSitesChart
+                  ? null
+                  : periodForLabel(formattedDate, focusedCountry);
+                const tooltipHeading = tooltipPeriod
+                  ? `${formatISODateStringHumanNumbersOnly(
+                      tooltipPeriod.start,
+                      timezone,
+                      locale
+                    )}–${formatISODateStringAsZonedTime(tooltipPeriod.end, timezone, locale)}`
+                  : formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale);
+
                 // Show the p-levels in the tooltip higher ones above the current and lower below
                 const pLevelRows = pLevels
                   .flatMap(([lower, upper]) => {
@@ -1263,9 +1288,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <div className="px-3 py-2 bg-surface-raised bg-opacity-80 shadow">
                     <ul className="">
                       <li className={`flex justify-between pb-2 text-xs text-content font-sans`}>
-                        <div className="pr-3 font-mono tabular-nums">
-                          {formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale)}
-                        </div>
+                        <div className="pr-3 font-mono tabular-nums">{tooltipHeading}</div>
                         <div>{isSitesChart ? "KW" : "MW"}</div>
                       </li>
                       {Object.entries(toolTiplabels)

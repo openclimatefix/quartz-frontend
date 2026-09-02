@@ -46,7 +46,13 @@ const pvForecastData: ForecastData = [
 const renderHeader = () =>
   render(<ForecastHeader pvLiveData={pvLiveData} pvForecastData={pvForecastData} deltaView />);
 
-/** Every time the header renders, in DOM order: the latest actual, then the next forecast. */
+/**
+ * Every time the header renders, in DOM order.
+ *
+ * Four, not two, since each figure states the *period* its reading covers rather than the
+ * instant the country names it by — start then end, stacked under the clock (`ui.tsx`). The
+ * pairs are the latest actual's period, then the next forecast's.
+ */
 const renderedTimes = () => screen.getAllByText(/^\d{2}:\d{2}$/).map((el) => el.textContent);
 
 beforeEach(() => {
@@ -60,12 +66,13 @@ afterEach(() => {
 describe("the current country drives how instants are rendered", () => {
   test("GB renders Europe/London, unchanged from before the wiring", () => {
     renderHeader();
-    expect(renderedTimes()).toEqual(["11:00", "11:30"]);
+    // GB labels the END of its half hour, so the 11:00 point covers 10:30–11:00.
+    expect(renderedTimes()).toEqual(["10:30", "11:00", "11:00", "11:30"]);
   });
 
   test("switching to NL re-renders the same instants in Europe/Amsterdam", () => {
     renderHeader();
-    expect(renderedTimes()).toEqual(["11:00", "11:30"]);
+    expect(renderedTimes()).toEqual(["10:30", "11:00", "11:00", "11:30"]);
 
     act(() => setFocusedCountry("NL"));
 
@@ -76,13 +83,18 @@ describe("the current country drives how instants are rendered", () => {
     // The second moved from 12:30 to 12:15 in Phase 6 Track B, and deliberately: "the next
     // forecast" is one step on the *country's* grid, and NL publishes every 15 minutes where
     // GB publishes every 30. It used to be a hardcoded half hour for everyone.
-    expect(renderedTimes()).toEqual(["12:00", "12:15"]);
+    //
+    // The pairs also flip which side of the label they sit on: NL labels the START of its
+    // quarter, so its 12:00 point covers 12:00–12:15 where GB's 11:00 covered 10:30–11:00.
+    // That is `periodForLabel` doing its job, and it is the difference this whole area exists
+    // to keep visible (`lib/time/cursor.ts`).
+    expect(renderedTimes()).toEqual(["12:00", "12:15", "12:15", "12:30"]);
   });
 
   test("switching back restores the GB rendering", () => {
     renderHeader();
     act(() => setFocusedCountry("NL"));
     act(() => setFocusedCountry("GB"));
-    expect(renderedTimes()).toEqual(["11:00", "11:30"]);
+    expect(renderedTimes()).toEqual(["10:30", "11:00", "11:00", "11:30"]);
   });
 });

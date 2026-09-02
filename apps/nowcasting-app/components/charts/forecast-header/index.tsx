@@ -1,6 +1,6 @@
 import React from "react";
 import { useFocusedCountry } from "../../../hooks/data/use-countries";
-import { cadenceMinutesFor, nextSlot } from "../../../lib/time/cursor";
+import { cadenceMinutesFor, nextSlot, periodForLabel } from "../../../lib/time/cursor";
 import useTimeNow from "../../hooks/use-time-now";
 import { PvRealData, ForecastData } from "../../types";
 import {
@@ -54,7 +54,8 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   const { timezone, locale } = useCountryFormatting();
   // The header reads one country's numbers, so it steps on that country's grid — 30 minutes
   // for GB, 15 for NL — rather than on the shared cursor's.
-  const cadenceMinutes = cadenceMinutesFor(useFocusedCountry());
+  const focusedCountry = useFocusedCountry();
+  const cadenceMinutes = cadenceMinutesFor(focusedCountry);
 
   const latestGeneration = latestReading(generationSeries);
 
@@ -79,6 +80,27 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   const followingPvForecastDateString = formatISODateString(
     followingPvForecastDatetime.toISOString()
   );
+
+  /**
+   * The two headline times as the *periods* they name.
+   *
+   * `periodForLabel`, not `periodForInstant`: both instants here are published timestamps — the
+   * latest observed point's `timeUtc` and the forecast slot after it — and asking the cursor
+   * question about a label returns the period after the right one on a period-end country like
+   * GB (`lib/time/cursor.ts`). Same distinction as the chart's tooltip.
+   *
+   * `ui.tsx` stacks the pair under the clock rather than writing `17:00–17:30`, so this costs
+   * the header no width.
+   */
+  const periodTimes = (instant: string): [string, string] => {
+    const period = periodForLabel(instant, focusedCountry);
+    return [
+      formatISODateStringAsZonedTime(period.start, timezone, locale),
+      formatISODateStringAsZonedTime(period.end, timezone, locale)
+    ];
+  };
+  const pvTimeRange = periodTimes(latestPvActualDatetime);
+  const forecastNextTimeRange = periodTimes(followingPvForecastDatetime.toISOString());
 
   // One shape for both dialects, so the two lookups and the play button below read the same
   // whichever the caller passed.
@@ -106,6 +128,8 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
         forecastPV={selectedPvForecastInGW}
         pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
         forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
+        pvTimeRange={pvTimeRange}
+        forecastNextTimeRange={forecastNextTimeRange}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
       </ForecastHeaderUI>
@@ -119,6 +143,8 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastPV={selectedPvForecastInGW}
       pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
       forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
+      pvTimeRange={pvTimeRange}
+      forecastNextTimeRange={forecastNextTimeRange}
     />
   );
 };

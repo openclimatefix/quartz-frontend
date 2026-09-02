@@ -11,9 +11,12 @@ type ForecastHeaderGSPProps = {
   deltaView?: boolean;
   deltaValue?: string;
   pvTimeOnly: string;
+  /** The period that instant names, stacked under the clock. See `ForecastHeadlineFigure`. */
+  pvTimeRange?: [string, string];
   pvValue?: string;
   forecastPV?: string;
   forecastNextTimeOnly?: string;
+  forecastNextTimeRange?: [string, string];
   forecastNextPV?: string;
   children?: React.ReactNode;
   titleTooltipText?: string[];
@@ -25,9 +28,11 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   deltaValue,
   forecastPV,
   pvTimeOnly,
+  pvTimeRange,
   pvValue,
   forecastNextPV,
   forecastNextTimeOnly,
+  forecastNextTimeRange,
   onClose,
   titleTooltipText = []
 }) => {
@@ -61,6 +66,7 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
                 gsp={true}
                 tip={"Latest PV Actual / OCF Forecast"}
                 time={pvTimeOnly}
+                times={pvTimeRange}
                 unit={"MW"}
                 color={"solar"}
               >
@@ -75,6 +81,7 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
                   gsp={true}
                   tip={"Next OCF Forecast"}
                   time={forecastNextTimeOnly}
+                  times={forecastNextTimeRange}
                   unit={"MW"}
                   color={"solar"}
                 >

@@ -18,7 +18,7 @@ import { formatRegionLabel } from "../../../lib/domain/region-label";
 import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
 import { groupRegionNames } from "../../helpers/data";
 import useGlobalState, { useCountryState } from "../../helpers/globalState";
-import { cadenceMinutesFor, cursorNow, nextSlot } from "../../../lib/time/cursor";
+import { cadenceMinutesFor, cursorNow, nextSlot, periodForLabel } from "../../../lib/time/cursor";
 import Spinner from "../../icons/spinner";
 import React, { FC, useMemo } from "react";
 import { getTicks } from "../../helpers/chartUtils";
@@ -255,6 +255,21 @@ const GspPvRemixChart: FC<{
     0;
 
   const pvTimeOnly = formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale);
+  /**
+   * The two headline times as the periods they name — the same treatment as the national header
+   * (`forecast-header/index.tsx`), for the same reason: a regional reading is an average over a
+   * settlement period too, and the country's labelling decides which side of the label it sits.
+   * `periodForLabel`, because both instants here are published timestamps rather than cursors.
+   */
+  const periodTimes = (instant: string): [string, string] => {
+    const period = periodForLabel(instant, focusedCountry);
+    return [
+      formatISODateStringAsZonedTime(period.start, timezone, locale),
+      formatISODateStringAsZonedTime(period.end, timezone, locale)
+    ];
+  };
+  const pvTimeRange = periodTimes(latestPvActualDatetime);
+  const forecastNextTimeRange = periodTimes(followingPvForecastDatetime.toISOString());
   const pvValueMw = latestGeneration?.powerMw ?? 0;
   const forecastPvMw = forecastAt(pvForecastDatetime);
   const forecastNextTimeOnly = formatISODateStringAsZonedTime(
@@ -293,9 +308,11 @@ const GspPvRemixChart: FC<{
           title={title}
           mwpercent={Math.round((forecastAtSelectedTimeMw / (gspInstalledCapacity || 1)) * 100)}
           pvTimeOnly={pvTimeOnly}
+          pvTimeRange={pvTimeRange}
           pvValue={pvValueMw.toFixed(1)}
           forecastPV={forecastPvMw.toFixed(1)}
           forecastNextTimeOnly={forecastNextTimeOnly}
+          forecastNextTimeRange={forecastNextTimeRange}
           forecastNextPV={forecastNextPvMw.toFixed(1)}
           deltaValue={deltaValue.toString()}
           deltaView={deltaView}
