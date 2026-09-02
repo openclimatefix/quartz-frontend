@@ -176,10 +176,50 @@ const CustomizedLabel: FC<any> = ({
   className,
   solidLine,
   onClick,
-  onGrab
+  onGrab,
+  grip
 }) => {
   const yy = 10;
   const pillWidth = Math.max(40, String(value ?? "").length * 7.2 + 14);
+
+  /* MOCK (uncommitted): the grip-only cursor.
+     The period label moves out of the chart and lives once, in the footer, tethered to the
+     scrub handle. What stays here is the control itself, drawn as the *same object* the footer
+     draws — `scrub-track.tsx`'s handle is a 5x26 `bg-interactive` capsule with a dark ring, and
+     that file's own comment says the two "only teach that by looking like one object". So this
+     is that capsule, in SVG units, at the top of the cursor's line.
+     The line under it is the ReferenceLine's own stroke, so no stub is drawn here. */
+  if (grip) {
+    return (
+      <g
+        className={className || ""}
+        style={{ pointerEvents: "all" }}
+        onMouseDown={(e) => {
+          if (!onGrab) return;
+          e.stopPropagation();
+          onGrab();
+        }}
+        onMouseUp={(e) => {
+          if (!onGrab) return;
+          e.stopPropagation();
+        }}
+      >
+        {/* A 5px-wide target is not grabbable with a mouse, let alone a trackpad. */}
+        <rect x={x - 9} y={yy - 5} width={18} height={36} fill="transparent" />
+        <rect
+          x={x - 2.5}
+          y={yy}
+          width={5}
+          height={26}
+          rx={2.5}
+          className="fill-interactive"
+          stroke="rgba(0,0,0,0.7)"
+          strokeWidth={1.5}
+        />
+      </g>
+    );
+  }
+
   return (
     <g>
       <line
@@ -853,25 +893,17 @@ const RemixLine: React.FC<RemixLineProps> = ({
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
               scale={isSitesChart ? "time" : "auto"}
-              label={
-                <CustomizedLabel
-                  className={`text-sm ${draggingCursor ? "cursor-grabbing" : "cursor-grab"}`}
-                  onGrab={beginCursorDrag}
-                  // The *period*, not the instant. Which side of the label the span sits on is
-                  // the country's own convention (GB labels the end of its half hour, NL the
-                  // start of its quarter) and this is where that stops being invisible.
-                  value={
-                    cursorPeriod
-                      ? `${prettyPrintChartAxisLabelDate(
-                          cursorPeriod.start,
-                          timezone,
-                          locale
-                        )}–${prettyPrintChartAxisLabelDate(cursorPeriod.end, timezone, locale)}`
-                      : prettyPrintChartAxisLabelDate(timeOfInterest, timezone, locale)
-                  }
-                  solidLine={true}
-                ></CustomizedLabel>
-              }
+              /* MOCK (uncommitted): no label at all.
+                 The chart's cursor becomes an *indicator* — the line and the period band under
+                 it — and stops being a control you grab. Two reasons it came off:
+                 the grip and the LIVE marker are both `--interactive` objects at the top of a
+                 reference line, so near "now" they compete and neither reads; and the chart
+                 never needed a drag to move the cursor. Click-to-set-time is on the chart's own
+                 `onClick` (`activeLabel`, above) and is untouched — that is the interaction the
+                 layout contract §4 protects. Continuous dragging is the footer's job, on a
+                 full-width track that is a better scrub surface than a 5px capsule.
+                 `beginCursorDrag` and `draggingCursor` are now unreachable; if this stays, they
+                 and the pointer-move plumbing come out with it. */
             />
 
             {deltaView && (
