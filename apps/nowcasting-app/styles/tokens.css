@@ -140,8 +140,8 @@
    *
    * The edge used to be brand orange with the alpha turned down to 0 — an accent that was
    * switched off, which left the whole of selection resting on a text-colour step. */
-  --selected: var(--ocf-grey-1);
-  --selected-edge: var(--ocf-grey-1);
+  --selected: var(--ocf-grey-3);
+  --selected-edge: var(--ocf-grey-3);
   /* How loud the selection edge is. Still the knob: 1 is a full-strength oat rule, 0 removes
    * the edge entirely and lets the fill carry selection on its own. */
   --selected-edge-alpha: 1;

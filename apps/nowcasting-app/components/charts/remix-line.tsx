@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useRef, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DateTime } from "luxon";
 import {
   Area,
@@ -17,6 +17,7 @@ import {
 import {
   convertToLocaleDateString,
   dateToZonedDateTimeString,
+  formatISODateString,
   formatISODateStringHumanNumbersOnly,
   getRoundedTickBoundary,
   prettyPrintChartAxisLabelDate
@@ -426,15 +427,60 @@ const RemixLine: React.FC<RemixLineProps> = ({
    * *after* the right one on a period-end country — which is how the chart and the scrub bar
    * came to draw two different windows for one cursor.
    *
-   * Both ends come back as cursor strings, which is exactly the axis' category key format, so
-   * they address the axis directly. That only works because a period boundary is always a point
+   * **Both ends are then cut to the axis' category format**, which is not what they arrive in.
+   * `periodForLabel` returns full ISO instants (`2026-09-02T13:00:00.000Z`); the axis' categories
+   * are `formattedDate`, a 16-character slice (`2026-09-02T13:00`). A category axis matches
+   * `x1`/`x2` by exact value and `ifOverflow="hidden"` drops an area whose ends are not in the
+   * domain, so full ISO ends silently rendered nothing at all — which is what the band did from
+   * the day it was written until this was found. `formatISODateString` is the same cut the axis
+   * itself applies, so the two agree by construction rather than by coincidence.
+   *
+   * Addressing the axis by a boundary only works because a period boundary is always a point
    * this country publishes — the band is one cadence wide by construction.
    */
   const focusedCountry = useFocusedCountry();
-  const cursorPeriod = useMemo(
-    () => (isSitesChart ? null : periodForLabel(timeOfInterest, focusedCountry)),
-    [isSitesChart, timeOfInterest, focusedCountry]
-  );
+  const cursorPeriod = useMemo(() => {
+    if (isSitesChart) return null;
+    const period = periodForLabel(timeOfInterest, focusedCountry);
+    return {
+      start: formatISODateString(period.start),
+      end: formatISODateString(period.end)
+    };
+  }, [isSitesChart, timeOfInterest, focusedCountry]);
+
+  /**
+   * The period under the pointer — the one a click is about to select.
+   *
+   * Drawn the same way as `cursorPeriod` and from the same call, so the thing you are about to
+   * pick and the thing you have picked are the same shape and cannot drift apart. It is fainter,
+   * which is the whole distinction between them: an intention, not a selection.
+   *
+   * **Held as a label, not as pixels.** A custom Recharts `cursor` element would have to rebuild
+   * the period rule in pixel space — a band width, and which side of the point it falls on,
+   * which is the country's labelling convention all over again (see `lib/time/cursor.ts`). This
+   * asks `periodForLabel` instead, exactly as the selection does.
+   *
+   * **And it only re-renders once per category.** `onMouseMove` fires per pixel, so the write is
+   * guarded on the label actually changing — the same rate Recharts already updates the tooltip
+   * at. The ref is what lets the guard read the current value without the handler depending on
+   * the state it sets.
+   */
+  const [hoverLabel, setHoverLabel] = useState<string | null>(null);
+  const hoverLabelRef = useRef<string | null>(null);
+  const setHoverLabelIfChanged = useCallback((label: string | null) => {
+    if (hoverLabelRef.current === label) return;
+    hoverLabelRef.current = label;
+    setHoverLabel(label);
+  }, []);
+
+  const hoverPeriod = useMemo(() => {
+    if (isSitesChart || !hoverLabel) return null;
+    const period = periodForLabel(hoverLabel, focusedCountry);
+    return {
+      start: formatISODateString(period.start),
+      end: formatISODateString(period.end)
+    };
+  }, [isSitesChart, hoverLabel, focusedCountry]);
 
   /**
    * The x axis's tick labels — 6-hourly (00:00/06:00/12:00/18:00) with room, midnight/midday
@@ -703,6 +749,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
             onMouseMove={(e?: { activeLabel?: string }) => {
+              setHoverLabelIfChanged(e?.activeLabel ?? null);
               // Before the zoom guard: the cursor is draggable whether or not zoom is enabled.
               if (draggingCursorRef.current) {
                 commitCursor(e?.activeLabel);
@@ -716,6 +763,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
               }
             }}
+            onMouseLeave={() => setHoverLabelIfChanged(null)}
             onMouseUp={(e?: { activeLabel?: string }) => {
               if (draggingCursorRef.current) return;
               if (!zoomEnabled) return;
@@ -867,11 +915,41 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             />
 
-            {/* The period the cursor names, drawn behind its own line. Low alpha and no stroke:
-                it is context for the line, not a second mark competing with it, and it sits over
-                the series rather than under them because reference elements render after the
-                plot — at this alpha the curves read through it unchanged. */}
-            {cursorPeriod && (
+            {/* The cursor carries no label and no grip. The period reads once, in the footer,
+                tethered to the scrub handle; the grip collided with the LIVE marker, both being
+                `--interactive` objects at the top of a reference line. Click-to-set-time
+                (`onClick`/`activeLabel` above) is untouched — that is the interaction layout
+                contract §4 protects — and dragging is the footer track's job. `beginCursorDrag`
+                and `draggingCursor` are unreachable now and come out if this holds up. */}
+            {/* MOCK (uncommitted): the cursor IS the period.
+                The 2px line is gone and the band it used to sit inside carries the cursor on its
+                own, spanning the whole span the reading covers. A line says "this instant",
+                which is not what the cursor means — every value on this chart is an average over
+                a settlement period, and the line was drawing one edge of it (which edge depended
+                on the country's labelling). The band draws the thing itself.
+
+                Kept low. As the only mark it competes with the series rather than sitting behind
+                them, and the two dials are `fillOpacity` (the block) and `strokeOpacity` (its
+                edges). The edges are what stop it reading as a smudge — they are where the period
+                starts and stops, and at this width that is most of the information. */}
+            {/* MOCK (uncommitted): the period you are about to select. Under half the
+                selection's alpha and no edges — edges would make it a second definite mark, and
+                this one is provisional. Suppressed while it coincides with the selection, where
+                two stacked fills would read as a third, brighter state that means nothing. */}
+            {hoverPeriod && hoverPeriod.start !== cursorPeriod?.start && (
+              <ReferenceArea
+                x1={hoverPeriod.start}
+                x2={hoverPeriod.end}
+                yAxisId={"y-axis"}
+                xAxisId={"x-axis"}
+                fill={plot.cursor}
+                fillOpacity={0.09}
+                strokeWidth={0}
+                ifOverflow="hidden"
+              />
+            )}
+
+            {cursorPeriod ? (
               <ReferenceArea
                 x1={cursorPeriod.start}
                 x2={cursorPeriod.end}
@@ -884,27 +962,19 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 strokeWidth={1}
                 ifOverflow="hidden"
               />
+            ) : (
+              /* No period resolved — the sites chart's numeric axis, or a cursor outside the
+                 plotted range. The line is the fallback so the cursor never disappears. */
+              <ReferenceLine
+                x={isSitesChart ? new Date(localeTimeOfInterest).getTime() : timeOfInterest}
+                stroke={plot.cursor}
+                strokeOpacity={0.6}
+                strokeWidth={2}
+                yAxisId={"y-axis"}
+                xAxisId={"x-axis"}
+                scale={isSitesChart ? "time" : "auto"}
+              />
             )}
-
-            <ReferenceLine
-              x={isSitesChart ? new Date(localeTimeOfInterest).getTime() : timeOfInterest}
-              stroke={plot.cursor}
-              strokeWidth={2}
-              yAxisId={"y-axis"}
-              xAxisId={"x-axis"}
-              scale={isSitesChart ? "time" : "auto"}
-              /* MOCK (uncommitted): no label at all.
-                 The chart's cursor becomes an *indicator* — the line and the period band under
-                 it — and stops being a control you grab. Two reasons it came off:
-                 the grip and the LIVE marker are both `--interactive` objects at the top of a
-                 reference line, so near "now" they compete and neither reads; and the chart
-                 never needed a drag to move the cursor. Click-to-set-time is on the chart's own
-                 `onClick` (`activeLabel`, above) and is untouched — that is the interaction the
-                 layout contract §4 protects. Continuous dragging is the footer's job, on a
-                 full-width track that is a better scrub surface than a 5px capsule.
-                 `beginCursorDrag` and `draggingCursor` are now unreachable; if this stays, they
-                 and the pointer-move plumbing come out with it. */
-            />
 
             {deltaView && (
               <Bar
@@ -1147,6 +1217,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             )}
             <Tooltip
+              // The band above is the hover cursor now. Recharts' default is a vertical rule at
+              // the hovered point — the "this instant" reading the selection band just stopped
+              // making, and two of them at slightly different x is worse than either alone.
+              cursor={isSitesChart ? undefined : false}
               content={({ payload, label }) => {
                 const data = payload && payload[0]?.payload;
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
