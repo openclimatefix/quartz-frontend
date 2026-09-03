@@ -51,6 +51,58 @@ const PV_LAYER_IDS = [
   "latestPV-forecast-select-borders"
 ];
 
+/**
+ * The base style's label font, swapped for something nearer the brand's.
+ *
+ * **Mapbox does not use the page's fonts.** Labels are rendered from pre-generated SDF glyph
+ * atlases fetched from the style's `glyphs` URL, and `mapbox/dark-v10`'s points at Mapbox's own
+ * font namespace — so the only faces reachable without either uploading Matter to a Mapbox
+ * account or self-hosting our own glyph PBFs are the ones Mapbox hosts. This is the cheap half
+ * of that question: see whether the map's typography is worth the licensing work at all before
+ * anyone reads a font licence.
+ *
+ * `MAP_LABEL_FONT` is a Mapbox-hosted family name. Candidates, closest first by letterform —
+ * Matter is a geometric sans with a tall x-height and straight terminals:
+ *
+ *   "Work Sans"  — grotesque/geometric hybrid, tall x-height, straight terminals. Closest.
+ *   "Manrope"    — semi-geometric, tall x-height. Closer still if Mapbox hosts it.
+ *   "Rubik"      — geometric and warm, but its rounded corners are a tell Matter does not have.
+ *   "Poppins"    — monoline geometric; rounder and wider than Matter.
+ *   "Montserrat" — wide, which costs a lot of room in map labels.
+ *
+ * **If the labels vanish, the name is wrong.** Mapbox composites a font stack server-side, so a
+ * family it does not host 404s the whole glyph range rather than falling back — which is also
+ * why `Arial Unicode MS Regular` trails every stack below: it is Mapbox's universal fallback and
+ * carries the glyphs the Latin faces do not.
+ */
+const MAP_LABEL_FONT = "Work Sans";
+
+/**
+ * The weight the layer already asked for, kept. dark-v10 uses several DIN Pro weights to
+ * separate countries from cities from water, and flattening them all to Regular would throw
+ * away a hierarchy the style spent them on.
+ */
+const matchingWeight = (existing: string): string => {
+  if (/bold/i.test(existing)) return "Bold";
+  if (/medium|semibold/i.test(existing)) return "Medium";
+  if (/light/i.test(existing)) return "Light";
+  return "Regular";
+};
+
+const applyBrandLabelFont = (m: mapboxgl.Map) => {
+  for (const layer of m.getStyle()?.layers ?? []) {
+    if (layer.type !== "symbol") continue;
+    const existing = (layer.layout as { "text-font"?: unknown })?.["text-font"];
+    // Only a plain array is safe to rewrite: `text-font` can also be a zoom expression, and
+    // replacing one of those with a flat stack would drop whatever it was varying.
+    if (!Array.isArray(existing) || typeof existing[0] !== "string") continue;
+    m.setLayoutProperty(layer.id, "text-font", [
+      `${MAP_LABEL_FONT} ${matchingWeight(existing[0])}`,
+      "Arial Unicode MS Regular"
+    ]);
+  }
+};
+
 const applyPvLayerVisibility = (m: mapboxgl.Map, visible: boolean) => {
   PV_LAYER_IDS.forEach((id) => {
     if (m.getLayer(id)) {
@@ -499,6 +551,7 @@ const Map: FC<IMap> = ({
 
       map.current.on("load", (event) => {
         setIsMapReady(true);
+        if (map.current) applyBrandLabelFont(map.current);
         if (map.current?.getCanvas()?.width === 800) {
           map.current?.resize();
         }
