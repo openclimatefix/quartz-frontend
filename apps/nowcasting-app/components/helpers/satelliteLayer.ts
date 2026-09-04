@@ -11,7 +11,10 @@ export const SATELLITE_CHANNELS = [
   "IR_120",
   "IR_134",
   "WV_062",
-  "WV_073"
+  "WV_073",
+  "VISIBLE_COMPOSITE",
+  "INFRARED_COMPOSITE",
+  "WATER_VAPOUR_COMPOSITE"
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
@@ -106,7 +109,10 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_120: "Infrared 12.0µm",
   IR_134: "Infrared 13.4µm",
   WV_062: "Water Vapour 6.2µm",
-  WV_073: "Water Vapour 7.3µm"
+  WV_073: "Water Vapour 7.3µm",
+  VISIBLE_COMPOSITE: "Visible Composite - Backend Test",
+  INFRARED_COMPOSITE: "Infrared Composite - Backend Test",
+  WATER_VAPOUR_COMPOSITE: "Water Vapour Composite - Backend Test"
 };
 
 export type TifLayerData = {
@@ -234,11 +240,49 @@ export async function fetchSatelliteTif(
   }
 }
 
+// Presigned URLs warmed from GET /satellite/history, keyed by `channel|timestamp`.
+const presignedUrlCache = new Map<string, string>();
+
+// Warm the cache for `channels` between startISO and endISO (inclusive), one
+// GET /satellite/history request per channel rather than one per timestep.
+export async function warmPresignedUrlHistory(
+  channels: SatelliteChannel[],
+  startISO: string,
+  endISO: string
+): Promise<void> {
+  const token = await getToken();
+  await Promise.all(
+    channels.map(async (channel) => {
+      const url = `${API_PREFIX}/satellite/history?channel=${encodeURIComponent(
+        channel
+      )}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) return;
+      const entries: { timestamp: string; url: string }[] = await res.json();
+      // new Date(...).toISOString() matches the "Z"-suffixed keys used elsewhere,
+      // even if the backend serialises its timestamp with a "+00:00" offset.
+      entries.forEach((e) =>
+        presignedUrlCache.set(`${channel}|${new Date(e.timestamp).toISOString()}`, e.url)
+      );
+    })
+  );
+}
+
 async function requestSatelliteTif(
   channel: SatelliteChannel,
   timestamp: string,
   latest: boolean
 ): Promise<ArrayBuffer | null> {
+  const cacheKey = `${channel}|${timestamp}`;
+  const cachedUrl = !latest ? presignedUrlCache.get(cacheKey) : undefined;
+  if (cachedUrl) {
+    const s3Res = await fetch(cachedUrl);
+    if (s3Res.ok) return s3Res.arrayBuffer();
+    if (s3Res.status === 404) return null;
+    // Stale despite being warmed — drop it and fall through to a fresh request.
+    presignedUrlCache.delete(cacheKey);
+  }
+
   const token = await getToken();
   const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
     channel
@@ -266,6 +310,7 @@ async function requestSatelliteTif(
     const contentType = apiRes.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       const { url } = await apiRes.json();
+      if (!latest) presignedUrlCache.set(cacheKey, url);
       const s3Res = await fetch(url);
       if (s3Res.status === 404) return null;
       if (!s3Res.ok) throw new Error(`S3 fetch failed: ${s3Res.status}`);
