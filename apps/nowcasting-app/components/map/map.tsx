@@ -25,7 +25,8 @@ import {
   fetchAndDecodeSatelliteTif,
   applyTifLayerToMap,
   setVisibleSatelliteChannels,
-  orderSatelliteLayers
+  orderSatelliteLayers,
+  warmPresignedUrlHistory
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
 
@@ -295,6 +296,19 @@ const Map: FC<IMap> = ({
       if (refresh) clearInterval(refresh);
     };
   }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer, timeNow, title]);
+
+  // Warm the presigned-URL cache for the whole scrubbable history, once per
+  // channel selection, so scrubbing back lands on a cached URL.
+  const historyWarmedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (title !== VIEWS.FORECAST || !isMapReady) return;
+    if (historyWarmedForRef.current === activeChannel) return;
+    historyWarmedForRef.current = activeChannel;
+
+    const anchor = get30MinNow();
+    const start = addMinutesToISODate(anchor, -2880);
+    warmPresignedUrlHistory(channelsForSelection(activeChannel), start, anchor);
+  }, [activeChannel, isMapReady, title]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
