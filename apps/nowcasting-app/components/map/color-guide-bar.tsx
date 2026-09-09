@@ -15,6 +15,7 @@ import {
 } from "./feature-state";
 import { useMapObserver } from "./map-observer";
 import { ActiveUnit } from "./types";
+import { theme } from "../../tailwind.config";
 
 type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
 
@@ -109,9 +110,9 @@ const PercentRamp: React.FC = () => {
   return (
     <div className="flex w-full min-w-[10rem] max-w-[16rem] flex-col dash:max-w-[24rem]">
       <div
-        className="relative h-4 w-full rounded border border-content-on-accent dash:h-6"
+        className="relative h-4 w-full rounded border border-content-on-accent bg-map-land dash:h-6"
         style={{
-          backgroundImage: `linear-gradient(to right, rgba(255,208,83,${ZERO_OPACITY}), rgba(255,208,83,1))`
+          backgroundImage: `linear-gradient(to right, ${solarAt(ZERO_OPACITY)}, ${solarAt(1)})`
         }}
       >
         {NORMALIZED_TICKS.map((fraction) => (
@@ -139,13 +140,39 @@ const PercentRamp: React.FC = () => {
 };
 
 /** The six pills, from a label per band. Opacity and text colour are fixed per position. */
+/**
+ * The data yellow at a given opacity, as a CSS colour.
+ *
+ * Read from the Tailwind theme — the same `theme.extend.colors.solar.DEFAULT` the map's paint
+ * expression reads (`feature-state.ts`) — so the legend cannot describe a colour the map does
+ * not paint. `PercentRamp` used to write its gradient as a literal `rgba(255,208,83, …)`, which
+ * was not `solar` at all (`#FFD053` against `#FFD480`: 45 out in blue, visibly more orange), so
+ * the percentage legend and the map were genuinely painting two different yellows.
+ */
+const SOLAR_RGB = (() => {
+  const hex = theme.extend.colors.solar.DEFAULT.replace("#", "");
+  return [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(",");
+})();
+
+const solarAt = (alpha: number) => `rgba(${SOLAR_RGB},${alpha})`;
+
+/**
+ * A flat fill of `solarAt(alpha)`, as a `background-image`.
+ *
+ * The ground underneath is `bg-map-land`, so the pill composites the same yellow over the same
+ * colour the map does and the two agree at every band rather than only at the top one. A
+ * two-stop gradient because `background-image` layers over `background-color` where a second
+ * `background-color` cannot.
+ */
+const bandFill = (alpha: number) => `linear-gradient(${solarAt(alpha)},${solarAt(alpha)})`;
+
 const bandPills = (labels: string[]) =>
   labels.map((value, index) => ({
     value,
-    // The same array the paint expression steps to, as a Tailwind opacity suffix. 0.03 * 100
-    // is 3.0000000000000004 in floating point and `bg-solar/3.0000000000000004` is not a
-    // class, hence the round.
-    opacity: Math.round(BAND_OPACITIES[index] * 100),
+    // The same array the paint expression steps to, as a raw alpha. It used to be rounded to a
+    // percentage for a `bg-solar/${n}` class, which needed a hand-maintained safelist; the fill
+    // is an inline gradient now, so the alpha goes through exactly as the map has it.
+    opacity: BAND_OPACITIES[index],
     // The top three bands are dark enough to need dark text on them.
     textColor: index < 3 ? "content" : "content-on-accent"
   }));
@@ -207,7 +234,8 @@ const SequentialBands: React.FC<{
         {values?.map((value, index) => (
           <div
             key={value.value}
-            className={`rounded border border-content-on-accent px-3 py-[1px] dash:px-4 dash:py-[2px] bg-solar/${value.opacity} whitespace-nowrap text-${value.textColor}`}
+            className={`rounded border border-content-on-accent bg-map-land px-3 py-[1px] dash:px-4 dash:py-[2px] whitespace-nowrap text-${value.textColor}`}
+            style={{ backgroundImage: bandFill(value.opacity) }}
           >
             {value.value}
             {index === 0 && (

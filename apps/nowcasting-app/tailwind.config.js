@@ -236,6 +236,10 @@ module.exports = {
           light: DATA.yellowLight
         },
 
+        /* The Mapbox basemap's land fill — see `--map-land` in `styles/tokens.css`. Here so the
+         * colour legend can composite the data yellow over the same ground the map does. */
+        "map-land": "rgb(var(--map-land) / <alpha-value>)",
+
         /* ---- Plot internals. Themed roles — see `--plot-*` in `styles/tokens.css`. ----
          * `bg-plot-base` is the plot floor. The two bands are the day/night alternation and
          * are read at runtime by Recharts through `useTokens`, not through these classes;
@@ -448,24 +452,17 @@ module.exports = {
     "./hooks/**/*.{js,ts,jsx,tsx}"
   ],
   safelist: [
-    "bg-solar",
-    // The legend's faintest band renders at /3, matching `BAND_OPACITIES[0]` (0.03) in
-    // `feature-state.ts` — the deliberate "published a real zero" band, which must stay
-    // distinguishable from "published nothing". Without this entry the class is never
-    // generated and that pill renders with no fill at all, so the legend showed five bands
-    // where the map paints six.
-    "bg-solar/3",
-    "bg-solar/5",
-    "bg-solar/10",
-    "bg-solar/20",
-    "bg-solar/30",
-    "bg-solar/40",
-    "bg-solar/50",
-    "bg-solar/60",
-    "bg-solar/70",
-    "bg-solar/80",
-    "bg-solar/90",
-    "bg-solar/100"
+    // `bg-solar` alone is built dynamically in a few places (`sitesLegend.tsx`'s default prop,
+    // `search-table.tsx`), so it still needs an entry.
+    //
+    // The `bg-solar/3` … `bg-solar/100` ladder that used to sit here is gone with the class it
+    // served. `color-guide-bar.tsx` built its band pills as `bg-solar/${opacity}` — a template
+    // string Tailwind cannot see, hence a safelist that had to be kept in step with
+    // `BAND_OPACITIES` by hand, and had already failed once (the /3 band generated no class at
+    // all, so the legend showed five bands where the map painted six). The pills composite the
+    // yellow over `bg-map-land` with an explicit gradient now, so there is no generated class
+    // to safelist and no ladder to keep in step.
+    "bg-solar"
   ],
   plugins: [
     require("@tailwindcss/forms"),

@@ -82,6 +82,26 @@
     --ocf-ink-4
   ); /* lifted above a panel: popovers, hover, the selected control — Black 1 */
 
+  /* ---- The basemap ------------------------------------------------------ *
+   * The land fill of the Mapbox style, mirrored here so UI that has to composite *against* the
+   * map can do it exactly rather than approximately.
+   *
+   * The map's region fills are `fill-opacity` over this colour, so the land is literally the
+   * bottom of the data ramp: a region generating zero is 97% this value (`ZERO_OPACITY`). The
+   * legend draws the same yellow at the same opacities, and was compositing it over the control
+   * panel's own ground instead — `--surface-panel` at 95%, about `#1e2020`, which is ~10/255
+   * darker. Identical at the top band and visibly off at the bottom, which is exactly where the
+   * "real zero versus no data" distinction has to survive.
+   *
+   * **This one does not theme.** There is a single Mapbox style and it is dark, so the value is
+   * the same in both blocks and is deliberately not redefined in the light one below.
+   *
+   * **It is a copy, and nothing can check it.** The authority is the Mapbox style
+   * (`mapbox://styles/bradbdf/…`, see `map.tsx`); if the land colour changes there, this has to
+   * be changed here by hand or the legend quietly drifts out of agreement with the map again.
+   */
+  --map-land: 40 42 42; /* #282a2a */
+
   --content: var(--ocf-white);
   --content-secondary: 200 200 200;
   --content-muted: 169 169 169;
