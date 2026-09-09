@@ -75,7 +75,7 @@ const PV_LAYER_IDS = [
  * why `Arial Unicode MS Regular` trails every stack below: it is Mapbox's universal fallback and
  * carries the glyphs the Latin faces do not.
  */
-const MAP_LABEL_FONT = "Work Sans";
+const MAP_LABEL_FONT = "Manrope";
 
 /**
  * The weight the layer already asked for, kept. dark-v10 uses several DIN Pro weights to
