@@ -9,6 +9,8 @@ import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
 import { STAGE_GUTTER_PX } from "./geometry";
 import { useCursorRange } from "./use-cursor-range";
+import { useScrubPlacement } from "./use-scrub-placement";
+import ZoneStack from "./zone-stack";
 import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
 
 /**
@@ -51,6 +53,11 @@ const DashboardShell: FC<{
   chart: ReactNode;
 }> = ({ dashboardModeActive, comparisonActive, map, chart }) => {
   const [displayPanelOpen, setDisplayPanelOpen] = useState(false);
+  // SPIKE — `?scrub=chart` folds the cursor footer into the chart card. See
+  // `use-scrub-placement.ts`; the default is the shipped placement, so an unflagged URL is
+  // unchanged.
+  const scrubPlacement = useScrubPlacement();
+  const scrubInChart = scrubPlacement === "chart";
 
   // Left/Right walk the shared cursor. Mounted here rather than inside a chart, which is where
   // it used to live (`pv-remix-chart.tsx`): the shortcut writes `selectedISOTime`, which is the
@@ -97,11 +104,14 @@ const DashboardShell: FC<{
                 onToggle={() => setDisplayPanelOpen((open) => !open)}
               />
             )}
+            {/* SPIKE — the zone stack, once the footer stops carrying it. `mt-auto` inside the
+                dock puts it at the bottom of the column, diagonally opposite the chart. */}
+            {scrubInChart && <ZoneStack />}
           </MapControlDock>
         </div>
       </div>
 
-      <CursorReadout />
+      {!scrubInChart && <CursorReadout />}
       <DeprecatedDomainNotice />
     </div>
   );

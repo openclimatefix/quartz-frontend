@@ -2,6 +2,9 @@ import { FC, useEffect, useMemo } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
 import ChartLegend from "./chart-legend";
+import ChartScrubber from "../shell/chart-scrubber";
+import { plottedKeyRange, usePlottedDomain } from "./plotted-domain";
+import { useScrubPlacement } from "../shell/use-scrub-placement";
 import useGlobalState, {
   useCountryState,
   getCursorCadenceMinutes,
@@ -59,6 +62,8 @@ const PvRemixChart: FC<{
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
+  // SPIKE — `?scrub=chart` mounts the scrub track in this card. See `use-scrub-placement.ts`.
+  const scrubInChart = useScrubPlacement() === "chart";
   const cursorInstant = formatISODateString(selectedISOTime || new Date().toISOString());
 
   const focusedCountry = useFocusedCountry();
@@ -191,6 +196,10 @@ const PvRemixChart: FC<{
     timeTrigger: selectedTime
   });
 
+  // SPIKE — the window the scrub track draws, taken off what this chart plots rather than
+  // derived a second time. See `plotted-domain.ts`.
+  const plottedDomain = usePlottedDomain(chartData);
+
   const yMax = useMemo(() => {
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
@@ -223,11 +232,18 @@ const PvRemixChart: FC<{
   // 30. Half of those instants have no exact match here, and demanding one made this effect
   // yank the cursor to "now" on every other scrub step, which then re-committed and fought back.
   // Out of range still resets: that is a cursor pointing at nothing, which is what this guards.
+  //
+  // **Earliest and latest, not `chartData[0]` and `chartData[n - 1]`.** Those are positions in
+  // an array `useFormatChartData` never sorts — it inserts generation before the forecast, and
+  // generation covers less history, so position 0 is where the *observed* data starts and the
+  // forecast's earlier points sit further down. Reading position 0 as the lower bound made the
+  // chart's own first several hours test as out of range: dragging the scrub handle to the left
+  // end reset the cursor to now, which then re-committed and fought the drag — the same
+  // fight the paragraph above describes, from a different direction. See `plotted-domain.ts`.
   useEffect(() => {
-    if (!chartData?.length) return;
-    const first = (chartData[0] as any).formattedDate;
-    const last = (chartData[chartData.length - 1] as any).formattedDate;
-    if (!selectedTime || selectedTime < first || selectedTime > last) {
+    const keys = plottedKeyRange(chartData);
+    if (!keys) return;
+    if (!selectedTime || selectedTime < keys.earliest || selectedTime > keys.latest) {
       setSelectedISOTime(getCursorNow());
     }
   }, [chartData, selectedTime, setSelectedISOTime]);
@@ -279,6 +295,9 @@ const PvRemixChart: FC<{
             ></GspPvRemixChart>
           </div>
         )}
+        {/* SPIKE — the scrub track, above the legend and inset to the plot's own x-axis. See
+            `components/shell/chart-scrubber.tsx`; `?scrub=chart` only. */}
+        {scrubInChart && <ChartScrubber domain={plottedDomain} />}
         {/* Below the well, not inside it: the key describes the plot rather than sitting on
               it, and it is where most charting libraries put one. */}
         <div className="flex px-2 pb-2 dash:h-auto">

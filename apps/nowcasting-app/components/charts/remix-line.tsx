@@ -34,6 +34,30 @@ import { useTokens } from "../helpers/colour";
 import { selectAxisTicks, TickDensity } from "../../lib/time/ticks";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
+/**
+ * The plot area's insets, published so chrome *outside* the chart can line up with the x-axis.
+ *
+ * Recharts gives no way to ask where the plot area starts once it has laid out, so anything
+ * that wants to sit under the axis and agree with it has to reconstruct the sum: the Y axis's
+ * width, plus the chart's left margin. Both were implicit before — the margin was a literal in
+ * the `margin` prop and the width was recharts' undeclared 60px default — which is fine while
+ * nothing else depends on them and a silent misalignment the moment something does.
+ *
+ * So `YAxis` below now names its width instead of inheriting it, the margins read from here,
+ * and `PLOT_INSET_LEFT_PX` is the one number external chrome measures from. Changing a margin
+ * moves the scrub track with the axis rather than away from it.
+ *
+ * **The right edge is only right for the plain chart.** Delta view mounts a second `YAxis` on
+ * the right and shrinks `rightChartMargin` to make room for it, so its plot area ends further
+ * in than `PLOT_INSET_RIGHT_PX` says. Nothing here corrects for that — see
+ * `components/shell/chart-scrubber.tsx`.
+ */
+export const CHART_Y_AXIS_WIDTH_PX = 60;
+export const CHART_MARGIN_LEFT_PX = 16;
+export const CHART_MARGIN_RIGHT_PX = 16;
+export const PLOT_INSET_LEFT_PX = CHART_Y_AXIS_WIDTH_PX + CHART_MARGIN_LEFT_PX;
+export const PLOT_INSET_RIGHT_PX = CHART_MARGIN_RIGHT_PX;
+
 const yellow = theme.extend.colors.solar.DEFAULT;
 const orange = theme.extend.colors.series.nHour;
 const ecmwfOnly = theme.extend.colors.series.ecmwf;
@@ -687,7 +711,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
     );
   };
 
-  let rightChartMargin = 16;
+  let rightChartMargin = CHART_MARGIN_RIGHT_PX;
   let deltaLabelOffset = roundTickMax ? -20 : -10;
   if (deltaView) {
     if (selectedMapRegionIds?.length) {
@@ -729,7 +753,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               top: 20,
               right: rightChartMargin,
               bottom: -4,
-              left: 16
+              left: CHART_MARGIN_LEFT_PX
             }}
             onClick={(e?: { activeLabel?: string }) => {
               if (draggingCursorRef.current) return;
@@ -846,6 +870,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
             />
 
             <YAxis
+              // Named rather than left to recharts' 60px default, so `PLOT_INSET_LEFT_PX` above
+              // is a fact about this chart and not a guess about the library.
+              width={CHART_Y_AXIS_WIDTH_PX}
               tickFormatter={
                 isSitesChart ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
               }

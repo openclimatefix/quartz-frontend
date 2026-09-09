@@ -24,6 +24,7 @@ import {
   scrubScale,
   slotIndexOf,
   slotsPerMinutes,
+  type CursorRange,
   type DaylightWindow,
   type ScrubScale
 } from "./scrub-scale";
@@ -174,7 +175,23 @@ const TrackTicks: FC<{ scale: ScrubScale; zone: string }> = ({ scale, zone }) =>
   );
 };
 
-const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
+/**
+ * `range` overrides the window the track draws, and exists so the track can be handed the
+ * *plotted* domain of the chart it sits under rather than deriving a parallel one.
+ *
+ * `useCursorRange` reads the raw forecast series; the chart plots a merge of that series with
+ * generation, having dropped every point whose value is null (`use-format-chart-data.tsx`'s
+ * `fromTimeSeries`). Those two are close but not equal, and the difference shows as the track
+ * reaching further back than the axis above it. Deriving the window twice was always going to
+ * drift; passing the chart's own first and last key makes the two ends the same fact.
+ *
+ * Omitted, the hook's window is used — which is what the shell footer does, since a footer that
+ * outlives the chart swap cannot take its domain from whichever chart is mounted.
+ */
+const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
+  zone = "UTC",
+  range: rangeOverride
+}) => {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
@@ -192,7 +209,9 @@ const ScrubTrack: FC<{ zone?: string }> = ({ zone = "UTC" }) => {
   const isLive = intervals.length > 0;
   const { stopTime, resetTime } = useStopAndResetTime();
   const rangeData = useCursorRange();
-  const range = rangeData?.range ?? null;
+  // The override wins when there is one; daylight shading still comes from the hook, which is
+  // the only source for it and is derived over the same forecast series either way.
+  const range = rangeOverride ?? rangeData?.range ?? null;
   const daylight = rangeData?.daylight;
 
   const trackRef = useRef<HTMLDivElement | null>(null);

@@ -31,6 +31,9 @@ import {
 import type { Scope } from "../../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
 import { GENERATION_CHART_KEYS } from "../pv-remix-chart";
+import ChartScrubber from "../../shell/chart-scrubber";
+import { usePlottedDomain } from "../plotted-domain";
+import { useScrubPlacement } from "../../shell/use-scrub-placement";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
@@ -269,6 +272,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
+  // SPIKE — `?scrub=chart`. Mounted directly under the plot here: the delta card has no legend,
+  // it has the bucket table, and the track belongs with the chart it scrubs rather than
+  // floating above a list of GSPs. Its right edge does not line up — delta view mounts a second
+  // Y axis on the right; see `chart-scrubber.tsx`.
+  const scrubInChart = useScrubPlacement() === "chart";
   const focusedCountry = useFocusedCountry();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   // The cursor resolved onto the focused country's own grid. This used to round via
@@ -358,6 +366,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     timeTrigger: selectedTime,
     delta: true
   });
+
+  // SPIKE — see `pv-remix-chart.tsx` and `plotted-domain.ts`.
+  const plottedDomain = usePlottedDomain(chartData);
 
   const yMax = useMemo(() => {
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
@@ -471,6 +482,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             />
           </div>
         </div>
+        {scrubInChart && <ChartScrubber domain={plottedDomain} />}
         {selectedMapRegionIds && selectedMapRegionIds.length > 0 && (
           <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart

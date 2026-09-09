@@ -3,6 +3,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
 import ChartResizeHandle from "./chart-resize-handle";
 import useGlobalState, { setChartSplitOverride, useCountryState } from "../helpers/globalState";
 import { CHART_SPLIT, chartModeFor, STAGE_GUTTER_PX } from "./geometry";
+import { SCRUB_IN_CHART_MIN_WIDTH_PX, useScrubPlacement } from "./use-scrub-placement";
 import { useResizableChartSplit } from "./use-resizable-chart-split";
 
 /**
@@ -69,6 +70,7 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
 }) => {
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [chartSplitOverrides] = useGlobalState("chartSplitOverrides");
+  const scrubInChart = useScrubPlacement() === "chart";
   const regionSelected = !!selectedMapRegionIds && selectedMapRegionIds.length > 0;
 
   // Below `lg` there is not enough width for map and chart side by side, so the chart takes
@@ -114,7 +116,11 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
         // A holding position until the narrow stage is designed properly — see above.
         ...(isNarrow ? { bottom: STAGE_GUTTER_PX } : { top: STAGE_GUTTER_PX }),
         width: isNarrow ? `calc(100% - ${STAGE_GUTTER_PX * 2}px)` : `${split.width}%`,
-        height: `${split.height}%`
+        height: `${split.height}%`,
+        // SPIKE — with the scrub row inside the card (`?scrub=chart`), the narrowest the chart
+        // may be dragged is set by that row rather than by the plot. See
+        // `use-scrub-placement.ts` for where the number comes from.
+        ...(scrubInChart ? { minWidth: SCRUB_IN_CHART_MIN_WIDTH_PX } : {})
       }}
     >
       <section

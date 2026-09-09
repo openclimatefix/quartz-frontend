@@ -552,16 +552,7 @@ const Map: FC<IMap> = ({
       map.current.on("load", (event) => {
         setIsMapReady(true);
         if (map.current) applyBrandLabelFont(map.current);
-        if (map.current?.getCanvas()?.width === 800) {
-          map.current?.resize();
-        }
         loadDataOverlay(map);
-      });
-
-      map.current.on("dataloading", () => {
-        if (map.current?.getCanvas()?.width === 400) {
-          map.current?.resize();
-        }
       });
 
       map.current.on("moveend", onMoveEnd);
@@ -575,6 +566,44 @@ const Map: FC<IMap> = ({
       if (map.current) {
         map.current.off("moveend", onMoveEnd);
       }
+    };
+  }, []);
+
+  /**
+   * Keep the canvas the size of its container.
+   *
+   * Mapbox sizes its canvas when it initialises and then never again on its own — it has no way
+   * to know the box around it moved. Every time the shell's layout changes height or width
+   * without the window changing (chrome mounting or unmounting, the chart being dragged, a
+   * banner appearing) the map keeps the canvas it was born with and renders short, leaving bare
+   * ground along whichever edge grew. That is not a hypothetical: it is what the scrub-placement
+   * spike hit the moment the cursor footer stopped rendering.
+   *
+   * This replaces two guesses that were doing the same job by coincidence — `resize()` calls on
+   * `load` and `dataloading`, each gated on the canvas being exactly 800 or 400 pixels wide.
+   * They fired when a mid-init canvas happened to match one of those numbers and did nothing at
+   * any other size, which is why the symptom came and went. A `ResizeObserver` on the element
+   * Mapbox actually renders into needs no such number.
+   *
+   * `requestAnimationFrame` coalesces the callback to one resize per frame: a pointer-driven
+   * chart drag fires the observer on every frame of the gesture, and `resize()` re-reads layout
+   * and repaints.
+   */
+  useEffect(() => {
+    const element = mapContainer.current;
+    if (!element) return;
+    let frame: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        map.current?.resize();
+      });
+    });
+    observer.observe(element);
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      observer.disconnect();
     };
   }, []);
 
