@@ -642,9 +642,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
                 safelyUpdateMapData(map, addOrUpdateMapData);
               }
             }}
-            // The corner's own time readout went here (Wave 4) — the shell's cursor readout
-            // (`components/shell/cursor-readout.tsx`) already says it, better, once for both
-            // panes. `sitesMap.tsx` keeps its own: `/sites` has no shell cursor readout to
+            // The corner's own time readout went here (Wave 4) — the zone stack in the map
+            // control dock (`components/shell/zone-stack.tsx`) already says it, better, once
+            // for both panes. `sitesMap.tsx` keeps its own: `/sites` has no zone stack to
             // duplicate. Reused (Phase 6 followup, Track M) for the per-country coverage
             // banner — quiet unless an enabled country has nothing published at this instant,
             // or nothing at all.

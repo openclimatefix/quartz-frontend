@@ -10,7 +10,6 @@ import useGlobalState, {
   getCursorNow
 } from "../helpers/globalState";
 import QuickLRU from "quick-lru";
-import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
@@ -180,6 +179,8 @@ const Map: FC<IMap> = ({
   const [lat, setLat] = useCountryState("lat");
   const [zoom, setZoom] = useCountryState("zoom");
   const [maps, setMaps] = useGlobalState("maps");
+  const [, setMapFramingModified] = useGlobalState("mapFramingModified");
+  const [, setResetMapFraming] = useGlobalState("resetMapFraming");
   const [currentAggregation, setAggregation] = useCountryState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
   const [focusedCountry] = useGlobalState("focusedCountry");
@@ -251,7 +252,21 @@ const Map: FC<IMap> = ({
   resetFramingRef.current = () => {
     const union = unionBounds(enabledCountries);
     if (union) frameToBounds(union, 1500);
+    setMapFramingModified(false);
   };
+
+  /**
+   * Publish the framing action so the dock's reset button can call it.
+   *
+   * A holder around the *ref*, not around `resetFramingRef.current` — the ref is re-pointed on
+   * every render so it always frames the countries enabled now, and that was the whole reason
+   * it is a ref. Registering the current value instead would freeze the enabled set at mount,
+   * which is exactly the bug the ref exists to prevent.
+   */
+  useEffect(() => {
+    setResetMapFraming({ run: () => resetFramingRef.current() });
+    return () => setResetMapFraming(null);
+  }, [setResetMapFraming]);
 
   useEffect(() => {
     if (!map.current || !isMapReady) return;
@@ -262,12 +277,12 @@ const Map: FC<IMap> = ({
 
     const isFirstFraming = framedFor === null;
     framedFor = enabledKey;
+    setMapFramingModified(false);
 
     // The first framing is the initial view and should not animate in; later ones are a response
     // to the user toggling a country, where the movement is what explains the change.
     frameToBounds(union, isFirstFraming ? 0 : 700);
-  }, [enabledKey, enabledCountries, isMapReady, frameToBounds]);
-  const resetButtonDiv = useRef<HTMLDivElement | null>(null);
+  }, [enabledKey, enabledCountries, isMapReady, frameToBounds, setMapFramingModified]);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
   // Setters for these three are no longer called here — the Clouds/PV buttons and the channel
@@ -504,7 +519,7 @@ const Map: FC<IMap> = ({
         center?.lat.toFixed(4) !== lat.toFixed(4); // Check if latitude has changed
 
       if (mapModified) {
-        resetButtonDiv.current?.style.setProperty("display", "block");
+        setMapFramingModified(true);
       }
     };
 
@@ -512,7 +527,7 @@ const Map: FC<IMap> = ({
     if (mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/dark-v10",
+        style: "mapbox://styles/bradbdf/cm7yvv7y400wk01sdfdi4ep7l",
         center: [lng, lat],
         boxZoom: false,
         zoom,
@@ -525,29 +540,9 @@ const Map: FC<IMap> = ({
       // Updater function to prevent state updates overriding each other in race condition on load
       setMaps((m) => [...m, map.current!]);
 
-      const nav = new mapboxgl.NavigationControl({ showCompass: false });
-      map.current.addControl(nav, "bottom-right");
-      map.current.addControl(
-        {
-          onAdd: function (m) {
-            const div = document.createElement("div");
-            div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
-            div.style.setProperty("display", "none");
-            div.innerHTML = `<button title="Reset Zoom" style="padding:7px;">${ResetIcon()}</button>`;
-            // The same framing the enabled set gets on load, not a remembered centre and zoom.
-            // Read through a ref so it reflects the countries enabled *now* — this closure is
-            // built once, at map init, and everything captured here is frozen at that moment.
-            div.onclick = () => {
-              resetFramingRef.current();
-              div.style.setProperty("display", "none");
-            };
-            resetButtonDiv.current = div;
-            return div;
-          },
-          onRemove: function () {}
-        },
-        "bottom-right"
-      );
+      // No `addControl` for zoom or reset. Mapbox would position them against the map, in a
+      // box the shell cannot see or lay out beside — see `map-zoom-controls.tsx`, which renders
+      // both in the control dock instead. The attribution stays Mapbox's, as it must.
 
       map.current.on("load", (event) => {
         setIsMapReady(true);

@@ -2,14 +2,13 @@ import { FC, ReactNode, useState } from "react";
 
 import Header from "../layout/header";
 import DeprecatedDomainNotice from "../layout/deprecated-domain-notice";
-import CursorReadout from "./cursor-readout";
 import DisplayPanel from "./display-panel";
 import FloatingChart from "./floating-chart";
 import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
 import { STAGE_GUTTER_PX } from "./geometry";
 import { useCursorRange } from "./use-cursor-range";
-import { useScrubPlacement } from "./use-scrub-placement";
+import MapZoomControls from "./map-zoom-controls";
 import ZoneStack from "./zone-stack";
 import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
 
@@ -53,11 +52,6 @@ const DashboardShell: FC<{
   chart: ReactNode;
 }> = ({ dashboardModeActive, comparisonActive, map, chart }) => {
   const [displayPanelOpen, setDisplayPanelOpen] = useState(false);
-  // SPIKE — `?scrub=chart` folds the cursor footer into the chart card. See
-  // `use-scrub-placement.ts`; the default is the shipped placement, so an unflagged URL is
-  // unchanged.
-  const scrubPlacement = useScrubPlacement();
-  const scrubInChart = scrubPlacement === "chart";
 
   // Left/Right walk the shared cursor. Mounted here rather than inside a chart, which is where
   // it used to live (`pv-remix-chart.tsx`): the shortcut writes `selectedISOTime`, which is the
@@ -67,8 +61,8 @@ const DashboardShell: FC<{
   //
   // Limits come from `useCursorRange`, not from the chart's own first/last forecast point. That
   // is the range `ScrubTrack` is drawn against, so the keyboard and the drag handle now agree
-  // about where the ends are; they could differ before. It costs no request — `CursorReadout`'s
-  // track already calls this hook and the two share the SWR entry.
+  // about where the ends are; they could differ before. It costs no request — the track inside
+  // the chart card already calls this hook and the two share the SWR entry.
   useCursorHotkeys(useCursorRange()?.range);
 
   return (
@@ -104,14 +98,17 @@ const DashboardShell: FC<{
                 onToggle={() => setDisplayPanelOpen((open) => !open)}
               />
             )}
-            {/* SPIKE — the zone stack, once the footer stops carrying it. `mt-auto` inside the
-                dock puts it at the bottom of the column, diagonally opposite the chart. */}
-            {scrubInChart && <ZoneStack />}
+            {/* The map's own camera controls, which used to be Mapbox's and sat outside this
+                column entirely — see `map-zoom-controls.tsx`. `mt-auto` on that group bottom-
+                anchors it and the zone stack together. */}
+            <MapZoomControls />
+            {/* The zone stack, which the cursor footer used to carry. Bottom of the column,
+                diagonally opposite the chart. */}
+            <ZoneStack />
           </MapControlDock>
         </div>
       </div>
 
-      {!scrubInChart && <CursorReadout />}
       <DeprecatedDomainNotice />
     </div>
   );

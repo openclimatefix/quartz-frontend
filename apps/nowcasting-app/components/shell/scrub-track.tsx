@@ -90,14 +90,14 @@ import {
  * 4. the handle;
  * 5. NOW, drawn last so it is never covered.
  *
- * **The strip is 20px tall**, halved from 40px along with every offset inside it, which is what
- * sets the footer's height — nothing else in `cursor-readout.tsx`'s row is as tall. The floor is
- * the zone stack beside it (one `text-2xs` line per enabled country plus UTC), so on a
- * two-country build the track can shrink a little further before the footer stops following it.
+ * **The strip is 20px tall**, halved from 40px along with every offset inside it. That was the
+ * height of the shell footer this used to sit in, where nothing else in the row was as tall.
+ * The track lives inside the chart card now (`chart-scrubber.tsx`) and the footer is gone, so
+ * the height is no longer setting anyone else's — it is just the strip's own.
  *
  * **The tethered reading is a sixth thing, layered between 4 and 5, and it is not part of the
  * ranked strip encodings above** — it is text riding above the strip's own box, not a mark on
- * it. It used to be a fixed position in `cursor-readout.tsx`'s row (Track N); Brad's reaction to
+ * it. It used to be a fixed position in the shell footer's row (Track N); Brad's reaction to
  * that ("doesn't click as tethered") is what moved it here. It reads `cursor` — the same
  * drag-local-or-committed value the handle derives from — so it moves at the same pointer rate
  * as the handle, with no separate state and no easing.

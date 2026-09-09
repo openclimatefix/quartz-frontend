@@ -4,7 +4,6 @@ import ForecastHeader from "./forecast-header";
 import ChartLegend from "./chart-legend";
 import ChartScrubber from "../shell/chart-scrubber";
 import { plottedKeyRange, usePlottedDomain } from "./plotted-domain";
-import { useScrubPlacement } from "../shell/use-scrub-placement";
 import useGlobalState, {
   useCountryState,
   getCursorCadenceMinutes,
@@ -62,8 +61,6 @@ const PvRemixChart: FC<{
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
-  // SPIKE — `?scrub=chart` mounts the scrub track in this card. See `use-scrub-placement.ts`.
-  const scrubInChart = useScrubPlacement() === "chart";
   const cursorInstant = formatISODateString(selectedISOTime || new Date().toISOString());
 
   const focusedCountry = useFocusedCountry();
@@ -196,8 +193,8 @@ const PvRemixChart: FC<{
     timeTrigger: selectedTime
   });
 
-  // SPIKE — the window the scrub track draws, taken off what this chart plots rather than
-  // derived a second time. See `plotted-domain.ts`.
+  // The window the scrub track draws, taken off what this chart plots rather than derived a
+  // second time. See `plotted-domain.ts`.
   const plottedDomain = usePlottedDomain(chartData);
 
   const yMax = useMemo(() => {
@@ -295,9 +292,9 @@ const PvRemixChart: FC<{
             ></GspPvRemixChart>
           </div>
         )}
-        {/* SPIKE — the scrub track, above the legend and inset to the plot's own x-axis. See
-            `components/shell/chart-scrubber.tsx`; `?scrub=chart` only. */}
-        {scrubInChart && <ChartScrubber domain={plottedDomain} />}
+        {/* The scrub track, above the legend and inset to the plot's own x-axis. See
+            `components/shell/chart-scrubber.tsx`. */}
+        <ChartScrubber domain={plottedDomain} />
         {/* Below the well, not inside it: the key describes the plot rather than sitting on
               it, and it is where most charting libraries put one. */}
         <div className="flex px-2 pb-2 dash:h-auto">

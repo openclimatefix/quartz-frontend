@@ -15,7 +15,7 @@ import { FC, ReactNode, useEffect, useState } from "react";
  *     Warning: Text content did not match. Server: "GB" Client: "GB NL"
  *
  * That was `CountryToggle`'s loading branch, which renders `enabledCountries.join(" ")` as text.
- * It was not the only site — `cursor-readout.tsx` renders a row per enabled country — only the
+ * It was not the only site — `zone-stack.tsx` renders a row per enabled country — only the
  * first, after which React abandons the server HTML and re-renders the root on the client
  * anyway. So the server's work was already being thrown away; it was just being thrown away
  * *with four red overlays first*.

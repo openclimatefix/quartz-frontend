@@ -124,6 +124,24 @@ export type FlatGlobalStateType = {
   visibleLines: string[];
   selectedBuckets: string[];
   maps: mapboxgl.Map[];
+  /**
+   * The map's camera controls, hoisted out of Mapbox so the shell can lay them out.
+   *
+   * `map.tsx` used to add zoom and reset through `addControl(…, "bottom-right")`, which puts
+   * them in a box `mapbox-gl.css` positions against the map — outside the dock's flex column,
+   * so nothing in the shell could align with them and moving one meant a CSS override with the
+   * other's geometry hard-coded into it. The buttons are `map-zoom-controls.tsx` now and lay
+   * out in the dock like everything else; these two keys are the seam that made that possible.
+   *
+   * `mapFramingModified` is "has the user moved the camera off its framing" — `map.tsx` sets it
+   * on `moveend` and clears it whenever it frames. It only gates whether reset is offered.
+   *
+   * `resetMapFraming` is a holder rather than a bare function because these setters take
+   * functional updates, so a bare callback would be read as an updater. `map.tsx` registers one
+   * on mount and clears it on unmount; the shell treats null as "no map to reset".
+   */
+  mapFramingModified: boolean;
+  resetMapFraming: { run: () => void } | null;
   showSiteCount?: boolean;
   showNHourView?: boolean;
   showConstraints: boolean;
@@ -239,6 +257,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     ],
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
+    mapFramingModified: false,
+    resetMapFraming: null,
     autoZoom: true,
     isPlaying: false,
     playbackSpeed: 1,

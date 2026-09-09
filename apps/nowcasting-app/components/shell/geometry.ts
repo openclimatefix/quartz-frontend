@@ -23,6 +23,30 @@ export const STAGE_GUTTER_PX = 8;
 export const MAP_CONTROL_WIDTH_PX = 260;
 
 /**
+ * The one piece of Mapbox's own chrome the shell still has to work around: the attribution.
+ *
+ * The zoom pair and the reset button used to be here too, added with `addControl(…,
+ * "bottom-right")` and therefore positioned by `mapbox-gl.css` against the *map*, outside the
+ * dock's flex column. Working around them meant reproducing their geometry here — a 29px button
+ * and a 10px gutter, correct until Mapbox changed either — so that a dock child could dodge
+ * sideways past them. They are `map-zoom-controls.tsx` now and lay out in the dock like
+ * everything else, and that whole clearance went with them.
+ *
+ * The attribution cannot follow. Mapbox's terms require it on the map, so it stays in
+ * `.mapboxgl-ctrl-bottom-right` with that file's `margin: 0 10px 10px 0`, and anything the dock
+ * puts at the bottom of its column has to clear it.
+ *
+ * The dock already sits `STAGE_GUTTER_PX` in from each edge and a card wants `STAGE_GUTTER_PX`
+ * of gap above the attribution, so the inset it starts with and the gap it wants cancel: the
+ * margin to add is exactly the attribution's own reserve.
+ */
+const MAP_CHROME_GUTTER_PX = 10;
+const MAP_ATTRIBUTION_TEXT_PX = 4;
+
+/** How far the attribution reaches up from the map's bottom edge. */
+export const MAP_ATTRIBUTION_RESERVE_PX = MAP_CHROME_GUTTER_PX + MAP_ATTRIBUTION_TEXT_PX;
+
+/**
  * Phase 6 followup, Track G moved the cluster from bottom-right to top-right, to sit with the
  * Clouds/PV layer toggles `map.tsx` rendered there itself (forecast map only). `map.tsx` was
  * off-limits to that track (concurrent, unrelated work), so it stopped at "same corner,
@@ -56,6 +80,21 @@ export const MAP_CONTROL_WIDTH_PX = 260;
 
 /** Floor on the chart's rendered size, so a drag cannot shrink it to an unreadable sliver. */
 export const MIN_CHART_WIDTH_PX = 320;
+
+/**
+ * The floor the scrub row puts under the chart's width, which is higher than the plot's own.
+ *
+ * Measured from what the row actually contains, left to right: the play button (28px), a 12px
+ * gap, the track's own `min-w-[140px]`, and the card's 16px of horizontal padding either side.
+ * At `MIN_CHART_WIDTH_PX` the axis has 140px to draw two days in, which `selectAxisTicks`
+ * answers by dropping to `midnight-only`.
+ *
+ * 460px is the width at which the axis can still hold `midday-midnight` across a two-day window
+ * (~55px per gap, per `lib/time/ticks.ts`'s ladder). That is the honest minimum for the control
+ * to still be a control — and it is 140px of chart width bought by a row that is not the plot,
+ * which was the finding when the row lived behind a flag and is the cost of keeping it now.
+ */
+export const MIN_CHART_WIDTH_WITH_SCRUB_PX = 460;
 export const MIN_CHART_HEIGHT_PX = 220;
 
 /**

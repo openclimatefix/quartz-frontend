@@ -1,6 +1,6 @@
 import { FC, ReactNode } from "react";
 
-import { MAP_CONTROL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
+import { MAP_ATTRIBUTION_RESERVE_PX, MAP_CONTROL_WIDTH_PX, STAGE_GUTTER_PX } from "./geometry";
 
 /**
  * The right-hand control column — the map's own controls, and the display panel under them. Track G moved this dock
@@ -56,7 +56,12 @@ const MapControlDock: FC<{ children: ReactNode }> = ({ children }) => (
     style={{
       right: STAGE_GUTTER_PX,
       top: STAGE_GUTTER_PX,
-      bottom: STAGE_GUTTER_PX,
+      // The bottom gutter carries Mapbox's attribution reserve as well, because the attribution
+      // is the one piece of its chrome that cannot move into this column — see `geometry.ts`.
+      // On the dock rather than on a card: which child is bottom-most is not fixed, and a
+      // clearance that lives on the column is right whichever one it is. It also stops the
+      // display panel scrolling its last row down behind the attribution.
+      bottom: STAGE_GUTTER_PX + MAP_ATTRIBUTION_RESERVE_PX,
       width: MAP_CONTROL_WIDTH_PX
     }}
   >

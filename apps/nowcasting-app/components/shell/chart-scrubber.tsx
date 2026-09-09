@@ -10,11 +10,12 @@ import type { CursorRange } from "./scrub-scale";
 import useCursorRange from "./use-cursor-range";
 
 /**
- * SPIKE — the scrub track inside the chart card, lined up with the chart's own x-axis.
+ * The scrub track inside the chart card, lined up with the chart's own x-axis.
  *
- * Mounted between the plot well and the legend (`pv-remix-chart.tsx`, `delta-view-chart.tsx`),
- * behind `?scrub=chart`. See `use-scrub-placement.ts` for the flag and
- * `docs/scrub-placement-spike.md` for what this is testing.
+ * Mounted between the plot well and the legend (`pv-remix-chart.tsx`, `delta-view-chart.tsx`).
+ * This began as a spike behind `?scrub=chart`, with the shell footer as the alternative; the
+ * flag and the footer placement are both gone and this is the only placement now.
+ * `docs/scrub-placement-spike.md` still holds the measurements and the argument.
  *
  * **The chart hands over its own domain**, which is what makes lining the two up meaningful
  * rather than decorative. The first version let the track derive its window independently, from
@@ -37,7 +38,7 @@ import useCursorRange from "./use-cursor-range";
  * luck in this layout, since the space reserved for the Y axis labels is exactly the space a
  * transport control wants and was otherwise empty.
  *
- * **Two ways the alignment is approximate, both worth knowing before this ships anywhere:**
+ * **Two ways the alignment is approximate, both still outstanding:**
  *
  * 1. **Delta view's right edge is wrong by ~45px.** It mounts a second `YAxis` on the right and
  *    shrinks its own right margin to fit it, so its plot ends further in than

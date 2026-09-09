@@ -10,10 +10,10 @@ type UiProps = {
  * Phase 6 followup, Track P: the footer's version of this control, not the chart header's.
  *
  * This used to be a full-height yellow block (`w-14 h-14 dash:h-full`) sized for a chart header
- * row. Its only home now is the dense footer strip (plus `/sites`, which has no footer of its
- * own — see `components/play-button/index.tsx`'s doc comment), so it is sized and weighted like
- * the footer's other controls (`now` in `scrub-track.tsx`, the grain value in
- * `cursor-readout.tsx`): a small bordered icon button rather than a headline block, with
+ * row. Its homes now are the chart card's scrub row (`components/shell/chart-scrubber.tsx`)
+ * and `/sites`, which has its own arrangement — see `components/play-button/index.tsx`'s doc
+ * comment. So it is sized and weighted like the controls it sits beside (`now` in
+ * `scrub-track.tsx`): a small bordered icon button rather than a headline block, with
  * `aria-label`/`aria-pressed`/`title` matching the pattern the `now` button already set, and a
  * native `<button>` so it is keyboard-operable for free.
  */
