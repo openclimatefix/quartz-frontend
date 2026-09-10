@@ -60,6 +60,27 @@ import type { CountryListing } from "../../../lib/domain/types";
 // `surface-inset` puts it a step below the header instead. Written out rather than appended,
 // because two background utilities in one class string are resolved by stylesheet order, not by
 // the order they are written.
+/**
+ * The switcher's outline — the dock's edge, and nothing else it wears.
+ *
+ * The header is `absolute top-0` with no ground of its own (`layout/header/index.tsx`), so this
+ * control floats directly over the map exactly as the map control dock's panels do, and it had
+ * no edge at all: loose type on the basemap rather than an object you can act on.
+ *
+ * The full card treatment was tried first — `surface-panel/95` ground, `p-1`, `shadow-2xl`, the
+ * dock's cards exactly — and was too heavy here. The dock's panels earn their ground by holding
+ * several stacked rows over a busy map; this is one row of two or three codes, and giving it a
+ * band and a shadow made a small control look like a container. So the border alone, at the
+ * dock's `rounded-lg` and `border-content/10` so the two corners still agree, with no padding of
+ * its own — the label and the pill inside already carry theirs, and the edge sits on that.
+ *
+ * All four branches below wear it — loading, unavailable, single country and the radiogroup —
+ * because the outline is the control's resting shape, not a decoration on its fullest state. An
+ * edge that appeared only once a second country arrived would make the manifest resolving look
+ * like a layout bug.
+ */
+const MINI_PANEL = "flex items-center rounded-lg border border-content/10 text-content";
+
 const PILL_BASE = `${CONTROL_ROW.replace("bg-surface-inner", "bg-surface-inset")} align-middle`;
 
 // `px-3`, replacing the dock's `px-2`: the dock's buttons are packed into a 260px column and
@@ -203,7 +224,7 @@ const CountryToggle: React.FC = () => {
   // fully usable in either: focus comes from the cookie, not the manifest.
   if (isLoading) {
     return (
-      <div className="flex items-center px-2" role="group" aria-label="Countries" aria-busy="true">
+      <div className={MINI_PANEL} role="group" aria-label="Countries" aria-busy="true">
         <CountryLabel code={focusedCountry} title="Loading countries" />
       </div>
     );
@@ -211,7 +232,7 @@ const CountryToggle: React.FC = () => {
 
   if (error || countries.length === 0) {
     return (
-      <div className="flex items-center px-2" role="group" aria-label="Countries">
+      <div className={MINI_PANEL} role="group" aria-label="Countries">
         <CountryLabel code={focusedCountry} title="Country list unavailable" />
       </div>
     );
@@ -222,7 +243,7 @@ const CountryToggle: React.FC = () => {
   if (countries.length === 1) {
     const only = countries[0];
     return (
-      <div className="flex items-center px-2" role="group" aria-label="Countries">
+      <div className={MINI_PANEL} role="group" aria-label="Countries">
         <CountryLabel code={only.code} title={only.name} />
       </div>
     );
@@ -281,7 +302,7 @@ const CountryRadioGroup: React.FC<{
   };
 
   return (
-    <div className="flex items-center px-2" role="group" aria-label="Countries">
+    <div className={MINI_PANEL} role="group" aria-label="Countries">
       {/* One container, N segments — the pill grows with the country list rather than the
           segments being sized to a fixed track, which is what keeps 1 through 4 countries
           looking like the same object. */}
