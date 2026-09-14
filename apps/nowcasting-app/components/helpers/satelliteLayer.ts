@@ -330,7 +330,11 @@ async function requestSatelliteTif(
   return null;
 }
 
-export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLayerData> {
+export async function decodeTif(
+  buf: ArrayBuffer,
+  invert = false,
+  alphaCap = SAT_MAX_ALPHA
+): Promise<TifLayerData> {
   const tiff = await fromArrayBuffer(buf);
   const image = await tiff.getImage();
   const width = image.getWidth();
@@ -387,7 +391,7 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
       // opaque and dominates, while dark pixels (clear sky, and the whole visible
       // band at night) go transparent and let the layers beneath show through.
       // Scaled so the brightest pixel still tops out at the previous flat value.
-      px[pi + 3] = (g * SAT_MAX_ALPHA) / 255;
+      px[pi + 3] = (g * alphaCap) / 255;
     } else {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
     }
@@ -413,7 +417,8 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest);
   if (!buf) return null;
-  return decodeTif(buf, shouldInvertChannel(channel));
+  const alphaCap = channel in BACKEND_TEST_COMPOSITE_CHANNEL ? 255 : SAT_MAX_ALPHA;
+  return decodeTif(buf, shouldInvertChannel(channel), alphaCap);
 }
 
 export function applyTifLayerToMap(
@@ -461,7 +466,7 @@ export function applyTifLayerToMap(
         // every frame — which matters once a composite stacks several of them.
         layout: { visibility: "none" },
         paint: {
-          "raster-opacity": SAT_OPACITY,
+          "raster-opacity": channel in BACKEND_TEST_COMPOSITE_CHANNEL ? 0.9 : SAT_OPACITY,
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
           "raster-fade-duration": 0
