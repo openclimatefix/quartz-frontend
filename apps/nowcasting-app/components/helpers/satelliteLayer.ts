@@ -1,6 +1,9 @@
 import { fromArrayBuffer } from "geotiff";
 
 export const SATELLITE_CHANNELS = [
+  "COMPOSITE_VISIBLE",
+  "COMPOSITE_INFRARED",
+  "COMPOSITE_BLUE",
   "VIS006",
   "VIS008",
   "IR_016",
@@ -15,85 +18,7 @@ export const SATELLITE_CHANNELS = [
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
-// SEVIRI channels grouped by how they sense. IR_016 (1.6um) is near-IR and
-// *reflective* despite the "IR_" prefix, so it groups with the visible ones.
-//
-// STACK ORDER: every list here is ordered **bottom-most first** — the last entry
-// renders on top. This matters a lot, because each layer only contributes about
-// 0.42 effective alpha (texture alpha 180/255 x raster-opacity 0.6), so five
-// layers above something leave only (1-0.42)^5 ~= 7% of it visible. Anything
-// buried is effectively gone, and the stack averages out to flat grey. So the
-// crisp, high-contrast bands go last, and the flat ones go underneath.
-export const REFLECTIVE_CHANNELS: SatelliteChannel[] = [
-  "IR_016", // near-IR, useful for ice/water cloud discrimination
-  "VIS008",
-  "VIS006" // the classic visible band, most interpretable — keep it on top
-];
-
-// The "true" emissive IR channels. The API already inverts these before saving,
-// so they arrive with cold cloud tops bright and need no client-side flip.
-export const THERMAL_CHANNELS: SatelliteChannel[] = [
-  "IR_134",
-  "IR_097",
-  "IR_120",
-  "IR_087",
-  "IR_108" // the standard atmospheric window channel, most informative thermal
-];
-
-// Also emissive, and likewise already inverted API-side.
-export const WATER_VAPOUR_CHANNELS: SatelliteChannel[] = ["WV_073", "WV_062"];
-
-// IR_039 (3.9um) carries both reflected solar and emitted thermal signal, so the
-// two partly cancel in daylight. That makes it washed out, and makes its polarity
-// behave unlike the true IR channels the API inverts. Its genuine uses (night fog
-// / low cloud via the 3.9-10.8 difference, hotspot detection) aren't served by a
-// brightness composite, so it stays out of the composites and is offered only as
-// a single channel.
-export const MIXED_CHANNELS: SatelliteChannel[] = ["IR_039"];
-
-// Only IR_039 needs a client-side flip, to line it up with the API-inverted
-// channels when viewed on its own.
-//
-// TEMPORARY: this belongs in the API, done client-side only to try the composites.
-const INVERTED_CHANNELS: SatelliteChannel[] = [...MIXED_CHANNELS];
-
-export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
-  INVERTED_CHANNELS.includes(ch);
-
-// Selections that overlay several same-family channels into one combined view.
-// Keys are stored in global state, so renaming one invalidates a user's saved
-// selection — labels are free to change, keys are not. (A full visible+IR
-// composite was tried and dropped: greyscale-averaging reflective and thermal
-// bands muddied both and lost the per-band nuance, for little gain in a
-// daytime-centric solar app.)
-//
-// Labels name the bands they stack, matching how the single channels below are
-// listed. "Blue" was the odd one out — it described neither the instrument nor
-// the output, so it reads as Water Vapour instead.
-export const COMPOSITE_SELECTIONS = {
-  COMPOSITE_VISIBLE: { label: "Visible Composite", channels: REFLECTIVE_CHANNELS },
-  COMPOSITE_INFRARED: { label: "Infrared Composite", channels: THERMAL_CHANNELS },
-  COMPOSITE_BLUE: { label: "Water Vapour Composite", channels: WATER_VAPOUR_CHANNELS }
-};
-
-export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
-export type ChannelSelection = SatelliteChannel | CompositeSelection;
-
-// Default selection: the visible composite — the most legible view in daylight,
-// the hours that matter for solar. (It is dark at night, when the reflective
-// bands see no sunlight; acceptable since generation is zero then.)
-export const DEFAULT_CHANNEL_SELECTION: CompositeSelection = "COMPOSITE_VISIBLE";
-
-// Resolve a dropdown selection to the actual channels to render.
-export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] =>
-  sel in COMPOSITE_SELECTIONS
-    ? COMPOSITE_SELECTIONS[sel as CompositeSelection].channels
-    : [sel as SatelliteChannel];
-
-// Widest composite, used to size the tif cache so a full selection still fits.
-export const MAX_COMPOSITE_CHANNELS = Math.max(
-  ...Object.values(COMPOSITE_SELECTIONS).map((c) => c.channels.length)
-);
+export const isCompositeChannel = (ch: SatelliteChannel): boolean => ch.startsWith("COMPOSITE_");
 
 export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   VIS006: "Visible 0.6µm",
@@ -106,7 +31,10 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_120: "Infrared 12.0µm",
   IR_134: "Infrared 13.4µm",
   WV_062: "Water Vapour 6.2µm",
-  WV_073: "Water Vapour 7.3µm"
+  WV_073: "Water Vapour 7.3µm",
+  COMPOSITE_VISIBLE: "Visible Composite",
+  COMPOSITE_INFRARED: "Infrared Composite",
+  COMPOSITE_BLUE: "Water Vapour Composite" // API's "Blue" channel is water vapour
 };
 
 export type TifLayerData = {
@@ -117,26 +45,17 @@ export type TifLayerData = {
 const API_PREFIX =
   process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
 
-// One layer/source per channel, so a composite can stack them. Kept here rather
-// than in map.tsx so the ids have a single home.
 export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
 const SAT_OPACITY = 0.6;
 const SAT_TEXTURE_SIZE = 512;
-// Alpha of the brightest pixel in a decoded texture. Everything darker scales
-// down from here, so the effective ceiling matches the old flat value.
+// Ceiling alpha for the brightest pixel; darker pixels scale down from here.
 const SAT_MAX_ALPHA = 180;
-// Encoding for the cached texture. WebP is much smaller than PNG and preserves
-// alpha; quality is a lossy/size trade — raise toward 1 if artefacts show. (Size
-// is largely alpha-bound, and WebP stores alpha losslessly, so quality has little
-// effect here — kept high for free colour fidelity.)
-const SAT_IMAGE_TYPE = "image/webp";
+const SAT_IMAGE_TYPE = "image/webp"; // smaller than PNG, keeps alpha
 const SAT_IMAGE_QUALITY = 0.9;
 
-// Per-map, per-layer counter, so a slow texture swap can't clobber a newer one on
-// the same layer. Must be per-layer: with a single counter, stacking N channels
-// means only the last one applied would pass the token check.
+// Per-layer counter so a slow texture swap can't clobber a newer one.
 const swapTokenByMap = new WeakMap<mapboxgl.Map, Map<string, number>>();
 
 function nextSwapToken(map: mapboxgl.Map, layerId: string): number {
@@ -161,11 +80,7 @@ function mercToWgs84(x: number, y: number): [number, number] {
   return [lon, lat];
 }
 
-// /api/get_token is an Auth0 session round-trip on the Next server, not a cheap
-// read, and every channel fetch used to pay for its own. A composite with the
-// +/-1 prefetch meant ~15 of them per timestep, each one sitting in front of its
-// tif request. Share one token instead. The TTL is far shorter than the token's
-// own lifetime, so this only collapses the burst — it can't serve a stale token.
+// Share one auth token across concurrent fetches instead of round-tripping per request.
 const TOKEN_TTL_MS = 60_000;
 let tokenPromise: Promise<string> | null = null;
 let tokenFetchedAt = 0;
@@ -181,9 +96,7 @@ async function getToken(): Promise<string> {
     return data.accessToken as string;
   })();
 
-  // Never cache a rejection: drop it so the next caller retries, rather than
-  // replaying one failed auth call for the rest of the TTL. The caller still
-  // sees this rejection — clearing the cache doesn't swallow it.
+  // Never cache a rejection, so the next caller retries instead of reusing it.
   const pending = tokenPromise;
   pending.catch(() => {
     if (tokenPromise === pending) tokenPromise = null;
@@ -192,12 +105,7 @@ async function getToken(): Promise<string> {
   return pending;
 }
 
-// Cap concurrent satellite requests. A composite fetches one tif per channel and
-// the +/-1 prefetch triples that, so an uncapped selection can put ~15 requests
-// in flight — enough to trip the API's rate limit and drop the whole batch into
-// the 429 backoff path below, which is slower than simply queuing in the first
-// place. The visible frame is always requested before the prefetches (see
-// map.tsx), so it takes the slots first and can't be starved by speculative work.
+// Cap concurrent requests so scrubbing quickly doesn't trip the API's rate limit.
 const MAX_CONCURRENT_SAT_REQUESTS = 4;
 
 let activeRequests = 0;
@@ -212,8 +120,7 @@ function acquireRequestSlot(): Promise<void> {
 }
 
 function releaseRequestSlot(): void {
-  // Hand the slot directly to the next waiter rather than decrementing, so a
-  // queued request can't have it stolen by a newly-arriving one.
+  // Hand the slot directly to the next waiter so it can't be stolen.
   const next = waitingForSlot.shift();
   if (next) next();
   else activeRequests--;
@@ -224,8 +131,7 @@ export async function fetchSatelliteTif(
   timestamp: string,
   latest = false
 ): Promise<ArrayBuffer | null> {
-  // The slot is held across the 429 retries too: a rate limit means the API is
-  // already saturated, so keeping the queue closed is the useful backpressure.
+  // Held across 429 retries too — that's the useful backpressure.
   await acquireRequestSlot();
   try {
     return await requestSatelliteTif(channel, timestamp, latest);
@@ -234,11 +140,43 @@ export async function fetchSatelliteTif(
   }
 }
 
+// Presigned URLs warmed from GET /satellite/history, keyed by `channel|timestamp`.
+const presignedUrlCache = new Map<string, string>();
+
+// Warm the cache for `channel` between startISO and endISO in one request.
+export async function warmPresignedUrlHistory(
+  channel: SatelliteChannel,
+  startISO: string,
+  endISO: string
+): Promise<void> {
+  const token = await getToken();
+  const url = `${API_PREFIX}/satellite/history?channel=${encodeURIComponent(
+    channel
+  )}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return;
+  const entries: { timestamp: string; url: string }[] = await res.json();
+  // Normalise to "Z"-suffixed ISO to match keys used elsewhere.
+  entries.forEach((e) =>
+    presignedUrlCache.set(`${channel}|${new Date(e.timestamp).toISOString()}`, e.url)
+  );
+}
+
 async function requestSatelliteTif(
   channel: SatelliteChannel,
   timestamp: string,
   latest: boolean
 ): Promise<ArrayBuffer | null> {
+  const cacheKey = `${channel}|${timestamp}`;
+  const cachedUrl = !latest ? presignedUrlCache.get(cacheKey) : undefined;
+  if (cachedUrl) {
+    const s3Res = await fetch(cachedUrl);
+    if (s3Res.ok) return s3Res.arrayBuffer();
+    if (s3Res.status === 404) return null;
+    // Stale despite being warmed — drop it and fall through to a fresh request.
+    presignedUrlCache.delete(cacheKey);
+  }
+
   const token = await getToken();
   const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
     channel
@@ -266,6 +204,7 @@ async function requestSatelliteTif(
     const contentType = apiRes.headers.get("content-type") || "";
     if (contentType.includes("application/json")) {
       const { url } = await apiRes.json();
+      if (!latest) presignedUrlCache.set(cacheKey, url);
       const s3Res = await fetch(url);
       if (s3Res.status === 404) return null;
       if (!s3Res.ok) throw new Error(`S3 fetch failed: ${s3Res.status}`);
@@ -276,7 +215,7 @@ async function requestSatelliteTif(
   return null;
 }
 
-export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLayerData> {
+export async function decodeTif(buf: ArrayBuffer): Promise<TifLayerData> {
   const tiff = await fromArrayBuffer(buf);
   const image = await tiff.getImage();
   const width = image.getWidth();
@@ -323,16 +262,11 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
     const pi = i * 4;
     const v = band[i];
     if (isFinite(v)) {
-      const stretched = Math.max(0, Math.min(255, (v - minVal) * scale));
-      const g = invert ? 255 - stretched : stretched;
+      const g = Math.max(0, Math.min(255, (v - minVal) * scale));
       px[pi] = g;
       px[pi + 1] = g;
       px[pi + 2] = g;
-      // Alpha tracks brightness rather than being flat, which turns a stack from
-      // "average everything" into roughly "brightest wins": bright cloud stays
-      // opaque and dominates, while dark pixels (clear sky, and the whole visible
-      // band at night) go transparent and let the layers beneath show through.
-      // Scaled so the brightest pixel still tops out at the previous flat value.
+      // Alpha tracks brightness: dark pixels go transparent, bright cloud stays opaque.
       px[pi + 3] = (g * SAT_MAX_ALPHA) / 255;
     } else {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
@@ -345,9 +279,7 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
   outCanvas.height = SAT_TEXTURE_SIZE;
   const outCtx = outCanvas.getContext("2d")!;
   outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, SAT_TEXTURE_SIZE, SAT_TEXTURE_SIZE);
-  // WebP keeps the alpha channel (unlike JPEG) but compresses far better than the
-  // default PNG (~4x smaller here), so each cached entry is a fraction of the size.
-  // Falls back to the browser default if WebP isn't supported (a PNG data URL).
+  // WebP: keeps alpha, ~4x smaller than PNG.
   const imageDataUrl = outCanvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
   return { imageDataUrl, bounds: [minLon, minLat, maxLon, maxLat] };
 }
@@ -359,7 +291,7 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest);
   if (!buf) return null;
-  return decodeTif(buf, shouldInvertChannel(channel));
+  return decodeTif(buf);
 }
 
 export function applyTifLayerToMap(
@@ -402,12 +334,10 @@ export function applyTifLayerToMap(
         id: layerId,
         type: "raster",
         source: sourceId,
-        // Hidden layers use layout visibility rather than zero opacity: Mapbox
-        // skips a "none" layer entirely, whereas an opacity-0 layer is still drawn
-        // every frame — which matters once a composite stacks several of them.
+        // Layout visibility, not zero opacity: Mapbox skips a "none" layer entirely.
         layout: { visibility: "none" },
         paint: {
-          "raster-opacity": SAT_OPACITY,
+          "raster-opacity": isCompositeChannel(channel) ? 0.9 : SAT_OPACITY,
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
           "raster-fade-duration": 0
@@ -434,27 +364,7 @@ export function setSatelliteLayerVisibility(
   }
 }
 
-// Show exactly the channels in `visible`, hiding every other satellite layer.
-export function setVisibleSatelliteChannels(map: mapboxgl.Map, visible: SatelliteChannel[]): void {
-  const visibleSet = new Set(visible);
-  SATELLITE_CHANNELS.forEach((ch) => setSatelliteLayerVisibility(map, visibleSet.has(ch), ch));
-}
-
-// Restack the given channels, bottom-most first. Layers are created lazily — the
-// first time a composite containing them is selected — so creation order depends
-// on which selections the user happened to visit and can't be relied on. Moving
-// each layer in turn to just below the anchor reproduces the intended order
-// exactly, whatever the history. Cheap: a style reorder over at most a few layers.
-export function orderSatelliteLayers(
-  map: mapboxgl.Map,
-  channels: SatelliteChannel[],
-  beforeId?: string
-): void {
-  // A missing anchor means "move to the top of the stack", which still gives the
-  // right relative order when iterating bottom-most first.
-  const anchor = beforeId && map.getLayer(beforeId) ? beforeId : undefined;
-  channels.forEach((ch) => {
-    const layerId = satLayerId(ch);
-    if (map.getLayer(layerId)) map.moveLayer(layerId, anchor);
-  });
+// Show exactly `channel`, hiding the rest. Pass undefined to hide all.
+export function setVisibleSatelliteChannels(map: mapboxgl.Map, channel?: SatelliteChannel): void {
+  SATELLITE_CHANNELS.forEach((ch) => setSatelliteLayerVisibility(map, ch === channel, ch));
 }

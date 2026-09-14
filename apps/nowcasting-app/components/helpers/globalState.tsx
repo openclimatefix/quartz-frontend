@@ -14,7 +14,7 @@ import {
 import { LoadingState, NationalEndpointStates, SitesEndpointStates } from "../types";
 import { ActiveUnit, NationalAggregation } from "../map/types";
 import { DateTime } from "luxon";
-import type { ChannelSelection } from "./satelliteLayer";
+import type { SatelliteChannel } from "./satelliteLayer";
 
 export function get30MinNow(offsetMinutes = 0) {
   // this is a function to get the date of now, but rounded up to the closest 30 minutes
@@ -91,7 +91,7 @@ export type GlobalStateType = {
   nationalAggregationLevel: NationalAggregation;
   pLevels: [number, number][];
   showCloudLayer: boolean;
-  activeChannel: ChannelSelection;
+  activeChannel: SatelliteChannel;
   showPvLayer: boolean;
 };
 

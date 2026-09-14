@@ -17,15 +17,12 @@ import {
   SATELLITE_CHANNELS,
   SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
-  ChannelSelection,
-  COMPOSITE_SELECTIONS,
-  MAX_COMPOSITE_CHANNELS,
-  channelsForSelection,
   TifLayerData,
   fetchAndDecodeSatelliteTif,
   applyTifLayerToMap,
   setVisibleSatelliteChannels,
-  orderSatelliteLayers
+  warmPresignedUrlHistory,
+  isCompositeChannel
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
 
@@ -52,23 +49,14 @@ const SAT_BELOW_LAYER_IDS = [...PV_LAYER_IDS, "boundary-data"];
 const getSatelliteBeforeId = (m: mapboxgl.Map): string | undefined =>
   SAT_BELOW_LAYER_IDS.find((id) => m.getLayer(id));
 
-// Prefetch one timestep either side — enough to keep single-step scrubbing and
-// the play button smooth, without front-loading speculative frames the forecast
-// latency would mask anyway.
+// Prefetch one timestep either side, for smooth scrubbing.
 const PREFETCH_STEPS = 1;
 
-// How often to re-pull the latest frame while parked on "now". SEVIRI lands
-// roughly every 5 minutes, so polling faster mostly re-decodes an image we
-// already have.
+// SEVIRI lands roughly every 5 minutes.
 const LATEST_REFRESH_MS = 5 * 60 * 1000;
 
-// Retain roughly this many distinct timesteps of scrub history. A selection costs
-// up to MAX_COMPOSITE_CHANNELS entries per timestep, so the cache is sized to fit.
-// (QuickLRU keeps up to 2x maxSize resident, and the cache is cleared when the
-// cloud layer is switched off — see the showCloudLayer effect.) Kept modest as
-// each decoded entry is ~0.5MB and this runs on always-on wallboards.
-const CACHE_TIMESTEPS = 6;
-const TIF_CACHE_SIZE = MAX_COMPOSITE_CHANNELS * CACHE_TIMESTEPS;
+// Timesteps of scrub history to retain (QuickLRU keeps up to 2x this resident).
+const TIF_CACHE_SIZE = 6;
 
 const setAggregationLevelByCurrentZoom = (
   currentZoom: number,
@@ -134,10 +122,9 @@ const Map: FC<IMap> = ({
   const [satelliteError, setSatelliteError] = useState<string | null>(null);
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
-  // Show the selected channel(s) and hide the rest. A composite selection resolves
-  // to several channels, each with its own layer, so they stack.
+  // Show the selected channel and hide the rest.
   const applySatelliteVisibility = (m: mapboxgl.Map, visible: boolean) => {
-    setVisibleSatelliteChannels(m, visible ? channelsForSelection(channelRef.current) : []);
+    setVisibleSatelliteChannels(m, visible ? channelRef.current : undefined);
   };
 
   useEffect(() => {
@@ -145,10 +132,7 @@ const Map: FC<IMap> = ({
     if (!map.current) return;
     applySatelliteVisibility(map.current, showCloudLayer);
     if (!showCloudLayer) {
-      // Drop the scrub-ahead cache when the layer is switched off — the visible
-      // frame stays on its (now hidden) map layer, so re-enabling is still instant,
-      // but we stop holding decoded frames a user has chosen not to see. Reset the
-      // keys so re-enabling re-applies the currently-selected timestep afresh.
+      // Drop the scrub-ahead cache when the layer is switched off.
       tifCache.current.clear();
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
@@ -171,8 +155,7 @@ const Map: FC<IMap> = ({
   const satelliteTimestampFor = (ts: string) => addMinutesToISODate(ts, -15);
   const isFutureTimestamp = (ts: string) => new Date(ts).getTime() > Date.now();
 
-  // Doubles as the per-channel cache key and the per-selection request key.
-  const satCacheKey = (sel: ChannelSelection, ts: string) => `${sel}__${ts}`;
+  const satCacheKey = (ch: SatelliteChannel, ts: string) => `${ch}__${ts}`;
 
   const fetchIntoCache = async (
     ch: SatelliteChannel,
@@ -187,24 +170,15 @@ const Map: FC<IMap> = ({
     return data;
   };
 
-  // `silent` suppresses the spinner: used by the background refresh below, where
-  // a frame is already on screen and flashing a loader every few minutes on an
-  // always-on wallboard is just noise.
-  const applyForTimestamp = async (sel: ChannelSelection, ts: string, silent = false) => {
+  // `silent` suppresses the spinner, for the background refresh below.
+  const applyForTimestamp = async (ch: SatelliteChannel, ts: string, silent = false) => {
     if (!map.current) return;
     const setLoading = (loading: boolean) => {
       if (!silent) setIsSatelliteLoading(loading);
     };
     const satTs = satelliteTimestampFor(ts);
-    // `timeNow` and `selectedISOTime` are written by two independent 60s timers
-    // (use-time-now, mounted via ForecastHeader, and use-and-update-selected-time
-    // in pages/index) whose phase isn't locked — ForecastHeader unmounts on a view
-    // switch and restarts its timer at a fresh offset. Across a half-hour boundary
-    // that leaves a window where selectedISOTime has advanced but timeNow hasn't,
-    // and trusting `timeNow` alone would read the new slot as a future timestamp:
-    // clouds hidden behind "not yet available", healing itself a minute later.
-    // Deriving the slot directly makes this path independent of that race.
-    // Scrubbing to a genuinely future slot still fails the check, as it should.
+    // Derived directly rather than trusting `timeNow`, which can lag `selectedISOTime`
+    // across a half-hour boundary and misread the new slot as future.
     const isNow = ts === timeNow || ts === get30MinNow();
     if (!isNow && isFutureTimestamp(satTs)) {
       applySatelliteVisibility(map.current, false);
@@ -214,31 +188,21 @@ const Map: FC<IMap> = ({
       setSatelliteError("Satellite not yet available for future");
       return;
     }
-    // Key on the whole selection, since a composite applies several channels as
-    // one unit and must be superseded as one unit.
-    const key = satCacheKey(sel, satTs);
+    const key = satCacheKey(ch, satTs);
     requestedKeyRef.current = key;
     if (!isNow && currentKeyRef.current === key) {
       setLoading(false);
       return;
     }
-    const channels = channelsForSelection(sel);
     setLoading(true);
     try {
-      const results = await Promise.all(
-        channels.map(async (ch) => ({ ch, data: await fetchIntoCache(ch, satTs, isNow) }))
-      );
-      // Bail if the selection or timestamp moved on while we were fetching.
+      const data = await fetchIntoCache(ch, satTs, isNow);
+      // Bail if the channel or timestamp moved on while we were fetching.
       if (requestedKeyRef.current !== key || !map.current) return;
       currentKeyRef.current = key;
       const beforeId = getSatelliteBeforeId(map.current);
-      results.forEach(({ ch, data }) =>
-        applyTifLayerToMap(map.current!, data, ch, showCloudRef.current, beforeId)
-      );
-      // `channels` is ordered bottom-most first; enforce it explicitly since
-      // lazily-created layers won't be in the right order on their own.
-      orderSatelliteLayers(map.current, channels, beforeId);
-      setSatelliteError(results.some((r) => r.data) ? null : "Satellite unavailable for this time");
+      applyTifLayerToMap(map.current!, data, ch, showCloudRef.current, beforeId);
+      setSatelliteError(data ? null : "Satellite unavailable for this time");
     } catch (err) {
       Sentry.captureException(err, {
         tags: { error: "satellite tif fetch/decode failed" }
@@ -251,37 +215,24 @@ const Map: FC<IMap> = ({
     }
   };
 
-  // One effect owns all satellite loading. It used to be two — one keyed on
-  // selectedISOTime, one on timeNow — but both of those change in the same commit
-  // when the half-hour rolls over, so both fired and each did a full uncached
-  // fetch/decode of every channel (the `latest` path deliberately bypasses the
-  // cache, so the second pass was not free). Folding them together makes the
-  // boundary cost exactly one pass.
+  // One effect owns all satellite loading, keyed on both selectedISOTime and
+  // timeNow so a half-hour rollover triggers exactly one fetch, not two.
   useEffect(() => {
-    // Nothing satellite-related runs until the user actually enables clouds, so a
-    // visitor who never turns the layer on pays no satellite requests at all.
     if (title !== VIEWS.FORECAST || !showCloudLayer || !isMapReady || !selectedISOTime) return;
     let cancelled = false;
     (async () => {
-      // Load the frame the user is actually looking at first, then warm the
-      // neighbours in the background — so the visible frame is never queued behind
-      // speculative prefetches.
+      // Load the visible frame first, then warm neighbours in the background.
       await applyForTimestamp(activeChannel, selectedISOTime);
       if (cancelled) return;
-      const channels = channelsForSelection(activeChannel);
       for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
         if (offset === 0) continue;
         const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
         if (isFutureTimestamp(satTs)) continue;
-        channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
+        fetchIntoCache(activeChannel, satTs).catch(() => {});
       }
     })();
 
-    // Parked on "now": poll for a fresher image. Both selectedISOTime and timeNow
-    // only advance on the half hour (get30MinNow rounds to the slot, so the string
-    // is identical in between and React bails out of the re-render), which would
-    // otherwise leave the displayed frame up to 30 minutes behind imagery that
-    // lands every ~5. Silent, so the spinner doesn't flash on a wallboard.
+    // Parked on "now": poll for fresher imagery (SEVIRI lands every ~5min, slots every 30).
     const refresh =
       selectedISOTime === timeNow
         ? setInterval(
@@ -295,6 +246,19 @@ const Map: FC<IMap> = ({
       if (refresh) clearInterval(refresh);
     };
   }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer, timeNow, title]);
+
+  // Warm the presigned-URL cache for the whole scrubbable history, once per
+  // channel selection, so scrubbing back lands on a cached URL.
+  const historyWarmedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (title !== VIEWS.FORECAST || !isMapReady) return;
+    if (historyWarmedForRef.current === activeChannel) return;
+    historyWarmedForRef.current = activeChannel;
+
+    const anchor = get30MinNow();
+    const start = addMinutesToISODate(anchor, -2880);
+    warmPresignedUrlHistory(activeChannel, start, anchor);
+  }, [activeChannel, isMapReady, title]);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
@@ -441,7 +405,7 @@ const Map: FC<IMap> = ({
             {showCloudLayer && (
               <select
                 value={activeChannel}
-                onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
+                onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
                 disabled={!!satelliteError}
                 className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
               >
@@ -450,14 +414,14 @@ const Map: FC<IMap> = ({
                 ) : (
                   <>
                     <optgroup label="Composites">
-                      {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
-                        <option key={key} value={key}>
-                          {label}
+                      {SATELLITE_CHANNELS.filter(isCompositeChannel).map((ch) => (
+                        <option key={ch} value={ch}>
+                          {SATELLITE_CHANNEL_LABELS[ch]}
                         </option>
                       ))}
                     </optgroup>
                     <optgroup label="Individual bands">
-                      {SATELLITE_CHANNELS.map((ch) => (
+                      {SATELLITE_CHANNELS.filter((ch) => !isCompositeChannel(ch)).map((ch) => (
                         <option key={ch} value={ch}>
                           {SATELLITE_CHANNEL_LABELS[ch]}
                         </option>
