@@ -12,11 +12,20 @@ export const SATELLITE_CHANNELS = [
   "IR_134",
   "WV_062",
   "WV_073",
-  "VISIBLE_COMPOSITE",
-  "INFRARED_COMPOSITE",
-  "WATER_VAPOUR_COMPOSITE"
+  "COMPOSITE_VISIBLE_TEST",
+  "COMPOSITE_INFRARED_TEST",
+  "COMPOSITE_BLUE_TEST"
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
+
+const BACKEND_TEST_COMPOSITE_CHANNEL: Partial<Record<SatelliteChannel, string>> = {
+  COMPOSITE_VISIBLE_TEST: "COMPOSITE_VISIBLE",
+  COMPOSITE_INFRARED_TEST: "COMPOSITE_INFRARED",
+  COMPOSITE_BLUE_TEST: "COMPOSITE_BLUE"
+};
+
+const apiChannelParam = (channel: SatelliteChannel): string =>
+  BACKEND_TEST_COMPOSITE_CHANNEL[channel] ?? channel;
 
 // SEVIRI channels grouped by how they sense. IR_016 (1.6um) is near-IR and
 // *reflective* despite the "IR_" prefix, so it groups with the visible ones.
@@ -110,9 +119,9 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_134: "Infrared 13.4µm",
   WV_062: "Water Vapour 6.2µm",
   WV_073: "Water Vapour 7.3µm",
-  VISIBLE_COMPOSITE: "Visible Composite - Backend Test",
-  INFRARED_COMPOSITE: "Infrared Composite - Backend Test",
-  WATER_VAPOUR_COMPOSITE: "Water Vapour Composite - Backend Test"
+  COMPOSITE_VISIBLE_TEST: "Visible Composite - Backend Test",
+  COMPOSITE_INFRARED_TEST: "Infrared Composite - Backend Test",
+  COMPOSITE_BLUE_TEST: "Water Vapour Composite - Backend Test"
 };
 
 export type TifLayerData = {
@@ -254,7 +263,7 @@ export async function warmPresignedUrlHistory(
   await Promise.all(
     channels.map(async (channel) => {
       const url = `${API_PREFIX}/satellite/history?channel=${encodeURIComponent(
-        channel
+        apiChannelParam(channel)
       )}&start=${encodeURIComponent(startISO)}&end=${encodeURIComponent(endISO)}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) return;
@@ -285,7 +294,7 @@ async function requestSatelliteTif(
 
   const token = await getToken();
   const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
-    channel
+    apiChannelParam(channel)
   )}&timestamp=${encodeURIComponent(timestamp)}${latest ? "&latest=true" : ""}`;
 
   const maxRetries = 5;
