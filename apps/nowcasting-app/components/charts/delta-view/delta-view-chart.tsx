@@ -32,7 +32,7 @@ import type { Scope } from "../../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
 import { GENERATION_CHART_KEYS } from "../pv-remix-chart";
 import ChartScrubber from "../../shell/chart-scrubber";
-import { usePlottedDomain } from "../plotted-domain";
+import { plottedKeyRange, usePlottedDomain } from "../plotted-domain";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
@@ -278,6 +278,14 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   // a no-op for whole-hour offsets and the reason it never misbehaved, but it rounded on the
   // wrong clock and at a hardcoded half hour. `slotForInstant` is the same answer stated once.
   const selectedTimeSlot = slotForInstant(selectedTime, focusedCountry);
+  // The same slot in the chart's own key spelling. Everything compared against or drawn on the
+  // x axis uses this, as `pv-remix-chart` does; `selectedTime` is the raw cursor, which on a
+  // period-end country (GB) is a slot before its label, and only `useGspDeltas` wants it, since
+  // it resolves the slot itself.
+  const selectedLabel = formatISODateString(selectedTimeSlot);
+  // The latest-delta slot is a label; the cursor is an instant, so write the label's period.
+  const cursorForLabel = (label: string) =>
+    periodForLabel(`${label}:00.000Z`, focusedCountry).start;
 
   // `timeNow` is a cursor value — a period start under the one shared rule — while the chart's
   // x axis is keyed on this country's own labels. Resolve it the same way the cursor is, or the
@@ -357,7 +365,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     forecastSeries: forecast.data,
     nHourSeries: nHour.data,
     generationSeries,
-    timeTrigger: selectedTime,
+    timeTrigger: selectedLabel,
     delta: true
   });
 
@@ -390,14 +398,19 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   // effect could fire on, and dropped rather than swapped for an equivalent check.
   // Range, not exact slot — see the same effect in `pv-remix-chart.tsx`. The cursor steps on
   // the finest enabled country's grid, so requiring an exact match here fought the scrubber.
+  //
+  // Earliest and latest, not `chartData[0]` and `chartData[n - 1]`: the array is not sorted, so
+  // position 0 is not the chart's start. See `plotted-domain.ts`.
   useEffect(() => {
-    if (!chartData?.length) return;
-    const first = (chartData[0] as any).formattedDate;
-    const last = (chartData[chartData.length - 1] as any).formattedDate;
-    if (!selectedTime || selectedTime < first || selectedTime > last) {
-      setSelectedISOTime(latestSlotWithDelta ?? getCursorNow());
+    const keys = plottedKeyRange(chartData);
+    if (!keys) return;
+    if (selectedLabel < keys.earliest || selectedLabel > keys.latest) {
+      setSelectedISOTime(
+        latestSlotWithDelta ? cursorForLabel(latestSlotWithDelta) : getCursorNow()
+      );
     }
-  }, [chartData, selectedTime, setSelectedISOTime, latestSlotWithDelta]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData, selectedLabel, setSelectedISOTime, latestSlotWithDelta]);
 
   /**
    * Land the cursor somewhere the delta view can actually show something — once.
@@ -413,11 +426,12 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   useEffect(() => {
     if (landedRef.current || !chartData?.length) return;
     landedRef.current = true;
-    const current = chartData.find((d: any) => d.formattedDate === selectedTime);
+    const current = chartData.find((d: any) => d.formattedDate === selectedLabel);
     if (current && (current as any).DELTA === undefined && latestSlotWithDelta) {
-      setSelectedISOTime(latestSlotWithDelta);
+      setSelectedISOTime(cursorForLabel(latestSlotWithDelta));
     }
-  }, [chartData, selectedTime, setSelectedISOTime, latestSlotWithDelta]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartData, selectedLabel, setSelectedISOTime, latestSlotWithDelta]);
 
   const hasError = [forecast, ...generationResults, nHour].some((result) => !!result.error);
   // The single-observer generalisation from Track B: a country with one observer waits for
@@ -471,7 +485,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             <RemixLine
               resetTime={resetTime}
               timeNow={liveSlot}
-              timeOfInterest={selectedTime}
+              timeOfInterest={selectedLabel}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
               yMax={yMax}
@@ -493,7 +507,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
                 setSelectedMapRegionIds([]);
               }}
               setTimeOfInterest={setSelectedTime}
-              selectedTime={selectedTime}
+              selectedTime={selectedLabel}
               selectedRegions={selectedRegions}
               timeNow={liveSlot}
               resetTime={resetTime}
