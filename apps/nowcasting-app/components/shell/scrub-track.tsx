@@ -14,6 +14,7 @@ import {
 import { DEFAULT_LOCALE, formatISODateStringAsZonedTime } from "../helpers/utils";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import useCursorRange from "./use-cursor-range";
+import ZoomFrame from "./zoom-frame";
 import {
   clampToScale,
   fractionForClientX,
@@ -362,6 +363,15 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
     setSelectedISOTime(instant);
   };
 
+  /** A click that another control inside the track handed back: set the cursor there. */
+  const selectAt = (clientX: number) => {
+    const instant = instantAt(clientX);
+    if (instant === null) return;
+    beginUserInput();
+    cancelPendingCommit();
+    setSelectedISOTime(instant);
+  };
+
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!draggingRef.current) return;
     const instant = instantAt(event.clientX);
@@ -601,6 +611,14 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
               />
             ))}
           </div>
+          {/* Layer 3d: the chart's zoom window, when it has one. Above the ground, under the
+              handle and NOW. */}
+          <ZoomFrame
+            scale={scale}
+            trackRef={trackRef}
+            cursorFraction={cursorFraction}
+            onSelectAt={selectAt}
+          />
           {/* Layer 4: the handle. */}
           <div
             // Wider, rounded and ringed rather than a hairline rule: it is a control, and it was
@@ -656,7 +674,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
             dimmed while adrift — which is also the only honest reading of the mode. */}
           {nowFraction !== null && (
             <div
-              className="absolute top-0 h-full w-px bg-content"
+              className="absolute top-0 z-[15] h-full w-px bg-content"
               style={{ left: `${nowFraction * 100}%` }}
             >
               {/* Only while adrift. The label is a *destination* — "there is a place to get back
