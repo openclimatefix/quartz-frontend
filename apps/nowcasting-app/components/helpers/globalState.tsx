@@ -50,6 +50,18 @@ export function getNext30MinSlot(isoTime: Date) {
   return isoTime;
 }
 
+// GB forecasts and PV Live actuals are labelled with the *end* of the settlement period, whereas
+// NL is start-of-period on a 15-minute grain. A selected time that falls inside a GB settlement
+// period (e.g. 10:15 or 10:45) therefore belongs to the period ending after it, so round up.
+export function roundISOTimeUpTo30Min(isoTime: string) {
+  const date = DateTime.fromISO(isoTime, { zone: "utc" });
+  if (!date.isValid) return isoTime;
+
+  const flooredDate = date.startOf("minute").set({ minute: Math.floor(date.minute / 30) * 30 });
+  const roundedDate = date.equals(flooredDate) ? flooredDate : flooredDate.plus({ minutes: 30 });
+  return roundedDate.toISO() as string;
+}
+
 export type GlobalStateType = {
   activeUnit: ActiveUnit;
   selectedISOTime: string;

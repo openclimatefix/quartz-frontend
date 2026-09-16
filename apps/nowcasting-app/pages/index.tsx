@@ -12,7 +12,11 @@ import Cookies from "cookies";
 import Header from "../components/layout/header";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import { API_PREFIX, DELTA_BUCKET, SITES_API_PREFIX, V1_API_PREFIX, VIEWS } from "../constant";
-import useGlobalState, { get30MinNow, setGlobalState } from "../components/helpers/globalState";
+import useGlobalState, {
+  get30MinNow,
+  roundISOTimeUpTo30Min,
+  setGlobalState
+} from "../components/helpers/globalState";
 import {
   AllGspRealData,
   AllSites,
@@ -101,7 +105,9 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
   const [showNHourView] = useGlobalState("showNHourView");
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const selectedTime = String(DateTime.fromISO(selectedISOTime).toUTC().toISO()).slice(0, 16);
+  // GB data is only ever on 30-minute settlement periods, so a selection made on the NL 15-minute
+  // grain (:15/:45) is snapped up to the period it falls inside. No-op when GB is selected.
+  const selectedTime = roundISOTimeUpTo30Min(selectedISOTime).slice(0, 16);
   const [timeNow] = useGlobalState("timeNow");
   const { user, isLoading, error } = useUser();
   const [maps] = useGlobalState("maps");

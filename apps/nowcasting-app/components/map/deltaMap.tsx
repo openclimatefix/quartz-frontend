@@ -7,7 +7,7 @@ import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, SelectedData } from "./types";
 import { DELTA_BUCKET, VIEWS } from "../../constant";
 import gspShapeData from "../../data/gsp_regions_20220314.json";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { roundISOTimeUpTo30Min } from "../helpers/globalState";
 import { formatISODateString, formatISODateStringHuman } from "../helpers/utils";
 import {
   AllGspRealData,
@@ -57,16 +57,28 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
   const forecastError = combinedErrors?.allGspForecastError;
 
+  // GB forecasts only exist on 30-minute settlement periods; snap up so a time picked on the NL
+  // 15-minute grain still resolves to the GB period containing it.
+  const gbSelectedISOTime = useMemo(
+    () => roundISOTimeUpTo30Min(selectedISOTime),
+    [selectedISOTime]
+  );
+
   const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(initForecastData, selectedISOTime, combinedData, gspDeltas);
-  }, [initForecastData, selectedISOTime, combinedData, gspDeltas]);
+    return generateGeoJsonForecastData(
+      initForecastData,
+      gbSelectedISOTime,
+      combinedData,
+      gspDeltas
+    );
+  }, [initForecastData, gbSelectedISOTime, combinedData, gspDeltas]);
 
   const updateMapData = (map: mapboxgl.Map) => {
     const source = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
     if (!source) {
       const { forecastGeoJson } = generateGeoJsonForecastData(
         initForecastData,
-        selectedISOTime,
+        gbSelectedISOTime,
         combinedData,
         gspDeltas,
         nationalAggregationLevel
@@ -145,7 +157,7 @@ const DeltaMap: React.FC<DeltaMapProps> = ({
     if (!source) {
       const { forecastGeoJson } = generateGeoJsonForecastData(
         initForecastData,
-        selectedISOTime,
+        gbSelectedISOTime,
         combinedData,
         gspDeltas,
         nationalAggregationLevel

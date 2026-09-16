@@ -4,7 +4,7 @@ import mapboxgl, { Expression, LngLatLike } from "mapbox-gl";
 import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
 import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
 import { MAX_POWER_GENERATED, V1_API_PREFIX, VIEWS } from "../../constant";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { roundISOTimeUpTo30Min } from "../helpers/globalState";
 import { useLoadDataFromApi } from "../hooks/useLoadDataFromApi";
 import { V1ForecastSnapshot } from "../types";
 import { formatISODateStringHuman } from "../helpers/utils";
@@ -73,6 +73,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       keepPreviousData: true
     }
   );
+  // The NL province shapes are always present, so a feature count says nothing about whether a
+  // snapshot arrived — only the snapshot itself does.
+  const nlSnapshotHasData = !!nlForecastSnapshot?.values?.length;
 
   const showConstraintsRef = useRef(showConstraints);
   useEffect(() => {
@@ -209,10 +212,17 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         ]
       : ["interpolate", ["linear"], ["to-number", ["get", selectedData]], 0, 0, 5000, 1];
 
+  // GB forecasts only exist on 30-minute settlement periods; snap up so a time picked on the NL
+  // 15-minute grain still resolves to the GB period containing it.
+  const gbSelectedISOTime = useMemo(
+    () => roundISOTimeUpTo30Min(selectedISOTime),
+    [selectedISOTime]
+  );
+
   const generatedGeoJsonForecastData = useMemo(() => {
     return generateGeoJsonForecastData(
       initForecastData,
-      selectedISOTime,
+      gbSelectedISOTime,
       combinedData,
       undefined,
       nationalAggregationLevel
@@ -221,7 +231,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     combinedData.allGspForecastData,
     combinedLoading.allGspForecastLoading,
     combinedValidating.allGspForecastValidating,
-    selectedISOTime,
+    gbSelectedISOTime,
     combinedData.allGspSystemData,
     nationalAggregationLevel
   ]);
@@ -233,6 +243,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !generatedNetherlandsGeoJsonForecastData) return;
+    // Without a snapshot the generated data is every province at 0 MW, which would blank the map.
+    if (!nlSnapshotHasData) return;
     const nlSource = map.getSource("nlSource") as unknown as mapboxgl.GeoJSONSource;
     if (!nlSource) return;
     const selectedDataName = getActiveUnitFromMap(map);
@@ -243,7 +255,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       "fill-opacity",
       getNLFillOpacity(selectedDataName, isNormalized)
     );
-  }, [generatedNetherlandsGeoJsonForecastData]);
+  }, [generatedNetherlandsGeoJsonForecastData, nlSnapshotHasData]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -273,11 +285,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
       typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
         ?.expectedPowerGenerationMegawatts === "number";
-    if (!geoJsonHasData) {
+    // The NL sources and layers are created further down this function, so bailing out on missing
+    // GB data would leave the NL map unrendered as well. Only wait if neither country has data.
+    if (!geoJsonHasData && !nlSnapshotHasData) {
       console.log("geoJsonForecastData empty, trying again...");
       setShouldUpdateMap(true);
       return;
     }
+    // Carry on to build the NL layers, but don't re-arm the retry: the effect above already runs
+    // this again when the GB forecast data arrives, and re-arming here spins the map update.
     setShouldUpdateMap(false);
 
     //////////////////////////
@@ -292,10 +308,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         data: forecastGeoJson,
         promoteId: "id"
       });
-    } else {
+    } else if (geoJsonHasData) {
+      // Only write when there is something to write, so a run triggered by NL doesn't blank the
+      // GB map while its forecast is still loading.
       forecastSource.setData(generatedGeoJsonForecastData.forecastGeoJson);
     }
-    console.log("latestPV source set");
 
     const nlSource = map.getSource("nlSource") as unknown as mapboxgl.GeoJSONSource;
     if (!nlSource) {
@@ -419,18 +436,22 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       });
 
       map.on("data", (e) => {
-        if (e.dataType === "source" && e.sourceId === "latestPV" && e.isSourceLoaded) {
+        if (
+          e.dataType === "source" &&
+          (e.sourceId === "latestPV" || e.sourceId === "nlSource") &&
+          e.isSourceLoaded
+        ) {
           setMapDataLoading(false);
         }
       });
 
       map.on("sourcedata", (e) => {
-        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
+        if ((e.sourceId === "latestPV" || e.sourceId === "nlSource") && e.isSourceLoaded) {
           setMapDataLoading(false);
         }
       });
     } else {
-      if (generatedGeoJsonForecastData && forecastSource) {
+      if (generatedGeoJsonForecastData && forecastSource && geoJsonHasData) {
         const currentActiveUnit = getActiveUnitFromMap(map);
         const isNormalized = currentActiveUnit === ActiveUnit.percentage;
         forecastSource?.setData(generatedGeoJsonForecastData.forecastGeoJson);
@@ -529,7 +550,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
         popup.remove();
       });
     } else {
-      if (generatedNetherlandsGeoJsonForecastData && nlSource) {
+      if (generatedNetherlandsGeoJsonForecastData && nlSource && nlSnapshotHasData) {
         const currentActiveUnit = getActiveUnitFromMap(map);
         const isNormalized = currentActiveUnit === ActiveUnit.percentage;
         nlSource.setData(generatedNetherlandsGeoJsonForecastData.forecastGeoJson);
@@ -696,8 +717,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     <div className={`pv-map relative h-full w-full ${className}`}>
       {
         <>
-          {(!combinedData.allGspForecastData ||
-            combinedLoading.allGspForecastLoading ||
+          {/* A GB fetch in flight shouldn't cover an NL map that already has its snapshot. */}
+          {(((!combinedData.allGspForecastData || combinedLoading.allGspForecastLoading) &&
+            !nlSnapshotHasData) ||
             mapDataLoading) && (
             <LoadStateMap>
               <Spinner />
