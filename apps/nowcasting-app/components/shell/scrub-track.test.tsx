@@ -237,11 +237,13 @@ describe("the keyboard", () => {
 
 describe("dragging — the handle's rate and the commit's rate are not the same", () => {
   // x=240 is halfway, i.e. 2026-08-11T00:00 and slot 48. From there each 5px is one slot.
+  // A pointer on a boundary is in the period that starts there, so x=250 (01:00) commits the
+  // 01:00 cursor, the 01:30 label on GB.
   test("a press commits at once, because a press is also a click", () => {
     renderTrack();
     down(250);
-    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
   });
 
   test("a run of moves commits once per frame, not once per event", () => {
@@ -249,8 +251,8 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     // Pressed at 01:00, not at the 00:00 the cursor already holds — writing a value identical
     // to the current one is free (React bails), so starting there would prove nothing.
     down(250);
-    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
 
     // Four pointer events inside one frame. This is the case that was janky: each of these
     // used to be a global write, and each global write rebuilds every enabled country's map
@@ -259,21 +261,21 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     move(270);
     move(280);
     move(300);
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z"]);
-    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
 
     // The handle, meanwhile, has been tracking the pointer the whole time.
-    expect(slider()).toHaveAttribute("aria-valuenow", "59");
+    expect(slider()).toHaveAttribute("aria-valuenow", "60");
 
     // One frame, one commit — and it carries the LATEST position, not a replay of the four.
     stepFrame();
-    expect(cursor()).toBe("2026-08-11T05:30:00.000Z");
+    expect(cursor()).toBe("2026-08-11T06:00:00.000Z");
     // Two instants reached the app for five pointer events, and neither is an intermediate.
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T05:30:00.000Z"]);
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T06:00:00.000Z"]);
 
     // No backlog left behind: a further frame has nothing to do.
     stepFrame();
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T05:30:00.000Z"]);
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T06:00:00.000Z"]);
   });
 
   test("releasing commits the final position exactly once, and it is the snapped one", () => {
@@ -287,12 +289,12 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     // Ceiling, as everywhere: 04:18 belongs to the 04:30 slot, whose period starts at 04:00. And 02:00, the intermediate the
     // pending frame was holding, never reached the app at all.
     expect(cursor()).toBe("2026-08-11T04:00:00.000Z");
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T04:00:00.000Z"]);
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T04:00:00.000Z"]);
 
     // And the frame that was pending must not fire a second, stale commit.
     stepFrame();
     expect(cursor()).toBe("2026-08-11T04:00:00.000Z");
-    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T04:00:00.000Z"]);
+    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T04:00:00.000Z"]);
   });
 
   test("the drag-local position is dropped on release, so the handle derives from state again", () => {
@@ -300,7 +302,7 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     down(240);
     move(300);
     up(300);
-    expect(slider()).toHaveAttribute("aria-valuenow", "59");
+    expect(slider()).toHaveAttribute("aria-valuenow", "60");
 
     // Nothing of the drag outlives it: another input moves the handle as it does at rest.
     act(() => setGlobalState("selectedISOTime", "2026-08-10T11:30:00.000Z"));

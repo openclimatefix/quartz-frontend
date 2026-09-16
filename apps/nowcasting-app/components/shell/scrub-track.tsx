@@ -19,7 +19,6 @@ import {
   fractionForClientX,
   fractionForInstant,
   fractionForMs,
-  instantForFraction,
   instantForSlotIndex,
   scrubScale,
   selectableLabelRange,
@@ -323,9 +322,13 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
     const current = scaleRef.current;
     const element = trackRef.current;
     if (!current || !element) return null;
-    return toCursor(
-      instantForFraction(fractionForClientX(clientX, element.getBoundingClientRect()), current)
-    );
+    // The period the pointer's instant falls in — not the label nearest it, nor the one after
+    // it, either of which lit a band beside the pointer on one country or the other. Then held
+    // to the selectable labels, as every other stop is.
+    const fraction = fractionForClientX(clientX, element.getBoundingClientRect());
+    const pointerMs = current.startMs + fraction * (current.endMs - current.startMs);
+    const label = toLabel(DateTime.fromMillis(pointerMs, { zone: "utc" }).toISO() as string);
+    return toCursor(clampToScale(label, current));
   };
 
   /**

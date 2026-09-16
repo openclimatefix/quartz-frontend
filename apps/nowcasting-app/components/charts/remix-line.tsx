@@ -349,6 +349,14 @@ const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLin
  */
 const DELTA_BAR_WIDTH_PX = 3;
 
+/** The parts of a Recharts chart mouse event `periodLabelAt` reads. */
+type ChartPointerEvent = {
+  activeLabel?: string;
+  activeTooltipIndex?: number;
+  activeCoordinate?: { x: number };
+  chartX?: number;
+};
+
 const periodBandShape = (props: any) => (
   <Rectangle {...props} x={props.x + props.width / 4} width={props.width / 2} />
 );
@@ -520,6 +528,21 @@ const RemixLine: React.FC<RemixLineProps> = ({
     setHoverLabel(label);
   }, []);
 
+  /**
+   * The hover dots, drawn at the hovered period's label.
+   *
+   * Recharts' own active dots sit on its nearest label, which is not always the hovered period's
+   * (`periodLabelAt`), so they jumped between the band's two edges. Drawn here instead they always
+   * sit on the edge the country labels: right for GB, left for NL. The sites chart has no hover
+   * label and keeps Recharts' dots (`activeDot={isSitesChart}`).
+   */
+  const hoverDot = (props: any): React.ReactElement => {
+    const { cx, cy, stroke, payload, key } = props;
+    const isHovered = !!hoverLabel && payload?.formattedDate === hoverLabel;
+    if (!isHovered || !Number.isFinite(cx) || !Number.isFinite(cy)) return <g key={key} />;
+    return <circle key={key} cx={cx} cy={cy} r={4} fill={stroke} stroke="#fff" strokeWidth={2} />;
+  };
+
   const hoverPeriod = useMemo(() => {
     if (isSitesChart || !hoverLabel) return null;
     const period = periodForLabel(hoverLabel, focusedCountry);
@@ -559,6 +582,28 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // The category axis' domain — whatever is actually plotted, zoomed or not — is what the tick
   // instants have to be found inside and translated back to.
   const displayedChartData = zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData;
+
+  /**
+   * The label of the period under the pointer.
+   *
+   * Recharts' `activeLabel` is the *nearest* label, which covers half a step either side of its
+   * point, while the label's period runs a whole step to one side of it: back where labels close
+   * their period (GB), forward where they open it (NL). So half the time the pointer sat outside
+   * the band it lit, on opposite sides for the two. Past the point on a period-end country, or
+   * before it on a period-start one, the pointer is in the neighbouring label's period instead.
+   * `preppedData` is sorted, so the neighbour by index is the neighbour in time.
+   */
+  const periodLabelAt = (e?: ChartPointerEvent): string | undefined => {
+    const label = e?.activeLabel;
+    if (!label || isSitesChart) return label;
+    const index = e?.activeTooltipIndex;
+    const pointX = e?.activeCoordinate?.x;
+    if (typeof index !== "number" || typeof pointX !== "number" || typeof e?.chartX !== "number")
+      return label;
+    const closesPeriod = slotLabellingFor(focusedCountry) !== "period-start";
+    const step = closesPeriod ? (e.chartX > pointX ? 1 : 0) : e.chartX < pointX ? -1 : 0;
+    return displayedChartData[index + step]?.formattedDate ?? label;
+  };
 
   const categoryTicks = useMemo(() => {
     if (isSitesChart || displayedChartData.length === 0) return undefined;
@@ -795,16 +840,17 @@ const RemixLine: React.FC<RemixLineProps> = ({
               bottom: -4,
               left: CHART_MARGIN_LEFT_PX
             }}
-            onClick={(e?: { activeLabel?: string }) => {
+            onClick={(e?: ChartPointerEvent) => {
               if (draggingCursorRef.current) return;
               if (globalIsZooming) return;
 
-              if (setTimeOfInterest && e?.activeLabel) {
+              const label = periodLabelAt(e);
+              if (setTimeOfInterest && label) {
                 isSitesChart
                   ? setTimeOfInterest(
-                      new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
+                      new Date(Number(label))?.toISOString() || new Date().toISOString()
                     )
-                  : setTimeOfInterest(e.activeLabel);
+                  : setTimeOfInterest(label);
               }
             }}
             onMouseDown={(e?: { activeLabel?: string }) => {
@@ -817,11 +863,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 setGlobalZoomArea({ x1: xValue, x2: xValue });
               }
             }}
-            onMouseMove={(e?: { activeLabel?: string }) => {
-              setHoverLabelIfChanged(e?.activeLabel ?? null);
+            onMouseMove={(e?: ChartPointerEvent) => {
+              setHoverLabelIfChanged(periodLabelAt(e) ?? null);
               // Before the zoom guard: the cursor is draggable whether or not zoom is enabled.
               if (draggingCursorRef.current) {
-                commitCursor(e?.activeLabel);
+                commitCursor(periodLabelAt(e));
                 return;
               }
               if (!zoomEnabled) return;
@@ -833,7 +879,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
             onMouseLeave={() => setHoverLabelIfChanged(null)}
-            onMouseUp={(e?: { activeLabel?: string }) => {
+            onMouseUp={(e?: ChartPointerEvent) => {
               if (draggingCursorRef.current) return;
               if (!zoomEnabled) return;
 
@@ -844,7 +890,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   setTimeOfInterest
                 ) {
                   setGlobalZoomArea(temporaryZoomArea);
-                  setTimeOfInterest(e?.activeLabel);
+                  setTimeOfInterest(periodLabelAt(e) ?? e.activeLabel);
                 } else if (globalZoomArea?.x1?.length && globalZoomArea?.x2?.length) {
                   let { x1 } = globalZoomArea;
                   let x2 = e?.activeLabel || "";
@@ -1067,7 +1113,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 <Line
                   type="monotone"
                   dataKey="N_HOUR_FORECAST"
-                  dot={false}
+                  dot={hoverDot}
+                  activeDot={isSitesChart}
                   yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   strokeDasharray="5 5"
@@ -1080,7 +1127,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 <Line
                   type="monotone"
                   dataKey="N_HOUR_PAST_FORECAST"
-                  dot={false}
+                  dot={hoverDot}
+                  activeDot={isSitesChart}
                   yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
@@ -1097,7 +1145,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 key={`${lower}-${upper}`}
                 type="monotone"
                 dataKey={getPLevelRangeKey(lower, upper)}
-                dot={false}
+                dot={hoverDot}
+                activeDot={isSitesChart}
                 xAxisId={"x-axis"}
                 yAxisId={"y-axis"}
                 stroke={yellow}
@@ -1113,7 +1162,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="SEASONAL_MEAN"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={seasonal}
@@ -1131,7 +1181,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     key={`SEASONAL_BOUND_${boundPair.join("_")}`}
                     dataKey={`SEASONAL_BOUND_${boundPair.join("_")}`}
                     type="monotone"
-                    dot={false}
+                    dot={hoverDot}
+                    activeDot={isSitesChart}
                     xAxisId={"x-axis"}
                     yAxisId={"y-axis"}
                     stroke={seasonal}
@@ -1152,7 +1203,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="PAST_INTRADAY_ECMWF_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={ecmwfOnly} //yellow
@@ -1165,7 +1217,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="INTRADAY_ECMWF_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -1179,7 +1232,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="PAST_SAT_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={satOnly}
@@ -1192,7 +1246,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="SAT_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -1206,7 +1261,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="PAST_MET_OFFICE_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={metOfficeOnly}
@@ -1219,7 +1275,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="MET_OFFICE_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -1233,7 +1290,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="GENERATION"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={toolTipColors.GENERATION}
@@ -1249,14 +1307,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={toolTipColors.GENERATION_UPDATED}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
               dataKey="PAST_FORECAST"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               connectNulls={true}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
@@ -1270,7 +1330,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="FORECAST"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -1297,7 +1358,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               // making, and two of them at slightly different x is worse than either alone.
               cursor={isSitesChart ? undefined : false}
               content={({ payload, label }) => {
-                const data = payload && payload[0]?.payload;
+                // The row for the period under the pointer, which is not always Recharts' active
+                // one; see `periodLabelAt`.
+                const hoveredRow =
+                  !isSitesChart && hoverLabel
+                    ? displayedChartData.find((d) => d.formattedDate === hoverLabel)
+                    : undefined;
+                const data: any = hoveredRow ?? (payload && payload[0]?.payload);
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
                   return <div></div>;
 
