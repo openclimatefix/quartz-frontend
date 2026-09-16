@@ -198,3 +198,33 @@ export const selectAxisTicks = (input: {
   const ticks = ticksByDensity.get(density) ?? [];
   return { density, ticks };
 };
+
+/** A tick's label, in parts, so each surface can lay the day out its own way. */
+export type TickLabel = {
+  time: string;
+  /** Present at a midnight, and on the first tick so a window starting mid-day is anchored. */
+  day?: string;
+  /**
+   * A midnight. Its label is the day alone, drawn from the line into the day: "Wed 00:00"
+   * centred on the line put "Wed" before it, where it read as Tuesday.
+   */
+  startsDay: boolean;
+};
+
+/**
+ * Labels for a run of tick instants: the time, plus the day wherever a reader needs one to place
+ * the times. Today is named "Today", the day a reader is usually looking for.
+ */
+export const tickLabels = (instantsMs: number[], zone: string, locale?: string): TickLabel[] => {
+  const today = DateTime.now().setZone(zone).toISODate();
+  return instantsMs.map((ms, index) => {
+    const dt = DateTime.fromMillis(ms, { zone, locale });
+    const startsDay = dt.hour === 0 && dt.minute === 0;
+    const day = dt.toISODate() === today ? "Today" : dt.toFormat("ccc");
+    return {
+      time: dt.toFormat("HH:mm"),
+      day: startsDay || index === 0 ? day : undefined,
+      startsDay
+    };
+  });
+};

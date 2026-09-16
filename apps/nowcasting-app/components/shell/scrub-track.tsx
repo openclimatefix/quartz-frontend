@@ -9,6 +9,7 @@ import {
   midnightInstants,
   quarterDayInstants,
   selectAxisTicks,
+  tickLabels,
   TickDensity
 } from "../../lib/time/ticks";
 import { DEFAULT_LOCALE, formatISODateStringAsZonedTime } from "../helpers/utils";
@@ -113,6 +114,8 @@ const PAGE_MINUTES = 180;
  * overflow the track's own box. **Guess** — untested against a real narrow footer.
  */
 const LABEL_EDGE_ANCHOR_FRACTION = 0.1;
+/** A tick label whose instant is within this many px of an end is held flush to that end. */
+const TICK_EDGE_ANCHOR_PX = 30;
 
 /**
  * The track's own tick labels — 6-hourly (00:00/06:00/12:00/18:00) when there is room,
@@ -150,28 +153,52 @@ const TrackTicks: FC<{ scale: ScrubScale; zone: string }> = ({ scale, zone }) =>
     });
     previousDensityRef.current = selection.density;
 
-    let previousDay = "";
-    return selection.ticks.map((ms) => {
-      const dt = DateTime.fromMillis(ms, { zone });
-      const day = dt.toFormat("yyyy-LL-dd");
-      // The window is ~three days long, so bare times repeat and a reader cannot place them.
-      // Name the day only when it changes — including on the first mark, which anchors the rest.
-      const showDay = day !== previousDay;
-      previousDay = day;
-      return {
-        key: day + dt.toFormat("HHmm"),
-        label: dt.toFormat(showDay ? "ccc HH:mm" : "HH:mm")
-      };
-    });
+    // The window is ~three days long, so bare times repeat; `tickLabels` names the days.
+    const labels = tickLabels(selection.ticks, zone);
+    return selection.ticks.map((ms, i) => ({
+      ...labels[i],
+      key: ms,
+      fraction: fractionForMs(ms, scale)
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scale.startMs, scale.endMs, zone, widthPx]);
 
+  // Each label centred on its instant, as the chart's axis centres its own — they were spread
+  // evenly with `justify-between`, which put them nowhere near the hairlines they name. A label
+  // too close to an end to centre is held flush to that end instead of overflowing it.
   return (
-    <div ref={containerRef} aria-hidden="true" className="flex justify-between pt-1">
-      {ticks.map((tick) => (
-        <span key={tick.key} className="font-mono text-2xs tabular-nums text-content-secondary">
-          {tick.label}
-        </span>
-      ))}
+    <div ref={containerRef} aria-hidden="true" className="relative my-0.5 h-4">
+      {ticks.map((tick) => {
+        const px = tick.fraction * widthPx;
+        // A day label starts at its midnight line; the rest centre on their instant.
+        const translate =
+          tick.startsDay || px < TICK_EDGE_ANCHOR_PX
+            ? "0%"
+            : widthPx - px < TICK_EDGE_ANCHOR_PX
+            ? "-100%"
+            : "-50%";
+        return (
+          <span
+            key={tick.key}
+            className={`absolute top-0 whitespace-nowrap font-mono text-2xs tabular-nums text-content-secondary ${
+              tick.startsDay ? "pl-1" : ""
+            }`}
+            style={{ left: `${tick.fraction * 100}%`, transform: `translateX(${translate})` }}
+          >
+            {tick.startsDay ? (
+              <>
+                {tick.day}
+                {/* A margin, not a space: a monospace space is a whole character wide. */}
+                <span className="ml-0.5">→</span>
+              </>
+            ) : tick.day ? (
+              `${tick.day} ${tick.time}`
+            ) : (
+              tick.time
+            )}
+          </span>
+        );
+      })}
     </div>
   );
 };
@@ -449,14 +476,17 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   //
   // "Either way" is now true, which it was not before: this used to be 3px + 16px against a live
   // track of 40px + a 20px tick row, so the footer grew by ~21px the moment a range arrived. The
-  // two boxes below mirror the live layout exactly — an `h-5` strip with the resting line centred
-  // in it, then an `h-5` stand-in for `TrackTicks` (its `pt-1` plus one `text-2xs`/`text-xs`
-  // line). Halving the track was the moment to make the claim honest rather than re-break it.
+  // boxes below mirror the live layout exactly — the slider's `pt-0.5 pb-1` around an `h-5` strip
+  // with the resting line centred in it, then an `h-5` stand-in for `TrackTicks` (its `my-0.5`
+  // around an `h-4` row). Halving the track was the moment to make the claim honest rather than
+  // re-break it.
   if (!scale || !selectedISOTime) {
     return (
       <div data-testid="scrub-track-idle">
-        <div className="flex h-5 items-center">
-          <div className="h-[3px] w-full rounded-sm bg-content/10" />
+        <div className="pb-1 pt-0.5">
+          <div className="flex h-5 items-center">
+            <div className="h-[3px] w-full rounded-sm bg-content/10" />
+          </div>
         </div>
         <div className="h-5" />
       </div>
@@ -504,11 +534,11 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
           rather than the same marks in a shorter box). But the whole strip is what you grab —
           `onPointerDown` is here, not on the handle — and a 20px-tall target fails WCAG 2.2
           SC 2.5.8, which asks for 24×24 CSS px. So the interactive box is this element, padded
-          to 28px, and the painted box is the child below at 20px.
+          to 26px, and the painted box is the child below at 20px.
 
           The padding has to live on a wrapper rather than on the strip itself: absolutely
           positioned children resolve against the *padding* box, so padding here would stretch
-          the `inset-y-0` bands and NOW's `h-full` back to 28px and undo the halving.
+          the `inset-y-0` bands and NOW's `h-full` back to 26px and undo the halving.
 
           Nothing about the drag maths cares — `instantAt` reads `getBoundingClientRect()` for x
           only, and `trackRef` stays on the painted strip, whose width is identical. */}
@@ -521,7 +551,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
         aria-valuenow={slotIndexOf(cursor, scale)}
         aria-valuetext={`${cursorLabel} ${zone}`}
         aria-orientation="horizontal"
-        className="group cursor-grab touch-none select-none py-1 outline-none active:cursor-grabbing"
+        className="group cursor-grab touch-none select-none pt-0.5 pb-1 outline-none active:cursor-grabbing"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
@@ -641,7 +671,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
             // `items-center`, not `items-baseline`: the country code is `text-2xs` and the time
             // larger, so baseline alignment sat them on a shared baseline with visibly different
             // cap heights and left the tag looking tilted. Centring aligns what the eye reads.
-            className="absolute top-[26px] z-30 flex touch-none items-center gap-1 whitespace-nowrap rounded border border-interactive/60 bg-surface px-[7px] py-[3.5px] tabular-nums shadow"
+            className="absolute top-[26px] z-30 flex touch-none items-center gap-1 whitespace-nowrap rounded border border-interactive/60 bg-surface px-[4px] py-[3.5px] tabular-nums shadow"
             style={{ left: `${cursorFraction * 100}%`, transform: `translateX(${labelTranslate})` }}
           >
             {/* `text-box` trims each line box to cap height and baseline, so centring the two spans

@@ -31,7 +31,7 @@ import useGlobalState, { useCountryState, getCursorNow } from "../helpers/global
 import { DELTA_BUCKET } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { useTokens } from "../helpers/colour";
-import { selectAxisTicks, TickDensity } from "../../lib/time/ticks";
+import { selectAxisTicks, TickDensity, tickLabels, type TickLabel } from "../../lib/time/ticks";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
 /**
@@ -711,26 +711,53 @@ const RemixLine: React.FC<RemixLineProps> = ({
    * property of a tick's *position in the sequence*, and Recharts calls the formatter per tick
    * with no reliable ordering guarantee.
    */
+  /**
+   * The sites chart's x tick: Recharts' own, except that a day label starts at its midnight line
+   * where the rest are centred on their instant — see `axisTickLabels`.
+   */
+  const sitesTick = (props: any): React.ReactElement => {
+    const { payload, textAnchor, x, y } = props;
+    const label = axisTickLabels[String(payload?.value)];
+    const startsDay = !!label?.startsDay;
+    return (
+      <text
+        x={x}
+        y={y}
+        // What Recharts' own `Text` does for a tick below the axis: hang it from its top.
+        dy="0.71em"
+        dx={startsDay ? 4 : 0}
+        fill={plot.axis}
+        style={{ fontSize: "10px", fontFamily: MONO }}
+        textAnchor={startsDay ? "start" : textAnchor}
+      >
+        {startsDay ? label.day : label?.day ? `${label.day} ${label.time}` : label?.time}
+        {/* An offset, not a space: a monospace space is a whole character wide. */}
+        {startsDay && <tspan dx={2}>→</tspan>}
+      </text>
+    );
+  };
+
   const axisTickLabels = useMemo(() => {
-    const source: (string | number)[] | undefined = isSitesChart ? ticks : categoryTicks;
-    const labels: Record<string, string> = {};
-    if (!source) return labels;
-    let previousDay = "";
-    for (const value of source) {
-      const dt = (
-        typeof value === "number"
-          ? DateTime.fromMillis(value)
-          : DateTime.fromISO(value, { zone: "utc", setZone: true })
-      )
-        .setZone(timezone)
-        .setLocale(locale);
-      if (!dt.isValid) continue;
-      const day = dt.toFormat("yyyy-LL-dd");
-      const showDay = day !== previousDay;
-      previousDay = day;
-      labels[String(value)] = dt.toFormat(showDay ? "ccc HH:mm" : "HH:mm");
-    }
-    return labels;
+    const source: (string | number)[] = (isSitesChart ? ticks : categoryTicks) ?? [];
+    const valid = source
+      .map((value) => ({
+        value,
+        ms:
+          typeof value === "number"
+            ? value
+            : DateTime.fromISO(value, { zone: "utc", setZone: true }).toMillis()
+      }))
+      .filter(({ ms }) => Number.isFinite(ms));
+    const labels = tickLabels(
+      valid.map(({ ms }) => ms),
+      timezone,
+      locale
+    );
+    const byValue: Record<string, TickLabel> = {};
+    valid.forEach(({ value }, i) => {
+      byValue[String(value)] = labels[i];
+    });
+    return byValue;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSitesChart, ticks.join(","), categoryTicks?.join(","), timezone, locale]);
   //get Y axis boundary
@@ -921,11 +948,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis"}
+              // Only the sites chart names days (`sitesTick` draws them). The dashboard's charts sit
+              // above the scrub track, whose labels already name them.
               tickFormatter={(x) =>
-                axisTickLabels[String(x)] ?? prettyPrintChartAxisLabelDate(x, timezone, locale)
+                axisTickLabels[String(x)]?.time ??
+                prettyPrintChartAxisLabelDate(x, timezone, locale)
               }
               scale={isSitesChart ? "time" : "auto"}
-              tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
+              tick={
+                isSitesChart
+                  ? sitesTick
+                  : { fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }
+              }
               tickLine={true}
               // The labels used to sit tight under the rule because a second row carried the
               // date below them and closed the gap. With that row gone they were the last thing

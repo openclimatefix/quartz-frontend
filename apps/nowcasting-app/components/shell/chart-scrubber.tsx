@@ -62,7 +62,7 @@ const ChartScrubber: FC<{ domain?: CursorRange | null }> = ({ domain }) => {
 
   return (
     <div
-      className="flex items-start px-2 pb-1 pt-1.5 text-xs text-content"
+      className="flex items-start px-2 pb-1 pt-0 text-xs text-content"
       style={{ paddingRight: PLOT_INSET_RIGHT_PX + 8 }}
     >
       {/* The Y-axis gutter, used. Fixed at the inset's width so the track's left edge is the
