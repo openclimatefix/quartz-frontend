@@ -1,7 +1,24 @@
 import { useEffect, useMemo } from "react";
 import useGlobalState, { getCursorCadenceMinutes } from "../helpers/globalState";
-import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
+import { addMinutesToISODate } from "../helpers/utils";
 import type { CursorRange } from "../shell/scrub-scale";
+
+/**
+ * One step, stopping at the limits rather than passing them. Compared as times: an equality
+ * check on the ends let a cursor that was already past one (written by another input) keep
+ * walking away from the window.
+ */
+const stepWithin = (current: string, minutes: number, limits?: CursorRange): string => {
+  const next = addMinutesToISODate(current || "", minutes);
+  if (!limits) return next;
+  if (minutes < 0 && Date.parse(next) < Date.parse(limits.start)) {
+    return Date.parse(current) < Date.parse(limits.start) ? current : limits.start;
+  }
+  if (minutes > 0 && Date.parse(next) > Date.parse(limits.end)) {
+    return Date.parse(current) > Date.parse(limits.end) ? current : limits.end;
+  }
+  return next;
+};
 
 const leftKey = "ArrowLeft";
 const rightKey = "ArrowRight";
@@ -50,19 +67,13 @@ const useCursorHotkeys = (limits?: CursorRange) => {
       if (target?.closest?.("[data-cursor-scrubber],[data-arrow-keys-handled]")) return;
 
       if (e.key === leftKey) {
-        setSelectedISOTime((selectedISOTime) => {
-          if (
-            formatISODateString(selectedISOTime || "") === formatISODateString(limits?.start || "")
-          )
-            return selectedISOTime;
-          return addMinutesToISODate(selectedISOTime || "", -getCursorCadenceMinutes());
-        });
+        setSelectedISOTime((selectedISOTime) =>
+          stepWithin(selectedISOTime, -getCursorCadenceMinutes(), limits)
+        );
       } else if (e.key === rightKey) {
-        setSelectedISOTime((selectedISOTime) => {
-          if (formatISODateString(selectedISOTime || "") === formatISODateString(limits?.end || ""))
-            return selectedISOTime;
-          return addMinutesToISODate(selectedISOTime || "", getCursorCadenceMinutes());
-        });
+        setSelectedISOTime((selectedISOTime) =>
+          stepWithin(selectedISOTime, getCursorCadenceMinutes(), limits)
+        );
       }
     },
     [limits, setSelectedISOTime]

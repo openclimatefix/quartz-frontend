@@ -1,4 +1,4 @@
-import { FC, ReactNode, useState } from "react";
+import { FC, ReactNode, useMemo, useState } from "react";
 
 import Header from "../layout/header";
 import DeprecatedDomainNotice from "../layout/deprecated-domain-notice";
@@ -8,6 +8,8 @@ import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
 import { STAGE_GUTTER_PX } from "./geometry";
 import { useCursorRange } from "./use-cursor-range";
+import { selectableCursorRange } from "./scrub-scale";
+import { useFocusedCountry } from "../../hooks/data";
 import MapZoomControls from "./map-zoom-controls";
 import ZoneStack from "./zone-stack";
 import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
@@ -63,7 +65,16 @@ const DashboardShell: FC<{
   // is the range `ScrubTrack` is drawn against, so the keyboard and the drag handle now agree
   // about where the ends are; they could differ before. It costs no request — the track inside
   // the chart card already calls this hook and the two share the SWR entry.
-  useCursorHotkeys(useCursorRange()?.range);
+  //
+  // Converted to cursor instants first, with the track's own stops, so the last press lands on
+  // the last period the track can select rather than the slot past it.
+  const cursorRange = useCursorRange()?.range;
+  const focusedCountry = useFocusedCountry();
+  const hotkeyLimits = useMemo(
+    () => (cursorRange ? selectableCursorRange(cursorRange, focusedCountry) : undefined),
+    [cursorRange, focusedCountry]
+  );
+  useCursorHotkeys(hotkeyLimits);
 
   return (
     // No `pt-14` any more: the header carries no fill, so the map runs edge to edge behind it

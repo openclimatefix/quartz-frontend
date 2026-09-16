@@ -10,6 +10,8 @@ import {
   instantForFraction,
   instantForSlotIndex,
   scrubScale,
+  selectableCursorRange,
+  selectableLabelRange,
   slotIndexOf,
   slotsPerMinutes
 } from "./scrub-scale";
@@ -352,5 +354,33 @@ describe("partitioning the strip around NOW", () => {
     const built = scale(GB);
     expect(fractionForMs(Date.parse("2026-08-09T00:00:00.000Z"), built)).toBe(0);
     expect(fractionForMs(Date.parse("2026-08-13T00:00:00.000Z"), built)).toBe(1);
+  });
+});
+
+describe("selectable bounds — only periods that sit wholly inside the window", () => {
+  it("drops GB's first label, whose period starts before the window", () => {
+    expect(selectableLabelRange(RANGE, "GB")).toEqual({
+      start: "2026-08-10T00:30:00.000Z",
+      end: RANGE.end
+    });
+  });
+
+  it("drops NL's last label, whose period runs past the window", () => {
+    expect(selectableLabelRange(RANGE, "NL")).toEqual({
+      start: RANGE.start,
+      end: "2026-08-11T23:45:00.000Z"
+    });
+  });
+
+  it("gives GB's bounds as cursor instants, a slot before the labels", () => {
+    // The last one is the regression: `RANGE.end` as a cursor reads back as the slot past it.
+    expect(selectableCursorRange(RANGE, "GB")).toEqual({
+      start: RANGE.start,
+      end: "2026-08-11T23:30:00.000Z"
+    });
+  });
+
+  it("gives NL's bounds unchanged, because its labels already open their period", () => {
+    expect(selectableCursorRange(RANGE, "NL")).toEqual(selectableLabelRange(RANGE, "NL"));
   });
 });

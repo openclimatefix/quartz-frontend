@@ -22,6 +22,7 @@ import {
   instantForFraction,
   instantForSlotIndex,
   scrubScale,
+  selectableLabelRange,
   slotIndexOf,
   slotsPerMinutes,
   type CursorRange,
@@ -236,18 +237,10 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   const [dragInstant, setDragInstant] = useState<string | null>(null);
 
   const cadenceMinutes = cursorCadenceMinutes(focusedCountry);
-  // Only labels whose whole period sits inside the window are selectable: the label of the
-  // period that opens at the window's start, through the label of the one that closes at its
-  // end. Where labels close their period (GB) that drops the first label, whose period starts
-  // before the chart does; where they open it (NL) it drops the last, whose period runs past.
+  // Drawn against the whole window; stops only where a whole period fits inside it.
   const scale = useMemo(() => {
     if (!range?.start || !range?.end) return null;
-    const endMs = DateTime.fromISO(range.end, { zone: "utc" }).toMillis();
-    const selectable = {
-      start: slotForInstant(range.start, focusedCountry),
-      end: slotForInstant(DateTime.fromMillis(endMs - 1, { zone: "utc" }), focusedCountry)
-    };
-    return scrubScale(range, cadenceMinutes, selectable);
+    return scrubScale(range, cadenceMinutes, selectableLabelRange(range, focusedCountry));
   }, [range, cadenceMinutes, focusedCountry]);
 
   // The scale is in **label** space — the window is the chart's first and last published

@@ -6,7 +6,7 @@ import { DEFAULT_TIMEZONE } from "../helpers/utils";
 import { PLOT_INSET_LEFT_PX, PLOT_INSET_RIGHT_PX } from "../charts/remix-line";
 import PlayButton from "../play-button";
 import ScrubTrack from "./scrub-track";
-import type { CursorRange } from "./scrub-scale";
+import { selectableCursorRange, type CursorRange } from "./scrub-scale";
 import useCursorRange from "./use-cursor-range";
 
 /**
@@ -56,6 +56,9 @@ const ChartScrubber: FC<{ domain?: CursorRange | null }> = ({ domain }) => {
   const focusedCountry = useFocusedCountry();
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
   const rangeData = useCursorRange();
+  // Play walks the same window the track beside it is drawn against, between the same stops.
+  const playRange = domain ?? rangeData?.range;
+  const playBounds = playRange ? selectableCursorRange(playRange, focusedCountry) : null;
 
   return (
     <div
@@ -71,9 +74,7 @@ const ChartScrubber: FC<{ domain?: CursorRange | null }> = ({ domain }) => {
         className="flex shrink-0 items-center justify-center self-start"
         style={{ width: PLOT_INSET_LEFT_PX }}
       >
-        {rangeData && (
-          <PlayButton startTime={rangeData.range.start} endTime={rangeData.range.end} />
-        )}
+        {playBounds && <PlayButton startTime={playBounds.start} endTime={playBounds.end} />}
       </div>
       <div className="min-w-0 flex-1">
         <ScrubTrack zone={focusedZone} range={domain} />

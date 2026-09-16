@@ -4,7 +4,7 @@ import useGlobalState, {
   snapCursorToFocusedGrid
 } from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
+import { addMinutesToISODate } from "../helpers/utils";
 import Ui, { SpeedControl } from "./ui";
 
 /**
@@ -50,14 +50,18 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
   // replacement one, so the two can never drift into stepping differently.
   const tick = () => {
     setSelectedISOTime((selectedISOTime) => {
-      if (formatISODateString(selectedISOTime || "") === formatISODateString(endTime)) {
+      // At or past the end, loop to the start. Compared as times: the stride is the finest
+      // enabled cadence, so it need not step onto `endTime` exactly, and an equality check let
+      // it walk past the end — where the chart reset it to now.
+      if (!selectedISOTime || Date.parse(selectedISOTime) >= Date.parse(endTime)) {
         return startTime;
       }
       // Step by the *finest* cadence across the countries drawn, not the focused country's —
       // playback is the one case where nobody is aiming at a step, so a coarse focus must not
       // play a fine country at half its resolution. See `playbackStrideMinutes`. Speed changes
       // the period between ticks, never this stride.
-      return addMinutesToISODate(selectedISOTime || "", getPlaybackStrideMinutes());
+      const next = addMinutesToISODate(selectedISOTime, getPlaybackStrideMinutes());
+      return Date.parse(next) > Date.parse(endTime) ? endTime : next;
     });
   };
 

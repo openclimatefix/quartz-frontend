@@ -1,6 +1,12 @@
 import { DateTime } from "luxon";
 
-import { Instant, periodForLabel, snapDownToCadence, snapToCadence } from "../../lib/time/cursor";
+import {
+  Instant,
+  periodForLabel,
+  slotForInstant,
+  snapDownToCadence,
+  snapToCadence
+} from "../../lib/time/cursor";
 
 /**
  * The scrub track's arithmetic — pixels ↔ instants, and nothing else.
@@ -74,6 +80,39 @@ const toIso = (ms: number): string => DateTime.fromMillis(ms, { zone: "utc" }).t
 
 const clamp = (value: number, low: number, high: number): number =>
   Math.min(high, Math.max(low, value));
+
+/**
+ * The labels a window of labels may select: only those whose whole period sits inside it.
+ *
+ * The first is the label of the period that opens at the window's start, the last the label of
+ * the period that closes at its end. Where labels close their period (GB) that drops the first
+ * label, whose period starts before the chart does; where they open it (NL) it drops the last,
+ * whose period runs past. The country's labelling comes from config, so neither case is named.
+ */
+export const selectableLabelRange = (
+  range: CursorRange,
+  country: string | null | undefined
+): CursorRange => ({
+  start: slotForInstant(range.start, country),
+  end: slotForInstant(toIso(msOf(range.end) - 1), country)
+});
+
+/**
+ * The same bounds as cursor instants — what the play button and the arrow keys step between.
+ *
+ * A label is not a cursor: GB's label closes its period, so writing the last label as the
+ * cursor reads back as the slot after it, which the chart's range guard resets to now.
+ */
+export const selectableCursorRange = (
+  range: CursorRange,
+  country: string | null | undefined
+): CursorRange => {
+  const labels = selectableLabelRange(range, country);
+  return {
+    start: periodForLabel(labels.start, country).start,
+    end: periodForLabel(labels.end, country).start
+  };
+};
 
 /**
  * Lay the cursor grid over a data window.

@@ -12,7 +12,12 @@ import { afterEach, beforeEach, describe, expect, test } from "@jest/globals";
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
-import { getCursorCadenceMinutes, getGlobalState, setGlobalState } from "../helpers/globalState";
+import {
+  getCursorCadenceMinutes,
+  getGlobalState,
+  getPlaybackStrideMinutes,
+  setGlobalState
+} from "../helpers/globalState";
 import { addMinutesToISODate } from "../helpers/utils";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import PlayButton from "./index";
@@ -249,5 +254,45 @@ describe("speed control", () => {
     });
     expect(speedChip()).toHaveTextContent("1x");
     expect(getGlobalState("playbackSpeed")).toBe(1);
+  });
+});
+
+describe("reaching the end", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    act(() => {
+      (getGlobalState("intervals") as ReturnType<typeof setInterval>[]).forEach((id) =>
+        clearInterval(id)
+      );
+      setGlobalState("intervals", []);
+      setGlobalState("isPlaying", false);
+    });
+    jest.useRealTimers();
+  });
+
+  test("a stride that would pass the end stops on it, and the next tick loops to the start", () => {
+    // Half a stride short of the end, so the next step overshoots it. An equality check on the
+    // end never matched here and playback walked on past the chart, which reset it to now.
+    const nearEnd = addMinutesToISODate(END, -getPlaybackStrideMinutes() / 2);
+    render(<PlayButton startTime={START} endTime={END} />);
+    // After mounting: the mount-time pause snaps the cursor onto the focused grid, which would
+    // put it on the end before the test starts.
+    act(() => setGlobalState("selectedISOTime", nearEnd));
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    });
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(getGlobalState("selectedISOTime")).toBe(END);
+
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(getGlobalState("selectedISOTime")).toBe(START);
   });
 });
