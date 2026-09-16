@@ -25,7 +25,7 @@ import {
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
-import { periodForLabel } from "../../lib/time/cursor";
+import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
 import { DELTA_BUCKET } from "../../constant";
@@ -347,6 +347,8 @@ const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLin
  * runs centre to centre, so trim half a band — a quarter of the drawn width — off each side.
  * On the point scale the other charts use, bands have no width and the default is already right.
  */
+const DELTA_BAR_WIDTH_PX = 3;
+
 const periodBandShape = (props: any) => (
   <Rectangle {...props} x={props.x + props.width / 4} width={props.width / 2} />
 );
@@ -603,10 +605,30 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
-  const CustomBar = (props: { DELTA: number }) => {
-    const { DELTA } = props;
-    let fill = DELTA > 0 ? deltaPos : deltaNeg;
-    return <Rectangle {...props} fill={fill} />;
+  /**
+   * A delta bar, drawn in the middle of the period it measures.
+   *
+   * A delta is a whole period's value, and the selection and hover bands now show that period,
+   * so a bar on the band's edge could belong to either neighbour. With no category gap and no
+   * fixed `barSize`, Recharts hands each bar its label's whole band: `x` is the band's start and
+   * `width` its width, and the lines pass through the band's centre, at the label. The period
+   * runs from that centre one band back where labels close their period (GB), so its middle is
+   * the band's start; where they open it (NL), one band forward, so its middle is the band's
+   * end. The lines stay on the labels.
+   */
+  const periodMiddleOffset = slotLabellingFor(focusedCountry) === "period-start" ? 1 : 0;
+  const CustomBar = (props: { DELTA: number; x: number; width: number }) => {
+    const { DELTA, x, width } = props;
+    const fill = DELTA > 0 ? deltaPos : deltaNeg;
+    const middle = x + width * periodMiddleOffset;
+    return (
+      <Rectangle
+        {...props}
+        x={middle - DELTA_BAR_WIDTH_PX / 2}
+        width={DELTA_BAR_WIDTH_PX}
+        fill={fill}
+      />
+    );
   };
 
   const deltaMax = data
@@ -762,6 +784,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
         <ResponsiveContainer debounce={100}>
           <ComposedChart
             className="select-none"
+            // No gap, so each delta bar is given its label's whole band; see `CustomBar`.
+            barCategoryGap={0}
             width={500}
             height={400}
             data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
@@ -1036,7 +1060,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 xAxisId={"x-axis"}
                 // @ts-ignore
                 shape={<CustomBar />}
-                barSize={3}
               />
             )}
             {showNHourView && (
