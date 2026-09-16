@@ -641,13 +641,16 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
             // `items-center`, not `items-baseline`: the country code is `text-2xs` and the time
             // larger, so baseline alignment sat them on a shared baseline with visibly different
             // cap heights and left the tag looking tilted. Centring aligns what the eye reads.
-            className="absolute top-[26px] z-30 flex touch-none items-center gap-1 whitespace-nowrap rounded border border-interactive bg-surface px-1.5 py-0.5 tabular-nums shadow-lg"
+            className="absolute top-[26px] z-30 flex touch-none items-center gap-1 whitespace-nowrap rounded border border-interactive/60 bg-surface px-[7px] py-[3.5px] tabular-nums shadow"
             style={{ left: `${cursorFraction * 100}%`, transform: `translateX(${labelTranslate})` }}
           >
-            <span className="text-2xs font-bold uppercase tracking-wider text-interactive">
+            {/* `text-box` trims each line box to cap height and baseline, so centring the two spans
+                centres the glyphs themselves. Without it the capitals sat off-centre, because
+                the two fonts put different space above and below their capitals. */}
+            <span className="text-[9px] font-bold uppercase leading-none tracking-wider text-interactive/80 [text-box:trim-both_cap_alphabetic]">
               {focusedCountry}
             </span>
-            <span className="font-mono text-xs font-semibold leading-none text-interactive">
+            <span className="font-mono text-[11px] font-semibold leading-none text-interactive [text-box:trim-both_cap_alphabetic]">
               {focusedLocal}
             </span>
             {/* The live dot: state, on the thing that moves. The same colour as the lettering it
@@ -662,7 +665,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
             {isLive && (
               <span
                 aria-hidden
-                className="h-1.5 w-1.5 shrink-0 self-center rounded-full bg-interactive motion-safe:animate-beat"
+                className="h-[5px] w-[5px] shrink-0 self-center rounded-full bg-interactive motion-safe:animate-beat"
               />
             )}
           </div>
