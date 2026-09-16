@@ -337,6 +337,20 @@ const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLin
   );
 };
 
+/**
+ * A period band on a chart whose x axis is a band scale.
+ *
+ * A `<Bar>` turns the category axis into bands, and `ReferenceArea` then spans from the *start*
+ * of `x1`'s band to the *end* of `x2`'s, while the lines pass through band centres. A period's
+ * two ends are adjacent categories, so that is two bands wide where the period is one: the delta
+ * view drew every selection and hover band twice the width of the forecast view's. The period
+ * runs centre to centre, so trim half a band — a quarter of the drawn width — off each side.
+ * On the point scale the other charts use, bands have no width and the default is already right.
+ */
+const periodBandShape = (props: any) => (
+  <Rectangle {...props} x={props.x + props.width / 4} width={props.width / 2} />
+);
+
 const RemixLine: React.FC<RemixLineProps> = ({
   timeOfInterest,
   data,
@@ -468,6 +482,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
    * this country publishes — the band is one cadence wide by construction.
    */
   const focusedCountry = useFocusedCountry();
+  // Only a chart with bars draws its categories as bands; see `periodBandShape`.
+  const periodShape = deltaView ? periodBandShape : undefined;
   const cursorPeriod = useMemo(() => {
     if (isSitesChart) return null;
     const period = periodForLabel(timeOfInterest, focusedCountry);
@@ -960,6 +976,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 fillOpacity={0.09}
                 strokeWidth={0}
                 ifOverflow="hidden"
+                shape={periodShape}
               />
             )}
 
@@ -975,6 +992,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 strokeOpacity={0.45}
                 strokeWidth={1}
                 ifOverflow="hidden"
+                shape={periodShape}
               />
             ) : (
               /* No period resolved — the sites chart's numeric axis, or a cursor outside the
