@@ -9,7 +9,7 @@ import useGlobalState, {
   getCursorCadenceMinutes,
   getCursorNow
 } from "../helpers/globalState";
-import { slotForInstant, snapToCadence } from "../../lib/time/cursor";
+import { periodForLabel, slotForInstant, snapToCadence } from "../../lib/time/cursor";
 import useFormatChartData, { type ChartSeriesInput } from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
@@ -210,9 +210,14 @@ const PvRemixChart: FC<{
   // Click-to-set-time. The label comes off this country's axis, so it may sit between two
   // slots of the shared cursor grid when a finer country is enabled — snap it, so the chart
   // and the map are never a slot apart. On a single-cadence session this is a no-op.
+  //
+  // The label is a published timestamp and the cursor is an instant, so it goes through
+  // `periodForLabel`: writing the label itself selected the period *after* it wherever labels
+  // close their period (GB), because the chart reads the cursor back with `slotForInstant`.
   const setSelectedTime = (time: string) => {
     stopTime();
-    setSelectedISOTime(snapToCadence(`${time}:00.000Z`, getCursorCadenceMinutes()));
+    const { start } = periodForLabel(`${time}:00.000Z`, focusedCountry);
+    setSelectedISOTime(snapToCadence(start, getCursorCadenceMinutes()));
   };
 
   let selectedRegions: string[] = [];
