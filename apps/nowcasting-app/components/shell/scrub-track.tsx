@@ -3,7 +3,7 @@ import { DateTime } from "luxon";
 
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
-import { cursorCadenceMinutes, periodForInstant, slotForInstant } from "../../lib/time/cursor";
+import { cursorCadenceMinutes, periodForLabel, slotForInstant } from "../../lib/time/cursor";
 import {
   middayInstants,
   midnightInstants,
@@ -236,7 +236,28 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   const [dragInstant, setDragInstant] = useState<string | null>(null);
 
   const cadenceMinutes = cursorCadenceMinutes(focusedCountry);
-  const scale = useMemo(() => scrubScale(range, cadenceMinutes), [range, cadenceMinutes]);
+  // Only labels whose whole period sits inside the window are selectable: the label of the
+  // period that opens at the window's start, through the label of the one that closes at its
+  // end. Where labels close their period (GB) that drops the first label, whose period starts
+  // before the chart does; where they open it (NL) it drops the last, whose period runs past.
+  const scale = useMemo(() => {
+    if (!range?.start || !range?.end) return null;
+    const endMs = DateTime.fromISO(range.end, { zone: "utc" }).toMillis();
+    const selectable = {
+      start: slotForInstant(range.start, focusedCountry),
+      end: slotForInstant(DateTime.fromMillis(endMs - 1, { zone: "utc" }), focusedCountry)
+    };
+    return scrubScale(range, cadenceMinutes, selectable);
+  }, [range, cadenceMinutes, focusedCountry]);
+
+  // The scale is in **label** space — the window is the chart's first and last published
+  // timestamp, and the track is drawn against the chart's axis — while the cursor is an
+  // instant. Writing a label as the cursor selected the period after it wherever labels close
+  // their period (GB), and at the track's right end that is a slot past the chart, which the
+  // chart's out-of-range guard reset to now while the drag wrote it back: the edge flash. So
+  // every value crosses between the two here, and nowhere else.
+  const toCursor = (label: string) => periodForLabel(label, focusedCountry).start;
+  const toLabel = (instant: string) => slotForInstant(instant, focusedCountry);
 
   // Both memoised on the scale and the country's zone/data, never on the drag-local cursor —
   // neither layer may recompute per pointer move.
@@ -309,9 +330,8 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
     const current = scaleRef.current;
     const element = trackRef.current;
     if (!current || !element) return null;
-    return instantForFraction(
-      fractionForClientX(clientX, element.getBoundingClientRect()),
-      current
+    return toCursor(
+      instantForFraction(fractionForClientX(clientX, element.getBoundingClientRect()), current)
     );
   };
 
@@ -388,7 +408,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const current = scale;
     if (!current || !selectedISOTime) return;
-    const index = slotIndexOf(selectedISOTime, current);
+    const index = slotIndexOf(toLabel(selectedISOTime), current);
     const page = slotsPerMinutes(PAGE_MINUTES, current);
 
     const target = (() => {
@@ -415,7 +435,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
     if (target === null) return;
     event.preventDefault();
     beginUserInput();
-    setSelectedISOTime(instantForSlotIndex(target, current));
+    setSelectedISOTime(toCursor(instantForSlotIndex(target, current)));
   };
 
   // An inert track while the window is unknown. Drawing a handle over a guessed horizon would
@@ -439,7 +459,8 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
 
   // The drag-local value while a drag is live, the shared cursor otherwise. `dragInstant` is
   // null at rest, so at rest this line *is* the original derive-from-`selectedISOTime`.
-  const cursor = clampToScale(dragInstant ?? selectedISOTime, scale);
+  // `cursor` is the label the handle sits on, so it lines up with the chart's point for it.
+  const cursor = clampToScale(toLabel(dragInstant ?? selectedISOTime), scale);
   const cursorFraction = fractionForInstant(cursor, scale);
   const nowFraction = timeNow ? fractionForInstant(timeNow, scale) : null;
   const cursorLabel = DateTime.fromISO(cursor, { zone: "utc" })
@@ -455,7 +476,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   // The **period**, not the instant. A single time on this chip made the reader supply the
   // country's labelling convention to know what it covered — GB's 13:00 is the half hour before
   // it, NL's the quarter after — which is precisely the thing nobody knows. A range says it.
-  const focusedPeriod = periodForInstant(cursor, focusedCountry);
+  const focusedPeriod = periodForLabel(cursor, focusedCountry);
   const focusedLocal = `${formatISODateStringAsZonedTime(
     focusedPeriod.start,
     zone,

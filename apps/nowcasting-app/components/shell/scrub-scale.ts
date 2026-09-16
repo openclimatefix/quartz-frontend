@@ -82,10 +82,15 @@ const clamp = (value: number, low: number, high: number): number =>
  * all three mean "there is nothing to scrub", and the caller renders an inert track rather than
  * a handle that can only sit in one place. A window whose ends are one step apart is fine; a
  * degenerate one is not.
+ *
+ * `selectable` narrows where the handle may stop without moving the window it is drawn against.
+ * The track draws the chart's first and last label, but a label stands for a whole period, and
+ * the periods of the two end labels need not sit inside that window. Omitted, it is `range`.
  */
 export const scrubScale = (
   range: CursorRange | null | undefined,
-  cadenceMinutes: number
+  cadenceMinutes: number,
+  selectable: CursorRange | null = null
 ): ScrubScale | null => {
   if (!range?.start || !range?.end) return null;
   if (!Number.isFinite(cadenceMinutes) || cadenceMinutes <= 0) return null;
@@ -94,8 +99,14 @@ export const scrubScale = (
   const endMs = msOf(range.end);
   if (!(endMs > startMs)) return null;
 
-  const firstMs = msOf(snapToCadence(range.start, cadenceMinutes));
-  const lastMs = msOf(snapDownToCadence(range.end, cadenceMinutes));
+  const firstMs = Math.max(
+    startMs,
+    msOf(snapToCadence(selectable?.start ?? range.start, cadenceMinutes))
+  );
+  const lastMs = Math.min(
+    endMs,
+    msOf(snapDownToCadence(selectable?.end ?? range.end, cadenceMinutes))
+  );
   if (lastMs < firstMs) return null;
 
   const step = cadenceMinutes * MS_PER_MINUTE;

@@ -40,6 +40,14 @@ import type { CursorRangeData } from "./use-cursor-range";
 // suite's mock always reports none, which also exercises the "no daylight data" render path.
 const RANGE: CursorRange = { start: "2026-08-10T00:00:00.000Z", end: "2026-08-12T00:00:00.000Z" };
 let mockRangeData: CursorRangeData | null = { range: RANGE, daylight: [] };
+// What the track writes at its two ends. The range is the chart's first and last *label*, and a
+// GB label closes its period, so the cursor sits a slot earlier. Writing `RANGE.end` itself read
+// back as the slot after the chart's last point, which the chart reset to now mid-drag. And the
+// first label is not selectable at all: its period (23:30–00:00) starts before the window, so
+// the first stop is the 00:30 label, whose period opens at `RANGE.start`. That is also why slot
+// indices below count from 00:30 and there are 95 steps, not 96.
+const FIRST_CURSOR = "2026-08-10T00:00:00.000Z";
+const LAST_CURSOR = "2026-08-11T23:30:00.000Z";
 
 const slider = () => screen.getByRole("slider");
 const cursor = () => getGlobalState("selectedISOTime");
@@ -141,7 +149,8 @@ beforeEach(() => {
   });
   mockRangeData = { range: RANGE, daylight: [] };
   setEnabledCountries(["GB"]);
-  setGlobalState("selectedISOTime", "2026-08-11T00:00:00.000Z");
+  // GB labels close their period, so the cursor instant for the 00:00 label (slot 48) is 23:30.
+  setGlobalState("selectedISOTime", "2026-08-10T23:30:00.000Z");
   setGlobalState("timeNow", "2026-08-10T12:00:00.000Z");
   setGlobalState("isPlaying", false);
 });
@@ -155,8 +164,8 @@ describe("what the track reports", () => {
   test("counts positions in slots, not pixels or milliseconds", () => {
     render(<ScrubTrack />);
     expect(slider()).toHaveAttribute("aria-valuemin", "0");
-    expect(slider()).toHaveAttribute("aria-valuemax", "96");
-    expect(slider()).toHaveAttribute("aria-valuenow", "48");
+    expect(slider()).toHaveAttribute("aria-valuemax", "95");
+    expect(slider()).toHaveAttribute("aria-valuenow", "47");
     expect(slider()).toHaveAttribute("aria-valuetext", "Tue 11 Aug 00:00 UTC");
   });
 
@@ -176,18 +185,18 @@ describe("what the track reports", () => {
 describe("following the cursor's other inputs", () => {
   test("the handle is derived from shared state, so anything that writes it moves the handle", () => {
     const view = render(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuenow", "48");
+    expect(slider()).toHaveAttribute("aria-valuenow", "47");
 
     // Exactly what the chart click, an arrow key and a play tick all do.
-    act(() => setGlobalState("selectedISOTime", "2026-08-11T06:00:00.000Z"));
+    act(() => setGlobalState("selectedISOTime", "2026-08-11T05:30:00.000Z"));
     view.rerender(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuenow", "60");
+    expect(slider()).toHaveAttribute("aria-valuenow", "59");
   });
 
   test("a cursor written off the track is shown at the end it ran past", () => {
     setGlobalState("selectedISOTime", "2026-09-01T00:00:00.000Z");
     render(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuenow", "96");
+    expect(slider()).toHaveAttribute("aria-valuenow", "95");
   });
 });
 
@@ -195,34 +204,34 @@ describe("the keyboard", () => {
   test("arrows step one slot, and the ends do not wrap", () => {
     render(<ScrubTrack />);
     fireEvent.keyDown(slider(), { key: "ArrowRight" });
-    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
+    expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
     fireEvent.keyDown(slider(), { key: "ArrowLeft" });
     fireEvent.keyDown(slider(), { key: "ArrowLeft" });
-    expect(cursor()).toBe("2026-08-10T23:30:00.000Z");
+    expect(cursor()).toBe("2026-08-10T23:00:00.000Z");
 
     fireEvent.keyDown(slider(), { key: "Home" });
-    expect(cursor()).toBe(RANGE.start);
+    expect(cursor()).toBe(FIRST_CURSOR);
     fireEvent.keyDown(slider(), { key: "ArrowLeft" });
-    expect(cursor()).toBe(RANGE.start);
+    expect(cursor()).toBe(FIRST_CURSOR);
 
     fireEvent.keyDown(slider(), { key: "End" });
-    expect(cursor()).toBe(RANGE.end);
+    expect(cursor()).toBe(LAST_CURSOR);
     fireEvent.keyDown(slider(), { key: "ArrowRight" });
-    expect(cursor()).toBe(RANGE.end);
+    expect(cursor()).toBe(LAST_CURSOR);
   });
 
   test("page keys jump three hours, on the grid", () => {
     render(<ScrubTrack />);
     fireEvent.keyDown(slider(), { key: "PageUp" });
-    expect(cursor()).toBe("2026-08-11T03:00:00.000Z");
+    expect(cursor()).toBe("2026-08-11T02:30:00.000Z");
     fireEvent.keyDown(slider(), { key: "PageDown" });
-    expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
+    expect(cursor()).toBe("2026-08-10T23:30:00.000Z");
   });
 
   test("a key the track does not own is left alone for the app's other handlers", () => {
     render(<ScrubTrack />);
     fireEvent.keyDown(slider(), { key: "a" });
-    expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
+    expect(cursor()).toBe("2026-08-10T23:30:00.000Z");
   });
 });
 
@@ -231,8 +240,8 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
   test("a press commits at once, because a press is also a click", () => {
     renderTrack();
     down(250);
-    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z"]);
   });
 
   test("a run of moves commits once per frame, not once per event", () => {
@@ -240,8 +249,8 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     // Pressed at 01:00, not at the 00:00 the cursor already holds — writing a value identical
     // to the current one is free (React bails), so starting there would prove nothing.
     down(250);
-    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z"]);
 
     // Four pointer events inside one frame. This is the case that was janky: each of these
     // used to be a global write, and each global write rebuilds every enabled country's map
@@ -250,21 +259,21 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     move(270);
     move(280);
     move(300);
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z"]);
-    expect(cursor()).toBe("2026-08-11T01:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
 
     // The handle, meanwhile, has been tracking the pointer the whole time.
-    expect(slider()).toHaveAttribute("aria-valuenow", "60");
+    expect(slider()).toHaveAttribute("aria-valuenow", "59");
 
     // One frame, one commit — and it carries the LATEST position, not a replay of the four.
     stepFrame();
-    expect(cursor()).toBe("2026-08-11T06:00:00.000Z");
+    expect(cursor()).toBe("2026-08-11T05:30:00.000Z");
     // Two instants reached the app for five pointer events, and neither is an intermediate.
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T06:00:00.000Z"]);
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T05:30:00.000Z"]);
 
     // No backlog left behind: a further frame has nothing to do.
     stepFrame();
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T06:00:00.000Z"]);
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T05:30:00.000Z"]);
   });
 
   test("releasing commits the final position exactly once, and it is the snapped one", () => {
@@ -275,15 +284,15 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
 
     // Release before the pending frame ever runs.
     up(283);
-    // Ceiling, as everywhere: 04:18 belongs to the 04:30 slot. And 02:00, the intermediate the
+    // Ceiling, as everywhere: 04:18 belongs to the 04:30 slot, whose period starts at 04:00. And 02:00, the intermediate the
     // pending frame was holding, never reached the app at all.
-    expect(cursor()).toBe("2026-08-11T04:30:00.000Z");
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T04:30:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T04:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T04:00:00.000Z"]);
 
     // And the frame that was pending must not fire a second, stale commit.
     stepFrame();
-    expect(cursor()).toBe("2026-08-11T04:30:00.000Z");
-    expect(committed).toEqual(["2026-08-11T01:00:00.000Z", "2026-08-11T04:30:00.000Z"]);
+    expect(cursor()).toBe("2026-08-11T04:00:00.000Z");
+    expect(committed).toEqual(["2026-08-11T00:30:00.000Z", "2026-08-11T04:00:00.000Z"]);
   });
 
   test("the drag-local position is dropped on release, so the handle derives from state again", () => {
@@ -291,11 +300,11 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     down(240);
     move(300);
     up(300);
-    expect(slider()).toHaveAttribute("aria-valuenow", "60");
+    expect(slider()).toHaveAttribute("aria-valuenow", "59");
 
     // Nothing of the drag outlives it: another input moves the handle as it does at rest.
-    act(() => setGlobalState("selectedISOTime", "2026-08-10T12:00:00.000Z"));
-    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+    act(() => setGlobalState("selectedISOTime", "2026-08-10T11:30:00.000Z"));
+    expect(slider()).toHaveAttribute("aria-valuenow", "23");
   });
 
   test("a drag does not fight the play button", () => {
@@ -312,17 +321,17 @@ describe("dragging — the handle's rate and the commit's rate are not the same"
     down(240);
     move(-500);
     stepFrame();
-    expect(cursor()).toBe(RANGE.start);
+    expect(cursor()).toBe(FIRST_CURSOR);
     move(9999);
     stepFrame();
-    expect(cursor()).toBe(RANGE.end);
+    expect(cursor()).toBe(LAST_CURSOR);
   });
 
   test("moves before any press are ignored", () => {
     renderTrack();
     move(300);
     expect(committed).toEqual([]);
-    expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
+    expect(cursor()).toBe("2026-08-10T23:30:00.000Z");
   });
 });
 
@@ -332,16 +341,16 @@ describe("when focus changes underneath it", () => {
     const view = render(<ScrubTrack />);
     // Both countries are drawn, but GB is focused and GB publishes every 30 minutes — the
     // track steps on what is being read, not on the finest grid present.
-    expect(slider()).toHaveAttribute("aria-valuemax", "96");
+    expect(slider()).toHaveAttribute("aria-valuemax", "95");
 
     act(() => setFocusedCountry("NL"));
     view.rerender(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuemax", "192");
+    expect(slider()).toHaveAttribute("aria-valuemax", "191");
     expect(slider()).toHaveAccessibleName("Time cursor, 15-minute steps");
 
     // And a step is now a quarter hour rather than a half.
     fireEvent.keyDown(slider(), { key: "ArrowRight" });
-    expect(cursor()).toBe("2026-08-11T00:15:00.000Z");
+    expect(cursor()).toBe("2026-08-10T23:45:00.000Z");
   });
 
   test("coarsening the grid moves the cursor forward onto a slot GB actually publishes", () => {
@@ -362,11 +371,11 @@ describe("when focus changes underneath it", () => {
 
   test("enabling another country leaves the grid alone", () => {
     const view = render(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuemax", "96");
+    expect(slider()).toHaveAttribute("aria-valuemax", "95");
 
     act(() => setEnabledCountries(["GB", "NL"]));
     view.rerender(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuemax", "96");
+    expect(slider()).toHaveAttribute("aria-valuemax", "95");
   });
 });
 
