@@ -27,7 +27,7 @@ import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
 import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
-import useGlobalState, { useCountryState, getCursorNow } from "../helpers/globalState";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { DELTA_BUCKET } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { useTokens } from "../helpers/colour";
@@ -400,10 +400,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [showNHourView] = useGlobalState("showNHourView");
   const [isSitesChart] = useGlobalState("isSitesChart");
   const [largeScreenMode] = useGlobalState("dashboardMode");
-  // The "now" reference line, on the cursor grid — it is compared against `timeOfInterest`,
-  // which is the cursor, so the two have to be rounded the same way. The helper this replaced
-  // read `getMinutes()` off a local-zone `Date`, which also only worked by cancellation.
-  const currentTime = getCursorNow().slice(0, 16);
+  // The LIVE line sits on the label of the period in progress, which the caller resolves for its
+  // country. This used to read `getCursorNow()`, a period start, and ignore the prop — so on a
+  // period-end country (GB) LIVE sat one period early, and the delta tooltip blanked the last
+  // finished period instead of the one in progress.
+  const currentTime = timeNow.slice(0, 16);
 
   /**
    * Dragging the cursor pill.
