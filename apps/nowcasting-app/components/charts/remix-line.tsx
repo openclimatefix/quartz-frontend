@@ -25,6 +25,7 @@ import {
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
+import { useGenerationSources } from "../../hooks/data/use-regions";
 import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
@@ -121,6 +122,17 @@ export type ChartDataBase = {
 };
 export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound & PLevelBounds;
 
+/**
+ * `pv-remix-chart.tsx`'s `GENERATION_CHART_KEYS`, duplicated rather than imported: that file
+ * imports this one. Observers land on these keys in manifest order.
+ */
+const GENERATION_KEYS = ["GENERATION", "GENERATION_UPDATED"] as const;
+
+/**
+ * The generation entries are fallbacks only: the dashboard charts replace them with the
+ * focused country's observer labels from the manifest, as the legend does. These are GB's,
+ * and used to be shown for every country.
+ */
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Live Actual",
@@ -493,6 +505,16 @@ const RemixLine: React.FC<RemixLineProps> = ({
    * this country publishes — the band is one cadence wide by construction.
    */
   const focusedCountry = useFocusedCountry();
+  const generationSources = useGenerationSources(
+    !isSitesChart && focusedCountry ? { country: focusedCountry, source: "solar" } : null
+  );
+  const tooltipLabels = useMemo(() => {
+    const labels = { ...toolTiplabels };
+    (generationSources.data ?? []).slice(0, GENERATION_KEYS.length).forEach((source, index) => {
+      labels[GENERATION_KEYS[index]] = source.label;
+    });
+    return labels;
+  }, [generationSources.data]);
   // Only a chart with bars draws its categories as bands; see `periodBandShape`.
   const periodShape = deltaView ? periodBandShape : undefined;
   const cursorPeriod = useMemo(() => {
@@ -1461,7 +1483,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                         <div className="pr-3 font-mono tabular-nums">{tooltipHeading}</div>
                         <div>{isSitesChart ? "KW" : "MW"}</div>
                       </li>
-                      {Object.entries(toolTiplabels)
+                      {Object.entries(tooltipLabels)
                         .filter(
                           ([key]) =>
                             (data[key] !== undefined &&

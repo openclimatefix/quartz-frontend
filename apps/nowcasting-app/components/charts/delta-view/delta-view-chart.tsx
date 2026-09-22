@@ -315,6 +315,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   // Observers come from the manifest, never a hardcoded pair — see pv-remix-chart.tsx.
   const generationSources = useGenerationSources(scope);
+  // Named after whoever publishes this country's generation; GB's name until the manifest
+  // resolves, as in the header and the chart tooltip.
+  const observerLabel = generationSources.data?.[0]?.label ?? "PV Live";
   const observers = useMemo(
     () => (generationSources.data ?? []).map((source) => source.name),
     [generationSources.data]
@@ -524,7 +527,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
           <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
           {!hasGspPvInitialForSelectedTime && (
             <div className="flex flex-1 m-3 p-4 font-thin tracking-wide border border-dashed border-content-secondary rounded-md justify-center items-center text-center text-content-secondary">
-              [ Delta values not available until PV Live output available ]
+              [ Delta values not available until {observerLabel} output available ]
             </div>
           )}
           {hasGspPvInitialForSelectedTime && gspDeltas && (

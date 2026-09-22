@@ -2,6 +2,7 @@ import { theme } from "../../../tailwind.config";
 import { ClockIcon } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
 import useGlobalState from "../../helpers/globalState";
+import { useGenerationSources } from "../../../hooks/data/use-regions";
 import { useFocusedCountry } from "../../../hooks/data";
 import { getCountryConfig } from "../../../config/countries";
 import { comparisonTitle } from "../../helpers/comparison";
@@ -233,6 +234,12 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   // Falls back to the code rather than to "National": if the registry has no entry the code is
   // at least true, where a generic word would quietly identify nothing.
   const countryName = getCountryConfig(focusedCountry)?.displayName ?? focusedCountry;
+  // The observed figure is whoever publishes this country's generation, not GB's PV Live.
+  // GB's name is the fallback for the render before the manifest resolves.
+  const generationSources = useGenerationSources(
+    focusedCountry ? { country: focusedCountry, source: "solar" } : null
+  );
+  const observerLabel = generationSources.data?.[0]?.label ?? "PV Live";
   return (
     <div
       data-test="national-chart-header"
@@ -250,7 +257,7 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
       <div className="flex flex-2 justify-between">
         <div className="pr-3 lg:pr-4">
           <ForecastHeadlineFigure
-            tip={`PV Live / OCF Forecast`}
+            tip={`${observerLabel} / OCF Forecast`}
             time={pvTimeOnly}
             times={pvTimeRange}
             color="solar"
