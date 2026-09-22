@@ -227,21 +227,21 @@ describe("with the manifest loaded", () => {
         HttpResponse.json([
           ...(countriesFixture as unknown[]),
           {
-            country: "DE",
-            name: "Deutschland",
-            capacity_kW: 90000000,
-            centroid: { lat: 51.16, lng: 10.45 },
+            country: "FR",
+            name: "France",
+            capacity_kW: 25000000,
+            centroid: { lat: 46.6, lng: 2.4 },
             region_types: [],
             generation_sources: []
           }
         ])
       )
     );
-    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "DE"] };
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "FR"] };
     renderToggle();
-    await waitFor(() => expect(screen.getByRole("radio", { name: "DE" })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("radio", { name: "FR" })).toBeInTheDocument());
 
-    expect(screen.getByRole("radio", { name: "DE" })).toBeDisabled();
+    expect(screen.getByRole("radio", { name: "FR" })).toBeDisabled();
   });
 });
 

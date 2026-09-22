@@ -43,4 +43,11 @@ describe("formatRegionLabel", () => {
     expect(formatRegionLabel(null, "titleCase")).toBe("");
     expect(formatRegionLabel("", "titleCase")).toBe("");
   });
+
+  it("looks a name up in a names table, and shows an unlisted one raw", () => {
+    const style = { names: { tennet: "TenneT", "50hertz": "50Hertz" } };
+    expect(formatRegionLabel("tennet", style)).toBe("TenneT");
+    expect(formatRegionLabel("50hertz", style)).toBe("50Hertz");
+    expect(formatRegionLabel("amprion", style)).toBe("amprion");
+  });
 });

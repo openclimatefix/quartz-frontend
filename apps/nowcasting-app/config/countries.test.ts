@@ -14,7 +14,7 @@ const entries = Object.entries(COUNTRY_CONFIG);
 
 describe("COUNTRY_CONFIG", () => {
   test("carries the countries the manifest currently serves", () => {
-    expect(configuredCountryCodes().sort()).toEqual(["GB", "NL"]);
+    expect(configuredCountryCodes().sort()).toEqual(["DE", "GB", "NL"]);
   });
 
   test.each(entries)("%s is well-formed", (key, config: CountryConfig) => {
@@ -181,7 +181,7 @@ describe("getCountryConfig", () => {
 
   // /countries returns every country the API serves, so the manifest can name one this
   // build has no entry for. That must be a miss, not a throw.
-  test.each([["DE"], [""], ["not-a-country"]])("returns undefined for %p", (input) => {
+  test.each([["FR"], [""], ["not-a-country"]])("returns undefined for %p", (input) => {
     expect(getCountryConfig(input)).toBeUndefined();
   });
 

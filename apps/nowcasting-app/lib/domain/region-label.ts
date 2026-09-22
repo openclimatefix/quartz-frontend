@@ -17,8 +17,14 @@
  * region's `name`, so they never reach this function.
  */
 
-/** How a region type's raw names should be written for display. */
-export type RegionNameStyle = "raw" | "titleCase";
+/**
+ * How a region type's raw names should be written for display.
+ *
+ * `{ names }` is for names whose capitals no rule can recover: DE's TSOs are served
+ * `tennet` and `50hertz`, and title case gives "Tennet" where the company is "TenneT". The
+ * table is keyed by the raw name; a name it does not list is shown raw.
+ */
+export type RegionNameStyle = "raw" | "titleCase" | { names: Record<string, string> };
 
 /**
  * Word boundaries for title casing: whitespace and hyphens, both preserved.
@@ -54,5 +60,6 @@ export const formatRegionLabel = (
   style: RegionNameStyle = "raw"
 ): string => {
   if (!label) return "";
+  if (typeof style === "object") return style.names[label] ?? label;
   return style === "titleCase" ? titleCase(label) : label;
 };

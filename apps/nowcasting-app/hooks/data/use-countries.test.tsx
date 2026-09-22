@@ -137,7 +137,7 @@ describe("useCountries", () => {
     expect(result.current.countries.every((c) => c.entitled)).toBe(true);
   });
 
-  // Phase 6 adds DE by adding a registry entry. Until it does, a DE in the manifest must
+  // A country with no registry entry (FR here) that appears in the manifest must
   // still list — discoverable and flagged — rather than be dropped or crash the app.
   test("a manifest country with no registry entry is listed and flagged", async () => {
     server.use(
@@ -145,8 +145,8 @@ describe("useCountries", () => {
         HttpResponse.json([
           ...(countriesFixture as unknown[]),
           {
-            country: "DE",
-            name: "Deutschland",
+            country: "FR",
+            name: "France",
             capacity_kW: 90000000,
             centroid: { lat: 51.16, lng: 10.45 },
             region_types: [],
@@ -155,16 +155,16 @@ describe("useCountries", () => {
         ])
       )
     );
-    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "DE"] };
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB", "FR"] };
 
     const { result } = renderCountries();
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const de = result.current.countries.find((c) => c.code === "DE");
-    expect(de).toBeDefined();
-    expect(de?.configured).toBe(false);
-    expect(de?.config).toBeUndefined();
-    expect(de?.entitled).toBe(true);
+    const fr = result.current.countries.find((c) => c.code === "FR");
+    expect(fr).toBeDefined();
+    expect(fr?.configured).toBe(false);
+    expect(fr?.config).toBeUndefined();
+    expect(fr?.entitled).toBe(true);
   });
 
   test("caches the manifest across consumers rather than refetching", async () => {

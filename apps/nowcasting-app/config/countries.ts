@@ -539,6 +539,94 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: null,
     seasonalNorms: null,
     auth0Role: "NL_ROLE_ID"
+  },
+  DE: {
+    code: "DE",
+    displayName: "Germany",
+    timezone: "Europe/Berlin",
+    locale: "de-DE",
+    // Forecast and ENTSO-E generation both arrive every 15 minutes.
+    cadenceMinutes: 15,
+    // **UNCONFIRMED.** Period-start is what ENTSO-E's Transparency Platform (and entsoe-py)
+    // label by, and matches NL, but nobody has said how the DE pipeline stores it. A wrong
+    // value here is one slot out everywhere and looks fine on screen; see NL's note.
+    slotLabelling: "period-start",
+    // Centred on the manifest's DE centroid (51.16, 10.45). DE is about 2.4x NL's width, so
+    // the default zoom is NL's 6.5 less log2(2.4). Bounds are the TSO boundary file's extent.
+    map: {
+      center: { lng: 10.45, lat: 51.16 },
+      zoom: 5.25,
+      minZoom: 0,
+      maxZoom: 14,
+      bounds: [5.87, 47.27, 15.04, 55.06]
+    },
+    // Scaled from GB's region bands the same way NL's were: by the largest region's peak.
+    // TenneT holds 21.5 GW of the 58.2 GW, and DE's national peak runs about 0.65 of
+    // capacity (38.0 GW in ENTSO-E's 2026-09-16 day), so TenneT peaks near 14 GW:
+    // 13,500 / 450 = 30. The other TSOs (7.9-15.4 GW installed) spread across the lower bands.
+    mapBands: {
+      region: [1500, 4500, 7500, 10500, 13500],
+      grouped: null
+    },
+    // DE's only observer.
+    mapObserver: "entsoe_de",
+    // Boundaries: SMARD's control-area files (BNetzA, 2012, GeoNutzV licence), simplified.
+    // The national outline is the four areas dissolved.
+    geo: {
+      national: {
+        url: "/geo/de/national.json",
+        joinProperty: "name",
+        minZoom: 0,
+        maxZoom: 5
+      },
+      tso: {
+        url: "/geo/de/tso.json",
+        // Features are named as SMARD writes them ("TenneT"); v1 serves them lowercased.
+        joinProperty: "name",
+        joinTransform: "lowercase",
+        label: "TSO",
+        // v1 serves no `full_name`, and title case would give "Tennet" and "Transnetbw".
+        regionNameStyle: {
+          names: {
+            "50hertz": "50Hertz",
+            amprion: "Amprion",
+            tennet: "TenneT",
+            transnetbw: "TransnetBW"
+          }
+        },
+        minZoom: 5,
+        maxZoom: 14
+      }
+    },
+    derivedRegionTypes: {},
+    // DE has no `blend`; the manifest's default model is the combined one. The single-source
+    // lines reuse GB's keys, so they share GB's colours and legend entries. Not charted:
+    // `ecmwf_pv` (two inputs, not one) and `pv`, which has no line or colour yet.
+    nationalChartSeries: [
+      { key: "FORECAST", model: "ecmwf_mo_pv_sat", label: "Current" },
+      {
+        key: "INTRADAY_ECMWF_ONLY",
+        model: "ecmwf",
+        label: "ECMWF-only",
+        legend: { iconClasses: "text-series-ecmwf", tooltipInputs: ["ECMWF"] }
+      },
+      {
+        key: "MET_OFFICE_ONLY",
+        model: "mo",
+        label: "Met Office-only",
+        legend: { iconClasses: "text-series-metOffice", tooltipInputs: ["MET_OFFICE"] }
+      },
+      {
+        key: "SAT_ONLY",
+        model: "sat_8h",
+        label: "Satellite-only",
+        legend: { iconClasses: "text-series-satellite", tooltipInputs: ["SAT"] }
+      }
+    ],
+    overlays: [],
+    publisher: { name: "ENTSO-E", url: "https://transparency.entsoe.eu/" },
+    seasonalNorms: null,
+    auth0Role: "DE_ROLE_ID"
   }
 };
 

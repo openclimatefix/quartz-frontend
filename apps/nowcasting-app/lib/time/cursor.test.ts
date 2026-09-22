@@ -31,9 +31,9 @@ describe("cadence from the registry", () => {
   });
 
   it("falls back for a country the build has no entry for", () => {
-    expect(cadenceMinutesFor("DE")).toBe(FALLBACK_CADENCE_MINUTES);
+    expect(cadenceMinutesFor("FR")).toBe(FALLBACK_CADENCE_MINUTES);
     expect(cadenceMinutesFor(undefined)).toBe(FALLBACK_CADENCE_MINUTES);
-    expect(slotLabellingFor("DE")).toBe("period-end");
+    expect(slotLabellingFor("FR")).toBe("period-end");
   });
 
   it("keeps every configured cadence a divisor of an hour", () => {
@@ -228,7 +228,7 @@ describe("slotForInstant — the cursor resolved to one country's grid", () => {
   });
 
   it("falls back to a 30-minute period-end grid for an unconfigured country", () => {
-    expect(slotForInstant("2026-08-10T16:15:00.000Z", "DE")).toBe("2026-08-10T16:30:00.000Z");
+    expect(slotForInstant("2026-08-10T16:15:00.000Z", "FR")).toBe("2026-08-10T16:30:00.000Z");
   });
 });
 
@@ -273,7 +273,7 @@ describe("periodForInstant — the span a slot covers, not the label it goes by"
     };
     expect(lengthMinutes("2026-08-10T16:05:00.000Z", "GB")).toBe(30);
     expect(lengthMinutes("2026-08-10T16:05:00.000Z", "NL")).toBe(15);
-    expect(lengthMinutes("2026-08-10T16:05:00.000Z", "DE")).toBe(FALLBACK_CADENCE_MINUTES);
+    expect(lengthMinutes("2026-08-10T16:05:00.000Z", "FR")).toBe(FALLBACK_CADENCE_MINUTES);
   });
 
   it("follows the registry field rather than a baked-in direction", () => {
