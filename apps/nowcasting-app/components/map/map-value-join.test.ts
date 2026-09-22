@@ -461,6 +461,15 @@ const evaluate = (
   }
 };
 
+/**
+ * The MW ramp's value at a given power, worked out by hand against a country's own top
+ * threshold — the same linear interpolation `bandExpression` performs, but computed here from
+ * `COUNTRY_CONFIG`'s numbers rather than by calling into the module under test. Used to predict
+ * concrete opacities for real thresholds, not to restate the source as a tautology.
+ */
+const rampAt = (power: number, top: number): number =>
+  power >= top ? 1 : ZERO_OPACITY + (power / top) * (1 - ZERO_OPACITY);
+
 describe("paint expressions render the three states distinctly", () => {
   const base = { power: 0, normalized: 0, capacity: 100, deltaBucket: 0, hasDelta: false };
   const unpublished = { ...base, dataState: "unpublished" };
@@ -491,28 +500,62 @@ describe("paint expressions render the three states distinctly", () => {
     expect(evaluate(colour, genuineZero)).not.toBe(NO_DATA_COLOR);
   });
 
-  test("the MW bands match the labels ColorGuideBar draws", () => {
-    expect(evaluate(opacity, { ...base, dataState: "value", power: 49 }, GB)).toBe(0.03);
-    expect(evaluate(opacity, { ...base, dataState: "value", power: 50 }, GB)).toBe(0.2);
-    expect(evaluate(opacity, generating, GB)).toBe(0.6);
+  test("the MW ramp runs GB's own scale, saturating at its top threshold", () => {
+    const top = COUNTRY_CONFIG.GB.mapBands.region[COUNTRY_CONFIG.GB.mapBands.region.length - 1]; // 450
+    expect(evaluate(opacity, { ...base, dataState: "value", power: 49 }, GB)).toBeCloseTo(
+      rampAt(49, top),
+      6
+    );
+    expect(evaluate(opacity, { ...base, dataState: "value", power: 50 }, GB)).toBeCloseTo(
+      rampAt(50, top),
+      6
+    );
+    expect(evaluate(opacity, generating, GB)).toBeCloseTo(rampAt(300, top), 6);
+    // At and above the top threshold the ramp is fully saturated.
+    expect(evaluate(opacity, { ...base, dataState: "value", power: 450 }, GB)).toBe(1);
     expect(evaluate(opacity, { ...base, dataState: "value", power: 999 }, GB)).toBe(1);
   });
 
-  test("grouped levels use the ten-times bands the zone/DNO legend shows", () => {
-    expect(evaluate(opacity, { ...base, dataState: "value", power: 300, grouped: true }, GB)).toBe(
-      0.03
-    );
-    expect(evaluate(opacity, { ...base, dataState: "value", power: 3000, grouped: true }, GB)).toBe(
-      0.6
-    );
+  test("grouped levels ramp against the ten-times DNO/zone scale, not the region scale", () => {
+    const groupedTop =
+      COUNTRY_CONFIG.GB.mapBands.grouped![COUNTRY_CONFIG.GB.mapBands.grouped!.length - 1]; // 4500
+    expect(
+      evaluate(opacity, { ...base, dataState: "value", power: 300, grouped: true }, GB)
+    ).toBeCloseTo(rampAt(300, groupedTop), 6);
+    expect(
+      evaluate(opacity, { ...base, dataState: "value", power: 3000, grouped: true }, GB)
+    ).toBeCloseTo(rampAt(3000, groupedTop), 6);
+    // Same power reads far fainter grouped than ungrouped, because the grouped scale's top is
+    // ten times taller.
+    const ungrouped = evaluate(
+      opacity,
+      { ...base, dataState: "value", power: 300, grouped: false },
+      GB
+    ) as number;
+    const grouped = evaluate(
+      opacity,
+      { ...base, dataState: "value", power: 300, grouped: true },
+      GB
+    ) as number;
+    expect(grouped).toBeLessThan(ungrouped);
   });
 
-  test("one expression bands a grouped and an ungrouped feature differently in the same frame", () => {
+  test("one expression ramps a grouped and an ungrouped feature differently in the same frame", () => {
     // The reason grouped-ness became feature state: GB on its DNO rollup and NL on provinces
     // are drawn by the same paint expression, and 300 MW means different things to each.
     const value = { ...base, dataState: "value", power: 300 };
-    expect(evaluate(opacity, { ...value, grouped: true }, GB)).toBe(0.03);
-    expect(evaluate(opacity, { ...value, grouped: false }, GB)).toBe(0.6);
+    const regionTop =
+      COUNTRY_CONFIG.GB.mapBands.region[COUNTRY_CONFIG.GB.mapBands.region.length - 1];
+    const groupedTop =
+      COUNTRY_CONFIG.GB.mapBands.grouped![COUNTRY_CONFIG.GB.mapBands.grouped!.length - 1];
+    expect(evaluate(opacity, { ...value, grouped: true }, GB)).toBeCloseTo(
+      rampAt(300, groupedTop),
+      6
+    );
+    expect(evaluate(opacity, { ...value, grouped: false }, GB)).toBeCloseTo(
+      rampAt(300, regionTop),
+      6
+    );
   });
 
   // -------------------------------------------------------------------------------------
@@ -520,40 +563,52 @@ describe("paint expressions render the three states distinctly", () => {
   // producing 1.3 GW — a normal midday value — sat in the same top band as everything else
   // and the whole country read as flat.
   // -------------------------------------------------------------------------------------
-  test("the same MW value lands in a different band in each country", () => {
+  test("the same MW value lands at a different point on each country's ramp", () => {
     const value = { ...base, dataState: "value", power: 1300 };
-    // GB GSP: 1.3 GW is far past the 450 MW top band.
+    // GB GSP: 1.3 GW is far past the 450 MW top threshold, so the ramp is saturated.
     expect(evaluate(opacity, value, GB)).toBe(1);
-    // NL province: 1.3 GW is Drenthe at midday — mid-scale, not saturated.
-    expect(evaluate(opacity, value, NL)).toBe(0.4);
+    // NL province: 1.3 GW is Drenthe at midday — mid-scale on NL's own 3.6 GW top, not
+    // saturated.
+    expect(evaluate(opacity, value, NL)).toBeCloseTo(rampAt(1300, 3600), 6);
   });
 
-  test("NL's provinces spread across the bands instead of pinning to one", () => {
-    const at = (power: number) => evaluate(opacity, { ...base, dataState: "value", power }, NL);
-    // Zeeland's peak, Drenthe's peak, Noord-Brabant's peak. Three provinces, three bands.
-    expect(at(753)).toBe(0.2);
-    expect(at(1313)).toBe(0.4);
-    expect(at(3654)).toBe(1);
-    // And a genuine zero is still the faintest band, not nothing.
-    expect(at(0)).toBe(0.03);
+  test("NL's provinces spread continuously across the ramp instead of pinning to one band", () => {
+    const at = (power: number) =>
+      evaluate(opacity, { ...base, dataState: "value", power }, NL) as number;
+    // Zeeland's peak, Drenthe's peak, Noord-Brabant's peak: three provinces, three different
+    // points on NL's own ramp — and, unlike six fixed bands, genuinely distinguishable from
+    // each other rather than three ways of saying "top band".
+    expect(at(753)).toBeCloseTo(rampAt(753, 3600), 6);
+    expect(at(1313)).toBeCloseTo(rampAt(1313, 3600), 6);
+    expect(at(3654)).toBe(1); // past NL's 3.6 GW top: saturated.
+    expect(at(753)).toBeLessThan(at(1313));
+    expect(at(1313)).toBeLessThan(at(3654));
+    // And a genuine zero is still the faintest opacity, not nothing.
+    expect(at(0)).toBe(ZERO_OPACITY);
   });
 
-  test("a grouped GB feature and a plain NL feature in one frame each get their own country's thresholds", () => {
+  test("a grouped GB feature and a plain NL feature in one frame each get their own country's ramp", () => {
     // The frame this whole design exists for: GB on its DNO rollup next to NL on provinces.
-    // 3,000 MW is band 4 for a GB DNO and band 5 for an NL province: two different countries'
-    // scales, one expression, one frame.
+    // 3,000 MW is most of the way up a GB DNO's 4.5 GW top and most of the way up an NL
+    // province's 3.6 GW top: two different countries' scales, one expression, one frame.
     const value = { ...base, dataState: "value", power: 3000 };
-    expect(evaluate(opacity, { ...value, grouped: true }, GB)).toBe(0.6);
-    expect(evaluate(opacity, value, NL)).toBe(0.8);
+    const gbGroupedOpacity = evaluate(opacity, { ...value, grouped: true }, GB) as number;
+    const nlOpacity = evaluate(opacity, value, NL) as number;
+    expect(gbGroupedOpacity).toBeCloseTo(rampAt(3000, 4500), 6);
+    expect(nlOpacity).toBeCloseTo(rampAt(3000, 3600), 6);
+    // NL, closer to its own (shorter) top, reads brighter than GB on its grouped scale.
+    expect(nlOpacity).toBeGreaterThan(gbGroupedOpacity);
   });
 
   test("NL has no grouped tier, so nothing can hand it GB's grouped numbers", () => {
     expect(mapBandsFor("NL", true)).toBeUndefined();
     expect(COUNTRY_CONFIG.NL.mapBands.grouped).toBeNull();
-    // Even if a `grouped` flag somehow reached an NL feature, it stays on NL's region bands
-    // rather than falling through to GB's 4.5 GW ceiling.
+    // Even if a `grouped` flag somehow reached an NL feature, it stays on NL's own 3.6 GW
+    // region ramp rather than falling through to GB's 4.5 GW grouped ceiling.
     const value = { ...base, dataState: "value", power: 3000, grouped: true };
-    expect(evaluate(opacity, value, NL)).toBe(0.8);
+    const nlOpacity = evaluate(opacity, value, NL) as number;
+    expect(nlOpacity).toBeCloseTo(rampAt(3000, 3600), 6);
+    expect(nlOpacity).not.toBeCloseTo(rampAt(3000, 4500), 6);
   });
 
   test("an unstamped feature is conspicuous rather than plausibly faint", () => {
@@ -617,14 +672,33 @@ describe("paint expressions render the three states distinctly", () => {
 
   test("capacity mode is not gated on dataState — capacity is known regardless", () => {
     const capacity = fillOpacityExpression(ActiveUnit.capacity);
-    expect(evaluate(capacity, { ...unpublished, capacity: 300 }, GB)).toBe(0.6);
+    // A region that has published nothing still draws its installed capacity, on the capacity
+    // ramp's own top rather than the output ramp's.
+    expect(evaluate(capacity, { ...unpublished, capacity: 300 }, GB)).toBeCloseTo(
+      rampAt(300, COUNTRY_CONFIG.GB.mapBands.capacityTop.region),
+      6
+    );
   });
 
-  test("capacity mode uses the same per-country scale as MW", () => {
+  test("capacity has its own top, because installed capacity dwarfs output", () => {
     const capacity = fillOpacityExpression(ActiveUnit.capacity);
-    // Zeeland's installed 943 MW: past GB's top GSP band, second band on NL's own scale.
-    expect(evaluate(capacity, { ...unpublished, capacity: 943 }, GB)).toBe(1);
-    expect(evaluate(capacity, { ...unpublished, capacity: 943 }, NL)).toBe(0.2);
+    const power = fillOpacityExpression(ActiveUnit.MW);
+    // Zeeland's installed 943 MW on NL. Against NL's output top (3.6 GW) that is a quarter of
+    // the way up; against its capacity top (4.5 GW) it is a fifth — different scales, which
+    // is the whole point. Sharing one saturated every DE region at once, since DE's smallest
+    // TSO holds 7.9 GW against an output top of 13.5 GW.
+    expect(evaluate(capacity, { ...unpublished, capacity: 943 }, NL)).toBeCloseTo(
+      rampAt(943, COUNTRY_CONFIG.NL.mapBands.capacityTop.region),
+      6
+    );
+    expect(evaluate(capacity, { ...unpublished, capacity: 943 }, NL)).not.toBeCloseTo(
+      rampAt(943, 3600),
+      6
+    );
+    // DE's largest TSO is at the top of the capacity ramp and past the top of the output one.
+    const DE = { country: "DE" };
+    expect(evaluate(capacity, { ...unpublished, capacity: 21514 }, DE)).toBeLessThan(1);
+    expect(evaluate(power, { ...generating, power: 21514 }, DE)).toBe(1);
   });
 
   // -------------------------------------------------------------------------------------
@@ -672,7 +746,12 @@ describe("paint expressions render the three states distinctly", () => {
       ]);
     });
 
-    test("every country's labels name the values that switch bands, in both directions", () => {
+    // Under the old six `step` bands every threshold was itself an opacity boundary, so this
+    // test could check each of the five thresholds both directions. A continuous ramp only has
+    // one true boundary — the top, where it saturates — so that is what survives here: the
+    // legend's last label is still the number the expression treats as "full opacity from here
+    // on", checked for every country and tier, in both directions.
+    test("every country's top label is where its ramp saturates, and only there", () => {
       Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
         (
           [
@@ -684,17 +763,16 @@ describe("paint expressions render the three states distinctly", () => {
           if (!thresholds) return;
           const labels = bandLabels(thresholds);
           expect(labels).toHaveLength(BAND_OPACITIES.length);
-          // The numbers printed on the pills ARE the thresholds the expression steps at.
+          // The numbers printed on the labels ARE the thresholds the ramp is built from — the
+          // top of them is the ramp's top stop, and `ValueRamp` ticks the rest along its width.
           expect(boundariesOf(labels)).toEqual([...thresholds]);
-          thresholds.forEach((threshold, index) => {
-            const at = (power: number) =>
-              evaluate(opacity, { ...base, dataState: "value", power, grouped }, { country: code });
-            // A value on a threshold is in the band the label above it names, and a value
-            // just below it is in the band before. Both directions, so an off-by-one in
-            // either the expression or the labels fails.
-            expect(at(threshold)).toBe(BAND_OPACITIES[index + 1]);
-            expect(at(threshold - 1)).toBe(BAND_OPACITIES[index]);
-          });
+          const top = thresholds[thresholds.length - 1];
+          const at = (power: number) =>
+            evaluate(opacity, { ...base, dataState: "value", power, grouped }, { country: code });
+          // At the top threshold the ramp is fully saturated; just below it, it is not — an
+          // off-by-one in either the expression or the top threshold fails this.
+          expect(at(top)).toBe(1);
+          expect(at(top - 1)).toBeLessThan(1);
         });
       });
     });

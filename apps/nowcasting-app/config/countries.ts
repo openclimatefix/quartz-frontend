@@ -138,15 +138,23 @@ export type MapBandThresholds = readonly [number, number, number, number, number
  * value is "there is no such thing here". Writing it explicitly is what stops the next country
  * silently inheriting GB's 4.5 GW ceiling the way NL inherited its 450 MW one.
  *
- * MW mode and capacity mode share one scale, as they always have — installed capacity and
- * instantaneous output are both megawatts of the same region, and a scale that reads well for
- * one reads well for the other.
+ * MW mode and capacity mode no longer share one scale. They did, on the reasoning that both
+ * are megawatts of the same region — but output peaks at a fraction of capacity, so a ramp
+ * sized to output saturates on every region the moment it is asked to draw capacity. DE made
+ * it plain: a 13.5 GW top against four TSOs holding 7.9-21.5 GW painted the whole country one
+ * flat colour. `capacityTop` is where the capacity ramp saturates instead — the country's
+ * largest region, rounded up.
  */
 export type MapBandsConfig = {
   /** Thresholds for one API-served region. */
   region: MapBandThresholds;
   /** Thresholds for a client-side grouping, or `null` where the country has none. */
   grouped: MapBandThresholds | null;
+  /**
+   * Where the CAPACITY ramp saturates, in MW: `region` for an API-served region, `grouped`
+   * for a client-side rollup (`null` where the country has no grouped tier).
+   */
+  capacityTop: { region: number; grouped: number | null };
 };
 
 export type MapDefaults = {
@@ -375,7 +383,12 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // steps below it spread the rest. The grouped set is exactly ten times the region set.
     mapBands: {
       region: [50, 150, 250, 350, 450],
-      grouped: [500, 1500, 2500, 3500, 4500]
+      grouped: [500, 1500, 2500, 3500, 4500],
+      // The largest GSP holds 654 MW (the 99th percentile 507), so 700 covers every GSP with
+      // a little headroom for a capacity register that only grows. The grouped figure is the
+      // largest DNO licence area's share of the 22.6 GW total, rounded up — REVISIT when a
+      // capacity-by-DNO number is to hand; it is an estimate, unlike the region one.
+      capacityTop: { region: 700, grouped: 4000 }
     },
     // PV Live Estimated — the in-day observer. This is what the map has always drawn (it was
     // `[0]` of the manifest); naming it changes no pixels, only who decided it.
@@ -509,7 +522,9 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     //
     // The ratio is the claim here, not five hand-picked numbers — if NL's installed base
     // grows, rescale from the largest province's peak the same way.
+    // Noord-Brabant holds 4,437 MW of the 25.1 GW, so the capacity ramp tops out at 4.5 GW.
     mapBands: {
+      capacityTop: { region: 4500, grouped: null },
       region: [400, 1200, 2000, 2800, 3600],
       // No `derivedRegionTypes`, so no grouped tier can ever be asked for. Explicitly absent
       // rather than inherited: see `MapBandsConfig`.
@@ -581,7 +596,9 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // 13,500 / 450 = 30. The other TSOs (7.9-15.4 GW installed) spread across the lower bands.
     mapBands: {
       region: [1500, 4500, 7500, 10500, 13500],
-      grouped: null
+      grouped: null,
+      // TenneT holds 21,514 MW of the 58.2 GW; 22 GW is that rounded up.
+      capacityTop: { region: 22000, grouped: null }
     },
     // DE's only observer.
     mapObserver: "entsoe_de",

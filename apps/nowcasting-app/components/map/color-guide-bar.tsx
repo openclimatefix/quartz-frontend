@@ -7,6 +7,7 @@ import { ComparisonSelection } from "../helpers/comparison";
 import {
   BAND_OPACITIES,
   bandLabels,
+  capacityTopFor,
   mapBandsFor,
   NORMALIZED_TICKS,
   normalizedTickLabels,
@@ -128,7 +129,11 @@ const PercentRamp: React.FC = () => {
         {NORMALIZED_TICKS.map((fraction, index) => (
           <span
             key={fraction}
-            className="absolute -translate-x-1/2 whitespace-nowrap tabular-nums"
+            // Centred on its own tick, except the last, which is held flush to the right edge:
+            // centred, half of "80%+" hangs off the panel.
+            className={`absolute whitespace-nowrap tabular-nums ${
+              index === NORMALIZED_TICKS.length - 1 ? "-translate-x-full" : "-translate-x-1/2"
+            }`}
             style={{ left: `${Math.min(100, (fraction / PERCENT_RAMP_TOP) * 100)}%` }}
           >
             {ticks[index]}
@@ -140,7 +145,89 @@ const PercentRamp: React.FC = () => {
   );
 };
 
-/** The six pills, from a label per band. Opacity and text colour are fixed per position. */
+/**
+ * The megawatt legend: the same ramp as `PercentRamp`, ticked at the country's own thresholds.
+ *
+ * The pills went when the map's megawatt paint went continuous — six swatches describing an
+ * unbroken ramp would be a second, coarser account of the same scale. The numbers are the
+ * unchanged `mapBands` thresholds, in the country's display unit; the last is where the ramp
+ * saturates, hence its "+".
+ */
+/**
+ * Round numbers to tick a ramp at, given where it saturates.
+ *
+ * The thresholds themselves were the obvious choice and read badly: they are derived from a
+ * country's largest region, so DE's come out 1.5 / 4.5 / 7.5 / 10.5 against a 13.5 top, and at
+ * panel width the last two collide. A scale is easier to read at round numbers with uneven
+ * gaps than at exact ones that overlap — the ticks annotate the ramp, they do not define it.
+ *
+ * Roughly four ticks, on a 1/2/5 step (so 2, 5, 10, 20, 50 … and 0.5 where the top is small),
+ * dropping any that crowds the saturation label at the right-hand end.
+ */
+const rampTickValues = (top: number): number[] => {
+  const ticksFor = (step: number) => {
+    const values: number[] = [];
+    for (let value = step; value < top; value += step) {
+      // The saturation label ("3.6GW+") is held flush right and is wide, so the last fifth of
+      // the ramp is its own — a tick at 3 against a top of 3.6 ran into it and read "33.6GW+".
+      if ((top - value) / top < 0.2) break;
+      values.push(Number(value.toFixed(2)));
+    }
+    return values;
+  };
+
+  // 1/2/5 across every magnitude the ramp could want. The COARSEST step that still gives two
+  // ticks wins: finer steps are what push a ramp into halves and quarters, and a scale is read
+  // more easily at two round numbers than at five awkward ones.
+  const magnitudes = [-2, -1, 0, 1, 2, 3, 4].map((power) => Math.pow(10, power));
+  const steps = magnitudes.flatMap((magnitude) => [1, 2, 5].map((n) => n * magnitude));
+  const usable = steps.filter((candidate) => ticksFor(candidate).length >= 2);
+  const step = usable[usable.length - 1];
+  return step === undefined ? [] : ticksFor(step);
+};
+
+const ValueRamp: React.FC<{ thresholds: number[]; unitText: string }> = ({
+  thresholds,
+  unitText
+}) => {
+  const top = thresholds[thresholds.length - 1];
+  const ticks = rampTickValues(top);
+  return (
+    <div className="flex w-full min-w-[10rem] max-w-[16rem] flex-col dash:max-w-[24rem]">
+      <div
+        className="relative h-4 w-full rounded border border-content-on-accent bg-map-land dash:h-6"
+        style={{
+          backgroundImage: `linear-gradient(to right, ${solarAt(ZERO_OPACITY)}, ${solarAt(1)})`
+        }}
+      >
+        {ticks.map((value) => (
+          <span
+            key={value}
+            className="absolute top-0 bottom-0 w-px bg-content/50"
+            style={{ left: `${Math.min(100, (value / top) * 100)}%` }}
+          />
+        ))}
+      </div>
+      <div className="relative mt-0.5 h-3 font-mono text-2xs text-content-secondary dash:h-4 dash:text-xs">
+        {ticks.map((value) => (
+          <span
+            key={value}
+            className="absolute -translate-x-1/2 whitespace-nowrap tabular-nums"
+            style={{ left: `${(value / top) * 100}%` }}
+          >
+            {value}
+          </span>
+        ))}
+        {/* Where the ramp saturates, held flush to the right edge and carrying the unit. */}
+        <span className="absolute right-0 whitespace-nowrap tabular-nums">
+          {top}
+          {unitText}+
+        </span>
+      </div>
+    </div>
+  );
+};
+
 /**
  * The data yellow at a given opacity, as a CSS colour.
  *
@@ -167,17 +254,6 @@ const solarAt = (alpha: number) => `rgba(${SOLAR_RGB},${alpha})`;
  */
 const bandFill = (alpha: number) => `linear-gradient(${solarAt(alpha)},${solarAt(alpha)})`;
 
-const bandPills = (labels: string[]) =>
-  labels.map((value, index) => ({
-    value,
-    // The same array the paint expression steps to, as a raw alpha. It used to be rounded to a
-    // percentage for a `bg-solar/${n}` class, which needed a hand-maintained safelist; the fill
-    // is an inline gradient now, so the alpha goes through exactly as the map has it.
-    opacity: BAND_OPACITIES[index],
-    // The top three bands are dark enough to need dark text on them.
-    textColor: index < 3 ? "content" : "content-on-accent"
-  }));
-
 const SequentialBands: React.FC<{
   unit: ActiveUnit;
   currentLevel: ReturnType<typeof useCurrentAggregationLevel>;
@@ -203,7 +279,16 @@ const SequentialBands: React.FC<{
     // National level draws one polygon per country and has no useful band scale; it showed
     // nothing before and shows nothing now.
     if (!currentLevel || currentLevel.level <= 0) return undefined;
-    const thresholds = mapBandsFor(country, currentLevel.derived);
+    // Capacity has its own saturation point (`capacityTop`), because installed capacity runs
+    // several times the output a region reaches — see `MapBandsConfig`. The ramp needs only
+    // where it ends, so capacity mode hands over a single value.
+    const capacityTop = capacityTopFor(country, currentLevel.derived);
+    const thresholds =
+      unit === ActiveUnit.capacity
+        ? capacityTop === undefined
+          ? undefined
+          : [capacityTop]
+        : mapBandsFor(country, currentLevel.derived);
     if (!thresholds) return undefined;
     // The thresholds themselves stay MW — they are the map's own paint expression's numbers,
     // read from the same lookup, and nothing here is allowed to drift from that. This is a
@@ -212,7 +297,7 @@ const SequentialBands: React.FC<{
     const displayThresholds = thresholds.map((value) =>
       Number(toDisplayPower(value, displayUnit).toFixed(displayDecimalsFor(displayUnit)))
     );
-    return bandPills(bandLabels(displayThresholds));
+    return displayThresholds;
   }, [unit, currentLevel, country]);
   const displayUnit = displayUnitFor(country);
   let unitText = unit === ActiveUnit.MW ? displayUnit : "%";
@@ -240,26 +325,7 @@ const SequentialBands: React.FC<{
       */}
       <div className="flex flex-wrap gap-1 font-mono tabular-nums text-xs h-full text-content-on-accent font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
         {unit === ActiveUnit.percentage && <PercentRamp />}
-        {values?.map((value, index) => (
-          <div
-            key={value.value}
-            className={`rounded border border-content-on-accent bg-map-land px-3 py-[1px] dash:px-4 dash:py-[2px] whitespace-nowrap text-${value.textColor}`}
-            style={{ backgroundImage: bandFill(value.opacity) }}
-          >
-            {value.value}
-            {index === 0 && (
-              <span
-                className={`font-normal ${
-                  value.textColor === "content-on-accent"
-                    ? "text-surface"
-                    : "text-content-secondary"
-                } text-xs ml-1`}
-              >
-                {unitText}
-              </span>
-            )}
-          </div>
-        ))}
+        {values && <ValueRamp thresholds={values} unitText={unitText} />}
       </div>
     </div>
   );

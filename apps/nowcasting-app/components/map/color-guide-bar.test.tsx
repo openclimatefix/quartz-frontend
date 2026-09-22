@@ -52,13 +52,20 @@ const level = (regionType: string, derived = false) => ({
   derived
 });
 
+/**
+ * The megawatt/capacity legend stopped drawing six pills when the paint expression went
+ * continuous — `ValueRamp` ticks the country's own thresholds along one gradient bar instead
+ * (see `color-guide-bar.tsx`), the same shape `PercentRamp` already used. So this reads the
+ * tick labels themselves, exactly as `rampTicks` below does for the percentage ramp: every
+ * threshold gets its own label, and only the last carries the unit and the trailing "+" —
+ * there is no more "0-50MW"-style range text, because there is no more discrete first band to
+ * name a range for.
+ */
 const bandsShown = (unit: ActiveUnit): string[] => {
   const { container, unmount } = render(<ColorGuideBar comparison={null} unit={unit} />);
-  // The pills, in order. The first one carries the unit suffix in a nested span, so its text
-  // reads "0-50MW" without a space.
-  const text = Array.from(container.querySelectorAll("div.rounded")).map(
-    (node) => node.textContent ?? ""
-  );
+  const text = Array.from(container.querySelectorAll("span.absolute"))
+    .map((node) => node.textContent ?? "")
+    .filter((label) => label.length > 0);
   unmount();
   return text;
 };
@@ -69,16 +76,21 @@ describe("the legend's bands are the focused country's", () => {
     enabled = ["GB"];
     currentLevel = level("gsp");
     const bands = bandsShown(ActiveUnit.MW);
-    // "no data" is no longer among the pills — the legend carries the value scale only, and the
-    // other two states are named on hover. See the absence test below.
-    expect(bands).toEqual(["0-50MW", "50-150", "150-250", "250-350", "350-450", "450+"]);
+    // "no data" is no longer among the labels — the legend carries the value scale only, and
+    // the other two states are named on hover. See the absence test below.
+    //
+    // The interior ticks are round numbers chosen for the ramp's top rather than the
+    // thresholds themselves: GB's 50/150/250/350 are unevenly spaced and, on a country whose
+    // numbers run to decimals, collided at panel width. The top — where the ramp saturates —
+    // is still GB's own top threshold.
+    expect(bands).toEqual(["100", "200", "300", "450MW+"]);
   });
 
   test("GB on a derived level draws the ten-times bands", () => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = level("dno", true);
-    expect(bandsShown(ActiveUnit.MW)).toContain("4.5k+");
+    expect(bandsShown(ActiveUnit.MW)).toContain("4500MW+");
   });
 
   test("NL at province level draws NL's bands, where it used to draw none", () => {
@@ -86,17 +98,23 @@ describe("the legend's bands are the focused country's", () => {
     enabled = ["NL"];
     currentLevel = level("province");
     const bands = bandsShown(ActiveUnit.MW);
-    // NL's display unit is GW (`config/countries.ts`), so the legend's thresholds are the same
-    // scale in GW rather than MW — 400 MW is 0.4 GW, and below 1000 (of anything) there is no
-    // "k" abbreviation to apply.
-    expect(bands).toEqual(["0-0.4GW", "0.4-1.2", "1.2-2", "2-2.8", "2.8-3.6", "3.6+"]);
+    // NL's display unit is GW (`config/countries.ts`), so the ramp is the same scale in GW
+    // rather than MW — its top threshold of 3,600 MW is 3.6 GW, and the round ticks below it
+    // are whole gigawatts.
+    // No tick at 3: the last fifth of the ramp belongs to the saturation label, which would
+    // otherwise run into it.
+    expect(bands).toEqual(["1", "2", "3.6GW+"]);
   });
 
-  test("capacity mode reads the same scale as MW", () => {
+  test("capacity reads its own scale, not the output one", () => {
     focused = "NL";
     enabled = ["NL"];
     currentLevel = level("province");
-    expect(bandsShown(ActiveUnit.capacity)).toEqual(bandsShown(ActiveUnit.MW));
+    // NL's output ramp tops out at 3.6 GW and its capacity ramp at 4.5 GW — the largest
+    // province's installed capacity. Sharing one top saturated the map in capacity mode,
+    // because every region holds far more than it ever generates.
+    expect(bandsShown(ActiveUnit.capacity)).toEqual(["1", "2", "3", "4.5GW+"]);
+    expect(bandsShown(ActiveUnit.MW)).toEqual(["1", "2", "3.6GW+"]);
   });
 
   /**
@@ -142,16 +160,6 @@ describe("the legend's bands are the focused country's", () => {
       enabled = ["GB"];
       currentLevel = level("gsp");
       expect(rampTicks()).toEqual(nl);
-    });
-
-    test("no pills are drawn at all", () => {
-      focused = "GB";
-      enabled = ["GB"];
-      currentLevel = level("gsp");
-      // `bandsShown` selects `div.rounded`, which now also matches the ramp bar itself — it is
-      // rounded too, and carries no text. Dropping the empty entry leaves what this asserts:
-      // percentage contributes no labelled pill of its own.
-      expect(bandsShown(ActiveUnit.percentage).filter(Boolean)).toEqual([]);
     });
   });
 

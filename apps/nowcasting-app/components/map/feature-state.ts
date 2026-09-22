@@ -143,6 +143,21 @@ export const UNBANDED_COUNTRY_OPACITY = 1;
  * with no registry entry, and for the grouped tier of a country with no groupings — which is a
  * real answer ("this country has no such level"), not a reason to borrow another country's.
  */
+/**
+ * Where the capacity ramp saturates for a country's tier, or `undefined` for a country this
+ * build has no entry for. The capacity twin of `mapBandsFor`, and read by the legend so the
+ * bar cannot describe a scale the map does not paint.
+ */
+export const capacityTopFor = (
+  country: string | null | undefined,
+  grouped: boolean
+): number | undefined => {
+  if (!country) return undefined;
+  const tops = COUNTRY_CONFIG[country.toUpperCase()]?.mapBands.capacityTop;
+  if (!tops) return undefined;
+  return grouped ? tops.grouped ?? undefined : tops.region;
+};
+
 export const mapBandsFor = (
   country: string | null | undefined,
   grouped: boolean
@@ -187,12 +202,19 @@ export const normalizedTickLabels = (): string[] =>
 const continuousOpacity = (input: Expression): Expression =>
   ["interpolate", ["linear"], input, 0, ZERO_OPACITY, PERCENT_RAMP_TOP, 1] as unknown as Expression;
 
+/**
+ * The megawatt ramp, now continuous like the percentage one (Brad, this session: the stepped
+ * version "looks and feels" worse beside it).
+ *
+ * The country's thresholds survive as the ramp's TOP and as the legend's tick marks: the top
+ * band's floor is where the ramp saturates, so the fullest colour still means what the top
+ * pill used to mean, and every value below it now reads as a position on a scale rather than
+ * as one of six buckets. `interpolate` clamps past its last stop, so a region above the top
+ * threshold draws at full rather than overshooting.
+ */
 const bandExpression = (input: Expression, thresholds: readonly number[]): Expression => {
-  const expression: unknown[] = ["step", input, BAND_OPACITIES[0]];
-  thresholds.forEach((threshold, index) => {
-    expression.push(threshold, BAND_OPACITIES[index + 1]);
-  });
-  return expression as unknown as Expression;
+  const top = thresholds[thresholds.length - 1];
+  return ["interpolate", ["linear"], input, 0, ZERO_OPACITY, top, 1] as unknown as Expression;
 };
 
 const state = (key: keyof MapFeatureState): Expression =>
@@ -219,6 +241,32 @@ const state = (key: keyof MapFeatureState): Expression =>
  * A country with no grouped tier emits no `case` at all, so it is structurally incapable of
  * picking up another country's grouped numbers.
  */
+/**
+ * The capacity ramp, per country and per tier: the same shape as the output ramp, saturating
+ * at `capacityTop` instead. Installed capacity is several times the output a region ever
+ * reaches, so the two cannot share a top without one of them being useless.
+ */
+const countryAwareCapacity = (input: Expression): Expression => {
+  const arms: unknown[] = [];
+  Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
+    const { region, grouped } = config.mapBands.capacityTop;
+    const ramp = (top: number): Expression =>
+      ["interpolate", ["linear"], input, 0, ZERO_OPACITY, top, 1] as unknown as Expression;
+    arms.push(
+      code,
+      grouped
+        ? ["case", ["==", ["feature-state", "grouped"], true], ramp(grouped), ramp(region)]
+        : ramp(region)
+    );
+  });
+  return [
+    "match",
+    ["get", REGION_COUNTRY_PROPERTY],
+    ...arms,
+    UNBANDED_COUNTRY_OPACITY
+  ] as unknown as Expression;
+};
+
 const countryAwareBands = (input: Expression): Expression => {
   const arms: unknown[] = [];
   Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
@@ -252,12 +300,13 @@ const countryAwareBands = (input: Expression): Expression => {
  */
 export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
   if (unit === ActiveUnit.capacity) {
-    return countryAwareBands(state("capacity"));
+    return countryAwareCapacity(state("capacity"));
   }
 
-  // Percentage is continuous; MW and capacity stay banded. They are absolute megawatts on a
-  // per-country scale, so their bands are a registry fact rather than a fitted guess, and the
-  // seasonal-mistuning argument above does not apply to them in the same way.
+  // All three are continuous ramps now. What differs is where each saturates: percentage at
+  // a fraction of capacity, MW at the country's top output threshold, capacity at its
+  // `capacityTop` — registry facts rather than fitted guesses, so the seasonal-mistuning
+  // argument above does not apply to them in the same way.
   const valueOpacity =
     unit === ActiveUnit.percentage
       ? continuousOpacity(state("normalized"))
