@@ -89,7 +89,11 @@ const MapZoomControls: FC = () => {
     // full-height flex, so the first bottom-anchored child absorbs the free space and the zone
     // stack below simply follows in the gap. That is the whole of "the buttons and the card move
     // together" — one auto margin, at the top of the group, instead of two sets of clearances.
-    <div className="ml-auto mt-auto flex w-fit flex-col items-end gap-2">
+    //
+    // Reset sits beside the zoom pair, level with zoom out, where it used to stack above it:
+    // the dock's height is the scarce thing. Zoom stays at the right edge whether or not reset is
+    // showing, so its appearing never moves a button someone is reaching for.
+    <div className="ml-auto mt-auto flex w-fit flex-row items-end gap-2">
       {canReset && (
         <div className={GROUP_CLASS}>
           <ControlButton label="Reset zoom" onClick={() => resetMapFraming!.run()}>

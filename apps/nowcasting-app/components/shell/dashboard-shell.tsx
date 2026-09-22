@@ -6,6 +6,7 @@ import DisplayPanel from "./display-panel";
 import FloatingChart from "./floating-chart";
 import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
+import MapExtrasDrawer from "./map-extras-drawer";
 import { STAGE_GUTTER_PX } from "./geometry";
 import { useCursorRange } from "./use-cursor-range";
 import { selectableCursorRange } from "./scrub-scale";
@@ -116,6 +117,7 @@ const DashboardShell: FC<{
           </FloatingChart>
           <MapControlDock>
             <MapEncodingControls />
+            <MapExtrasDrawer />
             {/* The map's own camera controls, which used to be Mapbox's and sat outside this
                 column entirely — see `map-zoom-controls.tsx`. `mt-auto` on that group bottom-
                 anchors it and the zone stack together. */}

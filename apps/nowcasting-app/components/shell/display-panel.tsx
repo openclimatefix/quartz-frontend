@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import { FC, ReactNode, useMemo } from "react";
 import { MdKeyboardArrowLeft } from "@react-icons/all-files/md/MdKeyboardArrowLeft";
 import { MdKeyboardArrowRight } from "@react-icons/all-files/md/MdKeyboardArrowRight";
 
@@ -7,13 +7,10 @@ import Toggle from "../Toggle";
 import LegendItem from "../charts/LegendItem";
 import { GENERATION_CHART_KEYS } from "../charts/pv-remix-chart";
 import { N_HOUR_FORECAST_OPTIONS, P_LEVEL_OPTIONS } from "../../constant";
-import {
-  CookieStorageKeys,
-  setArraySettingInCookieStorage,
-  setBooleanSettingInLocalStorage
-} from "../helpers/cookieStorage";
-import { useFocusedCountry, useGenerationSources } from "../../hooks/data";
-import { getCountryConfig } from "../../config/countries";
+import { CookieStorageKeys, setArraySettingInCookieStorage } from "../helpers/cookieStorage";
+import { useFocusedCountry, useGenerationSources, useNationalForecast } from "../../hooks/data";
+import { getAvailablePLevels } from "../helpers/chartUtils";
+import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
 import { STAGE_GUTTER_PX } from "./geometry";
 
 /**
@@ -67,9 +64,51 @@ const RailRow: FC<{ label: string; on: boolean; onToggle: () => void }> = ({
   </div>
 );
 
+/**
+ * Which of the configured pairs the country's forecast actually carries.
+ *
+ * Read from the data rather than declared per country: the levels a model publishes are the
+ * API's to change, and a config list would go stale silently — offering a band that draws
+ * nothing, which reads as a broken toggle. DE publishes p10/p90 only, where GB has all three.
+ *
+ * This is the primary series' own query, with the arguments `pv-remix-chart.tsx` passes, so
+ * react-query serves it from cache and the panel costs no request. Until it resolves, every
+ * configured pair shows — the chart is empty then too, so there is nothing to mismatch.
+ */
+const useAvailablePLevels = (): [number, number][] => {
+  const focusedCountry = useFocusedCountry();
+  const config = getCountryConfig(focusedCountry);
+  const primary = config?.nationalChartSeries[0];
+  const forecast = useNationalForecast(
+    focusedCountry && primary
+      ? { country: focusedCountry, source: "solar", regionType: "national" }
+      : null,
+    { model: primary ? forecastSeriesModel(primary) : undefined }
+  );
+
+  return useMemo(() => {
+    // `plevelsMw` is keyed by the bare level ("10"), which is what `normalise.ts` reconciles
+    // the wire's `p10` down to — and what `getAvailablePLevels` wants prefixed again.
+    const published = forecast.data?.values?.find(
+      (value) => value.plevelsMw && Object.keys(value.plevelsMw).length > 0
+    )?.plevelsMw;
+    if (!published) return P_LEVEL_OPTIONS;
+    const prefixed: Record<string, number | undefined> = {};
+    // A `null` plevel is a published band with no value at this instant, which is not the
+    // same as an absent band — but for "does this country have this band at all" it reads the
+    // same way, and the chart would draw nothing either.
+    for (const [level, mw] of Object.entries(published)) {
+      prefixed[`plevel_${level}`] = mw ?? undefined;
+    }
+    return getAvailablePLevels(prefixed, P_LEVEL_OPTIONS);
+  }, [forecast.data]);
+};
+
 /** Confidence bands. Lifted out of the settings modal, which held nothing else. */
 const ConfidenceBands: FC = () => {
   const [pLevels, setPLevels] = useGlobalState("pLevels");
+
+  const available = useAvailablePLevels();
 
   const toggle = (pair: [number, number]) => {
     const next = pLevels.some(([lower]) => lower === pair[0])
@@ -81,7 +120,7 @@ const ConfidenceBands: FC = () => {
 
   return (
     <>
-      {P_LEVEL_OPTIONS.map(([lower, upper]) => (
+      {available.map(([lower, upper]) => (
         <RailRow
           key={lower}
           label={`P${lower} / P${upper}`}
@@ -201,21 +240,6 @@ const SeriesToggles: FC = () => {
   );
 };
 
-const MapLayers: FC = () => {
-  const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
-
-  return (
-    <RailRow
-      label="Constraint boundaries"
-      on={showConstraints}
-      onToggle={() => {
-        setShowConstraints(!showConstraints);
-        setBooleanSettingInLocalStorage(CookieStorageKeys.CONSTRAINTS, !showConstraints);
-      }}
-    />
-  );
-};
-
 const DisplayPanel: FC<{
   open: boolean;
   onToggle: () => void;
@@ -303,9 +327,6 @@ const DisplayPanel: FC<{
     >
       <RailGroup title="Confidence">
         <ConfidenceBands />
-      </RailGroup>
-      <RailGroup title="Map layers">
-        <MapLayers />
       </RailGroup>
       <RailGroup title="Series">
         <SeriesToggles />
