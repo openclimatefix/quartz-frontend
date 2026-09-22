@@ -28,6 +28,10 @@ type LegendEntry = {
   /** A `text-*` class naming the series colour. `currentColor` inside the swatch reads it. */
   iconClasses: string;
   symbolStyle?: "both" | "dashed" | "solid" | "area";
+  /** Matches a series the chart draws thicker than the rest; see the seasonal mean. */
+  strokeWidth?: number;
+  /** Matches a series the chart draws softened; see the seasonal mean. */
+  strokeOpacity?: number;
 };
 
 const Swatch: FC<{ entry: LegendEntry }> = ({ entry }) =>
@@ -37,6 +41,8 @@ const Swatch: FC<{ entry: LegendEntry }> = ({ entry }) =>
     <LegendLineGraphIcon
       className={`${entry.iconClasses} h-3 w-4 shrink-0`}
       dashStyle={entry.symbolStyle}
+      strokeWidth={entry.strokeWidth}
+      strokeOpacity={entry.strokeOpacity}
     />
   );
 
@@ -86,7 +92,10 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
     {
       key: "SEASONAL_MEAN",
       label: "Seasonal mean",
-      iconClasses: "text-series-seasonal"
+      iconClasses: "text-series-seasonal",
+      // The chart draws it heavier and softer than the forecast lines; the icon says so.
+      strokeWidth: 4,
+      strokeOpacity: 0.5
     },
     {
       key: "SEASONAL_BOUNDS",

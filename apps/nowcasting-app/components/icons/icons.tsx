@@ -4,6 +4,10 @@ import logout from "../../pages/logout";
 type LegendLineGraphIconProps = {
   className?: string;
   dashStyle?: "both" | "dashed" | "solid";
+  /** Icon stroke, for a series the chart draws at its own weight (the seasonal mean). */
+  strokeWidth?: number;
+  /** Matches a series the chart draws softened, so the swatch is not brighter than the line. */
+  strokeOpacity?: number;
 };
 
 type IconProps = {
@@ -16,7 +20,9 @@ type InfoIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashStyle = "solid"
+  dashStyle = "solid",
+  strokeWidth = 2,
+  strokeOpacity = 1
 }) => {
   let dash = "0";
   switch (dashStyle) {
@@ -40,7 +46,8 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
     >
       <path
         d="M2.5 15.5C5.8 15.5 10 13 10.4 9.1C10.8 5.1 14.2 2.5 17.5 2.5"
-        strokeWidth={2}
+        strokeWidth={strokeWidth}
+        strokeOpacity={strokeOpacity}
         stroke="currentColor"
         strokeLinecap="round"
         strokeDasharray={dash}

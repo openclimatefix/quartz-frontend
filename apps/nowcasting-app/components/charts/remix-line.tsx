@@ -1177,7 +1177,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   strokeDasharray="5 5"
                   strokeDashoffset={3}
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 1}
+                  strokeWidth={largeScreenMode ? 4 : 1.5}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
@@ -1190,7 +1190,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 1}
+                  strokeWidth={largeScreenMode ? 4 : 1.5}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
@@ -1226,7 +1226,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={seasonal}
               fill="transparent"
               fillOpacity={50}
-              strokeWidth={largeScreenMode ? 3 : 1}
+              // A wide, soft band rather than a line: the seasonal mean is the backdrop the
+              // day is read against, not another series competing with the forecast. Weight
+              // and opacity do that where colour could not — it sits close to the observed
+              // line's hue and the palette has no free slot.
+              strokeWidth={largeScreenMode ? 5 : 3}
+              strokeOpacity={0.5}
+              strokeLinecap="round"
               hide={!visibleLines.includes("SEASONAL_MEAN")}
               isAnimationActive={false}
             />
@@ -1267,7 +1273,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={ecmwfOnly} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
               isAnimationActive={false}
             />
@@ -1282,7 +1288,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={ecmwfOnly} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
               isAnimationActive={false}
             />
@@ -1296,7 +1302,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={satOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
@@ -1311,7 +1317,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={satOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("SAT_ONLY")}
               isAnimationActive={false}
             />
@@ -1325,7 +1331,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={metOfficeOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("MET_OFFICE_ONLY")}
               isAnimationActive={false}
             />
@@ -1340,7 +1346,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={metOfficeOnly}
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("MET_OFFICE_ONLY")}
               isAnimationActive={false}
             />
@@ -1352,7 +1358,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={toolTipColors.GENERATION}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
               isAnimationActive={false}
@@ -1360,7 +1366,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="GENERATION_UPDATED"
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               stroke={toolTipColors.GENERATION_UPDATED}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
@@ -1380,7 +1386,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
@@ -1395,7 +1401,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
