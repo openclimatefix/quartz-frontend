@@ -94,7 +94,10 @@ beforeEach(() => {
   process.env.NEXT_PUBLIC_DEV_MODE = "false";
   // `react-hooks-global-state`'s store is module-global and leaks between tests.
   setGlobalState("focusedCountry", DEFAULT_COUNTRY_CODE);
-  setGlobalState("enabledCountries", [DEFAULT_COUNTRY_CODE]);
+  // Both fixture countries are ON the map. The toggle lists the enabled ones (a country
+  // switched off in the map settings drawer is not something you can focus), so a test that
+  // enabled GB alone would be testing the filter rather than whatever it means to test.
+  setGlobalState("enabledCountries", ["GB", "NL"]);
 });
 
 // A fresh SWR cache per render, so one test's hour-long manifest cache cannot satisfy the

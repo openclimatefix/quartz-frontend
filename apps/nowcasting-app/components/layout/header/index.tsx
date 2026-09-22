@@ -1,4 +1,5 @@
 import { classNames } from "../../helpers/utils";
+import useSyncEnabledCountries from "../../../hooks/data/use-sync-enabled-countries";
 import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
 import DataInfoButton from "./data-info-button";
@@ -8,7 +9,6 @@ import { useRouter } from "next/router";
 import { Menu } from "@headlessui/react";
 import { ReactNode } from "react";
 import { ExternalLinkIcon } from "../../icons/icons";
-import useSyncEnabledCountries from "../../../hooks/data/use-sync-enabled-countries";
 
 /**
  * The top nav — "what you are looking at", and only that (contract §6).
@@ -83,9 +83,8 @@ type HeaderProps = {
 };
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
-  // Temporary scaffolding (see the hook's own doc comment): keeps the enabled set at "every
-  // entitled, configured country" until a sidebar control can shrink it on purpose. Mounted
-  // here because the header renders on every page.
+  // Seeds the enabled set for a visitor who has never chosen one (see the hook's own doc
+  // comment). Mounted here because the header renders on every page.
   useSyncEnabledCountries();
 
   return (

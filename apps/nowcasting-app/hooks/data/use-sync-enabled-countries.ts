@@ -1,17 +1,21 @@
 import React from "react";
 
 import { setEnabledCountries } from "../../components/helpers/globalState";
+import {
+  CookieStorageKeys,
+  getArraySettingFromCookieStorage
+} from "../../components/helpers/cookieStorage";
 import { useEntitledCountries } from "./use-countries";
 
 /**
- * Temporary scaffolding: keeps the enabled set equal to "every entitled and configured
- * country", now that the header's country control owns focus rather than the enabled set.
+ * SEEDS the enabled set to "every entitled and configured country", once, for a visitor who
+ * has never chosen.
  *
- * The enable/disable UI is moving to a sidebar and has not landed yet, so until it does there
- * is no control left that can shrink the enabled set on purpose — this hook is what stands in
- * for it, mounted once in the header. `setEnabledCountries`/`toggleCountryEnabled` in
- * `globalState` are untouched and ready for that control to call directly when it exists;
- * delete this hook and its mount point then.
+ * It used to *pin* the set to that list on every load, standing in for an enable/disable UI
+ * that did not exist. The UI exists now (`map-extras-drawer.tsx`), and a control whose
+ * choices are overwritten on the next render is not a control — so the sync only runs when
+ * the cookie holds no set at all. It still matters: the default enabled set is GB alone, so
+ * without it an account entitled only to NL or DE would open on an empty map.
  *
  * Guarded against calling `setEnabledCountries([])`: the manifest is an hour-cached request
  * that can be loading or can fail, and `useEntitledCountries` reports an empty list in both
@@ -30,6 +34,9 @@ const useSyncEnabledCountries = (): void => {
   React.useEffect(() => {
     if (isLoading || error) return;
     if (codes.length === 0) return;
+    // Someone who has used the drawer has a set of their own; leave it alone.
+    const chosen = getArraySettingFromCookieStorage<string>(CookieStorageKeys.ENABLED_COUNTRIES);
+    if (chosen && chosen.length > 0) return;
     setEnabledCountries(codes);
     // `codes` is intentionally not a dependency: `key` already captures its identity, and
     // recomputing it inside the effect would defeat the point of the guard above.

@@ -2,7 +2,11 @@ import React from "react";
 
 import { setFocusedCountry } from "../../helpers/globalState";
 import { sortCountryCodes } from "../../../config/countries";
-import { useCountries, useFocusedCountry } from "../../../hooks/data/use-countries";
+import {
+  useCountries,
+  useEnabledCountries,
+  useFocusedCountry
+} from "../../../hooks/data/use-countries";
 import { useCountryStatus } from "../../../hooks/data/use-country-status";
 import type { CountryStatus } from "../../../hooks/data/use-country-status";
 import {
@@ -18,11 +22,14 @@ import type { CountryListing } from "../../../lib/domain/types";
 //
 // Phase 6 split "which country" in two (`docs/phase6-layout-contract.md` §1): *enabled* is a
 // set and belongs to the map, *focused* is one country and belongs to the chart. This control
-// used to own the enabled half — a bank of independent switches — but the enable/disable UI
-// is moving to a sidebar and has not landed yet. Until it does, the enabled set is simply
-// every entitled and configured country, kept in sync by `useSyncEnabledCountries`, and this
+// used to own the enabled half — a bank of independent switches — and that half now lives in
+// the map control dock's settings drawer (`components/shell/map-extras-drawer.tsx`). This
 // control's whole job is focus: which one country the chart, the headline figures and the
-// level selector follow. That makes it one-of-N, the same grammar as the chart's own picker
+// level selector follow.
+//
+// A country the user has switched OFF in that drawer is not listed here at all: it is not on
+// the map, so "read this one" is not a thing that can be asked of it, and a row that cannot
+// be chosen would be a second, quieter disabled state meaning something else entirely. That makes it one-of-N, the same grammar as the chart's own picker
 // (`components/charts/country-picker.tsx`, which this borrows its keyboard handling from) —
 // that component has no importers right now and is dead code, kept only as the reference this
 // one is copying from.
@@ -215,8 +222,23 @@ const CountryOption = React.forwardRef<
 CountryOption.displayName = "CountryOption";
 
 const CountryToggle: React.FC = () => {
-  const { countries, isLoading, error } = useCountries();
+  const { countries: allCountries, isLoading, error } = useCountries();
   const focusedCountry = useFocusedCountry();
+  const enabledCountries = useEnabledCountries();
+
+  // Only a country the user could have switched off is hidden when it is off. An unentitled
+  // one, or one this build cannot draw, still shows disabled — that is the prospect case, and
+  // neither can be in the enabled set in the first place (`setEnabledCountries` drops them),
+  // so testing the set alone would hide exactly the rows that exist to be seen. The focused
+  // country is never hidden: the invariants keep it inside the set, and a group with no
+  // checked member is the one state this control must not reach.
+  const countries = allCountries.filter(
+    (country) =>
+      !country.entitled ||
+      !country.configured ||
+      enabledCountries.includes(country.code) ||
+      country.code === focusedCountry
+  );
 
   // The manifest is an hour-cached request that can also cold-start with a retryable 503.
   // A momentarily empty control would read as "your country went away", so both the
