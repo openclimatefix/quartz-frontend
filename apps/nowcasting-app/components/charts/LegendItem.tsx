@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, ReactNode, useEffect, useMemo, useState } from "react";
 import useGlobalState from "../helpers/globalState";
 import { LegendAreaGraphIcon, LegendLineGraphIcon } from "../icons/icons";
 import Toggle from "../Toggle";
@@ -8,7 +8,13 @@ const LegendItem: FC<{
   label: string;
   symbolStyle?: "both" | "dashed" | "solid" | "area";
   dataKey: string;
-}> = ({ iconClasses, label, symbolStyle, dataKey }) => {
+  /**
+   * A control that *is* this row's name — the N-hour row, whose label states the horizon and
+   * so may as well set it. It replaces the label button, which would otherwise swallow the
+   * clicks meant for it; the toggle to the right still shows and switches the line.
+   */
+  labelControl?: ReactNode;
+}> = ({ iconClasses, label, symbolStyle, dataKey, labelControl }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const [mounted, setMounted] = useState(false);
 
@@ -36,12 +42,16 @@ const LegendItem: FC<{
       ) : (
         <LegendLineGraphIcon className={iconClasses} dashStyle={symbolStyle} />
       )}
-      <button
-        className="inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-2xs @lg:pr-1 @xl:pr-0 @xl:text-2xs dash:text-base dash:tracking-wider dash:pb-1"
-        onClick={toggleLineVisibility}
-      >
-        <span className={labelClasses}>{label}</span>
-      </button>
+      {labelControl ? (
+        <div className="inline-flex flex-1 pl-1 leading-tight">{labelControl}</div>
+      ) : (
+        <button
+          className="inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-2xs @lg:pr-1 @xl:pr-0 @xl:text-2xs dash:text-base dash:tracking-wider dash:pb-1"
+          onClick={toggleLineVisibility}
+        >
+          <span className={labelClasses}>{label}</span>
+        </button>
+      )}
       <Toggle onClick={toggleLineVisibility} visible={mounted && isVisible} />
     </div>
   );

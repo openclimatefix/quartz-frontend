@@ -6,7 +6,7 @@ import useGlobalState from "../helpers/globalState";
 import Toggle from "../Toggle";
 import LegendItem from "../charts/LegendItem";
 import { GENERATION_CHART_KEYS } from "../charts/pv-remix-chart";
-import { P_LEVEL_OPTIONS } from "../../constant";
+import { N_HOUR_FORECAST_OPTIONS, P_LEVEL_OPTIONS } from "../../constant";
 import {
   CookieStorageKeys,
   setArraySettingInCookieStorage,
@@ -109,9 +109,42 @@ const ConfidenceBands: FC = () => {
  * `/sites` is untouched: it has no display rail and renders its own `LegendItem`s inline
  * (`solar-site-view/solar-site-chart.tsx`), which was never `ChartLegend` and was out of scope.
  */
+/**
+ * The N-hour line's horizon. It lost its control when the old `ChartLegend` went and has sat
+ * on its default of four hours since; it comes back on the row that names the line rather
+ * than as a rail setting of its own, because the number IS the line's label.
+ */
+const NHourSelect: FC = () => {
+  const [nHourForecast, setNHourForecast] = useGlobalState("nHourForecast");
+  return (
+    <label className="flex items-center">
+      <span className="sr-only">Comparison forecast horizon, in hours</span>
+      {/* The whole label is the control, so it reads as a name and behaves as a menu: the
+          caret is the only chrome, and the type matches the rows either side of it. */}
+      <select
+        value={nHourForecast}
+        onChange={(event) => setNHourForecast(Number(event.target.value))}
+        className="m-0 h-auto w-auto cursor-pointer appearance-none border-0 bg-transparent p-0 pr-3 pl-1 text-2xs uppercase leading-tight text-content focus:outline-none focus:ring-0 dash:text-base dash:tracking-wider"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6' fill='none' stroke='rgb(200,200,200)' stroke-width='1.5'><path d='M1 1l4 4 4-4'/></svg>\")",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "right center",
+          backgroundSize: "7px 5px"
+        }}
+      >
+        {N_HOUR_FORECAST_OPTIONS.map((option) => (
+          <option key={`n-hour-${option}`} value={option} className="bg-surface text-content">
+            {option} hour
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+};
+
 const SeriesToggles: FC = () => {
   const [showNHourView] = useGlobalState("showNHourView");
-  const [nHourForecast] = useGlobalState("nHourForecast");
   const focusedCountry = useFocusedCountry();
   const seriesConfig = getCountryConfig(focusedCountry)?.nationalChartSeries ?? [];
   const generationSources = useGenerationSources(
@@ -125,8 +158,9 @@ const SeriesToggles: FC = () => {
         <LegendItem
           iconClasses="text-series-nHour"
           symbolStyle="both"
-          label={`${nHourForecast} hour`}
+          label="hour"
           dataKey="N_HOUR_FORECAST"
+          labelControl={<NHourSelect />}
         />
       )}
       {seriesConfig
@@ -193,7 +227,7 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
   // height out of here, which is the right half to lose.
   <aside
     aria-label="Display settings"
-    className="relative flex min-h-0 flex-col rounded-lg border border-content/10 bg-surface-panel/95 text-content shadow-2xl"
+    className="relative flex min-h-0 flex-col rounded-lg rounded-tl-none border border-content/10 bg-surface-panel/95 text-content shadow-2xl"
     style={{
       transform: open ? undefined : `translateX(calc(100% + ${STAGE_GUTTER_PX}px))`,
       // `visibility` rides along so a parked panel is out of the tab order as well as out of
@@ -212,6 +246,10 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
         panel's left edge, which is what leaves it on screen once the panel has parked: shut, it
         sits flush against the stage's right edge, just below the map controls.
 
+        It is level with the panel's top, whose top-left corner is square so the two read as one
+        piece. `-top-px` because the tab is placed from inside the panel's border, so `top-0`
+        left its own top border a pixel below the panel's.
+
         `visibility: visible` re-declares what the parked panel above has just turned off —
         the property inherits, and this is the one thing that must survive it. */}
     <button
@@ -222,7 +260,7 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
       title={open ? "Hide display settings" : "Show display settings"}
       onClick={onToggle}
       style={{ visibility: "visible" }}
-      className="absolute -left-8 top-3 flex h-8 w-8 items-center justify-center rounded-l-lg border border-r-0 border-content/10 bg-surface-panel/95 text-interactive shadow-2xl transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-interactive"
+      className="absolute -left-8 -top-px flex h-8 w-8 items-center justify-center rounded-l-lg border border-r-0 border-content/10 bg-surface-panel/95 text-interactive shadow-2xl transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-interactive"
     >
       {open ? <MdKeyboardArrowRight size={20} /> : <MdKeyboardArrowLeft size={20} />}
     </button>
