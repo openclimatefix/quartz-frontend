@@ -25,6 +25,7 @@ import {
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
+import { displayUnitFor } from "../../lib/domain/power-unit";
 import { useGenerationSources } from "../../hooks/data/use-regions";
 import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
@@ -54,7 +55,7 @@ import { ZoomOutIcon } from "@heroicons/react/solid";
  * `components/shell/chart-scrubber.tsx`.
  */
 export const CHART_Y_AXIS_WIDTH_PX = 60;
-export const CHART_MARGIN_LEFT_PX = 16;
+export const CHART_MARGIN_LEFT_PX = 4;
 export const CHART_MARGIN_RIGHT_PX = 16;
 export const PLOT_INSET_LEFT_PX = CHART_Y_AXIS_WIDTH_PX + CHART_MARGIN_LEFT_PX;
 export const PLOT_INSET_RIGHT_PX = CHART_MARGIN_RIGHT_PX;
@@ -178,6 +179,8 @@ type RemixLineProps = {
   setTimeOfInterest?: (t: string) => void;
   yMax: number | string;
   timeNow: string;
+  /** Set by the national charts, whose figures are gigawatts for every country. */
+  national?: boolean;
   resetTime?: () => void;
   visibleLines: string[];
   zoomEnabled?: boolean;
@@ -379,6 +382,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   setTimeOfInterest,
   yMax,
   timeNow,
+  national = false,
   resetTime,
   visibleLines,
   zoomEnabled = true,
@@ -505,6 +509,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
    * this country publishes — the band is one cadence wide by construction.
    */
   const focusedCountry = useFocusedCountry();
+  // The sites chart is always KW, untouched by the country registry; every other line here
+  // reads the country's `MW`/`GW` field, so GB's `MW` divides by 1 and is unchanged.
+  // The national chart is always gigawatts: a country's output is that order of magnitude
+  // whoever it is, and the headline above the chart has always read GW. Only the sub-national
+  // charts take the country's own unit, which is where GB and NL/DE genuinely differ.
+  const displayUnit = national ? "GW" : displayUnitFor(focusedCountry);
+  const displayDivisionFactor = displayUnit === "GW" ? 1000 : 1;
   const generationSources = useGenerationSources(
     !isSitesChart && focusedCountry ? { country: focusedCountry, source: "solar" } : null
   );
@@ -1017,7 +1028,15 @@ const RemixLine: React.FC<RemixLineProps> = ({
               // is a fact about this chart and not a guess about the library.
               width={CHART_Y_AXIS_WIDTH_PX}
               tickFormatter={
-                isSitesChart ? undefined : (val, i) => prettyPrintYNumberWithCommas(val)
+                isSitesChart
+                  ? undefined
+                  : // One decimal, and none at all where it would be a zero: the ticks are round
+                    // numbers in MW, so in GW they come out as "9" or "3.5" and never "9.00".
+                    (val, i) =>
+                      prettyPrintYNumberWithCommas(val, 1, displayDivisionFactor).replace(
+                        /\.0$/,
+                        ""
+                      )
               }
               yAxisId={"y-axis"}
               tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
@@ -1025,13 +1044,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
               ticks={yTicks}
               domain={globalIsZoomed && !isSitesChart ? [0, Number(zoomYMax * 1.1)] : [0, yMax]}
               label={{
-                value: isSitesChart ? "Generation (KW)" : "Generation (MW)",
+                value: isSitesChart ? "Generation (KW)" : `Generation (${displayUnit})`,
                 angle: 270,
                 position: "outsideLeft",
                 fill: plot.axis,
                 style: { fontSize: "10px", fontFamily: MONO },
                 offset: 0,
-                dx: -26,
+                dx: -10,
                 dy: 0
               }}
             />
@@ -1474,7 +1493,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     <div className="flex justify-between">
                       <div>{`OCF P${level}`}:</div>
                       <div className="ml-4 font-mono tabular-nums">
-                        {prettyPrintYNumberWithCommas(String(value), 1)}
+                        {prettyPrintYNumberWithCommas(String(value), 1, displayDivisionFactor)}
                       </div>
                     </div>
                   </li>
@@ -1487,7 +1506,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     <ul className="">
                       <li className={`flex justify-between pb-2 text-xs text-content font-sans`}>
                         <div className="pr-3 font-mono tabular-nums">{tooltipHeading}</div>
-                        <div>{isSitesChart ? "KW" : "MW"}</div>
+                        <div>{isSitesChart ? "KW" : displayUnit}</div>
                       </li>
                       {Object.entries(tooltipLabels)
                         .filter(
@@ -1536,12 +1555,18 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               ? deltaPos
                               : deltaNeg
                             : toolTipColors[key];
+                          // DELTA stays MW — it's the delta view's own reading, untouched here —
+                          // every other row reads in the country's display unit.
                           const computedValue =
                             key === "DELTA" &&
                             !showNHourView &&
                             `${data["formattedDate"]}:00.000Z` >= currentTime
                               ? "-"
-                              : prettyPrintYNumberWithCommas(String(value), 1);
+                              : prettyPrintYNumberWithCommas(
+                                  String(value),
+                                  1,
+                                  key === "DELTA" ? 1 : displayDivisionFactor
+                                );
                           let title = name;
                           if (key.includes("N_HOUR")) {
                             title = title.replace("N-hour", `${nHourForecast}-hour`);

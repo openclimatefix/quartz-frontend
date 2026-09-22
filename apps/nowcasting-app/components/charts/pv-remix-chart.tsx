@@ -271,6 +271,7 @@ const PvRemixChart: FC<{
           <div className="relative flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
             <DataLoadingChartStatus loadingState={loadingState} />
             <RemixLine
+              national
               resetTime={resetTime}
               timeNow={liveSlot}
               timeOfInterest={selectedTime}

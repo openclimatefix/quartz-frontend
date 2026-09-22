@@ -20,6 +20,11 @@ type ForecastHeaderGSPProps = {
   forecastNextPV?: string;
   children?: React.ReactNode;
   titleTooltipText?: string[];
+  /**
+   * The country's display unit for the readings below, the delta chip included. The chip
+   * converts back to MW for its colour buckets, so the thresholds do not move with it.
+   */
+  unit?: "MW" | "GW";
 };
 
 const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
@@ -34,7 +39,8 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   forecastNextTimeOnly,
   forecastNextTimeRange,
   onClose,
-  titleTooltipText = []
+  titleTooltipText = [],
+  unit = "MW"
 }) => {
   const titleTooltipContent = (
     <ul className="text-left">
@@ -67,7 +73,7 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
                 tip={"Latest PV Actual / OCF Forecast"}
                 time={pvTimeOnly}
                 times={pvTimeRange}
-                unit={"MW"}
+                unit={unit}
                 color={"solar"}
               >
                 <span className="text-solar-light">{pvValue}</span>
@@ -82,7 +88,7 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
                   tip={"Next OCF Forecast"}
                   time={forecastNextTimeOnly}
                   times={forecastNextTimeRange}
-                  unit={"MW"}
+                  unit={unit}
                   color={"solar"}
                 >
                   {/*<span className="text-content-on-accent">{actualPV}</span>*/}
@@ -94,7 +100,7 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
           </>
         )}
       </div>
-      {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || "-"} unit={"MW"} />}
+      {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || "-"} unit={unit} />}
       <button
         type="button"
         onClick={onClose}

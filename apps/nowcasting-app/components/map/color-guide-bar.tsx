@@ -16,6 +16,7 @@ import {
 import { useMapObserver } from "./map-observer";
 import { ActiveUnit } from "./types";
 import { theme } from "../../tailwind.config";
+import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../lib/domain/power-unit";
 
 type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
 
@@ -204,11 +205,19 @@ const SequentialBands: React.FC<{
     if (!currentLevel || currentLevel.level <= 0) return undefined;
     const thresholds = mapBandsFor(country, currentLevel.derived);
     if (!thresholds) return undefined;
-    return bandPills(bandLabels(thresholds));
+    // The thresholds themselves stay MW — they are the map's own paint expression's numbers,
+    // read from the same lookup, and nothing here is allowed to drift from that. This is a
+    // display-only copy, rounded to the country's unit purely for the label under each pill.
+    const displayUnit = displayUnitFor(country);
+    const displayThresholds = thresholds.map((value) =>
+      Number(toDisplayPower(value, displayUnit).toFixed(displayDecimalsFor(displayUnit)))
+    );
+    return bandPills(bandLabels(displayThresholds));
   }, [unit, currentLevel, country]);
-  let unitText = unit === ActiveUnit.MW ? "MW" : "%";
+  const displayUnit = displayUnitFor(country);
+  let unitText = unit === ActiveUnit.MW ? displayUnit : "%";
   if (unit === ActiveUnit.capacity) {
-    unitText = "MW";
+    unitText = displayUnit;
   }
   return (
     // Positioning only: this used to anchor itself to the map's bottom-left corner

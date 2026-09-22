@@ -86,7 +86,10 @@ describe("the legend's bands are the focused country's", () => {
     enabled = ["NL"];
     currentLevel = level("province");
     const bands = bandsShown(ActiveUnit.MW);
-    expect(bands).toEqual(["0-400MW", "400-1.2k", "1.2k-2k", "2k-2.8k", "2.8k-3.6k", "3.6k+"]);
+    // NL's display unit is GW (`config/countries.ts`), so the legend's thresholds are the same
+    // scale in GW rather than MW — 400 MW is 0.4 GW, and below 1000 (of anything) there is no
+    // "k" abbreviation to apply.
+    expect(bands).toEqual(["0-0.4GW", "0.4-1.2", "1.2-2", "2-2.8", "2.8-3.6", "3.6+"]);
   });
 
   test("capacity mode reads the same scale as MW", () => {

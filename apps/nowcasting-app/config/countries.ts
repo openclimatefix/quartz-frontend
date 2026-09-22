@@ -213,6 +213,9 @@ export type ForecastSeriesConfig = {
 /** The weather inputs a forecast model can consume. Mirrors `DataInput` in the legend tooltip. */
 export type ForecastInput = "ECMWF" | "MET_OFFICE" | "SAT";
 
+/** How power figures are written. Stored values are always MW. */
+export type PowerUnit = "MW" | "GW";
+
 /**
  * Appended to every `ForecastSeriesConfig.model` below. **This is the one-line swap.**
  *
@@ -326,6 +329,16 @@ export type CountryConfig = {
   publisher: { name: string; url: string } | null;
   /** Seasonal norm dataset, or `null` where one has not been produced. */
   seasonalNorms: string | null;
+  /**
+   * The unit every power figure is *shown* in for this country. Values stay MW everywhere
+   * inside the app; this is a display decision and nothing else.
+   *
+   * GB's GSPs peak in the hundreds of MW, where NL's provinces and DE's TSOs run to
+   * thousands — "13,500 MW" is a number you have to count the digits of. One setting per
+   * country for now: it keeps the map, the chart and the headline saying the same thing,
+   * which is the point. Split it per region type when a country needs two.
+   */
+  displayUnit: PowerUnit;
   /** Auth0 role id granting this country; the country claim is derived from these. */
   auth0Role: string;
 };
@@ -454,6 +467,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     overlays: [{ id: "constraints", url: "/geo/gb/ng-constraints.json", label: "Constraints" }],
     publisher: { name: "PV_Live", url: "https://www.solar.sheffield.ac.uk/pvlive/" },
     seasonalNorms: "/data/gb/national-metrics.json",
+    displayUnit: "MW",
     auth0Role: "GB_ROLE_ID"
   },
   NL: {
@@ -538,6 +552,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // convention without a link rather than inventing one.
     publisher: null,
     seasonalNorms: null,
+    displayUnit: "GW",
     auth0Role: "NL_ROLE_ID"
   },
   DE: {
@@ -626,6 +641,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     overlays: [],
     publisher: { name: "ENTSO-E", url: "https://transparency.entsoe.eu/" },
     seasonalNorms: null,
+    displayUnit: "GW",
     auth0Role: "DE_ROLE_ID"
   }
 };

@@ -6,8 +6,10 @@ import { DELTA_BUCKET, deltaBucketEdge } from "../../../constant";
 import { ActiveUnit } from "../../map/types";
 import { Bucket, GspDeltaValue } from "../../types";
 import { createBucketObject } from "../../helpers/utils";
+import { displayDecimalsFor, toDisplayPower } from "../../../lib/domain/power-unit";
+import type { PowerUnit } from "../../../config/countries";
 
-const BucketItem: React.FC<Bucket> = ({
+const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
   dataKey,
   quantity,
   text,
@@ -16,7 +18,8 @@ const BucketItem: React.FC<Bucket> = ({
   textColor,
   altTextColor,
   lowerBound,
-  upperBound
+  upperBound,
+  unit
 }) => {
   const selectedClass = `${borderColor}`;
   const unselectedClass = `bg-opacity-0 ${
@@ -54,14 +57,20 @@ const BucketItem: React.FC<Bucket> = ({
             `${text} MW`, which was true only while the buckets were megawatts. `text` is the
             bucket's enum value, i.e. its ordinal, so it stops being a megawatt figure the
             moment percentage mode uses the same nine cells for capacity fractions.
+
+            The edge itself is still computed in MW — bucket boundaries are a fixed MW ladder —
+            so a non-percentage figure is converted to the focused country's unit only for
+            display, the same last step every other regional figure goes through.
           */}
           <span className="flex text-xs">
             {text === DELTA_BUCKET.ZERO.toString()
               ? `-/+`
-              : `${deltaBucketEdge(
-                  DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET],
-                  asPercentage
-                )}${asPercentage ? "%" : " MW"}`}
+              : asPercentage
+              ? `${deltaBucketEdge(DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET], true)}%`
+              : `${toDisplayPower(
+                  deltaBucketEdge(DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET], false),
+                  unit
+                ).toFixed(displayDecimalsFor(unit))} ${unit}`}
           </span>
         </button>
       </div>
@@ -72,11 +81,12 @@ const BucketItem: React.FC<Bucket> = ({
 const DeltaBuckets: React.FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
   bucketSelection: string[];
+  unit: PowerUnit;
   setClickedGspId?: Dispatch<SetStateAction<number | undefined>>;
   negative?: boolean;
   lowerBound?: number;
   upperBound?: number;
-}> = ({ gspDeltas, negative = false }) => {
+}> = ({ gspDeltas, unit, negative = false }) => {
   if (!gspDeltas?.size) return null;
 
   const deltaArray = Array.from(gspDeltas.values());
@@ -104,7 +114,7 @@ const DeltaBuckets: React.FC<{
     <>
       <div className="sticky top-0 bg-surface-panel z-10 mx-3 pb-1 flex justify-center gap-1 lg:gap-3">
         {buckets.map((bucket) => {
-          return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket}></BucketItem>;
+          return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket} unit={unit}></BucketItem>;
         })}
       </div>
     </>

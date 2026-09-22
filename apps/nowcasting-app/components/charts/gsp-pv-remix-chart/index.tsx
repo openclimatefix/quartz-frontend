@@ -14,6 +14,7 @@ import {
   useFocusedCountry
 } from "../../../hooks/data";
 import { getCountryConfig } from "../../../config/countries";
+import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../../lib/domain/power-unit";
 import { formatRegionLabel } from "../../../lib/domain/region-label";
 import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
 import { groupRegionNames } from "../../helpers/data";
@@ -70,6 +71,7 @@ const GspPvRemixChart: FC<{
   const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const { timezone, locale } = useCountryFormatting();
   const focusedCountry = useFocusedCountry();
+  const displayUnit = displayUnitFor(focusedCountry);
   const [show4hView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
 
@@ -270,6 +272,17 @@ const GspPvRemixChart: FC<{
   };
   const pvTimeRange = periodTimes(latestPvActualDatetime);
   const forecastNextTimeRange = periodTimes(followingPvForecastDatetime.toISOString());
+  /**
+   * A headline reading in the country's display unit. GB's `MW` branch is the untouched
+   * pre-unit expression (one decimal), so its output is byte-for-byte what it always was; NL
+   * and DE go through `toDisplayPower`/`displayDecimalsFor` so a GW figure keeps the precision
+   * a much smaller number needs.
+   */
+  const formatHeadline = (valueMw: number): string =>
+    displayUnit === "MW"
+      ? valueMw.toFixed(1)
+      : toDisplayPower(valueMw, displayUnit).toFixed(displayDecimalsFor(displayUnit));
+
   const pvValueMw = latestGeneration?.powerMw ?? 0;
   const forecastPvMw = forecastAt(pvForecastDatetime);
   const forecastNextTimeOnly = formatISODateStringAsZonedTime(
@@ -279,7 +292,16 @@ const GspPvRemixChart: FC<{
   );
   const forecastNextPvMw = forecastAt(followingPvForecastDateString);
   const forecastAtSelectedTimeMw = forecastAt(nowSlot);
-  const deltaValue = dataMissing ? "---" : (pvValueMw - forecastPvMw).toFixed(1);
+  // In the country's unit, like every other figure in this header. `DeltaHeaderBlock` takes
+  // the unit alongside it and converts back to MW for its colour buckets, so the thresholds
+  // are unaffected by how the number is written.
+  const deltaValue = dataMissing
+    ? "---"
+    : displayUnit === "MW"
+    ? (pvValueMw - forecastPvMw).toFixed(1)
+    : toDisplayPower(pvValueMw - forecastPvMw, displayUnit).toFixed(
+        displayDecimalsFor(displayUnit)
+      );
 
   const chartData = useFormatChartData({
     forecastSeries: activeForecast,
@@ -309,24 +331,32 @@ const GspPvRemixChart: FC<{
           mwpercent={Math.round((forecastAtSelectedTimeMw / (gspInstalledCapacity || 1)) * 100)}
           pvTimeOnly={pvTimeOnly}
           pvTimeRange={pvTimeRange}
-          pvValue={pvValueMw.toFixed(1)}
-          forecastPV={forecastPvMw.toFixed(1)}
+          pvValue={formatHeadline(pvValueMw)}
+          forecastPV={formatHeadline(forecastPvMw)}
           forecastNextTimeOnly={forecastNextTimeOnly}
           forecastNextTimeRange={forecastNextTimeRange}
-          forecastNextPV={forecastNextPvMw.toFixed(1)}
+          forecastNextPV={formatHeadline(forecastNextPvMw)}
           deltaValue={deltaValue.toString()}
           deltaView={deltaView}
           titleTooltipText={selectedGSPNames}
+          unit={displayUnit}
         >
           <span className="text-lg font-medium leading-none text-solar md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
-            {Math.round(forecastAtSelectedTimeMw)}
+            {displayUnit === "MW"
+              ? Math.round(forecastAtSelectedTimeMw)
+              : formatHeadline(forecastAtSelectedTimeMw)}
           </span>
 
           <span className="text-lg font-medium leading-none text-content md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
             {" "}
-            / {gspInstalledCapacity}
+            /{" "}
+            {displayUnit === "MW"
+              ? gspInstalledCapacity
+              : toDisplayPower(gspInstalledCapacity, displayUnit).toFixed(
+                  displayDecimalsFor(displayUnit)
+                )}
           </span>
-          <span className="text-xs dash:text-2xl text-content"> MW</span>
+          <span className="text-xs dash:text-2xl text-content"> {displayUnit}</span>
         </ForecastHeaderGSP>
       </div>
       {/* Same well as the national chart — see `pv-remix-chart.tsx`. */}

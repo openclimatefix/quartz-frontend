@@ -29,15 +29,17 @@ import {
   useNationalGeneration
 } from "../../../hooks/data";
 import type { Scope } from "../../../lib/domain/types";
-import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
+import { forecastSeriesModel, getCountryConfig, type PowerUnit } from "../../../config/countries";
+import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../../lib/domain/power-unit";
 import { GENERATION_CHART_KEYS } from "../pv-remix-chart";
 import ChartScrubber from "../../shell/chart-scrubber";
 import { plottedKeyRange, usePlottedDomain } from "../plotted-domain";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
+  unit: PowerUnit;
   negative?: boolean;
-}> = ({ gspDeltas, negative = false }) => {
+}> = ({ gspDeltas, unit, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
@@ -179,7 +181,7 @@ const GspDeltaColumn: FC<{
                   </DeltaForecastLabel>
                 </div>
 
-                {/* delta value in mw */}
+                {/* delta value, in the focused country's display unit */}
                 <div className="col-span-6 xl:col-span-2 flex justify-start">
                   <DeltaForecastLabel
                     tip={
@@ -192,15 +194,17 @@ const GspDeltaColumn: FC<{
                       <p>
                         {!negative && "+"}
                         <span className="font-semibold">
-                          {Number(gspDelta.delta).toFixed(0)}
+                          {toDisplayPower(Number(gspDelta.delta), unit).toFixed(
+                            displayDecimalsFor(unit)
+                          )}
                         </span>{" "}
-                        <span className="opacity-80 text-2xs font-thin">MW</span>
+                        <span className="opacity-80 text-2xs font-thin">{unit}</span>
                       </p>
                     </div>
                   </DeltaForecastLabel>
                 </div>
 
-                {/* currentYield/forecasted yield */}
+                {/* currentYield/forecasted yield, in the focused country's display unit */}
                 <div className="col-span-6 xl:col-span-3">
                   <DeltaForecastLabel
                     tip={
@@ -212,10 +216,17 @@ const GspDeltaColumn: FC<{
                     <div className="flex flex-1 items-end justify-end text-right font-semibold">
                       <div>
                         <span className={"text-content-on-accent"}>
-                          {Number(gspDelta.currentYield).toFixed(0)}
+                          {toDisplayPower(Number(gspDelta.currentYield), unit).toFixed(
+                            displayDecimalsFor(unit)
+                          )}
                         </span>{" "}
-                        / <span className="text-solar">{Number(gspDelta.forecast).toFixed(0)}</span>{" "}
-                        <span className={`opacity-80 text-2xs font-thin`}>MW</span>
+                        /{" "}
+                        <span className="text-solar">
+                          {toDisplayPower(Number(gspDelta.forecast), unit).toFixed(
+                            displayDecimalsFor(unit)
+                          )}
+                        </span>{" "}
+                        <span className={`opacity-80 text-2xs font-thin`}>{unit}</span>
                       </div>
                     </div>
                   </DeltaForecastLabel>
@@ -272,6 +283,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
   const focusedCountry = useFocusedCountry();
+  // Regional delta figures read in the focused country's own unit, same as the rest of its
+  // chrome — only the national delta header (`ForecastHeader`) is pinned to GW regardless.
+  const displayUnit = displayUnitFor(focusedCountry);
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
   // The cursor resolved onto the focused country's own grid. This used to round via
   // `convertToLocaleDateString` + a `Date` whose `getMinutes()` reads the *viewer's* zone —
@@ -486,6 +500,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
           <div className={"flex-1 relative"}>
             <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
             <RemixLine
+              national
               resetTime={resetTime}
               timeNow={liveSlot}
               timeOfInterest={selectedLabel}
@@ -524,7 +539,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             hasGspPvInitialForSelectedTime ? " overflow-y-scroll" : ""
           } ${selectedMapRegionIds?.length ? "h-[30%]" : "h-[40%]"}`}
         >
-          <DeltaBuckets bucketSelection={selectedBuckets} gspDeltas={gspDeltas} />
+          <DeltaBuckets
+            bucketSelection={selectedBuckets}
+            gspDeltas={gspDeltas}
+            unit={displayUnit}
+          />
           {!hasGspPvInitialForSelectedTime && (
             <div className="flex flex-1 m-3 p-4 font-thin tracking-wide border border-dashed border-content-secondary rounded-md justify-center items-center text-center text-content-secondary">
               [ Delta values not available until {observerLabel} output available ]
@@ -532,8 +551,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
           )}
           {hasGspPvInitialForSelectedTime && gspDeltas && (
             <div className="flex pt-2 mx-3 max-h-96">
-              <GspDeltaColumn gspDeltas={gspDeltas} negative />
-              <GspDeltaColumn gspDeltas={gspDeltas} />
+              <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} negative />
+              <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} />
             </div>
           )}
         </div>

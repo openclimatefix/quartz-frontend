@@ -6,6 +6,7 @@ import { ActiveUnit, MAP_TITLE_MAIN } from "./types";
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
+import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../lib/domain/power-unit";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
 import {
@@ -305,11 +306,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           const state = (feature.state ?? {}) as Partial<MapFeatureState>;
           const capacity = state.capacity ?? 0;
 
+          // Hoisted above the figures below, which now all need it: a hovered region's unit is
+          // its own country's (`config/countries.ts`), not the dashboard's focused one — the map
+          // can show several countries at once.
+          const featureCountry = String(properties?.[REGION_COUNTRY_PROPERTY] ?? "").toUpperCase();
+          const displayUnit = displayUnitFor(featureCountry);
+          const displayDecimals = displayDecimalsFor(displayUnit);
+
           // "not published yet", "reported nothing" and "zero" are three different answers
           // and the popup says which one it is rather than printing 0 for all three.
           const forecastText =
             state.dataState === "value"
-              ? (state.power ?? 0).toFixed(0)
+              ? toDisplayPower(state.power ?? 0, displayUnit).toFixed(displayDecimals)
               : state.dataState === "no-data"
               ? "no data"
               : "awaiting";
@@ -317,10 +325,6 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             state.dataState === "value" ? ((state.normalized ?? 0) * 100).toFixed(0) : forecastText;
           const actualText = state.actual === null || state.actual === undefined ? "-" : "";
 
-          // Hoisted out of the capacity branch, which used to be the only thing that needed it:
-          // the observer label is per country too, so every unit needs to know whose region
-          // this is.
-          const featureCountry = String(properties?.[REGION_COUNTRY_PROPERTY] ?? "").toUpperCase();
           // What the left-hand number actually is. Falls back to "Actual" only while the
           // manifest is still in flight — never as a permanent name for it, which is the whole
           // point of the change.
@@ -330,9 +334,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           let forecastValue = "";
           let unit = "";
           if (currentActiveUnit === ActiveUnit.MW) {
-            actualValue = actualText || (state.actual as number).toFixed(0);
+            actualValue =
+              actualText ||
+              toDisplayPower(state.actual as number, displayUnit).toFixed(displayDecimals);
             forecastValue = forecastText;
-            unit = "MW";
+            unit = displayUnit;
           } else if (currentActiveUnit === ActiveUnit.percentage) {
             actualValue =
               actualText ||
@@ -345,7 +351,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             actualValue =
               nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : "-";
             forecastValue = "-";
-            unit = "MW";
+            // Dead weight in practice — this branch's own block below overwrites
+            // `actualAndForecastSection` with its "% of National" markup and never reads `unit`
+            // — but set honestly all the same rather than left as a stray "MW".
+            unit = displayUnit;
           }
 
           // Was "Actual / Forecast", which named neither of GB's two observers and so let the
@@ -376,7 +385,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           let deltaSection = "";
           if (isDeltaRef.current) {
             const asPercentage = currentActiveUnit === ActiveUnit.percentage;
-            const deltaValue = asPercentage ? (state.deltaNormalized ?? 0) * 100 : state.delta ?? 0;
+            const deltaValueMw = asPercentage
+              ? (state.deltaNormalized ?? 0) * 100
+              : state.delta ?? 0;
+            const deltaValue = asPercentage
+              ? deltaValueMw
+              : toDisplayPower(deltaValueMw, displayUnit);
+            // GB's own delta has always read to one decimal in MW; that stays exactly as it was.
+            // GW needs `displayDecimalsFor`'s extra place, or a sub-GW swing rounds to "0.0".
+            const deltaDecimals = asPercentage ? 1 : displayUnit === "MW" ? 1 : displayDecimals;
             const deltaBody = !state.hasDelta
               ? `<span class="text-content-muted">no delta yet</span>`
               : `<span class="font-bold">${
@@ -386,8 +403,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
                 }</span>
                 <span class="mr-1 ${
                   deltaValue > 0 ? "text-ocf-delta-900" : "text-ocf-delta-100"
-                }">${deltaValue.toFixed(1)}</span><small class="text-xs">${
-                  asPercentage ? "% of capacity" : "MW"
+                }">${deltaValue.toFixed(deltaDecimals)}</span><small class="text-xs">${
+                  asPercentage ? "% of capacity" : displayUnit
                 }</small>`;
 
             // Which observed stream the delta is measured against, and in which direction. The
@@ -414,9 +431,9 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
             <div class="flex flex-col text-xs">
               <span class="text-2xs uppercase tracking-wide text-content-muted">Capacity</span>
-              <div><span>${capacity.toFixed(
-                0
-              )}</span> <span class="text-2xs text-content-muted">MW</span></div>
+              <div><span>${toDisplayPower(capacity, displayUnit).toFixed(
+                displayDecimals
+              )}</span> <span class="text-2xs text-content-muted">${displayUnit}</span></div>
             </div>
             <div class="flex flex-col text-xs items-end">
               ${actualAndForecastSection}
