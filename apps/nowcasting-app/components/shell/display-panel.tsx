@@ -46,8 +46,8 @@ import { STAGE_GUTTER_PX } from "./geometry";
  */
 
 const RailGroup: FC<{ title: string; children: ReactNode }> = ({ title, children }) => (
-  <div className="border-t border-content/10 px-2 py-2.5 first:border-t-0">
-    <span className="mb-2 block text-2xs font-semibold uppercase tracking-wider text-content-secondary">
+  <div className="border-t border-content/10 px-2 py-2 first:border-t-0">
+    <span className="mb-1.5 block text-2xs font-semibold uppercase tracking-wider text-content-secondary">
       {title}
     </span>
     {children}
@@ -59,7 +59,7 @@ const RailRow: FC<{ label: string; on: boolean; onToggle: () => void }> = ({
   on,
   onToggle
 }) => (
-  <div className="flex items-center justify-between py-1 text-sm">
+  <div className="flex items-center justify-between py-0.5 text-2xs uppercase tracking-wider">
     <button type="button" onClick={onToggle} className="flex-1 text-left text-content">
       <span className={on ? "text-content" : undefined}>{label}</span>
     </button>
@@ -270,7 +270,7 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
     <div
       id="display-settings"
       aria-hidden={!open}
-      className="min-h-0 flex-1 overflow-y-auto rounded-lg py-1"
+      className="min-h-0 flex-1 overflow-y-auto rounded-lg"
     >
       <RailGroup title="Confidence">
         <ConfidenceBands />
