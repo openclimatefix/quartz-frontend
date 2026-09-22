@@ -116,6 +116,13 @@ const PAGE_MINUTES = 180;
 const LABEL_EDGE_ANCHOR_FRACTION = 0.1;
 /** A tick label whose instant is within this many px of an end is held flush to that end. */
 const TICK_EDGE_ANCHOR_PX = 30;
+/**
+ * Room a day label ("Thu →") needs to the right of its midnight line before it is worth
+ * drawing. A day label cannot re-anchor the way a time can — it is flush left *because* it
+ * names the day starting there — so one too near the right edge overhangs the track instead.
+ * Dropped rather than squeezed: the day it names is barely on screen anyway.
+ */
+const DAY_LABEL_MIN_PX = 40;
 
 /**
  * The track's own tick labels — 6-hourly (00:00/06:00/12:00/18:00) when there is room,
@@ -170,6 +177,7 @@ const TrackTicks: FC<{ scale: ScrubScale; zone: string }> = ({ scale, zone }) =>
     <div ref={containerRef} aria-hidden="true" className="relative my-0.5 h-4">
       {ticks.map((tick) => {
         const px = tick.fraction * widthPx;
+        if (tick.startsDay && widthPx - px < DAY_LABEL_MIN_PX) return null;
         // A day label starts at its midnight line; the rest centre on their instant.
         const translate =
           tick.startsDay || px < TICK_EDGE_ANCHOR_PX
