@@ -5,6 +5,7 @@ import useGlobalState, { setChartSplitOverride, useCountryState } from "../helpe
 import {
   CHART_SPLIT,
   chartModeFor,
+  MAP_CONTROL_WIDTH_PX,
   MIN_CHART_WIDTH_WITH_SCRUB_PX,
   STAGE_GUTTER_PX
 } from "./geometry";
@@ -68,10 +69,17 @@ import { useResizableChartSplit } from "./use-resizable-chart-split";
 
 const NARROW_QUERY = "(max-width: 1023px)";
 
-const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
-  children,
-  comparisonActive
-}) => {
+/**
+ * TRIAL (Brad, this session): the display panel hangs off the chart's right edge instead of
+ * living in the map control dock's column. It is positioned at `left-full` so it costs the
+ * chart no width — the chart's own size rules are untouched — and it inherits the chart's
+ * height, which is the point of trying it: the settings for a chart sit against that chart.
+ */
+const FloatingChart: FC<{
+  children: ReactNode;
+  comparisonActive: boolean;
+  panel?: ReactNode;
+}> = ({ children, comparisonActive, panel }) => {
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [chartSplitOverrides] = useGlobalState("chartSplitOverrides");
   const regionSelected = !!selectedMapRegionIds && selectedMapRegionIds.length > 0;
@@ -127,10 +135,28 @@ const FloatingChart: FC<{ children: ReactNode; comparisonActive: boolean }> = ({
     >
       <section
         aria-label="Chart"
-        className="flex h-full w-full flex-col overflow-hidden rounded-lg border border-content/10 bg-surface-panel text-content shadow-2xl focus:outline-none"
+        // Above the panel, which parks behind it: the two are siblings, so without a stacking
+        // order the later one in the DOM would slide over the chart instead of under it.
+        className="relative z-10 flex h-full w-full flex-col overflow-hidden rounded-lg border border-content/10 bg-surface-panel text-content shadow-2xl focus:outline-none"
       >
         {children}
       </section>
+
+      {/* Hung off the chart's right edge at the chart's own height, costing the chart no
+          width. The opener rides on the panel, as it always has — it just faces the other
+          way now, because the panel parks left behind the chart instead of right off the
+          stage. */}
+      {panel && !isNarrow && (
+        <div
+          // The wrapper is a position, not a surface: parked, it would otherwise sit over the
+          // map as a 260px dead strip that swallows pans. The panel and its tab take their own
+          // events back.
+          className="pointer-events-none absolute top-0 z-0 flex h-full flex-col"
+          style={{ left: `calc(100% + ${STAGE_GUTTER_PX}px)`, width: MAP_CONTROL_WIDTH_PX }}
+        >
+          {panel}
+        </div>
+      )}
 
       {/* Resizing is a pointer/keyboard interaction that does not translate to touch-only
           layouts, and the narrow layout ignores the split entirely (full width, seed height) —

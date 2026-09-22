@@ -216,7 +216,16 @@ const MapLayers: FC = () => {
   );
 };
 
-const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onToggle }) => (
+const DisplayPanel: FC<{
+  open: boolean;
+  onToggle: () => void;
+  /**
+   * TRIAL: attached to the chart's right edge rather than parked at the stage's. The park
+   * slide and the tab both assume a stage edge to hide behind — here there is none, so the
+   * panel simply is not rendered when shut and its opener rides on the chart instead.
+   */
+  attached?: boolean;
+}> = ({ open, onToggle, attached = false }) => (
   // Parked off the right edge when shut, the way the rail was, and clipped by the stage's
   // `overflow-hidden`. The offset is `100% + STAGE_GUTTER_PX` because the column itself is
   // inset from the stage edge by that gutter — a plain `100%` leaves an 8px slice showing.
@@ -227,9 +236,18 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
   // height out of here, which is the right half to lose.
   <aside
     aria-label="Display settings"
-    className="relative flex min-h-0 flex-col rounded-lg rounded-tl-none border border-content/10 bg-surface-panel/95 text-content shadow-2xl"
+    className={`pointer-events-auto relative flex min-h-0 flex-col rounded-lg border border-content/10 bg-surface-panel/95 text-content shadow-2xl ${
+      attached ? "rounded-tr-none" : "rounded-tl-none"
+    }`}
     style={{
-      transform: open ? undefined : `translateX(calc(100% + ${STAGE_GUTTER_PX}px))`,
+      // Shut, it parks off its own edge: left, behind the chart, when attached to one;
+      // right, off the stage, when it lives in the dock's column. Either way the tab it
+      // carries stays on screen, which is what makes it findable again.
+      transform: open
+        ? undefined
+        : attached
+        ? `translateX(calc(-100% - ${STAGE_GUTTER_PX}px))`
+        : `translateX(calc(100% + ${STAGE_GUTTER_PX}px))`,
       // `visibility` rides along so a parked panel is out of the tab order as well as out of
       // sight — `aria-hidden` alone leaves a dozen focusable toggles reachable off-stage, which
       // the old rail got wrong too. It flips instantly on the way in and waits out the slide on
@@ -243,8 +261,9 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
   >
     {/* The tab rides on the panel rather than sitting in the column, so one transform moves
         both and there is no second position to keep in step. It hangs a tab's width outside the
-        panel's left edge, which is what leaves it on screen once the panel has parked: shut, it
-        sits flush against the stage's right edge, just below the map controls.
+        panel's outer edge, which is what leaves it on screen once the panel has parked — the
+        left edge in the dock's column, the right edge when the panel is attached to the chart
+        and parks behind it.
 
         It is level with the panel's top, whose top-left corner is square so the two read as one
         piece. `-top-px` because the tab is placed from inside the panel's border, so `top-0`
@@ -260,9 +279,19 @@ const DisplayPanel: FC<{ open: boolean; onToggle: () => void }> = ({ open, onTog
       title={open ? "Hide display settings" : "Show display settings"}
       onClick={onToggle}
       style={{ visibility: "visible" }}
-      className="absolute -left-8 -top-px flex h-8 w-8 items-center justify-center rounded-l-lg border border-r-0 border-content/10 bg-surface-panel/95 text-interactive shadow-2xl transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-interactive"
+      className={`pointer-events-auto absolute -top-px flex h-8 items-center border border-content/10 ${
+        attached
+          ? // Shut, it is wider than it looks: the extra width runs left, under the chart,
+            // filling the notch the chart's rounded corner would otherwise leave beside it.
+            // Open, that overhang would lie across the panel instead — drawing its bottom
+            // border over the first row — so the tab narrows to its visible width.
+            `${
+              open ? "w-8 justify-center" : "w-12 justify-end pr-1"
+            } -right-8 rounded-r-lg border-l-0`
+          : "w-8 -left-8 rounded-l-lg border-r-0"
+      } bg-surface-panel/95 text-interactive shadow-2xl transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-interactive`}
     >
-      {open ? <MdKeyboardArrowRight size={20} /> : <MdKeyboardArrowLeft size={20} />}
+      {open === attached ? <MdKeyboardArrowLeft size={20} /> : <MdKeyboardArrowRight size={20} />}
     </button>
     {/* No "Display / how it's drawn" header any more (Brad, 2026-08-28: "I'm not convinced
         it is useful at all"). It cost a row of vertical space in a column that is already the

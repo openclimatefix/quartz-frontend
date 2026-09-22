@@ -100,15 +100,22 @@ const DashboardShell: FC<{
           className="pointer-events-none absolute inset-x-0 bottom-0"
           style={{ top: `calc(3.5rem - ${STAGE_GUTTER_PX}px)` }}
         >
-          <FloatingChart comparisonActive={comparisonActive}>{chart}</FloatingChart>
+          <FloatingChart
+            comparisonActive={comparisonActive}
+            panel={
+              dashboardModeActive ? undefined : (
+                <DisplayPanel
+                  attached
+                  open={displayPanelOpen}
+                  onToggle={() => setDisplayPanelOpen((open) => !open)}
+                />
+              )
+            }
+          >
+            {chart}
+          </FloatingChart>
           <MapControlDock>
             <MapEncodingControls />
-            {!dashboardModeActive && (
-              <DisplayPanel
-                open={displayPanelOpen}
-                onToggle={() => setDisplayPanelOpen((open) => !open)}
-              />
-            )}
             {/* The map's own camera controls, which used to be Mapbox's and sat outside this
                 column entirely — see `map-zoom-controls.tsx`. `mt-auto` on that group bottom-
                 anchors it and the zone stack together. */}
