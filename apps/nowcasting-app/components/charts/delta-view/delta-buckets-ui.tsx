@@ -8,23 +8,28 @@ import { Bucket, GspDeltaValue } from "../../types";
 import { createBucketObject } from "../../helpers/utils";
 import { displayDecimalsFor, toDisplayPower } from "../../../lib/domain/power-unit";
 import type { PowerUnit } from "../../../config/countries";
+import { deltaExtent, deltaRampColor } from "../../../lib/domain/delta-ramp";
+
+/**
+ * Legible text colour for a chip painted with the delta ramp. The ramp's poles are light
+ * colours and its neutral middle is a dark grey, so which text reads depends on how far a
+ * bucket's edge sits from zero, not on which side of zero it is on — a rule keyed on sign
+ * would flip the text colour across zero for no visual reason, when the buckets straddling it
+ * sit on nearly the same dark ground.
+ */
+const deltaTextClass = (value: number, extent: number): string => {
+  const ratio = extent === 0 ? 0 : Math.min(1, Math.abs(value) / extent);
+  return ratio > 0.5 ? "text-content-on-accent" : "text-content";
+};
 
 const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
   dataKey,
   quantity,
   text,
-  bucketColor,
-  borderColor,
-  textColor,
-  altTextColor,
   lowerBound,
   upperBound,
   unit
 }) => {
-  const selectedClass = `${borderColor}`;
-  const unselectedClass = `bg-opacity-0 ${
-    borderColor === "border-content" ? "border-surface-panel" : borderColor
-  }`;
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const [activeUnit] = useGlobalState("activeUnit");
   // Capacity has no delta, so it labels as megawatts — the same fold the map and the deltas
@@ -39,16 +44,52 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
     }
   };
 
+  // These rows genuinely ARE buckets — the GSPs really are grouped into nine bins — so the
+  // grouping stays. But each row used to pick a hand-kept `ocf-delta-N00` swatch for its bin;
+  // it now samples the same continuous ramp the map paints, at the bucket's own EDGE value, so
+  // a row's colour is exactly the colour the map would give a region sitting right on that
+  // boundary. `deltaBucketEdge`'s percentage form already comes back as a percentage (e.g. 35,
+  // not 0.35), so the extent it is compared against needs the same scaling — `deltaExtent`
+  // is normalised (0–1 of capacity), hence the `* 100` below.
+  const bucket = DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET];
+  const edge = deltaBucketEdge(bucket, asPercentage);
+  const extent = asPercentage ? deltaExtent(true) * 100 : deltaExtent(false);
+  const rampColor = deltaRampColor(edge, extent);
+  const textClass = deltaTextClass(edge, extent);
+  const isZero = bucket === DELTA_BUCKET.ZERO;
+
+  // Unselected rows used to show `altTextColor` — the bucket's own hue as text on an
+  // otherwise-empty chip, or `text-surface-panel` for the neutral bucket, which had no hue of
+  // its own to show. The ramp keeps that split: a non-zero bucket still tints its own outline
+  // and text with its ramp colour; the zero bucket falls back to the ordinary panel/content
+  // classes, since its ramp colour is the same neutral grey as its own fill and would draw an
+  // invisible border rather than a deliberate one.
+  // Off, the zero chip sinks instead of tinting: its ramp colour IS the panel's black now
+  // (the midpoint is the map's ground), so an outline in it drew nothing and the chip read as
+  // a hole. A recessed ground and a faint edge give it a shape without giving it a hue it does
+  // not have.
+  const zeroBorderClass = isSelected ? "border-content" : "border-edge";
+  const zeroGroundClass = isSelected ? "" : "bg-surface-sunken";
+
   return (
     <>
       <div
-        className={`${isSelected ? `${textColor}` : `${altTextColor}`} justify-between flex flex-1
-            flex-col items-center rounded`}
+        className={`${
+          isSelected ? textClass : isZero ? "text-content-secondary" : ""
+        } justify-between flex flex-1 flex-col items-center rounded`}
       >
         <button
-          className={`flex flex-col flex-1 w-full items-center p-1 rounded-md justify-center border-2 ${bucketColor} ${
-            isSelected ? selectedClass : unselectedClass
+          // The fill is a computed rgb(), not a Tailwind swatch, so background and border come
+          // from an inline style rather than `bg-ocf-delta-*` / `border-ocf-delta-*` classes,
+          // except for the zero bucket's border, which keeps its fixed content/panel classes.
+          className={`flex flex-col flex-1 w-full items-center p-1 rounded-md justify-center border-2 ${
+            isZero ? `${zeroBorderClass} ${zeroGroundClass}` : ""
           }`}
+          style={{
+            backgroundColor: isSelected ? rampColor : "transparent",
+            borderColor: isZero ? undefined : rampColor,
+            color: isSelected || isZero ? undefined : rampColor
+          }}
           onClick={toggleBucketSelection}
         >
           <span className="text-xl font-semibold leading-tight">{quantity}</span>

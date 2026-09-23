@@ -48,6 +48,7 @@ import {
   UNBANDED_COUNTRY_OPACITY,
   bandLabels,
   deltaFillColorExpression,
+  deltaFillOpacityExpression,
   fillColorExpression,
   fillOpacityExpression,
   mapBandsFor
@@ -437,14 +438,28 @@ const evaluate = (
       }
       return output;
     }
-    // Linear `interpolate` only — the percentage ramp is the one place it is used, and Mapbox
-    // clamps outside the stop range rather than extrapolating, which this reproduces.
+    case "abs":
+      return Math.abs(Number(next(args[0])));
+    // Linear `interpolate`, and Mapbox clamps outside the stop range rather than
+    // extrapolating, which this reproduces. Colour stops (the delta ramp) are not blended
+    // here — a blended hex would be this evaluator's arithmetic rather than Mapbox's, and
+    // nothing is learned by testing it — so a colour ramp is only ever asserted at a stop or
+    // beyond an end, where the answer is one of the stops verbatim.
     case "interpolate": {
       const input = Number(next(args[1]));
-      const stops: Array<[number, number]> = [];
+      const rawStops: Array<[number, unknown]> = [];
       for (let i = 2; i + 1 < args.length; i += 2) {
-        stops.push([Number(args[i]), Number(next(args[i + 1]))]);
+        rawStops.push([Number(args[i]), next(args[i + 1])]);
       }
+      if (rawStops.some(([, output]) => typeof output === "string")) {
+        if (!rawStops.length) return undefined;
+        if (input <= rawStops[0][0]) return rawStops[0][1];
+        const lastColour = rawStops[rawStops.length - 1];
+        if (input >= lastColour[0]) return lastColour[1];
+        const exact = rawStops.find(([at]) => at === input);
+        return exact ? exact[1] : undefined;
+      }
+      const stops: Array<[number, number]> = rawStops.map(([at, output]) => [at, Number(output)]);
       if (!stops.length) return undefined;
       if (input <= stops[0][0]) return stops[0][1];
       const last = stops[stops.length - 1];
@@ -778,15 +793,26 @@ describe("paint expressions render the three states distinctly", () => {
     });
   });
 
-  test("no computable delta draws nothing rather than the zero-bucket colour", () => {
+  test("no computable delta draws nothing; the rest ramp between the two poles", () => {
     const deltaColour = deltaFillColorExpression();
-    expect(evaluate(deltaColour, { ...base, hasDelta: false, deltaBucket: 0 })).toBe("transparent");
-    expect(evaluate(deltaColour, { ...base, hasDelta: true, deltaBucket: 0 })).toBe("transparent");
-    expect(evaluate(deltaColour, { ...base, hasDelta: true, deltaBucket: DELTA_BUCKET.POS2 })).toBe(
-      theme.extend.colors["ocf-delta"][700]
+    const deltaOpacity = deltaFillOpacityExpression();
+    // Nothing to say: drawn as absent, not as a delta of zero.
+    expect(evaluate(deltaColour, { ...base, hasDelta: false, delta: 0 })).toBe("transparent");
+    // A real zero has a colour now — the neutral middle — but it draws at no opacity, so the
+    // two agree on screen and only the popup tells them apart.
+    expect(evaluate(deltaOpacity, { ...base, hasDelta: true, delta: 0 })).toBe(0);
+    // The poles, at and beyond saturation. `interpolate` clamps, so a region twice as far off
+    // as the scale's end paints the same as one exactly at it.
+    expect(evaluate(deltaColour, { ...base, hasDelta: true, delta: DELTA_BUCKET.POS4 })).toBe(
+      "#FAA056"
     );
-    expect(evaluate(deltaColour, { ...base, hasDelta: true, deltaBucket: DELTA_BUCKET.NEG4 })).toBe(
-      theme.extend.colors["ocf-delta"][200]
+    expect(evaluate(deltaColour, { ...base, hasDelta: true, delta: DELTA_BUCKET.NEG4 * 2 })).toBe(
+      "#65B0C9"
     );
+    // Halfway out is halfway to the pole, which is the whole point of a continuous scale:
+    // magnitude is readable without counting steps against a legend.
+    const half = evaluate(deltaOpacity, { ...base, hasDelta: true, delta: DELTA_BUCKET.POS2 });
+    const full = evaluate(deltaOpacity, { ...base, hasDelta: true, delta: DELTA_BUCKET.POS4 });
+    expect(half).toBeCloseTo((full as number) / 2, 6);
   });
 });

@@ -34,6 +34,7 @@ import { DELTA_BUCKET } from "../../constant";
 import { getZoomYMax } from "../helpers/chartUtils";
 import { useTokens } from "../helpers/colour";
 import { selectAxisTicks, TickDensity, tickLabels, type TickLabel } from "../../lib/time/ticks";
+import { DELTA_COOL, DELTA_WARM } from "../../lib/domain/delta-ramp";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
 /**
@@ -68,8 +69,11 @@ const satOnly = theme.extend.colors.series.satellite;
 const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
 const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const seasonal = theme.extend.colors.series.seasonal;
-const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
-const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+// The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
+// colour the map paints a region that came in under forecast, and one above it the colour it
+// paints a region that came in over.
+const deltaNeg = DELTA_COOL;
+const deltaPos = DELTA_WARM;
 
 // Matter SemiMono is the brand's face for values. Recharts writes its ticks and axis labels
 // as SVG attributes rather than classed elements, so they cannot take `font-mono` and name
@@ -1180,6 +1184,11 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 dataKey="DELTA"
                 yAxisId={"delta"}
                 xAxisId={"x-axis"}
+                // Every other mark on this chart says the same: Recharts re-runs a series'
+                // entry animation whenever its props change identity, and hovering changes
+                // them every frame, so the bars grew up from the axis again on each mouse
+                // move. The lines were given this at the same time and for the same reason.
+                isAnimationActive={false}
                 // @ts-ignore
                 shape={<CustomBar />}
               />

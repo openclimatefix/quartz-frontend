@@ -1,6 +1,8 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from "react";
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
+import { ActiveUnit } from "../../map/types";
+import { deltaExtent, deltaRampColor } from "../../../lib/domain/delta-ramp";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, {
   useCountryState,
@@ -42,8 +44,17 @@ const GspDeltaColumn: FC<{
 }> = ({ gspDeltas, unit, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
+  const [activeUnit] = useGlobalState("activeUnit");
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;
+
+  // Each row is one GSP's actual delta, a continuous figure rather than a bucket, so it reads
+  // the same ramp the map fills its region with — at the region's own value, not at whichever
+  // bucket edge it happens to have crossed. `deltaNormalized` is already a fraction of
+  // capacity (see `use-gsp-deltas.ts`), the same scale `deltaExtent(true)` saturates at, so
+  // percentage mode needs no rescaling the way the bucket rows' *100 edges do.
+  const asPercentage = activeUnit === ActiveUnit.percentage;
+  const rowExtent = deltaExtent(asPercentage);
 
   const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
     if (negative) {
@@ -58,62 +69,30 @@ const GspDeltaColumn: FC<{
     <>
       <div className={`flex flex-col flex-1`}>
         {deltaArray.sort(sortFunc).map((gspDelta) => {
-          let bucketColor = "";
-          let dataKey = "";
-          let progressLineColor = "";
           if (negative && gspDelta.delta >= 0) {
             return null;
           }
           if (!negative && gspDelta.delta <= 0) {
             return null;
           }
-          switch (gspDelta.deltaBucket) {
-            case DELTA_BUCKET.NEG4:
-              bucketColor = "border-ocf-delta-100";
-              progressLineColor = "bg-ocf-delta-100";
-              dataKey = "-4";
-              break;
-            case DELTA_BUCKET.NEG3:
-              bucketColor = "border-ocf-delta-200";
-              progressLineColor = "bg-ocf-delta-200";
-              dataKey = "-3";
-              break;
-            case DELTA_BUCKET.NEG2:
-              bucketColor = "border-ocf-delta-300";
-              progressLineColor = "bg-ocf-delta-300";
-              dataKey = "-2";
-              break;
-            case DELTA_BUCKET.NEG1:
-              bucketColor = "border-ocf-delta-400";
-              progressLineColor = "bg-ocf-delta-400";
-              dataKey = "-1";
-              break;
-            case DELTA_BUCKET.ZERO:
-              bucketColor = "border-content border-opacity-40";
-              progressLineColor = "bg-content bg-opacity-40";
-              dataKey = "0";
-              break;
-            case DELTA_BUCKET.POS1:
-              bucketColor = "border-ocf-delta-600";
-              progressLineColor = "bg-ocf-delta-600";
-              dataKey = "1";
-              break;
-            case DELTA_BUCKET.POS2:
-              bucketColor = "border-ocf-delta-700";
-              progressLineColor = "bg-ocf-delta-700";
-              dataKey = "2";
-              break;
-            case DELTA_BUCKET.POS3:
-              bucketColor = "border-ocf-delta-800";
-              progressLineColor = "bg-ocf-delta-800";
-              dataKey = "3";
-              break;
-            case DELTA_BUCKET.POS4:
-              bucketColor = "border-ocf-delta-900";
-              progressLineColor = "bg-ocf-delta-900";
-              dataKey = "4";
-              break;
-          }
+
+          // The row's own value, in whichever unit the ramp is currently keyed to — MW outside
+          // percentage mode, the capacity fraction inside it — rather than the bucket it was
+          // filed under. The zero bucket keeps its own fixed, low-opacity border and progress
+          // colour: at a value of zero the ramp gives back its neutral grey too, but a border
+          // drawn in a colour rather than a state (`border-opacity-40`) reads as "a small
+          // negative delta" instead of "no delta worth ranking".
+          const rowValue = asPercentage ? Number(gspDelta.deltaNormalized) : gspDelta.delta;
+          const isZeroBucket = gspDelta.deltaBucket === DELTA_BUCKET.ZERO;
+          const rampColor = deltaRampColor(rowValue, rowExtent);
+          const bucketColor = isZeroBucket ? "border-content border-opacity-40" : "";
+          const progressLineColor = isZeroBucket ? "bg-content bg-opacity-40" : "";
+          // Computed rgb()s, so the ramp's border and fill come from inline style rather than
+          // the `border-ocf-delta-*` / `bg-ocf-delta-*` classes they replace — the zero bucket
+          // alone keeps its class, since it wants a fixed low-opacity tone rather than a point
+          // on the ramp.
+          const bucketBorderStyle = isZeroBucket ? undefined : { borderColor: rampColor };
+          const bucketFillStyle = isZeroBucket ? undefined : { backgroundColor: rampColor };
 
           const bucketIsSelected = selectedBuckets.includes(gspDelta.deltaBucketKey);
           if (bucketIsSelected && !hasRows) {
@@ -131,12 +110,6 @@ const GspDeltaColumn: FC<{
             Number(gspDelta.deltaNormalized) * 100
           ).toFixed(0);
 
-          const tickerColor = `${isSelectedGsp ? `h-2.5` : `h-2`} ${
-            gspDelta.delta > 0 ? `bg-ocf-delta-900` : `bg-ocf-delta-100`
-          }`;
-
-          const deltaRowClasses = `bg-ocf-delta-950`;
-
           const selectedDeltaRowClasses = `bg-surface-panel items-end`;
 
           if (!bucketIsSelected) {
@@ -145,20 +118,24 @@ const GspDeltaColumn: FC<{
 
           return (
             <div
-              className={`mb-0.5 border-surface-raised border ${
-                isSelectedGsp ? selectedDeltaRowClasses : deltaRowClasses
+              // `bg-surface-inner` is the panel's own recess token: a row's ground is not a
+              // reading of zero, and the two only looked alike while the ramp's midpoint was
+              // a mid grey rather than the map's black.
+              className={`mb-0.5 border-surface-raised border bg-surface-inner ${
+                isSelectedGsp ? selectedDeltaRowClasses : ""
               } ${
                 negative ? "rounded-l" : "rounded-r"
-              } box-content cursor-pointer relative flex w-full transition duration-200 ease-out 
+              } box-content cursor-pointer relative flex w-full transition duration-200 ease-out
               hover:bg-surface-raised hover:ease-in`}
               key={`gspCol${gspDelta.regionId}`}
               onClick={() => setSelectedMapRegionIds([gspDelta.regionId])}
             >
               <div
-                className={`items-start xl:items-center text-xs grid grid-cols-12 flex-1 py-1.5 justify-between px-2 
+                className={`items-start xl:items-center text-xs grid grid-cols-12 flex-1 py-1.5 justify-between px-2
                 transition duration-200 ease-out hover:ease-in ${bucketColor} ${
                   gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
                 }`}
+                style={bucketBorderStyle}
                 key={`gspCol${gspDelta.regionId}`}
               >
                 <div className="col-span-10 xl:col-span-5 flex-initial flex justify-between self-stretch items-center dash:max-w-full">
@@ -233,7 +210,10 @@ const GspDeltaColumn: FC<{
                 </div>
                 {/*</div>*/}
               </div>
-              <div className={`absolute bottom-0 right-0 left-0 ${bucketColor}`}>
+              <div
+                className={`absolute bottom-0 right-0 left-0 ${bucketColor}`}
+                style={bucketBorderStyle}
+              >
                 <div
                   className={`flex items-end justify-end ${
                     gspDelta.delta > 0 ? `bottom-0 flex-row-reverse ml-2` : `mr-2`
@@ -245,7 +225,7 @@ const GspDeltaColumn: FC<{
                   ></div>
                   <div
                     className={`${isSelectedGsp ? `h-1.5` : `h-1`} ${progressLineColor}`}
-                    style={{ width: `${deltaNormalizedPercentage}%` }}
+                    style={{ width: `${deltaNormalizedPercentage}%`, ...bucketFillStyle }}
                   ></div>
                 </div>
               </div>

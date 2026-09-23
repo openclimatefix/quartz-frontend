@@ -14,6 +14,7 @@ import {
   PERCENT_RAMP_TOP,
   ZERO_OPACITY
 } from "./feature-state";
+import { DELTA_COOL, DELTA_NEUTRAL, DELTA_WARM, deltaExtent } from "../../lib/domain/delta-ramp";
 import { useMapObserver } from "./map-observer";
 import { ActiveUnit } from "./types";
 import { theme } from "../../tailwind.config";
@@ -332,52 +333,6 @@ const SequentialBands: React.FC<{
 };
 
 /**
- * The nine delta buckets, in scale order: the Tailwind background and text colour for each.
- *
- * Was a nine-arm `switch` inside the render, matching each `getDeltaBucketKeys()` entry against
- * `deltaKeys[n]` to recover the index it already had. Same colours, same order — the shape is
- * now a table because the row's sizing (below) has to reason about how many cells there are.
- * The `opacity` each arm also computed was dead: the backgrounds are solid `ocf-delta` steps,
- * not opacity ramps like the sequential pills, and nothing ever read it.
- */
-const DELTA_STEPS: { value: DELTA_BUCKET; background: string; text: string }[] = [
-  { value: DELTA_BUCKET.NEG4, background: "bg-ocf-delta-100", text: "text-content-on-accent" },
-  { value: DELTA_BUCKET.NEG3, background: "bg-ocf-delta-200", text: "text-content-on-accent" },
-  { value: DELTA_BUCKET.NEG2, background: "bg-ocf-delta-300", text: "text-content-on-accent" },
-  { value: DELTA_BUCKET.NEG1, background: "bg-ocf-delta-400", text: "text-content" },
-  { value: DELTA_BUCKET.ZERO, background: "bg-ocf-delta-500", text: "text-content" },
-  { value: DELTA_BUCKET.POS1, background: "bg-ocf-delta-600", text: "text-content" },
-  { value: DELTA_BUCKET.POS2, background: "bg-ocf-delta-700", text: "text-content-on-accent" },
-  { value: DELTA_BUCKET.POS3, background: "bg-ocf-delta-800", text: "text-content-on-accent" },
-  { value: DELTA_BUCKET.POS4, background: "bg-ocf-delta-900", text: "text-content-on-accent" }
-];
-
-/**
- * The same nine cells labelled with `DELTA_PERCENTAGE_EDGES` instead of megawatts.
- *
- * Built from the edges rather than written out, so the legend cannot drift from the scale
- * `getDeltaBucketNormalized` actually steps on. The colours are positional and shared with the
- * megawatt row above — only the numbers change with the unit, because only the numbers do.
- */
-/**
- * The nine legend cells' opacities, mirroring `DELTA_BUCKET_OPACITIES` outward from the middle.
- *
- * The neutral cell is `0.45` rather than the map's `0` — on the map "no meaningful difference"
- * is correctly drawn as nothing, but a legend cell that renders as nothing is not a legend, it
- * is a gap. It stays the faintest cell in the row, which is the property that matters.
- */
-const DELTA_CELL_OPACITIES = [
-  ...[...DELTA_BUCKET_OPACITIES].reverse(),
-  0.45,
-  ...DELTA_BUCKET_OPACITIES
-];
-
-const DELTA_PERCENTAGE_STEPS = DELTA_STEPS.map((step) => ({
-  ...step,
-  value: deltaBucketEdge(step.value, true)
-}));
-
-/**
  * The diverging legend: nine buckets on one row, and the observer they are measured against.
  *
  * ## Why it says what it is measured against
@@ -426,9 +381,11 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
   // the MW branch is a defensive default rather than a statement about what capacity means.
   const asPercentage = unit === ActiveUnit.percentage;
   const unitText = asPercentage ? "% of capacity" : "MW";
-  // The edges the paint expression actually steps on, in the unit being shown, so the legend
-  // and the fill cannot describe different scales.
-  const steps = asPercentage ? DELTA_PERCENTAGE_STEPS : DELTA_STEPS;
+  // Where the paint expression saturates, in the unit being shown, so the legend and the fill
+  // cannot describe different scales. The percentage scale is held as a fraction.
+  const extent = asPercentage
+    ? Math.round(deltaExtent(true) * 100)
+    : Math.round(deltaExtent(false));
   return (
     <div className="flex flex-col bg-surface-raised">
       <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-secondary">
@@ -450,61 +407,40 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
         "100, 75, 50 … 100" with the direction — the entire point of a diverging scale —
         missing.
       */}
+      {/*
+        One `role="img"` with the whole scale in its label, rather than cells a screen reader
+        would read as bare numbers: the magnitudes are unsigned, so read out individually they
+        would lose the direction, which is the entire point of a diverging scale.
+      */}
       <div
         role="img"
-        aria-label={`Delta colour scale, minus ${Math.abs(steps[0].value)} to plus ${
-          steps[steps.length - 1].value
-        } ${unitText}${
+        aria-label={`Delta colour scale, minus ${extent} to plus ${extent} ${unitText}${
           label ? `, ${label} minus forecast; positive means actual above forecast` : ""
         }`}
-        className="flex items-center gap-1 font-mono text-2xs font-bold text-content-secondary dash:text-base"
+        className="flex w-full min-w-[10rem] max-w-[16rem] flex-col dash:max-w-[24rem]"
       >
         {/*
-          The sign, twice, instead of nine times. With equal `flex-1` cells the *widest* cell
-          sets the width of every cell, so `+100` at ~23.5px in a ~25px cell was what made the
-          row cramped — and per-cell signs are redundant anyway on a scale that is symmetric
-          about a labelled `0` and already runs cold-to-hot left-to-right. Hoisting them to the
-          ends is the one piece of information the row genuinely needs, stated once at each end.
-
-          The two glyphs cost ~22px including their gaps and give back ~26px across the cells,
-          so the row is marginally narrower *and* each cell holds a 3-character number in ~23px
-          — enough that the horizontal padding, dropped to make `+100` fit, comes back.
-
-          U+2212 MINUS, not a hyphen: it is the same width and weight as the `+` opposite it,
-          where a hyphen sits high and short and makes the two ends look mismatched.
+          The ramp the map draws, not a sampled set of it: nine pills describing a continuous
+          fill would be a second, coarser account of one scale. Cold on the left, hot on the
+          right, neutral through the middle — where the map paints nothing at all, which is
+          why the bar fades there rather than showing a band.
         */}
-        <span aria-hidden>−</span>
-        {/*
-          `flex-wrap` matters only in `dash:`. The dock is a fixed `MAP_CONTROL_WIDTH_PX` in
-          every mode, so the dashboard's larger type cannot fit nine cells across it however
-          they are sized; there `flex-none` returns them to content width and lets them wrap as
-          they did before. One row is a normal-size claim, not a universal one — better than
-          holding the line by leaving a wall display at 10px.
-        */}
-        <div className="flex flex-1 flex-wrap gap-[2px] items-end tabular-nums">
-          {steps.map(({ value, background, text }, index) => (
-            <div
-              key={value}
-              className={`flex-1 rounded-sm px-[2px] py-[1px] text-center dash:flex-none dash:px-2 dash:py-[2px] whitespace-nowrap ${background} ${text}`}
-              /*
-                The same magnitude ramp the fill draws (`deltaFillOpacityExpression`), so the
-                legend keeps describing the map now that strength carries meaning as well as
-                hue. Inline rather than a `bg-…/${n}` utility because these are computed and
-                Tailwind cannot see them to generate the class.
-
-                Position, not value: the row is symmetric, so cell `index` maps onto the
-                opacity ladder from the outside in and back out. The neutral cell keeps a floor
-                of its own — it paints transparent on the map, but a legend cell has to be
-                visible to be read as the "no meaningful difference" step.
-              */
-              style={{ opacity: DELTA_CELL_OPACITIES[index] }}
-            >
-              {/* Magnitude only — the sign is on the row, and `0` has neither. */}
-              {Math.abs(value)}
-            </div>
-          ))}
+        <div
+          className="relative h-4 w-full rounded border border-content-on-accent bg-map-land dash:h-6"
+          style={{
+            backgroundImage: `linear-gradient(to right, ${DELTA_COOL}, ${DELTA_NEUTRAL}, ${DELTA_WARM})`
+          }}
+        >
+          <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-content/50" />
         </div>
-        <span aria-hidden>+</span>
+        <div className="relative mt-0.5 h-3 font-mono text-2xs tabular-nums text-content-secondary dash:h-4 dash:text-xs">
+          <span className="absolute left-0">−{extent}</span>
+          <span className="absolute left-1/2 -translate-x-1/2">0</span>
+          <span className="absolute right-0">
+            +{extent}
+            {asPercentage ? "%" : ""}
+          </span>
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,12 @@ import type { Expression } from "mapbox-gl";
 
 import { COUNTRY_CONFIG, type MapBandThresholds } from "../../config/countries";
 import { DELTA_BUCKET, DELTA_BUCKET_OPACITIES } from "../../constant";
+import {
+  DELTA_COOL,
+  DELTA_NEUTRAL,
+  DELTA_WARM,
+  deltaExtent
+} from "../../lib/domain/delta-ramp";
 import { theme } from "../../tailwind.config";
 import type { MapFeatureState } from "../helpers/data";
 import { REGION_COUNTRY_PROPERTY } from "./country-features";
@@ -336,6 +342,14 @@ export const fillColorExpression = (unit: ActiveUnit): Expression => {
 
 const delta = theme.extend.colors["ocf-delta"];
 
+/** The scale's numbers and poles live in `lib/domain/delta-ramp.ts`; see there for why. */
+const deltaValue = (normalized: boolean): Expression =>
+  [
+    "coalesce",
+    ["feature-state", normalized ? "deltaNormalized" : "delta"],
+    0
+  ] as unknown as Expression;
+
 /**
  * `fill-color` for the delta layer, as a `step` over the pre-computed bucket.
  *
@@ -349,33 +363,25 @@ const delta = theme.extend.colors["ocf-delta"];
  * therefore one `setPaintProperty` against feature state that is already on every feature — no
  * refetch, no value rebuild. See `DELTA_PERCENTAGE_EDGES` for why the second scale exists.
  */
-export const deltaFillColorExpression = (normalized = false): Expression =>
-  [
+export const deltaFillColorExpression = (normalized = false): Expression => {
+  const extent = deltaExtent(normalized);
+  return [
     "case",
     ["!=", ["feature-state", "hasDelta"], true],
     "transparent",
     [
-      "step",
-      ["coalesce", ["feature-state", normalized ? "deltaBucketNormalized" : "deltaBucket"], 0],
-      delta[100],
-      DELTA_BUCKET.NEG4,
-      delta[200],
-      DELTA_BUCKET.NEG3,
-      delta[300],
-      DELTA_BUCKET.NEG2,
-      delta[400],
-      DELTA_BUCKET.NEG1,
-      "transparent",
-      DELTA_BUCKET.POS1,
-      delta[600],
-      DELTA_BUCKET.POS2,
-      delta[700],
-      DELTA_BUCKET.POS3,
-      delta[800],
-      DELTA_BUCKET.POS4,
-      delta[900]
+      "interpolate",
+      ["linear"],
+      deltaValue(normalized),
+      -extent,
+      DELTA_COOL,
+      0,
+      DELTA_NEUTRAL,
+      extent,
+      DELTA_WARM
     ]
   ] as unknown as Expression;
+};
 
 /**
  * `fill-opacity` for the delta layer: magnitude, so the eye can rank without the legend.
@@ -388,7 +394,22 @@ export const deltaFillColorExpression = (normalized = false): Expression =>
  * draws as nothing, exactly as a region with no delta does. Those two look the same on purpose —
  * neither is a finding — and the popup still distinguishes them ("no delta yet" vs a figure).
  */
-export const deltaFillOpacityExpression = (normalized = false): Expression =>
+export const deltaFillOpacityExpression = (normalized = false): Expression => {
+  const extent = deltaExtent(normalized);
+  // Magnitude, continuous: nothing at zero so ordinary forecast noise stays invisible, rising
+  // to the same 0.85 the outermost bucket used to paint.
+  return [
+    "interpolate",
+    ["linear"],
+    ["abs", deltaValue(normalized)],
+    0,
+    0,
+    extent,
+    DELTA_BUCKET_OPACITIES[0]
+  ] as unknown as Expression;
+};
+
+const deltaFillOpacityStepped = (normalized = false): Expression =>
   [
     "step",
     ["coalesce", ["feature-state", normalized ? "deltaBucketNormalized" : "deltaBucket"], 0],
