@@ -614,9 +614,9 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       }
     },
     derivedRegionTypes: {},
-    // DE has no `blend`; the manifest's default model is the combined one. The single-source
-    // lines reuse GB's keys, so they share GB's colours and legend entries. Not charted:
-    // `ecmwf_pv` (two inputs, not one) and `pv`, which has no line or colour yet.
+    // The single-source lines reuse GB's keys, so they share GB's colours and legend
+    // entries. Not charted: `ecmwf_pv` (two inputs, not one) and `pv`, which has no line
+    // or colour yet.
     nationalChartSeries: [
       { key: "FORECAST", model: "blend", label: "Current" },
       {
