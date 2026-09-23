@@ -4,8 +4,11 @@ import { COUNTRY_CONFIG, type MapBandThresholds } from "../../config/countries";
 import { DELTA_BUCKET, DELTA_BUCKET_OPACITIES } from "../../constant";
 import {
   DELTA_COOL,
+  DELTA_COOL_MID,
+  DELTA_MID_STOP,
   DELTA_NEUTRAL,
   DELTA_WARM,
+  DELTA_WARM_MID,
   deltaExtent
 } from "../../lib/domain/delta-ramp";
 import { theme } from "../../tailwind.config";
@@ -369,14 +372,21 @@ export const deltaFillColorExpression = (normalized = false): Expression => {
     "case",
     ["!=", ["feature-state", "hasDelta"], true],
     "transparent",
+    // Five stops, following the brand kit's gradient out from zero — Blue, Sky Blue, the
+    // map's own black, Yellow, Orange. `deltaRampColor` mixes the same five for every
+    // surface off the map, so a chip and a region at the same delta are the same colour.
     [
       "interpolate",
       ["linear"],
       deltaValue(normalized),
       -extent,
       DELTA_COOL,
+      -extent * DELTA_MID_STOP,
+      DELTA_COOL_MID,
       0,
       DELTA_NEUTRAL,
+      extent * DELTA_MID_STOP,
+      DELTA_WARM_MID,
       extent,
       DELTA_WARM
     ]
@@ -397,15 +407,21 @@ export const deltaFillColorExpression = (normalized = false): Expression => {
 export const deltaFillOpacityExpression = (normalized = false): Expression => {
   const extent = deltaExtent(normalized);
   // Magnitude, continuous: nothing at zero so ordinary forecast noise stays invisible, rising
-  // to the same 0.85 the outermost bucket used to paint.
+  // to the 0.85 the OUTERMOST bucket used to paint — `DELTA_BUCKET_OPACITIES[0]` is the
+  // innermost 0.35, and reading the ladder from the wrong end ran the whole scale at 40% of
+  // its intended strength.
+  //
+  // Square root rather than linear, matching `deltaRampOpacity`: on a straight line everything
+  // below half the scale was too faint to read.
+  const top = DELTA_BUCKET_OPACITIES[DELTA_BUCKET_OPACITIES.length - 1];
   return [
     "interpolate",
     ["linear"],
-    ["abs", deltaValue(normalized)],
+    ["sqrt", ["/", ["abs", deltaValue(normalized)], extent]],
     0,
     0,
-    extent,
-    DELTA_BUCKET_OPACITIES[0]
+    1,
+    top
   ] as unknown as Expression;
 };
 

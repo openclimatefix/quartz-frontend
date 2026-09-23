@@ -12,15 +12,26 @@ import { DELTA_BUCKET, DELTA_PERCENTAGE_EDGES } from "../../constant";
  * chip and the bucket rows — and they were four hand-kept copies of a nine-step palette. A
  * ramp cannot be copied by hand at all, so it has to live in one place.
  */
-// Sky Blue, not the kit's darker Blue (#4675C1): on a dark map, and at the low opacities a
-// small delta draws with, that one goes muddy long before it reads as a colour. This sits
-// nearer the warm pole in lightness, so the two ends carry equal weight either side of zero.
-export const DELTA_COOL = "#65B0C9";
+/**
+ * The ramp follows the brand kit's own gradient on the way out from zero, rather than fading
+ * a single hue: Sky Blue then Blue going cold, Yellow then Orange going hot. A delta halfway
+ * to saturation therefore has a colour of its own instead of being a washed-out pole, which
+ * is what made the middle of the scale unreadable.
+ */
+export const DELTA_COOL_MID = "#65B0C9";
+export const DELTA_COOL = "#4675C1";
+export const DELTA_WARM_MID = "#FFD480";
 // The map's own ground, not a mid grey: the midpoint should VANISH — a delta too small to
 // mean anything is not a finding, and painting it a distinct grey made it one. It also keeps
 // the scale inside the reskin's blacks, where #6C6C6C was left over from the old palette.
 export const DELTA_NEUTRAL = "#282A2A";
 export const DELTA_WARM = "#FAA056";
+
+/**
+ * Where each side's mid stop sits, as a fraction of the way out to saturation. Exported
+ * because the map builds its own Mapbox `interpolate` from the same five stops.
+ */
+export const DELTA_MID_STOP = 0.5;
 
 /** Where the ramp saturates: fixed MW, or a fraction of installed capacity. */
 export const deltaExtent = (normalized: boolean): number =>
@@ -51,16 +62,23 @@ const mix = (from: string, to: string, ratio: number): [number, number, number] 
  */
 export const deltaRampColor = (value: number, extent: number): string => {
   const clamped = Math.max(-1, Math.min(1, extent === 0 ? 0 : value / extent));
+  const magnitude = Math.abs(clamped);
+  const [near, far] = clamped < 0 ? [DELTA_COOL_MID, DELTA_COOL] : [DELTA_WARM_MID, DELTA_WARM];
   const [r, g, b] =
-    clamped < 0
-      ? mix(DELTA_NEUTRAL, DELTA_COOL, -clamped)
-      : mix(DELTA_NEUTRAL, DELTA_WARM, clamped);
+    magnitude <= DELTA_MID_STOP
+      ? mix(DELTA_NEUTRAL, near, magnitude / DELTA_MID_STOP)
+      : mix(near, far, (magnitude - DELTA_MID_STOP) / (1 - DELTA_MID_STOP));
   return `rgb(${r}, ${g}, ${b})`;
 };
 
 /**
  * Strength for one delta: nothing at zero, so ordinary forecast noise recedes, rising to
- * `topOpacity` at saturation. The same magnitude rule the map's fill opacity applies.
+ * `topOpacity` at saturation.
+ *
+ * The climb is a square root, not a straight line. Linear left everything below about half
+ * the scale too faint to read — half the magnitude is half the strength, and half of a low
+ * top opacity is nothing at all. The curve gives the middle of the scale most of its colour
+ * while leaving the smallest deltas where they belong, which is barely there.
  */
 export const deltaRampOpacity = (value: number, extent: number, topOpacity: number): number =>
-  extent === 0 ? 0 : Math.min(1, Math.abs(value) / extent) * topOpacity;
+  extent === 0 ? 0 : Math.sqrt(Math.min(1, Math.abs(value) / extent)) * topOpacity;

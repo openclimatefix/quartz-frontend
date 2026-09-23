@@ -14,7 +14,14 @@ import {
   PERCENT_RAMP_TOP,
   ZERO_OPACITY
 } from "./feature-state";
-import { DELTA_COOL, DELTA_NEUTRAL, DELTA_WARM, deltaExtent } from "../../lib/domain/delta-ramp";
+import {
+  DELTA_COOL,
+  DELTA_COOL_MID,
+  DELTA_NEUTRAL,
+  DELTA_WARM,
+  DELTA_WARM_MID,
+  deltaExtent
+} from "../../lib/domain/delta-ramp";
 import { useMapObserver } from "./map-observer";
 import { ActiveUnit } from "./types";
 import { theme } from "../../tailwind.config";
@@ -428,7 +435,9 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
         <div
           className="relative h-4 w-full rounded border border-content-on-accent bg-map-land dash:h-6"
           style={{
-            backgroundImage: `linear-gradient(to right, ${DELTA_COOL}, ${DELTA_NEUTRAL}, ${DELTA_WARM})`
+            // Five stops, like the fill: the mid stops are where the scale gets its colour,
+            // and a three-stop bar would show a fade the map does not draw.
+            backgroundImage: `linear-gradient(to right, ${DELTA_COOL}, ${DELTA_COOL_MID}, ${DELTA_NEUTRAL}, ${DELTA_WARM_MID}, ${DELTA_WARM})`
           }}
         >
           <span className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-content/50" />

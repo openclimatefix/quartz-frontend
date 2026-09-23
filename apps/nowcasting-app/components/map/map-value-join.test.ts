@@ -440,6 +440,10 @@ const evaluate = (
     }
     case "abs":
       return Math.abs(Number(next(args[0])));
+    case "sqrt":
+      return Math.sqrt(Number(next(args[0])));
+    case "/":
+      return Number(next(args[0])) / Number(next(args[1]));
     // Linear `interpolate`, and Mapbox clamps outside the stop range rather than
     // extrapolating, which this reproduces. Colour stops (the delta ramp) are not blended
     // here — a blended hex would be this evaluator's arithmetic rather than Mapbox's, and
@@ -801,18 +805,25 @@ describe("paint expressions render the three states distinctly", () => {
     // A real zero has a colour now — the neutral middle — but it draws at no opacity, so the
     // two agree on screen and only the popup tells them apart.
     expect(evaluate(deltaOpacity, { ...base, hasDelta: true, delta: 0 })).toBe(0);
-    // The poles, at and beyond saturation. `interpolate` clamps, so a region twice as far off
-    // as the scale's end paints the same as one exactly at it.
+    // The poles, at and beyond saturation — the kit's Blue and Orange. `interpolate` clamps,
+    // so a region twice as far off as the scale's end paints the same as one exactly at it.
+    // Between zero and a pole the ramp passes through that side's mid stop (Sky Blue, Yellow),
+    // which is what stops a half-sized delta reading as a washed-out pole.
     expect(evaluate(deltaColour, { ...base, hasDelta: true, delta: DELTA_BUCKET.POS4 })).toBe(
       "#FAA056"
     );
     expect(evaluate(deltaColour, { ...base, hasDelta: true, delta: DELTA_BUCKET.NEG4 * 2 })).toBe(
-      "#65B0C9"
+      "#4675C1"
     );
-    // Halfway out is halfway to the pole, which is the whole point of a continuous scale:
-    // magnitude is readable without counting steps against a legend.
+    // Halfway out carries MORE than half the strength: the climb is a square root, because on
+    // a straight line everything below half the scale was too faint to read. It still has to
+    // be less than a saturated region, or magnitude would stop being readable at the top.
     const half = evaluate(deltaOpacity, { ...base, hasDelta: true, delta: DELTA_BUCKET.POS2 });
     const full = evaluate(deltaOpacity, { ...base, hasDelta: true, delta: DELTA_BUCKET.POS4 });
-    expect(half).toBeCloseTo((full as number) / 2, 6);
+    expect(half as number).toBeGreaterThan((full as number) / 2);
+    expect(half as number).toBeLessThan(full as number);
+    // The top is the outermost bucket's own opacity, not the innermost — reading that ladder
+    // from the wrong end ran the whole scale at 40% strength.
+    expect(full).toBeCloseTo(0.85, 6);
   });
 });
