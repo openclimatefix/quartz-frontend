@@ -57,13 +57,12 @@ const GspDeltaColumn: FC<{
   const asPercentage = activeUnit === ActiveUnit.percentage;
   const rowExtent = deltaExtent(asPercentage);
 
-  const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) => {
-    if (negative) {
-      return a.delta - b.delta;
-    } else {
-      return b.delta - a.delta;
-    }
-  };
+  // Sorted by whichever figure the unit toggle puts first: MW delta, or delta as a share of
+  // capacity in percentage mode — a large region's modest miss otherwise tops a list that is
+  // being read in percent. Same sign either way, so the column split is unaffected.
+  const sortKey = (d: GspDeltaValue) => (asPercentage ? Number(d.deltaNormalized) : d.delta);
+  const sortFunc = (a: GspDeltaValue, b: GspDeltaValue) =>
+    negative ? sortKey(a) - sortKey(b) : sortKey(b) - sortKey(a);
 
   let hasRows = false;
   return (
