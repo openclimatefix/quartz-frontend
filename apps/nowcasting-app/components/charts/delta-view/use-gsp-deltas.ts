@@ -16,6 +16,7 @@ import { buildRegionBridge, buildRegionValues } from "../../helpers/data";
 import { slotForInstant } from "../../../lib/time/cursor";
 import { DELTA_BUCKET } from "../../../constant";
 import { deltaTopFor } from "../../../lib/domain/delta-ramp";
+import { formatRegionLabel } from "../../../lib/domain/region-label";
 import { useMapObserver } from "../../map/map-observer";
 import { ActiveUnit } from "../../map/types";
 import { GspDeltaValue } from "../../types";
@@ -157,7 +158,12 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       result.set(regionName, {
         regionId,
         gspId,
-        gspRegion: value.label,
+        // Cased by the registry's rule for this region type, as the map popup and the chart
+        // title already are: NL's API serves `noord-brabant`, DE's `tennet`.
+        gspRegion: formatRegionLabel(
+          value.label,
+          getCountryConfig(country)?.geo[regionType ?? ""]?.regionNameStyle
+        ),
         gspInstalledCapacity: value.capacity,
         currentYield,
         forecast: forecastMw,
