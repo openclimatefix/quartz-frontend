@@ -134,7 +134,7 @@ const GspDeltaColumn: FC<{
               <div
                 className={`items-start xl:items-center text-xs grid grid-cols-12 flex-1 py-1.5 justify-between px-2
                 transition duration-200 ease-out hover:ease-in ${bucketColor} ${
-                  gspDelta.delta > 0 ? `border-l-8` : `border-r-8`
+                  gspDelta.delta > 0 ? `border-l-4` : `border-r-4`
                 }`}
                 style={bucketBorderStyle}
                 key={`gspCol${gspDelta.regionId}`}
@@ -218,15 +218,15 @@ const GspDeltaColumn: FC<{
               >
                 <div
                   className={`flex items-end justify-end ${
-                    gspDelta.delta > 0 ? `bottom-0 flex-row-reverse ml-2` : `mr-2`
+                    gspDelta.delta > 0 ? `bottom-0 flex-row-reverse ml-1` : `mr-1`
                   }`}
                 >
                   <div
-                    className={`${isSelectedGsp ? `h-1.5` : `h-1`} bg-surface-panel`}
+                    className={`${isSelectedGsp ? `h-1` : `h-0.5`} bg-surface-panel`}
                     style={{ width: `2px` }}
                   ></div>
                   <div
-                    className={`${isSelectedGsp ? `h-1.5` : `h-1`} ${progressLineColor}`}
+                    className={`${isSelectedGsp ? `h-1` : `h-0.5`} ${progressLineColor}`}
                     style={{ width: `${deltaNormalizedPercentage}%`, ...bucketFillStyle }}
                   ></div>
                 </div>
