@@ -102,15 +102,46 @@ const mix = (from: string, to: string, ratio: number): [number, number, number] 
  * The ramp's colour for one delta, as CSS. Clamped at both ends, exactly as the map's
  * `interpolate` clamps — a region twice as far off as the scale's end paints like one at it.
  */
-export const deltaRampColor = (value: number, extent: number): string => {
+const rampRgb = (value: number, extent: number): [number, number, number] => {
   const clamped = Math.max(-1, Math.min(1, extent === 0 ? 0 : value / extent));
   const magnitude = Math.abs(clamped);
   const [near, far] = clamped < 0 ? [DELTA_COOL_MID, DELTA_COOL] : [DELTA_WARM_MID, DELTA_WARM];
-  const [r, g, b] =
-    magnitude <= DELTA_MID_STOP
-      ? mix(DELTA_NEUTRAL, near, magnitude / DELTA_MID_STOP)
-      : mix(near, far, (magnitude - DELTA_MID_STOP) / (1 - DELTA_MID_STOP));
+  return magnitude <= DELTA_MID_STOP
+    ? mix(DELTA_NEUTRAL, near, magnitude / DELTA_MID_STOP)
+    : mix(near, far, (magnitude - DELTA_MID_STOP) / (1 - DELTA_MID_STOP));
+};
+
+export const deltaRampColor = (value: number, extent: number): string => {
+  const [r, g, b] = rampRgb(value, extent);
   return `rgb(${r}, ${g}, ${b})`;
+};
+
+/** WCAG relative luminance of an sRGB colour, 0 (black) to 1 (white). */
+const luminance = ([r, g, b]: [number, number, number]): number => {
+  const linear = (channel: number) => {
+    const c = channel / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+};
+
+// `--content` (white) and `--content-on-accent` (`--ocf-black-2`, 12 13 13) in `tokens.css`.
+const LIGHT_TEXT_LUMINANCE = 1;
+const DARK_TEXT_LUMINANCE = luminance([12, 13, 13]);
+
+/**
+ * Whether text on the ramp's colour for this delta should be dark, by whichever of the two
+ * text colours has more contrast against it.
+ *
+ * Read off the colour itself, not the distance out: the ramp is brightest at its mid stops and
+ * darkens again towards the poles, so a rule of "dark beyond halfway" put white text on the
+ * palest chip whenever an edge fell exactly on the mid stop — which the MW edges (50 of 100) do.
+ */
+export const deltaRampWantsDarkText = (value: number, extent: number): boolean => {
+  const ground = luminance(rampRgb(value, extent));
+  const contrastLight = (LIGHT_TEXT_LUMINANCE + 0.05) / (ground + 0.05);
+  const contrastDark = (ground + 0.05) / (DARK_TEXT_LUMINANCE + 0.05);
+  return contrastDark > contrastLight;
 };
 
 /**

@@ -1,8 +1,8 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, it, test } from "@jest/globals";
 
 import { DELTA_BUCKET, deltaBucketEdge } from "../../constant";
 import { getDeltaBucket } from "../../components/helpers/utils";
-import { deltaTopFor } from "./delta-ramp";
+import { deltaRampWantsDarkText, deltaTopFor } from "./delta-ramp";
 
 describe("deltaTopFor", () => {
   // Each tier's top output threshold × 100/450, so GB's GSPs keep the ±100 MW they were tuned
@@ -32,5 +32,22 @@ describe("deltaTopFor", () => {
     expect(getDeltaBucket(750, top)).toBe(DELTA_BUCKET.POS1);
     expect(getDeltaBucket(-2250, top)).toBe(DELTA_BUCKET.NEG3);
     expect(getDeltaBucket(3000, top)).toBe(DELTA_BUCKET.POS4);
+  });
+});
+
+describe("deltaRampWantsDarkText", () => {
+  // The chips' own edges. White text belongs on the dark middle and the saturated blue pole;
+  // dark text on everything pale — including an edge that lands exactly on the mid stop,
+  // which the MW edges' ±50 of 100 do and which the old distance rule got wrong.
+  it.each([
+    [0, 100, false],
+    [-25, 100, false],
+    [-50, 100, true],
+    [50, 100, true],
+    [75, 100, true],
+    [100, 100, true],
+    [-100, 100, false]
+  ])("delta %d of ±%d → dark text %s", (value, extent, dark) => {
+    expect(deltaRampWantsDarkText(value, extent)).toBe(dark);
   });
 });

@@ -8,20 +8,20 @@ import { Bucket, GspDeltaValue } from "../../types";
 import { createBucketObject } from "../../helpers/utils";
 import { displayDecimalsFor, toDisplayPower } from "../../../lib/domain/power-unit";
 import type { PowerUnit } from "../../../config/countries";
-import { deltaExtent, deltaRampColor, deltaTopFor } from "../../../lib/domain/delta-ramp";
+import {
+  deltaExtent,
+  deltaRampColor,
+  deltaRampWantsDarkText,
+  deltaTopFor
+} from "../../../lib/domain/delta-ramp";
 import { useFocusedCountry } from "../../../hooks/data";
 
 /**
- * Legible text colour for a chip painted with the delta ramp. The ramp's poles are light
- * colours and its neutral middle is a dark grey, so which text reads depends on how far a
- * bucket's edge sits from zero, not on which side of zero it is on — a rule keyed on sign
- * would flip the text colour across zero for no visual reason, when the buckets straddling it
- * sit on nearly the same dark ground.
+ * Legible text colour for a chip painted with the delta ramp, chosen by contrast against the
+ * chip's actual colour — see `deltaRampWantsDarkText` for why distance from zero was not enough.
  */
-const deltaTextClass = (value: number, extent: number): string => {
-  const ratio = extent === 0 ? 0 : Math.min(1, Math.abs(value) / extent);
-  return ratio > 0.5 ? "text-content-on-accent" : "text-content";
-};
+const deltaTextClass = (value: number, extent: number): string =>
+  deltaRampWantsDarkText(value, extent) ? "text-content-on-accent" : "text-content";
 
 const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
   dataKey,
