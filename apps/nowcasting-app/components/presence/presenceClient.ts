@@ -11,6 +11,7 @@ export type PresenceMeta = {
   selectedTime?: string;
   selectedRegionIds?: string[];
   dashboardMode?: boolean;
+  pageVisible?: boolean;
 };
 
 export class PresenceClient {
@@ -19,6 +20,9 @@ export class PresenceClient {
   private heartbeatId: number | null = null;
   private reconnectId: number | null = null;
   private active = false;
+  private handleVisibilityChange = () => {
+    this.setMeta({ pageVisible: document.visibilityState === "visible" });
+  };
 
   constructor(private wsUrl: string) {}
 
@@ -26,6 +30,10 @@ export class PresenceClient {
     if (this.ws || typeof window === "undefined") return;
 
     this.active = true;
+    if (typeof document !== "undefined") {
+      this.meta = { ...this.meta, pageVisible: document.visibilityState === "visible" };
+      document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    }
     this.ws = new WebSocket(this.wsUrl);
 
     this.ws.addEventListener("open", () => {
@@ -69,6 +77,9 @@ export class PresenceClient {
     this.active = false;
     if (this.reconnectId) window.clearTimeout(this.reconnectId);
     this.reconnectId = null;
+    if (typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+    }
     try {
       this.ws?.close();
     } catch {}
