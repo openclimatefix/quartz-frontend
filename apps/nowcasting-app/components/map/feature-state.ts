@@ -16,6 +16,7 @@ import { theme } from "../../tailwind.config";
 import type { MapFeatureState } from "../helpers/data";
 import { REGION_COUNTRY_PROPERTY } from "./country-features";
 import { ActiveUnit } from "./types";
+import { CapacityUnit, type OutputUnit } from "../helpers/map-mode";
 
 /**
  * How values reach Mapbox.
@@ -168,6 +169,58 @@ export const capacityTopFor = (
   return grouped ? tops.grouped ?? undefined : tops.region;
 };
 
+/**
+ * Where the MW/km² ramp saturates: one scale for every country, split only by tier.
+ *
+ * Density is already normalised by area, so unlike MW a fixed scale means the same thing
+ * everywhere, and one shared top is what makes the countries comparable (Brad, 2026-09-28).
+ * DE's control areas are country-sized and read faint against it, which is true of them.
+ *
+ * The tier split is not a country difference: a rollup is summed capacity over summed area,
+ * which averages out the dense urban regions, so a grouped top sits below the region one.
+ * Measured on real capacity and geometry: the densest GB GSP is 0.80 (p99 0.51), NL's densest
+ * province 0.99 (Zuid-Holland), TenneT 0.16; three GB DNO rollups sit just over 0.2 and clamp,
+ * the other eleven run 0.006-0.18. The tops come from PR 772's MW/km² view.
+ */
+export const CAPACITY_DENSITY_TOP = { region: 1, grouped: 0.2 } as const;
+
+/** The density top for one tier — `CAPACITY_DENSITY_TOP`, read the way `capacityTopFor` is. */
+export const capacityDensityTopFor = (grouped: boolean): number =>
+  grouped ? CAPACITY_DENSITY_TOP.grouped : CAPACITY_DENSITY_TOP.region;
+
+/**
+ * `value` rounded UP to one significant figure: 0.029 -> 0.03, 0.177 -> 0.2, 0.37 -> 0.4.
+ *
+ * A ramp's top is also the legend's end label, so it is worth a round number — and rounding up,
+ * never to nearest, keeps the largest value inside the ramp rather than clamped at its end.
+ */
+export const tidyCeil = (value: number): number => {
+  if (!(value > 0)) return 0;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  // `toPrecision` strips the float noise `ceil(x / m) * m` leaves (0.30000000000000004).
+  return Number((Math.ceil(value / magnitude - 1e-9) * magnitude).toPrecision(12));
+};
+
+/**
+ * Where one country's "% of national" ramp saturates: its largest region's share, `tidyCeil`ed.
+ *
+ * Derived from the data rather than configured, because a share has no natural scale of its
+ * own — it depends on how many regions the country is cut into (a GB GSP is ~3% of GB, an NL
+ * province ~18% of NL, a German TSO ~37% of Germany) and on which level is showing. A fixed
+ * top would either saturate every DE region or leave every GB GSP near-invisible.
+ *
+ * Read off the same feature states the map paints, so it is always the top of the tier the
+ * country is actually drawn at: a GB user on the DNO rollup gets the rollups' largest share.
+ * `undefined` while no region has a share yet (capacity or national total not arrived).
+ */
+export const capacityShareTopOf = (
+  states: Iterable<Pick<MapFeatureState, "capacityShare">>
+): number | undefined => {
+  let largest = 0;
+  for (const state of states) largest = Math.max(largest, state.capacityShare);
+  return largest > 0 ? tidyCeil(largest) : undefined;
+};
+
 export const mapBandsFor = (
   country: string | null | undefined,
   grouped: boolean
@@ -252,14 +305,21 @@ const state = (key: keyof MapFeatureState): Expression =>
  * picking up another country's grouped numbers.
  */
 /**
- * The capacity ramp, per country and per tier: the same shape as the output ramp, saturating
- * at `capacityTop` instead. Installed capacity is several times the output a region ever
+ * A capacity ramp, per country and per tier: the same shape as the output ramp, saturating at
+ * the country's own top instead. Installed capacity is several times the output a region ever
  * reaches, so the two cannot share a top without one of them being useless.
+ *
+ * `topsOf` names the tops per country — `capacityTop` for MW, `CAPACITY_DENSITY_TOP` for MW/km²,
+ * the derived share tops for "% of national". A country with no grouped top emits no `case`,
+ * as in `countryAwareBands` below.
  */
-const countryAwareCapacity = (input: Expression): Expression => {
+const countryAwareCapacity = (
+  input: Expression,
+  topsOf: (code: string) => { region: number; grouped: number | null }
+): Expression => {
   const arms: unknown[] = [];
-  Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
-    const { region, grouped } = config.mapBands.capacityTop;
+  Object.keys(COUNTRY_CONFIG).forEach((code) => {
+    const { region, grouped } = topsOf(code);
     const ramp = (top: number): Expression =>
       ["interpolate", ["linear"], input, 0, ZERO_OPACITY, top, 1] as unknown as Expression;
     arms.push(
@@ -304,19 +364,13 @@ const countryAwareBands = (input: Expression): Expression => {
 /**
  * `fill-opacity` for the forecast layer.
  *
- * Capacity mode is not gated on `dataState`: installed capacity is known for every region
- * whether or not it has published a reading, so gating it would blank the capacity view
- * every time the newest slot was mid-fill.
+ * Takes only the output units: capacity is its own mode with its own units, painted by
+ * `capacityFillOpacityExpression` below. It used to be a third unit here, which is how a
+ * capacity unit could be asked of a delta fill in the first place.
  */
-export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
-  if (unit === ActiveUnit.capacity) {
-    return countryAwareCapacity(state("capacity"));
-  }
-
-  // All three are continuous ramps now. What differs is where each saturates: percentage at
-  // a fraction of capacity, MW at the country's top output threshold, capacity at its
-  // `capacityTop` — registry facts rather than fitted guesses, so the seasonal-mistuning
-  // argument above does not apply to them in the same way.
+export const fillOpacityExpression = (unit: OutputUnit): Expression => {
+  // Both are continuous ramps. What differs is where each saturates: percentage at a fraction
+  // of capacity, MW at the country's top output threshold.
   const valueOpacity =
     unit === ActiveUnit.percentage
       ? continuousOpacity(state("normalized"))
@@ -334,8 +388,7 @@ export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
   ] as unknown as Expression;
 };
 
-export const fillColorExpression = (unit: ActiveUnit): Expression => {
-  if (unit === ActiveUnit.capacity) return yellow as unknown as Expression;
+export const fillColorExpression = (): Expression => {
   return [
     "case",
     ["==", ["feature-state", "dataState"], "no-data"],
@@ -343,6 +396,58 @@ export const fillColorExpression = (unit: ActiveUnit): Expression => {
     yellow
   ] as unknown as Expression;
 };
+
+/**
+ * Where each country's "% of national" ramp saturates, by country code — `capacityShareTopOf`
+ * for each enabled country. A country missing from it has no shares yet, and ramps to 100%.
+ */
+export type CapacityShareTops = Readonly<Record<string, number>>;
+
+/**
+ * `fill-opacity` for the capacity mode, in any of its three units.
+ *
+ * Not gated on `dataState`: installed capacity is known for every region whether or not it
+ * has published a reading, so gating it would blank the capacity view every time the newest
+ * slot was mid-fill.
+ *
+ * - **MW** saturates at the registry's `capacityTop`, per country and tier.
+ * - **MW/km²** at `CAPACITY_DENSITY_TOP`, the same for every country, per tier. A rollup's density is summed
+ *   capacity over summed area (`rollUpRegionValues`), which averages out the dense urban
+ *   regions — hence a grouped top below the region one.
+ * - **% of national** at the country's derived top (`capacityShareTopOf`). One arm per country
+ *   with no `grouped` case: the top is read off whichever tier the country is drawn at, so it
+ *   is already that tier's.
+ */
+export const capacityFillOpacityExpression = (
+  unit: CapacityUnit,
+  shareTops: CapacityShareTops = {}
+): Expression => {
+  switch (unit) {
+    case CapacityUnit.MW:
+      return countryAwareCapacity(
+        state("capacity"),
+        (code) => COUNTRY_CONFIG[code].mapBands.capacityTop
+      );
+    case CapacityUnit.density:
+      return countryAwareCapacity(
+        state("capacityDensity"),
+        // Same tops for every country; the grouped arm only where a country has a grouped tier,
+        // so the per-country `match` keeps that structural guarantee.
+        (code) => ({
+          region: CAPACITY_DENSITY_TOP.region,
+          grouped: COUNTRY_CONFIG[code].mapBands.grouped ? CAPACITY_DENSITY_TOP.grouped : null
+        })
+      );
+    case CapacityUnit.shareOfNational:
+      return countryAwareCapacity(state("capacityShare"), (code) => ({
+        region: shareTops[code] ?? 1,
+        grouped: null
+      }));
+  }
+};
+
+/** Capacity is never "no data" — see `capacityFillOpacityExpression` — so it is one flat yellow. */
+export const capacityFillColorExpression = (): Expression => yellow as unknown as Expression;
 
 const delta = theme.extend.colors["ocf-delta"];
 

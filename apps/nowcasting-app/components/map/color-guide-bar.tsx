@@ -3,11 +3,13 @@ import { useMemo } from "react";
 import { DELTA_BUCKET, DELTA_BUCKET_OPACITIES, deltaBucketEdge } from "../../constant";
 import { useCurrentAggregationLevel } from "../../hooks/data";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data/use-countries";
-import { ComparisonSelection } from "../helpers/comparison";
+import useGlobalState from "../helpers/globalState";
+import { CapacityUnit, type MapEncoding, type OutputUnit } from "../helpers/map-mode";
 import {
   BAND_OPACITIES,
   bandLabels,
   capacityTopFor,
+  capacityDensityTopFor,
   mapBandsFor,
   NORMALIZED_TICKS,
   normalizedTickLabels,
@@ -28,16 +30,16 @@ import { ActiveUnit } from "./types";
 import { theme } from "../../tailwind.config";
 import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../lib/domain/power-unit";
 
-type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
+type ColorGuideBarProps = { encoding: MapEncoding };
 
 /**
  * What the map's fill means, for whichever encoding "Map shows" currently selects.
  *
  * Phase 6 §5: `color-guide-bar` and `delta-color-guide-bar` were two components swapped by a
  * ternary on `comparison`, below the segmented control that sets it. They are now one control
- * that reads the same `comparison` value and switches internally — selecting the encoding and
+ * that reads the map's encoding and switches on its `kind` — selecting the encoding and
  * explaining it are one control rather than two things that happen to sit next to each other.
- * Neither branch's bands, colours or copy changed; only the file and the export did.
+ * Capacity is the third arm, with its own units rather than a third unit on the forecast arm.
  *
  * ## The multi-country legend question (handed to this track by Phase 6 Track F)
  *
@@ -88,25 +90,44 @@ type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
  * render a key *conditionally*, when a region in frame is actually in that state — by which
  * point there would be evidence it happens.
  */
-const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
+const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ encoding }) => {
   const focusedCountry = useFocusedCountry();
   const enabledCountries = useEnabledCountries();
   const currentLevel = useCurrentAggregationLevel();
+  const attributed = enabledCountries.length > 1;
 
-  return (
-    <div>
-      {comparison ? (
-        <DeltaBands country={focusedCountry} unit={unit} grouped={!!currentLevel?.derived} />
-      ) : (
-        <SequentialBands
-          unit={unit}
-          currentLevel={currentLevel}
-          country={focusedCountry}
-          attributed={enabledCountries.length > 1}
-        />
-      )}
-    </div>
-  );
+  const bands = (() => {
+    switch (encoding.kind) {
+      case "delta":
+        return (
+          <DeltaBands
+            country={focusedCountry}
+            unit={encoding.unit}
+            grouped={!!currentLevel?.derived}
+          />
+        );
+      case "forecast":
+        return (
+          <SequentialBands
+            unit={encoding.unit}
+            currentLevel={currentLevel}
+            country={focusedCountry}
+            attributed={attributed}
+          />
+        );
+      case "capacity":
+        return (
+          <CapacityBands
+            unit={encoding.unit}
+            currentLevel={currentLevel}
+            country={focusedCountry}
+            attributed={attributed}
+          />
+        );
+    }
+  })();
+
+  return <div>{bands}</div>;
 };
 
 /**
@@ -265,7 +286,7 @@ const solarAt = (alpha: number) => `rgba(${SOLAR_RGB},${alpha})`;
 const bandFill = (alpha: number) => `linear-gradient(${solarAt(alpha)},${solarAt(alpha)})`;
 
 const SequentialBands: React.FC<{
-  unit: ActiveUnit;
+  unit: OutputUnit;
   currentLevel: ReturnType<typeof useCurrentAggregationLevel>;
   /** The focused country — whose bands these are, and where the numbers come from. */
   country: string;
@@ -276,8 +297,7 @@ const SequentialBands: React.FC<{
     // Percentage is drawn as a continuous ramp, so it has no pills to build — see
     // `PercentRamp` below and the note on `NORMALIZED_TICKS` in `feature-state.ts`.
     if (unit === ActiveUnit.percentage) return undefined;
-    // MW and capacity are absolute megawatts, so they need the focused country's scale. Both
-    // read the same thresholds, as they always have.
+    // MW is absolute, so it needs the focused country's scale.
     //
     // These used to be four hardcoded lists in this file, branching on
     // `currentLevel.regionType === "gsp"` — GB's region type by name, so NL's provinces
@@ -289,16 +309,7 @@ const SequentialBands: React.FC<{
     // National level draws one polygon per country and has no useful band scale; it showed
     // nothing before and shows nothing now.
     if (!currentLevel || currentLevel.level <= 0) return undefined;
-    // Capacity has its own saturation point (`capacityTop`), because installed capacity runs
-    // several times the output a region reaches — see `MapBandsConfig`. The ramp needs only
-    // where it ends, so capacity mode hands over a single value.
-    const capacityTop = capacityTopFor(country, currentLevel.derived);
-    const thresholds =
-      unit === ActiveUnit.capacity
-        ? capacityTop === undefined
-          ? undefined
-          : [capacityTop]
-        : mapBandsFor(country, currentLevel.derived);
+    const thresholds = mapBandsFor(country, currentLevel.derived);
     if (!thresholds) return undefined;
     // The thresholds themselves stay MW — they are the map's own paint expression's numbers,
     // read from the same lookup, and nothing here is allowed to drift from that. This is a
@@ -309,11 +320,7 @@ const SequentialBands: React.FC<{
     );
     return displayThresholds;
   }, [unit, currentLevel, country]);
-  const displayUnit = displayUnitFor(country);
-  let unitText = unit === ActiveUnit.MW ? displayUnit : "%";
-  if (unit === ActiveUnit.capacity) {
-    unitText = displayUnit;
-  }
+  const unitText = unit === ActiveUnit.MW ? displayUnitFor(country) : "%";
   return (
     // Positioning only: this used to anchor itself to the map's bottom-left corner
     // (`absolute bottom-12 left-0 ml-12 z-20`), which is where the floating chart now sits. It
@@ -336,6 +343,69 @@ const SequentialBands: React.FC<{
       <div className="flex flex-wrap gap-1 font-mono tabular-nums text-xs h-full text-content-on-accent font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
         {unit === ActiveUnit.percentage && <PercentRamp />}
         {values && <ValueRamp thresholds={values} unitText={unitText} />}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * The capacity legend: the same ramp, ending where the capacity fill for the focused country's
+ * tier saturates, in the chosen capacity unit.
+ *
+ * Every capacity unit is per country — MW and MW/km² from the registry (`capacityTop`,
+ * `CAPACITY_DENSITY_TOP`, the same for every country), "% of national" from the country's own largest share
+ * (`capacityShareTopOf`) — so the `{country} bands` attribution applies to all three, on the
+ * same condition as the sequential legend's.
+ *
+ * "% of national" also names its denominator in the caption, since "3%+" alone reads as a
+ * percentage of capacity, which is what the forecast legend's "%" means.
+ */
+const CapacityBands: React.FC<{
+  unit: CapacityUnit;
+  currentLevel: ReturnType<typeof useCurrentAggregationLevel>;
+  country: string;
+  attributed: boolean;
+}> = ({ unit, currentLevel, country, attributed }) => {
+  const [shareTops] = useGlobalState("capacityShareTops");
+  const shareTop = shareTops[country.toUpperCase()];
+  const displayUnit = displayUnitFor(country);
+
+  // Same exclusion as the sequential legend: the national level is one polygon per country.
+  const top = (() => {
+    if (!currentLevel || currentLevel.level <= 0) return undefined;
+    switch (unit) {
+      case CapacityUnit.MW: {
+        const mw = capacityTopFor(country, currentLevel.derived);
+        return mw === undefined
+          ? undefined
+          : Number(toDisplayPower(mw, displayUnit).toFixed(displayDecimalsFor(displayUnit)));
+      }
+      case CapacityUnit.density:
+        return capacityDensityTopFor(currentLevel.derived);
+      case CapacityUnit.shareOfNational:
+        // Held as a fraction; `toPrecision` drops the float tail `0.03 * 100` leaves.
+        return shareTop === undefined ? undefined : Number((shareTop * 100).toPrecision(12));
+    }
+  })();
+
+  const unitText =
+    unit === CapacityUnit.MW ? displayUnit : unit === CapacityUnit.density ? unit : "%";
+  const caption = [
+    attributed ? `${country} bands` : null,
+    unit === CapacityUnit.shareOfNational ? "% of national" : null
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  return (
+    <div className="flex flex-col">
+      {caption && (
+        <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-secondary">
+          {caption}
+        </span>
+      )}
+      <div className="flex flex-wrap gap-1 font-mono tabular-nums text-xs h-full text-content-on-accent font-bold relative items-end md:text-sm dash:text-xl dash:tracking-wide">
+        {top !== undefined && <ValueRamp thresholds={[top]} unitText={unitText} />}
       </div>
     </div>
   );
@@ -382,7 +452,7 @@ const SequentialBands: React.FC<{
  * expose that `ocf-delta` is not monotonic in lightness — 800 is brighter than 900 — which is
  * Delta v2's palette work, not this change's.)
  */
-const DeltaBands: React.FC<{ country: string; unit: ActiveUnit; grouped: boolean }> = ({
+const DeltaBands: React.FC<{ country: string; unit: OutputUnit; grouped: boolean }> = ({
   country,
   unit,
   grouped
@@ -390,8 +460,6 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit; grouped: boolean
   // The manifest slice the map's own values pipeline reads, so the legend cannot name a
   // stream the fill was not computed from. No extra request: see `useMapObserver`.
   const { label } = useMapObserver(country ? { country, source: "solar" } : null);
-  // Capacity cannot reach here — `setComparison` moves off it and the toggle disables it — so
-  // the MW branch is a defensive default rather than a statement about what capacity means.
   const asPercentage = unit === ActiveUnit.percentage;
   const displayUnit = displayUnitFor(country);
   const unitText = asPercentage ? "% of capacity" : displayUnit;

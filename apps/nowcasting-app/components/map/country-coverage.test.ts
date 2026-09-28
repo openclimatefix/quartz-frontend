@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { computeCountryCoverage, decideCountryCoverage } from "./country-coverage";
+import { computeCountryCoverage, coverageGaps, decideCountryCoverage } from "./country-coverage";
 import type { MapFeatureState } from "../helpers/data";
 import { DELTA_BUCKET } from "../../constant";
 
@@ -8,6 +8,9 @@ const state = (overrides: Partial<MapFeatureState> = {}): MapFeatureState => ({
   power: 0,
   normalized: 0,
   capacity: 100,
+  areaKm2: 0,
+  capacityDensity: 0,
+  capacityShare: 0,
   actual: null,
   delta: 0,
   deltaNormalized: 0,
@@ -62,7 +65,8 @@ describe("computeCountryCoverage", () => {
     ]);
     expect(computeCountryCoverage(states)).toEqual({
       anyValueAtCursor: false,
-      anyDeltaAtCursor: false
+      anyDeltaAtCursor: false,
+      anyCapacity: true
     });
   });
 
@@ -73,7 +77,8 @@ describe("computeCountryCoverage", () => {
     ]);
     expect(computeCountryCoverage(states)).toEqual({
       anyValueAtCursor: false,
-      anyDeltaAtCursor: false
+      anyDeltaAtCursor: false,
+      anyCapacity: true
     });
   });
 
@@ -84,7 +89,8 @@ describe("computeCountryCoverage", () => {
     ]);
     expect(computeCountryCoverage(states)).toEqual({
       anyValueAtCursor: true,
-      anyDeltaAtCursor: true
+      anyDeltaAtCursor: true,
+      anyCapacity: true
     });
   });
 
@@ -94,14 +100,48 @@ describe("computeCountryCoverage", () => {
     const states = new Map([["a", state({ dataState: "value", power: 5, hasDelta: false })]]);
     expect(computeCountryCoverage(states)).toEqual({
       anyValueAtCursor: true,
-      anyDeltaAtCursor: false
+      anyDeltaAtCursor: false,
+      anyCapacity: true
     });
   });
 
   it("is false/false for an empty region set", () => {
     expect(computeCountryCoverage(new Map())).toEqual({
       anyValueAtCursor: false,
-      anyDeltaAtCursor: false
+      anyDeltaAtCursor: false,
+      anyCapacity: false
     });
+  });
+});
+
+/**
+ * Capacity comes with the region list, not the forecast, and does not move with the cursor. So
+ * the capacity map must not report a forecast outage or an empty instant as a gap of its own —
+ * reading `comparison === null` as "forecast" would have done exactly that.
+ */
+describe("coverageGaps for the capacity fill", () => {
+  const status = (over: { isLoading?: boolean; hasValues?: boolean; anyCapacity?: boolean }) => ({
+    isLoading: over.isLoading ?? false,
+    hasValues: over.hasValues ?? false,
+    coverage: {
+      anyValueAtCursor: false,
+      anyDeltaAtCursor: false,
+      anyCapacity: over.anyCapacity ?? false
+    }
+  });
+
+  it("a country with capacity but no forecast at all is no gap on the capacity map", () => {
+    const statuses = { GB: status({ hasValues: false, anyCapacity: true }) };
+    expect(coverageGaps(statuses, "value")).toEqual([
+      { code: "GB", state: "no-forecast", metric: "value" }
+    ]);
+    expect(coverageGaps(statuses, "capacity")).toEqual([]);
+  });
+
+  it("a country with no capacity at all is one, once it has finished loading", () => {
+    expect(coverageGaps({ NL: status({ isLoading: true }) }, "capacity")).toEqual([]);
+    expect(coverageGaps({ NL: status({}) }, "capacity")).toEqual([
+      { code: "NL", state: "no-forecast", metric: "capacity" }
+    ]);
   });
 });

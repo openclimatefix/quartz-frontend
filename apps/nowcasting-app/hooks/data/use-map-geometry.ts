@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { FeatureCollection } from "geojson";
 
 import { getCountryConfig, type GeoLayerConfig } from "../../config/countries";
-import { buildMapGeometry } from "../../components/helpers/data";
+import { buildMapGeometry, regionAreasKm2 } from "../../components/helpers/data";
 import type { AggregationLevel } from "../../components/helpers/aggregationLevels";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import type { Region } from "../../lib/domain/types";
@@ -162,8 +162,33 @@ export type MapGeometryResult = {
    * structurally impossible.
    */
   groupings: Record<string, string[]> | undefined;
+  /**
+   * Area in km² per region name, for the capacity density fill — `undefined` until the file it
+   * is measured from has arrived. Always the level's SOURCE regions (a GSP, a province), never
+   * a derived level's own polygons: a rollup's area is the sum of its members', so the rollup
+   * sums these the way it sums their capacity (`rollUpRegionValues`).
+   *
+   * Memoised with the geometry and measured once per boundary file (`featureAreasKm2`), so a
+   * value tick never reaches `turf.area`.
+   */
+  regionAreasKm2: Map<string, number> | undefined;
   isLoading: boolean;
   error: unknown;
+};
+
+/**
+ * The layer a level's region areas are measured from: the level's own for an API-served level,
+ * the level it rolls up for a derived one.
+ */
+const areaLayerFor = (
+  country: string | null,
+  level: AggregationLevel | undefined
+): GeoLayerConfig | undefined => {
+  const config = getCountryConfig(country);
+  if (!config || !level) return undefined;
+  if (!level.derived) return config.geo[level.regionType];
+  const source = config.derivedRegionTypes[level.regionType]?.source;
+  return source ? config.geo[source] : undefined;
 };
 
 /**
@@ -176,7 +201,16 @@ export type MapGeometryResult = {
 export const useMapGeometry = (
   level: AggregationLevel | undefined,
   regions: Region[] | undefined,
-  countryCode?: string
+  countryCode?: string,
+  options: {
+    /**
+     * Fetch a derived level's SOURCE boundaries for their areas. Off unless capacity is on the
+     * map: on GB's DNO level it is the 9 MB GSP file, which Phase 5 made sure nothing fetches
+     * for a level that does not draw it. An API-served level measures its own polygons, which
+     * are already here, so this changes nothing for one.
+     */
+    sourceAreas?: boolean;
+  } = {}
 ): MapGeometryResult => {
   const focusedCountry = useFocusedCountry();
   const country = countryCode ?? focusedCountry;
@@ -186,6 +220,22 @@ export const useMapGeometry = (
 
   const shapes = useGeoAsset<FeatureCollection>(layer?.url);
   const groupings = useGeoAsset<Record<string, string[]>>(groupingsUrl);
+
+  const areaLayer = useMemo(() => areaLayerFor(country, level), [country, level]);
+  const sourceShapes = useGeoAsset<FeatureCollection>(
+    level?.derived && options.sourceAreas ? areaLayer?.url : undefined
+  );
+  const areaShapes = level?.derived ? sourceShapes.data : shapes.data;
+  const areas = useMemo(() => {
+    if (!areaLayer || !areaShapes) return undefined;
+    return regionAreasKm2({
+      shapes: areaShapes,
+      regions,
+      joinProperty: areaLayer.joinProperty,
+      joinTransform: areaLayer.joinTransform,
+      country
+    });
+  }, [areaLayer, areaShapes, regions, country]);
 
   const geometry = useMemo(() => {
     if (!level || !layer || !shapes.data) return undefined;
@@ -203,12 +253,13 @@ export const useMapGeometry = (
   return {
     geometry,
     groupings: groupings.data,
+    regionAreasKm2: areas,
     // A level with no boundaries configured is not "loading" — it will never arrive, and it
     // is not an error either: `deriveAggregationLevels` gates the level list on the registry's
     // `geo` block, so the only way here is a derived level whose `geometry` entry is missing,
     // which is a config bug the level list would already have hidden.
-    isLoading: shapes.isLoading || groupings.isLoading,
-    error: shapes.error ?? groupings.error
+    isLoading: shapes.isLoading || groupings.isLoading || sourceShapes.isLoading,
+    error: shapes.error ?? groupings.error ?? sourceShapes.error
   };
 };
 

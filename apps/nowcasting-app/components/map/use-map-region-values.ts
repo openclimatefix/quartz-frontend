@@ -182,7 +182,23 @@ export const useMapRegionValues = (
   // since Phase 5. `groupings` comes back on the same object because the two must agree:
   // rolling values up with one level's groupings onto another level's polygons is exactly
   // the out-of-order failure `useMapGeometry` guards against.
-  const geo = useMapGeometry(level, regions.data, country);
+  //
+  // Capacity mode asks for region areas on a derived level too, which costs the source level's
+  // boundary file (see `useMapGeometry`'s `sourceAreas`). Asked only in that mode — the one
+  // place this pipeline reads the map's mode, and it gates a fetch, never a value: the density
+  // fields are computed in every mode from whatever areas are to hand.
+  const [mapMode] = useGlobalState("mapMode");
+  const geo = useMapGeometry(level, regions.data, country, {
+    sourceAreas: mapMode.kind === "capacity"
+  });
+
+  const nationalCapacityMw = useMemo(
+    () =>
+      (regions.data ?? [])
+        .filter((region) => !isLegacyRegion(country, region.name))
+        .reduce((total, region) => total + (region.capacityMw ?? 0), 0),
+    [regions.data, country]
+  );
 
   const featureStates = useMemo(
     () =>
@@ -193,7 +209,9 @@ export const useMapRegionValues = (
           forecast: forecast.data,
           generation: generation.data,
           targetTime: targetSlot,
-          timeNow
+          timeNow,
+          areasKm2: geo.regionAreasKm2,
+          nationalCapacityMw
         },
         { groupings: geo.groupings, country }
       ),
@@ -204,6 +222,8 @@ export const useMapRegionValues = (
       generation.data,
       targetSlot,
       timeNow,
+      geo.regionAreasKm2,
+      nationalCapacityMw,
       geo.groupings,
       country
     ]
@@ -214,14 +234,6 @@ export const useMapRegionValues = (
     const published = expected.filter((name) => forecast.data?.regions[name] !== undefined).length;
     return { published, expected: expected.length, isPartial: expected.length > published };
   }, [regions.data, forecast.data]);
-
-  const nationalCapacityMw = useMemo(
-    () =>
-      (regions.data ?? [])
-        .filter((region) => !isLegacyRegion(country, region.name))
-        .reduce((total, region) => total + (region.capacityMw ?? 0), 0),
-    [regions.data, country]
-  );
 
   return {
     featureStates,

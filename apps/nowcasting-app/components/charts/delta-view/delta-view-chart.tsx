@@ -75,7 +75,8 @@ const GspDeltaColumn: FC<{
 }> = ({ gspDeltas, unit, negative = false }) => {
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
-  const [activeUnit] = useGlobalState("activeUnit");
+  // The delta map's unit — the forecast/delta family's, see `MapUnits`.
+  const [{ output: activeUnit }] = useGlobalState("mapUnits");
   const country = useFocusedCountry();
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;

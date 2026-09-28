@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { createGlobalState } from "react-hooks-global-state";
 import { getDeltaBucketKeys, P_LEVEL_OPTIONS, SORT_BY } from "../../constant";
 import {
@@ -12,8 +12,20 @@ import { LoadingState, SitesEndpointStates } from "../types";
 import { ActiveUnit } from "../map/types";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
-import { ComparisonSelection } from "./comparison";
+import {
+  DEFAULT_MAP_UNITS,
+  FORECAST_MODE,
+  MapEncoding,
+  MapMode,
+  MapUnits,
+  OutputUnit,
+  CapacityUnit,
+  chartComparisonOf,
+  mapEncodingOf
+} from "./map-mode";
+import type { ComparisonSelection } from "./comparison";
 import type { CoverageGap } from "../map/country-coverage";
+import type { CapacityShareTops } from "../map/feature-state";
 import { CHART_SPLIT, ChartMode, ChartSplitPercent } from "../shell/geometry";
 import {
   cursorCadenceMinutes,
@@ -100,12 +112,22 @@ export type FlatGlobalStateType = {
    */
   enabledCountries: string[];
   /**
-   * What the map's colour means: a comparison preset, or `null` for the plain forecast.
-   *
-   * This is what the dashboard switches on since Phase 6 — see `helpers/comparison.ts` and
-   * contract §2. Write it through `setComparison`.
+   * What the map's fill encodes: forecast, a delta against a comparison preset, or installed
+   * capacity. The dashboard's one mode axis — see `helpers/map-mode.ts` for why it replaced
+   * `comparison`. Write it through `setMapMode`; read it through `useMapEncoding` (the map) or
+   * `useChartComparison` (the chart).
    */
-  comparison: ComparisonSelection;
+  mapMode: MapMode;
+  /**
+   * The last unit chosen per unit family, so a mode switch restores the unit that mode was
+   * last shown in. Write it through `setOutputUnit` / `setCapacityUnit`.
+   */
+  mapUnits: MapUnits;
+  /**
+   * The `/sites` map's unit, and nothing else's since the dashboard's map took per-mode units
+   * (`mapUnits`). The sites map still offers %/MW/Capacity as one row of units, so it keeps the
+   * enum it was written against rather than sharing a slot whose values it cannot all show.
+   */
   activeUnit: ActiveUnit;
   selectedISOTime: string;
   timeNow: string;
@@ -178,6 +200,12 @@ export type FlatGlobalStateType = {
    * where the chart card cannot cover it. Empty whenever the map is not mounted.
    */
   coverageGaps: CoverageGap[];
+  /**
+   * Each enabled country's "% of national" ramp top, by upper-case code. Published by
+   * `pvLatestMap` from the same values it paints, for the legend in the dock, which has no
+   * pipeline of its own — the `coverageGaps` arrangement. See `capacityShareTopOf`.
+   */
+  capacityShareTops: CapacityShareTops;
   /**
    * The floating chart's per-mode size overrides — Phase 6 followup, OPEN 5. `CHART_SPLIT` in
    * `geometry.ts` is the seed each `ChartMode` starts from; once the user drags a mode to a
@@ -276,7 +304,8 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     ...initialCountryKeyedState(),
     focusedCountry: INITIAL_FOCUSED_COUNTRY,
     enabledCountries: INITIAL_ENABLED_COUNTRIES,
-    comparison: null,
+    mapMode: FORECAST_MODE,
+    mapUnits: DEFAULT_MAP_UNITS,
     activeUnit: ActiveUnit.percentage,
     selectedISOTime: INITIAL_CURSOR,
     timeNow: INITIAL_CURSOR,
@@ -310,6 +339,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     isSatelliteLoading: false,
     satelliteError: null,
     coverageGaps: [],
+    capacityShareTops: {},
     chartSplitOverrides: getValidatedChartSplitOverrides()
   });
 
@@ -536,35 +566,50 @@ export const toggleCountryEnabled = (code: string): void => {
 };
 
 /**
- * Choose what the map's colour means — the dashboard's one mode axis since Phase 6 §2.
+ * Choose what the map's fill encodes — the dashboard's one mode axis since Phase 6 §2.
  *
- * `null` is the plain forecast, an id is a comparison preset. Both the map's fill and the
- * chart's extra series follow from it, and so does the chart's default split: a comparison
- * shrinks the chart because the difference is a *spatial* question.
+ * Forecast, a delta against a comparison preset, or installed capacity. The map's fill follows
+ * from it, and so do the chart's extra series and default split — but only through
+ * `chartComparisonOf`, since capacity changes the map and not the chart.
  *
- * Through Wave 3 this also wrote `view` in lockstep, because a dozen components still read
- * it. Wave 4 migrated every one of them onto `comparison` (and, for the sites/dashboard
- * split, `isSitesChart`), so this is a plain `setGlobalState` again.
+ * This used to be `setComparison`, which also moved the unit off "Capacity" when a comparison
+ * was selected (installed capacity has no delta). That rule has nothing left to guard: the unit
+ * is remembered per family (`mapUnits`), and which family applies is decided by the mode, so a
+ * capacity unit cannot be the unit of a delta by construction.
  */
-export const setComparison = (id: ComparisonSelection): void => {
-  // Installed capacity has no delta, so "Capacity" is not a unit a comparison can be shown in.
-  // It used to fall through to megawatts, which put the map back in the state that started this
-  // whole thread: a control reading one unit while the map painted another.
-  //
-  // Enforced here rather than in the toggle's click handler because this is the one chokepoint
-  // every comparison change goes through — a deep link, restored state or any future caller
-  // gets the invariant too, instead of it holding only for the path through the button.
-  //
-  // Percentage rather than megawatts: it is the delta scale that works for both countries (the
-  // MW buckets leave 96% of GB's GSPs in the neutral bucket — see `DELTA_PERCENTAGE_EDGES`).
-  //
-  // Deliberately not restored on the way back to the forecast view. `activeUnit` is one shared
-  // setting, and remembering what we switched away from means the unit can also change under
-  // the user when they return — Brad's call: not worth the extra state.
-  if (id !== null && getGlobalState("activeUnit") === ActiveUnit.capacity) {
-    setGlobalState("activeUnit", ActiveUnit.percentage);
-  }
-  setGlobalState("comparison", id);
+export const setMapMode = (mode: MapMode): void => {
+  // Compared by content: a delta mode is built fresh per click (`deltaMode(preset)`), and a new
+  // identity for the same mode would rebuild and re-push the map's paint for nothing.
+  const current = getGlobalState("mapMode");
+  if (chartComparisonOf(current) === chartComparisonOf(mode) && current.kind === mode.kind) return;
+  setGlobalState("mapMode", mode);
+};
+
+/** Set the forecast/delta family's unit. It is remembered while capacity is showing. */
+export const setOutputUnit = (unit: OutputUnit): void => {
+  const previous = getGlobalState("mapUnits");
+  if (previous.output !== unit) setGlobalState("mapUnits", { ...previous, output: unit });
+};
+
+/** Set the capacity family's unit. It is remembered while forecast or delta is showing. */
+export const setCapacityUnit = (unit: CapacityUnit): void => {
+  const previous = getGlobalState("mapUnits");
+  if (previous.capacity !== unit) setGlobalState("mapUnits", { ...previous, capacity: unit });
+};
+
+/** The map's mode and the unit it is drawn in. What every map surface switches on. */
+export const useMapEncoding = (): MapEncoding => {
+  const [mode] = useGlobalState("mapMode");
+  const [units] = useGlobalState("mapUnits");
+  // Memoised on the two state values, so the encoding is a stable dependency for the paint
+  // expressions and legend memos downstream rather than a fresh object every render.
+  return useMemo(() => mapEncodingOf(mode, units), [mode, units]);
+};
+
+/** The chart's comparison — its B side, `null` for none. See `chartComparisonOf`. */
+export const useChartComparison = (): ComparisonSelection => {
+  const [mode] = useGlobalState("mapMode");
+  return chartComparisonOf(mode);
 };
 
 /**

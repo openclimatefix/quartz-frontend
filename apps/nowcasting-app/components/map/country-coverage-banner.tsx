@@ -4,14 +4,18 @@ import useGlobalState from "../helpers/globalState";
 import type { CoverageGap } from "./country-coverage";
 import { CONTROL_ROW } from "./control-button";
 
-type Reason = "no-forecast" | "no-forecast-at-cursor" | "no-actuals-at-cursor";
+type Reason = "no-forecast" | "no-capacity" | "no-forecast-at-cursor" | "no-actuals-at-cursor";
 
 /**
  * `no-data` splits by map: on the forecast fill the missing thing is a forecast, on the delta
- * fill it is usually the actuals, since generation reports late (the GB stale-cache case).
+ * fill it is usually the actuals, since generation reports late (the GB stale-cache case). The
+ * capacity fill has its own "nothing arrived": the other one talks about a fetched window of
+ * forecasts, which is not what the capacity map is missing.
  */
 const reasonOf = ({ state, metric }: CoverageGap): Reason =>
-  state === "no-forecast"
+  metric === "capacity"
+    ? "no-capacity"
+    : state === "no-forecast"
     ? "no-forecast"
     : metric === "delta"
     ? "no-actuals-at-cursor"
@@ -19,19 +23,26 @@ const reasonOf = ({ state, metric }: CoverageGap): Reason =>
 
 const REASON_TEXT: Record<Reason, string> = {
   "no-forecast": "No data loaded",
+  "no-capacity": "No capacity data",
   "no-forecast-at-cursor": "No forecast for this time",
   "no-actuals-at-cursor": "No actuals yet for this time"
 };
 
 const REASON_TITLE: Record<Reason, string> = {
   "no-forecast": "Nothing has arrived for the whole fetched window, not just this instant.",
+  "no-capacity": "No region has an installed capacity to draw.",
   "no-forecast-at-cursor":
     "No region has a forecast for this moment. Try selecting a previous period.",
   "no-actuals-at-cursor":
     "No region has reported generation for this moment yet, so there is no delta to draw. Try selecting a previous period."
 };
 
-const REASON_ORDER: Reason[] = ["no-forecast", "no-forecast-at-cursor", "no-actuals-at-cursor"];
+const REASON_ORDER: Reason[] = [
+  "no-forecast",
+  "no-capacity",
+  "no-forecast-at-cursor",
+  "no-actuals-at-cursor"
+];
 
 /**
  * Country-level legibility, beside the country toggle in the header.

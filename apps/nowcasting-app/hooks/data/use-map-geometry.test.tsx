@@ -50,6 +50,13 @@ jest.mock("../../lib/geo/assets", () => ({
   }
 }));
 
+// Counted, not replaced: the areas must still be real so the join can be checked too.
+jest.mock("@turf/turf", () => {
+  const actual = jest.requireActual<typeof import("@turf/turf")>("@turf/turf");
+  return { __esModule: true, ...actual, area: jest.fn(actual.area) };
+});
+
+import { area } from "@turf/turf";
 import { useLevelGroupings, useMapGeometry } from "./use-map-geometry";
 
 const GSP_URL = "/geo/gb/gsp.json";
@@ -322,5 +329,87 @@ describe("useLevelGroupings", () => {
     expect(requestedUrls).toEqual([]);
     expect(view.result.current.data).toBeUndefined();
     expect(view.result.current.isLoading).toBe(false);
+  });
+});
+
+/**
+ * Region areas, for the capacity density fill. `turf.area` walks every ring vertex — GB's GSP
+ * file is 9 MB of them — so it must run once when a boundary file arrives and never again on
+ * a re-render, a value tick or a refreshed region list.
+ */
+describe("useMapGeometry — region areas", () => {
+  /** A fresh object per test: the area cache is keyed on the parsed file's identity. */
+  const squareShapes = (): FeatureCollection => {
+    const square = (x: number, y: number) => ({
+      type: "Polygon" as const,
+      coordinates: [
+        [
+          [x, y],
+          [x + 0.1, y],
+          [x + 0.1, y + 0.1],
+          [x, y + 0.1],
+          [x, y]
+        ]
+      ]
+    });
+    return {
+      type: "FeatureCollection",
+      features: [
+        // A multi-part GSP: two polygons, one region, so its area is their sum.
+        { type: "Feature", properties: { GSPs: "CITR_1" }, geometry: square(0, 51) },
+        { type: "Feature", properties: { GSPs: "CITR_1" }, geometry: square(1, 51) },
+        // A polygon that draws no region is measured but belongs to nobody.
+        { type: "Feature", properties: { GSPs: "OFF_NETS" }, geometry: square(2, 51) }
+      ]
+    };
+  };
+  const areaCalls = () => (area as unknown as jest.Mock).mock.calls.length;
+
+  test("areas are measured once per boundary file, whatever re-renders after", async () => {
+    const view = renderHook(
+      ({ regionList }: { regionList: Region[] }) => useMapGeometry(GSP_LEVEL, regionList),
+      { initialProps: { regionList: regions } }
+    );
+    expect(view.result.current.regionAreasKm2).toBeUndefined();
+    await settle(GSP_URL, squareShapes());
+    await waitFor(() => expect(view.result.current.regionAreasKm2).toBeDefined());
+    expect(areaCalls()).toBe(3);
+
+    const citr = view.result.current.regionAreasKm2!.get("citr_1")!;
+    // Two 0.1° squares at 51°N: roughly 2 x 11.1 km x 7.0 km.
+    expect(citr).toBeGreaterThan(140);
+    expect(citr).toBeLessThan(170);
+    expect(view.result.current.regionAreasKm2!.size).toBe(1);
+
+    // Re-renders, and a region list that is equal but a new object — what an SWR revalidation
+    // hands over. The join re-runs; the measuring does not.
+    view.rerender({ regionList: regions });
+    view.rerender({ regionList: [...regions] });
+    view.rerender({ regionList: [...regions] });
+    expect(areaCalls()).toBe(3);
+    expect(view.result.current.regionAreasKm2!.get("citr_1")).toBe(citr);
+
+    // A second consumer of the same parsed file — a remount, another map — measures nothing.
+    const second = renderHook(() => useMapGeometry(GSP_LEVEL, regions));
+    await waitFor(() => expect(second.result.current.regionAreasKm2).toBeDefined());
+    expect(areaCalls()).toBe(3);
+  });
+
+  test("a derived level measures its SOURCE regions, and fetches them only when asked", async () => {
+    // Without capacity on the map: the DNO level's own two assets and nothing else.
+    renderHook(() => useMapGeometry(DNO_LEVEL, regions));
+    expect(requestedUrls).not.toContain(GSP_URL);
+
+    const view = renderHook(() =>
+      useMapGeometry(DNO_LEVEL, regions, undefined, { sourceAreas: true })
+    );
+    expect(requestedUrls).toContain(GSP_URL);
+    await settle(DNO_SHAPES_URL, dnoShapes);
+    await settle(DNO_GROUPINGS_URL, { "UKPN (East)": ["citr_1"] });
+    await settle(GSP_URL, squareShapes());
+    await waitFor(() => expect(view.result.current.regionAreasKm2).toBeDefined());
+    // Keyed by the member GSP, which the rollup sums — not by the group's own polygon.
+    expect(view.result.current.regionAreasKm2!.has("citr_1")).toBe(true);
+    expect(view.result.current.regionAreasKm2!.has("UKPN (East)")).toBe(false);
   });
 });

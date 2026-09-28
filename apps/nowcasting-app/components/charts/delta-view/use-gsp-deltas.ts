@@ -112,9 +112,9 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
 
   // The map paints percentage-of-capacity buckets when the unit toggle says so; the panel
   // groups by the same buckets and must follow, or its counts describe a different scale from
-  // the colours next to them. Capacity cannot be active while a comparison is — `setComparison`
-  // moves off it — so the MW branch here is a defensive default, not a meaning for capacity.
-  const [activeUnit] = useGlobalState("activeUnit");
+  // the colours next to them. The forecast/delta family's unit (`MapUnits.output`), which can
+  // only be % or MW — capacity's units are a separate slot that cannot reach here.
+  const [{ output: activeUnit }] = useGlobalState("mapUnits");
   const asPercentage = activeUnit === ActiveUnit.percentage;
 
   const gspDeltas = useMemo(() => {

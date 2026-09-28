@@ -6,7 +6,7 @@ import { classNames } from "../../helpers/utils";
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
-import useGlobalState from "../../helpers/globalState";
+import useGlobalState, { useChartComparison } from "../../helpers/globalState";
 import { Checkmark, ExternalLinkIcon } from "../../icons/icons";
 import {
   CookieStorageKeys,
@@ -31,9 +31,10 @@ const ProfileDropDown = () => {
   // Read rather than passed down: the header no longer knows or cares which view is showing
   // since the three-way switcher went (contract §2), and this menu is the last thing in the
   // header that asks "are we on the sites route" (`isSitesChart`) or "is a comparison active"
-  // (`comparison`) — the two facts `view` used to fold into one value.
+  // (`comparison`) — the two facts `view` used to fold into one value. The chart's comparison:
+  // the CSV's delta column is the chart's B side, which the capacity map does not have.
   const [isSitesChart] = useGlobalState("isSitesChart");
-  const [comparison] = useGlobalState("comparison");
+  const comparison = useChartComparison();
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");

@@ -24,6 +24,7 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
 
 import gbGspForecastPeriod from "../../lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json";
 import gbRegionsGsp from "../../lib/api/v1/__fixtures__/gb-regions-gsp.json";
+import nlRegionsProvince from "../../lib/api/v1/__fixtures__/nl-regions-province.json";
 import { normaliseForecastMatrix, normaliseRegions } from "../../lib/domain/normalise";
 import type { Region, RegionSeries } from "../../lib/domain/types";
 import { DELTA_BUCKET } from "../../constant";
@@ -47,12 +48,17 @@ import {
   NO_DATA_OPACITY,
   UNBANDED_COUNTRY_OPACITY,
   bandLabels,
+  capacityFillOpacityExpression,
+  CAPACITY_DENSITY_TOP,
+  capacityShareTopOf,
   deltaFillColorExpression,
   deltaFillOpacityExpression,
   fillColorExpression,
   fillOpacityExpression,
-  mapBandsFor
+  mapBandsFor,
+  tidyCeil
 } from "./feature-state";
+import { CapacityUnit } from "../helpers/map-mode";
 import { COUNTRY_CONFIG } from "../../config/countries";
 import { deltaTopFor } from "../../lib/domain/delta-ramp";
 
@@ -278,6 +284,55 @@ describe("rollUpRegionValues", () => {
     const rolled = rollUpRegionValues(values, { Double: ["a", "a"] });
     expect(rolled.get("Double")!.power).toBe(20);
     expect(rolled.get("Double")!.capacity).toBe(200);
+  });
+
+  describe("capacity density and share", () => {
+    // Areas chosen so the two ways of combining disagree loudly: a small dense member (100 MW
+    // over 10 km², 10 MW/km²) and a large sparse one (200 MW over 190 km², ~1.05 MW/km²).
+    const withAreas = buildRegionValues({
+      regions,
+      forecast: series({ a: [10, 10, 10], b: [20, 20, 20] }),
+      generation: undefined,
+      targetTime: TIMES[0],
+      timeNow: TIMES[2],
+      areasKm2: new Map([
+        ["a", 10],
+        ["b", 190]
+      ]),
+      nationalCapacityMw: 600
+    });
+
+    test("a region's density is its capacity over its own area, and unknown area is 0", () => {
+      expect(withAreas.get("a")!.capacityDensity).toBeCloseTo(10, 6);
+      expect(withAreas.get("b")!.capacityDensity).toBeCloseTo(200 / 190, 6);
+      // `c` has no area: not a density of infinity, and not borrowed from anyone.
+      expect(withAreas.get("c")!.areaKm2).toBe(0);
+      expect(withAreas.get("c")!.capacityDensity).toBe(0);
+    });
+
+    test("a rollup's density is SUM(capacity) / SUM(area), never the mean of its members'", () => {
+      const rolled = rollUpRegionValues(withAreas, { North: ["a", "b"] }, undefined, 600);
+      const north = rolled.get("North")!;
+      expect(north.areaKm2).toBe(200);
+      expect(north.capacityDensity).toBeCloseTo(300 / 200, 6); // 1.5
+      const meanOfMembers = (10 + 200 / 190) / 2; // ~5.5 — the answer this must not give
+      expect(north.capacityDensity).not.toBeCloseTo(meanOfMembers, 1);
+    });
+
+    test("a member counted twice counts twice in both sums, so the ratio does not move", () => {
+      const rolled = rollUpRegionValues(withAreas, { Double: ["a", "a"] }, undefined, 600);
+      expect(rolled.get("Double")!.capacityDensity).toBeCloseTo(10, 6);
+    });
+
+    test("share is capacity over the country's national capacity, for regions and rollups", () => {
+      expect(withAreas.get("b")!.capacityShare).toBeCloseTo(200 / 600, 6);
+      const rolled = rollUpRegionValues(withAreas, { North: ["a", "b"] }, undefined, 600);
+      expect(rolled.get("North")!.capacityShare).toBeCloseTo(300 / 600, 6);
+      // No national figure yet: no share, rather than a division by zero.
+      expect(rollUpRegionValues(withAreas, { North: ["a", "b"] }).get("North")!.capacityShare).toBe(
+        0
+      );
+    });
   });
 
   test("deltas roll up too, and a group with no computable member has none", () => {
@@ -507,7 +562,7 @@ describe("paint expressions render the three states distinctly", () => {
   // and an NL province in the same frame, on different countries' scales. Absent `grouped`
   // flag = region-level bands.
   const opacity = fillOpacityExpression(ActiveUnit.MW);
-  const colour = fillColorExpression(ActiveUnit.MW);
+  const colour = fillColorExpression();
 
   test("a genuine zero is faint but drawn; unpublished is not drawn at all", () => {
     expect(evaluate(opacity, genuineZero, GB)).toBe(0.03);
@@ -691,7 +746,7 @@ describe("paint expressions render the three states distinctly", () => {
   });
 
   test("capacity mode is not gated on dataState — capacity is known regardless", () => {
-    const capacity = fillOpacityExpression(ActiveUnit.capacity);
+    const capacity = capacityFillOpacityExpression(CapacityUnit.MW);
     // A region that has published nothing still draws its installed capacity, on the capacity
     // ramp's own top rather than the output ramp's.
     expect(evaluate(capacity, { ...unpublished, capacity: 300 }, GB)).toBeCloseTo(
@@ -701,7 +756,7 @@ describe("paint expressions render the three states distinctly", () => {
   });
 
   test("capacity has its own top, because installed capacity dwarfs output", () => {
-    const capacity = fillOpacityExpression(ActiveUnit.capacity);
+    const capacity = capacityFillOpacityExpression(CapacityUnit.MW);
     const power = fillOpacityExpression(ActiveUnit.MW);
     // Zeeland's installed 943 MW on NL. Against NL's output top (3.6 GW) that is a quarter of
     // the way up; against its capacity top (4.5 GW) it is a fifth — different scales, which
@@ -719,6 +774,102 @@ describe("paint expressions render the three states distinctly", () => {
     const DE = { country: "DE" };
     expect(evaluate(capacity, { ...unpublished, capacity: 21514 }, DE)).toBeLessThan(1);
     expect(evaluate(power, { ...generating, power: 21514 }, DE)).toBe(1);
+  });
+
+  /**
+   * The capacity mode's other two units follow the MW one's shape: a `match` on the feature's
+   * country, and a `case` on `grouped` only where the country has a grouped tier.
+   */
+  describe("capacity density, one scale for every country, per tier", () => {
+    const density = capacityFillOpacityExpression(CapacityUnit.density);
+    const at = (capacityDensity: number, grouped: boolean, props: Record<string, unknown>) =>
+      evaluate(density, { ...unpublished, capacityDensity, grouped }, props) as number;
+
+    test("every country's arm saturates at the shared region top", () => {
+      for (const code of Object.keys(COUNTRY_CONFIG)) {
+        const top = CAPACITY_DENSITY_TOP.region;
+        expect(at(top / 2, false, { country: code })).toBeCloseTo(rampAt(top / 2, top), 6);
+        expect(at(top, false, { country: code })).toBeCloseTo(1, 6);
+      }
+    });
+
+    test("GB's grouped tier has its own, lower top", () => {
+      // 0.1 MW/km² is half-way up a DNO rollup's 0.2 and a tenth of the way up a GSP's 1.
+      expect(at(0.1, true, GB)).toBeCloseTo(rampAt(0.1, 0.2), 6);
+      expect(at(0.1, false, GB)).toBeCloseTo(rampAt(0.1, 1), 6);
+    });
+
+    test("a country with no grouped tier emits no case, so it cannot pick up GB's", () => {
+      expect(COUNTRY_CONFIG.NL.mapBands.grouped).toBeNull();
+      expect(at(0.1, true, NL)).toBeCloseTo(at(0.1, false, NL), 6);
+      const arms = (density as unknown as unknown[]).slice(2, -1);
+      const nlArm = arms[arms.indexOf("NL") + 1] as unknown[];
+      expect(nlArm[0]).toBe("interpolate");
+      const gbArm = arms[arms.indexOf("GB") + 1] as unknown[];
+      expect(gbArm[0]).toBe("case");
+    });
+
+    test("not gated on dataState, like the MW capacity fill", () => {
+      expect(at(0.5, false, GB)).toBeGreaterThan(ZERO_OPACITY);
+    });
+  });
+
+  describe("capacity % of national, per country from the derived tops", () => {
+    const shares = capacityFillOpacityExpression(CapacityUnit.shareOfNational, {
+      GB: 0.03,
+      NL: 0.2
+    });
+    const at = (capacityShare: number, props: Record<string, unknown>, grouped = false) =>
+      evaluate(shares, { ...unpublished, capacityShare, grouped }, props) as number;
+
+    test("each country ramps to its own top", () => {
+      // 2% of national is two-thirds of GB's ramp and a tenth of NL's.
+      expect(at(0.02, GB)).toBeCloseTo(rampAt(0.02, 0.03), 6);
+      expect(at(0.02, NL)).toBeCloseTo(rampAt(0.02, 0.2), 6);
+      expect(at(0.2, NL)).toBeCloseTo(1, 6);
+    });
+
+    test("no grouped case — the derived top is already the drawn tier's", () => {
+      expect(at(0.02, GB, true)).toBeCloseTo(at(0.02, GB, false), 6);
+    });
+
+    test("a country with no top yet ramps to 100% rather than borrowing another's", () => {
+      expect(at(0.5, { country: "DE" })).toBeCloseTo(rampAt(0.5, 1), 6);
+    });
+  });
+
+  describe("the derived share top", () => {
+    test("is the largest share, rounded up to one significant figure", () => {
+      expect(tidyCeil(0.029)).toBe(0.03);
+      expect(tidyCeil(0.177)).toBe(0.2);
+      expect(tidyCeil(0.37)).toBe(0.4);
+      expect(tidyCeil(0.2)).toBe(0.2);
+      expect(
+        capacityShareTopOf([
+          { capacityShare: 0.01 },
+          { capacityShare: 0.029 },
+          { capacityShare: 0 }
+        ])
+      ).toBe(0.03);
+    });
+
+    test("is undefined before any region has a share", () => {
+      expect(capacityShareTopOf([{ capacityShare: 0 }])).toBeUndefined();
+      expect(capacityShareTopOf([])).toBeUndefined();
+    });
+
+    test("GB's GSPs and NL's provinces, from the recorded fixtures", () => {
+      const shareTop = (fixture: unknown) => {
+        const list = normaliseRegions(fixture as never);
+        const national = list.reduce((sum, r) => sum + (r.capacityMw ?? 0), 0);
+        return capacityShareTopOf(
+          list.map((r) => ({ capacityShare: (r.capacityMw ?? 0) / national }))
+        );
+      };
+      // Largest GSP 654 MW of 22.6 GW (2.9%); Noord-Brabant 4,437 MW of 25.1 GW (17.7%).
+      expect(shareTop(gbRegionsGsp)).toBe(0.03);
+      expect(shareTop(nlRegionsProvince)).toBe(0.2);
+    });
   });
 
   // -------------------------------------------------------------------------------------

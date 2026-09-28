@@ -1,4 +1,5 @@
-import { FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection } from "geojson";
+import { featureAreasKm2 } from "../../lib/geo/area";
 import { DateTime } from "luxon";
 import { getDeltaBucket, getDeltaBucketNormalized } from "./utils";
 import { DELTA_BUCKET } from "../../constant";
@@ -79,6 +80,21 @@ export type MapFeatureState = {
   normalized: number;
   /** Installed capacity in MW. Known independently of whether a value has published. */
   capacity: number;
+  /**
+   * The region's area in km², summed over every polygon it draws; `0` while the area is not
+   * known (the boundary file has not arrived, or the region has no polygon).
+   *
+   * Carried so a rollup can sum it: a group's density is its members' summed capacity over
+   * their summed area, which needs the areas themselves, not the members' densities.
+   */
+  areaKm2: number;
+  /** `capacity / areaKm2` in MW/km², `0` when the area is not known. */
+  capacityDensity: number;
+  /**
+   * `capacity` as a fraction of the region's own country's national installed capacity, 0..1.
+   * `0` until the national figure is known.
+   */
+  capacityShare: number;
   /** Observed generation in MW, or `null` when it has not published / reported. */
   actual: number | null;
   /** Observed minus forecast, in MW. `0` when no delta is computable — see `hasDelta`. */
@@ -267,6 +283,9 @@ const EMPTY_VALUE: MapFeatureState = {
   power: 0,
   normalized: 0,
   capacity: 0,
+  areaKm2: 0,
+  capacityDensity: 0,
+  capacityShare: 0,
   actual: null,
   delta: 0,
   deltaNormalized: 0,
@@ -291,7 +310,22 @@ export type RegionValueInputs = {
    * `deltaBucket` steps on the country's own edges. Omitted, the enum's global ±100.
    */
   deltaTop?: number;
+  /**
+   * Each region's area in km², by region name — `regionAreasKm2` over the boundary file. Built
+   * once per geometry load and passed in, never computed here: this runs on every cursor tick.
+   * Omitted, every density is 0.
+   */
+  areasKm2?: ReadonlyMap<string, number>;
+  /**
+   * The country's national installed capacity in MW, the denominator of `capacityShare`.
+   * Omitted, every share is 0.
+   */
+  nationalCapacityMw?: number;
 };
+
+/** `numerator / denominator`, or 0 where the denominator is not a positive number. */
+const ratioOrZero = (numerator: number, denominator: number | undefined): number =>
+  denominator !== undefined && denominator > 0 ? numerator / denominator : 0;
 
 /**
  * Join forecast, generation and capacity onto every region, keyed by region name.
@@ -306,7 +340,9 @@ export const buildRegionValues = ({
   generation,
   targetTime,
   timeNow,
-  deltaTop
+  deltaTop,
+  areasKm2,
+  nationalCapacityMw
 }: RegionValueInputs): Map<string, MapRegionValue> => {
   const forecastSnapshot = regionSeriesSnapshotAt(forecast, targetTime);
   const generationSnapshot = regionSeriesSnapshotAt(generation, targetTime);
@@ -323,6 +359,7 @@ export const buildRegionValues = ({
     const generationMw =
       generationState === "value" ? generationSnapshot!.regions[name].powerMw! : null;
     const capacityMw = region.capacityMw ?? 0;
+    const areaKm2 = areasKm2?.get(name) ?? 0;
 
     // A genuine 0 is a delta input like any other. The v0 path treated `!currentYield.yield`
     // as "no reading" and forced the delta to 0, which silently erased every real overnight
@@ -340,6 +377,9 @@ export const buildRegionValues = ({
       power: forecastMw ?? 0,
       normalized: forecastMw !== null && capacityMw > 0 ? forecastMw / capacityMw : 0,
       capacity: capacityMw,
+      areaKm2,
+      capacityDensity: ratioOrZero(capacityMw, areaKm2),
+      capacityShare: ratioOrZero(capacityMw, nationalCapacityMw),
       actual: generationMw,
       delta,
       deltaNormalized,
@@ -366,18 +406,26 @@ export const buildRegionValues = ({
  * A group's `dataState` is `"value"` when at least one member published, so a partially
  * filled newest slot renders as a (low) real total rather than a hole. `no-data` is reserved
  * for a group whose members all reported nothing.
+ *
+ * Capacity density is summed capacity over summed member AREA, like `deltaNormalized` below:
+ * averaging the members' densities would let a 7 km² city GSP count as much as a 290 km² rural
+ * one. The double-counted GSPs above count twice in both sums, so the ratio stays consistent
+ * with the capacity it is quoted beside.
  */
 export const rollUpRegionValues = (
   values: Map<string, MapRegionValue>,
   groupings: Record<string, string[]>,
   // The GROUPED tier's delta top (`deltaTopFor(country, true)`): a rollup's delta is the sum
   // of its members', so it is bucketed on the rollup's scale, not a member's.
-  deltaTop?: number
+  deltaTop?: number,
+  // The country's national capacity, for the group's `capacityShare`.
+  nationalCapacityMw?: number
 ): Map<string, MapRegionValue> => {
   const rolled = new Map<string, MapRegionValue>();
   for (const groupName of Object.keys(groupings)) {
     let power = 0;
     let capacity = 0;
+    let areaKm2 = 0;
     let actual: number | null = null;
     let delta = 0;
     let published = 0;
@@ -396,6 +444,7 @@ export const rollUpRegionValues = (
       if (!value) continue;
       membersTotal += 1;
       capacity += value.capacity;
+      areaKm2 += value.areaKm2;
       if (value.dataState === "value") {
         published += 1;
         power += value.power;
@@ -423,6 +472,9 @@ export const rollUpRegionValues = (
       power,
       normalized: capacity > 0 ? power / capacity : 0,
       capacity,
+      areaKm2,
+      capacityDensity: ratioOrZero(capacity, areaKm2),
+      capacityShare: ratioOrZero(capacity, nationalCapacityMw),
       actual,
       delta,
       // The group's summed delta over the summed capacity of the members it was summed over —
@@ -558,7 +610,12 @@ export const buildMapFeatureStates = (
     // No grouping file yet means no rollup is computable — an empty map, not a map of
     // zeroes. The map draws its polygons unstyled until the asset lands.
     return new Map<string | number, MapFeatureState>(
-      rollUpRegionValues(byRegionName, options.groupings ?? {}, deltaTopFor(options.country, true))
+      rollUpRegionValues(
+        byRegionName,
+        options.groupings ?? {},
+        deltaTopFor(options.country, true),
+        inputs.nationalCapacityMw
+      )
     );
   }
 
@@ -590,6 +647,58 @@ const applyJoinTransform = (value: string, transform: GeoJoinTransform | undefin
     : transform === "uppercase"
     ? value.toUpperCase()
     : value;
+
+/**
+ * The region a boundary feature draws, or `undefined` for one that draws none.
+ *
+ * `buildMapGeometry`'s join, factored out so `regionAreasKm2` measures exactly the polygons the
+ * map paints for each region — aliases, legacy exclusions and all — rather than a second
+ * account of which feature belongs to whom.
+ */
+const regionJoin = (
+  regions: Region[] | undefined,
+  joinProperty: string,
+  joinTransform: GeoJoinTransform | undefined,
+  country: string | null | undefined
+): ((feature: Feature) => Region | undefined) => {
+  const byFeatureKey = new Map<string, Region>();
+  for (const region of regions ?? []) {
+    if (isLegacyRegion(country, region.name)) continue;
+    for (const key of geoAliasesFor(country, region.name)) byFeatureKey.set(key, region);
+  }
+  return (feature) => {
+    const raw = feature.properties?.[joinProperty];
+    const key = typeof raw === "string" ? applyJoinTransform(raw, joinTransform) : undefined;
+    return key === undefined ? undefined : byFeatureKey.get(key);
+  };
+};
+
+/**
+ * Each region's area in km², by region name: the sum of every feature the region draws, since a
+ * multi-part GSP is several polygons sharing one id. Features that draw no region are skipped.
+ *
+ * The expensive half — measuring each polygon — is `featureAreasKm2`, cached on the parsed
+ * boundary file, so calling this again for a new region list re-runs only the join. Callers
+ * still memoise it with the geometry (`useMapGeometry`): the value pipeline that reads it runs
+ * on every cursor tick.
+ */
+export const regionAreasKm2 = ({
+  shapes,
+  regions,
+  joinProperty,
+  joinTransform,
+  country
+}: Omit<MapGeometryInputs, "level" | "groupings">): Map<string, number> => {
+  const regionOf = regionJoin(regions, joinProperty, joinTransform, country);
+  const areas = featureAreasKm2(shapes);
+  const byRegion = new Map<string, number>();
+  shapes.features.forEach((feature, index) => {
+    const region = regionOf(feature);
+    if (!region) return;
+    byRegion.set(region.name, (byRegion.get(region.name) ?? 0) + areas[index]);
+  });
+  return byRegion;
+};
 
 export type MapGeometryInputs = {
   level: AggregationLevel;
@@ -654,19 +763,13 @@ export const buildMapGeometry = ({
     };
   }
 
-  const byFeatureKey = new Map<string, Region>();
-  for (const region of regions ?? []) {
-    if (isLegacyRegion(country, region.name)) continue;
-    for (const key of geoAliasesFor(country, region.name)) byFeatureKey.set(key, region);
-  }
+  const regionOf = regionJoin(regions, joinProperty, joinTransform, country);
 
   let unmatched = 0;
   return {
     type: "FeatureCollection",
     features: shapes.features.map((feature) => {
-      const raw = feature.properties?.[joinProperty];
-      const key = typeof raw === "string" ? applyJoinTransform(raw, joinTransform) : undefined;
-      const region = key === undefined ? undefined : byFeatureKey.get(key);
+      const region = regionOf(feature);
       const id = region ? featureIdFor(region) : --unmatched;
       return {
         ...feature,

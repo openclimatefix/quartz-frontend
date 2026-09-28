@@ -1,45 +1,65 @@
 /**
- * Comparison.
+ * Comparison, and the map mode that replaced it as state.
  *
- * Phase 6 §2 replaced the dashboard's three-way view switch with comparison state: `null` is
- * the plain forecast, an id is a preset.
+ * Phase 6 §2 replaced the dashboard's three-way view switch with comparison state: `null` was
+ * the plain forecast, an id a preset. Capacity made that a three-way switch again, and `null`
+ * could no longer mean "forecast" — so the state is `mapMode` now (`helpers/map-mode.ts`), and
+ * the comparison survives only as the chart's question: what B side does it draw?
  *
- * Through Wave 3, `setComparison` also wrote a `view: VIEWS` value in lockstep, because a
- * dozen components still read it, and this file pinned that the two could never disagree — a
- * `view` of `FORECAST` with a comparison active would draw the delta map under a chart that
- * reset the cursor whenever the delta series lagged, which is the kind of wrong that looks
- * plausible.
- *
- * Wave 4 retired `view` and its mirroring: every consumer now reads `comparison` directly, or
- * (for the sites/dashboard split `view` also served) the new `isSitesChart` flag. There is no
- * second value left to disagree with, so the "never disagree" tests go — they would otherwise
- * be asserting a relationship that no longer exists — and what is left is what was always the
- * substance underneath them: `setComparison` sets `comparison`, and the chart header's echo
- * names it correctly.
+ * What is pinned here is the seam: the chart's comparison is the delta preset or nothing, and
+ * capacity is nothing to the chart while being its own thing to the map.
  */
 import { afterEach, describe, expect, test } from "@jest/globals";
 
 import { comparisonTitle } from "./comparison";
-import { getGlobalState, setComparison } from "./globalState";
+import { getGlobalState, setMapMode } from "./globalState";
+import {
+  CAPACITY_MODE,
+  FORECAST_MODE,
+  chartComparisonOf,
+  deltaMode,
+  mapEncodingOf,
+  DEFAULT_MAP_UNITS
+} from "./map-mode";
 
-afterEach(() => setComparison(null));
+afterEach(() => setMapMode(FORECAST_MODE));
 
-describe("setComparison", () => {
-  test("defaults to no comparison", () => {
-    expect(getGlobalState("comparison")).toBeNull();
+describe("setMapMode", () => {
+  test("defaults to the forecast", () => {
+    expect(getGlobalState("mapMode")).toEqual({ kind: "forecast" });
   });
 
-  test("selecting a preset sets the comparison", () => {
-    setComparison("generation");
-
-    expect(getGlobalState("comparison")).toBe("generation");
+  test("selecting a preset sets the delta mode", () => {
+    setMapMode(deltaMode("generation"));
+    expect(getGlobalState("mapMode")).toEqual({ kind: "delta", preset: "generation" });
   });
 
   test("clearing it returns to the plain forecast", () => {
-    setComparison("generation");
-    setComparison(null);
+    setMapMode(deltaMode("generation"));
+    setMapMode(FORECAST_MODE);
+    expect(getGlobalState("mapMode").kind).toBe("forecast");
+  });
 
-    expect(getGlobalState("comparison")).toBeNull();
+  test("the same mode again is not a new state", () => {
+    setMapMode(deltaMode("generation"));
+    const before = getGlobalState("mapMode");
+    setMapMode(deltaMode("generation"));
+    expect(getGlobalState("mapMode")).toBe(before);
+  });
+});
+
+describe("the chart's comparison", () => {
+  test("is the preset in delta mode", () => {
+    expect(chartComparisonOf(deltaMode("generation"))).toBe("generation");
+  });
+
+  test("is none for both the forecast and capacity — capacity changes the map, not the chart", () => {
+    expect(chartComparisonOf(FORECAST_MODE)).toBeNull();
+    expect(chartComparisonOf(CAPACITY_MODE)).toBeNull();
+  });
+
+  test("capacity is still not the forecast to the map", () => {
+    expect(mapEncodingOf(CAPACITY_MODE, DEFAULT_MAP_UNITS).kind).toBe("capacity");
   });
 });
 

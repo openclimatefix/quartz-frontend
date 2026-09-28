@@ -64,11 +64,18 @@ export const decideCountryCoverage = ({
 export type CountryCoverage = {
   anyValueAtCursor: boolean;
   anyDeltaAtCursor: boolean;
+  /**
+   * Whether any region has an installed capacity — the capacity fill's fact. Not tied to the
+   * cursor or to the forecast at all: capacity comes with the region list, so a country whose
+   * forecast failed outright still has a capacity map to draw.
+   */
+  anyCapacity: boolean;
 };
 
 export const EMPTY_COUNTRY_COVERAGE: CountryCoverage = {
   anyValueAtCursor: false,
-  anyDeltaAtCursor: false
+  anyDeltaAtCursor: false,
+  anyCapacity: false
 };
 
 /**
@@ -81,21 +88,30 @@ export const computeCountryCoverage = (
 ): CountryCoverage => {
   let anyValueAtCursor = false;
   let anyDeltaAtCursor = false;
+  let anyCapacity = false;
   for (const state of states.values()) {
     if (state.dataState === "value") anyValueAtCursor = true;
     if (state.hasDelta) anyDeltaAtCursor = true;
-    if (anyValueAtCursor && anyDeltaAtCursor) break;
+    if (state.capacity > 0) anyCapacity = true;
+    if (anyValueAtCursor && anyDeltaAtCursor && anyCapacity) break;
   }
-  return { anyValueAtCursor, anyDeltaAtCursor };
+  return { anyValueAtCursor, anyDeltaAtCursor, anyCapacity };
 };
 
 /** One enabled country the map has nothing to draw for — what the header's pills say. */
 export type CoverageGap = {
   code: string;
   state: "no-forecast" | "no-data";
-  /** Which map asked: a `no-data` gap means a missing forecast on one, missing actuals on the other. */
-  metric: "value" | "delta";
+  /**
+   * Which fill asked: a `no-data` gap means a missing forecast on the forecast fill and missing
+   * actuals on the delta one. The capacity fill only ever reports `no-forecast` — see
+   * `coverageGaps`.
+   */
+  metric: CoverageMetric;
 };
+
+/** The fact each map mode needs a country to have. One per `MapMode` kind. */
+export type CoverageMetric = "value" | "delta" | "capacity";
 
 /**
  * The countries worth a note: `no-forecast` and `no-data` only, since `loading` near the
@@ -107,16 +123,25 @@ export const coverageGaps = (
     string,
     { isLoading: boolean; hasValues: boolean; coverage: CountryCoverage }
   >,
-  metric: "value" | "delta"
+  metric: CoverageMetric
 ): CoverageGap[] => {
   const gaps: CoverageGap[] = [];
   for (const [code, status] of Object.entries(countryStatus)) {
-    const state = decideCountryCoverage({
-      isLoading: status.isLoading,
-      hasValues: status.hasValues,
-      anyAtCursor:
-        metric === "value" ? status.coverage.anyValueAtCursor : status.coverage.anyDeltaAtCursor
-    });
+    // Capacity does not come from the forecast and does not move with the cursor, so both of
+    // the other fills' facts are the wrong question for it: a forecast outage leaves the
+    // capacity map whole, and "nothing at this instant" cannot happen to it. Its one fact
+    // stands in for both, so the only gap it can report is "nothing arrived".
+    const facts =
+      metric === "capacity"
+        ? { hasValues: status.coverage.anyCapacity, anyAtCursor: status.coverage.anyCapacity }
+        : {
+            hasValues: status.hasValues,
+            anyAtCursor:
+              metric === "value"
+                ? status.coverage.anyValueAtCursor
+                : status.coverage.anyDeltaAtCursor
+          };
+    const state = decideCountryCoverage({ isLoading: status.isLoading, ...facts });
     if (state === "no-forecast" || state === "no-data") gaps.push({ code, state, metric });
   }
   return gaps.sort((a, b) => a.code.localeCompare(b.code));

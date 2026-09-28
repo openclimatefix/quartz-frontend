@@ -21,6 +21,11 @@ import { render, screen } from "@testing-library/react";
 import ColorGuideBar from "./color-guide-bar";
 import { ActiveUnit } from "./types";
 import { PERCENT_RAMP_TOP } from "./feature-state";
+import { CapacityUnit, type MapEncoding, type OutputUnit } from "../helpers/map-mode";
+import { setGlobalState } from "../helpers/globalState";
+
+const forecast = (unit: OutputUnit): MapEncoding => ({ kind: "forecast", unit });
+const capacity = (unit: CapacityUnit): MapEncoding => ({ kind: "capacity", unit });
 
 let focused = "GB";
 let enabled: string[] = ["GB"];
@@ -61,8 +66,8 @@ const level = (regionType: string, derived = false) => ({
  * there is no more "0-50MW"-style range text, because there is no more discrete first band to
  * name a range for.
  */
-const bandsShown = (unit: ActiveUnit): string[] => {
-  const { container, unmount } = render(<ColorGuideBar comparison={null} unit={unit} />);
+const bandsShown = (encoding: MapEncoding): string[] => {
+  const { container, unmount } = render(<ColorGuideBar encoding={encoding} />);
   const text = Array.from(container.querySelectorAll("span.absolute"))
     .map((node) => node.textContent ?? "")
     .filter((label) => label.length > 0);
@@ -75,7 +80,7 @@ describe("the legend's bands are the focused country's", () => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = level("gsp");
-    const bands = bandsShown(ActiveUnit.MW);
+    const bands = bandsShown(forecast(ActiveUnit.MW));
     // "no data" is no longer among the labels — the legend carries the value scale only, and
     // the other two states are named on hover. See the absence test below.
     //
@@ -90,14 +95,14 @@ describe("the legend's bands are the focused country's", () => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = level("dno", true);
-    expect(bandsShown(ActiveUnit.MW)).toContain("4500MW+");
+    expect(bandsShown(forecast(ActiveUnit.MW))).toContain("4500MW+");
   });
 
   test("NL at province level draws NL's bands, where it used to draw none", () => {
     focused = "NL";
     enabled = ["NL"];
     currentLevel = level("province");
-    const bands = bandsShown(ActiveUnit.MW);
+    const bands = bandsShown(forecast(ActiveUnit.MW));
     // NL's display unit is GW (`config/countries.ts`), so the ramp is the same scale in GW
     // rather than MW — its top threshold of 3,600 MW is 3.6 GW, and the round ticks below it
     // are whole gigawatts.
@@ -113,8 +118,8 @@ describe("the legend's bands are the focused country's", () => {
     // NL's output ramp tops out at 3.6 GW and its capacity ramp at 4.5 GW — the largest
     // province's installed capacity. Sharing one top saturated the map in capacity mode,
     // because every region holds far more than it ever generates.
-    expect(bandsShown(ActiveUnit.capacity)).toEqual(["1", "2", "3", "4.5GW+"]);
-    expect(bandsShown(ActiveUnit.MW)).toEqual(["1", "2", "3.6GW+"]);
+    expect(bandsShown(capacity(CapacityUnit.MW))).toEqual(["1", "2", "3", "4.5GW+"]);
+    expect(bandsShown(forecast(ActiveUnit.MW))).toEqual(["1", "2", "3.6GW+"]);
   });
 
   /**
@@ -126,7 +131,7 @@ describe("the legend's bands are the focused country's", () => {
   describe("percentage mode renders a ramp, not bands", () => {
     const rampTicks = (): string[] => {
       const { container, unmount } = render(
-        <ColorGuideBar comparison={null} unit={ActiveUnit.percentage} />
+        <ColorGuideBar encoding={forecast(ActiveUnit.percentage)} />
       );
       const ticks = Array.from(container.querySelectorAll("span.absolute"))
         .map((node) => node.textContent ?? "")
@@ -175,14 +180,16 @@ describe("the legend's bands are the focused country's", () => {
    * scale, where a non-quantity reads as a step on it.
    */
   test.each([
-    ["percentage", ActiveUnit.percentage],
-    ["MW", ActiveUnit.MW],
-    ["capacity", ActiveUnit.capacity]
-  ])("%s mode's legend carries the scale only, no 'no data' entry", (_label, unit) => {
+    ["percentage", forecast(ActiveUnit.percentage)],
+    ["MW", forecast(ActiveUnit.MW)],
+    ["capacity MW", capacity(CapacityUnit.MW)],
+    ["capacity density", capacity(CapacityUnit.density)],
+    ["capacity share", capacity(CapacityUnit.shareOfNational)]
+  ])("%s mode's legend carries the scale only, no 'no data' entry", (_label, encoding) => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = level("gsp");
-    const { container, unmount } = render(<ColorGuideBar comparison={null} unit={unit} />);
+    const { container, unmount } = render(<ColorGuideBar encoding={encoding} />);
     expect(container.textContent).not.toContain("no data");
     unmount();
   });
@@ -191,16 +198,69 @@ describe("the legend's bands are the focused country's", () => {
     focused = "GB";
     enabled = ["GB"];
     currentLevel = { ...level("national"), level: 0 };
-    expect(bandsShown(ActiveUnit.MW)).toEqual([]);
+    expect(bandsShown(forecast(ActiveUnit.MW))).toEqual([]);
   });
 
   test("with several countries enabled the row says whose bands these are", () => {
     focused = "NL";
     enabled = ["GB", "NL"];
     currentLevel = level("province");
-    render(<ColorGuideBar comparison={null} unit={ActiveUnit.MW} />);
+    render(<ColorGuideBar encoding={forecast(ActiveUnit.MW)} />);
     // The attribution matters more now than when Track F added it: with per-country bands,
     // "NL bands" means numbers GB's polygons on the same map are genuinely not drawn on.
     expect(screen.getByText("NL bands")).toBeTruthy();
+  });
+});
+
+/**
+ * Capacity is a mode with three units, each on its own per-country scale. The legend ends where
+ * the capacity fill saturates for the focused country's tier, in the unit chosen.
+ */
+describe("the capacity legend", () => {
+  test("MW/km² ends at the registry's density top, per tier", () => {
+    focused = "GB";
+    enabled = ["GB"];
+    currentLevel = level("gsp");
+    expect(bandsShown(capacity(CapacityUnit.density))).toEqual(["0.2", "0.4", "0.6", "1MW/km²+"]);
+    // A rollup averages the dense GSPs out, so its top sits BELOW the region one.
+    currentLevel = level("dno", true);
+    expect(bandsShown(capacity(CapacityUnit.density))).toEqual([
+      "0.05",
+      "0.1",
+      "0.15",
+      "0.2MW/km²+"
+    ]);
+  });
+
+  test("% of national ends at the focused country's derived top, and names its denominator", () => {
+    focused = "NL";
+    enabled = ["NL"];
+    currentLevel = level("province");
+    setGlobalState("capacityShareTops", { GB: 0.03, NL: 0.2 });
+    const { container, unmount } = render(
+      <ColorGuideBar encoding={capacity(CapacityUnit.shareOfNational)} />
+    );
+    expect(container.textContent).toContain("20%+");
+    // "%" alone is the forecast legend's percentage of capacity; this one is not.
+    expect(container.textContent?.toLowerCase()).toContain("% of national");
+    unmount();
+    setGlobalState("capacityShareTops", {});
+  });
+
+  test("% of national draws no ramp before the shares are known", () => {
+    focused = "GB";
+    enabled = ["GB"];
+    currentLevel = level("gsp");
+    setGlobalState("capacityShareTops", {});
+    expect(bandsShown(capacity(CapacityUnit.shareOfNational))).toEqual([]);
+  });
+
+  test("every capacity unit is attributed to its country with several enabled", () => {
+    focused = "NL";
+    enabled = ["GB", "NL"];
+    currentLevel = level("province");
+    const { unmount } = render(<ColorGuideBar encoding={capacity(CapacityUnit.density)} />);
+    expect(screen.getByText("NL bands")).toBeTruthy();
+    unmount();
   });
 });

@@ -12,7 +12,7 @@ import { PvLatestMap } from "../components/map";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
 import useAndUpdateSelectedTime from "../components/hooks/use-and-update-selected-time";
-import useGlobalState from "../components/helpers/globalState";
+import useGlobalState, { useChartComparison } from "../components/helpers/globalState";
 import {
   CookieStorageKeys,
   setArraySettingInCookieStorage
@@ -41,8 +41,9 @@ import {
  */
 export default function Home({ dashboardModeServer }: { dashboardModeServer: string }) {
   useAndUpdateSelectedTime();
-  const [comparison] = useGlobalState("comparison");
-  const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
+  // The chart's comparison, not the map's mode: capacity is a map mode over the ordinary
+  // forecast chart, so for everything on this page it reads as "no comparison".
+  const comparison = useChartComparison();
   const { user, isLoading, error } = useUser();
   const [largeScreenMode] = useGlobalState("dashboardMode");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -106,7 +107,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
         <DashboardShell
           dashboardModeActive={combinedDashboardModeActive}
           comparisonActive={!!comparison}
-          map={<PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />}
+          map={<PvLatestMap />}
           chart={comparison ? <DeltaViewChart /> : <PvRemixChart />}
         />
       </Layout>

@@ -26,6 +26,8 @@ type ButtonProps<T> = {
   unavailableReason?: string;
   /** Share the group's width equally, for a group that spans the panel rather than a column. */
   grow?: boolean;
+  /** Hover text for a label too short to say everything, e.g. what a bare "%" is out of. */
+  hint?: string;
 };
 
 const MapUIButton = <T,>({
@@ -37,14 +39,15 @@ const MapUIButton = <T,>({
   value,
   unavailable = false,
   unavailableReason,
-  grow = false
+  grow = false,
+  hint
 }: ButtonProps<T>) => {
   return (
     <button
       onClick={(event) => onToggle(event, value)}
       disabled={isLoading || unavailable}
       id={id}
-      title={unavailable ? unavailableReason : undefined}
+      title={unavailable ? unavailableReason : hint}
       aria-disabled={unavailable || undefined}
       type="button"
       // `unavailable` beats `active`: a unit the current view cannot show must never render as
@@ -62,81 +65,64 @@ const MapUIButton = <T,>({
   );
 };
 
+/** One button of a unit toggle. `id` is the DOM id, kept stable for anything that targets it. */
+export type UnitOption<T extends string> = { value: T; label: string; id: string; hint?: string };
+
 /**
- * The %/MW/Capacity unit toggle. Split out of the combined `MeasuringUnit` (Phase 6 followup,
- * Track I) so the consolidated map panel can keep it always visible — it changes the numbers
- * `ColorGuideBar` shows, so hiding it behind the same disclosure as the aggregation-level and
- * layer controls would hide the reason the legend's numbers just changed.
+ * A unit toggle over whichever units the current map mode offers. Split out of the combined
+ * `MeasuringUnit` (Phase 6 followup, Track I) so the consolidated map panel can keep it always
+ * visible — it changes the numbers `ColorGuideBar` shows, so hiding it behind the same
+ * disclosure as the aggregation-level and layer controls would hide the reason the legend's
+ * numbers just changed.
+ *
+ * Takes its options rather than knowing them. It used to be a fixed %/MW/Capacity row that
+ * greyed "Capacity" out under a delta; with capacity a mode of its own, each mode has its own
+ * set of units and the dock hands over the set for the mode that is showing — so there is no
+ * unit left that the current mode cannot express, and nothing to grey out.
  */
-export const UnitToggle: FC<{
-  activeUnit: ActiveUnit;
-  setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
+export const UnitToggle = <T extends string>({
+  options,
+  active,
+  onSelect,
+  isLoading
+}: {
+  options: readonly UnitOption<T>[];
+  active: T;
+  onSelect: (unit: T) => void;
   isLoading: boolean;
-  /**
-   * Units the current view cannot express, greyed and inert rather than hidden.
-   *
-   * Hidden was the alternative and is worse here: this panel already orders itself so that
-   * switching to delta cannot shove controls upward under the pointer (see the note in
-   * `map-encoding-controls.tsx`), and dropping a third of this toggle would do exactly that to
-   * the legend below it. A greyed button also says "not for this view" where a missing one says
-   * nothing at all.
-   *
-   * The toggle only *renders* the rule; it does not enforce it. `setComparison` guarantees the
-   * active unit is never one of these, so this cannot be the only thing standing between the
-   * user and a map painted in a unit its own control denies.
-   */
-  unavailableUnits?: readonly ActiveUnit[];
-  /** Why those units are unavailable, for the disabled buttons' tooltip. */
-  unavailableReason?: string;
-}> = ({ activeUnit, setActiveUnit, isLoading, unavailableUnits = [], unavailableReason }) => {
-  const onToggleUnit = async (
-    event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
-    unit: ActiveUnit
-  ) => {
+}) => {
+  const onToggleUnit = async (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>, unit: T) => {
     event.preventDefault();
-    setActiveUnit(unit);
+    onSelect(unit);
   };
 
   // Spread across the panel rather than huddled at its right edge: this sits directly above the
-  // legend it re-scales, and a full-width row of three reads as one control with three settings.
+  // legend it re-scales, and a full-width row reads as one control with several settings.
   return (
     <div className={CONTROL_ROW}>
-      <MapUIButton<ActiveUnit>
-        grow
-        id={"UnitButtonPercentage"}
-        active={activeUnit === ActiveUnit.percentage}
-        isLoading={isLoading}
-        onToggle={onToggleUnit}
-        text={"%"}
-        value={ActiveUnit.percentage}
-        unavailable={unavailableUnits.includes(ActiveUnit.percentage)}
-        unavailableReason={unavailableReason}
-      />
-      <MapUIButton<ActiveUnit>
-        grow
-        id={"UnitButtonMW"}
-        active={activeUnit === ActiveUnit.MW}
-        isLoading={isLoading}
-        onToggle={onToggleUnit}
-        text={"MW"}
-        value={ActiveUnit.MW}
-        unavailable={unavailableUnits.includes(ActiveUnit.MW)}
-        unavailableReason={unavailableReason}
-      />
-      <MapUIButton<ActiveUnit>
-        grow
-        id={"UnitButtonCapacity"}
-        active={activeUnit === ActiveUnit.capacity}
-        isLoading={isLoading}
-        onToggle={onToggleUnit}
-        text={"Capacity"}
-        value={ActiveUnit.capacity}
-        unavailable={unavailableUnits.includes(ActiveUnit.capacity)}
-        unavailableReason={unavailableReason}
-      />
+      {options.map((option) => (
+        <MapUIButton<T>
+          key={option.value}
+          grow
+          id={option.id}
+          active={active === option.value}
+          isLoading={isLoading}
+          onToggle={onToggleUnit}
+          text={option.label}
+          hint={option.hint}
+          value={option.value}
+        />
+      ))}
     </div>
   );
 };
+
+/** The `/sites` map's units — still one row of three, since that map has no modes. */
+const SITES_UNIT_OPTIONS: readonly UnitOption<ActiveUnit>[] = [
+  { value: ActiveUnit.percentage, label: "%", id: "UnitButtonPercentage" },
+  { value: ActiveUnit.MW, label: "MW", id: "UnitButtonMW" },
+  { value: ActiveUnit.capacity, label: "Capacity", id: "UnitButtonCapacity" }
+];
 
 /**
  * The GSP/DNO aggregation-level toggle. Split out of the combined `MeasuringUnit` (Track I) so
@@ -219,10 +205,10 @@ export const AggregationLevelToggle: FC<{ isLoading: boolean }> = ({ isLoading }
 };
 
 /**
- * Combined default export, unchanged in behaviour — kept for anything that still wants both
- * rows together in one call. `map-encoding-controls.tsx` uses `UnitToggle` and
- * `AggregationLevelToggle` separately instead, now that they sit in different parts of the
- * consolidated panel (see those components' own doc comments).
+ * Combined default export, unchanged in behaviour — the `/sites` map's controls, both rows
+ * together. `map-encoding-controls.tsx` uses `UnitToggle` and `AggregationLevelToggle`
+ * separately instead, now that they sit in different parts of the consolidated panel (see those
+ * components' own doc comments).
  */
 const MeasuringUnit = ({
   activeUnit,
@@ -234,7 +220,12 @@ const MeasuringUnit = ({
   isLoading: boolean;
 }) => (
   <>
-    <UnitToggle activeUnit={activeUnit} setActiveUnit={setActiveUnit} isLoading={isLoading} />
+    <UnitToggle
+      options={SITES_UNIT_OPTIONS}
+      active={activeUnit}
+      onSelect={setActiveUnit}
+      isLoading={isLoading}
+    />
     <div className="mt-3">
       <AggregationLevelToggle isLoading={isLoading} />
     </div>

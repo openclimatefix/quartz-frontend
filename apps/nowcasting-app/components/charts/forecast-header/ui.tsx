@@ -1,7 +1,7 @@
 import { theme } from "../../../tailwind.config";
 import { ClockIcon } from "../../icons/icons";
 import ForecastLabel from "../../national_forecast_labels";
-import useGlobalState from "../../helpers/globalState";
+import useGlobalState, { useChartComparison } from "../../helpers/globalState";
 import { useGenerationSources } from "../../../hooks/data/use-regions";
 import { useFocusedCountry } from "../../../hooks/data";
 import { getCountryConfig } from "../../../config/countries";
@@ -124,7 +124,7 @@ type ForecastHeaderProps = {
  * header still says "National" is how you misread it.
  */
 const ComparisonEcho: React.FC = () => {
-  const [comparison] = useGlobalState("comparison");
+  const comparison = useChartComparison();
   if (!comparison) return null;
   // An empty title means the preset has nothing worth echoing (Brad, 2026-08-17: the titles
   // "were taking up unnecessary space"). Render nothing rather than an empty span — the header

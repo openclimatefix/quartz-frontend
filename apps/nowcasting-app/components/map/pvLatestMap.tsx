@@ -1,9 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import mapboxgl, { LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map } from "./";
 import { ActiveUnit, MAP_TITLE_MAIN } from "./types";
-import useGlobalState, { setGlobalState } from "../helpers/globalState";
+import useGlobalState, { setGlobalState, useMapEncoding } from "../helpers/globalState";
+import { CapacityUnit, type MapEncoding } from "../helpers/map-mode";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import {
@@ -14,12 +15,7 @@ import {
 } from "../../lib/domain/power-unit";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
-import {
-  getActiveUnitFromMap,
-  getBoundingBoxFromPoint,
-  safelyUpdateMapData,
-  setActiveUnitOnMap
-} from "../helpers/mapUtils";
+import { getBoundingBoxFromPoint, safelyUpdateMapData } from "../helpers/mapUtils";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
 import { FeatureCollection } from "geojson";
@@ -28,13 +24,15 @@ import useEnabledCountryMapData from "./use-enabled-country-map-data";
 import {
   PV_SOURCE_ID,
   applyFeatureStates,
+  capacityFillColorExpression,
+  capacityFillOpacityExpression,
   deltaFillColorExpression,
   deltaFillOpacityExpression,
   fillColorExpression,
   fillOpacityExpression
 } from "./feature-state";
 import { FEATURE_KEY_PROPERTY, REGION_COUNTRY_PROPERTY } from "./country-features";
-import { coverageGaps } from "./country-coverage";
+import { coverageGaps, type CoverageMetric } from "./country-coverage";
 import type { MapFeatureState } from "../helpers/data";
 
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -120,8 +118,13 @@ export const showPopupAtPointer = (
 
 type PvLatestMapProps = {
   className?: string;
-  activeUnit: ActiveUnit;
-  setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
+};
+
+/** The fact each mode needs a country to have, for the header's coverage pills. */
+const COVERAGE_METRIC: Record<MapEncoding["kind"], CoverageMetric> = {
+  forecast: "value",
+  delta: "delta",
+  capacity: "capacity"
 };
 
 /**
@@ -135,22 +138,23 @@ type PvLatestMapProps = {
  * fact that both already updated paint through `setPaintProperty`. They were one map with two
  * paint configurations, split by history.
  *
- * So `comparison` selects the paint expressions and adds a line to the popup, and nothing else
- * about the instance changes. What the merge buys beyond the flash is everything the delta view
+ * So the map's mode (`useMapEncoding`) selects the paint expressions and the popup's figures,
+ * and nothing else about the instance changes — capacity is a third set of expressions over
+ * the same source, not a third instance. What the merge buys beyond the flash is everything the delta view
  * was missing by accident rather than by intent (contract §2 says delta "differs by *what the
  * map's fill encodes*", which makes the rest accident by definition): clouds, the constraints
  * overlay, the PV fill toggle and a free aggregation level all now work in both modes, because
  * they belong to the instance rather than to the encoding.
  */
-const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
+const PvLatestMap: React.FC<PvLatestMapProps> = ({ className }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const country = useFocusedCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
-  // The one thing that differs between the two modes. `null` is the forecast fill; any preset
-  // is the delta fill (contract §2).
-  const [comparison] = useGlobalState("comparison");
-  const isDelta = comparison !== null;
+  // The one thing that differs between the modes: forecast, delta or capacity, and the unit it
+  // is drawn in. Switched on by `kind` everywhere below, never by asking whether a comparison
+  // is set — capacity has none and is not the forecast either.
+  const encoding = useMapEncoding();
 
   const showConstraintsRef = useRef(showConstraints);
   useEffect(() => {
@@ -165,19 +169,32 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   const {
     featureStates,
     geometry,
-    capacityByCountry,
     observerLabelByCountry,
     hasValues,
+    hasCapacity,
+    capacityShareTops,
     isLoading,
     error,
     loaders,
     countryStatus
   } = useEnabledCountryMapData(selectedISOTime);
 
+  // The share tops by content: the record is rebuilt on every cursor move, and the paint
+  // expression built from it must not be — `setPaintProperty` re-validates the style.
+  const shareTopsKey = JSON.stringify(capacityShareTops);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `shareTopsKey` is the record by content
+  const stableShareTops = useMemo(() => capacityShareTops, [shareTopsKey]);
+  // Published for the legend, which sits in the dock and has no pipeline of its own — the same
+  // arrangement as `coverageGaps` below, and for the same reason.
+  useEffect(() => {
+    setGlobalState("capacityShareTops", stableShareTops);
+  }, [stableShareTops]);
+  useEffect(() => () => setGlobalState("capacityShareTops", {}), []);
+
   // Publish the per-country gaps for the header's pills. Compared by content, because
   // `countryStatus` is rebuilt on every cursor move and a fresh array would re-render the header
   // each time. Cleared on unmount so a page without this map shows no stale pills.
-  const metric = isDelta ? "delta" : "value";
+  const metric = COVERAGE_METRIC[encoding.kind];
   const gaps = coverageGaps(countryStatus, metric);
   const gapsKey = gaps.map((g) => `${g.code}:${g.state}:${g.metric}`).join(",");
   useEffect(() => {
@@ -228,32 +245,19 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   const pendingGeometryReloadRef = useRef(false);
   const constraintHandlersRef = useRef(false);
 
-  useEffect(() => {
-    // Add unit to map container so that it can be accessed by popup in the map event listeners
-    const map: HTMLDivElement | null = document.querySelector(`#Map-${MAP_TITLE_MAIN}`);
-    if (map) {
-      setActiveUnitOnMap(map, activeUnit);
-    }
-  }, [activeUnit]);
-
-  // Capacity per country, not one figure: the "% of national" popup on an NL province must
-  // divide by NL's installed capacity, and with both countries drawn a single value would
-  // silently report NL regions as a percentage of GB.
-  const capacityByCountryRef = useRef(capacityByCountry);
-  capacityByCountryRef.current = capacityByCountry;
-
-  // Same shape, same reason as capacity above: the popup names the observer its "actual" came
-  // from, and that is a per-country fact. Through a ref because the popup handler is built
+  // Per country, not one figure: the popup names the observer its "actual" came from, and
+  // with GB and NL both drawn a single label would be wrong for one of them. Through a ref because the popup handler is built
   // once, on the first effect run, and closes over whatever it can see at that moment.
   const observerLabelByCountryRef = useRef(observerLabelByCountry);
   observerLabelByCountryRef.current = observerLabelByCountry;
 
   // Same reason again: the popup handler is registered once, on the effect run that creates the
   // fill layer, so which mode is showing has to reach it through a ref rather than a closure.
-  // The unit does not need one — it is read off the container's data attribute at hover time
-  // (`getActiveUnitFromMap`), which is what that attribute exists for.
-  const isDeltaRef = useRef(isDelta);
-  isDeltaRef.current = isDelta;
+  // The unit rides in the same ref. It used to be read off a `data-unit` attribute on the map
+  // container, a second copy of the unit that the mode could not travel with; one ref holding
+  // the whole encoding cannot pair a mode with a unit from the other family.
+  const encodingRef = useRef(encoding);
+  encodingRef.current = encoding;
 
   // Toggle constraints visibility on map
   useEffect(() => {
@@ -296,20 +300,27 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   // One object rather than two values so `appliedPaintRef` has a single identity to compare:
   // with a second axis (the mode) feeding the same two expressions, guarding on the opacity
   // alone would have missed any change that moved the colour and not the opacity.
+  //
+  // Capacity: its own expressions over its own feature-state keys, per country and tier like
+  // the rest. The share tops are data-derived, so they feed this memo — by content, above.
   const paint = useMemo(() => {
-    if (isDelta) {
-      // Capacity cannot reach here — `setComparison` moves the active unit off it when a
-      // comparison is selected, and `UnitToggle` greys it out for as long as one is. The
-      // `=== percentage` test therefore falls back to MW as a defensive default, not as a
-      // claim that capacity means megawatts.
-      const normalized = activeUnit === ActiveUnit.percentage;
-      return {
-        color: deltaFillColorExpression(normalized),
-        opacity: deltaFillOpacityExpression(normalized)
-      };
+    switch (encoding.kind) {
+      case "delta": {
+        const normalized = encoding.unit === ActiveUnit.percentage;
+        return {
+          color: deltaFillColorExpression(normalized),
+          opacity: deltaFillOpacityExpression(normalized)
+        };
+      }
+      case "forecast":
+        return { color: fillColorExpression(), opacity: fillOpacityExpression(encoding.unit) };
+      case "capacity":
+        return {
+          color: capacityFillColorExpression(),
+          opacity: capacityFillOpacityExpression(encoding.unit, stableShareTops)
+        };
     }
-    return { color: fillColorExpression(activeUnit), opacity: fillOpacityExpression(activeUnit) };
-  }, [isDelta, activeUnit]);
+  }, [encoding, stableShareTops]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -387,7 +398,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
           // Change the cursor style as a UI indicator.
           map.getCanvas().style.cursor = "pointer";
-          const currentActiveUnit = getActiveUnitFromMap(map);
+          const currentEncoding = encodingRef.current;
 
           const feature = e.features?.[0];
           if (!feature) return;
@@ -429,59 +440,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           const partialCoverage = membersCompared > 0 && membersCompared < membersTotal;
           const showMatched =
             partialCoverage &&
-            isDeltaRef.current &&
+            currentEncoding.kind === "delta" &&
             typeof state.comparedActual === "number" &&
             typeof state.comparedForecast === "number";
           const comparedCapacity = state.comparedCapacity ?? 0;
 
-          let actualValue = "";
-          let forecastValue = "";
-          let unit = "";
-          if (currentActiveUnit === ActiveUnit.MW) {
-            actualValue = showMatched
-              ? toDisplayPower(state.comparedActual as number, displayUnit).toFixed(displayDecimals)
-              : actualText ||
-                toDisplayPower(state.actual as number, displayUnit).toFixed(displayDecimals);
-            forecastValue = showMatched
-              ? toDisplayPower(state.comparedForecast as number, displayUnit).toFixed(
-                  displayDecimals
-                )
-              : forecastText;
-            unit = displayUnit;
-          } else if (currentActiveUnit === ActiveUnit.percentage) {
-            if (showMatched) {
-              actualValue =
-                comparedCapacity > 0
-                  ? (((state.comparedActual as number) / comparedCapacity) * 100).toFixed(0)
-                  : NO_VALUE;
-              forecastValue =
-                comparedCapacity > 0
-                  ? (((state.comparedForecast as number) / comparedCapacity) * 100).toFixed(0)
-                  : NO_VALUE;
-            } else {
-              actualValue =
-                actualText ||
-                (capacity > 0
-                  ? (((state.actual as number) / capacity) * 100).toFixed(0)
-                  : NO_VALUE);
-              forecastValue = forecastPercentText;
-            }
-            unit = "%";
-          } else if (currentActiveUnit === ActiveUnit.capacity) {
-            // This region's own country's national capacity, off the feature.
-            const nationalCapacity = capacityByCountryRef.current[featureCountry] ?? 0;
-            actualValue =
-              nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : NO_VALUE;
-            forecastValue = NO_VALUE;
-            // Dead weight in practice — this branch's own block below overwrites
-            // `actualAndForecastSection` with its "% of National" markup and never reads `unit`
-            // — but set honestly all the same rather than left as a stray "MW".
-            unit = displayUnit;
-          }
-
           // Was "Actual / Forecast", which named neither of GB's two observers and so let the
           // in-day estimate read as "the actual". The heading is the stream's own label now.
-          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">${actualLabel} / Forecast</span>
+          const outputSection = (actualValue: string, forecastValue: string, unit: string) =>
+            `<span class="text-2xs uppercase tracking-wide text-content-muted">${actualLabel} / Forecast</span>
               <div>
                 <span class="">${actualValue}</span>  /
                 <span class="text-solar">${forecastValue}</span>  <span class="text-2xs text-content-muted">${unit}</span>
@@ -490,9 +457,69 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
                   ? `<span class="text-2xs text-content-muted">${membersCompared} of ${membersTotal} regions reporting</span>`
                   : ""
               }`;
-          if (currentActiveUnit === ActiveUnit.capacity) {
-            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">% of National</span>
-            <div><span>${actualValue}</span> <span class="text-2xs text-content-muted">%</span></div>`;
+          const figureSection = (heading: string, value: string, unit: string) =>
+            `<span class="text-2xs uppercase tracking-wide text-content-muted">${heading}</span>
+            <div><span>${value}</span> <span class="text-2xs text-content-muted">${unit}</span></div>`;
+
+          // The right-hand figure is the one the fill encodes, in the unit it is drawn in. The
+          // left-hand "Capacity" stays in MW whichever unit is chosen, so the popup always says
+          // how big the region is — which is also why capacity in MW keeps the "% of National"
+          // this popup always showed for capacity: repeating the left-hand figure says nothing.
+          let actualAndForecastSection = "";
+          if (currentEncoding.kind === "capacity") {
+            if (currentEncoding.unit !== CapacityUnit.density) {
+              actualAndForecastSection = figureSection(
+                "% of National",
+                (state.capacityShare ?? 0) > 0
+                  ? ((state.capacityShare ?? 0) * 100).toFixed(1)
+                  : NO_VALUE,
+                "%"
+              );
+            } else {
+              // An unknown area is NO_VALUE, not 0: a region whose polygon has not been measured
+              // yet (or has none) is not a region with no capacity on it.
+              actualAndForecastSection = figureSection(
+                "Capacity Density",
+                (state.areaKm2 ?? 0) > 0 ? (state.capacityDensity ?? 0).toFixed(2) : NO_VALUE,
+                CapacityUnit.density
+              );
+            }
+          } else if (currentEncoding.unit === ActiveUnit.MW) {
+            actualAndForecastSection = showMatched
+              ? outputSection(
+                  toDisplayPower(state.comparedActual as number, displayUnit).toFixed(
+                    displayDecimals
+                  ),
+                  toDisplayPower(state.comparedForecast as number, displayUnit).toFixed(
+                    displayDecimals
+                  ),
+                  displayUnit
+                )
+              : outputSection(
+                  actualText ||
+                    toDisplayPower(state.actual as number, displayUnit).toFixed(displayDecimals),
+                  forecastText,
+                  displayUnit
+                );
+          } else if (showMatched) {
+            actualAndForecastSection = outputSection(
+              comparedCapacity > 0
+                ? (((state.comparedActual as number) / comparedCapacity) * 100).toFixed(0)
+                : NO_VALUE,
+              comparedCapacity > 0
+                ? (((state.comparedForecast as number) / comparedCapacity) * 100).toFixed(0)
+                : NO_VALUE,
+              "%"
+            );
+          } else {
+            actualAndForecastSection = outputSection(
+              actualText ||
+                (capacity > 0
+                  ? (((state.actual as number) / capacity) * 100).toFixed(0)
+                  : NO_VALUE),
+              forecastPercentText,
+              "%"
+            );
           }
 
           // The delta line, in delta mode only.
@@ -509,8 +536,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           // be the safer-looking choice and the wrong one, since the point of the unit control
           // is that the user has said which question they are asking.
           let deltaSection = "";
-          if (isDeltaRef.current) {
-            const asPercentage = currentActiveUnit === ActiveUnit.percentage;
+          if (currentEncoding.kind === "delta") {
+            const asPercentage = currentEncoding.unit === ActiveUnit.percentage;
             const deltaValueMw = asPercentage
               ? (state.deltaNormalized ?? 0) * 100
               : state.delta ?? 0;
@@ -761,7 +788,12 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   // on the failure arm would unmount the pipeline that produced the error — clearing the
   // error, re-rendering the normal arm, remounting, re-failing: a flicker loop rather than a
   // failure state.
-  if (error && !hasValues) {
+  //
+  // Capacity mode gates on `hasCapacity` instead: it draws from the region list alone, so a
+  // forecast outage must not put "Failed to load" over a capacity map that has everything it
+  // needs.
+  const hasWhatThisModeDraws = encoding.kind === "capacity" ? hasCapacity : hasValues;
+  if (error && !hasWhatThisModeDraws) {
     return (
       <div className={`pv-map relative h-full w-full ${className}`}>
         {loaders}

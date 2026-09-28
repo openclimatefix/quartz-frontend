@@ -1,92 +1,122 @@
 /**
- * "Capacity" is not a unit a delta can be shown in — installed capacity has no delta.
+ * Capacity is a map mode with its own units, and each unit family remembers its last choice.
  *
- * It used to fall through to megawatts, so the toggle read "Capacity" over a map painted in MW.
- * That is the same defect as the delta view ignoring `activeUnit` entirely: a control asserting
- * one unit while the map draws another. Two halves, tested here:
+ * It used to be a third unit beside % and MW, which meant a delta could be asked for in it —
+ * installed capacity has no delta — so `setComparison` moved the unit off it and `UnitToggle`
+ * greyed it out. Both rules are gone because the state no longer allows the combination: the
+ * mode selects the family (`mapEncodingOf`), and each family has its own remembered slot. What
+ * this file pins is that memory:
  *
- * 1. `setComparison` moves the active unit off Capacity — the invariant, at the chokepoint.
- * 2. `UnitToggle` greys the button out — the affordance, so the rule is visible rather than
- *    something the user discovers by having their selection silently changed.
+ * 1. Leaving a mode and coming back restores the unit it was last shown in.
+ * 2. Forecast and delta share one slot, as they shared `activeUnit` before.
+ * 3. `UnitToggle` renders the set it is handed, and selecting writes through `onSelect`.
  */
-import { describe, expect, test, beforeEach } from "@jest/globals";
+import { afterEach, describe, expect, jest, test } from "@jest/globals";
 import React from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 import { UnitToggle } from "./measuringUnit";
 import { ActiveUnit } from "./types";
-import { setComparison, setGlobalState, getGlobalState } from "../helpers/globalState";
+import {
+  getGlobalState,
+  setCapacityUnit,
+  setGlobalState,
+  setMapMode,
+  setOutputUnit
+} from "../helpers/globalState";
+import {
+  CAPACITY_MODE,
+  CapacityUnit,
+  DEFAULT_MAP_UNITS,
+  FORECAST_MODE,
+  deltaMode,
+  mapEncodingOf
+} from "../helpers/map-mode";
 
-describe("setComparison keeps the unit valid for the view", () => {
-  beforeEach(() => {
-    setComparison(null);
+const encoding = () => mapEncodingOf(getGlobalState("mapMode"), getGlobalState("mapUnits"));
+
+afterEach(() => {
+  setMapMode(FORECAST_MODE);
+  setGlobalState("mapUnits", DEFAULT_MAP_UNITS);
+});
+
+describe("each mode remembers its own unit", () => {
+  test("Forecast -> Capacity -> Forecast restores the forecast's unit", () => {
+    setOutputUnit(ActiveUnit.MW);
+    setMapMode(CAPACITY_MODE);
+    setCapacityUnit(CapacityUnit.density);
+    setMapMode(FORECAST_MODE);
+    expect(encoding()).toEqual({ kind: "forecast", unit: ActiveUnit.MW });
   });
 
-  test("selecting a comparison moves Capacity to percentage", () => {
-    setGlobalState("activeUnit", ActiveUnit.capacity);
-    setComparison("generation");
-    expect(getGlobalState("activeUnit")).toBe(ActiveUnit.percentage);
+  test("Capacity -> Forecast -> Capacity restores capacity's unit", () => {
+    setMapMode(CAPACITY_MODE);
+    setCapacityUnit(CapacityUnit.shareOfNational);
+    setMapMode(FORECAST_MODE);
+    setOutputUnit(ActiveUnit.MW);
+    setMapMode(CAPACITY_MODE);
+    expect(encoding()).toEqual({ kind: "capacity", unit: CapacityUnit.shareOfNational });
   });
 
-  test("percentage rather than MW — the MW delta scale is 96% neutral for GB", () => {
-    setGlobalState("activeUnit", ActiveUnit.capacity);
-    setComparison("generation");
-    expect(getGlobalState("activeUnit")).not.toBe(ActiveUnit.MW);
+  test("forecast and delta share one remembered unit", () => {
+    setOutputUnit(ActiveUnit.MW);
+    setMapMode(deltaMode("generation"));
+    expect(encoding()).toEqual({ kind: "delta", preset: "generation", unit: ActiveUnit.MW });
+    setOutputUnit(ActiveUnit.percentage);
+    setMapMode(FORECAST_MODE);
+    expect(encoding().unit).toBe(ActiveUnit.percentage);
   });
 
-  test("a unit the view CAN show is left alone", () => {
-    setGlobalState("activeUnit", ActiveUnit.MW);
-    setComparison("generation");
-    expect(getGlobalState("activeUnit")).toBe(ActiveUnit.MW);
+  test("delta can never be drawn in a capacity unit", () => {
+    // The combination `setComparison` used to have to guard against, now unrepresentable.
+    setMapMode(CAPACITY_MODE);
+    setCapacityUnit(CapacityUnit.density);
+    setMapMode(deltaMode("generation"));
+    expect(Object.values(ActiveUnit)).toContain(encoding().unit);
+    expect(encoding().unit).not.toBe(CapacityUnit.density);
   });
 
-  test("returning to the forecast view does not change the unit back", () => {
-    // Deliberate: `activeUnit` is one shared setting, and restoring it would mean the unit can
-    // also change under the user on the way back. Brad's call — not worth the extra state.
-    setGlobalState("activeUnit", ActiveUnit.capacity);
-    setComparison("generation");
-    setComparison(null);
-    expect(getGlobalState("activeUnit")).toBe(ActiveUnit.percentage);
+  test("the defaults: % for output, MW for capacity", () => {
+    expect(encoding()).toEqual({ kind: "forecast", unit: ActiveUnit.percentage });
+    setMapMode(CAPACITY_MODE);
+    expect(encoding()).toEqual({ kind: "capacity", unit: CapacityUnit.MW });
   });
 });
 
-describe("UnitToggle greys out units the view cannot express", () => {
-  const noop = () => undefined;
-  beforeEach(cleanup);
+describe("UnitToggle renders the units it is handed", () => {
+  afterEach(cleanup);
 
-  test("Capacity is disabled and says why when a comparison is selected", () => {
+  const options = [
+    { value: CapacityUnit.shareOfNational, label: "% of national", id: "a" },
+    { value: CapacityUnit.MW, label: "MW", id: "b" },
+    { value: CapacityUnit.density, label: "MW/km²", id: "c" }
+  ];
+
+  test("one button per option, the active one pressed", () => {
     render(
       <UnitToggle
-        activeUnit={ActiveUnit.percentage}
-        setActiveUnit={noop}
+        options={options}
+        active={CapacityUnit.density}
+        onSelect={() => undefined}
         isLoading={false}
-        unavailableUnits={[ActiveUnit.capacity]}
-        unavailableReason="Installed capacity has no delta"
       />
     );
-    const capacity = screen.getByRole("button", { name: "Capacity" });
-    expect(capacity).toBeDisabled();
-    // A disabled control with no reason reads as broken rather than as deliberate.
-    expect(capacity).toHaveAttribute("title", "Installed capacity has no delta");
+    expect(screen.getAllByRole("button")).toHaveLength(3);
+    // Nothing is greyed out: every unit offered is one the mode can draw.
+    screen.getAllByRole("button").forEach((button) => expect(button).toBeEnabled());
   });
 
-  test("the other units stay live", () => {
+  test("selecting a unit writes through onSelect", () => {
+    const onSelect = jest.fn();
     render(
       <UnitToggle
-        activeUnit={ActiveUnit.percentage}
-        setActiveUnit={noop}
+        options={options}
+        active={CapacityUnit.MW}
+        onSelect={onSelect}
         isLoading={false}
-        unavailableUnits={[ActiveUnit.capacity]}
       />
     );
-    expect(screen.getByRole("button", { name: "%" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "MW" })).toBeEnabled();
-  });
-
-  test("nothing is disabled on the forecast view", () => {
-    render(
-      <UnitToggle activeUnit={ActiveUnit.percentage} setActiveUnit={noop} isLoading={false} />
-    );
-    expect(screen.getByRole("button", { name: "Capacity" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "MW/km²" }));
+    expect(onSelect).toHaveBeenCalledWith(CapacityUnit.density);
   });
 });

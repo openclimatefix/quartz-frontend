@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { useEnabledCountries } from "../../hooks/data";
 import { statusProductsFor, useProductStatuses } from "../hooks/useStatus";
 import useGlobalState from "../helpers/globalState";
+import type { MapModeKind } from "../helpers/map-mode";
 import StatusBanner from "./StatusBanner";
 
 interface ILayout {
@@ -10,17 +11,25 @@ interface ILayout {
   environment?: string;
 }
 
+/** The page title's view name per map mode. */
+const MODE_TITLE: Record<MapModeKind, string> = {
+  forecast: "PV Forecast",
+  delta: "Delta",
+  capacity: "Capacity"
+};
+
 const Layout = ({ children }: ILayout) => {
   const [isSitesChart] = useGlobalState("isSitesChart");
   // One Status API call; the rows kept are the enabled countries' products, or the sites
   // product on /sites. See `statusProductsFor`.
   const enabledCountries = useEnabledCountries();
   const statuses = useProductStatuses(statusProductsFor(isSitesChart, enabledCountries));
-  const [comparison] = useGlobalState("comparison");
-  // Replaces `getViewTitle(view)` (Wave 4): the three titles it produced — "PV Forecast",
-  // "Delta", "Solar Sites" — now come from the two facts that used to be folded into `view`,
-  // route and comparison, rather than from a third piece of state mirroring both.
-  const viewTitle = isSitesChart ? "Solar Sites" : comparison ? "Delta" : "PV Forecast";
+  const [mapMode] = useGlobalState("mapMode");
+  // Replaces `getViewTitle(view)` (Wave 4): the titles it produced — "PV Forecast", "Delta",
+  // "Solar Sites" — now come from the two facts that used to be folded into `view`, route and
+  // the map's mode, rather than from a third piece of state mirroring both. Capacity names
+  // itself: it is not the forecast, whatever chart sits under it.
+  const viewTitle = isSitesChart ? "Solar Sites" : MODE_TITLE[mapMode.kind];
   const pageTitle = `Quartz Solar - ${viewTitle}`;
 
   return (

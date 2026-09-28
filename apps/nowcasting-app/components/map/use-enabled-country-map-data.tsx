@@ -17,6 +17,7 @@ import {
   type CountryCoverage
 } from "./country-coverage";
 import useMapRegionValues from "./use-map-region-values";
+import { capacityShareTopOf, type CapacityShareTops } from "./feature-state";
 
 /**
  * The map's fan-out over the enabled countries.
@@ -78,6 +79,11 @@ export type CountryStatus = {
   isLoading: boolean;
   error: unknown;
   coverage: CountryCoverage;
+  /**
+   * Where this country's "% of national" ramp saturates at the level it is drawn at, or
+   * `undefined` before any region has a share. See `capacityShareTopOf`.
+   */
+  capacityShareTop: number | undefined;
 };
 
 const EMPTY_STATUS: CountryStatus = {
@@ -86,7 +92,8 @@ const EMPTY_STATUS: CountryStatus = {
   hasValues: false,
   isLoading: false,
   error: undefined,
-  coverage: EMPTY_COUNTRY_COVERAGE
+  coverage: EMPTY_COUNTRY_COVERAGE,
+  capacityShareTop: undefined
 };
 
 export type EnabledCountryMapData = {
@@ -100,7 +107,10 @@ export type EnabledCountryMapData = {
   geometry: FeatureCollection | undefined;
   /** Every enabled country's values, keyed by country-qualified feature key. */
   featureStates: Map<string | number, MapFeatureState>;
-  /** Installed capacity per country code, for the "% of national" popup. */
+  /**
+   * Installed capacity per country code. The "% of national" popup used to divide by this; the
+   * share now travels as feature state (`capacityShare`), computed against the same total.
+   */
   capacityByCountry: Record<string, number>;
   /**
    * The observed-generation stream each country's values were read against, per country code,
@@ -108,6 +118,11 @@ export type EnabledCountryMapData = {
    * manifest has not resolved yet.
    */
   observerLabelByCountry: Record<string, string | undefined>;
+  /**
+   * Each enabled country's "% of national" ramp top, by upper-case code, for the capacity fill
+   * and its legend. A country with no shares yet is absent.
+   */
+  capacityShareTops: CapacityShareTops;
   /** True while ANY enabled country is still loading. */
   isLoading: boolean;
   /**
@@ -115,6 +130,12 @@ export type EnabledCountryMapData = {
    * one country's 503 does not blank a map that is drawing another country perfectly well.
    */
   hasValues: boolean;
+  /**
+   * True when ANY enabled country has an installed capacity to draw — `hasValues`'s twin for
+   * the capacity fill, which does not need a forecast and so must not be failed by the lack
+   * of one.
+   */
+  hasCapacity: boolean;
   /** The first error any country reported, or `undefined`. */
   error: unknown;
   /**
@@ -174,6 +195,12 @@ const CountryMapLayer: React.FC<LoaderProps> = ({
     () => computeCountryCoverage(values.featureStates),
     [values.featureStates]
   );
+  // Off the same states the map paints, so the top is always the drawn tier's. A number, so
+  // the status memo below stays put across value ticks that do not move it.
+  const capacityShareTop = useMemo(
+    () => capacityShareTopOf(values.featureStates.values()),
+    [values.featureStates]
+  );
   const status = useMemo<CountryStatus>(
     () => ({
       nationalCapacityMw: values.nationalCapacityMw,
@@ -181,7 +208,8 @@ const CountryMapLayer: React.FC<LoaderProps> = ({
       hasValues: values.hasValues,
       isLoading: values.isLoading,
       error: values.error,
-      coverage
+      coverage,
+      capacityShareTop
     }),
     [
       values.nationalCapacityMw,
@@ -189,7 +217,8 @@ const CountryMapLayer: React.FC<LoaderProps> = ({
       values.hasValues,
       values.isLoading,
       values.error,
-      coverage
+      coverage,
+      capacityShareTop
     ]
   );
 
@@ -291,8 +320,17 @@ export const useEnabledCountryMapData = (
       observerLabelByCountry: Object.fromEntries(
         codes.map((code, index) => [code.toUpperCase(), statuses[index].observerLabel])
       ),
+      // Upper-case, like the two records above: the fill expression matches on the stamped
+      // country property, and the legend looks up the focused code.
+      capacityShareTops: Object.fromEntries(
+        codes.flatMap((code, index) => {
+          const top = statuses[index].capacityShareTop;
+          return top === undefined ? [] : [[code.toUpperCase(), top]];
+        })
+      ),
       isLoading: statuses.some((entry) => entry.isLoading),
       hasValues: statuses.some((entry) => entry.hasValues),
+      hasCapacity: statuses.some((entry) => entry.coverage.anyCapacity),
       error: statuses.find((entry) => entry.error !== undefined)?.error,
       countryStatus: Object.fromEntries(codes.map((code, index) => [code, statuses[index]]))
     };

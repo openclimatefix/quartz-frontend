@@ -33,7 +33,8 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit; disabled?: boolean }> = (
   disabled = false
 }) => {
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
-  const [activeUnit] = useGlobalState("activeUnit");
+  // The delta map's unit — the forecast/delta family's, see `MapUnits`.
+  const [{ output: activeUnit }] = useGlobalState("mapUnits");
   // Capacity has no delta, so it labels as megawatts — the same fold the map and the deltas
   // hook make.
   const asPercentage = activeUnit === ActiveUnit.percentage;
