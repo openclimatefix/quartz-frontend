@@ -87,7 +87,7 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
           // The fill is a computed rgb(), not a Tailwind swatch, so background and border come
           // from an inline style rather than `bg-ocf-delta-*` / `border-ocf-delta-*` classes,
           // except for the zero bucket's border, which keeps its fixed content/panel classes.
-          className={`flex flex-col flex-1 w-full items-center p-1 rounded-md justify-center border-2 ${
+          className={`flex flex-col flex-1 w-full items-center px-1 py-0.5 rounded-md justify-center border-2 ${
             isZero ? `${zeroBorderClass} ${zeroGroundClass}` : ""
           }`}
           style={{
@@ -97,7 +97,7 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
           }}
           onClick={toggleBucketSelection}
         >
-          <span className="text-xl font-semibold leading-tight">{quantity}</span>
+          <span className="text-base font-semibold leading-tight">{quantity}</span>
           {/*
             The edge in whichever unit the map is painting, from the shared lookup — this was
             `${text} MW`, which was true only while the buckets were megawatts. `text` is the
@@ -109,7 +109,7 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
             country's unit only for display, the same last step every other regional figure
             goes through.
           */}
-          <span className="flex text-xs">
+          <span className="flex text-2xs leading-tight">
             {text === DELTA_BUCKET.ZERO.toString()
               ? `-/+`
               : asPercentage
@@ -159,7 +159,7 @@ const DeltaBuckets: React.FC<{
 
   return (
     <>
-      <div className="sticky top-0 bg-surface-panel z-10 mx-3 pb-1 flex justify-center gap-1 lg:gap-3">
+      <div className="bg-surface-panel mx-3 pb-1 flex justify-center gap-1 lg:gap-2">
         {buckets.map((bucket) => {
           return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket} unit={unit}></BucketItem>;
         })}

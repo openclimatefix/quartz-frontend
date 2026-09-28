@@ -38,6 +38,36 @@ import ChartScrubber from "../../shell/chart-scrubber";
 import { plottedKeyRange, usePlottedDomain } from "../plotted-domain";
 import ChartLegend from "../chart-legend";
 
+/**
+ * One column's heading: which side of the forecast it holds, in the region column's slot (the
+ * names below need no label), then at `xl` — where a row is one line — what each figure is.
+ * Padded and bordered like a row, transparently, so the labels sit over their columns.
+ *
+ * Outside the rows' scroll, not sticky inside it: sticky headings inside the scrolling box
+ * pinned short of its top and let rows show above them.
+ */
+const GspDeltaColumnHeading: FC<{ unit: PowerUnit; negative?: boolean }> = ({
+  unit,
+  negative = false
+}) => (
+  <div
+    className={`flex-1 grid grid-cols-12 whitespace-nowrap border border-transparent pl-2 pr-1 py-1 text-2xs uppercase tracking-wider text-content-secondary ${
+      negative ? "border-r-4" : "border-l-4"
+    }`}
+  >
+    <span className="col-span-12 xl:col-span-5 font-semibold text-content">
+      {negative ? "Under forecast" : "Over forecast"}
+      {/* Below `xl` the field labels are hidden, and with them the only statement of the unit. */}
+      <span className="xl:hidden font-normal text-content-secondary"> · {unit}</span>
+    </span>
+    {/* Centred over the % and Δ figures, which centre in their cells at `xl`. */}
+    <span className="hidden xl:block col-span-2 text-center">% cap.</span>
+    {/* The units live here, once, so the cells are bare figures. */}
+    <span className="hidden xl:block col-span-2 text-center">Δ {unit}</span>
+    <span className="hidden xl:block col-span-3 text-right">Act / Fcst {unit}</span>
+  </div>
+);
+
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
   unit: PowerUnit;
@@ -145,9 +175,12 @@ const GspDeltaColumn: FC<{
                   <span className="">{gspDelta.gspRegion}</span>
                   {/* normalized percentage: delta value/gsp installed mw capacity */}
                 </div>
-                <div className="col-span-2 xl:col-span-2 flex">
+                {/* Aligned by the cell, not the label: `DeltaForecastLabel` carries
+                    `flex-initial`, which wins over a `flex-1` passed in, so it never spans the
+                    cell and justifying inside it moved nothing. */}
+                <div className="col-span-2 xl:col-span-2 flex justify-end xl:justify-center">
                   <DeltaForecastLabel
-                    className="flex-1 text-right justify-end xl:justify-start "
+                    className="text-right"
                     tip={
                       <div className="px-1 text-xs">
                         <p>{"Normalized Delta"}</p>
@@ -156,13 +189,13 @@ const GspDeltaColumn: FC<{
                   >
                     <span className={"self-stretch opacity-80"}>
                       {negative ? "-" : "+"}
-                      {deltaNormalizedPercentage}%
+                      {deltaNormalizedPercentage}
                     </span>
                   </DeltaForecastLabel>
                 </div>
 
                 {/* delta value, in the focused country's display unit */}
-                <div className="col-span-6 xl:col-span-2 flex justify-start">
+                <div className="col-span-6 xl:col-span-2 flex justify-start xl:justify-center">
                   <DeltaForecastLabel
                     tip={
                       <div className="w-28 text-xs">
@@ -177,8 +210,7 @@ const GspDeltaColumn: FC<{
                           {toDisplayPower(Number(gspDelta.delta), unit).toFixed(
                             displayDecimalsFor(unit)
                           )}
-                        </span>{" "}
-                        <span className="opacity-80 text-2xs font-thin">{unit}</span>
+                        </span>
                       </p>
                     </div>
                   </DeltaForecastLabel>
@@ -206,8 +238,7 @@ const GspDeltaColumn: FC<{
                           {toDisplayPower(Number(gspDelta.forecast), unit).toFixed(
                             displayDecimalsFor(unit)
                           )}
-                        </span>{" "}
-                        <span className={`opacity-80 text-2xs font-thin`}>{unit}</span>
+                        </span>
                       </div>
                     </div>
                   </DeltaForecastLabel>
@@ -313,9 +344,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   // Observers come from the manifest, never a hardcoded pair — see pv-remix-chart.tsx.
   const generationSources = useGenerationSources(scope);
-  // Named after whoever publishes this country's generation; GB's name until the manifest
-  // resolves, as in the header and the chart tooltip.
-  const observerLabel = generationSources.data?.[0]?.label ?? "PV Live";
   const observers = useMemo(
     () => (generationSources.data ?? []).map((source) => source.name),
     [generationSources.data]
@@ -528,9 +556,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
           <ChartLegend generationKeys={GENERATION_CHART_KEYS} />
         </div>
         <div
-          className={`flex flex-col flex-grow-0 flex-shrink${
-            hasGspPvInitialForSelectedTime ? " overflow-y-scroll" : ""
-          } ${selectedMapRegionIds?.length ? "h-[30%]" : "h-[40%]"}`}
+          // Chips and headings fixed, only the rows scrolling beneath them — the chips used to
+          // be sticky in the same scroll as the rows and headings, and they collided.
+          className={`flex flex-col flex-grow-0 flex-shrink min-h-0 ${
+            selectedMapRegionIds?.length ? "h-[30%]" : "h-[40%]"
+          }`}
         >
           <DeltaBuckets
             bucketSelection={selectedBuckets}
@@ -538,15 +568,26 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             unit={displayUnit}
           />
           {!hasGspPvInitialForSelectedTime && (
-            <div className="flex flex-1 m-3 p-4 font-thin tracking-wide border border-dashed border-content-secondary rounded-md justify-center items-center text-center text-content-secondary">
-              [ Delta values not available until {observerLabel} output available ]
+            // One line, worded as the header's coverage note is: this is the ordinary state near
+            // the publishing edge, and a dashed box the height of the table read as a fault.
+            <div className="mx-3 py-3 text-xs text-content-secondary">
+              No actuals yet for this time. Try scrubbing further back.
             </div>
           )}
           {hasGspPvInitialForSelectedTime && gspDeltas && (
-            <div className="flex pt-2 mx-3 max-h-96">
-              <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} negative />
-              <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} />
-            </div>
+            <>
+              <div className="flex pt-0.5 mx-3">
+                <GspDeltaColumnHeading unit={displayUnit} negative />
+                <GspDeltaColumnHeading unit={displayUnit} />
+              </div>
+              {/* `max-h-96` is the real bound: the panel's `h-[%]` resolves against a card with
+                  no set height, so without it the table grows to every row and stretches the
+                  chart. */}
+              <div className="flex flex-1 min-h-0 max-h-96 overflow-y-auto mx-3">
+                <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} negative />
+                <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} />
+              </div>
+            </>
           )}
         </div>
       </div>

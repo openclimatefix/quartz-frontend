@@ -853,7 +853,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
           dy={3}
           textAnchor={"start"}
         >
-          {`${payload.value > 0 ? "+" : ""}${prettyPrintYNumberWithCommas(payload.value)}`}
+          {/* In the chart's display unit, like the generation axis beside it: the bars were
+              read in MW against lines in GW. Same one-decimal, no-".0" rule as that axis. */}
+          {`${payload.value > 0 ? "+" : ""}${prettyPrintYNumberWithCommas(
+            payload.value,
+            1,
+            displayDivisionFactor
+          ).replace(/\.0$/, "")}`}
         </text>
       </g>
     );
@@ -1073,7 +1079,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   scale={"auto"}
                   orientation="right"
                   label={{
-                    value: `Delta (MW)`,
+                    value: `Actual − Forecast (${displayUnit})`,
                     angle: 90,
                     position: "insideRight",
                     fill: plot.axis,
