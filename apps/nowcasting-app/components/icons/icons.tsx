@@ -164,7 +164,8 @@ export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
 
 type DeltaIconProps = {
   className?: string;
-  size?: number;
+  /** Pixels, or any SVG length — `"100%"` fills a box sized in `em` to follow the text. */
+  size?: number | string;
 };
 
 export const UpArrow: React.FC<DeltaIconProps> = ({ className, size = 22 }) => (

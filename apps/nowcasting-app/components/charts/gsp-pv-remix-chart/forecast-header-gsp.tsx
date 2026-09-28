@@ -1,5 +1,10 @@
 import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
-import { ForecastHeadlineFigure } from "../forecast-header/ui";
+import {
+  ForecastHeadlineFigure,
+  HEADER_FIGURES,
+  HEADER_ROW,
+  HEADER_TITLE
+} from "../forecast-header/ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 import React, { FC } from "react";
 import ForecastLabel from "../../national_forecast_labels";
@@ -52,8 +57,8 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
     </ul>
   );
   return (
-    <div className="mx-2 mb-1.5 flex flex-initial content-between rounded-md">
-      <div className="mx-auto my-0 ml-0 flex items-center gap-2">
+    <div className={HEADER_ROW}>
+      <div className={HEADER_TITLE}>
         <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
           {titleTooltipText.length ? (
             <ForecastLabel className="" position={"left"} tip={titleTooltipContent}>
@@ -64,10 +69,10 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
           )}
         </span>
       </div>
-      <div className="flex flex-2 items-center justify-between">
+      <div className={HEADER_FIGURES}>
         {forecastPV && (
           <>
-            <div className={deltaView ? "" : "pr-3 lg:pr-4"}>
+            <div>
               <ForecastHeadlineFigure
                 gsp={true}
                 tip={"Latest PV Actual / OCF Forecast"}
@@ -81,8 +86,8 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
                 {forecastPV}
               </ForecastHeadlineFigure>
             </div>
-            <div>
-              {!deltaView && forecastNextPV && (
+            {!deltaView && forecastNextPV && (
+              <div>
                 <ForecastHeadlineFigure
                   gsp={true}
                   tip={"Next OCF Forecast"}
@@ -91,21 +96,21 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
                   unit={unit}
                   color={"solar"}
                 >
-                  {/*<span className="text-content-on-accent">{actualPV}</span>*/}
-                  {/*<span className="text-content mx-1"> / </span>*/}
                   {forecastNextPV}
                 </ForecastHeadlineFigure>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
+        {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || "-"} unit={unit} gsp />}
       </div>
-      {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || "-"} unit={unit} />}
       <button
         type="button"
         onClick={onClose}
         aria-label="Close regional chart"
-        className="flex items-center self-center rounded-md p-2 -mr-3 leading-none transition-colors text-interactive focus:z-10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-interactive"
+        // `-my-2` gives back the padding's height, so the hit area stays but the button no
+        // longer sets the row's height above the national header's.
+        className="flex items-center self-center rounded-md p-2 -my-2 -mr-3 leading-none transition-colors text-interactive focus:z-10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-interactive"
       >
         <CloseButtonIcon />
       </button>

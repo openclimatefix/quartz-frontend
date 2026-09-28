@@ -36,6 +36,7 @@ import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../../lib
 import { GENERATION_CHART_KEYS } from "../pv-remix-chart";
 import ChartScrubber from "../../shell/chart-scrubber";
 import { plottedKeyRange, usePlottedDomain } from "../plotted-domain";
+import ChartLegend from "../chart-legend";
 
 const GspDeltaColumn: FC<{
   gspDeltas: Map<string, GspDeltaValue> | undefined;
@@ -192,7 +193,8 @@ const GspDeltaColumn: FC<{
                   >
                     <div className="flex flex-1 items-end justify-end text-right font-semibold">
                       <div>
-                        <span className={"text-content-on-accent"}>
+                        {/* Actual in the headers' actual colour, `solar-light`. */}
+                        <span className="text-solar-light">
                           {toDisplayPower(Number(gspDelta.currentYield), unit).toFixed(
                             displayDecimalsFor(unit)
                           )}
@@ -464,7 +466,9 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   return (
     <>
       <div className={`flex flex-col flex-1 ${className || ""}`}>
-        <div className="flex flex-1 flex-col relative">
+        {/* The same `p-2` card and plot well as `pv-remix-chart.tsx`, so the header and plot
+            sit in the same place when the comparison switches. */}
+        <div className="flex flex-1 flex-col relative px-2 pt-1.5 pb-2 dash:h-auto">
           <ForecastHeader
             forecastSeries={forecast.data}
             generationSeries={generation0.data}
@@ -477,7 +481,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
               <Spinner></Spinner>
             </div>
           )}
-          <div className={"flex-1 relative"}>
+          <div className="relative flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
             <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
             <RemixLine
               national
@@ -497,7 +501,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             and the track belongs with the chart it scrubs rather than floating above a list of
             GSPs. Its right edge does not line up — delta view mounts a second Y axis on the
             right; see `chart-scrubber.tsx`. */}
-        <ChartScrubber domain={plottedDomain} />
         {selectedMapRegionIds && selectedMapRegionIds.length > 0 && (
           <div className="flex-1 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
@@ -514,6 +517,14 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
             ></GspPvRemixChart>
           </div>
         )}
+        {/* The scrub track, above the legend and inset to the plot's own x-axis. See
+            `components/shell/chart-scrubber.tsx`. */}
+        <ChartScrubber domain={plottedDomain} />
+        {/* Below the well, not inside it: the key describes the plot rather than sitting on
+              it, and it is where most charting libraries put one. */}
+        <div className="flex px-2 pb-2 dash:h-auto">
+          <ChartLegend generationKeys={GENERATION_CHART_KEYS} />
+        </div>
         <div
           className={`flex flex-col flex-grow-0 flex-shrink${
             hasGspPvInitialForSelectedTime ? " overflow-y-scroll" : ""

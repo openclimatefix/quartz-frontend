@@ -253,7 +253,7 @@ const PvRemixChart: FC<{
   return (
     <>
       <div className={`flex flex-col flex-auto ${className || ""}`}>
-        <div className="flex flex-1 flex-col p-2 dash:h-auto">
+        <div className="flex flex-1 flex-col px-2 pt-1.5 pb-2 dash:h-auto">
           <ForecastHeader
             forecastSeries={forecastSeries}
             generationSeries={generation0.data}

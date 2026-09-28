@@ -38,7 +38,7 @@ export const ForecastHeadlineFigure: React.FC<{
   return (
     <div
       data-test="pvlive-ocf-headline-figure"
-      className="m-auto flex items-center justify-between gap-3 py-0.5 dash:py-1"
+      className="m-auto flex items-center justify-between gap-3 dash:py-0.5"
     >
       <div className="flex flex-1 self-center items-center justify-center">
         <div className={`flex items-center ${textSizeClasses}`}>
@@ -104,7 +104,7 @@ export const ForecastWithActualPV: React.FC<{
   sites?: boolean;
 }> = ({ forecast, pv, time, tip, color = yellow, sites = false }) => {
   return (
-    <div className="m-auto flex items-center justify-between gap-3 py-0.5 dash:py-1">
+    <div className="m-auto flex items-center justify-between gap-3 dash:py-0.5">
       <div className="dash:order-2">
         <ForecastLabel
           tip={
@@ -146,7 +146,7 @@ export const NextForecast: React.FC<{ pv: string; tip: string; time: string; col
   return (
     <div
       data-test="forecast-label-tooltip"
-      className="m-auto flex items-center justify-between gap-3 py-0.5 dash:py-1"
+      className="m-auto flex items-center justify-between gap-3 dash:py-0.5"
     >
       <ForecastLabel
         className="dash:order-2"
@@ -219,6 +219,16 @@ const ComparisonEcho: React.FC = () => {
   );
 };
 
+/**
+ * The chart headers' shared row, national and regional alike: the title on the left, then every
+ * figure (and the delta, when there is one) packed right on one centre line at one fixed gap.
+ * The figures used to sit in a `flex-2 justify-between` box, so the space between them grew with
+ * the card and each header padded its own wrappers differently.
+ */
+export const HEADER_ROW = "mx-1 mb-[5px] flex items-center gap-4";
+export const HEADER_TITLE = "mr-auto flex min-w-0 items-center gap-2";
+export const HEADER_FIGURES = "flex items-center gap-4 lg:gap-6";
+
 const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
   forecastPV,
@@ -241,21 +251,18 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   );
   const observerLabel = generationSources.data?.[0]?.label ?? "PV Live";
   return (
-    <div
-      data-test="national-chart-header"
-      className="mx-2 mb-1.5 flex flex-initial content-between rounded-md"
-    >
+    <div data-test="national-chart-header" className={HEADER_ROW}>
       {/* The title names the country outright. It used to read "National" beside a country
           picker — a word true of every country, so the picker was doing the identifying and
           the heading was decoration. The picker moved out; the name moved in. */}
-      <div className="mx-auto my-0 ml-0 flex items-center gap-2">
+      <div className={HEADER_TITLE}>
         <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
           {countryName}
         </span>
         <ComparisonEcho />
       </div>
-      <div className="flex flex-2 justify-between">
-        <div className="pr-3 lg:pr-4">
+      <div className={HEADER_FIGURES}>
+        <div>
           <ForecastHeadlineFigure
             tip={`${observerLabel} / OCF Forecast`}
             time={pvTimeOnly}
@@ -277,8 +284,8 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
             {forecastNextPV}
           </ForecastHeadlineFigure>
         </div>
+        {children}
       </div>
-      <div className="inline-flex h-full">{children}</div>
     </div>
   );
 };
