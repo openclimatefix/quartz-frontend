@@ -8,7 +8,8 @@ import { Bucket, GspDeltaValue } from "../../types";
 import { createBucketObject } from "../../helpers/utils";
 import { displayDecimalsFor, toDisplayPower } from "../../../lib/domain/power-unit";
 import type { PowerUnit } from "../../../config/countries";
-import { deltaExtent, deltaRampColor } from "../../../lib/domain/delta-ramp";
+import { deltaExtent, deltaRampColor, deltaTopFor } from "../../../lib/domain/delta-ramp";
+import { useFocusedCountry } from "../../../hooks/data";
 
 /**
  * Legible text colour for a chip painted with the delta ramp. The ramp's poles are light
@@ -35,6 +36,10 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
   // Capacity has no delta, so it labels as megawatts — the same fold the map and the deltas
   // hook make.
   const asPercentage = activeUnit === ActiveUnit.percentage;
+  // The focused country's region-tier scale, which is what `use-gsp-deltas.ts` filed these
+  // regions under — the chips must label the edges the regions were actually sorted on.
+  const country = useFocusedCountry();
+  const mwTop = deltaTopFor(country, false);
   const isSelected = selectedBuckets.includes(dataKey);
   const toggleBucketSelection = () => {
     if (isSelected) {
@@ -52,8 +57,8 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
   // not 0.35), so the extent it is compared against needs the same scaling — `deltaExtent`
   // is normalised (0–1 of capacity), hence the `* 100` below.
   const bucket = DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET];
-  const edge = deltaBucketEdge(bucket, asPercentage);
-  const extent = asPercentage ? deltaExtent(true) * 100 : deltaExtent(false);
+  const edge = deltaBucketEdge(bucket, asPercentage, mwTop);
+  const extent = asPercentage ? deltaExtent(true) * 100 : mwTop;
   const rampColor = deltaRampColor(edge, extent);
   const textClass = deltaTextClass(edge, extent);
   const isZero = bucket === DELTA_BUCKET.ZERO;
@@ -99,9 +104,10 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
             bucket's enum value, i.e. its ordinal, so it stops being a megawatt figure the
             moment percentage mode uses the same nine cells for capacity fractions.
 
-            The edge itself is still computed in MW — bucket boundaries are a fixed MW ladder —
-            so a non-percentage figure is converted to the focused country's unit only for
-            display, the same last step every other regional figure goes through.
+            The edge itself is still computed in MW — the enum's ladder stretched to the
+            country's own top — so a non-percentage figure is converted to the focused
+            country's unit only for display, the same last step every other regional figure
+            goes through.
           */}
           <span className="flex text-xs">
             {text === DELTA_BUCKET.ZERO.toString()
@@ -109,7 +115,7 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
               : asPercentage
               ? `${deltaBucketEdge(DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET], true)}%`
               : `${toDisplayPower(
-                  deltaBucketEdge(DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET], false),
+                  deltaBucketEdge(DELTA_BUCKET[dataKey as keyof typeof DELTA_BUCKET], false, mwTop),
                   unit
                 ).toFixed(displayDecimalsFor(unit))} ${unit}`}
           </span>

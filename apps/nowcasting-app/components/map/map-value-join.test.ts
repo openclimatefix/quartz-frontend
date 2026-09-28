@@ -54,6 +54,7 @@ import {
   mapBandsFor
 } from "./feature-state";
 import { COUNTRY_CONFIG } from "../../config/countries";
+import { deltaTopFor } from "../../lib/domain/delta-ramp";
 
 const TIMES = ["2026-08-04T00:00:00Z", "2026-08-04T00:30:00Z", "2026-08-04T01:00:00Z"];
 
@@ -825,5 +826,36 @@ describe("paint expressions render the three states distinctly", () => {
     // The top is the outermost bucket's own opacity, not the innermost — reading that ladder
     // from the wrong end ran the whole scale at 40% strength.
     expect(full).toBeCloseTo(0.85, 6);
+  });
+
+  // One map can hold several countries, each at its own level, so the MW delta ramp is picked
+  // per feature the way the output ramp is. Checked against `deltaTopFor` for every country and
+  // tier: saturated at the top, not just below it — so an arm built on another country's (or
+  // the other tier's) top fails. Percentage mode stays one scale and is not per-country.
+  test("MW delta saturates at each country and tier's own top, per feature", () => {
+    const colour = deltaFillColorExpression();
+    const opacity = deltaFillOpacityExpression();
+    Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
+      const tiers = config.mapBands.grouped ? [false, true] : [false];
+      tiers.forEach((grouped) => {
+        const top = deltaTopFor(code, grouped);
+        const at = (expression: unknown, delta: number) =>
+          evaluate(expression, { ...base, hasDelta: true, delta, grouped }, { country: code });
+        expect(at(colour, top)).toBe("#FAA056");
+        expect(at(colour, -top)).toBe("#4675C1");
+        expect(at(colour, top * 0.99)).not.toBe("#FAA056");
+        expect(at(opacity, top)).toBeCloseTo(0.85, 6);
+        expect(at(opacity, top * 0.9) as number).toBeLessThan(0.85);
+      });
+    });
+    // The arms really differ: a GB GSP is saturated by a delta a DE TSO region barely shows.
+    const gbTop = deltaTopFor("GB", false);
+    expect(
+      evaluate(
+        opacity,
+        { ...base, hasDelta: true, delta: gbTop, grouped: false },
+        { country: "DE" }
+      )
+    ).toBeLessThan(0.85);
   });
 });

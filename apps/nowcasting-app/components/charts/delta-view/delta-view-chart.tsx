@@ -2,7 +2,7 @@ import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from "react"
 import RemixLine from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
 import { ActiveUnit } from "../../map/types";
-import { deltaExtent, deltaRampColor } from "../../../lib/domain/delta-ramp";
+import { deltaExtent, deltaRampColor, deltaTopFor } from "../../../lib/domain/delta-ramp";
 import ForecastHeader from "../forecast-header";
 import useGlobalState, {
   useCountryState,
@@ -46,6 +46,7 @@ const GspDeltaColumn: FC<{
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [activeUnit] = useGlobalState("activeUnit");
+  const country = useFocusedCountry();
   const deltaArray = useMemo(() => Array.from(gspDeltas?.values() || []), [gspDeltas]);
   if (!gspDeltas?.size) return null;
 
@@ -53,9 +54,11 @@ const GspDeltaColumn: FC<{
   // the same ramp the map fills its region with — at the region's own value, not at whichever
   // bucket edge it happens to have crossed. `deltaNormalized` is already a fraction of
   // capacity (see `use-gsp-deltas.ts`), the same scale `deltaExtent(true)` saturates at, so
-  // percentage mode needs no rescaling the way the bucket rows' *100 edges do.
+  // percentage mode needs no rescaling the way the bucket rows' *100 edges do. In MW the rows
+  // are the focused country's regions, so they saturate at its region tier's top — the scale
+  // `use-gsp-deltas.ts` buckets them on.
   const asPercentage = activeUnit === ActiveUnit.percentage;
-  const rowExtent = deltaExtent(asPercentage);
+  const rowExtent = asPercentage ? deltaExtent(true) : deltaTopFor(country, false);
 
   // Sorted by whichever figure the unit toggle puts first: MW delta, or delta as a share of
   // capacity in percentage mode — a large region's modest miss otherwise tops a list that is

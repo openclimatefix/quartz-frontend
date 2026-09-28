@@ -9,6 +9,7 @@ import type { GeoJoinTransform } from "../../config/countries";
 import { getCountryConfig } from "../../config/countries";
 import { geoAliasesFor, isLegacyRegion } from "../../config/geo-aliases";
 import { formatRegionLabel } from "../../lib/domain/region-label";
+import { deltaTopFor } from "../../lib/domain/delta-ramp";
 import type {
   Region,
   RegionSeries,
@@ -90,7 +91,7 @@ export type MapFeatureState = {
    * reads it through a Mapbox expression, and expressions read one flat key at a time.
    */
   deltaNormalized: number;
-  /** The nine-step bucket of `delta`, on the fixed MW edges. */
+  /** The nine-step bucket of `delta`, on the MW edges of the region's country and tier. */
   deltaBucket: number;
   /**
    * The nine-step bucket of `deltaNormalized`, on `DELTA_PERCENTAGE_EDGES`.
@@ -272,6 +273,11 @@ export type RegionValueInputs = {
   targetTime: string;
   /** "Now", rounded to the current half-hour slot. Slots at or after it have no delta. */
   timeNow: string;
+  /**
+   * Where these regions' MW delta scale saturates — `deltaTopFor(country, false)` — so their
+   * `deltaBucket` steps on the country's own edges. Omitted, the enum's global ±100.
+   */
+  deltaTop?: number;
 };
 
 /**
@@ -286,7 +292,8 @@ export const buildRegionValues = ({
   forecast,
   generation,
   targetTime,
-  timeNow
+  timeNow,
+  deltaTop
 }: RegionValueInputs): Map<string, MapRegionValue> => {
   const forecastSnapshot = regionSeriesSnapshotAt(forecast, targetTime);
   const generationSnapshot = regionSeriesSnapshotAt(generation, targetTime);
@@ -323,7 +330,7 @@ export const buildRegionValues = ({
       actual: generationMw,
       delta,
       deltaNormalized,
-      deltaBucket: hasDelta ? getDeltaBucket(delta) : DELTA_BUCKET.ZERO,
+      deltaBucket: hasDelta ? getDeltaBucket(delta, deltaTop) : DELTA_BUCKET.ZERO,
       deltaBucketNormalized: hasDelta
         ? getDeltaBucketNormalized(deltaNormalized)
         : DELTA_BUCKET.ZERO,
@@ -349,7 +356,10 @@ export const buildRegionValues = ({
  */
 export const rollUpRegionValues = (
   values: Map<string, MapRegionValue>,
-  groupings: Record<string, string[]>
+  groupings: Record<string, string[]>,
+  // The GROUPED tier's delta top (`deltaTopFor(country, true)`): a rollup's delta is the sum
+  // of its members', so it is bucketed on the rollup's scale, not a member's.
+  deltaTop?: number
 ): Map<string, MapRegionValue> => {
   const rolled = new Map<string, MapRegionValue>();
   for (const groupName of Object.keys(groupings)) {
@@ -393,7 +403,7 @@ export const rollUpRegionValues = (
       // The group's summed delta over the group's summed capacity — not an average of its
       // members' percentages, which would weight a 5 MW GSP the same as a 500 MW one.
       deltaNormalized: hasDelta && capacity > 0 ? delta / capacity : 0,
-      deltaBucket: hasDelta ? getDeltaBucket(delta) : DELTA_BUCKET.ZERO,
+      deltaBucket: hasDelta ? getDeltaBucket(delta, deltaTop) : DELTA_BUCKET.ZERO,
       deltaBucketNormalized:
         hasDelta && capacity > 0 ? getDeltaBucketNormalized(delta / capacity) : DELTA_BUCKET.ZERO,
       hasDelta,
@@ -506,13 +516,16 @@ export const buildMapFeatureStates = (
   inputs: RegionValueInputs,
   options: { groupings?: Record<string, string[]>; country?: string | null } = {}
 ): Map<string | number, MapFeatureState> => {
-  const byRegionName = buildRegionValues(inputs);
+  const byRegionName = buildRegionValues({
+    ...inputs,
+    deltaTop: deltaTopFor(options.country, false)
+  });
 
   if (level?.derived) {
     // No grouping file yet means no rollup is computable — an empty map, not a map of
     // zeroes. The map draws its polygons unstyled until the asset lands.
     return new Map<string | number, MapFeatureState>(
-      rollUpRegionValues(byRegionName, options.groupings ?? {})
+      rollUpRegionValues(byRegionName, options.groupings ?? {}, deltaTopFor(options.country, true))
     );
   }
 

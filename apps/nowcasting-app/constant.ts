@@ -145,9 +145,17 @@ export const DELTA_BUCKET_ORDER: DELTA_BUCKET[] = [
  * count tiles — and before this they each knew that a bucket's *enum value* was its megawatt
  * edge. That stops being true in percentage mode, where the enum is a bare ordinal, so the
  * lookup lives here once rather than as three copies that can disagree about the same cell.
+ *
+ * In megawatts the enum's ±25/50/75/100 is the ladder's SHAPE, stretched to `mwTop` — the
+ * country and tier's own saturation point, from `deltaTopFor` in `lib/domain/delta-ramp.ts`.
+ * The default leaves it at the enum's own values, which is GB's region tier and solar sites.
  */
-export const deltaBucketEdge = (bucket: DELTA_BUCKET, asPercentage: boolean): number => {
-  if (!asPercentage) return Number(bucket);
+export const deltaBucketEdge = (
+  bucket: DELTA_BUCKET,
+  asPercentage: boolean,
+  mwTop: number = DELTA_BUCKET.POS4
+): number => {
+  if (!asPercentage) return (Number(bucket) * mwTop) / DELTA_BUCKET.POS4;
   const index = DELTA_BUCKET_ORDER.indexOf(bucket);
   if (index === 4 || index === -1) return 0;
   return index < 4

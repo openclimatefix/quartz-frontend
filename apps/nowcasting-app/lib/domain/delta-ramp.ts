@@ -1,3 +1,4 @@
+import { COUNTRY_CONFIG } from "../../config/countries";
 import { DELTA_BUCKET, DELTA_PERCENTAGE_EDGES } from "../../constant";
 
 /**
@@ -33,9 +34,50 @@ export const DELTA_WARM = "#FAA056";
  */
 export const DELTA_MID_STOP = 0.5;
 
-/** Where the ramp saturates: fixed MW, or a fraction of installed capacity. */
+/**
+ * Where the ramp saturates: a fraction of installed capacity, or the GLOBAL ±100 MW.
+ *
+ * The megawatt half is now only for things that are not a country's regions — solar sites —
+ * and for percentage mode's twin. Every country-facing MW surface goes through `deltaTopFor`.
+ */
 export const deltaExtent = (normalized: boolean): number =>
   normalized ? DELTA_PERCENTAGE_EDGES[DELTA_PERCENTAGE_EDGES.length - 1] : DELTA_BUCKET.POS4;
+
+/**
+ * The output threshold the ±100 MW delta scale was tuned against: GB's region-tier top band
+ * (`mapBands.region`'s last entry). A literal, not a lookup, because it records a calibration
+ * — the pairing "450 MW of output top goes with 100 MW of delta top" — and retuning GB's bands
+ * later should move GB's delta scale with them, not silently re-anchor every other country.
+ */
+const DELTA_CALIBRATION_OUTPUT_TOP = 450;
+
+/**
+ * MW of delta saturation per MW of a tier's top output threshold: 100 / 450.
+ *
+ * A single global ±100 MW suits GB's GSPs and nothing else — DE's TSO regions are GW-scale, NL's
+ * provinces run to thousands, and GB's own DNO / NG-zone rollups sum hundreds of GSPs. Each tier
+ * already declares how big its regions get, as `mapBands`; scaling the delta top off that keeps
+ * the delta ramp in the same proportion to a region's output that GB's GSPs had, with no second
+ * set of per-country numbers to keep in step with the first.
+ */
+export const DELTA_TOP_PER_OUTPUT_TOP = DELTA_BUCKET.POS4 / DELTA_CALIBRATION_OUTPUT_TOP;
+
+/**
+ * Where the MW delta ramp saturates for one country's tier: its top output threshold ×
+ * `DELTA_TOP_PER_OUTPUT_TOP`, rounded to whole MW (GB region 100, GB grouped 1000, NL 800,
+ * DE 3000).
+ *
+ * The global ±100 for a country this build has no entry for — the same fall-through
+ * `capacityTopFor` makes, except that it answers a number rather than `undefined`, because
+ * every caller here draws something regardless. The grouped tier of a country with no
+ * groupings cannot be on screen; asked anyway, it answers the region tier's top.
+ */
+export const deltaTopFor = (country: string | null | undefined, grouped: boolean): number => {
+  const bands = country ? COUNTRY_CONFIG[country.toUpperCase()]?.mapBands : undefined;
+  const thresholds = bands ? (grouped ? bands.grouped ?? bands.region : bands.region) : undefined;
+  if (!thresholds) return DELTA_BUCKET.POS4;
+  return Math.round(thresholds[thresholds.length - 1] * DELTA_TOP_PER_OUTPUT_TOP);
+};
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const value = hex.replace("#", "");

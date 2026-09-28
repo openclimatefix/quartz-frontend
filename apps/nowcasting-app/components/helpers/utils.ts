@@ -4,6 +4,7 @@ import { DISPLAY_LOCALE } from "../../lib/time/display";
 import {
   DELTA_BUCKET,
   DELTA_PERCENTAGE_EDGES,
+  deltaBucketEdge,
   getDeltaBucketKeys,
   MAX_NATIONAL_GENERATION_MW
 } from "../../constant";
@@ -434,20 +435,30 @@ export const getRoundedTickBoundary = (
   return yMax;
 };
 
-export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
+/**
+ * The megawatt bucket for one delta, on edges stretched to `mwTop` — the region's own country
+ * and tier's saturation point (`deltaTopFor`), so a DE TSO region's buckets step at ±750 MW
+ * rather than ±25. The bucket returned is still the enum member, an ordinal; only the edges it
+ * is compared against move. The default is the enum's own ±25…±100.
+ */
+export const getDeltaBucket: (delta: number, mwTop?: number) => DELTA_BUCKET = (
+  delta,
+  mwTop = DELTA_BUCKET.POS4
+) => {
   const deltaBucketKeys = getDeltaBucketKeys();
   let currentBucket = DELTA_BUCKET[deltaBucketKeys[0] as keyof typeof DELTA_BUCKET];
   for (const bucketKey of deltaBucketKeys) {
     let bucket = Number(DELTA_BUCKET[bucketKey as keyof typeof DELTA_BUCKET]);
+    const edge = deltaBucketEdge(bucket as DELTA_BUCKET, false, mwTop);
 
     if (delta < 0) {
-      if (delta <= bucket) {
+      if (delta <= edge) {
         return bucket as DELTA_BUCKET;
       }
     } else if (delta > 0) {
       if (bucket < 0) continue;
 
-      if (delta >= bucket) {
+      if (delta >= edge) {
         currentBucket = bucket;
         if (bucket === DELTA_BUCKET.POS4) {
           return bucket as DELTA_BUCKET;

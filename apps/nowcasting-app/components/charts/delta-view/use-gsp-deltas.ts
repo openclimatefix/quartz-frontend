@@ -15,6 +15,7 @@ import useGlobalState from "../../helpers/globalState";
 import { buildRegionBridge, buildRegionValues } from "../../helpers/data";
 import { slotForInstant } from "../../../lib/time/cursor";
 import { DELTA_BUCKET } from "../../../constant";
+import { deltaTopFor } from "../../../lib/domain/delta-ramp";
 import { useMapObserver } from "../../map/map-observer";
 import { ActiveUnit } from "../../map/types";
 import { GspDeltaValue } from "../../types";
@@ -122,7 +123,10 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       forecast: forecast.data,
       generation: generation.data,
       targetTime,
-      timeNow
+      timeNow,
+      // The region tier's scale, even at a grouped level: these rows are always the finer
+      // regions (`valueRegionTypeFor` above), never the rollups the map may be drawing.
+      deltaTop: deltaTopFor(country, false)
     });
 
     const result = new Map<string, GspDeltaValue>();
@@ -167,7 +171,7 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       });
     });
     return result;
-  }, [regions.data, forecast.data, generation.data, targetTime, timeNow, asPercentage]);
+  }, [regions.data, forecast.data, generation.data, targetTime, timeNow, asPercentage, country]);
 
   return {
     gspDeltas,

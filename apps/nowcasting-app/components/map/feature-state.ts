@@ -9,7 +9,8 @@ import {
   DELTA_NEUTRAL,
   DELTA_WARM,
   DELTA_WARM_MID,
-  deltaExtent
+  deltaExtent,
+  deltaTopFor
 } from "../../lib/domain/delta-ramp";
 import { theme } from "../../tailwind.config";
 import type { MapFeatureState } from "../helpers/data";
@@ -354,27 +355,63 @@ const deltaValue = (normalized: boolean): Expression =>
   ] as unknown as Expression;
 
 /**
- * `fill-color` for the delta layer, as a `step` over the pre-computed bucket.
+ * Build a delta ramp per feature on the MW scale: `match` on the feature's country, then a
+ * `case` on the feature-state `grouped` flag for a country that has a grouped tier — the same
+ * shape as `countryAwareBands`, and for the same reason (one source draws every enabled country,
+ * each at its own level). Each arm's top is `deltaTopFor`, which the legend, the bucketer and
+ * the delta panel read too, so no surface can saturate somewhere the fill does not.
+ *
+ * The fallback is `deltaTopFor`'s own answer for a country it does not know (the global ±100),
+ * so the expression and the lookup cannot disagree even there.
+ */
+const countryAwareDelta = (ramp: (top: number) => Expression): Expression => {
+  const arms: unknown[] = [];
+  Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
+    arms.push(
+      code,
+      config.mapBands.grouped
+        ? [
+            "case",
+            ["==", ["feature-state", "grouped"], true],
+            ramp(deltaTopFor(code, true)),
+            ramp(deltaTopFor(code, false))
+          ]
+        : ramp(deltaTopFor(code, false))
+    );
+  });
+  return [
+    "match",
+    ["get", REGION_COUNTRY_PROPERTY],
+    ...arms,
+    ramp(deltaTopFor(undefined, false))
+  ] as unknown as Expression;
+};
+
+/**
+ * Percentage mode is one scale for every country (a fraction of each region's own capacity);
+ * MW is each country's and tier's own, per feature. See `deltaTopFor` for why MW cannot be one.
+ */
+const deltaScale = (normalized: boolean, ramp: (top: number) => Expression): Expression =>
+  normalized ? ramp(deltaExtent(true)) : countryAwareDelta(ramp);
+
+/**
+ * `fill-color` for the delta layer, as a continuous ramp over the raw delta.
  *
  * `hasDelta` is false for a future slot and for a region where either side is missing; those
  * are drawn as nothing rather than as a delta of zero, which is what the v0 code showed.
  *
- * `normalized` switches which of the two pre-computed buckets is read — percentage mode steps
- * on `deltaBucketNormalized`, everything else on the megawatt `deltaBucket`. The steps, the
- * colours and the transparent middle are identical either way, because `DELTA_BUCKET`'s members
- * are ordinals here and only the *bucketer* knows they mean megawatts. Switching the unit is
- * therefore one `setPaintProperty` against feature state that is already on every feature — no
- * refetch, no value rebuild. See `DELTA_PERCENTAGE_EDGES` for why the second scale exists.
+ * `normalized` switches which delta is read — percentage mode ramps `deltaNormalized` against
+ * a fraction of capacity, everything else the megawatt `delta` against the feature's own
+ * country and tier's top (`countryAwareDelta`). The colours and the transparent middle are
+ * identical either way. Switching the unit is therefore one `setPaintProperty` against feature
+ * state that is already on every feature — no refetch, no value rebuild. See
+ * `DELTA_PERCENTAGE_EDGES` for why the second scale exists.
  */
 export const deltaFillColorExpression = (normalized = false): Expression => {
-  const extent = deltaExtent(normalized);
-  return [
-    "case",
-    ["!=", ["feature-state", "hasDelta"], true],
-    "transparent",
-    // Five stops, following the brand kit's gradient out from zero — Blue, Sky Blue, the
-    // map's own black, Yellow, Orange. `deltaRampColor` mixes the same five for every
-    // surface off the map, so a chip and a region at the same delta are the same colour.
+  // Five stops, following the brand kit's gradient out from zero — Blue, Sky Blue, the
+  // map's own black, Yellow, Orange. `deltaRampColor` mixes the same five for every
+  // surface off the map, so a chip and a region at the same delta are the same colour.
+  const ramp = (extent: number): Expression =>
     [
       "interpolate",
       ["linear"],
@@ -389,23 +426,27 @@ export const deltaFillColorExpression = (normalized = false): Expression => {
       DELTA_WARM_MID,
       extent,
       DELTA_WARM
-    ]
+    ] as unknown as Expression;
+  return [
+    "case",
+    ["!=", ["feature-state", "hasDelta"], true],
+    "transparent",
+    deltaScale(normalized, ramp)
   ] as unknown as Expression;
 };
 
 /**
  * `fill-opacity` for the delta layer: magnitude, so the eye can rank without the legend.
  *
- * Steps on the same bucket the colour does — which means it steps on `deltaBucketNormalized` in
- * percentage mode, and the two must be built with the same `normalized` flag or a region draws
- * one scale's hue at the other scale's strength.
+ * Reads the same delta against the same per-feature top the colour does, and the two must be
+ * built with the same `normalized` flag or a region draws one scale's hue at the other scale's
+ * strength.
  *
- * The neutral bucket is `0`: a difference below the first edge is ordinary forecast noise and
- * draws as nothing, exactly as a region with no delta does. Those two look the same on purpose —
- * neither is a finding — and the popup still distinguishes them ("no delta yet" vs a figure).
+ * Zero draws as nothing: a difference too small to register is ordinary forecast noise, exactly
+ * as a region with no delta is. Those two look the same on purpose — neither is a finding — and
+ * the popup still distinguishes them ("no delta yet" vs a figure).
  */
 export const deltaFillOpacityExpression = (normalized = false): Expression => {
-  const extent = deltaExtent(normalized);
   // Magnitude, continuous: nothing at zero so ordinary forecast noise stays invisible, rising
   // to the 0.85 the OUTERMOST bucket used to paint — `DELTA_BUCKET_OPACITIES[0]` is the
   // innermost 0.35, and reading the ladder from the wrong end ran the whole scale at 40% of
@@ -414,15 +455,17 @@ export const deltaFillOpacityExpression = (normalized = false): Expression => {
   // Square root rather than linear, matching `deltaRampOpacity`: on a straight line everything
   // below half the scale was too faint to read.
   const top = DELTA_BUCKET_OPACITIES[DELTA_BUCKET_OPACITIES.length - 1];
-  return [
-    "interpolate",
-    ["linear"],
-    ["sqrt", ["/", ["abs", deltaValue(normalized)], extent]],
-    0,
-    0,
-    1,
-    top
-  ] as unknown as Expression;
+  const ramp = (extent: number): Expression =>
+    [
+      "interpolate",
+      ["linear"],
+      ["sqrt", ["/", ["abs", deltaValue(normalized)], extent]],
+      0,
+      0,
+      1,
+      top
+    ] as unknown as Expression;
+  return deltaScale(normalized, ramp);
 };
 
 const deltaFillOpacityStepped = (normalized = false): Expression =>

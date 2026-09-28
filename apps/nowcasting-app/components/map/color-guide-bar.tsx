@@ -20,7 +20,8 @@ import {
   DELTA_NEUTRAL,
   DELTA_WARM,
   DELTA_WARM_MID,
-  deltaExtent
+  deltaExtent,
+  deltaTopFor
 } from "../../lib/domain/delta-ramp";
 import { useMapObserver } from "./map-observer";
 import { ActiveUnit } from "./types";
@@ -67,8 +68,9 @@ type ColorGuideBarProps = { comparison: ComparisonSelection; unit: ActiveUnit };
  * bands gets them the same way they already get its headline figure and level — by focusing
  * it, which a click on any of its regions does.
  *
- * The diverging (delta) buckets are a fixed MW scale from `constant.ts`, not derived from the
- * aggregation level, so they do not vary by country or level and never needed this label.
+ * The diverging (delta) scale in MW now varies by country and level too (`deltaTopFor`), and
+ * shows the focused country's; it does not carry this attribution line yet, which is a gap
+ * with more than one country enabled. Percentage mode is one scale for all countries.
  *
  * ## Why there is no "no data" key here (2026-08-15)
  *
@@ -94,7 +96,7 @@ const ColorGuideBar: React.FC<ColorGuideBarProps> = ({ comparison, unit }) => {
   return (
     <div>
       {comparison ? (
-        <DeltaBands country={focusedCountry} unit={unit} />
+        <DeltaBands country={focusedCountry} unit={unit} grouped={!!currentLevel?.derived} />
       ) : (
         <SequentialBands
           unit={unit}
@@ -380,40 +382,45 @@ const SequentialBands: React.FC<{
  * expose that `ocf-delta` is not monotonic in lightness — 800 is brighter than 900 — which is
  * Delta v2's palette work, not this change's.)
  */
-const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, unit }) => {
+const DeltaBands: React.FC<{ country: string; unit: ActiveUnit; grouped: boolean }> = ({
+  country,
+  unit,
+  grouped
+}) => {
   // The manifest slice the map's own values pipeline reads, so the legend cannot name a
   // stream the fill was not computed from. No extra request: see `useMapObserver`.
   const { label } = useMapObserver(country ? { country, source: "solar" } : null);
   // Capacity cannot reach here — `setComparison` moves off it and the toggle disables it — so
   // the MW branch is a defensive default rather than a statement about what capacity means.
   const asPercentage = unit === ActiveUnit.percentage;
-  const unitText = asPercentage ? "% of capacity" : "MW";
+  const displayUnit = displayUnitFor(country);
+  const unitText = asPercentage ? "% of capacity" : displayUnit;
   // Where the paint expression saturates, in the unit being shown, so the legend and the fill
-  // cannot describe different scales. The percentage scale is held as a fraction.
+  // cannot describe different scales. The percentage scale is held as a fraction; the MW one
+  // is the focused country's at the level on screen, the same lookup the fill's per-country
+  // arm reads (`deltaTopFor`), as the sequential legend does with `mapBandsFor`.
   const extent = asPercentage
     ? Math.round(deltaExtent(true) * 100)
-    : Math.round(deltaExtent(false));
+    : Number(
+        toDisplayPower(deltaTopFor(country, grouped), displayUnit).toFixed(
+          displayDecimalsFor(displayUnit)
+        )
+      );
   return (
     <div className="flex flex-col bg-surface-raised">
       <span className="pb-0.5 text-2xs font-semibold uppercase tracking-wider text-content-secondary">
         {/*
           The subtraction, not "vs". `delta` is `generationMw - forecastMw`, so a `+` means the
-          actual came in *above* the forecast — and "MW vs PV Live Estimated" does not say that,
-          while the ramp (cold on the left, hot on the right) cannot say it either. Writing the
-          operands in order is the only form that fixes the direction on screen.
+          actual came in *above* the forecast, which the ramp alone cannot say. "Actual" rather
+          than the observer's name (Brad, 2026-09-28): neater, and the same for every country;
+          the stream is still named in the `aria-label` below.
 
-          Until the manifest resolves, say the unit and no more rather than guessing a stream —
-          an unnamed delta is exactly what this replaced.
+          The country leads in MW only: each country's MW scale is its own (`deltaTopFor`), and
+          with several countries on the map the ends below are the focused one's. Percentage is
+          one scale for every country, so naming one there would imply a limit that is not there.
         */}
-        {`${label} − forecast`}
+        {`${asPercentage ? "" : `${country} · `}Actual − Forecast`}
       </span>
-      {/*
-        One `role="img"` with the whole scale in its label, rather than nine cells a screen
-        reader would read as bare numbers. It has to be here rather than on the cells: the
-        magnitudes below are deliberately unsigned, so read out individually they would say
-        "100, 75, 50 … 100" with the direction — the entire point of a diverging scale —
-        missing.
-      */}
       {/*
         One `role="img"` with the whole scale in its label, rather than cells a screen reader
         would read as bare numbers: the magnitudes are unsigned, so read out individually they
@@ -447,7 +454,7 @@ const DeltaBands: React.FC<{ country: string; unit: ActiveUnit }> = ({ country, 
           <span className="absolute left-1/2 -translate-x-1/2">0</span>
           <span className="absolute right-0">
             +{extent}
-            {asPercentage ? "%" : ""}
+            {asPercentage ? "%" : ` ${displayUnit}`}
           </span>
         </div>
       </div>
