@@ -177,7 +177,16 @@ export const useGspDeltas = (cursorTime: string): GspDeltasResult => {
       });
     });
     return result;
-  }, [regions.data, forecast.data, generation.data, targetTime, timeNow, asPercentage, country]);
+  }, [
+    regions.data,
+    forecast.data,
+    generation.data,
+    targetTime,
+    timeNow,
+    asPercentage,
+    country,
+    regionType
+  ]);
 
   return {
     gspDeltas,
