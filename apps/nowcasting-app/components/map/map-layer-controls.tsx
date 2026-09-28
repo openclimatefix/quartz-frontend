@@ -45,12 +45,14 @@ import {
  * `aria-hidden`: the button already carries `aria-pressed`, which says the same thing in the
  * one place a screen reader looks. A second announcement of the same state is noise.
  */
-const Lamp: FC<{ on: boolean; busy?: boolean }> = ({ on, busy = false }) => (
+const Lamp: FC<{ on: boolean; busy?: boolean; lit?: string }> = ({
+  on,
+  busy = false,
+  lit = CONTROL_LAMP_ON
+}) => (
   <span
     aria-hidden
-    className={`${CONTROL_LAMP_BASE} ${
-      busy ? CONTROL_LAMP_BUSY : on ? CONTROL_LAMP_ON : CONTROL_LAMP_OFF
-    }`}
+    className={`${CONTROL_LAMP_BASE} ${busy ? CONTROL_LAMP_BUSY : on ? lit : CONTROL_LAMP_OFF}`}
   />
 );
 
@@ -92,7 +94,8 @@ const MapLayerControls: FC = () => {
             showPvLayer ? CONTROL_BUTTON_ON : CONTROL_BUTTON_OFF
           }`}
         >
-          <Lamp on={showPvLayer} />
+          {/* Lit in solar yellow: the only source we draw today. */}
+          <Lamp on={showPvLayer} lit="border-content-on-accent bg-solar" />
           PV
         </button>
       </div>

@@ -113,19 +113,21 @@
 }
 
 /*
- * Off is a dark well inside a light rim; on fills that well with oat. The knob is the height
- * of the track, a light grey ringed one step darker in both states: it sits between the dark
- * well and the pale oat, so the knob keeps an edge whichever ground it is on, where a dark ring
- * vanished into the well and a light one into the oat. The knob stands a
+ * Off is a dark well inside a light rim; on fills that well with solar yellow, since every
+ * toggle today switches a solar layer — revisit when a second source arrives. The knob is the
+ * height of the track, ringed one step darker in both states: light grey when off, full
+ * `content` when on, because the grey looked dull against the yellow. The ring keeps the knob's
+ * edge whichever ground it is on, where a dark ring vanished into the well and a light one into
+ * the yellow. The knob stands a
  * shade proud of the track: an outline eats into the fill it encloses, and at the old size the
  * knob read as a dot rather than as a switch.
  */
 .toggle {
   @apply inline-flex items-center relative w-5 h-2.5 rounded-full bg-surface-sunken
   border border-content-muted transition-all duration-100 ease-in-out delay-0 cursor-pointer
-  checked:bg-interactive checked:border-interactive checked:bg-opacity-100
+  checked:bg-solar checked:border-solar checked:bg-opacity-100
   after:-ml-px checked:after:ml-px
-  checked:bg-none checked:text-interactive
+  checked:bg-none checked:text-solar checked:after:bg-content
   focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus:ring-transparent
   after:will-change-transform after:transition-all after:duration-200 after:ease-in-out after:inline-flex
   after:content-[''] after:bg-content-secondary after:border-content-muted after:border after:rounded-full after:h-[11px] after:w-[11px]
