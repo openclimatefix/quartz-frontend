@@ -2,6 +2,7 @@ import { classNames } from "../../helpers/utils";
 import useSyncEnabledCountries from "../../../hooks/data/use-sync-enabled-countries";
 import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
+import CountryCoverageBanner from "../../map/country-coverage-banner";
 import DataInfoButton from "./data-info-button";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
@@ -130,6 +131,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
           by URL rather than advertised. Restore the two `HeaderLink`s here if that changes. */}
       <div className="grow" />
       <div className="flex items-center gap-2">
+        {isLoggedIn && <CountryCoverageBanner />}
         {isLoggedIn && <CountryToggle />}
         {isLoggedIn && <DataInfoButton />}
         <div className="py-1">

@@ -3,7 +3,7 @@ import mapboxgl, { LngLatLike } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map } from "./";
 import { ActiveUnit, MAP_TITLE_MAIN } from "./types";
-import useGlobalState from "../helpers/globalState";
+import useGlobalState, { setGlobalState } from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../lib/domain/power-unit";
@@ -29,7 +29,7 @@ import {
   fillOpacityExpression
 } from "./feature-state";
 import { FEATURE_KEY_PROPERTY, REGION_COUNTRY_PROPERTY } from "./country-features";
-import CountryCoverageBanner from "./country-coverage-banner";
+import { coverageGaps } from "./country-coverage";
 import type { MapFeatureState } from "../helpers/data";
 
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
@@ -105,6 +105,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
     loaders,
     countryStatus
   } = useEnabledCountryMapData(selectedISOTime);
+
+  // Publish the per-country gaps for the header's pills. Compared by content, because
+  // `countryStatus` is rebuilt on every cursor move and a fresh array would re-render the header
+  // each time. Cleared on unmount so a page without this map shows no stale pills.
+  const metric = isDelta ? "delta" : "value";
+  const gaps = coverageGaps(countryStatus, metric);
+  const gapsKey = gaps.map((g) => `${g.code}:${g.state}:${g.metric}`).join(",");
+  useEffect(() => {
+    setGlobalState("coverageGaps", gaps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `gapsKey` is `gaps` by content
+  }, [gapsKey]);
+  useEffect(() => () => setGlobalState("coverageGaps", []), []);
 
   // The network constraint overlay. Fetched rather than imported since Phase 5 — it was
   // 430 KB of GeoJSON in the bundle of every page that imports this module, for a layer that
@@ -659,23 +671,10 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
                 safelyUpdateMapData(map, addOrUpdateMapData);
               }
             }}
-            // The corner's own time readout went here (Wave 4) — the zone stack in the map
-            // control dock (`components/shell/zone-stack.tsx`) already says it, better, once
-            // for both panes. `sitesMap.tsx` keeps its own: `/sites` has no zone stack to
-            // duplicate. Reused (Phase 6 followup, Track M) for the per-country coverage
-            // banner — quiet unless an enabled country has nothing published at this instant,
-            // or nothing at all.
-            //
-            // The metric follows the encoding: a country can have a published forecast and
-            // still have no computable delta, and on the delta fill "no delta" is the common
-            // reading rather than the exception, so the banner has to be answering about the
-            // quantity actually on screen.
-            controlOverlay={() => (
-              <CountryCoverageBanner
-                countryStatus={countryStatus}
-                metric={isDelta ? "delta" : "value"}
-              />
-            )}
+            // The corner's own time readout went here (Wave 4); the zone stack in the map
+            // control dock says it now. The coverage pills that followed it moved to the header
+            // (see `coverageGaps` above), since the chart card covers this corner.
+            controlOverlay={() => null}
             title={MAP_TITLE_MAIN}
           ></Map>
         </>

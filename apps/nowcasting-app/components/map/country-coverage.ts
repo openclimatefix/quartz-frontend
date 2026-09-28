@@ -88,3 +88,36 @@ export const computeCountryCoverage = (
   }
   return { anyValueAtCursor, anyDeltaAtCursor };
 };
+
+/** One enabled country the map has nothing to draw for — what the header's pills say. */
+export type CoverageGap = {
+  code: string;
+  state: "no-forecast" | "no-data";
+  /** Which map asked: a `no-data` gap means a missing forecast on one, missing actuals on the other. */
+  metric: "value" | "delta";
+};
+
+/**
+ * The countries worth a note: `no-forecast` and `no-data` only, since `loading` near the
+ * publishing edge is the common case and `ok` has nothing to say. Sorted by code so the list
+ * does not reorder as countries report in.
+ */
+export const coverageGaps = (
+  countryStatus: Record<
+    string,
+    { isLoading: boolean; hasValues: boolean; coverage: CountryCoverage }
+  >,
+  metric: "value" | "delta"
+): CoverageGap[] => {
+  const gaps: CoverageGap[] = [];
+  for (const [code, status] of Object.entries(countryStatus)) {
+    const state = decideCountryCoverage({
+      isLoading: status.isLoading,
+      hasValues: status.hasValues,
+      anyAtCursor:
+        metric === "value" ? status.coverage.anyValueAtCursor : status.coverage.anyDeltaAtCursor
+    });
+    if (state === "no-forecast" || state === "no-data") gaps.push({ code, state, metric });
+  }
+  return gaps.sort((a, b) => a.code.localeCompare(b.code));
+};

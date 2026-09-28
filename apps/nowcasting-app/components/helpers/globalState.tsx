@@ -13,6 +13,7 @@ import { ActiveUnit } from "../map/types";
 import type { ChannelSelection } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
 import { ComparisonSelection } from "./comparison";
+import type { CoverageGap } from "../map/country-coverage";
 import { CHART_SPLIT, ChartMode, ChartSplitPercent } from "../shell/geometry";
 import {
   cursorCadenceMinutes,
@@ -174,6 +175,12 @@ export type FlatGlobalStateType = {
   isSatelliteLoading: boolean;
   satelliteError: string | null;
   /**
+   * Enabled countries the map has nothing to draw for at the cursor. `pvLatestMap` writes it,
+   * since it holds the per-country pipelines; the header renders it beside the country toggle,
+   * where the chart card cannot cover it. Empty whenever the map is not mounted.
+   */
+  coverageGaps: CoverageGap[];
+  /**
    * The floating chart's per-mode size overrides — Phase 6 followup, OPEN 5. `CHART_SPLIT` in
    * `geometry.ts` is the seed each `ChartMode` starts from; once the user drags a mode to a
    * size, that size lives here and the seed is never read again for that mode. A mode absent
@@ -282,6 +289,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showPvLayer: true,
     isSatelliteLoading: false,
     satelliteError: null,
+    coverageGaps: [],
     chartSplitOverrides:
       getSettingFromCookieStorage<Partial<Record<ChartMode, ChartSplitPercent>>>(
         CookieStorageKeys.CHART_SPLIT_OVERRIDES
