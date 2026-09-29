@@ -1,29 +1,47 @@
-import { describe, expect, jest, test } from "@jest/globals";
-import { API_PREFIX, SITES_API_PREFIX } from "../../constant";
-import type { Scope } from "../../lib/domain/types";
+import { describe, expect, test } from "@jest/globals";
+import { normaliseLevel, normaliseMessage } from "./useStatus";
 
-const mockUseLoadDataFromApi = jest.fn();
-jest.mock("./useLoadDataFromApi", () => ({
-  useLoadDataFromApi: (...args: unknown[]) => mockUseLoadDataFromApi(...args)
-}));
-
-// Imported after the mock so useStatus picks up the mocked useLoadDataFromApi.
-import { useSitesStatus, useSolarStatus } from "./useStatus";
-
-describe("useStatus", () => {
-  const scope: Scope = { country: "GB", source: "solar", regionType: "national" };
-
-  test("useSolarStatus hits the GB status URL regardless of scope.country, carrying scope", () => {
-    useSolarStatus({ ...scope, country: "NL" });
-    expect(mockUseLoadDataFromApi).toHaveBeenCalledWith(`${API_PREFIX}/solar/GB/status`, {
-      scope: { ...scope, country: "NL" }
-    });
+describe("normaliseLevel", () => {
+  test("passes through every level the API spec publishes", () => {
+    // ProductStatusValue, spec v0.2.0.
+    expect(normaliseLevel("ok")).toBe("ok");
+    expect(normaliseLevel("info")).toBe("info");
+    expect(normaliseLevel("warning")).toBe("warning");
+    expect(normaliseLevel("error")).toBe("error");
+    expect(normaliseLevel("unknown")).toBe("unknown");
   });
 
-  test("useSitesStatus hits the scope-less sites status URL, carrying scope", () => {
-    useSitesStatus(scope);
-    expect(mockUseLoadDataFromApi).toHaveBeenCalledWith(`${SITES_API_PREFIX}/api_status`, {
-      scope
-    });
+  test("tolerates casing and whitespace", () => {
+    expect(normaliseLevel(" Warning ")).toBe("warning");
+    expect(normaliseLevel("ERROR")).toBe("error");
+  });
+
+  test("falls back to unknown, not info, for a level it cannot read", () => {
+    // Failing towards visible is deliberate — silently swallowing a level we do not know
+    // would hide a real incident. `unknown` rather than `info` because `info` now means a
+    // deliberate non-degraded notice, and it ranks lower, so it would fail quiet.
+    expect(normaliseLevel("degraded")).toBe("unknown");
+    expect(normaliseLevel("")).toBe("unknown");
+    expect(normaliseLevel(undefined)).toBe("unknown");
+    expect(normaliseLevel(null)).toBe("unknown");
+    expect(normaliseLevel(3)).toBe("unknown");
+  });
+});
+
+describe("normaliseMessage", () => {
+  test("trims a string message", () => {
+    expect(normaliseMessage("  Forecast delayed  ")).toBe("Forecast delayed");
+    expect(normaliseMessage("")).toBe("");
+  });
+
+  test("returns empty string for anything that is not a string", () => {
+    // The point is that none of these throw. `.trim()` on a non-string would take down the
+    // whole render, since this runs in a hook body — one malformed field would blank the app
+    // rather than drop one banner row. An empty message means the row is not drawn.
+    expect(normaliseMessage(null)).toBe("");
+    expect(normaliseMessage(undefined)).toBe("");
+    expect(normaliseMessage(42)).toBe("");
+    expect(normaliseMessage({ text: "nope" })).toBe("");
+    expect(normaliseMessage(["nope"])).toBe("");
   });
 });

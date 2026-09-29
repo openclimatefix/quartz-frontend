@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { Analytics } from "@vercel/analytics/next";
-import { useFocusedCountry } from "../../hooks/data";
-import { useSitesStatus, useSolarStatus } from "../hooks/useStatus";
+import { useEnabledCountries } from "../../hooks/data";
+import { statusProductsFor, useProductStatuses } from "../hooks/useStatus";
 import useGlobalState from "../helpers/globalState";
 import StatusBanner from "./StatusBanner";
 
@@ -11,16 +11,11 @@ interface ILayout {
 }
 
 const Layout = ({ children }: ILayout) => {
-  // Both status fetches carry a Scope even though neither backend consumes it yet — see
-  // components/hooks/useStatus.ts for why.
-  const country = useFocusedCountry();
-  const { data: solarStatus } = useSolarStatus({
-    country,
-    source: "solar",
-    regionType: "national"
-  });
-  const { data: sitesStatus } = useSitesStatus({ country, source: "solar", regionType: "site" });
   const [isSitesChart] = useGlobalState("isSitesChart");
+  // One Status API call; the rows kept are the enabled countries' products, or the sites
+  // product on /sites. See `statusProductsFor`.
+  const enabledCountries = useEnabledCountries();
+  const statuses = useProductStatuses(statusProductsFor(isSitesChart, enabledCountries));
   const [comparison] = useGlobalState("comparison");
   // Replaces `getViewTitle(view)` (Wave 4): the three titles it produced — "PV Forecast",
   // "Delta", "Solar Sites" — now come from the two facts that used to be folded into `view`,
@@ -44,11 +39,7 @@ const Layout = ({ children }: ILayout) => {
           floating pane that escapes its container from giving the whole page a horizontal
           scrollbar, which is never what is wanted on a full-height app shell. */}
       <main className="flex h-screen flex-col overflow-x-hidden">
-        <StatusBanner
-          isSitesChart={isSitesChart}
-          solarStatus={solarStatus}
-          sitesStatus={sitesStatus}
-        />
+        <StatusBanner statuses={statuses} />
         {children}
         <Analytics />
       </main>

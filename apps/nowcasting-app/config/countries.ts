@@ -1,4 +1,5 @@
 import type { RegionNameStyle } from "../lib/domain/region-label";
+import type { StatusProductKey } from "./statusProducts";
 
 // The static half of a country's configuration.
 //
@@ -360,6 +361,12 @@ export type CountryConfig = {
    * which is the point. Split it per region type when a country needs two.
    */
   displayUnit: PowerUnit;
+  /**
+   * This country's product key in the Status API, so the status banner shows an incident for
+   * every enabled country and for no other. Optional: a country the Status API has no product
+   * for (DE today) contributes no status row. See `config/statusProducts.ts`.
+   */
+  statusProduct?: StatusProductKey;
   /** Auth0 role id granting this country; the country claim is derived from these. */
   auth0Role: string;
 };
@@ -499,6 +506,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: { name: "PV_Live", url: "https://www.solar.sheffield.ac.uk/pvlive/" },
     seasonalNorms: "/data/gb/national-metrics.json",
     displayUnit: "MW",
+    statusProduct: "gb-solar",
     auth0Role: "GB_ROLE_ID"
   },
   NL: {
@@ -586,6 +594,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: null,
     seasonalNorms: null,
     displayUnit: "GW",
+    statusProduct: "nl-solar",
     auth0Role: "NL_ROLE_ID"
   },
   DE: {

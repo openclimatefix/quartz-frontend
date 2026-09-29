@@ -68,6 +68,20 @@
 - [ ] If I select a DNO, does the aggregated chart show for that DNO?
 - [ ] If I have a DNO selected, and click the "GSP" map button, does it deselect the DNO?
 - [ ] If I have a GSP selected, and click the "DNO" map button, does it deselect the GSP?
+- [ ] If I move the map does a reset icon appears on top of zoom icons?
+- [ ] If I click the reset icon does it zoom back to UK and disappear?
+- [ ] On a browser without WebGL support, does a friendly "Map Unavailable" message show instead of an error?
+
+### Cloud Layer
+- [ ] Does a `Clouds` toggle button show on the map (PV Forecast view only, not on Delta View)?
+- [ ] Clicking `Clouds` shows the satellite imagery layer on the map?
+- [ ] Clicking `Clouds` again hides the satellite imagery layer?
+- [ ] When `Clouds` is enabled, does a channel dropdown appear with `Composites` and `Individual bands` groups?
+- [ ] Does a loading spinner show on the `Clouds` button while satellite imagery is fetching?
+- [ ] Does a `PV` toggle button show, to show/hide the yellow PV forecast overlay on the map?
+- [ ] Turning `Clouds` off automatically re-enables the `PV` overlay?
+- [ ] Scrubbing between nearby timesteps with `Clouds` on feels smooth, without a fresh loading spinner each time (prefetch/caching)?
+- [ ] If satellite imagery isn't available for the selected time (e.g. future timestep), does a friendly "unavailable" message show in place of the dropdown?
 
 
 ## Delta View
@@ -132,6 +146,18 @@
   - [ ] Does the Nhr forecast _not_ show on the legend, charts or tooltips when switched off?
   - [ ] Does the Nhr hours switcher _not_ show when toggled off?
 - [ ] Does the Nhr forecast toggle persist across refreshes/logouts using cookie?
+
+
+## P-level Settings
+
+- [ ] Does a `Settings` option show in the Profile Dropdown menu (top right)?
+- [ ] Clicking `Settings` opens a Settings modal with a "P-levels" section?
+- [ ] Are the P2/P98, P10/P90 and P25/P75 pairs each shown with their own toggle?
+- [ ] Toggling a P-level pair on adds its shading/line to the National & GSP charts?
+- [ ] Toggling a P-level pair off removes its shading/line from the charts?
+- [ ] Does the chart tooltip only show values for the currently-enabled P-level pairs?
+- [ ] Does the P-level selection persist across refreshes/logouts using cookie?
+- [ ] Does the CSV export only include columns for the currently-selected P-levels?
 
 
 ## Combined views
