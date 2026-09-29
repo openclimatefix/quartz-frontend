@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 import { getCountryConfig } from "../../config/countries";
 import useGlobalState from "../../components/helpers/globalState";
-import { readCountryClaim, isEntitled } from "../../lib/api/auth/entitlement";
+import { readEntitlementClaim, isEntitled } from "../../lib/api/auth/entitlement";
 import * as queries from "../../lib/api/v1/queries";
 import { queryKey } from "../../lib/api/v1/queries";
 import { normaliseCountries } from "../../lib/domain/normalise";
@@ -53,7 +53,7 @@ export const useCountries = (): UseCountriesResult => {
     manifestSwrOptions
   );
 
-  const claim = useMemo(() => readCountryClaim(user), [user]);
+  const claim = useMemo(() => readEntitlementClaim(user), [user]);
 
   const countries = useMemo<CountryListing[]>(
     () =>

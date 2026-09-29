@@ -1,6 +1,6 @@
 /**
  * Which products' statuses the banner shows on a page: every enabled country's
- * `statusProduct` on the dashboard, `asset-solar` alone on /sites.
+ * `product` on the dashboard, `asset-solar` alone on /sites.
  *
  * Drives the real `useProductStatuses` and `StatusBanner` against one `/products` payload in
  * which every product has an incident, so a row that shows was kept by the page's product
@@ -26,7 +26,10 @@ const PAYLOAD: ProductsResponse = {
   products: [
     incident("gb-solar", "GB Solar"),
     incident("nl-solar", "NL Solar"),
-    incident("asset-solar", "Asset Solar")
+    incident("asset-solar", "Asset Solar"),
+    // Not a Status API product today. Here so the tests show a row for it would still be
+    // dropped, because the status registry does not list it.
+    incident("de-solar", "DE Solar")
   ],
   lastUpdated: "2026-09-29T09:00:00Z"
 };
@@ -57,7 +60,7 @@ describe("statusProductsFor", () => {
     expect(statusProductsFor(false, ["NL", "GB"])).toEqual(["nl-solar", "gb-solar"]);
   });
 
-  test("a country without a status product adds nothing and does not throw", () => {
+  test("a country whose product the status registry does not list adds nothing and does not throw", () => {
     expect(statusProductsFor(false, ["GB", "DE"])).toEqual(["gb-solar"]);
     expect(statusProductsFor(false, ["DE", "XX"])).toEqual([]);
   });
@@ -88,9 +91,10 @@ describe("status banner rows by page", () => {
     expect(screen.queryByText(/NL Solar incident/)).toBeNull();
   });
 
-  test("a country without a status product shows no row", async () => {
+  test("a country whose product the status registry does not list shows no row", async () => {
     renderBanner(false, ["DE", "GB"]);
     await waitFor(() => expect(screen.queryByText(/GB Solar incident/)).not.toBeNull());
+    expect(screen.queryByText(/DE Solar incident/)).toBeNull();
     expect(screen.getAllByRole("button")).toHaveLength(1);
   });
 });

@@ -1,5 +1,5 @@
 import type { RegionNameStyle } from "../lib/domain/region-label";
-import type { StatusProductKey } from "./statusProducts";
+import type { ProductKey } from "../lib/api/auth/entitlement";
 
 // The static half of a country's configuration.
 //
@@ -362,11 +362,13 @@ export type CountryConfig = {
    */
   displayUnit: PowerUnit;
   /**
-   * This country's product key in the Status API, so the status banner shows an incident for
-   * every enabled country and for no other. Optional: a country the Status API has no product
-   * for (DE today) contributes no status row. See `config/statusProducts.ts`.
+   * This country's product key. It decides entitlement — a user may use the country when
+   * their Auth0 `products` claim contains it (lib/api/auth/entitlement.ts) — and which status
+   * the banner shows for it. Optional: a country without one is never entitled by products.
+   * A product the Status API does not report on (DE's today) contributes no status row. See
+   * `config/statusProducts.ts`.
    */
-  statusProduct?: StatusProductKey;
+  product?: ProductKey;
   /** Auth0 role id granting this country; the country claim is derived from these. */
   auth0Role: string;
 };
@@ -506,7 +508,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: { name: "PV_Live", url: "https://www.solar.sheffield.ac.uk/pvlive/" },
     seasonalNorms: "/data/gb/national-metrics.json",
     displayUnit: "MW",
-    statusProduct: "gb-solar",
+    product: "gb-solar",
     auth0Role: "GB_ROLE_ID"
   },
   NL: {
@@ -594,7 +596,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: null,
     seasonalNorms: null,
     displayUnit: "GW",
-    statusProduct: "nl-solar",
+    product: "nl-solar",
     auth0Role: "NL_ROLE_ID"
   },
   DE: {
@@ -686,6 +688,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: { name: "ENTSO-E", url: "https://transparency.entsoe.eu/" },
     seasonalNorms: null,
     displayUnit: "GW",
+    product: "de-solar",
     auth0Role: "DE_ROLE_ID"
   }
 };

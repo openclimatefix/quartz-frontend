@@ -10,7 +10,7 @@ import { StatusLevel } from "../components/types";
  *
  * Declared data, no branching. Adding a product is one entry here.
  *
- * The country -> product link lives on `CountryConfig` as `statusProduct`, so the enabled
+ * The country -> product link lives on `CountryConfig` as `product`, so the enabled
  * countries decide which country rows show; the sites page shows `SITES_STATUS_PRODUCT`.
  * See `statusProductsFor` in components/hooks/useStatus.ts.
  */
@@ -39,60 +39,12 @@ export const isKnownProduct = (key: string): key is StatusProductKey =>
   Object.prototype.hasOwnProperty.call(STATUS_PRODUCTS, key);
 
 /**
- * Bare spelling, no namespace — what is actually set on the Auth0 dev tenant, following the
- * `trial_ends_at` precedent read straight off `session.user` in pages/api/get_token.ts.
- */
-export const PRODUCTS_CLAIM_KEY = "products";
-
-/**
- * Namespaced spelling, per Auth0's custom-claim convention.
- *
- * Both are read because the bare one may not survive. Auth0 silently drops non-namespaced
- * custom claims that an Action adds to a token; `trial_ends_at` works un-namespaced in
- * production, but most likely arrives by another route (a root profile attribute rather than
- * an Action-set claim), so it is not proof that `products` will. Reading both costs a line
- * and removes the question. lib/api/auth/entitlement.ts does the same for `countries`.
- *
- * Delete whichever spelling turns out to be unused once the Action ships.
- */
-export const PRODUCTS_CLAIM_KEY_NAMESPACED = "https://quartz.solar/products";
-
-/**
- * Pulls the product claim off an Auth0 user/session object.
- *
- * `user` is `unknown` on purpose: it arrives from `useUser()`, from `getSession()`, or from
- * the JSON `/api/get_token` returns, and at least one of those can be null mid-session.
- * Anything that is not an array of non-empty strings is treated as absent, so a missing or
- * malformed claim degrades to "nothing entitled" and never throws.
- *
- * Keys are lower-cased to match how the status API spells them, so a claim written
- * `["GB-Solar"]` still matches. Unknown keys are left in — intersecting against the registry
- * is the caller's job.
- */
-export const readProductsClaim = (user: unknown): string[] => {
-  if (user === null || typeof user !== "object") return [];
-
-  const record = user as Record<string, unknown>;
-  const raw = record[PRODUCTS_CLAIM_KEY] ?? record[PRODUCTS_CLAIM_KEY_NAMESPACED];
-  if (!Array.isArray(raw)) return [];
-
-  const keys = raw
-    .filter((entry): entry is string => typeof entry === "string")
-    .map((entry) => entry.trim().toLowerCase())
-    .filter((entry) => entry.length > 0);
-
-  // A malformed claim can repeat a key; downstream this is a membership set, not a list.
-  return Array.from(new Set(keys));
-};
-
-/**
  * Which products this user is allowed to see the status of.
  *
  * Returns all of them today, deliberately — we would rather show a GB-only customer an NL
  * incident than hide a GB one through a half-built entitlement check. `readProductsClaim`
- * above is the mechanism, built and tested but not yet wired in: the lock-down ships with
- * the Europe UI, and this is the one function that changes when it does. `useProductStatuses`
- * is the single place entitlement is applied.
+ * (lib/api/auth/entitlement.ts) is the mechanism, now deciding country entitlement but not
+ * wired in here: this is the one function that changes when status is locked down too.
  *
  * It reads a **`products`** claim, not the `countries` claim the Europe UI epic currently
  * builds against. That is a settled decision, not a preference: `asset-solar` is not a

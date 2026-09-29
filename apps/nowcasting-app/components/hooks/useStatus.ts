@@ -71,8 +71,9 @@ const normaliseProduct = (product: ProductStatus): ProductStatus => ({
  * Which products the banner reports on for the page in view.
  *
  * The sites page is about assets, so it shows `asset-solar` alone. Everywhere else it is
- * each enabled country's `statusProduct`, in enabled order; a country without one (DE, or a
- * code this build has no config for) adds nothing. For a regular user the enabled set is
+ * each enabled country's `product`, in enabled order; a country without one, or whose product
+ * the status registry does not know (DE's `de-solar` today), or a code this build has no
+ * config for, adds nothing. For a regular user the enabled set is
  * every country they are entitled to, so this is "all my countries' statuses".
  */
 export const statusProductsFor = (
@@ -82,8 +83,8 @@ export const statusProductsFor = (
   isSitesChart
     ? [SITES_STATUS_PRODUCT]
     : enabledCountries.flatMap((code) => {
-        const product = getCountryConfig(code)?.statusProduct;
-        return product ? [product] : [];
+        const product = getCountryConfig(code)?.product;
+        return product && isKnownProduct(product) ? [product] : [];
       });
 
 /**
