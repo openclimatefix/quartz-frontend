@@ -105,7 +105,7 @@ const server = setupServer(
   json("/GB/solar/regions/national/forecast", gbNationalForecast),
   http.get(`${V1}/GB/solar/regions/national/generation`, ({ request }) => {
     record(request);
-    const observer = new URL(request.url).searchParams.get("observer");
+    const observer = new URL(request.url).searchParams.get("observer_name");
     return HttpResponse.json(
       observer === "pvlive_day_after" ? gbNationalGenerationDayAfter : gbNationalGenerationInDay
     );
@@ -168,7 +168,7 @@ describe("the forecast series are driven by the country's config, not by the com
 
     const path = "/GB/solar/regions/national/forecast";
     const configured = COUNTRY_CONFIG.GB.nationalChartSeries.map(forecastSeriesModel);
-    expect(queryValues(path, "model")).toEqual([...configured].sort());
+    expect(queryValues(path, "model_name")).toEqual([...configured].sort());
     expect(seen(path)).toHaveLength(configured.length);
   });
 
@@ -187,15 +187,16 @@ describe("the forecast series are driven by the country's config, not by the com
     expect(seen("/GB/solar/regions/national/forecast").length).toBe(4);
   });
 
-  // v1 has no `trend_adjuster_on`; it exposes `_adjust` model variants instead, and the
-  // instruction is to run on the non-adjusted ones until the API settles. If someone flips
-  // NATIONAL_FORECAST_MODEL_SUFFIX, this and the config test move together.
-  test("no request asks for an _adjust variant", async () => {
+  // Adjustment is the `adjusted` parameter, not a model-name suffix.
+  test("no request asks for an _adjust variant, and every forecast request sets adjusted=true", async () => {
     const view = renderChart();
     await settled(view, 6);
-    for (const model of queryValues("/GB/solar/regions/national/forecast", "model")) {
+    for (const model of queryValues("/GB/solar/regions/national/forecast", "model_name")) {
       expect(model).not.toMatch(/_adjust$/);
     }
+    const adjusted = queryValues("/GB/solar/regions/national/forecast", "adjusted");
+    expect(adjusted.length).toBeGreaterThan(0);
+    expect(adjusted.every((value) => value === "true")).toBe(true);
   });
 
   /**
@@ -269,7 +270,7 @@ describe("observers are per country and there may be exactly one", () => {
     const view = renderChart();
     await settled(view, 6);
 
-    expect(queryValues("/GB/solar/regions/national/generation", "observer")).toEqual([
+    expect(queryValues("/GB/solar/regions/national/generation", "observer_name")).toEqual([
       "pvlive_day_after",
       "pvlive_in_day"
     ]);
@@ -287,7 +288,9 @@ describe("observers are per country and there may be exactly one", () => {
       rerender(view);
       expect(seen("/NL/solar/regions/national/generation")).toHaveLength(1);
     });
-    expect(queryValues("/NL/solar/regions/national/generation", "observer")).toEqual(["ned_nl"]);
+    expect(queryValues("/NL/solar/regions/national/generation", "observer_name")).toEqual([
+      "ned_nl"
+    ]);
     // ...and one forecast line, not GB's four.
     expect(seen("/NL/solar/regions/national/forecast")).toHaveLength(1);
     expect(seen("/GB/solar/regions/national/generation")).toHaveLength(0);

@@ -2,7 +2,6 @@ import { describe, expect, test } from "@jest/globals";
 
 import {
   COUNTRY_CONFIG,
-  NATIONAL_FORECAST_MODEL_SUFFIX,
   configuredCountryCodes,
   forecastSeriesModel,
   getCountryConfig,
@@ -73,8 +72,7 @@ describe("COUNTRY_CONFIG", () => {
     expect(new Set(keys).size).toBe(keys.length);
     for (const series of config.nationalChartSeries) {
       expect(series.label.length).toBeGreaterThan(0);
-      // Non-adjusted models only, for now. `_adjust` is applied centrally by the suffix, so a
-      // model name carrying it here would double up.
+      // Adjustment is the `adjusted` request parameter, so a model name never carries it.
       expect(series.model).not.toMatch(/_adjust$/);
     }
   });
@@ -123,9 +121,9 @@ describe("the national chart's series list", () => {
     // Every key here must have both, which is what stops this list growing dead entries again.
     expect(COUNTRY_CONFIG.GB.nationalChartSeries.map((s) => [s.key, s.model])).toEqual([
       ["FORECAST", "blend"],
-      ["INTRADAY_ECMWF_ONLY", "pvnet_ecmwf"],
-      ["MET_OFFICE_ONLY", "pvnet_ukv"],
-      ["SAT_ONLY", "pvnet_sat"]
+      ["INTRADAY_ECMWF_ONLY", "ecmwf"],
+      ["MET_OFFICE_ONLY", "mo"],
+      ["SAT_ONLY", "sat_8h"]
     ]);
   });
 
@@ -155,10 +153,8 @@ describe("the national chart's series list", () => {
     expect(withLegend).toEqual(["INTRADAY_ECMWF_ONLY", "MET_OFFICE_ONLY", "SAT_ONLY"]);
   });
 
-  // The `_adjust` swap has to stay a one-line edit, so it must go through this one function.
   describe("forecastSeriesModel", () => {
-    test("appends the suffix, which is empty today", () => {
-      expect(NATIONAL_FORECAST_MODEL_SUFFIX).toBe("");
+    test("sends the configured model name unchanged", () => {
       expect(forecastSeriesModel({ key: "FORECAST", model: "blend", label: "x" })).toBe("blend");
     });
 

@@ -1,0 +1,3091 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OCF Energy API Documentation",
+    "description": "\nRenewable generation forecasts and observed data across multiple countries.\n<br/>\n\n## Resources\n\n### Discovery\nList available energy sources, countries, region types, and\ngeneration sources per country, as well as browse locations by type (national, GSP, province, …).\nEach region carries a `name`, which is what every other endpoint identifies it by.\n\n### Forecasts\nPer-region time series, filterable all-region snapshots for a point in time,\nand a limited, filterable matrix of all-region data over a rolling ±2-day window.\n\n### Generation\nObserved PV output via the same three shapes (per-region, snapshot, and period matrix).\n\n## Authentication\n\nAll endpoints require a **Bearer token** issued via Auth0. Click `Authorize`\nat the top of this page to log in interactively; your token is then injected\ninto every request you send from here.\n\nFor programmatic access (scripts, integrations), see the\n[OCF Energy API authentication guide](https://www.notion.so/openclimatefix/API-Access-2d8d2f64215d4432be830cbcc9220012)\nfor copy-paste examples in Python, curl, and JavaScript.\n\nA free trial is available. Sign up through the `Authorize` button at the top or on any\nrequest in these docs, or at [app.ocf.energy](https://app.ocf.energy) to get started.\n\n## Rate limits\n\nRequests are limited to **20 per second** and **3,600 per hour**, counted per user and\nper route. Over either limit the response is a **429** carrying a `Retry-After` header\nwith the number of seconds to wait.\n\n## Units & Conventions\n\n- Power values are in **kW** throughout.\n- All timestamps are **UTC ISO 8601** (`2020-01-01T12:00:00Z`).\n- Regions are identified by **name** (case-insensitive). Browse them with the\n  `/regions` endpoints, which is where every name in this API comes from. Responses\n  identify regions by name and never return a UUID. The platform's own UUIDs are also\n  accepted anywhere a name is, for callers who already hold one.\n",
+    "contact": {
+      "name": "support@ocf.energy",
+      "url": "https://openclimatefix.org/",
+      "email": "support@ocf.energy"
+    },
+    "version": "1.0.72",
+    "x-logo": {
+      "url": "/static/logo.png"
+    }
+  },
+  "paths": {
+    "/sources": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Get Sources",
+        "description": "List available forecast energy sources.\n\nReturns the set of energy source types supported by the API. Use the `name` value\nas the `{source}` path segment in all other v1 routes (e.g. `/v1/GB/solar/regions`).",
+        "operationId": "get_sources_sources_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Source"
+                  },
+                  "type": "array",
+                  "title": "Response Get Sources Sources Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/countries": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Get Countries",
+        "description": "List available countries with their full capability manifest.\n\nReturns one entry per country the API has data for. Each entry includes:\n\n- **region_types**: the region granularities available for that country (e.g. national,\n  GSP), including the forecast models valid for each type.\n- **generation_sources**: the observed-generation observers available (e.g.\n  `pvlive_in_day`, `pvlive_day_after`).\n- **capacity_kW** and **centroid**: installed capacity and geographic centre.\n\nUse the `country` value (e.g. `GB`, `NL`) as the `{country}` path segment in all other\nv1 routes.",
+        "operationId": "get_countries_countries_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CountryDetail"
+                  },
+                  "type": "array",
+                  "title": "Response Get Countries Countries Get"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    },
+    "/{country}/{source}/region-types": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Get Region Types",
+        "description": "List available region types for a country and energy source.\n\nRegion types define the geographic granularity at which forecasts and generation\ndata are available, for example `national` or `gsp` for Great Britain.\n\nEach entry includes:\n\n- **type**: the slug used as the `region_type` query parameter throughout the API.\n- **level**: hierarchical depth (lower = coarser; 0 = national).\n- **forecast_models**: the models available for that region type, with the model\n  `name` used as the `model_name` parameter on forecast endpoints. The first listed model\n  is the default.",
+        "operationId": "get_region_types__country___source__region_types_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RegionType"
+                  },
+                  "title": "Response Get Region Types  Country   Source  Region Types Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/generation-sources": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Get Generation Sources",
+        "description": "List available observed-generation sources for a country and energy source.\n\nGeneration sources represent the different observers that produce actual (measured)\ngeneration data, for example PV_Live in-day estimates vs finalised day-after values.\nUse the `name` field as the `observer_name` parameter on generation endpoints.",
+        "operationId": "get_generation_sources__country___source__generation_sources_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GenerationSource"
+                  },
+                  "title": "Response Get Generation Sources  Country   Source  Generation Sources Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/regions": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Get Country Regions",
+        "description": "List regions for a country, optionally filtered by type, parent, and/or name.\n\nFilter behavior:\n- No filters: returns every region across all configured region types.\n- `region_type`: restricts results to one granularity level (e.g. `gsp`).\n- `parent`: returns the direct children of the specified parent region.\n- `name`: case-insensitive substring search across region names.",
+        "operationId": "get_country_regions__country___source__regions_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries.",
+              "enum": [
+                "gsp",
+                "national",
+                "province"
+              ],
+              "title": "Region Type"
+            },
+            "description": "Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries."
+          },
+          {
+            "name": "parent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "List children of a specific parent region (name or `national`).",
+              "title": "Parent"
+            },
+            "description": "List children of a specific parent region (name or `national`)."
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by name (case-insensitive substring match).",
+              "title": "Name"
+            },
+            "description": "Filter by name (case-insensitive substring match)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RegionDetail"
+                  },
+                  "title": "Response Get Country Regions  Country   Source  Regions Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/regions/{region}": {
+      "get": {
+        "tags": [
+          "Discovery"
+        ],
+        "summary": "Get Region",
+        "description": "Get details for a specific region.\n\nReturns a `RegionDetail` object with the region's name, type, installed\ncapacity, centroid, and any available metadata fields.",
+        "operationId": "get_region__country___source__regions__region__get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 256,
+              "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions.",
+              "examples": [
+                "national"
+              ],
+              "title": "Region"
+            },
+            "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an observer or model not available here.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such region in this country.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/regions/{region}/forecast": {
+      "get": {
+        "tags": [
+          "Forecasts"
+        ],
+        "summary": "Get Forecast",
+        "description": "Get the solar generation forecast for a specific region.\n\nReturns a time series of forecast values (power in kW) along with model metadata\n(name, version, creation time, initialisation time).\n\nBy default the window runs from **now** to **up to 48 hours ahead**, though a\nresponse reaches only as far as the latest model run does. Use `start_utc` /\n`end_utc` to override. Historical data is available up to 1 year back.",
+        "operationId": "get_forecast__country___source__regions__region__forecast_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 256,
+              "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions.",
+              "examples": [
+                "national"
+              ],
+              "title": "Region"
+            },
+            "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions."
+          },
+          {
+            "name": "start_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start of window (UTC). History reaches 1 year back, and a single request may span at most 3 months; split a longer range across requests.",
+              "title": "Start Utc"
+            },
+            "description": "Start of window (UTC). History reaches 1 year back, and a single request may span at most 3 months; split a longer range across requests."
+          },
+          {
+            "name": "end_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months.",
+              "title": "End Utc"
+            },
+            "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months."
+          },
+          {
+            "name": "creation_limit_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Only include forecasts created at or before this time (UTC). Use to retrieve the forecast 'as it was' at a point in time.",
+              "title": "Creation Limit Utc"
+            },
+            "description": "Only include forecasts created at or before this time (UTC). Use to retrieve the forecast 'as it was' at a point in time."
+          },
+          {
+            "name": "horizon_minutes",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Forecast horizon filter in minutes. For example, `60` returns only the 1-hour-ahead forecast value for each target timestep.",
+              "title": "Horizon Minutes"
+            },
+            "description": "Forecast horizon filter in minutes. For example, `60` returns only the 1-hour-ahead forecast value for each target timestep."
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DetailLevel",
+              "description": "How much metadata to return. `values` (default): the values only. `runs`: adds to each value which model run produced it (run and init time, model name and version) plus that value's own capacity; the top-level fields describe only the latest run in the response. `full`: adds the forecaster's own metadata to each value, including when each input data source was last ingested, with keys that vary by model. It also adds a top-level `metadata` object carrying `installed_capacity_kW` where the platform has one.",
+              "default": "values"
+            },
+            "description": "How much metadata to return. `values` (default): the values only. `runs`: adds to each value which model run produced it (run and init time, model name and version) plus that value's own capacity; the top-level fields describe only the latest run in the response. `full`: adds the forecaster's own metadata to each value, including when each input data source was last ingested, with keys that vary by model. It also adds a top-level `metadata` object carrying `installed_capacity_kW` where the platform has one."
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "Forecast model name. If omitted, the default model for the region type is used (see `/{country}/{source}/region-types`).",
+                  "enum": [
+                    "blend",
+                    "ecmwf",
+                    "ecmwf_mo",
+                    "ecmwf_mo_pv_sat_uncurtailed",
+                    "ecmwf_mo_sat_8h",
+                    "mo",
+                    "sat_8h"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Name"
+            }
+          },
+          {
+            "name": "model_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Forecast model version. If omitted, the latest version of the selected model is used.",
+              "title": "Model Version"
+            },
+            "description": "Forecast model version. If omitted, the latest version of the selected model is used."
+          },
+          {
+            "name": "adjusted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`).",
+              "default": true,
+              "title": "Adjusted"
+            },
+            "description": "Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an observer or model not available here.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such region in this country.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/regions/{region}/forecast/last-updated": {
+      "get": {
+        "tags": [
+          "Forecasts"
+        ],
+        "summary": "Get Forecast Last Updated Timestamp",
+        "description": "Return the creation time of the most recent forecast for a region.\n\nQueries the forecast within ±30 minutes of now and returns the `last_updated_utc`\nof the most recent run. Useful for monitoring freshness or driving \"last updated\"\nindicators in a UI.",
+        "operationId": "get_forecast_last_updated_timestamp__country___source__regions__region__forecast_last_updated_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 256,
+              "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions.",
+              "examples": [
+                "national"
+              ],
+              "title": "Region"
+            },
+            "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions."
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "Forecast model name. If omitted, the default model for the region type is used (see `/{country}/{source}/region-types`).",
+                  "enum": [
+                    "blend",
+                    "ecmwf",
+                    "ecmwf_mo",
+                    "ecmwf_mo_pv_sat_uncurtailed",
+                    "ecmwf_mo_sat_8h",
+                    "mo",
+                    "sat_8h"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Name"
+            }
+          },
+          {
+            "name": "model_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Forecast model version. If omitted, the latest version of the selected model is used.",
+              "title": "Model Version"
+            },
+            "description": "Forecast model version. If omitted, the latest version of the selected model is used."
+          },
+          {
+            "name": "adjusted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`).",
+              "default": true,
+              "title": "Adjusted"
+            },
+            "description": "Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time",
+                  "title": "Response Get Forecast Last Updated Timestamp  Country   Source  Regions  Region  Forecast Last Updated Get"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an observer or model not available here.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such region in this country.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/forecasts/snapshot": {
+      "get": {
+        "tags": [
+          "Forecasts"
+        ],
+        "summary": "Get Forecasts at Timestamp",
+        "description": "Get forecasts for all regions of a given type at a specific time.\n\nReturns a `ForecastSnapshot`: a single point in time with one forecast value per\nregion. Useful for rendering a map of forecast output across an entire country at\na glance.",
+        "operationId": "get_forecasts_at_time__country___source__forecasts_snapshot_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries.",
+              "enum": [
+                "gsp",
+                "national",
+                "province"
+              ],
+              "title": "Region Type"
+            },
+            "description": "Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries."
+          },
+          {
+            "name": "model_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "Forecast model name. If omitted, the default model for the region type is used (see `/{country}/{source}/region-types`).",
+                  "enum": [
+                    "blend",
+                    "ecmwf",
+                    "ecmwf_mo",
+                    "ecmwf_mo_pv_sat_uncurtailed",
+                    "ecmwf_mo_sat_8h",
+                    "mo",
+                    "sat_8h"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Name"
+            }
+          },
+          {
+            "name": "model_version",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Forecast model version. If omitted, the latest version of the selected model is used.",
+              "title": "Model Version"
+            },
+            "description": "Forecast model version. If omitted, the latest version of the selected model is used."
+          },
+          {
+            "name": "adjusted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`).",
+              "default": true,
+              "title": "Adjusted"
+            },
+            "description": "Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`)."
+          },
+          {
+            "name": "time_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Forecast target time (UTC). Rounded down to the country's time step (e.g. 30 minutes for GB, 15 for NL); the `time_utc` in the response is the timestamp actually used. Defaults to now.",
+              "title": "Time Utc"
+            },
+            "description": "Forecast target time (UTC). Rounded down to the country's time step (e.g. 30 minutes for GB, 15 for NL); the `time_utc` in the response is the timestamp actually used. Defaults to now."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/forecasts/period": {
+      "get": {
+        "tags": [
+          "Forecasts"
+        ],
+        "summary": "Get Forecasts for Current Period",
+        "description": "Get forecasts for all (or selected) regions across a time window.\n\nReturns a `RegionForecastMatrix`: a compact columnar structure with a shared\n`times` array and one `power_kW` series per region. Designed for efficiently\nloading all-region forecast data for charts or grid-management tools in a single\nrequest.\n\nThis endpoint is served entirely from a pre-warmed cache (one key per region).\nIt does not make live data-platform calls per request. If the cache has not yet\nbeen populated after startup, the endpoint returns **503** with a `Retry-After: 60`\nheader, so retry after a minute. The cache covers a ±2-day window around now,\nrefreshed every 24 hours (or on demand via `POST /{country}/{source}/forecasts/refresh`).\n\nTime-window and region filtering are applied in-memory from the cached data.\nThis endpoint fetches only the default forecast model for the selected\ncountry + region type.\n\nModel and horizon filters are **not** supported on this endpoint; use\n`GET /{country}/{source}/regions/{region}/forecast` for per-region model selection.\n\nNot available to intraday-only subscriptions: this endpoint serves the pre-warmed\nblend, and there is no intraday equivalent to fall back to.",
+        "operationId": "get_forecasts_period__country___source__forecasts_period_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Region type slug (e.g. 'gsp'). Only sub-national types are supported; national-level data is not pre-warmed. Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries.",
+              "enum": [
+                "gsp",
+                "province"
+              ],
+              "title": "Region Type"
+            },
+            "description": "Region type slug (e.g. 'gsp'). Only sub-national types are supported; national-level data is not pre-warmed. Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries."
+          },
+          {
+            "name": "start_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start of window (UTC). Defaults to 2 days before now (floored to the nearest 6 hours).",
+              "title": "Start Utc"
+            },
+            "description": "Start of window (UTC). Defaults to 2 days before now (floored to the nearest 6 hours)."
+          },
+          {
+            "name": "end_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months.",
+              "title": "End Utc"
+            },
+            "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months."
+          },
+          {
+            "name": "region_names",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit to specific region names (e.g. `?region_names=GSP1&region_names=GSP2`).",
+              "title": "Region Names"
+            },
+            "description": "Limit to specific region names (e.g. `?region_names=GSP1&region_names=GSP2`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionForecastMatrix"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The pre-warmed cache is still filling. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/regions/{region}/generation": {
+      "get": {
+        "tags": [
+          "Generation"
+        ],
+        "summary": "Get Generation",
+        "description": "Get observed solar generation for a specific region.\n\nReturns a time series of measured generation values (power in kW) from the\nspecified observer. The default window is the **last 24 hours**; use `start_utc` /\n`end_utc` to extend or shift it. Historical data is available up to 1 year back.\n\nTwo observers are available for GB solar:\n\n- **pvlive_in_day** (default): PV_Live in-day estimates, updated every 30 minutes.\n  These are the most recent values but may be revised later.\n- **pvlive_day_after**: PV_Live day-after final values, available from the following\n  morning. Use these when accuracy is more important than latency.\n\nNL currently has one observer for solar:\n\n- **ned_nl**: NED NL estimated solar generation for provinces / national including curtailment.",
+        "operationId": "get_generation__country___source__regions__region__generation_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 256,
+              "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions.",
+              "examples": [
+                "national"
+              ],
+              "title": "Region"
+            },
+            "description": "Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions."
+          },
+          {
+            "name": "observer_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(ned_nl|pvlive_day_after|pvlive_in_day)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`).",
+              "examples": [
+                "ned_nl",
+                "pvlive_day_after",
+                "pvlive_in_day"
+              ],
+              "enum": [
+                "ned_nl",
+                "pvlive_day_after",
+                "pvlive_in_day"
+              ],
+              "title": "Observer Name"
+            },
+            "description": "The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`)."
+          },
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/DetailLevel",
+              "description": "How much metadata to return. `values` (default): the values only. `runs`: adds each value's own capacity. Observations have no model run, so there is no run or init time to add here as there is on a forecast. `full`: adds nothing further per value, and adds a top-level `metadata` object carrying `installed_capacity_kW` where the platform has one. Accepted so one request shape works across forecast and generation routes.",
+              "default": "values"
+            },
+            "description": "How much metadata to return. `values` (default): the values only. `runs`: adds each value's own capacity. Observations have no model run, so there is no run or init time to add here as there is on a forecast. `full`: adds nothing further per value, and adds a top-level `metadata` object carrying `installed_capacity_kW` where the platform has one. Accepted so one request shape works across forecast and generation routes."
+          },
+          {
+            "name": "start_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start of window (UTC). History reaches 1 year back, and a single request may span at most 3 months; split a longer range across requests.",
+              "title": "Start Utc"
+            },
+            "description": "Start of window (UTC). History reaches 1 year back, and a single request may span at most 3 months; split a longer range across requests."
+          },
+          {
+            "name": "end_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months.",
+              "title": "End Utc"
+            },
+            "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an observer or model not available here.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No such region in this country.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/generation/snapshot": {
+      "get": {
+        "tags": [
+          "Generation"
+        ],
+        "summary": "Get Generation at Timestamp",
+        "description": "Get observed generation for all regions of a given type at a specific time.\n\nReturns a `GenerationSnapshot`: a single point in time with one observed generation\nvalue per region. Useful for rendering a map of current solar output across an entire\ncountry.\n\nWhen `time_utc` is omitted the endpoint resolves the most recent available timestamp\nautomatically (looking back up to 6 hours) rather than using \"now\", which would\nrarely have data.",
+        "operationId": "get_generation_at_timestamp__country___source__generation_snapshot_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries.",
+              "enum": [
+                "gsp",
+                "national",
+                "province"
+              ],
+              "title": "Region Type"
+            },
+            "description": "Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries."
+          },
+          {
+            "name": "observer_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(ned_nl|pvlive_day_after|pvlive_in_day)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`).",
+              "examples": [
+                "ned_nl",
+                "pvlive_day_after",
+                "pvlive_in_day"
+              ],
+              "enum": [
+                "ned_nl",
+                "pvlive_day_after",
+                "pvlive_in_day"
+              ],
+              "title": "Observer Name"
+            },
+            "description": "The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`)."
+          },
+          {
+            "name": "time_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Observation target time (UTC). Rounded down to the country's time step (e.g. 30 minutes for GB, 15 for NL); the `time_utc` in the response is the timestamp actually used. Defaults to the most recent available timestamp within the last 6 hours.",
+              "title": "Time Utc"
+            },
+            "description": "Observation target time (UTC). Rounded down to the country's time step (e.g. 30 minutes for GB, 15 for NL); the `time_utc` in the response is the timestamp actually used. Defaults to the most recent available timestamp within the last 6 hours."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerationSnapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{country}/{source}/generation/period": {
+      "get": {
+        "tags": [
+          "Generation"
+        ],
+        "summary": "Get Generation for Current Period",
+        "description": "Get observed generation for all (or selected) regions across a time window.\n\nReturns a `RegionGenerationMatrix`: a compact columnar structure with a shared\n`times` array and one `power_kW` series per region. Analogous to the forecast\nperiod endpoint but for observed (actual) generation data.\n\nThis endpoint is served entirely from a pre-warmed cache (one key per region).\nIt does not make live data-platform calls per request. If the cache has not yet\nbeen populated after startup, the endpoint returns **503** with a `Retry-After: 60`\nheader, so retry after a minute. The cache covers a ±2-day window around now,\nrefreshed every 24 hours (or on demand via `POST /{country}/{source}/generation/refresh`).\n\nTime-window and region filtering are applied in-memory from the cached data.",
+        "operationId": "get_generation_period__country___source__generation_period_get",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "source",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "solar"
+              ],
+              "title": "Source"
+            },
+            "description": "The energy source type. Currently only 'solar' is supported."
+          },
+          {
+            "name": "country",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "GB",
+                "NL"
+              ],
+              "title": "Country"
+            },
+            "description": "Country code according to ISO 3166-1 alpha-2 codes, case insensitive."
+          },
+          {
+            "name": "region_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Region type slug (e.g. 'gsp'). Only sub-national types are supported; national-level data is not pre-warmed. Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries.",
+              "enum": [
+                "gsp",
+                "province"
+              ],
+              "title": "Region Type"
+            },
+            "description": "Region type slug (e.g. 'gsp'). Only sub-national types are supported; national-level data is not pre-warmed. Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries."
+          },
+          {
+            "name": "observer_name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(ned_nl|pvlive_day_after|pvlive_in_day)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`).",
+              "examples": [
+                "ned_nl",
+                "pvlive_day_after",
+                "pvlive_in_day"
+              ],
+              "enum": [
+                "ned_nl",
+                "pvlive_day_after",
+                "pvlive_in_day"
+              ],
+              "title": "Observer Name"
+            },
+            "description": "The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`)."
+          },
+          {
+            "name": "start_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start of window (UTC). Defaults to 2 days before now (floored to the nearest 6 hours).",
+              "title": "Start Utc"
+            },
+            "description": "Start of window (UTC). Defaults to 2 days before now (floored to the nearest 6 hours)."
+          },
+          {
+            "name": "end_utc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months.",
+              "title": "End Utc"
+            },
+            "description": "End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months."
+          },
+          {
+            "name": "region_names",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Limit to specific region names (e.g. `?region_names=GSP1&region_names=GSP2`).",
+              "title": "Region Names"
+            },
+            "description": "Limit to specific region names (e.g. `?region_names=GSP1&region_names=GSP2`)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegionGenerationMatrix"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter was rejected, e.g. an unknown region name.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No bearer token, or one that could not be verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The token is valid but lacks access to this country or model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The pre-warmed cache is still filling. Carries a `Retry-After` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Centroid": {
+        "properties": {
+          "lat": {
+            "type": "number",
+            "title": "Lat"
+          },
+          "lng": {
+            "type": "number",
+            "title": "Lng"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "title": "Centroid",
+        "description": "Geographic centroid of a region."
+      },
+      "CountryDetail": {
+        "properties": {
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw"
+          },
+          "centroid": {
+            "$ref": "#/components/schemas/Centroid"
+          },
+          "region_types": {
+            "items": {
+              "$ref": "#/components/schemas/RegionType"
+            },
+            "type": "array",
+            "title": "Region Types",
+            "default": []
+          },
+          "generation_sources": {
+            "items": {
+              "$ref": "#/components/schemas/GenerationSource"
+            },
+            "type": "array",
+            "title": "Generation Sources",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "country",
+          "name",
+          "capacity_kW",
+          "centroid"
+        ],
+        "title": "CountryDetail",
+        "description": "Full capability manifest for a country: region types, models, and generation sources."
+      },
+      "DetailLevel": {
+        "type": "string",
+        "enum": [
+          "values",
+          "runs",
+          "full"
+        ],
+        "title": "DetailLevel",
+        "description": "How much per-value metadata a time-series response carries."
+      },
+      "ErrorDetail": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "ErrorDetail",
+        "description": "The body of every error this API returns."
+      },
+      "ForecastModel": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label"
+        ],
+        "title": "ForecastModel",
+        "description": "A forecaster (model) available for a region type."
+      },
+      "ForecastResponse": {
+        "properties": {
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw",
+            "description": "Effective capacity at the last target time in the response. Capacity varies over time, so on a long window earlier values may have had a different one; use `detail=runs` for per-value capacity.N.B. this is now `effective` rather than the `installed` that was provided through the v0 API; this is still available if needed through metadata, but prefer this value as this is what we use internally to train and normalize by."
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name",
+            "description": "Model that produced the response."
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version",
+            "description": "Version of that model."
+          },
+          "last_updated_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated Utc",
+            "description": "When the most recent run contributing to this response was created. Earlier values may come from earlier runs."
+          },
+          "latest_init_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Init Utc",
+            "description": "Init time of that most recent run."
+          },
+          "horizon_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Horizon Minutes",
+            "description": "Echo of the requested `horizon_minutes` filter, if any."
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Region-level extras, returned only when `detail=full`. Carries `installed_capacity_kW` where the platform has one: the capacity before degradation, which is what v0 reported as `installedCapacityMw` and what PV Live publishes. It is a few percent higher than `capacity_kW` (effective) and is **not** what the forecast is normalised against, so prefer `capacity_kW`. Retained for convenient reference and migration from v0."
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastValue"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_name",
+          "capacity_kW",
+          "values"
+        ],
+        "title": "ForecastResponse",
+        "description": "Forecast time series for a region, with shared metadata.\n\nThe data platform stitches the latest-run value for each target time, so a response\nnormally spans several model runs. The fields below describe the response as a whole;\nuse `detail=runs` for each value's own run."
+      },
+      "ForecastSnapshot": {
+        "properties": {
+          "time_utc": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Time Utc",
+            "description": "The single target time every value in this snapshot is for."
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name",
+            "description": "Model that produced the snapshot."
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version",
+            "description": "Version of that model."
+          },
+          "last_updated_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated Utc",
+            "description": "When the most recent run contributing to this snapshot was created. Regions are forecasted independently, so others may come from earlier runs."
+          },
+          "latest_init_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Init Utc",
+            "description": "Init time of that most recent run."
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/RegionForecastValue"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "time_utc",
+          "values"
+        ],
+        "title": "ForecastSnapshot",
+        "description": "Snapshot forecast across all regions at a single point in time."
+      },
+      "ForecastValue": {
+        "properties": {
+          "time_utc": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Time Utc"
+          },
+          "power_kW": {
+            "type": "number",
+            "title": "Power Kw"
+          },
+          "plevels_kW": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Plevels Kw"
+          },
+          "last_updated_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated Utc"
+          },
+          "latest_init_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Init Utc"
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "capacity_kW": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Kw"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "The forecaster's own metadata, including when each input data source was last ingested. Keys vary by model and are not a stable contract, and will be replaced by a typed structure once all models run through one pipeline. Passed through as the forecaster wrote it, with two exceptions: `app_version` is parsed from the string the pipeline emits into an object, and any model name is given as the name this API uses for it rather than the platform's internal one. Returned only when `detail=full`."
+          }
+        },
+        "type": "object",
+        "required": [
+          "time_utc",
+          "power_kW"
+        ],
+        "title": "ForecastValue",
+        "description": "A single forecast value at a point in time.\n\nEverything below `plevels_kW` is populated only when `detail` is raised above\n`values`. See `DetailLevel`."
+      },
+      "GenerationResponse": {
+        "properties": {
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw",
+            "description": "Effective capacity at the last target time in the response. Capacity varies over time; use `detail=runs` for per-value capacity."
+          },
+          "observer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observer Name",
+            "description": "Observer the values were recorded by, e.g. `pvlive_in_day`."
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata",
+            "description": "Region-level extras, returned only when `detail=full`. Carries `installed_capacity_kW` where the platform has one: the capacity before degradation, which is what v0 reported as `installedCapacityMw` and what PV Live publishes. It is a few percent higher than `capacity_kW` and is **not** what the forecast is normalised against, so prefer `capacity_kW`. Retained for migration from v0."
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/GenerationValue"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_name",
+          "capacity_kW",
+          "values"
+        ],
+        "title": "GenerationResponse",
+        "description": "Observed generation time series for a region, with shared metadata."
+      },
+      "GenerationSnapshot": {
+        "properties": {
+          "time_utc": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Time Utc"
+          },
+          "observer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observer Name"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/RegionGenerationValue"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "time_utc",
+          "values"
+        ],
+        "title": "GenerationSnapshot",
+        "description": "Snapshot observed generation across all regions at a single point in time."
+      },
+      "GenerationSource": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "name",
+          "label"
+        ],
+        "title": "GenerationSource",
+        "description": "A generation (observation) source definition for a country."
+      },
+      "GenerationValue": {
+        "properties": {
+          "time_utc": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Time Utc"
+          },
+          "power_kW": {
+            "type": "number",
+            "title": "Power Kw"
+          },
+          "capacity_kW": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Kw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "time_utc",
+          "power_kW"
+        ],
+        "title": "GenerationValue",
+        "description": "A single observed generation value at a point in time.\n\n`capacity_kW` is populated only when `detail` is raised above `values`. Observed\nvalues carry no model run, so there is nothing further for `detail=full` to add."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "RegionDetail": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw"
+          },
+          "centroid": {
+            "$ref": "#/components/schemas/Centroid"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "capacity_kW",
+          "centroid"
+        ],
+        "title": "RegionDetail",
+        "description": "Detailed region information including metadata."
+      },
+      "RegionForecast": {
+        "properties": {
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw"
+          },
+          "power_kW": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Power Kw"
+          },
+          "plevels_kW": {
+            "additionalProperties": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Plevels Kw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_name",
+          "capacity_kW",
+          "power_kW"
+        ],
+        "title": "RegionForecast",
+        "description": "Forecast time series for one region, used in matrix responses."
+      },
+      "RegionForecastMatrix": {
+        "properties": {
+          "model_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name"
+          },
+          "model_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Version"
+          },
+          "last_updated_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated Utc"
+          },
+          "latest_init_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Init Utc"
+          },
+          "cache_updated_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cache Updated Utc"
+          },
+          "times_utc": {
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "type": "array",
+            "title": "Times Utc"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/RegionForecast"
+            },
+            "type": "array",
+            "title": "Regions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "times_utc",
+          "regions"
+        ],
+        "title": "RegionForecastMatrix",
+        "description": "Forecast time series for all regions across a time window."
+      },
+      "RegionForecastValue": {
+        "properties": {
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw"
+          },
+          "power_kW": {
+            "type": "number",
+            "title": "Power Kw"
+          },
+          "plevels_kW": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plevels Kw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_name",
+          "capacity_kW",
+          "power_kW"
+        ],
+        "title": "RegionForecastValue",
+        "description": "A single forecast value for one region, used in snapshot responses."
+      },
+      "RegionGeneration": {
+        "properties": {
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw"
+          },
+          "power_kW": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Power Kw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_name",
+          "capacity_kW",
+          "power_kW"
+        ],
+        "title": "RegionGeneration",
+        "description": "Generation time series for one region, used in matrix responses."
+      },
+      "RegionGenerationMatrix": {
+        "properties": {
+          "observer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observer Name"
+          },
+          "cache_updated_utc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cache Updated Utc"
+          },
+          "times_utc": {
+            "items": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "type": "array",
+            "title": "Times Utc"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/RegionGeneration"
+            },
+            "type": "array",
+            "title": "Regions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "times_utc",
+          "regions"
+        ],
+        "title": "RegionGenerationMatrix",
+        "description": "Observed generation time series for all regions across a time window."
+      },
+      "RegionGenerationValue": {
+        "properties": {
+          "region_name": {
+            "type": "string",
+            "title": "Region Name"
+          },
+          "capacity_kW": {
+            "type": "number",
+            "title": "Capacity Kw"
+          },
+          "power_kW": {
+            "type": "number",
+            "title": "Power Kw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "region_name",
+          "capacity_kW",
+          "power_kW"
+        ],
+        "title": "RegionGenerationValue",
+        "description": "A single observed generation value for one region, used in snapshot responses."
+      },
+      "RegionType": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "default_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default Model"
+          },
+          "forecast_models": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastModel"
+            },
+            "type": "array",
+            "title": "Forecast Models",
+            "default": []
+          },
+          "supports_adjusted": {
+            "type": "boolean",
+            "title": "Supports Adjusted",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "label",
+          "level"
+        ],
+        "title": "RegionType",
+        "description": "A region type definition for a country."
+      },
+      "Source": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label"
+        ],
+        "title": "Source",
+        "description": "An available forecast source (energy type)."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "x-scalar-secret-client-id": "tuJKOXmMGbN27iX4ZXzgZsNIoxDTPO88",
+            "authorizationUrl": "https://nowcasting-pro.eu.auth0.com/authorize?audience=https://api.nowcasting.io/",
+            "tokenUrl": "https://nowcasting-pro.eu.auth0.com/oauth/token",
+            "scopes": {
+              "openid": "OpenID",
+              "profile": "Profile",
+              "email": "Email",
+              "offline_access": "Refresh token"
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/v1"
+    }
+  ]
+}

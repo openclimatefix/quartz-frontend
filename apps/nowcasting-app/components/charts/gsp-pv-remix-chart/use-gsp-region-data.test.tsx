@@ -81,7 +81,7 @@ const server = setupServer(
   json("/GB/solar/generation/sources", gbGenerationSources),
   http.get(`${V1}/GB/solar/regions/citr_1/generation`, ({ request }) => {
     record(request);
-    const observer = new URL(request.url).searchParams.get("observer");
+    const observer = new URL(request.url).searchParams.get("observer_name");
     return HttpResponse.json(
       observer === "pvlive_day_after" ? gbNationalGenerationDayAfter : gbNationalGenerationInDay
     );
@@ -169,11 +169,13 @@ describe("enabled with a resolvable GSP", () => {
     });
 
     const observerValues = seen("/GB/solar/regions/citr_1/generation")
-      .map((r) => r.url.searchParams.get("observer"))
+      .map((r) => r.url.searchParams.get("observer_name"))
       .sort();
     expect(observerValues).toEqual(["pvlive_day_after", "pvlive_in_day"]);
 
-    expect(seen("/GB/solar/regions/citr_1/forecast")[0]?.url.searchParams.get("model")).toBeNull();
+    expect(
+      seen("/GB/solar/regions/citr_1/forecast")[0]?.url.searchParams.get("model_name")
+    ).toBeNull();
 
     expect(result.current.generationSeries.map((s) => s.key)).toEqual([
       "GENERATION",

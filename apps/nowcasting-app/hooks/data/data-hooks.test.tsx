@@ -183,21 +183,21 @@ describe("forecast hooks", () => {
   test("useNationalForecast passes the model through and keys separately per model", async () => {
     const view = render(() => ({
       blend: useNationalForecast(GB_NATIONAL, { model: "blend" }),
-      adjust: useNationalForecast(GB_NATIONAL, { model: "blend_adjust" })
+      other: useNationalForecast(GB_NATIONAL, { model: "pvnet_day_ahead" })
     }));
-    await bothSettled(view, "blend", "adjust");
+    await bothSettled(view, "blend", "other");
 
     expect(countRequests("/GB/solar/regions/national/forecast")).toBe(2);
     const models = requests
       .filter((r) => r.path === "/GB/solar/regions/national/forecast")
-      .map((r) => r.url.searchParams.get("model"));
-    expect(models.sort()).toEqual(["blend", "blend_adjust"]);
+      .map((r) => r.url.searchParams.get("model_name"));
+    expect(models.sort()).toEqual(["blend", "pvnet_day_ahead"]);
   });
 
   test("useNationalForecast sends no model when none is asked for, letting the API default", async () => {
     const { result } = render(() => useNationalForecast(GB_NATIONAL));
     await settled(result);
-    expect(lastQuery("/GB/solar/regions/national/forecast")?.has("model")).toBe(false);
+    expect(lastQuery("/GB/solar/regions/national/forecast")?.has("model_name")).toBe(false);
   });
 
   test("useRegionForecast addresses the region named in the scope", async () => {
@@ -233,7 +233,7 @@ describe("forecast hooks", () => {
     expect(query?.get("start_utc")).toBe("2026-08-04T00:00:00Z");
     // No model parameter exists on this endpoint — the region type's default is what is
     // pre-warmed. A regional time series is pinned to it by design.
-    expect(query?.has("model")).toBe(false);
+    expect(query?.has("model_name")).toBe(false);
 
     expect(result.current.data?.times[0]).toBe("2026-08-04T00:00:00Z");
     const citr = result.current.data?.regions["citr_1"];
@@ -275,7 +275,7 @@ describe("generation hooks", () => {
   test("useGenerationPeriod normalises the matrix", async () => {
     const { result } = render(() => useGenerationPeriod(GB_GSP, { observer: "pvlive_in_day" }));
     await settled(result);
-    expect(lastQuery("/GB/solar/generation/period")?.get("observer")).toBe("pvlive_in_day");
+    expect(lastQuery("/GB/solar/generation/period")?.get("observer_name")).toBe("pvlive_in_day");
     expect(Object.keys(result.current.data?.regions ?? {}).length).toBeGreaterThan(0);
   });
 });

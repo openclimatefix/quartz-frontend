@@ -128,6 +128,12 @@ const seriesQuery = (window: SeriesWindow) => {
   };
 };
 
+/**
+ * The UI always shows trend-adjusted forecasts. Sent explicitly on every forecast request that
+ * accepts it, so the request does not depend on the API's default.
+ */
+const ADJUSTED = true;
+
 // ---- Forecasts --------------------------------------------------------------------------
 
 export type ForecastWindow = {
@@ -154,7 +160,8 @@ export const forecast = (
       ...seriesQuery(window),
       creation_limit_utc: optionalUtcInstant(window.creationLimit),
       horizon_minutes: window.horizonMinutes,
-      model: window.model
+      model_name: window.model,
+      adjusted: ADJUSTED
     })
   }
 });
@@ -166,7 +173,7 @@ export const forecastLastUpdated = (
   path: "/{country}/{source}/regions/{region}/forecast/last-updated",
   params: {
     path: { country, source, region: regionName },
-    query: omitUndefined({ model })
+    query: omitUndefined({ model_name: model, adjusted: ADJUSTED })
   }
 });
 
@@ -187,6 +194,7 @@ export const forecastSnapshot = (
       region_type: regionType,
       model_name: options.modelName,
       model_version: options.modelVersion,
+      adjusted: ADJUSTED,
       time_utc: optionalUtcInstant(options.time)
     })
   }
@@ -246,7 +254,7 @@ export const generation = (
     // 24h when given no `start`, where the forecast endpoint returns no past at all. One
     // resolver so the two series a chart plots together cover the same stretch of time.
     query: omitUndefined({
-      observer: window.observer,
+      observer_name: window.observer,
       ...seriesQuery(window)
     })
   }
@@ -266,7 +274,7 @@ export const generationSnapshot = (
     path: { country, source },
     query: omitUndefined({
       region_type: regionType,
-      observer: options.observer,
+      observer_name: options.observer,
       time_utc: optionalUtcInstant(options.time)
     })
   }
@@ -283,7 +291,7 @@ export const generationPeriod = (
     path: { country, source },
     query: omitUndefined({
       region_type: regionType,
-      observer: window.observer,
+      observer_name: window.observer,
       start_utc: optionalUtcInstant(window.start),
       end_utc: optionalUtcInstant(window.end),
       region_names: window.regionNames
