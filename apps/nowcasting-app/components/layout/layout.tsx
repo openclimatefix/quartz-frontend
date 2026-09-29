@@ -32,7 +32,12 @@ const Layout = ({ children }: ILayout) => {
     <>
       <Head>
         <title>{pageTitle}</title>
-        <link rel="icon" href="/favicon.ico" />
+        {/* `favicon.ico` carries 16/32/48px drawn from `ocf-icon-512x512.png`, for tabs and
+            anything that asks for `/favicon.ico` by name; the 512 PNG is there for high-DPI
+            uses that pick the largest; the touch icon is iOS's home-screen size. */}
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" type="image/png" href="/ocf-icon-512x512.png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
       {/* `overflow-x-hidden` is the backstop for the page, not the fix: the dashboard's stage
           clips its own off-screen chrome (see `dashboard-shell.tsx`). This stops any future
