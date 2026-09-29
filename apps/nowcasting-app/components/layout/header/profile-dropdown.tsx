@@ -95,7 +95,8 @@ const ProfileDropDown = () => {
       selectedColumns,
       nHourForecast,
       pLevels,
-      timezone
+      timezone,
+      focusedCountry
     );
   };
 

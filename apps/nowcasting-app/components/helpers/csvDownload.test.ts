@@ -719,3 +719,45 @@ describe("buildCsvRows — timezone parameterisation", () => {
     });
   });
 });
+
+describe("buildCsvRows — period length and labelling come from the country", () => {
+  const at = (timestamp: string, timezone: string, country: string) =>
+    buildCsvRows(
+      { forecast: series([{ timeUtc: timestamp, powerMw: 1 }]) },
+      [],
+      timezone,
+      country
+    )[0];
+
+  test("NL: a 15-minute period-start label spans that quarter", () => {
+    // 10:00Z is 12:00 in Amsterdam (CEST); NL's 10:00 covers 10:00-10:15Z.
+    expect(at("2026-09-29T10:00:00Z", "Europe/Amsterdam", "NL")).toMatchObject({
+      startDateTime: "2026-09-29T12:00:00.000+02:00",
+      endDateTime: "2026-09-29T12:15:00.000+02:00",
+      settlementPeriod: 49
+    });
+  });
+
+  test("NL: consecutive rows do not overlap", () => {
+    const rows = buildCsvRows(
+      {
+        forecast: series([
+          { timeUtc: "2026-09-29T10:00:00Z", powerMw: 1 },
+          { timeUtc: "2026-09-29T10:15:00Z", powerMw: 2 }
+        ])
+      },
+      [],
+      "Europe/Amsterdam",
+      "NL"
+    );
+    expect(rows[0].endDateTime).toBe(rows[1].startDateTime);
+  });
+
+  test("GB is unchanged: a period-end label covers the half hour before it", () => {
+    expect(at("2026-09-29T10:00:00Z", "Europe/London", "GB")).toMatchObject({
+      startDateTime: "2026-09-29T10:30:00.000+01:00",
+      endDateTime: "2026-09-29T11:00:00.000+01:00",
+      settlementPeriod: 22
+    });
+  });
+});

@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useMemo } from "react";
 import RemixLine, { plotInsetRightPx } from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
 import { ActiveUnit } from "../../map/types";
@@ -453,27 +453,6 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
       setSelectedISOTime(
         latestSlotWithDelta ? cursorForLabel(latestSlotWithDelta) : getCursorNow()
       );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartData, selectedLabel, setSelectedISOTime, latestSlotWithDelta]);
-
-  /**
-   * Land the cursor somewhere the delta view can actually show something — once.
-   *
-   * Entering a comparison used to leave the cursor wherever it was, which is usually "now",
-   * where by definition nothing has a delta yet: every region drew transparent and every
-   * tooltip said "no delta yet", so the view opened blank and read as broken. This moves the
-   * cursor to the most recent slot that has one, but only on the first render where the data
-   * is known — afterwards the cursor is the user's, and scrubbing deliberately into the
-   * forecast must not be yanked back.
-   */
-  const landedRef = useRef(false);
-  useEffect(() => {
-    if (landedRef.current || !chartData?.length) return;
-    landedRef.current = true;
-    const current = chartData.find((d: any) => d.formattedDate === selectedLabel);
-    if (current && (current as any).DELTA === undefined && latestSlotWithDelta) {
-      setSelectedISOTime(cursorForLabel(latestSlotWithDelta));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartData, selectedLabel, setSelectedISOTime, latestSlotWithDelta]);

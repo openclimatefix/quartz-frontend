@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { CSVColumn } from "../layout/header/csvDownloadModal";
-import { getSettlementPeriodForDate } from "./chartUtils";
+import { cadenceMinutesFor, periodForLabel } from "../../lib/time/cursor";
 import type { TimeSeries } from "../../lib/domain/types";
 
 export interface CSVRow {
@@ -45,11 +45,20 @@ const getColumnConfig = (
 // Phase 3: the zone the export renders its datetimes in, and counts settlement periods from,
 // comes from the country registry. Defaulted so existing call sites are unchanged.
 export const DEFAULT_CSV_TIMEZONE = "Europe/London";
+// The country whose period length and timestamp labelling the export reads, defaulted like the
+// zone so existing call sites are unchanged.
+export const DEFAULT_CSV_COUNTRY = "GB";
 
-const createEmptyRow = (timestamp: string, timezone: string): CSVRow => {
-  const end = DateTime.fromISO(timestamp).setZone(timezone);
-  const start = end.minus({ minutes: 30 });
-  const settlementPeriod = getSettlementPeriodForDate(start, timezone);
+const createEmptyRow = (timestamp: string, timezone: string, country: string): CSVRow => {
+  // A published label names a period of the country's cadence, and names it by its start or its
+  // end according to the country's labelling. `periodForLabel` reads both from the registry.
+  const period = periodForLabel(timestamp, country);
+  const start = DateTime.fromISO(period.start).setZone(timezone);
+  const end = DateTime.fromISO(period.end).setZone(timezone);
+  // 1-indexed count of the country's periods since local midnight.
+  const settlementPeriod =
+    Math.floor(start.diff(start.startOf("day"), "minutes").minutes / cadenceMinutesFor(country)) +
+    1;
 
   return {
     startDateTime: start.toISO() || "",
@@ -64,9 +73,14 @@ const createEmptyRow = (timestamp: string, timezone: string): CSVRow => {
   };
 };
 
-const getOrCreateRow = (map: Map<string, CSVRow>, ts: string, timezone: string): CSVRow => {
+const getOrCreateRow = (
+  map: Map<string, CSVRow>,
+  ts: string,
+  timezone: string,
+  country: string
+): CSVRow => {
   if (!map.has(ts)) {
-    map.set(ts, createEmptyRow(ts, timezone));
+    map.set(ts, createEmptyRow(ts, timezone, country));
   }
   return map.get(ts)!;
 };
@@ -94,13 +108,14 @@ export type NationalCsvSeries = {
 export const buildCsvRows = (
   series: NationalCsvSeries,
   pLevels: [number, number][],
-  timezone: string = DEFAULT_CSV_TIMEZONE
+  timezone: string = DEFAULT_CSV_TIMEZONE,
+  country: string = DEFAULT_CSV_COUNTRY
 ): CSVRow[] => {
   const dataByTimestamp = new Map<string, CSVRow>();
 
   // PV initial
   series.generationInitial?.values.forEach((point) => {
-    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
     // absent ≠ null ≠ zero: `powerMw` is already `number | null` MW off the v1 boundary, so a
     // genuine 0 MW overnight reading is preserved exactly, not coerced to a blank cell.
     row.solarGenerationPvliveInitial = point.powerMw;
@@ -108,7 +123,7 @@ export const buildCsvRows = (
 
   // PV updated
   series.generationUpdated?.values.forEach((point) => {
-    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
     row.solarGenerationPvliveUpdated = point.powerMw;
   });
 
@@ -120,7 +135,7 @@ export const buildCsvRows = (
 
   // Forecast
   series.forecast?.values.forEach((point) => {
-    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
     row.solarForecast = point.powerMw;
     pLevels.flat().forEach((level) => {
       row.pLevelValues[level] = point.plevelsMw?.[String(level)] ?? null;
@@ -129,7 +144,7 @@ export const buildCsvRows = (
 
   // N forecast
   series.nHour?.values.forEach((point) => {
-    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone);
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
     row.nForecast = point.powerMw;
   });
 
@@ -146,12 +161,13 @@ export const downloadNationalCsv = (
   selectedColumns: CSVColumn[],
   nHourForecast: number,
   pLevels: [number, number][],
-  timezone: string = DEFAULT_CSV_TIMEZONE
+  timezone: string = DEFAULT_CSV_TIMEZONE,
+  country: string = DEFAULT_CSV_COUNTRY
 ) => {
   if (!series.forecast && !series.generationInitial && !series.generationUpdated && !series.nHour)
     return;
 
-  const csvRows = buildCsvRows(series, pLevels, timezone);
+  const csvRows = buildCsvRows(series, pLevels, timezone, country);
   const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels);
 
   // download

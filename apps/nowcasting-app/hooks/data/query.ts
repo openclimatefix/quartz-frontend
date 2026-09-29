@@ -76,6 +76,8 @@ export const MAX_RETRIES = 6;
 export const apiV1SwrOptions: SWRConfiguration = {
   refreshInterval: FIVE_MINUTES_MS,
   dedupingInterval: TWO_MINUTES_MS,
+  // Kept within one scope only: `useApiQuery` withholds data fetched under another
+  // `continuityKey`, so a time-window change stays smooth and a scope change does not.
   keepPreviousData: true,
   shouldRetryOnError: true,
   onErrorRetry: (error, _key, _config, revalidate, { retryCount }) => {
@@ -191,6 +193,36 @@ export const fetchDescriptor = async <P extends keyof paths>(
   return data as ResponseOf<P>;
 };
 
+// --- scope continuity -------------------------------------------------------------------
+
+/**
+ * The query params that only move the time window. Everything else in a descriptor — path,
+ * country, source, region, region type, observer, model, horizon, creation limit, region
+ * names — is identity: a change to it makes the previous answer another scope's data.
+ *
+ * `start_utc`/`end_utc` bound a series; `time_utc` is a snapshot's instant (the cursor).
+ * A param left off this list costs a loading state when it changes; one wrongly put on it
+ * shows the previous request's data under the new label. When unsure, leave it off.
+ */
+const TIME_WINDOW_PARAMS: readonly string[] = ["start_utc", "end_utc", "time_utc"];
+
+/**
+ * `queryKey` with the time-window params removed. Two descriptors with the same continuity
+ * key ask about the same thing over a different stretch of time, so showing one's data while
+ * the other loads is a smooth pan; two with different continuity keys are different scopes.
+ */
+export const continuityKey = <P extends keyof paths>(descriptor: RequestDescriptor<P>): string => {
+  const params = descriptor.params as { query?: Record<string, unknown> };
+  if (params.query === undefined) return queryKey(descriptor);
+  const query = Object.fromEntries(
+    Object.entries(params.query).filter(([name]) => !TIME_WINDOW_PARAMS.includes(name))
+  );
+  return queryKey({ ...descriptor, params: { ...params, query } } as RequestDescriptor<P>);
+};
+
+/** What the cache holds: the data plus the continuity key it was fetched under. */
+type Tagged<T> = { continuityKey: string; data: T };
+
 // --- the hook ---------------------------------------------------------------------------
 
 /**
@@ -212,9 +244,40 @@ export const useApiQuery = <P extends keyof paths, T>(
   descriptor: RequestDescriptor<P> | null,
   select: (wire: ResponseOf<P>) => T,
   options: SWRConfiguration = {}
-): DataResult<T> =>
-  useSWR<T, unknown>(
+): DataResult<T> => {
+  const scope = descriptor === null ? null : continuityKey(descriptor);
+  const swr = useSWR<Tagged<T>, unknown>(
     descriptor === null ? null : queryKey(descriptor),
-    descriptor === null ? null : async () => select(await fetchDescriptor(descriptor)),
+    descriptor === null
+      ? null
+      : async () => ({
+          continuityKey: continuityKey(descriptor),
+          data: select(await fetchDescriptor(descriptor))
+        }),
     { ...apiV1SwrOptions, ...options }
   );
+  // The load-bearing guard, as in `use-map-geometry.ts`. `keepPreviousData` hands back the
+  // last key's data whatever that key was; data fetched under another scope is not this
+  // scope's answer. SWR's own `isLoading` already ignores laggy data, so it is true while the
+  // new scope's request is in flight and false once it has failed.
+  //
+  // Getters, so SWR's per-field dependency tracking still applies: a consumer that never
+  // reads `isValidating` is not re-rendered when it changes.
+  return {
+    get data() {
+      const tagged = swr.data;
+      return tagged !== undefined && scope !== null && tagged.continuityKey === scope
+        ? tagged.data
+        : undefined;
+    },
+    get error() {
+      return swr.error;
+    },
+    get isLoading() {
+      return swr.isLoading;
+    },
+    get isValidating() {
+      return swr.isValidating;
+    }
+  };
+};

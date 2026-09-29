@@ -328,9 +328,9 @@ export const KWtoMW = (MW: number) => {
 };
 
 export const addMinutesToISODate = (date: string, munites: number) => {
-  var d = new Date(date);
-  d.setMinutes(d.getMinutes() + munites);
-  return d.toISOString();
+  // Epoch arithmetic: `setMinutes` steps in the viewer's local time, which skips or repeats an
+  // hour across a local clock change.
+  return new Date(Date.parse(date) + munites * 60_000).toISOString();
 };
 
 // Rounds down to the half hour *in the display zone*, where it used to round in the viewer's zone

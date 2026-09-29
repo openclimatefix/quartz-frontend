@@ -113,6 +113,12 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [intervals]);
 
+  // The interval is this instance's own. Without this it outlives an unmount (the chart swap
+  // between Forecast and Delta) and keeps walking the cursor with nothing left to stop it.
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
   // Pause on mount. Used to be keyed on `view`, back when the three dashboard views were
   // mounted-but-hidden and this component stayed mounted across a tab switch — the dependency
   // was what caught the "switched away while playing" case. Every owner of `PlayButton` now

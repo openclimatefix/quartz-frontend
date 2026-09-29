@@ -342,20 +342,51 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           // point of the change.
           const actualLabel = observerLabelByCountryRef.current[featureCountry] ?? "Actual";
 
+          // A group whose members have not all published an actual at this slot. Its `actual`
+          // and `power` cover different members, so set side by side they read as a shortfall
+          // that is not there. Delta mode is the comparison, so there the pair is the matched
+          // figures the delta is computed from. Forecast mode keeps `power`, the value the
+          // region is painted with. Both say how many members are in.
+          const membersCompared = state.membersCompared ?? 0;
+          const membersTotal = state.membersTotal ?? 0;
+          const partialCoverage = membersCompared > 0 && membersCompared < membersTotal;
+          const showMatched =
+            partialCoverage &&
+            isDeltaRef.current &&
+            typeof state.comparedActual === "number" &&
+            typeof state.comparedForecast === "number";
+          const comparedCapacity = state.comparedCapacity ?? 0;
+
           let actualValue = "";
           let forecastValue = "";
           let unit = "";
           if (currentActiveUnit === ActiveUnit.MW) {
-            actualValue =
-              actualText ||
-              toDisplayPower(state.actual as number, displayUnit).toFixed(displayDecimals);
-            forecastValue = forecastText;
+            actualValue = showMatched
+              ? toDisplayPower(state.comparedActual as number, displayUnit).toFixed(displayDecimals)
+              : actualText ||
+                toDisplayPower(state.actual as number, displayUnit).toFixed(displayDecimals);
+            forecastValue = showMatched
+              ? toDisplayPower(state.comparedForecast as number, displayUnit).toFixed(
+                  displayDecimals
+                )
+              : forecastText;
             unit = displayUnit;
           } else if (currentActiveUnit === ActiveUnit.percentage) {
-            actualValue =
-              actualText ||
-              (capacity > 0 ? (((state.actual as number) / capacity) * 100).toFixed(0) : "-");
-            forecastValue = forecastPercentText;
+            if (showMatched) {
+              actualValue =
+                comparedCapacity > 0
+                  ? (((state.comparedActual as number) / comparedCapacity) * 100).toFixed(0)
+                  : "-";
+              forecastValue =
+                comparedCapacity > 0
+                  ? (((state.comparedForecast as number) / comparedCapacity) * 100).toFixed(0)
+                  : "-";
+            } else {
+              actualValue =
+                actualText ||
+                (capacity > 0 ? (((state.actual as number) / capacity) * 100).toFixed(0) : "-");
+              forecastValue = forecastPercentText;
+            }
             unit = "%";
           } else if (currentActiveUnit === ActiveUnit.capacity) {
             // This region's own country's national capacity, off the feature.
@@ -375,7 +406,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
               <div>
                 <span class="">${actualValue}</span>  /
                 <span class="text-solar">${forecastValue}</span>  <span class="text-2xs text-content-muted">${unit}</span>
-              </div>`;
+              </div>${
+                partialCoverage
+                  ? `<span class="text-2xs text-content-muted">${membersCompared} of ${membersTotal} regions reporting</span>`
+                  : ""
+              }`;
           if (currentActiveUnit === ActiveUnit.capacity) {
             actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">% of National</span>
             <div><span>${actualValue}</span> <span class="text-2xs text-content-muted">%</span></div>`;

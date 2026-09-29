@@ -77,8 +77,6 @@ const orange = theme.extend.colors.series.nHour;
 const ecmwfOnly = theme.extend.colors.series.ecmwf;
 const metOfficeOnly = theme.extend.colors.series.metOffice;
 const satOnly = theme.extend.colors.series.satellite;
-const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
-const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
 const seasonal = theme.extend.colors.series.seasonal;
 // The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
 // colour the map paints a region that came in under forecast, and one above it the colour it
@@ -235,50 +233,10 @@ const CustomizedLabel: FC<any> = ({
   viewBox: { x },
   className,
   solidLine,
-  onClick,
-  onGrab,
-  grip
+  onClick
 }) => {
   const yy = 10;
   const pillWidth = Math.max(40, String(value ?? "").length * 7.2 + 14);
-
-  /* MOCK (uncommitted): the grip-only cursor.
-     The period label moves out of the chart and lives once, in the footer, tethered to the
-     scrub handle. What stays here is the control itself, drawn as the *same object* the footer
-     draws — `scrub-track.tsx`'s handle is a 5x26 `bg-interactive` capsule with a dark ring, and
-     that file's own comment says the two "only teach that by looking like one object". So this
-     is that capsule, in SVG units, at the top of the cursor's line.
-     The line under it is the ReferenceLine's own stroke, so no stub is drawn here. */
-  if (grip) {
-    return (
-      <g
-        className={className || ""}
-        style={{ pointerEvents: "all" }}
-        onMouseDown={(e) => {
-          if (!onGrab) return;
-          e.stopPropagation();
-          onGrab();
-        }}
-        onMouseUp={(e) => {
-          if (!onGrab) return;
-          e.stopPropagation();
-        }}
-      >
-        {/* A 5px-wide target is not grabbable with a mouse, let alone a trackpad. */}
-        <rect x={x - 9} y={yy - 5} width={18} height={36} fill="transparent" />
-        <rect
-          x={x - 2.5}
-          y={yy}
-          width={5}
-          height={26}
-          rx={2.5}
-          className="fill-interactive"
-          stroke="rgba(0,0,0,0.7)"
-          strokeWidth={1.5}
-        />
-      </g>
-    );
-  }
 
   return (
     <g>
@@ -304,12 +262,11 @@ const CustomizedLabel: FC<any> = ({
         className={className || ""}
         style={{ pointerEvents: "all" }}
         onMouseDown={(e) => {
-          if (!onClick && !onGrab) return;
+          if (!onClick) return;
           e.stopPropagation();
-          onGrab?.();
         }}
         onMouseUp={(e) => {
-          if (!onClick && !onGrab) return;
+          if (!onClick) return;
           e.stopPropagation();
         }}
         onClick={(e) => {
@@ -337,26 +294,6 @@ const CustomizedLabel: FC<any> = ({
           x={x}
           y={yy + 14}
           className="fill-interactive font-mono font-medium tabular-nums text-xs"
-          id="time-now"
-          textAnchor="middle"
-        >
-          {value}
-        </text>
-      </g>
-    </g>
-  );
-};
-
-const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLine, onClick }) => {
-  const yy = -9;
-  return (
-    <g>
-      <g className={`fill-content ${className || ""}`} onClick={onClick}>
-        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text
-          x={x}
-          y={yy + 15}
-          className="fill-surface font-mono tabular-nums text-xs"
           id="time-now"
           textAnchor="middle"
         >
@@ -437,43 +374,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
   // finished period instead of the one in progress.
   const currentTime = timeNow.slice(0, 16);
 
-  /**
-   * Dragging the cursor pill.
-   *
-   * The position comes from Recharts' own `activeLabel` on the chart's `onMouseMove` rather
-   * than from pixel maths: the x axis is a *category* scale, so there is no scale to invert —
-   * `activeLabel` is already the nearest category, which is the snapping behaviour wanted.
-   *
-   * A ref beside the state because the chart's handlers are closures Recharts re-invokes at
-   * pointer rate; reading the state there would read the value from the render that installed
-   * them. The state is only there to drive the cursor style.
-   */
-  const [draggingCursor, setDraggingCursor] = useState(false);
-  const draggingCursorRef = useRef(false);
-  const beginCursorDrag = () => {
-    draggingCursorRef.current = true;
-    setDraggingCursor(true);
-  };
-  // On `window`, not on the chart: releasing outside the plot is the common case at the ends of
-  // the range, and a drag that never ends leaves every later mousemove moving the cursor.
-  useEffect(() => {
-    if (!draggingCursor) return;
-    const end = () => {
-      draggingCursorRef.current = false;
-      setDraggingCursor(false);
-    };
-    window.addEventListener("mouseup", end);
-    return () => window.removeEventListener("mouseup", end);
-  }, [draggingCursor]);
-
-  const commitCursor = (activeLabel?: string) => {
-    if (!activeLabel || !setTimeOfInterest) return;
-    setTimeOfInterest(
-      isSitesChart
-        ? new Date(Number(activeLabel))?.toISOString() || new Date().toISOString()
-        : activeLabel
-    );
-  };
   // Deliberately NOT given the country's zone, unlike the display helpers below.
   //
   // This value is not shown to anyone: it is turned into epoch millis and matched against the
@@ -687,15 +587,20 @@ const RemixLine: React.FC<RemixLineProps> = ({
     return keys.length > 0 ? keys : undefined;
   }, [isSitesChart, displayedChartData, timezone, chartWidthPx]);
 
+  // Axis ticks drop the decimals from 10 up; a reading (tooltip, p-levels) passes
+  // `decimalsAtAnySize` to keep them, or 21.4 GW reads "21".
   function prettyPrintYNumberWithCommas(
     x: string | number,
     showDecimals: number = 2,
-    divisionFactor: number = 1
+    divisionFactor: number = 1,
+    decimalsAtAnySize: boolean = false
   ) {
     const xNumber = Number(x) / divisionFactor;
     const isSmallNumber = xNumber !== 0 && (xNumber < 0 ? xNumber > -10 : xNumber < 10);
     const roundedNumber =
-      showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
+      showDecimals > 0 && (isSmallNumber || decimalsAtAnySize)
+        ? xNumber.toFixed(showDecimals)
+        : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
@@ -740,7 +645,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
     getRoundedTickBoundary(Math.max(Number(deltaMax), 0 - Number(deltaMin)) || 0, deltaMaxTicks);
 
   const roundTickMax = deltaYMax % 1000 === 0;
-  const isGSP = !!deltaYMaxOverride && deltaYMaxOverride < 1000;
   const now = new Date();
   const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
   const ticks = offsets.map((o) => {
@@ -927,7 +831,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               left: CHART_MARGIN_LEFT_PX
             }}
             onClick={(e?: ChartPointerEvent) => {
-              if (draggingCursorRef.current) return;
               if (globalIsZooming) return;
 
               const label = periodLabelAt(e);
@@ -940,7 +843,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
             onMouseDown={(e?: { activeLabel?: string }) => {
-              if (draggingCursorRef.current) return;
               if (!zoomEnabled) return;
               setTemporaryZoomArea(globalZoomArea);
               setGlobalIsZooming(true);
@@ -951,11 +853,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }}
             onMouseMove={(e?: ChartPointerEvent) => {
               setHoverLabelIfChanged(periodLabelAt(e) ?? null);
-              // Before the zoom guard: the cursor is draggable whether or not zoom is enabled.
-              if (draggingCursorRef.current) {
-                commitCursor(periodLabelAt(e));
-                return;
-              }
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -966,7 +863,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
             }}
             onMouseLeave={() => setHoverLabelIfChanged(null)}
             onMouseUp={(e?: ChartPointerEvent) => {
-              if (draggingCursorRef.current) return;
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -1030,22 +926,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               ticks={isSitesChart ? ticks : categoryTicks}
               domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
               interval={isSitesChart ? undefined : categoryTicks ? 0 : 11}
-            />
-            <XAxis
-              className="select-none"
-              dataKey="formattedDate"
-              xAxisId={"x-axis-2"}
-              tickFormatter={(x) => prettyPrintChartAxisLabelDate(x, timezone, locale)}
-              scale={isSitesChart ? "time" : "auto"}
-              tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
-              tickLine={true}
-              type={isSitesChart ? "number" : "category"}
-              ticks={isSitesChart ? ticks : categoryTicks}
-              domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={isSitesChart ? undefined : categoryTicks ? 0 : 11}
-              orientation="top"
-              padding="no-gap"
-              hide={true}
             />
 
             <YAxis
@@ -1126,8 +1006,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 tethered to the scrub handle; the grip collided with the LIVE marker, both being
                 `--interactive` objects at the top of a reference line. Click-to-set-time
                 (`onClick`/`activeLabel` above) is untouched — that is the interaction layout
-                contract §4 protects — and dragging is the footer track's job. `beginCursorDrag`
-                and `draggingCursor` are unreachable now and come out if this holds up. */}
+                contract §4 protects — and dragging is the footer track's job. */}
             {/* The cursor IS the period.
                 The 2px line is gone and the band it used to sit inside carries the cursor on its
                 own, spanning the whole span the reading covers. A line says "this instant",
@@ -1529,7 +1408,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     <div className="flex justify-between">
                       <div>{`OCF P${level}`}:</div>
                       <div className="ml-4 font-mono tabular-nums">
-                        {prettyPrintYNumberWithCommas(String(value), 1, displayDivisionFactor)}
+                        {prettyPrintYNumberWithCommas(
+                          String(value),
+                          1,
+                          displayDivisionFactor,
+                          displayUnit === "GW"
+                        )}
                       </div>
                     </div>
                   </li>
@@ -1591,8 +1475,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               ? deltaPos
                               : deltaNeg
                             : toolTipColors[key];
-                          // DELTA stays MW — it's the delta view's own reading, untouched here —
-                          // every other row reads in the country's display unit.
+                          // Every row reads in the heading's unit, DELTA included. A delta is
+                          // small beside the readings, so in GW it keeps two decimal places
+                          // (-350 MW is "-0.35"); in MW it reads as it always has.
                           const computedValue =
                             key === "DELTA" &&
                             !showNHourView &&
@@ -1600,8 +1485,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               ? "-"
                               : prettyPrintYNumberWithCommas(
                                   String(value),
-                                  1,
-                                  key === "DELTA" ? 1 : displayDivisionFactor
+                                  key === "DELTA" && displayUnit === "GW" ? 2 : 1,
+                                  displayDivisionFactor,
+                                  displayUnit === "GW"
                                 );
                           let title = name;
                           if (key.includes("N_HOUR")) {

@@ -117,6 +117,19 @@ export type MapFeatureState = {
    * what lets one paint expression serve both. Absent means false, i.e. region-level bands.
    */
   grouped?: boolean;
+  /**
+   * Rollups only (`rollUpRegionValues`); absent on a single region, where the comparison set is
+   * the region itself. The actual and forecast of the group's members that have both at this
+   * slot (`hasDelta`), summed over that one set so the two can be read side by side. `null`
+   * when no member has both. `actual` and `power` stay whole-group sums over different sets.
+   */
+  comparedActual?: number | null;
+  comparedForecast?: number | null;
+  /** Capacity of the same compared set: the divisor of the rollup's `deltaNormalized`. */
+  comparedCapacity?: number;
+  /** How many members are in the compared set, and how many the group has. */
+  membersCompared?: number;
+  membersTotal?: number;
 };
 
 /** One region's joined values, before it is flattened to feature state. */
@@ -370,10 +383,18 @@ export const rollUpRegionValues = (
     let published = 0;
     let reportedNothing = 0;
     let hasDelta = false;
+    // The compared set: members with both an actual and a forecast at this slot. Everything
+    // that sets actual against forecast is summed over this one set; `power` is not.
+    let comparedActual = 0;
+    let comparedForecast = 0;
+    let comparedCapacity = 0;
+    let membersCompared = 0;
+    let membersTotal = 0;
 
     for (const regionName of groupings[groupName]) {
       const value = values.get(regionName);
       if (!value) continue;
+      membersTotal += 1;
       capacity += value.capacity;
       if (value.dataState === "value") {
         published += 1;
@@ -385,6 +406,10 @@ export const rollUpRegionValues = (
       if (value.hasDelta) {
         hasDelta = true;
         delta += value.delta;
+        membersCompared += 1;
+        comparedActual += value.actual ?? 0;
+        comparedForecast += value.power;
+        comparedCapacity += value.capacity;
       }
     }
 
@@ -400,14 +425,22 @@ export const rollUpRegionValues = (
       capacity,
       actual,
       delta,
-      // The group's summed delta over the group's summed capacity — not an average of its
-      // members' percentages, which would weight a 5 MW GSP the same as a 500 MW one.
-      deltaNormalized: hasDelta && capacity > 0 ? delta / capacity : 0,
+      // The group's summed delta over the summed capacity of the members it was summed over —
+      // not an average of their percentages, which would weight a 5 MW GSP the same as a
+      // 500 MW one, and not the whole group's capacity, which fades a partly-published slot.
+      deltaNormalized: hasDelta && comparedCapacity > 0 ? delta / comparedCapacity : 0,
       deltaBucket: hasDelta ? getDeltaBucket(delta, deltaTop) : DELTA_BUCKET.ZERO,
       deltaBucketNormalized:
-        hasDelta && capacity > 0 ? getDeltaBucketNormalized(delta / capacity) : DELTA_BUCKET.ZERO,
+        hasDelta && comparedCapacity > 0
+          ? getDeltaBucketNormalized(delta / comparedCapacity)
+          : DELTA_BUCKET.ZERO,
       hasDelta,
-      label: groupName
+      label: groupName,
+      comparedActual: membersCompared > 0 ? comparedActual : null,
+      comparedForecast: membersCompared > 0 ? comparedForecast : null,
+      comparedCapacity,
+      membersCompared,
+      membersTotal
     });
   }
   return rolled;
