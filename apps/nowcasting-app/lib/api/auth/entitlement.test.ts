@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, test } from "@jest/globals";
 
 import {
   COUNTRY_CLAIM_KEY,
-  COUNTRY_CLAIM_KEY_FALLBACK,
   isDevModeEntitlementBypass,
   isEntitled,
   readCountryClaim
@@ -20,23 +19,12 @@ afterEach(() => {
 });
 
 describe("readCountryClaim", () => {
-  test("reads the namespaced claim", () => {
-    expect(readCountryClaim({ [COUNTRY_CLAIM_KEY]: ["GB", "NL"] })).toEqual(["GB", "NL"]);
+  test("reads the plain `countries` claim", () => {
+    expect(readCountryClaim({ countries: ["GB", "NL"] })).toEqual(["GB", "NL"]);
   });
 
-  // The tenant does not enforce namespacing — trial_ends_at is set un-namespaced and works
-  // in production — so the Action may land either spelling. Both are read until it does.
-  test("reads the un-namespaced claim", () => {
-    expect(readCountryClaim({ [COUNTRY_CLAIM_KEY_FALLBACK]: ["GB"] })).toEqual(["GB"]);
-  });
-
-  test("prefers the namespaced claim when both are present", () => {
-    expect(
-      readCountryClaim({
-        [COUNTRY_CLAIM_KEY]: ["NL"],
-        [COUNTRY_CLAIM_KEY_FALLBACK]: ["GB"]
-      })
-    ).toEqual(["NL"]);
+  test("ignores the namespaced spelling, which the Action does not set", () => {
+    expect(readCountryClaim({ "https://quartz.solar/countries": ["GB"] })).toEqual([]);
   });
 
   test("upper-cases and de-duplicates", () => {

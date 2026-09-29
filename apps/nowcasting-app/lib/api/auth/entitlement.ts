@@ -12,18 +12,11 @@
 // stood in before the claim shipped was removed on 2026-09-29.)
 
 /**
- * Namespaced spelling, per Auth0's custom-claim convention.
- *
- * Both spellings are accepted because the Action has not landed and the tenant does not in
- * fact enforce namespacing: the existing `trial_ends_at` claim is set un-namespaced and is
- * read straight off `session.user` in `pages/api/get_token.ts`, in production. The Action
- * author may reasonably follow that precedent. Delete whichever one is not used once the
- * Action ships.
+ * The claim's key, un-namespaced — as the Auth0 Action sets it, following the existing
+ * `trial_ends_at` claim's precedent (the tenant does not enforce namespacing). A namespaced
+ * `https://quartz.solar/countries` was also read until the Action shipped; it was never used.
  */
-export const COUNTRY_CLAIM_KEY = "https://quartz.solar/countries";
-
-/** Un-namespaced fallback, matching the `trial_ends_at` precedent. */
-export const COUNTRY_CLAIM_KEY_FALLBACK = "countries";
+export const COUNTRY_CLAIM_KEY = "countries";
 
 /**
  * `true` when the app is running against the local dev stub.
@@ -51,7 +44,7 @@ export const readCountryClaim = (user: unknown): string[] => {
   if (user === null || typeof user !== "object") return [];
 
   const record = user as Record<string, unknown>;
-  const raw = record[COUNTRY_CLAIM_KEY] ?? record[COUNTRY_CLAIM_KEY_FALLBACK];
+  const raw = record[COUNTRY_CLAIM_KEY];
   if (!Array.isArray(raw)) return [];
 
   const codes = raw
