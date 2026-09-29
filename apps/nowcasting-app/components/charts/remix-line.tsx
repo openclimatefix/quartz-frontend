@@ -896,8 +896,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
       }
     }
   }
-  console.log("chartData", data);
-  console.log("DELTA", deltaView);
 
   return (
     <div ref={chartContainerRef} style={{ position: "relative", width: "100%", height: "100%" }}>

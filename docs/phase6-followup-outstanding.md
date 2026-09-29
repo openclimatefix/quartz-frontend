@@ -495,8 +495,8 @@ All committed on `spike/ocf-reskin` (`1b92d66a`…`055b9053`), `next build` gree
 From the contract: **OPEN 8** region types across countries; **OPEN 9** the full A/B comparison
 picker (Delta v2 — Brad's "circle back"); **OPEN 10** the sites zoom bands. **OPEN 7** is partly
 answered by the coverage indicator but not for the chart. Also still queued: entitlement moving
-into `setEnabledCountries` when the Auth0 `countries` claim ships (which retires the temporary
-`NEXT_PUBLIC_DEV_ENTITLE_COUNTRIES` override, commit `117f5aa`); whether `MeasuringUnit` may edit a
+into `setEnabledCountries` now that the Auth0 `countries` claim has shipped (the temporary
+`NEXT_PUBLIC_DEV_ENTITLE_COUNTRIES` override from `117f5aa` was removed 2026-09-29); whether `MeasuringUnit` may edit a
 non-focused country's aggregation level; the constraints overlay being focused-country-only; and
 the hydration errors Brad parked ("4 errors" toast, dev only).
 

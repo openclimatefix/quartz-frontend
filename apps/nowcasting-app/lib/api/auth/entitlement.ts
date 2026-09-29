@@ -5,11 +5,11 @@
 // frontend intersects that manifest with this claim to decide what is *usable*. Nothing
 // here filters the manifest; it only marks it.
 //
-// The claim does not exist on the tenant yet — it is being added off the same
-// `GB_ROLE_ID`/`NL_ROLE_ID` roles that already drive access. Every read is therefore
-// written to be correct once it lands and harmless until then: a missing or malformed
-// claim degrades to "nothing entitled, everything discoverable" and never throws. That is
-// also what keeps claim-propagation lag from breaking a live session.
+// The claim is set by an Auth0 Action off the same roles that already drive access. Every
+// read degrades safely: a missing or malformed claim means "nothing entitled, everything
+// discoverable" and never throws, which is also what keeps claim-propagation lag from
+// breaking a live session. (The temporary `NEXT_PUBLIC_DEV_ENTITLE_COUNTRIES` override that
+// stood in before the claim shipped was removed on 2026-09-29.)
 
 /**
  * Namespaced spelling, per Auth0's custom-claim convention.
@@ -63,41 +63,6 @@ export const readCountryClaim = (user: unknown): string[] => {
   return Array.from(new Set(codes));
 };
 
-// ===========================================================================================
-// TEMPORARY — DELETE WHEN THE `countries` CLAIM LANDS ON THE AUTH0 DEV TENANT
-// ===========================================================================================
-//
-// `NEXT_PUBLIC_DEV_MODE` conflates two unrelated things: it swaps the real Auth0 token for a
-// literal `FAKE_TOKEN` (`pages/api/get_token.ts`) *and* it bypasses entitlement. That makes
-// the one switch that would let you see NL also the switch that makes every API call 401,
-// so there is currently no configuration in which an unentitled country is reviewable.
-//
-// This splits the second concern out: a real session against the real API, with entitlement
-// forced. It exists so NL's national chart can be eyeballed before the claim ships, and it
-// comes straight back out afterwards — this whole block and its two call sites below.
-//
-// Set it to a comma-separated list of country codes:
-//
-//     NEXT_PUBLIC_DEV_ENTITLE_COUNTRIES=GB,NL
-//
-// It does NOT accept a wildcard, on purpose: naming the countries keeps the blast radius
-// visible in the env file, and means a stale value grants exactly what it says.
-
-/**
- * Country codes force-entitled by the local override, upper-cased. Empty unless the env var
- * is set, and hard-disabled when `NODE_ENV === "production"` so a leaked value in a deployed
- * build (it is `NEXT_PUBLIC_`, so it *is* in the client bundle) cannot grant anything.
- */
-export const devEntitlementOverride = (): string[] => {
-  if (process.env.NODE_ENV === "production") return [];
-  return (process.env.NEXT_PUBLIC_DEV_ENTITLE_COUNTRIES ?? "")
-    .split(",")
-    .map((code) => code.trim().toUpperCase())
-    .filter((code) => code.length > 0);
-};
-
-// ===========================================================================================
-
 /**
  * Whether `code` is entitled by `claim`.
  *
@@ -109,7 +74,5 @@ export const isEntitled = (code: string, claim: readonly string[]): boolean => {
   if (isDevModeEntitlementBypass()) return true;
   if (typeof code !== "string" || code.length === 0) return false;
   const wanted = code.toUpperCase();
-  // TEMPORARY, see above.
-  if (devEntitlementOverride().includes(wanted)) return true;
   return claim.some((entry) => entry.toUpperCase() === wanted);
 };
