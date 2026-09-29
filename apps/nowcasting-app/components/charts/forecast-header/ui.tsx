@@ -42,31 +42,36 @@ export const ForecastHeadlineFigure: React.FC<{
     >
       <div className="flex flex-1 self-center items-center justify-center">
         <div className={`flex items-center ${textSizeClasses}`}>
-          <ForecastLabel
-            position={"middle"}
-            tip={
-              <div className="min-w-36 whitespace-nowrap z-[100]">
-                <p>{tip}</p>
-              </div>
-            }
-          >
-            {children}
-          </ForecastLabel>
+          {/* The unit rides on the figure's baseline, where a unit belongs. It used to share a
+              grid gutter with a clock icon beside the times, which read row by row as
+              "GW 10:00" — the unit paired with the end time instead of the number. */}
+          <div className="flex items-baseline">
+            <ForecastLabel
+              position={"middle"}
+              tip={
+                <div className="min-w-36 whitespace-nowrap z-[100]">
+                  <p>{tip}</p>
+                </div>
+              }
+            >
+              {children}
+            </ForecastLabel>
+            {times && (
+              <span className="ml-1 font-sans text-2xs dash:text-sm dash:xl:text-base font-normal leading-none text-content">
+                {unit}
+              </span>
+            )}
+          </div>
           <div
             className={`${
               gsp ? "dash:3xl:gap-0" : "dash:3xl:gap-1"
             } flex flex-col dash:xl:gap-0 gap-0.5 items-start justify-center dash:xl:justify-between dash:justify-center pl-2`}
           >
             {times ? (
-              /* Two rows, two columns: the clock and the unit share the left gutter, the two
-                 times share the right one. Aligning them that way is what makes the pair read
-                 as one span — a unit inline after the second time pushed it out of line with
-                 the first, and the eye lost the column. Monospace and tabular, so the two times
-                 are the same width and the grid needs no fixed sizes. */
-              <div className="grid grid-cols-[auto_auto] items-center gap-x-1 font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base leading-none dash:leading-none text-content">
-                <ClockIcon className="h-3" />
+              /* The period's two ends, stacked, and nothing else: two 24-hour times read as a
+                 span without a clock. Monospace and tabular, so they are the same width. */
+              <div className="flex flex-col gap-0.5 font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base leading-none dash:leading-none text-content">
                 <span>{times[0]}</span>
-                <span className="font-sans font-normal">{unit}</span>
                 {/* Same weight as the start. Dimming the end read as two different kinds of
                     value stacked, when they are two ends of one span. */}
                 <span>{times[1]}</span>
