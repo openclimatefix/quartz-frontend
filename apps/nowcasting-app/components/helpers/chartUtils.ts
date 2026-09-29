@@ -116,10 +116,9 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
  * seasonal-norm dataset in `data/national_metrics.json` is bucketed by UTC time-of-day (its
  * generator groups on `datetime_gmt`, so index 0 is the 00:00 UTC bucket), and indexing into that
  * array is a different question from "which GB settlement period is this?". The two answers differ
- * by two slots throughout BST — see `getSettlementPeriodForDate` below.
+ * by two slots throughout BST.
  *
- * Use this for indexing UTC-bucketed data. Use `getSettlementPeriodForDate` for anything a user
- * reads as a settlement period.
+ * Use this for indexing UTC-bucketed data.
  *
  * Phase 3 deliberately left this UTC while parameterising every user-facing helper by the
  * country's timezone. That asymmetry looks like an inconsistency and is not: day labels and
@@ -132,29 +131,6 @@ export const getUtcHalfHourIndex = (date: DateTime): number => {
   const utcDate = date.toUTC();
   const midnightBefore = utcDate.startOf("day");
   return Math.floor(utcDate.diff(midnightBefore, "minutes").minutes / 30);
-};
-
-/**
- * The GB settlement period: 1–48, numbered from midnight **Europe/London**. 00:00 London is 1,
- * 00:30 is 2, 01:00 is 3, and 23:30 is 48.
- *
- * B9: this used to count half-hours from midnight of whatever zone the caller's DateTime happened
- * to carry, so the answer depended on the caller rather than on the definition. `csvDownload.ts`
- * passes Europe/London and was right; a UTC caller would silently get a number two low all
- * summer. The conversion now happens here so callers cannot get it wrong. Using `startOf("day")`
- * rather than `set({ hour: 0, ... })` also makes the clock-change days come out right: 46 periods
- * on the short day in March, 50 on the long day in October.
- *
- * Phase 3: the zone is now an argument, defaulting to Europe/London so existing call sites are
- * unchanged; the country registry supplies it once call sites are wired up. The concept itself is
- * GB-specific — another country's half-hour numbering is its own — so the default is the
- * definition rather than a convenience.
- */
-export const getSettlementPeriodForDate = (date: DateTime, timezone: string = "Europe/London") => {
-  const zonedDate = date.setZone(timezone);
-  const midnightBefore = zonedDate.startOf("day");
-  const interval = zonedDate.diff(midnightBefore, "minutes").minutes;
-  return Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed;
 };
 
 /** Tick steps that read as round numbers at any power of ten. */

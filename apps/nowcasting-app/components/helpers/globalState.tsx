@@ -142,7 +142,6 @@ export type FlatGlobalStateType = {
    */
   mapFramingModified: boolean;
   resetMapFraming: { run: () => void } | null;
-  showSiteCount?: boolean;
   showNHourView?: boolean;
   showConstraints: boolean;
   dashboardMode: boolean;
@@ -294,7 +293,6 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     globalChartIsZooming: false,
     globalChartIsZoomed: false,
     globalZoomArea: { x1: "", x2: "" },
-    showSiteCount: undefined,
     sortBy: SORT_BY.CAPACITY,
     showNHourView: getBooleanSettingFromCookieStorage(CookieStorageKeys.N_HOUR_VIEW, true),
     showConstraints: getBooleanSettingFromCookieStorage(CookieStorageKeys.CONSTRAINTS),

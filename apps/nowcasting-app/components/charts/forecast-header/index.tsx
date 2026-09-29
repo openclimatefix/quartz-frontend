@@ -3,12 +3,10 @@ import { NO_VALUE } from "../../../lib/domain/power-unit";
 import { useFocusedCountry } from "../../../hooks/data/use-countries";
 import { cadenceMinutesFor, nextSlot, periodForLabel } from "../../../lib/time/cursor";
 import useTimeNow from "../../hooks/use-time-now";
-import { PvRealData, ForecastData } from "../../types";
 import {
   formatDateAsZonedTime,
   formatISODateString,
   formatISODateStringAsZonedTime,
-  KWtoGW,
   MWtoGW
 } from "../../helpers/utils";
 import { useCountryFormatting } from "../../../hooks/data/use-country-format";
@@ -17,13 +15,9 @@ import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 import type { TimeSeries } from "../../../lib/domain/types";
 
 type ForecastHeaderProps = {
-  /** @deprecated v0 shape. Still passed by the delta view, which migrates in a later step. */
-  pvLiveData?: PvRealData;
-  /** @deprecated v0 shape. Still passed by the delta view, which migrates in a later step. */
-  pvForecastData?: ForecastData;
-  /** Canonical observed generation — the country's first observer. Wins over `pvLiveData`. */
+  /** Canonical observed generation — the country's first observer. */
   generationSeries?: TimeSeries;
-  /** Canonical primary forecast. Wins over `pvForecastData`. */
+  /** Canonical primary forecast. */
   forecastSeries?: TimeSeries;
   deltaView: boolean;
 };
@@ -51,8 +45,6 @@ const gwOrPlaceholder = (mw: number | null | undefined): string =>
   typeof mw === "number" ? MWtoGW(mw) : NO_VALUE;
 
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({
-  pvLiveData,
-  pvForecastData,
   generationSeries,
   forecastSeries,
   deltaView
@@ -69,13 +61,11 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   // get the latest Actual pv value in GW
   const selectedPvActualInGW = generationSeries
     ? gwOrPlaceholder(latestGeneration?.powerMw)
-    : typeof pvLiveData?.[0]?.solarGenerationKw === "number"
-    ? KWtoGW(pvLiveData[0].solarGenerationKw)
     : NO_VALUE;
 
   // get pv times
   const latestPvActualDatetime =
-    (generationSeries ? latestGeneration?.timeUtc : pvLiveData?.[0]?.datetimeUtc) || timeNow;
+    (generationSeries ? latestGeneration?.timeUtc : undefined) || timeNow;
 
   // Use the same time for the Forecast historic
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime) || timeNow;
@@ -109,14 +99,9 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   const pvTimeRange = periodTimes(latestPvActualDatetime);
   const forecastNextTimeRange = periodTimes(followingPvForecastDatetime.toISOString());
 
-  // One shape for both dialects, so the two lookups and the play button below read the same
-  // whichever the caller passed.
   const forecastPoints: { timeUtc: string; powerMw: number | null }[] = forecastSeries
     ? forecastSeries.values.map((v) => ({ timeUtc: v.timeUtc, powerMw: v.powerMw }))
-    : (pvForecastData ?? []).map((fc) => ({
-        timeUtc: fc.targetTime,
-        powerMw: fc.expectedPowerGenerationMegawatts
-      }));
+    : [];
   const forecastAt = (formattedDate: string) =>
     forecastPoints.find((fc) => formatISODateString(fc.timeUtc) === formattedDate)?.powerMw;
 

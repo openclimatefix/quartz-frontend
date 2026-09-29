@@ -26,7 +26,7 @@ import { ChartData, getPLevelRangeKey } from "./remix-line";
 // before this test file switched over). Importing the shipped asset rather than the deleted
 // bundle import is what keeps the hand-checked assertions below an oracle on real data.
 import nationalMetrics from "../../public/data/gb/national-metrics.json";
-import { getSettlementPeriodForDate, getUtcHalfHourIndex } from "../helpers/chartUtils";
+import { getUtcHalfHourIndex } from "../helpers/chartUtils";
 import { useSeasonalNorms } from "../../hooks/data/use-seasonal-norms";
 
 // `useFormatChartData` now gets its norms through `useSeasonalNorms` rather than a bundled
@@ -507,24 +507,17 @@ describe("p-levels", () => {
   });
 });
 
-describe("settlement period vs UTC half-hour slot", () => {
-  // The regression guard for B9. The GB settlement period is counted from Europe/London midnight;
-  // the seasonal norms are indexed by the UTC half-hour slot; throughout BST the two answers are
-  // two apart. The chart row no longer carries a settlement period (it was written and never read),
-  // so this asserts against `getSettlementPeriodForDate` directly, and separately checks that the
-  // hook still picks the seasonal norms off the UTC slot. If these ever collapse back into one
-  // call — in chartUtils or in the hook — this fails.
+describe("seasonal norms are indexed by the UTC half-hour slot", () => {
+  // Seasonal norms are indexed by the UTC half-hour slot. The London-clock slot is two apart
+  // throughout BST, so a hook that indexed by local time would read the wrong bucket.
   const utcInstant = (iso: string) => DateTime.fromISO(iso, { zone: "utc" }) as DateTime;
 
-  test("in BST the settlement period is two slots ahead of the UTC half-hour index", () => {
+  test("in BST the hook reads the UTC slot, not the London-clock slot", () => {
     const instant = utcInstant(BOUNDARY_BST); // 10:30 UTC == 11:30 London
     const utcSlotIndex = getUtcHalfHourIndex(instant);
-    const settlementPeriod = getSettlementPeriodForDate(instant);
     expect(utcSlotIndex).toBe(21);
-    expect(settlementPeriod).toBe(24);
-    expect(settlementPeriod - (utcSlotIndex + 1)).toBe(2);
+    const londonClockSlotIndex = 23; // 11:30 London
 
-    // and the hook takes the seasonal value from the UTC slot, not from the settlement period
     const datum = at(
       run(baseProps({ forecastSeries: ts([[BOUNDARY_BST, 100]]) })),
       "2025-07-01T10:30"
@@ -534,19 +527,16 @@ describe("settlement period vs UTC half-hour slot", () => {
       6
     );
     expect(datum.SEASONAL_MEAN).not.toBeCloseTo(
-      nationalMetrics.data["7"]["1"].mean[settlementPeriod - 1] * NATIONAL_CAPACITY,
+      nationalMetrics.data["7"]["1"].mean[londonClockSlotIndex] * NATIONAL_CAPACITY,
       6
     );
   });
 
-  test("in GMT the two agree (settlement period is the UTC slot index plus one)", () => {
+  test("in GMT the hook reads the UTC slot", () => {
     freeze("2025-01-15T10:12:00.000Z");
     const instant = utcInstant("2025-01-15T10:30:00Z");
     const utcSlotIndex = getUtcHalfHourIndex(instant);
-    const settlementPeriod = getSettlementPeriodForDate(instant);
     expect(utcSlotIndex).toBe(21);
-    expect(settlementPeriod).toBe(22);
-    expect(settlementPeriod - (utcSlotIndex + 1)).toBe(0);
 
     const datum = at(
       run(baseProps({ forecastSeries: ts([["2025-01-15T10:30:00Z", 100]]) })),
@@ -556,14 +546,6 @@ describe("settlement period vs UTC half-hour slot", () => {
       nationalMetrics.data["1"]["15"].mean[utcSlotIndex] * NATIONAL_CAPACITY,
       6
     );
-  });
-
-  test("settlement periods run 1-48 from London midnight", () => {
-    expect(
-      ["2025-01-15T00:00:00Z", "2025-01-15T00:30:00Z", "2025-01-15T23:30:00Z"].map((iso) =>
-        getSettlementPeriodForDate(utcInstant(iso))
-      )
-    ).toEqual([1, 2, 48]);
   });
 });
 

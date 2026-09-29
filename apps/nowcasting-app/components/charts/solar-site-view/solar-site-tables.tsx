@@ -73,10 +73,6 @@ const TableData: React.FC<TableDataProps> = ({ rows }) => {
     return b.label - a.label;
   };
 
-  const unselectedSiteClass = `transition duration-200 ease-out hover:ease-in hover:bg-content-muted cursor-pointer`;
-
-  const selectedSiteClass = `bg-surface-panel cursor-pointer`;
-
   return (
     <>
       <div className="flex-1">

@@ -345,9 +345,6 @@ module.exports = {
     "./hooks/**/*.{js,ts,jsx,tsx}"
   ],
   safelist: [
-    // `bg-solar` alone is built dynamically in a few places (`sitesLegend.tsx`'s default prop,
-    // `search-table.tsx`), so it still needs an entry.
-    //
     // The `bg-solar/3` … `bg-solar/100` ladder that used to sit here is gone with the class it
     // served. `color-guide-bar.tsx` built its band pills as `bg-solar/${opacity}` — a template
     // string Tailwind cannot see, hence a safelist that had to be kept in step with
@@ -355,7 +352,6 @@ module.exports = {
     // all, so the legend showed five bands where the map painted six). The pills composite the
     // yellow over `bg-map-land` with an explicit gradient now, so there is no generated class
     // to safelist and no ladder to keep in step.
-    "bg-solar"
   ],
   plugins: [
     require("@tailwindcss/forms"),

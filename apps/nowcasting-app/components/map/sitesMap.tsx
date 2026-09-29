@@ -1,28 +1,21 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
+import mapboxgl, { CircleLayer } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map as MapComponent } from "./";
-import { ActiveUnit, MAP_TITLE_SOLAR_SITES, SelectedData } from "./types";
+import { ActiveUnit, MAP_TITLE_SOLAR_SITES } from "./types";
 import {
   AGGREGATION_LEVEL_MAX_ZOOM,
   AGGREGATION_LEVEL_MIN_ZOOM,
-  AGGREGATION_LEVELS,
-  MAX_POWER_GENERATED
+  AGGREGATION_LEVELS
 } from "../../constant";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
-import {
-  formatISODateString,
-  formatISODateStringHuman,
-  getRoundedPv,
-  getRoundedPvPercent
-} from "../helpers/utils";
+import { formatISODateStringHuman } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import {
   AggregatedSitesCombinedData,
   AggregatedSitesDataGroupMap,
   CombinedSitesData,
-  FcAllResData,
   SitesCombinedErrors
 } from "../types";
 import { theme } from "../../tailwind.config";
@@ -31,7 +24,6 @@ import Slider from "./sitesMapFeatures/sitesZoomSlider";
 import { safelyUpdateMapData, setBoundarySourceData } from "../helpers/mapUtils";
 import dynamic from "next/dynamic";
 
-const yellow = theme.extend.colors.solar.DEFAULT;
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type SitesMapProps = {
@@ -90,18 +82,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
       cancelled = true;
     };
   }, []);
-  const latestForecastValue = 0;
-  const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
-  if (activeUnit === ActiveUnit.percentage)
-    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
-  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
-  // const {
-  //   data: initForecastData,
-  //   isValidating,
-  //   error: forecastError
-  // } = getForecastsData(isNormalized);
-
   useEffect(() => {
     setNewDataForMap(true);
   }, [clickedSiteGroupId, autoZoom]);
@@ -112,18 +92,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
   }, [currentAggregationLevel, setClickedSiteGroupId]);
 
   const forecastLoading = false;
-
-  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the opacity will be 0
-    0,
-    0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : MAX_POWER_GENERATED,
-    1
-  ];
 
   const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS) => {
     // TODO: this will need to be dynamic depending on user's site capacities
@@ -139,55 +107,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
   };
 
-  const generateGeoJsonForecastData: (
-    forecastData?: FcAllResData,
-    targetTime?: string
-  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    // Exclude first item as it's not representing gsp area
-    const gspForecastData = forecastData?.forecasts?.slice(1);
-    // gspShapeData is now fetched (see the effect above) rather than bundled, so it may not
-    // have arrived yet. This function's only caller is commented out above (dead today), but
-    // it is kept type-safe against the async load rather than deleted along with it.
-    const gspShapeJson: FeatureCollection = gspShapeData ?? {
-      type: "FeatureCollection",
-      features: []
-    };
-    const forecastGeoJson = {
-      ...gspShapeData,
-      type: "FeatureCollection" as "FeatureCollection",
-      features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = gspForecastData && gspForecastData[index];
-        let selectedFCValue;
-        if (gspForecastData && targetTime) {
-          selectedFCValue = forecastDatum?.forecastValues.find(
-            (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
-          );
-        } else if (gspForecastData) {
-          selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
-        }
-
-        return {
-          ...featureObj,
-          properties: {
-            ...featureObj.properties,
-            [SelectedData.expectedPowerGenerationMegawattsRounded]:
-              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
-            [SelectedData.expectedPowerGenerationNormalizedRounded]:
-              selectedFCValue &&
-              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
-            [SelectedData.installedCapacityMw]: getRoundedPv(
-              forecastDatum?.location.installedCapacityMw || 0
-            )
-          }
-        };
-      })
-    };
-
-    return { forecastGeoJson };
-  };
-  // const generatedGeoJsonForecastData = useMemo(() => {
-  //   return generateGeoJsonForecastData(initForecastData, selectedISOTime);
-  // }, [initForecastData, selectedISOTime]);
   const setSourceData = (source: mapboxgl.GeoJSONSource, featuresArray: Feature[]) => {
     source.setData({
       type: "FeatureCollection",
@@ -428,27 +347,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
         setClickedSiteGroupId(e.features?.[0].properties?.id);
       });
     }
-    // map.current.on("mousemove", `Capacity-${site.label}`, (e) => {
-    //   // Change the cursor style as a UI indicator.
-    //   map.current.getCanvas().style.cursor = "pointer";
-    //
-    //   // Copy coordinates array.
-    //   const properties = e.features?.[0].properties;
-    //
-    //   const popupContent = `<div class="flex flex-col min-w-[16rem] bg-surface-raised text-content">
-    //     <span class="text-lg">${site.label}</span>
-    //   </div>`;
-    //
-    //   // Populate the popup and set its coordinates
-    //   // based on the feature found.
-    //   popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
-    // });
-    //
-    // map.current.on("mouseleave", `Capacity-sites`, () => {
-    //   map.current.getCanvas().style.cursor = "";
-    //   popup.remove();
-    // });
-
     // Generation circle
     let generationLayer =
       (map.getLayer(`Generation-${groupName}`) as unknown as CircleLayer) || undefined;
@@ -497,14 +395,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
   const addFCData = (map: mapboxgl.Map) => {
     console.log("start addFCData");
-    // Create a popup, but don't add it to the map yet.
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      anchor: "bottom-right",
-      maxWidth: "none"
-    });
-
     // Sites
     addOrUpdateMapGroup(
       map,
@@ -590,9 +480,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
             </>
           )}
           title={MAP_TITLE_SOLAR_SITES}
-        >
-          {/*<SitesLegend color={"color"} />*/}
-        </MapComponent>
+        ></MapComponent>
       )}
     </div>
   );

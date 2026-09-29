@@ -26,7 +26,7 @@ import Cookies from "js-cookie";
 import { CookieStorageKeys } from "../../helpers/cookieStorage";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
 import { setFocusedCountry, setGlobalState } from "../../helpers/globalState";
-import { PvRealData, ForecastData } from "../../types";
+import type { TimeSeries } from "../../../lib/domain/types";
 import ForecastHeader from "./index";
 
 // 10:00 UTC in July: 11:00 in Europe/London (BST), 12:00 in Europe/Amsterdam (CEST). A
@@ -34,17 +34,25 @@ import ForecastHeader from "./index";
 // boundary, so a wired-but-ignored timezone cannot produce the NL answer by luck.
 const LATEST_ACTUAL_UTC = "2025-07-01T10:00:00+00:00";
 
-const pvLiveData: PvRealData = [
-  { datetimeUtc: LATEST_ACTUAL_UTC, solarGenerationKw: 5_000_000 }
-] as unknown as PvRealData;
+const generationSeries: TimeSeries = {
+  regionName: "national",
+  capacityMw: null,
+  values: [{ timeUtc: LATEST_ACTUAL_UTC, powerMw: 5000 }]
+};
 
-const pvForecastData: ForecastData = [
-  { targetTime: LATEST_ACTUAL_UTC, expectedPowerGenerationMegawatts: 6000 },
-  { targetTime: "2025-07-01T10:30:00+00:00", expectedPowerGenerationMegawatts: 6500 }
-] as unknown as ForecastData;
+const forecastSeries: TimeSeries = {
+  regionName: "national",
+  capacityMw: null,
+  values: [
+    { timeUtc: LATEST_ACTUAL_UTC, powerMw: 6000 },
+    { timeUtc: "2025-07-01T10:30:00+00:00", powerMw: 6500 }
+  ]
+};
 
 const renderHeader = () =>
-  render(<ForecastHeader pvLiveData={pvLiveData} pvForecastData={pvForecastData} deltaView />);
+  render(
+    <ForecastHeader generationSeries={generationSeries} forecastSeries={forecastSeries} deltaView />
+  );
 
 /**
  * Every time the header renders, in DOM order.

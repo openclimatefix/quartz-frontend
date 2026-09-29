@@ -112,28 +112,6 @@ const SolarSiteChart: FC<{
   ];
   yMax = Math.ceil(getRoundedTickBoundary(yMax, yMax_levels));
 
-  const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
-    const siteForecast = combinedSitesData.sitesPvForecastData.find(
-      (fc) => fc.site_uuid === site_uuid
-    );
-    return (
-      siteForecast?.forecast_values.find(
-        (fv) => formatISODateString(fv.target_datetime_utc) === formatISODateString(targetTime)
-      )?.expected_generation_kw || 0
-    );
-  };
-
-  const getPvActualGenerationForSite = (site_uuid: string, targetTime: string) => {
-    const siteForecast = combinedSitesData.sitesPvActualData.find(
-      (pv) => pv.site_uuid === site_uuid
-    );
-    return (
-      siteForecast?.pv_actual_values.find(
-        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
-      )?.actual_generation_kw || 0
-    );
-  };
-
   const getTotalPvActualGenerationForGroup = (site_uuids: string[], targetTime: string) => {
     const sitesActuals = combinedSitesData.sitesPvActualData.filter((pv) =>
       site_uuids.includes(pv.site_uuid)

@@ -320,9 +320,6 @@ export function prettyPrintChartAxisLabelDate(
 export const MWtoGW = (MW: number) => {
   return (MW / 1000).toFixed(1);
 };
-export const KWtoGW = (MW: number) => {
-  return (MW / 1000 / 1000).toFixed(1);
-};
 export const KWtoMW = (MW: number) => {
   return (MW / 1000).toFixed(1);
 };
