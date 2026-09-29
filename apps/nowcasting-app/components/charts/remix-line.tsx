@@ -25,7 +25,7 @@ import {
 } from "../helpers/utils";
 import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
-import { displayUnitFor } from "../../lib/domain/power-unit";
+import { displayUnitFor, NO_VALUE } from "../../lib/domain/power-unit";
 import { useGenerationSources } from "../../hooks/data/use-regions";
 import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
@@ -1482,7 +1482,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             key === "DELTA" &&
                             !showNHourView &&
                             `${data["formattedDate"]}:00.000Z` >= currentTime
-                              ? "-"
+                              ? NO_VALUE
                               : prettyPrintYNumberWithCommas(
                                   String(value),
                                   key === "DELTA" && displayUnit === "GW" ? 2 : 1,

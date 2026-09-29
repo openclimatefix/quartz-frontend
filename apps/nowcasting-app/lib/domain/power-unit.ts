@@ -24,3 +24,6 @@ export const toDisplayPower = (valueMW: number, unit: PowerUnit): number =>
  * MW figure is already whole-number precision at the scale it is read.
  */
 export const displayDecimalsFor = (unit: PowerUnit): number => (unit === "GW" ? 2 : 0);
+
+/** What a figure shows when there is no value to show. One mark everywhere: an en dash. */
+export const NO_VALUE = "–";

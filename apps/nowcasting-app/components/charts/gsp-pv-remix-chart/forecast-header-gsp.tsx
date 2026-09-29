@@ -1,4 +1,5 @@
 import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
+import { NO_VALUE } from "../../../lib/domain/power-unit";
 import {
   ForecastHeadlineFigure,
   HEADER_FIGURES,
@@ -102,7 +103,7 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
             )}
           </>
         )}
-        {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || "-"} unit={unit} gsp />}
+        {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || NO_VALUE} unit={unit} gsp />}
       </div>
       <button
         type="button"
