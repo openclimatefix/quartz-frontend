@@ -270,12 +270,14 @@ const GspDeltaColumn: FC<{
 
         {!hasRows && (
           <div className={`${negative ? "pr-1.5" : "pl-1.5"}`}>
-            <div
-              className={`flex flex-col flex-1 items-center justify-center border-dashed border border-content rounded-md p-6`}
-            >
-              <span className="text-sm text-center text-content">
-                No {negative ? "negative" : "positive"} GSP deltas <br />
-                for current filters
+            {/* "Regions", not "GSPs": the rows are whichever regions the focused country has
+                (NL provinces, DE control areas). Quiet like the empty state below the chips —
+                nothing to show under a filter is not a fault. */}
+            <div className="flex flex-col flex-1 items-center justify-center border-dashed border border-edge rounded-md p-6">
+              <span className="text-xs text-center text-content-secondary">
+                No regions {negative ? "under" : "over"} forecast
+                <br />
+                for the current filters
               </span>
             </div>
           </div>
@@ -288,6 +290,20 @@ type DeltaChartProps = {
   date?: string;
   className?: string;
 };
+/**
+ * The deltas panel's share of the card's flexible height, as a flex ratio against the chart's
+ * `flex-1`: 0.67 is 40% beside the national chart alone, 0.86 is 30% beside it and the regional
+ * chart. A share of the card, not of its own contents, so the chart keeps one size whatever the
+ * table holds — rows, a chip filter, or the empty state. It was `h-[40%]`/`h-[30%]`, which never
+ * bound anything (a percentage height needs a definite parent), so the panel sized to its
+ * contents and the chart gave up or took the difference; a fixed `h-64` after that overflowed the
+ * card instead, since the card's height is the user's to drag.
+ */
+const DELTA_PANEL_FLEX = {
+  alone: "flex-[0.67_1_0%]",
+  withRegion: "flex-[0.86_1_0%]"
+} as const;
+
 const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
@@ -495,10 +511,13 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   return (
     <>
-      <div className={`flex flex-col flex-1 ${className || ""}`}>
+      {/* `min-h-0` down the column: a flex item's default `min-height: auto` is its content, so
+          without it a chart that grew pushed every box above it past the card's fixed height —
+          the plot swelled to two screens tall. */}
+      <div className={`flex flex-col flex-1 min-h-0 ${className || ""}`}>
         {/* The same `p-2` card and plot well as `pv-remix-chart.tsx`, so the header and plot
             sit in the same place when the comparison switches. */}
-        <div className="flex flex-1 flex-col relative px-2 pt-1.5 pb-2 dash:h-auto">
+        <div className="flex flex-1 min-h-0 flex-col relative px-2 pt-1.5 pb-2 dash:h-auto">
           <ForecastHeader
             forecastSeries={forecast.data}
             generationSeries={generation0.data}
@@ -511,28 +530,29 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
               <Spinner></Spinner>
             </div>
           )}
-          <div className="relative flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
+          <div className="relative flex-1 min-h-0 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
             <DataLoadingChartStatus<NationalEndpointStates> loadingState={loadingState} />
-            <RemixLine
-              national
-              resetTime={resetTime}
-              timeNow={liveSlot}
-              timeOfInterest={selectedLabel}
-              setTimeOfInterest={setSelectedTime}
-              data={chartData}
-              yMax={yMax}
-              yTicks={getTicks(yMax, Y_MAX_TICKS)}
-              visibleLines={visibleLines}
-              deltaView={true}
-            />
+            {/* Absolute, so the chart takes the well's size and never gives it one: recharts'
+                `ResponsiveContainer` is 100% of its parent, and a parent sized by its content
+                grows with it — a loop that only a box outside the flow breaks. */}
+            <div className="absolute inset-0">
+              <RemixLine
+                national
+                resetTime={resetTime}
+                timeNow={liveSlot}
+                timeOfInterest={selectedLabel}
+                setTimeOfInterest={setSelectedTime}
+                data={chartData}
+                yMax={yMax}
+                yTicks={getTicks(yMax, Y_MAX_TICKS)}
+                visibleLines={visibleLines}
+                deltaView={true}
+              />
+            </div>
           </div>
         </div>
-        {/* Directly under the plot here: the delta card has no legend, it has the bucket table,
-            and the track belongs with the chart it scrubs rather than floating above a list of
-            GSPs. Its right edge does not line up — delta view mounts a second Y axis on the
-            right; see `chart-scrubber.tsx`. */}
         {selectedMapRegionIds && selectedMapRegionIds.length > 0 && (
-          <div className="flex-1 flex flex-col relative dash:h-auto">
+          <div className="flex-1 min-h-0 flex flex-col relative dash:h-auto">
             <GspPvRemixChart
               close={() => {
                 setSelectedMapRegionIds([]);
@@ -549,6 +569,8 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
         )}
         {/* The scrub track, above the legend and inset to the plot's own x-axis. See
             `components/shell/chart-scrubber.tsx`. */}
+        {/* The delta chart's right inset, which differs for its second Y axis — see
+            `plotInsetRightPx`. */}
         <ChartScrubber
           domain={plottedDomain}
           insetRightPx={plotInsetRightPx(true, !!selectedMapRegionIds?.length)}
@@ -561,36 +583,33 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
         <div
           // Chips and headings fixed, only the rows scrolling beneath them — the chips used to
           // be sticky in the same scroll as the rows and headings, and they collided.
-          className={`flex flex-col flex-grow-0 flex-shrink min-h-0 ${
-            selectedMapRegionIds?.length ? "h-[30%]" : "h-[40%]"
+          className={`flex flex-col min-h-0 pb-3 ${
+            selectedMapRegionIds?.length ? DELTA_PANEL_FLEX.withRegion : DELTA_PANEL_FLEX.alone
           }`}
         >
+          {/* The chips and the headings stay whether or not there are actuals, so crossing the
+              publishing edge empties the table in place rather than collapsing the panel. */}
           <DeltaBuckets
             bucketSelection={selectedBuckets}
-            gspDeltas={gspDeltas}
+            gspDeltas={hasGspPvInitialForSelectedTime ? gspDeltas : undefined}
             unit={displayUnit}
           />
-          {!hasGspPvInitialForSelectedTime && (
-            // One line, worded as the header's coverage note is: this is the ordinary state near
-            // the publishing edge, and a dashed box the height of the table read as a fault.
-            <div className="mx-3 py-3 text-xs text-content-secondary">
-              No actuals yet for this time. Try scrubbing further back.
+          <div className="flex pt-0.5 mx-3">
+            <GspDeltaColumnHeading unit={displayUnit} negative />
+            <GspDeltaColumnHeading unit={displayUnit} />
+          </div>
+          {hasGspPvInitialForSelectedTime && gspDeltas ? (
+            // Fills what the panel leaves under the chips and headings (`DELTA_PANEL_FLEX`).
+            <div className="flex flex-1 min-h-0 overflow-y-auto mx-3">
+              <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} negative />
+              <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} />
             </div>
-          )}
-          {hasGspPvInitialForSelectedTime && gspDeltas && (
-            <>
-              <div className="flex pt-0.5 mx-3">
-                <GspDeltaColumnHeading unit={displayUnit} negative />
-                <GspDeltaColumnHeading unit={displayUnit} />
-              </div>
-              {/* `max-h-96` is the real bound: the panel's `h-[%]` resolves against a card with
-                  no set height, so without it the table grows to every row and stretches the
-                  chart. */}
-              <div className="flex flex-1 min-h-0 max-h-96 overflow-y-auto mx-3">
-                <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} negative />
-                <GspDeltaColumn gspDeltas={gspDeltas} unit={displayUnit} />
-              </div>
-            </>
+          ) : (
+            // In the table's own space, a table's height, worded as the header's coverage note
+            // is: this is the ordinary state near the publishing edge, not a fault.
+            <div className="mx-3 flex flex-1 min-h-0 items-center justify-center rounded border border-edge text-xs text-content-secondary">
+              No actuals yet for this time. Try selecting a previous period.
+            </div>
           )}
         </div>
       </div>

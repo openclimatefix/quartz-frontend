@@ -31,7 +31,7 @@ import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
 import useGlobalState, { useCountryState } from "../helpers/globalState";
 import { DELTA_BUCKET } from "../../constant";
-import { getZoomYMax } from "../helpers/chartUtils";
+import { getZoomYMax, niceQuarterStep } from "../helpers/chartUtils";
 import { useTokens } from "../helpers/colour";
 import { selectAxisTicks, TickDensity, tickLabels, type TickLabel } from "../../lib/time/ticks";
 import { DELTA_COOL, DELTA_WARM } from "../../lib/domain/delta-ramp";
@@ -876,6 +876,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
     );
   };
 
+  // In delta view the generation axis sits on quarters, like the delta axis beside it (−D, −D/2,
+  // 0, +D/2, +D), so every gridline carries a label on both sides. `getTicks` picks thirds or
+  // fifths or a special case, which the delta axis's labels fell between. The top rounds up to
+  // four round steps, so the quarters stay round numbers. Zoom keeps its own domain.
+  const quarterStep = deltaView && !isSitesChart ? niceQuarterStep(Number(yMax)) : 0;
+  const leftTop = quarterStep ? quarterStep * 4 : yMax;
+  const leftTicks = quarterStep ? [1, 2, 3, 4].map((k) => k * quarterStep) : yTicks;
+
   let rightChartMargin = CHART_MARGIN_RIGHT_PX;
   let deltaLabelOffset = roundTickMax ? -20 : -10;
   if (deltaView) {
@@ -1060,8 +1068,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
               yAxisId={"y-axis"}
               tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
               tickLine={false}
-              ticks={yTicks}
-              domain={globalIsZoomed && !isSitesChart ? [0, Number(zoomYMax * 1.1)] : [0, yMax]}
+              ticks={leftTicks}
+              domain={globalIsZoomed && !isSitesChart ? [0, Number(zoomYMax * 1.1)] : [0, leftTop]}
               label={{
                 value: isSitesChart ? "Generation (KW)" : `Generation (${displayUnit})`,
                 angle: 270,
@@ -1091,12 +1099,17 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   label={{
                     value: `Actual − Forecast (${displayUnit})`,
                     angle: 90,
-                    position: "insideRight",
+                    // Centred on the axis at any length, like the generation title opposite.
+                    // `insideRight` anchors rotated text at its END, so it ran up from the
+                    // midpoint and needed a `dy` tuned to one string ("Delta (MW)"); the longer
+                    // title ran off the top. `center` anchors the middle; `dx` adds half the
+                    // axis width back so it sits where `insideRight` put it across.
+                    position: "center",
                     fill: plot.axis,
                     style: { fontSize: "10px", fontFamily: MONO },
                     offset: 0,
-                    dx: deltaLabelOffset,
-                    dy: 29
+                    dx: CHART_DELTA_Y_AXIS_WIDTH_PX / 2 + deltaLabelOffset,
+                    dy: 0
                   }}
                   domain={[-deltaYMax, deltaYMax]}
                   padding={{ top: 0, bottom: 0 }}

@@ -23,13 +23,14 @@ import { useFocusedCountry } from "../../../hooks/data";
 const deltaTextClass = (value: number, extent: number): string =>
   deltaRampWantsDarkText(value, extent) ? "text-content-on-accent" : "text-content";
 
-const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
+const BucketItem: React.FC<Bucket & { unit: PowerUnit; disabled?: boolean }> = ({
   dataKey,
   quantity,
   text,
   lowerBound,
   upperBound,
-  unit
+  unit,
+  disabled = false
 }) => {
   const [selectedBuckets, setSelectedBuckets] = useGlobalState("selectedBuckets");
   const [activeUnit] = useGlobalState("activeUnit");
@@ -81,7 +82,9 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
       <div
         className={`${
           isSelected ? textClass : isZero ? "text-content-secondary" : ""
-        } justify-between flex flex-1 flex-col items-center rounded`}
+        } justify-between flex flex-1 flex-col items-center rounded ${
+          disabled ? "opacity-40 pointer-events-none" : ""
+        }`}
       >
         <button
           // The fill is a computed rgb(), not a Tailwind swatch, so background and border come
@@ -96,6 +99,7 @@ const BucketItem: React.FC<Bucket & { unit: PowerUnit }> = ({
             color: isSelected || isZero ? undefined : rampColor
           }}
           onClick={toggleBucketSelection}
+          disabled={disabled}
         >
           <span className="text-base font-semibold leading-tight">{quantity}</span>
           {/*
@@ -134,9 +138,11 @@ const DeltaBuckets: React.FC<{
   lowerBound?: number;
   upperBound?: number;
 }> = ({ gspDeltas, unit, negative = false }) => {
-  if (!gspDeltas?.size) return null;
-
-  const deltaArray = Array.from(gspDeltas.values());
+  // Drawn even with nothing to count — every bucket at 0, greyed and inert — so the panel keeps
+  // its shape when the cursor is past the latest actuals, instead of collapsing and moving
+  // everything under it. A count of 0 is true there; a delta of 0 would not be.
+  const empty = !gspDeltas?.size;
+  const deltaArray = Array.from(gspDeltas?.values() ?? []);
 
   const groupedDeltas: Map<DELTA_BUCKET, GspDeltaValue[]> = new Map([
     [DELTA_BUCKET.NEG4, []],
@@ -161,7 +167,14 @@ const DeltaBuckets: React.FC<{
     <>
       <div className="bg-surface-panel mx-3 pb-1 flex justify-center gap-1 lg:gap-2">
         {buckets.map((bucket) => {
-          return <BucketItem key={`Bucket-${bucket.dataKey}`} {...bucket} unit={unit}></BucketItem>;
+          return (
+            <BucketItem
+              key={`Bucket-${bucket.dataKey}`}
+              {...bucket}
+              unit={unit}
+              disabled={empty}
+            ></BucketItem>
+          );
         })}
       </div>
     </>

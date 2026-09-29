@@ -3,7 +3,8 @@ import {
   getSettlementPeriodForDate,
   getTicks,
   getUtcHalfHourIndex,
-  getZoomYMax
+  getZoomYMax,
+  niceQuarterStep
 } from "./chartUtils";
 import { ChartData } from "../charts/remix-line";
 import { describe, expect, it, test } from "@jest/globals";
@@ -406,5 +407,20 @@ describe("getSettlementPeriodForDate — timezone parameterisation", () => {
       getSettlementPeriodForDate(utc(dayStartUtc).plus({ hours }), zone);
     expect(lastOf("2025-03-29T23:00:00Z", "Europe/Amsterdam", 22.5)).toBe(46);
     expect(lastOf("2025-10-25T22:00:00Z", "Europe/Amsterdam", 24.5)).toBe(50);
+  });
+});
+
+describe("niceQuarterStep", () => {
+  test.each([
+    [16000, 4000],
+    [12500, 4000],
+    [12000, 3000],
+    [14000, 4000],
+    [250, 75],
+    [9, 2.5],
+    [0, 1]
+  ])("%d → step %d", (max, step) => {
+    expect(niceQuarterStep(max)).toBe(step);
+    if (max > 0) expect(niceQuarterStep(max) * 4).toBeGreaterThanOrEqual(max);
   });
 });

@@ -25,9 +25,10 @@ const REASON_TEXT: Record<Reason, string> = {
 
 const REASON_TITLE: Record<Reason, string> = {
   "no-forecast": "Nothing has arrived for the whole fetched window, not just this instant.",
-  "no-forecast-at-cursor": "No region has a forecast for this moment. Try scrubbing further back.",
+  "no-forecast-at-cursor":
+    "No region has a forecast for this moment. Try selecting a previous period.",
   "no-actuals-at-cursor":
-    "No region has reported generation for this moment yet, so there is no delta to draw. Try scrubbing further back."
+    "No region has reported generation for this moment yet, so there is no delta to draw. Try selecting a previous period."
 };
 
 const REASON_ORDER: Reason[] = ["no-forecast", "no-forecast-at-cursor", "no-actuals-at-cursor"];

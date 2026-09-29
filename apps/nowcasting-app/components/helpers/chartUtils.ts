@@ -190,3 +190,20 @@ export const getSettlementPeriodForDate = (date: DateTime, timezone: string = "E
   const interval = zonedDate.diff(midnightBefore, "minutes").minutes;
   return Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed;
 };
+
+/** Tick steps that read as round numbers at any power of ten. */
+const NICE_STEPS = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10];
+
+/**
+ * The smallest round step `s` with `quarters * s >= max`, for an axis that has to sit on
+ * `quarters` equal intervals — the delta chart's generation axis, whose ticks must land on the
+ * delta axis's (−D, −D/2, 0, +D/2, +D). 12,500 → 4,000 (top 16,000); 16,000 → 4,000.
+ */
+export const niceQuarterStep = (max: number, quarters = 4): number => {
+  if (!(max > 0)) return 1;
+  const raw = max / quarters;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = NICE_STEPS.find((n) => n * magnitude >= raw - 1e-9) ?? 10;
+  // `toPrecision` strips the float tail a fractional step times a power of ten can leave.
+  return Number((step * magnitude).toPrecision(12));
+};
