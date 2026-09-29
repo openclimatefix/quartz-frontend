@@ -6,7 +6,12 @@ import { ActiveUnit, MAP_TITLE_MAIN } from "./types";
 import useGlobalState, { setGlobalState } from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
-import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../lib/domain/power-unit";
+import {
+  displayDecimalsFor,
+  displayUnitFor,
+  NO_VALUE,
+  toDisplayPower
+} from "../../lib/domain/power-unit";
 import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
 import {
@@ -190,18 +195,27 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
   // Toggle constraints visibility on map
   useEffect(() => {
     if (mapRef.current) {
-      safelyUpdateMapData(mapRef.current, (m) => {
-        if (m.getLayer("boundary-data")) {
-          m.setLayoutProperty("boundary-data", "visibility", showConstraints ? "visible" : "none");
-        }
-        if (m.getLayer("boundary-data-labels")) {
-          m.setLayoutProperty(
-            "boundary-data-labels",
-            "visibility",
-            showConstraints ? "visible" : "none"
-          );
-        }
-      });
+      // Its own update kind, so a data update deferred alongside it does not replace it.
+      safelyUpdateMapData(
+        mapRef.current,
+        (m) => {
+          if (m.getLayer("boundary-data")) {
+            m.setLayoutProperty(
+              "boundary-data",
+              "visibility",
+              showConstraints ? "visible" : "none"
+            );
+          }
+          if (m.getLayer("boundary-data-labels")) {
+            m.setLayoutProperty(
+              "boundary-data-labels",
+              "visibility",
+              showConstraints ? "visible" : "none"
+            );
+          }
+        },
+        "constraints"
+      );
     }
   }, [showConstraints]);
 
@@ -335,7 +349,7 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
               : "awaiting";
           const forecastPercentText =
             state.dataState === "value" ? ((state.normalized ?? 0) * 100).toFixed(0) : forecastText;
-          const actualText = state.actual === null || state.actual === undefined ? "-" : "";
+          const actualText = state.actual === null || state.actual === undefined ? NO_VALUE : "";
 
           // What the left-hand number actually is. Falls back to "Actual" only while the
           // manifest is still in flight — never as a permanent name for it, which is the whole
@@ -376,15 +390,17 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
               actualValue =
                 comparedCapacity > 0
                   ? (((state.comparedActual as number) / comparedCapacity) * 100).toFixed(0)
-                  : "-";
+                  : NO_VALUE;
               forecastValue =
                 comparedCapacity > 0
                   ? (((state.comparedForecast as number) / comparedCapacity) * 100).toFixed(0)
-                  : "-";
+                  : NO_VALUE;
             } else {
               actualValue =
                 actualText ||
-                (capacity > 0 ? (((state.actual as number) / capacity) * 100).toFixed(0) : "-");
+                (capacity > 0
+                  ? (((state.actual as number) / capacity) * 100).toFixed(0)
+                  : NO_VALUE);
               forecastValue = forecastPercentText;
             }
             unit = "%";
@@ -392,8 +408,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             // This region's own country's national capacity, off the feature.
             const nationalCapacity = capacityByCountryRef.current[featureCountry] ?? 0;
             actualValue =
-              nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : "-";
-            forecastValue = "-";
+              nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : NO_VALUE;
+            forecastValue = NO_VALUE;
             // Dead weight in practice — this branch's own block below overwrites
             // `actualAndForecastSection` with its "% of National" markup and never reads `unit`
             // — but set honestly all the same rather than left as a stray "MW".

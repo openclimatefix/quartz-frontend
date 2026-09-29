@@ -17,22 +17,50 @@ export interface CSVRow {
 
 export const getNHourForecastLabel = (nHourForecast: number) => `${nHourForecast}-hour forecast`;
 
+export type CsvLabels = {
+  periodLabel: string;
+  /** Header labels of the country's first and second observer; absent for a missing observer. */
+  observerLabels: [string | undefined, string | undefined];
+};
+
+export const DEFAULT_CSV_LABELS: CsvLabels = {
+  periodLabel: "Settlement Period",
+  observerLabels: ["PVLive Initial", "PVLive Updated"]
+};
+
+/**
+ * The period and observer labels the CSV file and its column-selection modal both show:
+ * the config override if present, else the manifest's label, else the observer's raw name.
+ */
+export const csvLabelsFor = (
+  config: { periodLabel?: string; csvObserverLabels?: Record<string, string> } | undefined,
+  sources: { name: string; label?: string }[]
+): CsvLabels => {
+  const labelOf = (source: { name: string; label?: string } | undefined) =>
+    source && (config?.csvObserverLabels?.[source.name] ?? (source.label || source.name));
+  return {
+    periodLabel: config?.periodLabel ?? "Period",
+    observerLabels: [labelOf(sources[0]), labelOf(sources[1])]
+  };
+};
+
 const getColumnConfig = (
-  nHourForecast: number
+  nHourForecast: number,
+  labels: CsvLabels
 ): Record<
   Exclude<CSVColumn, "pLevels">,
   { key: keyof Omit<CSVRow, "pLevelValues">; header: string }
 > => ({
   startDateTime: { key: "startDateTime", header: "Start DateTime" },
   endDateTime: { key: "endDateTime", header: "End DateTime" },
-  settlementPeriod: { key: "settlementPeriod", header: "Settlement Period" },
+  settlementPeriod: { key: "settlementPeriod", header: labels.periodLabel },
   solarGenerationPvliveInitial: {
     key: "solarGenerationPvliveInitial",
-    header: "Solar Generation PVLive Initial (MW)"
+    header: `Solar Generation ${labels.observerLabels[0]} (MW)`
   },
   solarGenerationPvliveUpdated: {
     key: "solarGenerationPvliveUpdated",
-    header: "Solar Generation PVLive Updated (MW)"
+    header: `Solar Generation ${labels.observerLabels[1]} (MW)`
   },
   delta: { key: "delta", header: "Delta (MW)" },
   solarForecast: { key: "solarForecast", header: "Solar Forecast (MW)" },
@@ -162,13 +190,14 @@ export const downloadNationalCsv = (
   nHourForecast: number,
   pLevels: [number, number][],
   timezone: string = DEFAULT_CSV_TIMEZONE,
-  country: string = DEFAULT_CSV_COUNTRY
+  country: string = DEFAULT_CSV_COUNTRY,
+  labels: CsvLabels = DEFAULT_CSV_LABELS
 ) => {
   if (!series.forecast && !series.generationInitial && !series.generationUpdated && !series.nHour)
     return;
 
   const csvRows = buildCsvRows(series, pLevels, timezone, country);
-  const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels);
+  const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels, labels);
 
   // download
   const blob = new Blob([csv], { type: "text/csv" });
@@ -190,9 +219,10 @@ export function generateCsv(
   rows: CSVRow[],
   selectedColumns: CSVColumn[],
   nHourForecast: number,
-  pLevels: [number, number][]
+  pLevels: [number, number][],
+  labels: CsvLabels = DEFAULT_CSV_LABELS
 ): string {
-  const COLUMN_CONFIG = getColumnConfig(nHourForecast);
+  const COLUMN_CONFIG = getColumnConfig(nHourForecast, labels);
   const pLevelLevels = pLevels.flat();
 
   // "pLevels" is a single selectable column that expands to one header/value per selected band
@@ -206,10 +236,12 @@ export function generateCsv(
       ? pLevelLevels.map((level) => row.pLevelValues[level] ?? "")
       : [row[COLUMN_CONFIG[col].key] ?? ""];
 
-  const headers = selectedColumns.flatMap(getHeaders);
-  const lines = rows.map((row) =>
-    joinCsvRow(selectedColumns.flatMap((col) => getValues(row, col)))
+  // A single-observer country has no second generation column, in the file as in the modal.
+  const columns = selectedColumns.filter(
+    (col) => col !== "solarGenerationPvliveUpdated" || labels.observerLabels[1] !== undefined
   );
+  const headers = columns.flatMap(getHeaders);
+  const lines = rows.map((row) => joinCsvRow(columns.flatMap((col) => getValues(row, col))));
 
   return [joinCsvRow(headers), ...lines].join("\n");
 }

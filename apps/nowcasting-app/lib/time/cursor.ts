@@ -186,8 +186,8 @@ export const isOnCadence = (instant: Instant, cadenceMinutes: number): boolean =
  *
  * This is what every cursor *input* goes through: a click on the chart, a scrub, a restored
  * value. Clicking the chart usually lands on the grid already and this is a no-op; it earns
- * its keep when the grid coarsens under a value (NL switched off with the cursor at 16:15) or
- * when a country's own point is not on the shared grid.
+ * its keep when a country's own point is not on the shared grid. A cursor already in place that
+ * the grid coarsens under is re-snapped with `snapDownToCadence` instead, which keeps its period.
  */
 export const snapToCadence = (instant: Instant, cadenceMinutes: number): string =>
   toCursorString(roundToCadence(instant, cadenceMinutes, "up"));
@@ -195,12 +195,16 @@ export const snapToCadence = (instant: Instant, cadenceMinutes: number): string 
 /**
  * The last slot at or before an instant — `snapToCadence`'s floor.
  *
- * The ceiling is the rule for a cursor *value*, and nothing here changes that. This exists for
- * the one job the ceiling cannot do: finding the far end of a **bounded** span. The scrub
- * track's last reachable slot is the last one inside the data window, and ceiling the window's
- * end would put it one slot past the last published value — a handle that can be dragged onto
- * an instant nothing has a number for. Floor at the top of a range, ceiling everywhere a
- * cursor input is resolved.
+ * Two jobs the ceiling cannot do. The far end of a **bounded** span: the scrub track's last
+ * reachable slot is the last one inside the data window, and ceiling the window's end would put
+ * it one slot past the last published value — a handle that can be dragged onto an instant
+ * nothing has a number for.
+ *
+ * And **re-snapping a cursor already in place** onto a coarser grid (playback pausing off the
+ * focused grid, focus moving to a coarser country). Every country reads the period that starts
+ * at or before the cursor (`periodStartForInstant`), and the floor is that period's start, so
+ * the snap leaves the shown period alone. The ceiling moved it on one: paused at 16:15, GB's
+ * 16:00–16:30 became 16:30–17:00.
  */
 export const snapDownToCadence = (instant: Instant, cadenceMinutes: number): string =>
   toCursorString(roundToCadence(instant, cadenceMinutes, "down"));

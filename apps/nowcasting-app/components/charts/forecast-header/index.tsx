@@ -1,4 +1,5 @@
 import React from "react";
+import { NO_VALUE } from "../../../lib/domain/power-unit";
 import { useFocusedCountry } from "../../../hooks/data/use-countries";
 import { cadenceMinutesFor, nextSlot, periodForLabel } from "../../../lib/time/cursor";
 import useTimeNow from "../../hooks/use-time-now";
@@ -43,6 +44,12 @@ const latestReading = (series?: TimeSeries) => {
   return undefined;
 };
 
+/** What the header prints for a figure with no published value behind it. */
+
+/** An MW reading in GW, or the placeholder when nothing was published. A real 0 stays 0.0. */
+const gwOrPlaceholder = (mw: number | null | undefined): string =>
+  typeof mw === "number" ? MWtoGW(mw) : NO_VALUE;
+
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   pvLiveData,
   pvForecastData,
@@ -61,10 +68,10 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
 
   // get the latest Actual pv value in GW
   const selectedPvActualInGW = generationSeries
-    ? MWtoGW(latestGeneration?.powerMw ?? 0)
-    : pvLiveData?.length
-    ? KWtoGW(pvLiveData?.[0]?.solarGenerationKw)
-    : "0.0";
+    ? gwOrPlaceholder(latestGeneration?.powerMw)
+    : typeof pvLiveData?.[0]?.solarGenerationKw === "number"
+    ? KWtoGW(pvLiveData[0].solarGenerationKw)
+    : NO_VALUE;
 
   // get pv times
   const latestPvActualDatetime =
@@ -104,23 +111,27 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
 
   // One shape for both dialects, so the two lookups and the play button below read the same
   // whichever the caller passed.
-  const forecastPoints: { timeUtc: string; powerMw: number }[] = forecastSeries
-    ? forecastSeries.values.map((v) => ({ timeUtc: v.timeUtc, powerMw: v.powerMw ?? 0 }))
+  const forecastPoints: { timeUtc: string; powerMw: number | null }[] = forecastSeries
+    ? forecastSeries.values.map((v) => ({ timeUtc: v.timeUtc, powerMw: v.powerMw }))
     : (pvForecastData ?? []).map((fc) => ({
         timeUtc: fc.targetTime,
         powerMw: fc.expectedPowerGenerationMegawatts
       }));
   const forecastAt = (formattedDate: string) =>
-    forecastPoints.find((fc) => formatISODateString(fc.timeUtc) === formattedDate)?.powerMw || 0;
+    forecastPoints.find((fc) => formatISODateString(fc.timeUtc) === formattedDate)?.powerMw;
 
   // Get the next OCF forecast for the last PV value time
-  const selectedPvForecastInGW = MWtoGW(forecastAt(pvForecastDatetime));
+  const selectedPvForecastInGW = gwOrPlaceholder(forecastAt(pvForecastDatetime));
 
   // Get the next OCF forecast
-  const nextPvForecastInGW = MWtoGW(forecastAt(followingPvForecastDateString));
+  const nextPvForecastInGW = gwOrPlaceholder(forecastAt(followingPvForecastDateString));
 
   if (deltaView) {
-    const deltaValue = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
+    // No delta unless both sides were published.
+    const deltaValue =
+      selectedPvActualInGW === NO_VALUE || selectedPvForecastInGW === NO_VALUE
+        ? NO_VALUE
+        : (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
     return (
       <ForecastHeaderUI
         forecastNextPV={nextPvForecastInGW}

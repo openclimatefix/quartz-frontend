@@ -28,7 +28,7 @@ import {
 import { theme } from "../../tailwind.config";
 import { Feature, FeatureCollection } from "geojson";
 import Slider from "./sitesMapFeatures/sitesZoomSlider";
-import { safelyUpdateMapData } from "../helpers/mapUtils";
+import { safelyUpdateMapData, setBoundarySourceData } from "../helpers/mapUtils";
 import dynamic from "next/dynamic";
 
 const yellow = theme.extend.colors.solar.DEFAULT;
@@ -319,23 +319,13 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
 
     if (groupName === "regions") {
-      let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
-        | mapboxgl.GeoJSONSource
-        | undefined;
       // dnoShapeData now arrives from a fetch (see the effect above) rather than being
       // available synchronously on first render. The source is therefore added ONCE with an
-      // empty collection and populated when the geometry lands — never conditionally on the
+      // empty collection and populated when the geometry arrives — never conditionally on the
       // data being present. The layer below is added unconditionally and names this source,
       // so deferring the source until the fetch resolves makes `addLayer` reference a source
       // that does not exist yet, which Mapbox throws on.
-      if (!dnoBoundariesSource) {
-        map.addSource("dnoBoundaries", {
-          type: "geojson",
-          data: dnoShapeData ?? { type: "FeatureCollection", features: [] }
-        });
-      } else if (dnoShapeData) {
-        dnoBoundariesSource.setData(dnoShapeData);
-      }
+      setBoundarySourceData(map, "dnoBoundaries", dnoShapeData);
 
       let dnoBoundariesLayer =
         (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
@@ -357,19 +347,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
 
     if (groupName === "gsps") {
-      let gspBoundariesSource = map.getSource("gspBoundaries") as unknown as
-        | mapboxgl.GeoJSONSource
-        | undefined;
       // Same deferred-arrival handling as dnoBoundaries above: source added once, empty,
       // then populated — so the unconditional `addLayer` below always has it to point at.
-      if (!gspBoundariesSource) {
-        map.addSource("gspBoundaries", {
-          type: "geojson",
-          data: gspShapeData ?? { type: "FeatureCollection", features: [] }
-        });
-      } else if (gspShapeData) {
-        gspBoundariesSource.setData(gspShapeData);
-      }
+      setBoundarySourceData(map, "gspBoundaries", gspShapeData);
 
       let gspBoundariesLayer =
         (map.getLayer(`gspBoundaries`) as unknown as CircleLayer) || undefined;
@@ -594,7 +574,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
       ) : (
         <MapComponent
           loadDataOverlay={(map: { current: mapboxgl.Map }) =>
-            safelyUpdateMapData(map.current, addFCData)
+            safelyUpdateMapData(map.current, addFCData, "load")
           }
           updateData={{
             newData: newDataForMap,

@@ -68,6 +68,13 @@ const selectedIdsFromFilter = (filter: unknown): string[] =>
     ? (filter.slice(2) as string[]).map((key) => regionIdOfFeatureKey(String(key)))
     : [];
 
+/**
+ * A clicked feature's region id, as the string every selection holds. GB GSP features carry a
+ * numeric `gsp_id` here, and a selection mixing `"5"` and `5` can neither match nor deselect.
+ */
+const regionIdOfFeature = (feature: { properties?: Record<string, unknown> | null }): string =>
+  String(feature.properties?.id);
+
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
   const [clickedMapRegionIds, setClickedMapRegionIds] = useCountryState("clickedMapRegionIds");
   const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
@@ -173,7 +180,7 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
           // owns the focus-then-select ordering; doing it by hand here would silently drop
           // the click.
           if (featureCountry.toUpperCase() !== focusedCountryRef.current.toUpperCase()) {
-            focusAndSelectRegions(featureCountry, [String(clickedFeature.properties?.id)]);
+            focusAndSelectRegions(featureCountry, [regionIdOfFeature(clickedFeature)]);
             return;
           }
 
@@ -196,7 +203,7 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
                     feature.properties?.[REGION_COUNTRY_PROPERTY] ?? featureCountry
                   ).toUpperCase() === featureCountry.toUpperCase()
               )
-              .map((feature) => feature.properties?.id);
+              .map(regionIdOfFeature);
             if (clickedIds.length > 0) {
               const newSelectedMapRegionIds = clickedMapRegionIdsRef?.current
                 ? [...clickedMapRegionIdsRef.current]
@@ -210,20 +217,18 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
               });
               // Named country, not the hook setter — see the note on the plain-click branch.
               setCountryState("clickedMapRegionIds", newSelectedMapRegionIds, featureCountry);
-            } else {
-              console.log("no features clicked");
             }
           } else {
             // Ids are strings throughout now. The numeric branch this used to carry existed
             // only so the `["in", "id", …]` filter would match a numeric `gsp_id`; the filter
             // matches on `featureKey`, which `featureKeyFor` normalises, so there is nothing
             // left for the coercion to fix. `selectedMapRegionIds` was already string-valued.
-            let ids: string[] = [String(clickedFeature.properties?.id)];
+            let ids: string[] = [regionIdOfFeature(clickedFeature)];
             //  if there is one selected region, and it is the same as the clicked region, then deselect it
             if (
               selectedMapRegionIdsRef.current &&
               selectedMapRegionIdsRef.current.length === 1 &&
-              selectedMapRegionIdsRef.current[0] === String(clickedFeature.properties?.id)
+              selectedMapRegionIdsRef.current[0] === regionIdOfFeature(clickedFeature)
             ) {
               ids = [];
             }

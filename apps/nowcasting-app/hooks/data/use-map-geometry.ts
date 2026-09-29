@@ -41,36 +41,75 @@ import { useFocusedCountry } from "./use-countries";
 
 type GeoAssetResult<T> = { data: T | undefined; isLoading: boolean; error: unknown };
 
+// A failed fetch is retried here: `loadGeoAsset` evicts a rejection, but nothing else would
+// ask again, and one CDN blip would leave a country without polygons until a reload. Three
+// attempts with backoff, then `error` is set; if the asset is still missing when the tab
+// regains focus or comes back online, another round starts. `error` stays set through that
+// round, so it does not flicker back to loading, and is cleared when the asset arrives.
+const GEO_ASSET_ATTEMPTS = 3;
+const GEO_ASSET_RETRY_BASE_MS = 1000;
+
 const useGeoAsset = <T>(url: string | undefined): GeoAssetResult<T> => {
   const [entry, setEntry] = useState<{ url: string; data: T } | undefined>(undefined);
-  const [error, setError] = useState<unknown>(undefined);
+  // Keyed by URL like `entry`, so a failure for the previous URL is never reported under this one.
+  const [failure, setFailure] = useState<{ url: string; error: unknown } | undefined>(undefined);
   const latestUrl = useRef(url);
 
   useEffect(() => {
     latestUrl.current = url;
-    if (!url) {
-      setError(undefined);
-      return;
-    }
+    if (!url) return;
     let cancelled = false;
-    setError(undefined);
-    loadGeoAsset<T>(url)
-      .then((data) => {
-        if (cancelled || latestUrl.current !== url) return;
-        setEntry({ url, data });
-      })
-      .catch((err) => {
-        if (cancelled || latestUrl.current !== url) return;
-        setError(err);
-      });
+    let arrived = false;
+    let inFlight = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const attempt = (attemptIndex: number) => {
+      inFlight = true;
+      loadGeoAsset<T>(url)
+        .then((data) => {
+          inFlight = false;
+          if (cancelled || latestUrl.current !== url) return;
+          arrived = true;
+          setEntry({ url, data });
+          setFailure(undefined);
+        })
+        .catch((err) => {
+          inFlight = false;
+          if (cancelled || latestUrl.current !== url) return;
+          if (attemptIndex + 1 < GEO_ASSET_ATTEMPTS) {
+            retryTimer = setTimeout(() => {
+              retryTimer = undefined;
+              attempt(attemptIndex + 1);
+            }, GEO_ASSET_RETRY_BASE_MS * 2 ** attemptIndex);
+            return;
+          }
+          setFailure({ url, error: err });
+        });
+    };
+
+    const retryIfMissing = () => {
+      if (cancelled || arrived || inFlight || retryTimer !== undefined) return;
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+      attempt(0);
+    };
+
+    attempt(0);
+    window.addEventListener("focus", retryIfMissing);
+    window.addEventListener("online", retryIfMissing);
+    document.addEventListener("visibilitychange", retryIfMissing);
     return () => {
       cancelled = true;
+      if (retryTimer !== undefined) clearTimeout(retryTimer);
+      window.removeEventListener("focus", retryIfMissing);
+      window.removeEventListener("online", retryIfMissing);
+      document.removeEventListener("visibilitychange", retryIfMissing);
     };
   }, [url]);
 
   // The load-bearing guard. An entry fetched for a different URL is simply not this URL's
   // answer, whatever order the promises settled in.
   const data = entry && entry.url === url ? entry.data : undefined;
+  const error = failure && failure.url === url && data === undefined ? failure.error : undefined;
   return { data, isLoading: !!url && data === undefined && error === undefined, error };
 };
 

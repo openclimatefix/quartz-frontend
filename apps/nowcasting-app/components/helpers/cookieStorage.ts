@@ -22,13 +22,18 @@ export const getSettingFromCookieStorage = <T>(key: string): null | T => {
   const item = Cookies.get(key);
   if (!item) return null;
 
-  return JSON.parse(item);
+  // A cookie another site set, or one edited by hand, need not be JSON. Treat it as absent.
+  try {
+    return JSON.parse(item);
+  } catch {
+    return null;
+  }
 };
 
 export const setSettingInCookieStorage = <T>(key: string, value: T) => {
   if (typeof window === "undefined") return;
 
-  Cookies.set(key, JSON.stringify(value), { expires: 7 });
+  Cookies.set(key, JSON.stringify(value), { expires: 365 });
 };
 
 export const getBooleanSettingFromCookieStorage = (
@@ -36,7 +41,7 @@ export const getBooleanSettingFromCookieStorage = (
   defaultBool: boolean = false
 ): boolean => {
   const item = getSettingFromCookieStorage<boolean>(key);
-  if (item === null) return defaultBool;
+  if (typeof item !== "boolean") return defaultBool;
 
   return item;
 };
@@ -47,7 +52,7 @@ export const setBooleanSettingInLocalStorage = (key: string, value: boolean) => 
 
 export const getArraySettingFromCookieStorage = <T>(key: string): T[] | null => {
   const array = getSettingFromCookieStorage<T[]>(key);
-  if (array === null) return null;
+  if (!Array.isArray(array)) return null;
 
   return array;
 };

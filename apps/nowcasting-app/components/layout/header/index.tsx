@@ -22,8 +22,7 @@ import { ExternalLinkIcon } from "../../icons/icons";
  * route, so what is left of it here is a link rather than a mode.
  *
  * That leaves navigation proper: where you are, which countries are drawn, and the account.
- * Which country the *chart* reads is picked in the chart header instead — see Track A's notes
- * and `components/charts/country-picker.tsx`.
+ * Which country the chart reads is the focused one, chosen in `country-toggle.tsx`.
  */
 
 type HeaderLinkProps = {
@@ -83,11 +82,15 @@ type HeaderProps = {
   children?: ReactNode;
 };
 
-const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
-  // Seeds the enabled set for a visitor who has never chosen one (see the hook's own doc
-  // comment). Mounted here because the header renders on every page.
+// Seeds the enabled set for a visitor who has never chosen one (see the hook's own doc
+// comment). A component of its own so the header can mount it only with a session: the hook
+// fetches `/countries`, and the logged-out pages render a header too.
+const SyncEnabledCountries: React.FC = () => {
   useSyncEnabledCountries();
+  return null;
+};
 
+const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
   return (
     <header className="h-14 text-content text-right sm:px-4 flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
@@ -130,6 +133,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
           width on a destination most viewers never want. `/sites` still routes — it is reached
           by URL rather than advertised. Restore the two `HeaderLink`s here if that changes. */}
       <div className="grow" />
+      {isLoggedIn && <SyncEnabledCountries />}
       <div className="flex items-center gap-2">
         {isLoggedIn && <CountryCoverageBanner />}
         {isLoggedIn && <CountryToggle />}

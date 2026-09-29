@@ -19,7 +19,7 @@ import {
   cursorCadenceMinutes,
   cursorNow,
   playbackStrideMinutes,
-  snapToCadence
+  snapDownToCadence
 } from "../../lib/time/cursor";
 import {
   CountryKeyedState,
@@ -57,7 +57,7 @@ export const getPlaybackStrideMinutes = (): number =>
 export const snapCursorToFocusedGrid = (): void => {
   const selected = getGlobalState("selectedISOTime");
   if (selected)
-    setGlobalState("selectedISOTime", snapToCadence(selected, getCursorCadenceMinutes()));
+    setGlobalState("selectedISOTime", snapDownToCadence(selected, getCursorCadenceMinutes()));
 };
 
 /**
@@ -197,8 +197,9 @@ const DEFAULT_P_LEVELS: [number, number][] = [[10, 90]];
 // before the available p-levels changed can't select a pair the rest of the app doesn't know about.
 const getValidatedPLevels = (): [number, number][] => {
   const stored = getArraySettingFromCookieStorage<[number, number]>(CookieStorageKeys.P_LEVELS);
-  const validStored = stored?.filter(([lower, upper]) =>
-    P_LEVEL_OPTIONS.some(([l, u]) => l === lower && u === upper)
+  const validStored = stored?.filter(
+    (pair) =>
+      Array.isArray(pair) && P_LEVEL_OPTIONS.some(([l, u]) => l === pair[0] && u === pair[1])
   );
   return validStored?.length ? validStored : DEFAULT_P_LEVELS;
 };
@@ -236,6 +237,35 @@ const getValidatedEnabledCountries = (focused: string): string[] => {
   return enabled.includes(focused) ? enabled : [focused, ...enabled];
 };
 
+const DEFAULT_VISIBLE_LINES = [
+  "GENERATION",
+  "GENERATION_UPDATED",
+  "FORECAST",
+  "N_HOUR_FORECAST",
+  "SEASONAL_MEAN"
+];
+
+const getValidatedVisibleLines = (): string[] => {
+  const stored = getArraySettingFromCookieStorage<unknown>(CookieStorageKeys.VISIBLE_LINES);
+  return stored && stored.every((line) => typeof line === "string")
+    ? (stored as string[])
+    : DEFAULT_VISIBLE_LINES;
+};
+
+// Keep only the modes this build knows, each with finite numeric width and height.
+const getValidatedChartSplitOverrides = (): Partial<Record<ChartMode, ChartSplitPercent>> => {
+  const stored = getSettingFromCookieStorage<unknown>(CookieStorageKeys.CHART_SPLIT_OVERRIDES);
+  if (!stored || typeof stored !== "object" || Array.isArray(stored)) return {};
+  const valid: Partial<Record<ChartMode, ChartSplitPercent>> = {};
+  for (const mode of Object.keys(CHART_SPLIT) as ChartMode[]) {
+    const split = (stored as Record<string, unknown>)[mode] as ChartSplitPercent | undefined;
+    if (split && Number.isFinite(split.width) && Number.isFinite(split.height)) {
+      valid[mode] = { width: split.width, height: split.height };
+    }
+  }
+  return valid;
+};
+
 const INITIAL_FOCUSED_COUNTRY = getValidatedFocusedCountry();
 const INITIAL_ENABLED_COUNTRIES = getValidatedEnabledCountries(INITIAL_FOCUSED_COUNTRY);
 // `getCursorNow` reads focus off global state, which does not exist yet at this point — so
@@ -253,13 +283,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     timeNow: INITIAL_CURSOR,
     intervals: [],
     isSitesChart: false,
-    visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
-      "GENERATION",
-      "GENERATION_UPDATED",
-      "FORECAST",
-      "N_HOUR_FORECAST",
-      "SEASONAL_MEAN"
-    ],
+    visibleLines: getValidatedVisibleLines(),
     selectedBuckets: getDeltaBucketKeys().filter((key) => key !== "ZERO"),
     maps: [],
     mapFramingModified: false,
@@ -288,10 +312,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     isSatelliteLoading: false,
     satelliteError: null,
     coverageGaps: [],
-    chartSplitOverrides:
-      getSettingFromCookieStorage<Partial<Record<ChartMode, ChartSplitPercent>>>(
-        CookieStorageKeys.CHART_SPLIT_OVERRIDES
-      ) || {}
+    chartSplitOverrides: getValidatedChartSplitOverrides()
   });
 
 /**
@@ -397,7 +418,7 @@ const clearCountrySelection = (country: string): void => {
 const resnapCursorToGrid = (country: string | null | undefined): void => {
   const cadence = cursorCadenceMinutes(country);
   const selected = getGlobalState("selectedISOTime");
-  if (selected) setGlobalState("selectedISOTime", snapToCadence(selected, cadence));
+  if (selected) setGlobalState("selectedISOTime", snapDownToCadence(selected, cadence));
   setGlobalState("timeNow", cursorNow(cadence));
 };
 

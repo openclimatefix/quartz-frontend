@@ -535,9 +535,10 @@ describe("the cursor grid follows the focused country", () => {
     setGlobalState("selectedISOTime", "2026-08-10T16:15:00.000Z");
 
     // Back to GB: 16:15 is an instant GB never publishes, and every lookup at it comes back
-    // empty — a blank map rather than an error.
+    // empty — a blank map rather than an error. 16:15 sits inside GB's 16:00–16:30 period, so
+    // the cursor goes to that period's start and the period shown does not change.
     setFocusedCountry("GB");
-    expect(cursor()).toBe("2026-08-10T16:30:00.000Z");
+    expect(cursor()).toBe("2026-08-10T16:00:00.000Z");
   });
 
   test("leaves the cursor alone when focus only refines the grid", () => {

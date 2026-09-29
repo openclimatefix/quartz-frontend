@@ -118,6 +118,30 @@ const settle = async (url: string, value: unknown) => {
   });
 };
 
+/** Reject the pending request for `url` and evict it, as the real module does. */
+const failAttempt = async (url: string) => {
+  const deferral = deferrals.get(url);
+  if (!deferral) throw new Error(`nothing requested ${url}`);
+  await act(async () => {
+    promises.delete(url);
+    deferrals.delete(url);
+    deferral.reject(new Error("502"));
+  });
+};
+
+/** Fail the first attempt and both backoff retries. */
+const failEveryAttempt = async (url: string) => {
+  await failAttempt(url);
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  await failAttempt(url);
+  await act(async () => {
+    jest.advanceTimersByTime(2000);
+  });
+  await failAttempt(url);
+};
+
 beforeEach(() => {
   deferrals.clear();
   promises.clear();
@@ -184,14 +208,99 @@ describe("useMapGeometry — the out-of-order resolve", () => {
   });
 
   test("a failed fetch surfaces as an error and stops reporting as loading", async () => {
+    jest.useFakeTimers();
+    try {
+      const view = renderHook(() => useMapGeometry(GSP_LEVEL, regions));
+      await failEveryAttempt(GSP_URL);
+      expect(view.result.current.error).toBeDefined();
+      expect(view.result.current.isLoading).toBe(false);
+      expect(view.result.current.geometry).toBeUndefined();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
+describe("useMapGeometry — a failed boundary fetch is retried", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test("a single failure is retried with backoff and never reported", async () => {
     const view = renderHook(() => useMapGeometry(GSP_LEVEL, regions));
+    await failAttempt(GSP_URL);
+
+    expect(view.result.current.error).toBeUndefined();
+    expect(view.result.current.isLoading).toBe(true);
+
     await act(async () => {
-      deferrals.get(GSP_URL)!.reject(new Error("502"));
-      promises.delete(GSP_URL); // the real module evicts a rejection so a retry is possible
+      jest.advanceTimersByTime(1000);
     });
-    await waitFor(() => expect(view.result.current.error).toBeDefined());
+    expect(requestedUrls.filter((url) => url === GSP_URL)).toHaveLength(2);
+    await settle(GSP_URL, gspShapes);
+
+    expect(view.result.current.geometry?.features[0].id).toBe(67);
+    expect(view.result.current.error).toBeUndefined();
+  });
+
+  test("three failed attempts set the error, and regaining focus fetches again", async () => {
+    const view = renderHook(() => useMapGeometry(GSP_LEVEL, regions));
+    await failEveryAttempt(GSP_URL);
+    expect(requestedUrls.filter((url) => url === GSP_URL)).toHaveLength(3);
+    const reported = view.result.current.error;
+    expect(reported).toBeDefined();
+
+    // No further attempt on its own.
+    await act(async () => {
+      jest.advanceTimersByTime(60_000);
+    });
+    expect(requestedUrls.filter((url) => url === GSP_URL)).toHaveLength(3);
+
+    await act(async () => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    expect(requestedUrls.filter((url) => url === GSP_URL)).toHaveLength(4);
+    // The error stays put while the retry is in flight.
+    expect(view.result.current.error).toBe(reported);
     expect(view.result.current.isLoading).toBe(false);
-    expect(view.result.current.geometry).toBeUndefined();
+
+    await settle(GSP_URL, gspShapes);
+    expect(view.result.current.geometry?.features[0].id).toBe(67);
+    expect(view.result.current.error).toBeUndefined();
+  });
+
+  test("coming back online fetches a missing asset again", async () => {
+    renderHook(() => useMapGeometry(GSP_LEVEL, regions));
+    await failEveryAttempt(GSP_URL);
+    await act(async () => {
+      window.dispatchEvent(new Event("online"));
+    });
+    expect(requestedUrls.filter((url) => url === GSP_URL)).toHaveLength(4);
+  });
+
+  test("regaining focus fetches nothing once the asset has arrived", async () => {
+    renderHook(() => useMapGeometry(GSP_LEVEL, regions));
+    await settle(GSP_URL, gspShapes);
+    await act(async () => {
+      window.dispatchEvent(new Event("focus"));
+    });
+    expect(requestedUrls.filter((url) => url === GSP_URL)).toHaveLength(1);
+  });
+
+  test("a failure for the previous level is not reported under the new one", async () => {
+    const view = renderHook(
+      ({ level }: { level: AggregationLevel }) => useMapGeometry(level, regions),
+      { initialProps: { level: GSP_LEVEL } }
+    );
+    await failEveryAttempt(GSP_URL);
+    expect(view.result.current.error).toBeDefined();
+
+    view.rerender({ level: DNO_LEVEL });
+    expect(view.result.current.error).toBeUndefined();
+    expect(view.result.current.isLoading).toBe(true);
   });
 });
 

@@ -3,10 +3,12 @@ import {
   buildCsvRows,
   CSVRow,
   generateCsv,
+  csvLabelsFor,
   getNHourForecastLabel,
   NationalCsvSeries
 } from "./csvDownload";
 import { CSVColumn } from "../layout/header/csvDownloadModal";
+import { getCountryConfig } from "../../config/countries";
 import type { TimeSeries, TimeSeriesPoint } from "../../lib/domain/types";
 
 // The CSV now reads the same canonical `TimeSeries` the national chart and the delta view's
@@ -759,5 +761,40 @@ describe("buildCsvRows — period length and labelling come from the country", (
       endDateTime: "2026-09-29T11:00:00.000+01:00",
       settlementPeriod: 22
     });
+  });
+});
+
+describe("generateCsv — headers come from config and manifest labels", () => {
+  const gbSources = [
+    { name: "pvlive_in_day", label: "PV Live Estimated" },
+    { name: "pvlive_day_after", label: "PV Live Updated" }
+  ];
+  const generationColumns: CSVColumn[] = [
+    "settlementPeriod",
+    "solarGenerationPvliveInitial",
+    "solarGenerationPvliveUpdated"
+  ];
+
+  test("GB headers are unchanged", () => {
+    const csv = generateCsv(
+      [],
+      generationColumns,
+      4,
+      [],
+      csvLabelsFor(getCountryConfig("GB"), gbSources)
+    );
+    expect(csv).toBe(
+      "Settlement Period,Solar Generation PVLive Initial (MW),Solar Generation PVLive Updated (MW)"
+    );
+  });
+
+  test("a one-observer country without overrides gets Period and one generation column", () => {
+    const labels = csvLabelsFor({}, [{ name: "ned_nl", label: "NED" }]);
+    const csv = generateCsv([], generationColumns, 4, [], labels);
+    expect(csv).toBe("Period,Solar Generation NED (MW)");
+  });
+
+  test("an observer with no manifest label falls back to its raw name", () => {
+    expect(csvLabelsFor({}, [{ name: "ned_nl", label: "" }]).observerLabels[0]).toBe("ned_nl");
   });
 });

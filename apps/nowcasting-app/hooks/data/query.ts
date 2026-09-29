@@ -1,6 +1,11 @@
 import useSWR, { type SWRConfiguration, type SWRResponse } from "swr";
 
-import { ApiV1Error, apiV1Client, isNonRetryableApiV1Error } from "../../lib/api/v1/client";
+import {
+  ApiV1Error,
+  ApiV1NetworkError,
+  apiV1Client,
+  isNonRetryableApiV1Error
+} from "../../lib/api/v1/client";
 import { queryKey, type RequestDescriptor } from "../../lib/api/v1/queries";
 import type { components, paths } from "../../lib/api/v1/schema";
 
@@ -72,7 +77,20 @@ export const MAX_RETRIES = 6;
  * distinction is the whole reason `ApiV1Error` carries a status.
  *
  * Everything else (network blips, 429, 5xx, a 422 from a since-fixed caller bug) retries.
+ *
+ * Once the fast retries are spent, or at once for a 403, the query is re-asked at the
+ * refresh interval (at most five minutes) for as long as it keeps failing. SWR 2.2.5's own
+ * polling skips a key whose cache holds an error (`execute()` in swr/dist/core/index.mjs), so
+ * without this an outage longer than the fast retries froze the screen until a focus event
+ * or a reload. A 403 is re-asked slowly because entitlement can change. Each slow retry
+ * that fails calls this again with a higher `retryCount`, so the chain continues until a
+ * success clears the error and normal polling resumes.
  */
+const slowRetryDelay = (refreshInterval: SWRConfiguration["refreshInterval"]): number =>
+  typeof refreshInterval === "number" && refreshInterval > 0
+    ? Math.min(refreshInterval, FIVE_MINUTES_MS)
+    : FIVE_MINUTES_MS;
+
 export const apiV1SwrOptions: SWRConfiguration = {
   refreshInterval: FIVE_MINUTES_MS,
   dedupingInterval: TWO_MINUTES_MS,
@@ -80,10 +98,11 @@ export const apiV1SwrOptions: SWRConfiguration = {
   // `continuityKey`, so a time-window change stays smooth and a scope change does not.
   keepPreviousData: true,
   shouldRetryOnError: true,
-  onErrorRetry: (error, _key, _config, revalidate, { retryCount }) => {
-    if (isNonRetryableApiV1Error(error)) return;
-    if (retryCount >= MAX_RETRIES) return;
-    const delay = Math.min(RETRY_BASE_MS * 2 ** (retryCount - 1), RETRY_CAP_MS);
+  onErrorRetry: (error, _key, config, revalidate, { retryCount }) => {
+    const delay =
+      isNonRetryableApiV1Error(error) || retryCount >= MAX_RETRIES
+        ? slowRetryDelay(config.refreshInterval)
+        : Math.min(RETRY_BASE_MS * 2 ** (retryCount - 1), RETRY_CAP_MS);
     setTimeout(() => revalidate({ retryCount }), delay);
   }
 };
@@ -156,6 +175,53 @@ export const describeApiError = (error: unknown): ApiErrorInfo | null => {
     validationErrors,
     isColdCache: error.status === 503,
     isFatal: isNonRetryableApiV1Error(error)
+  };
+};
+
+// --- error reporting --------------------------------------------------------------------
+
+/**
+ * Whether a failed request is worth a Sentry event. Covers both error kinds SWR sees: v1's
+ * `ApiV1Error`/`ApiV1NetworkError` and v0's Axios errors. Not reported: 401 (the user is sent
+ * to log in again), 403 (not entitled), 404, and network failures (the user's connection,
+ * not the app). Anything else, including a thrown normaliser bug, is.
+ */
+const UNREPORTED_STATUSES: readonly number[] = [401, 403, 404];
+
+type AxiosLikeError = { isAxiosError: true; code?: string; response?: { status?: number } };
+const isAxiosLikeError = (error: unknown): error is AxiosLikeError =>
+  typeof error === "object" &&
+  error !== null &&
+  (error as { isAxiosError?: unknown }).isAxiosError === true;
+
+export const isReportableError = (error: unknown): boolean => {
+  if (error instanceof ApiV1NetworkError) return false;
+  if (error instanceof ApiV1Error) return !UNREPORTED_STATUSES.includes(error.status);
+  if (isAxiosLikeError(error)) {
+    if (error.code === "ERR_NETWORK") return false;
+    const status = error.response?.status;
+    return status === undefined || !UNREPORTED_STATUSES.includes(status);
+  }
+  return true;
+};
+
+/**
+ * SWR's global `onError`/`onSuccess` pair for Sentry. SWR calls `onError` on every failed
+ * attempt, retries included, so a key is reported once per failure episode: the first
+ * reportable failure is sent, later ones are not until a success for that key ends the
+ * episode.
+ */
+export const createErrorReporter = (capture: (error: unknown) => void) => {
+  const failingKeys = new Set<string>();
+  return {
+    onError: (error: unknown, key: string) => {
+      if (!isReportableError(error) || failingKeys.has(key)) return;
+      failingKeys.add(key);
+      capture(error);
+    },
+    onSuccess: (_data: unknown, key: string) => {
+      failingKeys.delete(key);
+    }
   };
 };
 

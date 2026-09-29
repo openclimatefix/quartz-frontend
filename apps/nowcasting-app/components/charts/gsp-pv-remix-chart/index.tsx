@@ -14,12 +14,23 @@ import {
   useFocusedCountry
 } from "../../../hooks/data";
 import { getCountryConfig } from "../../../config/countries";
-import { displayDecimalsFor, displayUnitFor, toDisplayPower } from "../../../lib/domain/power-unit";
+import {
+  displayDecimalsFor,
+  displayUnitFor,
+  NO_VALUE,
+  toDisplayPower
+} from "../../../lib/domain/power-unit";
 import { formatRegionLabel } from "../../../lib/domain/region-label";
 import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
 import { groupRegionNames } from "../../helpers/data";
 import useGlobalState, { useCountryState } from "../../helpers/globalState";
-import { cadenceMinutesFor, cursorNow, nextSlot, periodForLabel } from "../../../lib/time/cursor";
+import {
+  cadenceMinutesFor,
+  cursorNow,
+  nextSlot,
+  periodForLabel,
+  slotForInstant
+} from "../../../lib/time/cursor";
 import Spinner from "../../icons/spinner";
 import React, { FC, useMemo } from "react";
 import { getTicks } from "../../helpers/chartUtils";
@@ -36,6 +47,8 @@ import type { TimeSeries } from "../../../lib/domain/types";
  */
 const pluralise = (label: string): string =>
   label.length === 0 || label.endsWith("s") ? label : `${label}s`;
+
+/** What the header prints for a figure with no published value behind it. */
 
 /**
  * The latest point that actually carries a reading. Mirrors `forecast-header/index.tsx`'s
@@ -142,11 +155,31 @@ const GspPvRemixChart: FC<{
   }, [level, focusedCountry]);
 
   const isGroupSelection = !isSingleGsp && !!level?.derived;
-  const groupName = isGroupSelection ? selectedRegions[0] ?? null : null;
-  const groupRegions = useMemo(
-    () => (groupName ? groupRegionNames(groupings.data, groupName) ?? null : null),
-    [groupings.data, groupName]
+  // The selected groups that resolve in the grouping file; a name missing from it is skipped.
+  const resolvedGroups = useMemo(
+    () =>
+      isGroupSelection
+        ? selectedRegions.filter((name) => !!groupRegionNames(groupings.data, name))
+        : [],
+    [isGroupSelection, selectedRegions, groupings.data]
   );
+  const isMultiGroup = resolvedGroups.length > 1;
+  const groupName = !isGroupSelection
+    ? null
+    : isMultiGroup
+    ? `${resolvedGroups.length} ${pluralise(level?.label ?? "")}`
+    : resolvedGroups[0] ?? selectedRegions[0] ?? null;
+  // The union of the selected groups' members, each counted once: GB's DNO and NG-zone
+  // groupings share members (15 GSPs sit in two DNOs), so two selected groups can both list
+  // the same GSP, and summing it twice would double its generation and capacity.
+  const groupRegions = useMemo(() => {
+    if (resolvedGroups.length === 0) {
+      return groupName ? groupRegionNames(groupings.data, groupName) ?? null : null;
+    }
+    return Array.from(
+      new Set(resolvedGroups.flatMap((name) => groupRegionNames(groupings.data, name) ?? []))
+    );
+  }, [resolvedGroups, groupName, groupings.data]);
 
   // A multi-select at a non-derived level: the feature ids are the map's, numeric at GSP
   // level, so they need translating to region names before anything can be summed.
@@ -184,7 +217,9 @@ const GspPvRemixChart: FC<{
   // This chart reads one country's regions, so "now" and "the next slot" are that country's,
   // not the shared cursor's finest-enabled grid — see `lib/time/cursor.ts`.
   const cadenceMinutes = cadenceMinutesFor(focusedCountry);
-  const nowSlot = formatISODateString(cursorNow(cadenceMinutes));
+  // `cursorNow` spells the period start; the data is keyed by the country's labels, so it goes
+  // through `slotForInstant` first (GB labels period-end), as `use-format-chart-data.tsx` does.
+  const nowSlot = formatISODateString(slotForInstant(cursorNow(cadenceMinutes), focusedCountry));
 
   // The active series, whichever of the two paths is live. Both hooks always run (rules of
   // hooks), so this is just picking which result feeds the chart and the header math below.
@@ -229,6 +264,8 @@ const GspPvRemixChart: FC<{
     // from the grouping file already written the way they should read, so they are never put
     // through `formatRegionLabel`: title-casing one would give "Ukpn (East)".
     title = groupName || "";
+    // Several groups: the tooltip lists the selected groups, as a multi-select lists its regions.
+    if (isMultiGroup) selectedGSPNames = resolvedGroups;
   } else if (nationalAggregationLevel === "national") {
     title = `National ${regionLevelLabel} Sum`;
   } else if (selectedRegions.length === 1) {
@@ -257,9 +294,10 @@ const GspPvRemixChart: FC<{
   const followingPvForecastDateString = formatISODateString(
     followingPvForecastDatetime.toISOString()
   );
-  const forecastAt = (formattedDate: string) =>
+  // `null` when the slot is absent or unpublished, so the header can tell it from a real 0.
+  const forecastAt = (formattedDate: string): number | null =>
     activeForecast?.values.find((v) => formatISODateString(v.timeUtc) === formattedDate)?.powerMw ??
-    0;
+    null;
 
   const pvTimeOnly = formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale);
   /**
@@ -283,12 +321,14 @@ const GspPvRemixChart: FC<{
    * and DE go through `toDisplayPower`/`displayDecimalsFor` so a GW figure keeps the precision
    * a much smaller number needs.
    */
-  const formatHeadline = (valueMw: number): string =>
-    displayUnit === "MW"
+  const formatHeadline = (valueMw: number | null): string =>
+    valueMw === null
+      ? NO_VALUE
+      : displayUnit === "MW"
       ? valueMw.toFixed(1)
       : toDisplayPower(valueMw, displayUnit).toFixed(displayDecimalsFor(displayUnit));
 
-  const pvValueMw = latestGeneration?.powerMw ?? 0;
+  const pvValueMw = latestGeneration?.powerMw ?? null;
   const forecastPvMw = forecastAt(pvForecastDatetime);
   const forecastNextTimeOnly = formatISODateStringAsZonedTime(
     followingPvForecastDatetime.toISOString(),
@@ -300,13 +340,14 @@ const GspPvRemixChart: FC<{
   // In the country's unit, like every other figure in this header. `DeltaHeaderBlock` takes
   // the unit alongside it and converts back to MW for its colour buckets, so the thresholds
   // are unaffected by how the number is written.
-  const deltaValue = dataMissing
-    ? "---"
-    : displayUnit === "MW"
-    ? (pvValueMw - forecastPvMw).toFixed(1)
-    : toDisplayPower(pvValueMw - forecastPvMw, displayUnit).toFixed(
-        displayDecimalsFor(displayUnit)
-      );
+  const deltaValue =
+    dataMissing || pvValueMw === null || forecastPvMw === null
+      ? NO_VALUE
+      : displayUnit === "MW"
+      ? (pvValueMw - forecastPvMw).toFixed(1)
+      : toDisplayPower(pvValueMw - forecastPvMw, displayUnit).toFixed(
+          displayDecimalsFor(displayUnit)
+        );
 
   const chartData = useFormatChartData({
     forecastSeries: activeForecast,
@@ -333,7 +374,9 @@ const GspPvRemixChart: FC<{
         <ForecastHeaderGSP
           onClose={close}
           title={title}
-          mwpercent={Math.round((forecastAtSelectedTimeMw / (gspInstalledCapacity || 1)) * 100)}
+          mwpercent={Math.round(
+            ((forecastAtSelectedTimeMw ?? 0) / (gspInstalledCapacity || 1)) * 100
+          )}
           pvTimeOnly={pvTimeOnly}
           pvTimeRange={pvTimeRange}
           pvValue={formatHeadline(pvValueMw)}
@@ -347,19 +390,14 @@ const GspPvRemixChart: FC<{
           unit={displayUnit}
         >
           <span className="text-lg font-medium leading-none text-solar md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
-            {displayUnit === "MW"
+            {displayUnit === "MW" && forecastAtSelectedTimeMw !== null
               ? Math.round(forecastAtSelectedTimeMw)
               : formatHeadline(forecastAtSelectedTimeMw)}
           </span>
 
           <span className="text-lg font-medium leading-none text-content md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
             {" "}
-            /{" "}
-            {displayUnit === "MW"
-              ? gspInstalledCapacity
-              : toDisplayPower(gspInstalledCapacity, displayUnit).toFixed(
-                  displayDecimalsFor(displayUnit)
-                )}
+            / {formatHeadline(gspInstalledCapacity)}
           </span>
           <span className="text-xs dash:text-2xl text-content"> {displayUnit}</span>
         </ForecastHeaderGSP>

@@ -1,6 +1,11 @@
 import { useEffect, useMemo } from "react";
-import useGlobalState, { getCursorCadenceMinutes } from "../helpers/globalState";
+import useGlobalState, {
+  getCursorCadenceMinutes,
+  getGlobalState,
+  setGlobalState
+} from "../helpers/globalState";
 import { addMinutesToISODate } from "../helpers/utils";
+import { useStopAndResetTime } from "./use-and-update-selected-time";
 import type { CursorRange } from "../shell/scrub-scale";
 
 /**
@@ -45,6 +50,7 @@ const rightKey = "ArrowRight";
  */
 const useCursorHotkeys = (limits?: CursorRange) => {
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const { stopTime } = useStopAndResetTime();
   // Arrow keys walk the cursor one slot at a time, on its own grid — read inside the handler
   // so enabling a country mid-session changes the stride without re-binding the listener.
   const handleKeyDown = useMemo(
@@ -66,6 +72,13 @@ const useCursorHotkeys = (limits?: CursorRange) => {
       const target = e.target as HTMLElement | null;
       if (target?.closest?.("[data-cursor-scrubber],[data-arrow-keys-handled]")) return;
 
+      if (e.key !== leftKey && e.key !== rightKey) return;
+      // A step is a deliberate input, so it does what the scrub track's `beginUserInput` does:
+      // stop following now (or the minute timer writes the cursor back to now) and pause
+      // playback (or the next tick walks on from wherever the step put it).
+      stopTime();
+      if (getGlobalState("isPlaying")) setGlobalState("isPlaying", false);
+
       if (e.key === leftKey) {
         setSelectedISOTime((selectedISOTime) =>
           stepWithin(selectedISOTime, -getCursorCadenceMinutes(), limits)
@@ -76,7 +89,7 @@ const useCursorHotkeys = (limits?: CursorRange) => {
         );
       }
     },
-    [limits, setSelectedISOTime]
+    [limits, setSelectedISOTime, stopTime]
   );
   useEffect(() => {
     document.addEventListener("keydown", handleKeyDown);

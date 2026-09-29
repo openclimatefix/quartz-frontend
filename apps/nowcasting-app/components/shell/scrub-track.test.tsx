@@ -355,7 +355,7 @@ describe("when focus changes underneath it", () => {
     expect(cursor()).toBe("2026-08-10T23:45:00.000Z");
   });
 
-  test("coarsening the grid moves the cursor forward onto a slot GB actually publishes", () => {
+  test("coarsening the grid keeps the cursor in the GB period it was already inside", () => {
     setEnabledCountries(["GB", "NL"]);
     setFocusedCountry("NL");
     const view = render(<ScrubTrack />);
@@ -363,12 +363,12 @@ describe("when focus changes underneath it", () => {
     view.rerender(<ScrubTrack />);
     expect(slider()).toHaveAttribute("aria-valuenow", "97");
 
-    // `globalState.resnapCursorToGrid` owns the re-snap; the track must agree with it rather
-    // than round the other way and leave the handle a slot behind the map.
+    // `globalState.resnapCursorToGrid` owns the re-snap, and the track must agree with it.
+    // 00:15 sits inside GB's 00:00–00:30 period, so the cursor goes to that period's start.
     act(() => setFocusedCountry("GB"));
     view.rerender(<ScrubTrack />);
-    expect(cursor()).toBe("2026-08-11T00:30:00.000Z");
-    expect(slider()).toHaveAttribute("aria-valuenow", "49");
+    expect(cursor()).toBe("2026-08-11T00:00:00.000Z");
+    expect(slider()).toHaveAttribute("aria-valuenow", "48");
   });
 
   test("enabling another country leaves the grid alone", () => {

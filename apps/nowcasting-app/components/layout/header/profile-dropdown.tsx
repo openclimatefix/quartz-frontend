@@ -13,7 +13,7 @@ import {
   getBooleanSettingFromCookieStorage,
   setBooleanSettingInLocalStorage
 } from "../../helpers/cookieStorage";
-import { downloadNationalCsv } from "../../helpers/csvDownload";
+import { csvLabelsFor, downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
 import {
   NATIONAL_REGION_TYPE,
@@ -67,6 +67,10 @@ const ProfileDropDown = () => {
     () => (generationSources.data ?? []).map((source) => source.name),
     [generationSources.data]
   );
+  const csvLabels = useMemo(
+    () => csvLabelsFor(countryConfig, generationSources.data ?? []),
+    [countryConfig, generationSources.data]
+  );
   const generationInitial = useNationalGeneration(
     observers[0] === undefined ? null : nationalScope,
     { observer: observers[0] }
@@ -96,7 +100,8 @@ const ProfileDropDown = () => {
       nHourForecast,
       pLevels,
       timezone,
-      focusedCountry
+      focusedCountry,
+      csvLabels
     );
   };
 
@@ -315,6 +320,7 @@ const ProfileDropDown = () => {
         onDownload={handleDownload}
         nHourForecast={nHourForecast}
         comparisonActive={!!comparison}
+        labels={csvLabels}
       />
     </>
   );

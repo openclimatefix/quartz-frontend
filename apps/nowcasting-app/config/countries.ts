@@ -285,6 +285,19 @@ export type CountryConfig = {
   cadenceMinutes: number;
   /** See `SlotLabelling`. Decides which way the cursor rounds onto this country's grid. */
   slotLabelling: SlotLabelling;
+  /**
+   * What this country's market calls one period of its cadence, used as the CSV export's period
+   * column header. Optional: a country without it gets "Period". Set only where the term is
+   * confirmed (GB's "Settlement Period").
+   */
+  periodLabel?: string;
+  /**
+   * Observer name (the manifest's generation source `name`) to the label used in the CSV
+   * export's generation column headers. Exists so that a country's exported headers stay stable
+   * for people who parse the file. A country without it, or an observer missing from it, uses
+   * the manifest's label.
+   */
+  csvObserverLabels?: Record<string, string>;
   /** BCP-47 tag for number and date formatting at the render boundary. */
   locale: string;
   map: MapDefaults;
@@ -367,6 +380,11 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // The settlement period, and PV_Live's convention: 16:00 covers 15:30-16:00. Stated to
     // users in `ChartInfo.tsx`'s legend tooltip.
     slotLabelling: "period-end",
+    periodLabel: "Settlement Period",
+    csvObserverLabels: {
+      pvlive_in_day: "PVLive Initial",
+      pvlive_day_after: "PVLive Updated"
+    },
     // The centre and zoom currently hardcoded in `globalState.tsx`'s initial state.
     map: {
       center: { lng: -2.3175601, lat: 54.70534432 },

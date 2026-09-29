@@ -4,6 +4,7 @@ import { NATIONAL_REGION_TYPE, useFocusedCountry, useNationalForecast } from "..
 import type { Scope } from "../../lib/domain/types";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
 import { defaultSeriesStart } from "../../lib/api/v1/series-window";
+import useGlobalState from "../helpers/globalState";
 import { deriveDaylightWindows, type CursorRange, type DaylightWindow } from "./scrub-scale";
 
 /**
@@ -60,9 +61,12 @@ export const useCursorRange = (): CursorRangeData | null => {
     : null;
 
   const primarySeries = countryConfig?.nationalChartSeries?.[0];
-  // Memoised on mount for the same reason the chart memoises it: the value moves every 6 hours
-  // and an unstable SWR key would refetch the whole window on every scrub tick.
-  const start = useMemo(() => defaultSeriesStart(), []);
+  // Read on every render, as the chart's forecast reads it (the query layer's default), so the
+  // two windows move at the same 6-hour boundary. It is floored, so the SWR key is stable
+  // between boundaries. `timeNow` is subscribed to only for the re-render: it changes on a slot
+  // boundary, which every 6-hour boundary is, and it is what re-renders the chart too.
+  useGlobalState("timeNow");
+  const start = defaultSeriesStart();
 
   const forecast = useNationalForecast(primarySeries ? scope : null, {
     start,

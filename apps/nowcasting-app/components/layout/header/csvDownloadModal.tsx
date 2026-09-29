@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getNHourForecastLabel } from "../../helpers/csvDownload";
+import { CsvLabels, DEFAULT_CSV_LABELS, getNHourForecastLabel } from "../../helpers/csvDownload";
 import Toggle from "../../Toggle";
 import { CloseButtonIcon } from "../../icons/icons";
 
@@ -33,6 +33,8 @@ interface Props {
   nHourForecast: number;
   /** Whether a comparison is active — the delta column only makes sense against a B side. */
   comparisonActive: boolean;
+  /** The period and observer labels the file uses, so the modal and the file agree. */
+  labels?: CsvLabels;
 }
 
 export const CSVDownloadModal: React.FC<Props> = ({
@@ -40,16 +42,26 @@ export const CSVDownloadModal: React.FC<Props> = ({
   onClose,
   onDownload,
   nHourForecast,
-  comparisonActive
+  comparisonActive,
+  labels = DEFAULT_CSV_LABELS
 }) => {
   const selectableColumns = useMemo(
     () =>
-      SELECTABLE_COLUMNS.map((column) =>
-        column.id === "nForecast"
-          ? { ...column, label: `${getNHourForecastLabel(nHourForecast)}` }
-          : column
-      ),
-    [nHourForecast]
+      SELECTABLE_COLUMNS.flatMap((column) => {
+        if (column.id === "nForecast")
+          return [{ ...column, label: `${getNHourForecastLabel(nHourForecast)}` }];
+        if (column.id === "settlementPeriod") return [{ ...column, label: labels.periodLabel }];
+        // A single-observer country has no second generation column.
+        if (
+          column.id === "solarGenerationPvliveInitial" ||
+          column.id === "solarGenerationPvliveUpdated"
+        ) {
+          const label = labels.observerLabels[column.id === "solarGenerationPvliveInitial" ? 0 : 1];
+          return label === undefined ? [] : [{ ...column, label }];
+        }
+        return [column];
+      }),
+    [nHourForecast, labels]
   );
 
   const availableSelectableColumns = useMemo(
