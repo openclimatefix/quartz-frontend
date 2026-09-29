@@ -40,11 +40,9 @@ import useCursorRange from "./use-cursor-range";
  *
  * **Two ways the alignment is approximate, both still outstanding:**
  *
- * 1. **Delta view's right edge is wrong by ~45px.** It mounts a second `YAxis` on the right and
- *    shrinks its own right margin to fit it, so its plot ends further in than
- *    `PLOT_INSET_RIGHT_PX` describes. Correcting for it here would mean this component knowing
- *    which chart it is under, which is the shape of thing the shell has spent Phase 6 removing.
- *    Left uncorrected so the cost is visible rather than papered over.
+ * 1. **Delta view's right edge** used to be ~45px out: it mounts a second `YAxis` on the right.
+ *    Fixed without this component learning which chart it is under — the chart passes its own
+ *    right inset (`insetRightPx`, from `plotInsetRightPx`) as it passes `domain`.
  * 2. **Zoom breaks it outright.** `RemixLine` supports a zoom that narrows the plotted domain
  *    (`globalIsZoomed`) while the track keeps drawing the full window, so a zoomed chart is
  *    lined up with a track that no longer shares its scale — the ticks agree by position and
@@ -52,7 +50,10 @@ import useCursorRange from "./use-cursor-range";
  *    track to draw the zoom window as a band on itself; that is a design question, not a
  *    measurement, and it is not in this spike.
  */
-const ChartScrubber: FC<{ domain?: CursorRange | null }> = ({ domain }) => {
+const ChartScrubber: FC<{ domain?: CursorRange | null; insetRightPx?: number }> = ({
+  domain,
+  insetRightPx = PLOT_INSET_RIGHT_PX
+}) => {
   const focusedCountry = useFocusedCountry();
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
   const rangeData = useCursorRange();
@@ -63,7 +64,7 @@ const ChartScrubber: FC<{ domain?: CursorRange | null }> = ({ domain }) => {
   return (
     <div
       className="flex items-start px-2 pb-1 pt-0 text-xs text-content"
-      style={{ paddingRight: PLOT_INSET_RIGHT_PX + 8 }}
+      style={{ paddingRight: insetRightPx + 8 }}
     >
       {/* The Y-axis gutter, used. Fixed at the inset's width so the track's left edge is the
           plot's left edge; the button is centred in it rather than pushed against either side,

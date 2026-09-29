@@ -89,19 +89,24 @@ const getForecastChartData = (
       [pastKey]: fr.powerMw
     };
 };
-const getDelta: (datum: ChartData) => number = (datum) => {
-  if (datum.PAST_FORECAST !== undefined) {
-    if (datum.GENERATION_UPDATED !== undefined) {
-      return Number(datum.GENERATION_UPDATED) - Number(datum.PAST_FORECAST);
-    } else if (datum.GENERATION !== undefined) {
-      return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
-    } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
-      return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
-    }
-  } else if (datum.FORECAST !== undefined && datum["N_HOUR_FORECAST"] !== undefined) {
-    return Number(datum.FORECAST) - Number(datum["N_HOUR_FORECAST"]);
+/**
+ * Actual − forecast, or `undefined` where there is no actual yet — so those periods draw no bar.
+ *
+ * It used to fall back, wherever actuals were missing (the future, and recent periods not yet
+ * reported), to latest forecast − N-hour forecast: a forecast *revision*, a different quantity,
+ * drawn in the same bars on the same axis. The map and the legend only ever meant the first
+ * (Brad, 2026-09-28). A revision may come back as a comparison of its own — see
+ * `docs/delta-histogram-strip-spike.md`.
+ */
+const getDelta = (datum: ChartData): number | undefined => {
+  if (datum.PAST_FORECAST === undefined) return undefined;
+  if (datum.GENERATION_UPDATED !== undefined) {
+    return Number(datum.GENERATION_UPDATED) - Number(datum.PAST_FORECAST);
   }
-  return 0;
+  if (datum.GENERATION !== undefined) {
+    return Number(datum.GENERATION) - Number(datum.PAST_FORECAST);
+  }
+  return undefined;
 };
 
 const getSeasonalMetricsForDate = (
@@ -332,6 +337,7 @@ const useFormatChartData = ({
         for (const chartDatum in chartMap) {
           if (typeof chartMap[chartDatum] === "object") {
             const delta = getDelta(chartMap[chartDatum]);
+            if (delta === undefined) continue;
             chartMap[chartDatum].DELTA = delta;
             chartMap[chartDatum].DELTA_BUCKET = getDeltaBucket(delta);
           }

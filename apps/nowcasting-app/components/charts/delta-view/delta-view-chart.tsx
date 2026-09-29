@@ -1,5 +1,5 @@
 import { Dispatch, FC, SetStateAction, useEffect, useMemo, useRef } from "react";
-import RemixLine from "../remix-line";
+import RemixLine, { plotInsetRightPx } from "../remix-line";
 import { DELTA_BUCKET, MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../../constant";
 import { ActiveUnit } from "../../map/types";
 import { deltaExtent, deltaRampColor, deltaTopFor } from "../../../lib/domain/delta-ramp";
@@ -549,7 +549,10 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
         )}
         {/* The scrub track, above the legend and inset to the plot's own x-axis. See
             `components/shell/chart-scrubber.tsx`. */}
-        <ChartScrubber domain={plottedDomain} />
+        <ChartScrubber
+          domain={plottedDomain}
+          insetRightPx={plotInsetRightPx(true, !!selectedMapRegionIds?.length)}
+        />
         {/* Below the well, not inside it: the key describes the plot rather than sitting on
               it, and it is where most charting libraries put one. */}
         <div className="flex px-2 pb-2 dash:h-auto">

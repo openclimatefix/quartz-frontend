@@ -691,7 +691,10 @@ describe("delta mode", () => {
     expect(datum.DELTA_BUCKET).toBe(-25);
   });
 
-  test("with a PAST_FORECAST but no truth at all, it falls back to FORECAST minus N_HOUR_FORECAST", () => {
+  // Actual − forecast only. These used to pin a fallback to FORECAST − N_HOUR_FORECAST (a
+  // forecast revision, a different quantity drawn in the same bars) and a 0 for "nothing to
+  // compare"; both now give no DELTA, so the chart draws no bar there.
+  test("with a PAST_FORECAST but no truth at all, there is no delta — not a revision", () => {
     // The boundary slot is the only place both PAST_FORECAST and FORECAST exist.
     const datum = at(
       run(
@@ -704,10 +707,11 @@ describe("delta mode", () => {
       ),
       "2025-07-01T10:30"
     );
-    expect(datum.DELTA).toBe(40);
+    expect(datum.DELTA).toBeUndefined();
+    expect(datum.DELTA_BUCKET).toBeUndefined();
   });
 
-  test("with no PAST_FORECAST, future rows use FORECAST minus N_HOUR_FORECAST", () => {
+  test("future rows have no delta, even with an N-hour forecast to compare against", () => {
     const datum = at(
       run(
         baseProps({
@@ -719,14 +723,10 @@ describe("delta mode", () => {
       ),
       "2025-07-01T11:00"
     );
-    expect(datum.DELTA).toBe(-30);
+    expect(datum.DELTA).toBeUndefined();
   });
 
-  // CHARACTERISATION: current behaviour is wrong (or at least lossy) — `getDelta` returns 0 when
-  // no rule matches, so "we have nothing to compare" and "the forecast was exactly right" are
-  // indistinguishable downstream, and both land in the ZERO bucket. It should return undefined
-  // for "no comparison possible" so the delta map/chart can omit the row.
-  test("no comparable data yields DELTA 0, indistinguishable from a genuine zero delta", () => {
+  test("no comparable data is no delta, distinct from a genuine zero", () => {
     const noData = at(
       run(
         baseProps({
@@ -737,8 +737,8 @@ describe("delta mode", () => {
       ),
       "2025-07-01T11:00"
     );
-    expect(noData.DELTA).toBe(0);
-    expect(noData.DELTA_BUCKET).toBe(0);
+    expect(noData.DELTA).toBeUndefined();
+    expect(noData.DELTA_BUCKET).toBeUndefined();
 
     const genuineZero = at(
       run(
@@ -752,14 +752,9 @@ describe("delta mode", () => {
     );
     expect(genuineZero.DELTA).toBe(0);
     expect(genuineZero.DELTA_BUCKET).toBe(0);
-    // ...and the two rows are literally identical on the delta keys.
-    expect([noData.DELTA, noData.DELTA_BUCKET]).toEqual([
-      genuineZero.DELTA,
-      genuineZero.DELTA_BUCKET
-    ]);
   });
 
-  test("delta is computed for every row, including truth-only rows", () => {
+  test("a truth-only row has no delta: there is no forecast to subtract", () => {
     const data = run(
       baseProps({
         delta: true,
@@ -767,7 +762,7 @@ describe("delta mode", () => {
         generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 10]]) }]
       })
     );
-    expect(data[0].DELTA).toBe(0);
+    expect(data[0].DELTA).toBeUndefined();
   });
 });
 
@@ -954,7 +949,15 @@ describe("B6: the useMemo dependency array omits delta and gsp", () => {
     expect(view.result.current).not.toBe(before);
     expect(view.result.current[0].FORECAST).toBe(999);
     // and the previously-ignored `delta` is picked up as a side effect of the recompute, which
-    // is what makes B6 intermittent rather than reliably broken.
-    expect(view.result.current[0].DELTA).toBeDefined();
+    // is what makes B6 intermittent rather than reliably broken. A past row, since a future one
+    // has no delta at all now; a stale output would carry no DELTA on it either.
+    view.rerender(
+      stableProps({
+        forecastSeries: ts([[BEFORE_BST, 999]]),
+        generationSeries: [{ key: "GENERATION", series: ts([[BEFORE_BST, 1000]]) }],
+        delta: true
+      })
+    );
+    expect(at(view.result.current, "2025-07-01T10:00").DELTA).toBe(1);
   });
 });

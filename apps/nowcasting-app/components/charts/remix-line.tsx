@@ -50,16 +50,27 @@ import { ZoomOutIcon } from "@heroicons/react/solid";
  * and `PLOT_INSET_LEFT_PX` is the one number external chrome measures from. Changing a margin
  * moves the scrub track with the axis rather than away from it.
  *
- * **The right edge is only right for the plain chart.** Delta view mounts a second `YAxis` on
- * the right and shrinks `rightChartMargin` to make room for it, so its plot area ends further
- * in than `PLOT_INSET_RIGHT_PX` says. Nothing here corrects for that — see
- * `components/shell/chart-scrubber.tsx`.
+ * **The right edge differs in delta view**, which mounts a second `YAxis` on the right and
+ * changes its right margin to fit it. That axis names its width too, and `plotInsetRightPx`
+ * answers the inset for either chart, so the chart hands the scrub track its right edge the way
+ * it hands over its domain — the track still does not know which chart it sits under.
  */
 export const CHART_Y_AXIS_WIDTH_PX = 60;
 export const CHART_MARGIN_LEFT_PX = 4;
 export const CHART_MARGIN_RIGHT_PX = 16;
 export const PLOT_INSET_LEFT_PX = CHART_Y_AXIS_WIDTH_PX + CHART_MARGIN_LEFT_PX;
 export const PLOT_INSET_RIGHT_PX = CHART_MARGIN_RIGHT_PX;
+/** The delta view's right-hand `YAxis`, named for the same reason as the left one. */
+export const CHART_DELTA_Y_AXIS_WIDTH_PX = 60;
+
+/** Delta view's right margin: room for the regional chart's close control when one is open. */
+const deltaChartMarginRightPx = (hasSelection: boolean): number => (hasSelection ? 15 : 0);
+
+/** Where the plot area ends, in px from the chart's right edge — plain or delta chart. */
+export const plotInsetRightPx = (deltaView: boolean, hasSelection: boolean): number =>
+  deltaView
+    ? CHART_DELTA_Y_AXIS_WIDTH_PX + deltaChartMarginRightPx(hasSelection)
+    : PLOT_INSET_RIGHT_PX;
 
 const yellow = theme.extend.colors.solar.DEFAULT;
 const orange = theme.extend.colors.series.nHour;
@@ -868,15 +879,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
   let rightChartMargin = CHART_MARGIN_RIGHT_PX;
   let deltaLabelOffset = roundTickMax ? -20 : -10;
   if (deltaView) {
+    rightChartMargin = deltaChartMarginRightPx(!!selectedMapRegionIds?.length);
     if (selectedMapRegionIds?.length) {
-      rightChartMargin = 15;
       if (roundTickMax) {
         deltaLabelOffset = 0;
       } else {
         deltaLabelOffset = -5;
       }
-    } else {
-      rightChartMargin = 0;
     }
   }
   console.log("chartData", data);
@@ -1076,6 +1085,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   tickCount={5}
                   tickLine={false}
                   yAxisId={"delta"}
+                  width={CHART_DELTA_Y_AXIS_WIDTH_PX}
                   scale={"auto"}
                   orientation="right"
                   label={{
