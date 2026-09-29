@@ -14,7 +14,10 @@ racing each other over `.next`. Tests and typecheck are reliable under concurren
 
 ## 0. Start here next session
 
-**Merge the forecast and delta maps into one** — see `docs/forecast-delta-merge.md`, written
+**Updated 2026-09-29:** the merge below is done: one Mapbox instance repaints for both
+encodings, and `DeltaMap` no longer exists. For the latest state read **§5f** first.
+
+**~~Merge the forecast and delta maps into one~~** — see `docs/forecast-delta-merge.md`, written
 2026-08-15 to be picked up cold. It carries the plan, an intent-vs-accident classification of every
 difference between the two components, and a Delta v2 prep section recording how delta actually
 works today (notably: **the chart and the map compute different deltas under the same name**).
@@ -78,16 +81,17 @@ that file as a holding position. Do not build on it.
 
 ## 3. Flagged by agents, not fixed
 
-- **`MAP_CONTROL_HEIGHT_RESERVE_PX` is still a constant (350)**, sized for the map panel
+- ~~**`MAP_CONTROL_HEIGHT_RESERVE_PX` is still a constant (350)**~~ Gone from the code as of
+  2026-09-29., sized for the map panel
   *expanded*, while it is collapsed by default. Track L narrowed *when* it applies (only when the
   chart's width actually overlaps the dock's column, which is what unblocked the 90% seed) but
   could not measure the dock's live height without editing a file it did not own. A
   `ResizeObserver` publishing the dock's height would tighten it.
-- **The colour key disappears when the display rail is collapsed.** Track G moved the chart's
+- ~~**The colour key disappears when the display rail is collapsed.**~~ Stale as of 2026-09-29:
+  `ChartLegend` is back under the plot. Track G moved the chart's
   legend into the rail's series toggles; with the rail shut, nothing on screen names the line
   colours.
-- **Two dead files**: `components/charts/LegendTooltipContent.tsx` and `LegendTooltop.tsx` became
-  unreferenced when `ChartLegend` was deleted.
+- ~~**Two dead files**~~ Both removed (the last, `LegendTooltipContent.tsx`, on 2026-09-29).
 - **The camera reads chrome by `aria-label`.** `map.tsx` finds `[aria-label="Chart"]` and
   `[aria-label="Map controls"]` to work out what covers the map when framing countries. Renaming
   either label silently stops the camera accounting for it. Commented at both ends; still a
@@ -113,6 +117,13 @@ and each failed silently rather than loudly:
 
 The map layer was swept during Phase 6 Track F; the chart layer never was. A deliberate pass over
 `components/charts/` for those three would likely find what is left before a user does.
+
+**Swept 2026-09-29.** No live bugs remain. The only GB-shaped path is the regional chart's
+single-region fast path (`useGspRegionData`: `region_type=gsp` via the `gsp_id` bridge). Other
+countries' single clicks take the roll-up path as a group of one, which draws the same chart and
+is cheap at NL's 12 and DE's 4 regions. It is left deliberately, and documented at the call site
+in `gsp-pv-remix-chart/index.tsx`. Generic observer labels are manifest-driven with GB
+fallbacks; `/sites` is GB-only by tenancy.
 
 ## 5b. Verify before building on it — GB market auction times and BST
 
@@ -427,6 +438,57 @@ deliberately for external consumers per the comment in `presenceMetadataBridge.t
 becomes the new consumer, decide whether that pins the vocabulary permanently — post-Wave-4 the
 app no longer thinks in those three views (comparison is an encoding, sites is a route), so the
 labels already describe a model we have moved off.
+
+## 5f. Launch-week Delta polish — 2026-09-28/29
+
+All committed on `spike/ocf-reskin` (`1b92d66a`…`055b9053`), `next build` green at `68472d06`.
+
+**Done:**
+- Toggles are on in solar yellow (every toggle is solar today; revisit when a second source
+  arrives). The PV lamp is yellow too.
+- The per-country no-data note moved from the map's top-left corner (the chart card covered it)
+  into the header beside the country toggle. It is one line, worded by mode: "No forecast for
+  this time" / "No actuals yet for this time" / "No data loaded".
+- Chart header: the delta is a plain figure with its caret in the ramp's pole colour, and
+  "Delta" over the unit in white. There is one shared header row (`HEADER_ROW` and friends in
+  `forecast-header/ui.tsx`). Units now sit on the figure's baseline, and the times are two bare
+  stacked times with no clock icon.
+- **The MW delta scale is per country and tier**, derived from each tier's top output band ×
+  100/450 (GB region 100, GB grouped 1,000, NL 800, DE 3,000). The helper is `deltaTopFor` in
+  `lib/domain/delta-ramp.ts`. Percentage mode is unchanged.
+- The delta legend is captioned "Actual − Forecast", prefixed with the country in MW mode, and
+  its ends are in the country's display unit.
+- Bucket chip text is picked by contrast against the chip's own colour
+  (`deltaRampWantsDarkText`). The old distance rule put white text on the palest chips.
+- Deltas table: sorted by % of capacity in % mode; region names use the registry's casing;
+  one-line column headings ("Under/Over forecast · % cap. · Δ MW · Act / Fcst MW") sit outside
+  the scroll; units are in the headings only; the bands and chips are slimmer.
+- **The chart no longer draws the hybrid delta.** `getDelta` used to fall back to latest − N-hour
+  forecast wherever actuals were missing. It now returns undefined, so those periods have no bar.
+- Empty state: chips stay, at 0 and greyed; headings stay; the message sits in the table's space.
+- Layout: the panel takes a flex share of the card (`DELTA_PANEL_FLEX`). `min-h-0` runs down the
+  column, and the plot draws inside an `absolute inset-0` wrapper. Without both, recharts'
+  `ResponsiveContainer` and content-sized flex items fed each other and the chart swelled to two
+  screens tall. **Percentage heights (`h-[40%]`) inside the card never bound anything.**
+- The delta chart's generation axis sits on quarters (`niceQuarterStep`), so both axes share
+  gridlines. The axis title uses recharts' `center` position.
+- The scrub track takes the delta chart's right inset as a prop (`plotInsetRightPx`), so it
+  lines up without knowing which chart it sits under.
+
+**Open, and why:**
+- **Jump back to the latest actuals.** Brad wants to look at this next. He rejected moving the
+  cursor automatically on entering Delta: it is unintuitive and there is no good way to tell the
+  user it happened.
+- The bucket chips, and a forecast revision as its own comparison, are both in
+  `docs/delta-histogram-strip-spike.md`. Both are post-launch.
+- Scrub-bar placement differs between Forecast and Delta (Delta's sits under the chart). Not
+  decided.
+- Zoom still breaks scrub alignment, and quarter-tick alignment too.
+- The regional chart's plot well has no absolute wrapper. Add one if it ever swells.
+- Pinned, not fixed: `deltaFillOpacityStepped` is dead; `createBucketObject`'s bounds are unused;
+  the national chart still computes an unused `DELTA_BUCKET` on the global ±100.
+- **Capacity as a map mode** is a trial on `spike/capacity-mode` (`889c5c81`, which includes
+  the shared MW/km² top and the bare "%" label). Not merged; see the memory note for its shape.
 
 ## 6. Older open questions, still open
 

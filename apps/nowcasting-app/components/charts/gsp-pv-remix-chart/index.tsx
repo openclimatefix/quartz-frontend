@@ -81,9 +81,14 @@ const GspPvRemixChart: FC<{
   // `generation/period` across the group's GSP ids at every timestamp with
   // `rollUpRegionSeries`. The two never overlap and never double-fetch: each hook disables
   // itself (a `null` scope) whenever the other one is the active path.
-  // `nationalAggregationLevel` is a region type name now, not the enum (Phase 5 seam 1). This
-  // component is GB's GSP-specific chart — `useGspRegionData` below hardcodes the `"gsp"`
-  // region type — so the check is a genuine identity match, not a stand-in for `derived`.
+  // `nationalAggregationLevel` is a region type name now, not the enum (Phase 5 seam 1). The
+  // single-region fast path (`useGspRegionData`) is GB-only — it resolves the click through the
+  // GB `gsp_id` bridge and requests `region_type=gsp` — so the check is a genuine identity match,
+  // not a stand-in for `derived`. Every other country's single click (an NL province, a DE
+  // control area) takes the roll-up path as a group of one. Deliberately left so (sweep,
+  // 2026-09-29): it draws the same chart, and at 12 and 4 regions over the pre-warmed `period`
+  // endpoint the heavier path costs next to nothing. Generalise the fast path if a country with
+  // hundreds of regions and no `gsp_id` arrives.
   const isSingleGsp = nationalAggregationLevel === "gsp" && selectedRegions.length === 1;
   const gspId = isSingleGsp ? Number(selectedRegions[0]) : undefined;
   const nMinuteForecast = nHourForecast * 60;
