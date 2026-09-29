@@ -12,7 +12,21 @@ export type PresenceMeta = {
   selectedRegionIds?: string[];
   dashboardMode?: boolean;
   pageVisible?: boolean;
+  showCloudLayer?: boolean;
+  activeChannel?: string;
+  showConstraints?: boolean;
+  chartZoomed?: boolean;
+  isPlaying?: boolean;
+  mapZoom?: number;
+  viewportWidth?: number;
+  viewportHeight?: number;
 };
+
+// Rounded so resizing a window doesn't send a stream of near-identical updates.
+const getViewport = () => ({
+  viewportWidth: Math.round(window.innerWidth / 100) * 100,
+  viewportHeight: Math.round(window.innerHeight / 100) * 100
+});
 
 export class PresenceClient {
   private ws: WebSocket | null = null;
@@ -20,8 +34,13 @@ export class PresenceClient {
   private heartbeatId: number | null = null;
   private reconnectId: number | null = null;
   private active = false;
+  private resizeTimeoutId: number | null = null;
   private handleVisibilityChange = () => {
     this.setMeta({ pageVisible: document.visibilityState === "visible" });
+  };
+  private handleResize = () => {
+    if (this.resizeTimeoutId) window.clearTimeout(this.resizeTimeoutId);
+    this.resizeTimeoutId = window.setTimeout(() => this.setMeta(getViewport()), 500);
   };
 
   constructor(private wsUrl: string) {}
@@ -31,8 +50,13 @@ export class PresenceClient {
 
     this.active = true;
     if (typeof document !== "undefined") {
-      this.meta = { ...this.meta, pageVisible: document.visibilityState === "visible" };
+      this.meta = {
+        ...this.meta,
+        ...getViewport(),
+        pageVisible: document.visibilityState === "visible"
+      };
       document.addEventListener("visibilitychange", this.handleVisibilityChange);
+      window.addEventListener("resize", this.handleResize);
     }
     this.ws = new WebSocket(this.wsUrl);
 
@@ -79,6 +103,9 @@ export class PresenceClient {
     this.reconnectId = null;
     if (typeof document !== "undefined") {
       document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+      window.removeEventListener("resize", this.handleResize);
+      if (this.resizeTimeoutId) window.clearTimeout(this.resizeTimeoutId);
+      this.resizeTimeoutId = null;
     }
     try {
       this.ws?.close();
