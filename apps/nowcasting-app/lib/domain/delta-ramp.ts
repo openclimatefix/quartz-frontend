@@ -143,15 +143,3 @@ export const deltaRampWantsDarkText = (value: number, extent: number): boolean =
   const contrastDark = (ground + 0.05) / (DARK_TEXT_LUMINANCE + 0.05);
   return contrastDark > contrastLight;
 };
-
-/**
- * Strength for one delta: nothing at zero, so ordinary forecast noise recedes, rising to
- * `topOpacity` at saturation.
- *
- * The climb is a square root, not a straight line. Linear left everything below about half
- * the scale too faint to read — half the magnitude is half the strength, and half of a low
- * top opacity is nothing at all. The curve gives the middle of the scale most of its colour
- * while leaving the smallest deltas where they belong, which is barely there.
- */
-export const deltaRampOpacity = (value: number, extent: number, topOpacity: number): number =>
-  extent === 0 ? 0 : Math.sqrt(Math.min(1, Math.abs(value) / extent)) * topOpacity;

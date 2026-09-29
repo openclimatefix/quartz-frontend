@@ -74,7 +74,6 @@ export const normaliseCountryCodes = (codes: unknown): string[] => {
 
 /** State whose meaning is country-relative. Every key here is stored per country code. */
 export type CountryScopedStateType = {
-  clickedGspId?: number | string;
   clickedMapRegionIds?: string[];
   selectedMapRegionIds?: string[];
   clickedSiteGroupId?: string;
@@ -104,7 +103,6 @@ export type CountryKeyedState = {
 };
 
 export const COUNTRY_SCOPED_KEYS = [
-  "clickedGspId",
   "clickedMapRegionIds",
   "selectedMapRegionIds",
   "clickedSiteGroupId",
@@ -129,7 +127,6 @@ export const COUNTRY_SCOPED_KEYS = [
  * country-scoped and are leaving the dashboard entirely in Wave 2.
  */
 export const SELECTION_SCOPED_KEYS = [
-  "clickedGspId",
   "clickedMapRegionIds",
   "selectedMapRegionIds"
 ] as const satisfies readonly CountryScopedKey[];
@@ -167,7 +164,6 @@ export const defaultCountryScopedState = (code: string): CountryScopedStateType 
   const config = getCountryConfig(code);
   const map = config?.map ?? FALLBACK_MAP_DEFAULTS;
   return {
-    clickedGspId: undefined,
     clickedMapRegionIds: undefined,
     selectedMapRegionIds: undefined,
     clickedSiteGroupId: undefined,

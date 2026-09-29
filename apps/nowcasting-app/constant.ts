@@ -9,9 +9,6 @@ export const MAX_POWER_GENERATED = 500;
 export const MAX_NATIONAL_GENERATION_MW = 13500;
 
 // Static constant below of this function so we don't call dynamically unnecessarily.
-// import { generateYMaxTickArray } from "./components/helpers/chartUtils";
-// console.log("Y_MAX_TICKS", generateYMaxTickArray());
-//
 // We want to have the yMax of the graph to be related to the capacity of the GspPvRemixChart.
 // If we use the raw values, the graph looks funny, i.e y major ticks are 0 100 232
 // So, we round these up to the following numbers, which hopefully split nicely into the y-axis.

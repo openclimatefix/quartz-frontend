@@ -36,40 +36,6 @@ export const getAvailablePLevels = (
       plevelValues[`plevel_${lo}`] !== undefined && plevelValues[`plevel_${hi}`] !== undefined
   );
 
-// Function not "in use" but useful for regenerating yMax levels as a constant array for the chart
-export const generateYMaxTickArray = () => {
-  // Generate yMax levels
-  // Small values
-  let yMax_levels = Array.from({ length: 4 }, (_, i) => i + 1);
-  // Multiples of 3
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 6 }, (_, i) => (i + 1) * 3)];
-  // Multiples of 5
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 6 }, (_, i) => (i + 1) * 5)];
-  // Multiples of 10
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 10)];
-  // Multiples of 15
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 6 }, (_, i) => (i + 1) * 15)];
-  // Multiples of 20
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 20)];
-  // Multiples of 25
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 3 }, (_, i) => (i + 1) * 25)];
-  // Multiples of 50
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 50)];
-  // Multiples of 100
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 100)];
-  // Multiples of 500
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 500)];
-  // Multiples of 1000
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 15 }, (_, i) => (i + 1) * 1000)];
-  // Multiples of 2500
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 2500)];
-  // Remove duplicates
-  yMax_levels = [...new Set(yMax_levels)];
-  // Sort
-  yMax_levels.sort((a, b) => a - b);
-  return yMax_levels;
-};
-
 export const getTicks = (yMax: number, yMax_levels: number[]) => {
   if (yMax >= 13000 && yMax < 15000) {
     return [3000, 6000, 9000, 12000];

@@ -41,7 +41,6 @@ const SolarSiteChart: FC<{
   const [aggregationLevel, setAggregationLevel] = useCountryState("aggregationLevel");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const [sitesLoadingState] = useGlobalState("sitesLoadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());

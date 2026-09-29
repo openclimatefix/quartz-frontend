@@ -122,7 +122,6 @@ describe("per-country defaults", () => {
   test("selection starts empty and aggregation at national, for every country", () => {
     for (const code of ["GB", "NL", UNCONFIGURED]) {
       const slice = defaultCountryScopedState(code);
-      expect(slice.clickedGspId).toBeUndefined();
       expect(slice.selectedMapRegionIds).toBeUndefined();
       expect(slice.aggregationLevel).toBe(AGGREGATION_LEVELS.NATIONAL);
     }
@@ -186,14 +185,12 @@ describe("reading and writing through the focused country", () => {
   test("the selection does not survive the country losing focus", () => {
     setCountryState("selectedMapRegionIds", ["citr_1"]);
     setCountryState("clickedMapRegionIds", ["citr_1"]);
-    setCountryState("clickedGspId", 12);
 
     setFocusedCountry("NL");
     setFocusedCountry("GB");
 
     expect(getCountryState("selectedMapRegionIds")).toBeUndefined();
     expect(getCountryState("clickedMapRegionIds")).toBeUndefined();
-    expect(getCountryState("clickedGspId")).toBeUndefined();
   });
 
   test("each country's selection is cleared independently", () => {

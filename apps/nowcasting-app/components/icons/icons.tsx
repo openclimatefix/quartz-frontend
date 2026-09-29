@@ -1,5 +1,4 @@
 import React from "react";
-import logout from "../../pages/logout";
 
 type LegendLineGraphIconProps = {
   className?: string;
@@ -245,34 +244,6 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    className={`animate-spin fill-content ${props.className}`}
-    width={24}
-    height={24}
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle
-      cx={12}
-      cy={12}
-      r={10.5}
-      stroke="currentColor"
-      fill="none"
-      strokeOpacity={0.25}
-      strokeWidth={3}
-    />
-    <path
-      d="M12 1.5a10.5 10.5 0 019.988 7.26"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 export const SpinnerTextInline = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     className={`animate-spin fill-content ${props.className}`}
@@ -381,45 +352,6 @@ export const ClockInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title:
   </span>
 );
 
-export const ZoomOutIcon = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
-  <span title={props.title || ""}>
-    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <defs>
-        <style>
-          {
-            ".cls-1,.cls-2{fill:none;}.cls-2{stroke:#FFFF;stroke-linecap:round;stroke-linejoin:round;}"
-          }
-        </style>
-      </defs>
-      <g data-name="Layer 2" id="Layer_2">
-        <g id="Workspace">
-          <rect className="cls-1" height={24} width={24} />
-          <circle className="cls-2" cx={11.5} cy={11.5} r={4.5} />
-          <line className="cls-2" x1={18} x2={14.68} y1={18} y2={14.68} />
-          <line className="cls-2" x1={9.5} x2={13.5} y1={11.5} y2={11.5} />
-        </g>
-      </g>
-    </svg>
-  </span>
-);
-
-export const DownloadIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className || ""}
-    xmlns="http://www.w3.org/2000/svg"
-    width={24}
-    height={24}
-    fill="none"
-  >
-    <path
-      fill="currentColor"
-      fillRule="evenodd"
-      d="m16.75 8.96-4.01 4.01-.707.708-.708-.707-4.01-4.01 1.414-1.415 2.304 2.303V2h2v7.85l2.303-2.304zM1 20.34v-9h6v2H3v5h18v-5h-4v-2h6v9H1"
-      clipRule="evenodd"
-    />
-  </svg>
-);
-
 /**
  * Returned JSX rather than an HTML string, which is what it was while `map.tsx` injected it
  * into a `div.innerHTML` for a Mapbox control. The button is React now
@@ -433,5 +365,3 @@ export const ResetIcon = () => (
     />
   </svg>
 );
-
-export default ZoomOutIcon;

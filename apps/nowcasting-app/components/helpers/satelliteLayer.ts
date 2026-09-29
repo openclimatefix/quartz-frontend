@@ -102,11 +102,6 @@ export const COMPOSITE_SELECTIONS = {
 export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
 export type ChannelSelection = SatelliteChannel | CompositeSelection;
 
-// Default selection: the visible composite — the most legible view in daylight,
-// the hours that matter for solar. (It is dark at night, when the reflective
-// bands see no sunlight; acceptable since generation is zero then.)
-export const DEFAULT_CHANNEL_SELECTION: CompositeSelection = "COMPOSITE_VISIBLE";
-
 // Resolve a dropdown selection to the actual channels to render.
 export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] =>
   sel in COMPOSITE_SELECTIONS

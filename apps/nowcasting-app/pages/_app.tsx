@@ -6,7 +6,6 @@ import * as Sentry from "@sentry/nextjs";
 import { AxiosError } from "axios";
 import { GoogleTagManager } from "@next/third-parties/google";
 import CustomUserProvider from "../components/auth/CustomUserProvider";
-import ThemeToggle from "../components/dev/theme-toggle";
 import { PresenceProvider } from "../components/presence/presenceProvider";
 import { PresenceMetadataBridge } from "../components/presence/presenceMetadataBridge";
 import { LinkedInInsightTag } from "nextjs-linkedin-insight-tag";
@@ -79,8 +78,6 @@ function MyApp({ Component, pageProps }: any) {
             <PresenceMetadataBridge />
             <LinkedInInsightTag partnerId={process.env.NEXT_PUBLIC_LINKEDIN_PARTNER_ID} />
             <Component {...pageProps} />
-            {/* TEMPORARY: theme preview flip. Remove with `components/dev/theme-toggle.tsx`. */}
-            {/*<ThemeToggle />*/}
             <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
           </PresenceProvider>
         </SWRConfig>

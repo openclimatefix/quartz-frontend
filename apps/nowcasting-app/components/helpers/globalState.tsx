@@ -110,7 +110,6 @@ export type FlatGlobalStateType = {
   selectedISOTime: string;
   timeNow: string;
   intervals: any[];
-  forecastCreationTime?: string;
   /**
    * True only on `/sites` (`pages/sites.tsx` sets it on mount, clears it on unmount). The
    * dashboard route never writes it.
@@ -253,7 +252,6 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     selectedISOTime: INITIAL_CURSOR,
     timeNow: INITIAL_CURSOR,
     intervals: [],
-    forecastCreationTime: undefined,
     isSitesChart: false,
     visibleLines: getArraySettingFromCookieStorage(CookieStorageKeys.VISIBLE_LINES) || [
       "GENERATION",
