@@ -29,10 +29,8 @@ import type { CountryListing } from "../../../lib/domain/types";
 //
 // A country the user has switched OFF in that drawer is not listed here at all: it is not on
 // the map, so "read this one" is not a thing that can be asked of it, and a row that cannot
-// be chosen would be a second, quieter disabled state meaning something else entirely. That makes it one-of-N, the same grammar as the chart's own picker
-// (`components/charts/country-picker.tsx`, which this borrows its keyboard handling from) —
-// that component has no importers right now and is dead code, kept only as the reference this
-// one is copying from.
+// be chosen would be a second, quieter disabled state meaning something else entirely. That
+// makes it one-of-N.
 //
 // `/countries` returns every country the API serves, by design, so prospects can see what
 // exists before a subscription completes — which is why an unentitled country is rendered
@@ -294,9 +292,6 @@ const CountryRadioGroup: React.FC<{
    * Roving tabindex over a group that can contain disabled radios: `Left`/`Up` and
    * `Right`/`Down` step to the next *selectable* country, wrapping, skipping over any
    * unentitled or unconfigured ones in between rather than landing on something unclickable.
-   * Copied from `components/charts/country-picker.tsx`'s arrow handling, widened for the
-   * disabled case that control never has to deal with (it only ever lists countries already
-   * on the map).
    */
   const onKeyDown = (event: React.KeyboardEvent) => {
     const step =
