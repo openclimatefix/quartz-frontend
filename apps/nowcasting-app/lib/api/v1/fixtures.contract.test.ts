@@ -105,27 +105,27 @@ const fixtures: FixtureCase[] = [
   },
   {
     file: "gb-national-forecast.json",
-    request: "GET /GB/solar/regions/national/forecast",
+    request: "GET /GB/solar/regions/national/forecast?adjusted=true",
     schema: schemaRef("#/components/schemas/ForecastResponse")
   },
   {
     file: "gb-national-forecast-last-updated.json",
-    request: "GET /GB/solar/regions/national/forecast/last-updated",
+    request: "GET /GB/solar/regions/national/forecast/last-updated?adjusted=true",
     schema: DATE_TIME_STRING_SCHEMA
   },
   {
     file: "gb-national-generation-pvlive_in_day.json",
-    request: "GET /GB/solar/regions/national/generation?observer=pvlive_in_day",
+    request: "GET /GB/solar/regions/national/generation?observer_name=pvlive_in_day",
     schema: schemaRef("#/components/schemas/GenerationResponse")
   },
   {
     file: "gb-national-generation-pvlive_day_after.json",
-    request: "GET /GB/solar/regions/national/generation?observer=pvlive_day_after",
+    request: "GET /GB/solar/regions/national/generation?observer_name=pvlive_day_after",
     schema: schemaRef("#/components/schemas/GenerationResponse")
   },
   {
     file: "nl-national-generation-ned_nl.json",
-    request: "GET /NL/solar/regions/national/generation?observer=ned_nl",
+    request: "GET /NL/solar/regions/national/generation?observer_name=ned_nl",
     schema: schemaRef("#/components/schemas/GenerationResponse")
   },
   {
@@ -140,7 +140,7 @@ const fixtures: FixtureCase[] = [
   },
   {
     file: "gb-gsp-forecasts-snapshot.json",
-    request: "GET /GB/solar/forecasts/snapshot?region_type=gsp",
+    request: "GET /GB/solar/forecasts/snapshot?region_type=gsp&adjusted=true",
     schema: schemaRef("#/components/schemas/ForecastSnapshot")
   },
   {

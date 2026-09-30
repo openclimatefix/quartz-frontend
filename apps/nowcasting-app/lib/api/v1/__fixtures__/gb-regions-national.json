@@ -2,11 +2,13 @@
   {
     "name": "Great Britain",
     "type": "national",
-    "capacity_kW": 21904641,
+    "capacity_kW": 22536728,
     "centroid": {
       "lat": 54.142,
       "lng": -2.738
     },
-    "metadata": {}
+    "metadata": {
+      "installed_capacity_kW": 23963209
+    }
   }
 ]

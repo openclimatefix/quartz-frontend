@@ -172,7 +172,7 @@ describe("the forecast series are driven by the country's config, not by the com
     expect(seen(path)).toHaveLength(configured.length);
   });
 
-  // The whole reason the list is curated rather than derived: GB national offers twelve
+  // The whole reason the list is curated rather than derived: GB national offers six
   // models and the chart draws four of them. It drew six until `pvnet_day_ahead` and
   // `pvnet_intraday` were removed — fetched on every load with no legend entry and no line to
   // draw them on, and close enough to the blend they mostly make up to add nothing.
@@ -183,7 +183,7 @@ describe("the forecast series are driven by the country's config, not by the com
     const manifestModels = (countriesFixture as any[])
       .find((c) => c.country === "GB")
       .region_types.find((rt: any) => rt.type === "national").forecast_models;
-    expect(manifestModels.length).toBe(12);
+    expect(manifestModels.length).toBe(6);
     expect(seen("/GB/solar/regions/national/forecast").length).toBe(4);
   });
 

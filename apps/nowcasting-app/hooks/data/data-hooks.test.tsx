@@ -170,10 +170,11 @@ describe("forecast hooks", () => {
 
     expect(countRequests("/GB/solar/regions/national/forecast")).toBe(1);
     expect(result.current.data?.regionName).toBe("Great Britain");
-    // 21_905_152 kW on the wire; MW is what every chart, the CSV and Y_MAX_TICKS assume.
-    expect(result.current.data?.capacityMw).toBeCloseTo(21905.152, 3);
-    expect(result.current.data?.forecast?.modelName).toBe("blend_adjust");
-    expect(result.current.data?.values[0].timeUtc).toBe("2026-08-04T00:00:00Z");
+    // 22_536_729 kW on the wire; MW is what every chart, the CSV and Y_MAX_TICKS assume.
+    expect(result.current.data?.capacityMw).toBeCloseTo(22536.729, 3);
+    // Adjustment is the `adjusted` parameter, so the response names the plain model.
+    expect(result.current.data?.forecast?.modelName).toBe("blend");
+    expect(result.current.data?.values[0].timeUtc).toBe("2026-09-29T00:00:00Z");
     expect(result.current.error).toBeUndefined();
   });
 
@@ -235,10 +236,11 @@ describe("forecast hooks", () => {
     // pre-warmed. A regional time series is pinned to it by design.
     expect(query?.has("model_name")).toBe(false);
 
-    expect(result.current.data?.times[0]).toBe("2026-08-04T00:00:00Z");
+    expect(result.current.data?.times[0]).toBe("2026-09-29T00:00:00Z");
     const citr = result.current.data?.regions["citr_1"];
     expect(citr?.powerMw).toHaveLength(result.current.data?.times.length ?? 0);
-    expect(citr?.powerMw[10]).toBeCloseTo(0.029, 6);
+    // Index 20 (10:00Z), 1724.796 kW on the wire. Index 10 is now an overnight 0 kW.
+    expect(citr?.powerMw[20]).toBeCloseTo(1.724796, 6);
   });
 
   test("useForecastSnapshot sends model_name, unlike period", async () => {
@@ -249,7 +251,7 @@ describe("forecast hooks", () => {
     const query = lastQuery("/GB/solar/forecasts/snapshot");
     expect(query?.get("model_name")).toBe("blend");
     expect(query?.get("time_utc")).toBe("2026-08-05T15:00:00Z");
-    expect(result.current.data?.regions["citr_1"].powerMw).toBeCloseTo(2.026439, 6);
+    expect(result.current.data?.regions["citr_1"].powerMw).toBeCloseTo(0.302291, 6);
   });
 
   test("useForecastLastUpdated canonicalises the bare instant it is given", async () => {
@@ -335,7 +337,11 @@ describe("regions and capabilities", () => {
     const { result } = render(() => useRegions(GB_GSP));
     await settled(result);
     expect(lastQuery("/GB/solar/regions")?.get("region_type")).toBe("gsp");
-    expect(result.current.data?.[0]).toMatchObject({ name: "citr_1", label: "City Road" });
+    // The list is name-sorted now; it used to open with citr_1.
+    expect(result.current.data?.find((r) => r.name === "citr_1")).toMatchObject({
+      name: "citr_1",
+      label: "City Road"
+    });
   });
 
   // Models are per region type, not per country: a picker reading the country's models would
@@ -345,12 +351,12 @@ describe("regions and capabilities", () => {
     await settled(result);
 
     const byType = Object.fromEntries((result.current.data ?? []).map((rt) => [rt.type, rt]));
-    expect(byType.national.forecastModels.length).toBe(12);
-    expect(byType.national.defaultModel).toBe("blend_adjust");
+    expect(byType.national.forecastModels.length).toBe(6);
+    expect(byType.national.defaultModel).toBe("blend");
     expect(byType.gsp.forecastModels.map((m) => m.name)).toEqual([
       "blend",
-      "pvnet_intraday",
-      "pvnet_day_ahead"
+      "ecmwf_mo_sat_8h",
+      "ecmwf_mo"
     ]);
     expect(byType.gsp.defaultModel).toBe("blend");
     expect(byType.national.level).toBe(0);

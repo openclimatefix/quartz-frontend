@@ -110,21 +110,23 @@ describe("shipped GB GSP boundaries", () => {
 describe("GB national capacity under the NESO rule", () => {
   // Measurement only. The contract records the 338 API regions summing to 22,588 MW against a
   // national 21,905 MW — 683 MW / 3.1 % over — and attributes the excess to exactly the six
-  // legacy regions. Excluding them resolves the over-count and leaves a small shortfall, which
+  // legacy regions. Re-recorded from production on 2026-09-30 with API 1.0.72: capacities have
+  // moved (23,235 against 22,537, 698 MW over), the legacy set is unchanged, and the shortfall
+  // after excluding it is 124 MW, still the undrawn `seab1`. Excluding them resolves the over-count and leaves a small shortfall, which
   // is a different and much more ordinary problem (undrawn `seab1`, `grem_p`). Pinned here so
   // that whoever owns the capacity decision can see it move. Nothing in this repo consumes it.
   const sumMw = (regions: { name: string; capacity_kW: number }[]) =>
     regions.reduce((total, r) => total + r.capacity_kW, 0) / 1000;
 
-  it("over-counts by 683 MW when the legacy regions are included", () => {
-    expect(Math.round(sumMw(gbGspRegions))).toBe(22588);
-    expect(Math.round(gbNationalRegions[0].capacity_kW / 1000)).toBe(21905);
+  it("over-counts by 698 MW when the legacy regions are included", () => {
+    expect(Math.round(sumMw(gbGspRegions))).toBe(23235);
+    expect(Math.round(gbNationalRegions[0].capacity_kW / 1000)).toBe(22537);
   });
 
-  it("lands 122 MW UNDER national once the legacy regions are excluded", () => {
+  it("sits 124 MW UNDER national once the legacy regions are excluded", () => {
     const real = gbGspRegions.filter((r) => !isLegacyRegion("GB", r.name));
-    expect(Math.round(sumMw(real))).toBe(21783);
-    expect(Math.round(sumMw(real) - gbNationalRegions[0].capacity_kW / 1000)).toBe(-122);
+    expect(Math.round(sumMw(real))).toBe(22413);
+    expect(Math.round(sumMw(real) - gbNationalRegions[0].capacity_kW / 1000)).toBe(-124);
   });
 });
 

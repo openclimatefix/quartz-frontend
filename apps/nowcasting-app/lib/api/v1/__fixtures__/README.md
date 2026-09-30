@@ -1,15 +1,23 @@
 # v1 API fixtures
 
-Recorded verbatim from **production** (`https://api.quartz.solar/v1`) with the
-`QUARTZ_API_V1_TOKEN` in `.env.local`. Dev hosts reject this token (different Auth0
-tenant). Re-record with:
+Recorded verbatim from the live v1 API (spec 1.0.72). The recorder defaults to
+**production** (`https://api.quartz.solar/v1`) with `QUARTZ_API_V1_TOKEN_PROD` from
+`.env.local` (falling back to `QUARTZ_API_V1_TOKEN`, the dev-tenant token, which production
+rejects with 401). With `--base-from-env` the host comes from `NEXT_PUBLIC_API_V1_PREFIX` and
+the dev token is used. The current set was recorded on 2026-09-30 from production.
+Re-record with:
 
 ```
-node lib/api/v1/__fixtures__/record.mjs
+node lib/api/v1/__fixtures__/record.mjs [--base-from-env]
 ```
+
+Requests use the app's wire names: `observer_name`, `model_name`, and `adjusted=true` on the
+endpoints that accept it (national forecast, its `last-updated`, `forecasts/snapshot`), as
+`lib/api/v1/queries.ts` sends them. `forecasts/period` takes no `adjusted` parameter.
 
 The script is the source of truth for exactly which request produced each file — this
-table mirrors it at time of writing (2026-08-05).
+table mirrors it at time of writing (2026-09-29; the findings section further down was written
+against the 2026-08-05 recording and quotes its counts and model names).
 
 One caveat on "verbatim": the recorder pretty-prints each response through
 `JSON.parse`/`JSON.stringify` for readability. This can only change *cosmetic* number
@@ -21,32 +29,32 @@ against the recorder's output.
 
 | File | Request | Size |
 |---|---|---|
-| `countries.json` | `GET /countries` | 3.8 KB |
+| `countries.json` | `GET /countries` | 2.8 KB |
 | `sources.json` | `GET /sources` | 54 B |
-| `gb-region-types.json` | `GET /GB/solar/region-types` | 1.7 KB |
-| `nl-region-types.json` | `GET /NL/solar/region-types` | 0.9 KB |
+| `gb-region-types.json` | `GET /GB/solar/region-types` | 1.0 KB |
+| `nl-region-types.json` | `GET /NL/solar/region-types` | 0.7 KB |
 | `gb-generation-sources.json` | `GET /GB/solar/generation-sources` | 192 B |
 | `nl-generation-sources.json` | `GET /NL/solar/generation-sources` | 87 B |
-| `gb-regions-national.json` | `GET /GB/solar/regions?region_type=national` | 179 B |
-| `gb-regions-gsp.json` | `GET /GB/solar/regions?region_type=gsp` (full — 338 regions, no server-side count limit available) | 72.1 KB |
+| `gb-regions-national.json` | `GET /GB/solar/regions?region_type=national` | 223 B |
+| `gb-regions-gsp.json` | `GET /GB/solar/regions?region_type=gsp` (full — 338 regions, no server-side count limit available) | 84.4 KB |
 | `nl-regions-province.json` | `GET /NL/solar/regions?region_type=province` (12 regions) | 2.3 KB |
-| `gb-region-citr_1.json` | `GET /GB/solar/regions/citr_1` (single region) | 188 B |
-| `gb-national-forecast.json` | `GET /GB/solar/regions/national/forecast?start_utc=<yesterday 00:00Z>&end_utc=<today 00:00Z>` (default model, full day, 49 points) | 11.6 KB |
-| `gb-national-forecast-last-updated.json` | `GET /GB/solar/regions/national/forecast/last-updated` | 23 B |
-| `gb-national-generation-pvlive_in_day.json` | `GET /GB/solar/regions/national/generation?observer=pvlive_in_day&...` | 3.9 KB |
-| `gb-national-generation-pvlive_day_after.json` | `GET /GB/solar/regions/national/generation?observer=pvlive_day_after&...` | 3.8 KB |
-| `nl-national-generation-ned_nl.json` | `GET /NL/solar/regions/national/generation?observer=ned_nl&...` | 7.6 KB |
-| `gb-gsp-forecasts-period.json` | `GET /GB/solar/forecasts/period?region_type=gsp&...&region_names=citr_1,brfo_1\|clt03,sjow_1,hack_1,hack_6` (server-side trim to 5, full 49-point time axis) | 5.3 KB |
-| `gb-gsp-generation-period.json` | `GET /GB/solar/generation/period?region_type=gsp&observer=pvlive_in_day&...` (same 5 regions) | 5.0 KB |
-| `nl-province-forecasts-period.json` | `GET /NL/solar/forecasts/period?region_type=province&...&region_names=zeeland,noord-brabant,limburg,friesland,drenthe` | 25.6 KB |
-| `gb-gsp-forecasts-snapshot.json` | `GET /GB/solar/forecasts/snapshot?region_type=gsp` (one instant, 336 regions) | 32.7 KB |
-| `gb-gsp-generation-snapshot.json` | `GET /GB/solar/generation/snapshot?region_type=gsp&observer=pvlive_in_day&time_utc=2026-08-05T13:00:00Z` (a settled slot: full 336-region coverage) | 33 KB |
+| `gb-region-citr_1.json` | `GET /GB/solar/regions/citr_1` (single region) | 224 B |
+| `gb-national-forecast.json` | `GET /GB/solar/regions/national/forecast?start_utc=<yesterday 00:00Z>&end_utc=<today 00:00Z>&adjusted=true` (default model, full day, 49 points) | 11.8 KB |
+| `gb-national-forecast-last-updated.json` | `GET /GB/solar/regions/national/forecast/last-updated?adjusted=true` | 22 B |
+| `gb-national-generation-pvlive_in_day.json` | `GET /GB/solar/regions/national/generation?observer_name=pvlive_in_day&...` | 3.9 KB |
+| `gb-national-generation-pvlive_day_after.json` | `GET /GB/solar/regions/national/generation?observer_name=pvlive_day_after&...` (window is the day before the others; the last full day can be empty) | 3.9 KB |
+| `nl-national-generation-ned_nl.json` | `GET /NL/solar/regions/national/generation?observer_name=ned_nl&...` | 7.7 KB |
+| `gb-gsp-forecasts-period.json` | `GET /GB/solar/forecasts/period?region_type=gsp&...&region_names=citr_1,brfo_1\|clt03,sjow_1,hack_1,hack_6` (server-side trim to 5, full 49-point time axis) | 5.5 KB |
+| `gb-gsp-generation-period.json` | `GET /GB/solar/generation/period?region_type=gsp&observer_name=pvlive_in_day&...` (same 5 regions) | 5.3 KB |
+| `nl-province-forecasts-period.json` | `GET /NL/solar/forecasts/period?region_type=province&...&region_names=zeeland,noord-brabant,limburg,friesland,drenthe` | 27.1 KB |
+| `gb-gsp-forecasts-snapshot.json` | `GET /GB/solar/forecasts/snapshot?region_type=gsp&adjusted=true` (one instant, 336 regions) | 32.6 KB |
+| `gb-gsp-generation-snapshot.json` | `GET /GB/solar/generation/snapshot?region_type=gsp&observer_name=pvlive_in_day&time_utc=2026-09-30T06:30:00Z` (a settled slot: 336 regions) | 30.7 KB |
 | `gb-gsp-generation-snapshot-partial.json` | as above at `time_utc=2026-08-05T15:00:00Z`, recorded while that slot was still publishing — 127 of 336 regions. Kept deliberately; see finding 6 | 12.6 KB |
 | `error-422-missing-required-query-param.json` | `GET /GB/solar/forecasts/period` (region_type omitted) — real 422 | 173 B |
 | `error-400-unknown-region-type.json` | `GET /GB/solar/regions?region_type=bogus` — undocumented 400 | 85 B |
 | `error-400-national-on-period-endpoint.json` | `GET /GB/solar/forecasts/period?region_type=national` — undocumented 400 | 208 B |
 
-**Total: 194,419 bytes (~190 KB)**, well inside the ~1.5MB budget.
+**Total: 239,384 bytes (~234 KB) including the unchanged partial fixture**, well inside the ~1.5MB budget.
 
 Nothing is missing: both `/forecasts/period` and `/generation/period` for GB gsp
 recorded successfully as 200s (see "cache-backed 503s" below for why that took ~10
