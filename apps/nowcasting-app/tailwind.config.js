@@ -28,7 +28,7 @@ const VISUALISATION = {
   teal: "#58B0A9",
   tealLight: "#9ED1CD",
   yellow: "#FFD480",
-  yellowLight: "#FFE9BC",
+  yellowLight: "#FFF8EA",
   orange: "#FAA056",
   orangeLight: "#FFDABC"
 };
@@ -166,6 +166,11 @@ module.exports = {
         "2xs": "0.625rem"
       },
       keyframes: {
+        nudge: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "30%": { transform: "translateX(-6px)" },
+          "65%": { transform: "translateX(3px)" }
+        },
         /* Tailwind's own `pulse` only dips to 50% opacity, which on a 6px dot reads as a
          * slight shimmer rather than a beat. This goes almost all the way out, so the dot
          * plainly blinks. */
@@ -175,7 +180,9 @@ module.exports = {
         }
       },
       animation: {
-        beat: "beat 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+        beat: "beat 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        // The chart settings panel drawing the eye when a legend click finds it already open.
+        nudge: "nudge 0.45s ease-out"
       },
       colors: {
         /* ---- Role colours. See `styles/tokens.css`. Components use only these. ----

@@ -310,7 +310,7 @@ describe("observers are per country and there may be exactly one", () => {
 describe("the chart's own key", () => {
   // Track G deleted `ChartLegend` and this block asserted its absence. The key is back
   // (`chart-legend.tsx`), so what is worth pinning has moved: it names *drawn* series only, and
-  // it is inert. Both are the properties that stop it becoming the display rail drawn twice.
+  // it only opens the drawer. Both are the properties that stop it becoming the display rail drawn twice.
   test("GB: it names the drawn series and not the ones switched off", async () => {
     const view = renderChart();
     await settled(view, 6);
@@ -326,7 +326,7 @@ describe("the chart's own key", () => {
     }
   });
 
-  test("GB: the key is inert — it holds no controls", async () => {
+  test("GB: the key only opens the drawer — one labelled button per entry, no toggles", async () => {
     const view = renderChart();
     await settled(view, 6);
     await waitFor(() => {
@@ -335,7 +335,12 @@ describe("the chart's own key", () => {
     });
 
     const legend = screen.getByLabelText("Chart series");
-    expect(legend.querySelectorAll("button, input, [role='button']")).toHaveLength(0);
+    expect(legend.querySelectorAll("input, [role='button']")).toHaveLength(0);
+    const buttons = legend.querySelectorAll("button");
+    expect(buttons.length).toBe(legend.querySelectorAll("li").length);
+    buttons.forEach((button) =>
+      expect(button.getAttribute("aria-label")).toMatch(/chart settings/)
+    );
   });
 
   test("NL: the key follows the country's own series", async () => {

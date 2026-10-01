@@ -731,23 +731,21 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
                   onClick={resetTime}
                   title={
                     isLive
-                      ? "The cursor is following now"
-                      : "Return to now and follow it as it advances"
+                      ? "The cursor is following live"
+                      : "Return to live and follow it as it advances"
                   }
-                  aria-label={isLive ? "Following now" : "Return to now"}
+                  aria-label={isLive ? "Following live" : "Return to live"}
                   aria-pressed={isLive}
                   // Centred *on* the line, not offset to one side of it. Offset, it read as
                   // labelling whichever half of the strip it sat in rather than the rule itself —
                   // and it is the rule it names. Inside the strip rather than below, where it
                   // collided with the tick labels and took their baseline.
                   //
-                  // Called "now" and not "live": the mark is a *place*, and clicking it means
-                  // "take me there". Whether the cursor is *following* that place is a mode, and
-                  // the pulsing dot on the tethered tag is what says so — one label cannot honestly
-                  // do both jobs, which is what this one was trying to do.
+                  // Labelled "live" on the product owner's decision of 2026-09-29; the pulsing dot
+                  // on the tethered tag is still what shows the cursor is following.
                   className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded border border-interactive bg-surface px-1 py-px text-[9px] font-semibold uppercase leading-none tracking-wider text-interactive transition-colors hover:bg-surface-raised focus:outline-none focus-visible:ring-1 focus-visible:ring-interactive`}
                 >
-                  now
+                  live
                 </button>
               )}
             </div>
