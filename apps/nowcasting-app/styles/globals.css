@@ -23,11 +23,33 @@
   background: rgba(0, 0, 0, 0.75);
   color: white;
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem 0.5rem 0 0.5rem;
+  border-radius: 0.5rem;
 }
 
-.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
-  border-top-color: rgba(0, 0, 0, 0.5);
+/* The popup anchors on whichever side keeps it clear of the chart and the top edge, so the
+   tip can point any of four ways. Each tip takes the body's colour, and the body squares off
+   the corner the tip meets. */
+.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-content {
+  border-bottom-right-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-content {
+  border-bottom-left-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-top-right .mapboxgl-popup-content {
+  border-top-right-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-top-left .mapboxgl-popup-content {
+  border-top-left-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  border-top-color: rgba(0, 0, 0, 0.75);
+}
+.pv-map .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+  border-bottom-color: rgba(0, 0, 0, 0.75);
 }
 
 .mapboxgl-canvas {
