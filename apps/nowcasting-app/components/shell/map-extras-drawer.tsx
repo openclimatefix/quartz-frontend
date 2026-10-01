@@ -73,6 +73,15 @@ const MapExtrasDrawer: FC = () => {
                 onClick={() => toggleCountryEnabled(country.code)}
               >
                 {country.config?.displayName ?? country.code}
+                {/* Marks a setting only OCF admins see; these rows render for admins alone. Brand
+                    orange, which otherwise lives in the logo. */}
+                <span
+                  className="ml-1 text-[rgb(var(--ocf-brand-orange))]"
+                  title="OCF admin"
+                  aria-label="OCF admin"
+                >
+                  *
+                </span>
               </button>
               <Toggle
                 onClick={() => toggleCountryEnabled(country.code)}
