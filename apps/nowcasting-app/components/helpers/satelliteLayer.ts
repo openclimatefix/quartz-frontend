@@ -1,4 +1,4 @@
-import { fromArrayBuffer } from "geotiff";
+import { fromArrayBuffer, GeoTIFFImage } from "geotiff";
 import { getAccessToken } from "../../lib/api/auth/token";
 import type { Scope } from "../../lib/domain/types";
 
@@ -96,6 +96,7 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
 export type TifLayerData = {
   imageDataUrl: string;
   bounds: [number, number, number, number];
+  missingChannels?: string[];
 };
 
 // Satellite is on **neither v0 nor v1** — stripping `/v0` leaves the API root, so requests go to
@@ -113,7 +114,8 @@ export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
 const SAT_OPACITY = 0.6;
 const SAT_COMPOSITE_MAX_ALPHA = 255;
-const SAT_COMPOSITE_OPACITY = 0.85;
+const SAT_COMPOSITE_OPACITY = 0.95;
+const SAT_COMPOSITE_GAMMA = 0.6;
 
 export const isCompositeChannel = (ch: SatelliteChannel): boolean =>
   (SATELLITE_COMPOSITES as readonly SatelliteChannel[]).includes(ch);
@@ -166,7 +168,9 @@ const satOpacityExpression = (channel: SatelliteChannel): mapboxgl.Expression =>
   ["linear"],
   ["zoom"],
   CLOUD_FADE_START_ZOOM,
-  isCompositeChannel(channel) ? SAT_COMPOSITE_OPACITY : SAT_OPACITY,
+  isCompositeChannel(channel.split("@")[0] as SatelliteChannel)
+    ? SAT_COMPOSITE_OPACITY
+    : SAT_OPACITY,
   CLOUD_FADE_END_ZOOM,
   0
 ];
@@ -257,23 +261,12 @@ export async function fetchSatelliteTif(
   }
 }
 
-async function requestSatelliteTif(
-  channel: SatelliteChannel,
-  timestamp: string,
-  latest: boolean,
-  // Accepted, not yet consumed — see DEFAULT_SATELLITE_SCOPE's doc comment above.
-  scope: Scope = DEFAULT_SATELLITE_SCOPE
-): Promise<ArrayBuffer | null> {
-  void scope;
+async function requestTifFromRoute(routeUrl: string): Promise<ArrayBuffer | null> {
   const token = await getAccessToken();
-  const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
-    channel
-  )}&timestamp=${encodeURIComponent(timestamp)}${latest ? "&latest=true" : ""}`;
-
   const maxRetries = 5;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const apiRes = await fetch(apiUrl, {
+    const apiRes = await fetch(routeUrl, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -302,46 +295,39 @@ async function requestSatelliteTif(
   return null;
 }
 
-export async function decodeTif(
-  buf: ArrayBuffer,
-  invert = false,
-  maxAlpha: number = SAT_MAX_ALPHA
-): Promise<TifLayerData> {
-  const tiff = await fromArrayBuffer(buf);
-  const image = await tiff.getImage();
-  const width = image.getWidth();
-  const height = image.getHeight();
-  const data = await image.readRasters();
-  let minLon: number, minLat: number, maxLon: number, maxLat: number;
+async function requestSatelliteTif(
+  channel: SatelliteChannel,
+  timestamp: string,
+  latest: boolean,
+  // Accepted, not yet consumed — see DEFAULT_SATELLITE_SCOPE's doc comment above.
+  scope: Scope = DEFAULT_SATELLITE_SCOPE
+): Promise<ArrayBuffer | null> {
+  void scope;
+  const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
+    channel
+  )}&timestamp=${encodeURIComponent(timestamp)}${latest ? "&latest=true" : ""}`;
+  return requestTifFromRoute(apiUrl);
+}
+
+// The extent a tif draws over: its `bounds_wgs84` tag if present, else its projected bbox.
+async function readBounds(image: GeoTIFFImage): Promise<TifLayerData["bounds"]> {
   const meta = (await image.getGDALMetadata()) as { bounds_wgs84?: string } | null;
   const tag = meta?.bounds_wgs84?.split(",").map(Number);
   if (tag && tag.length === 4 && tag.every((n) => isFinite(n))) {
-    [minLon, minLat, maxLon, maxLat] = tag as [number, number, number, number];
-  } else {
-    const [minX, minY, maxX, maxY] = image.getBoundingBox();
-    [minLon, minLat] = mercToWgs84(minX, minY);
-    [maxLon, maxLat] = mercToWgs84(maxX, maxY);
+    return tag as TifLayerData["bounds"];
   }
+  const [minX, minY, maxX, maxY] = image.getBoundingBox();
+  return [...mercToWgs84(minX, minY), ...mercToWgs84(maxX, maxY)];
+}
 
-  const bands = Array.isArray(data) ? data : [data];
-  const band = bands[0] as Float32Array | Uint16Array | Uint8Array;
-
-  let minVal = Infinity;
-  let maxVal = -Infinity;
-  for (let i = 0; i < band.length; i++) {
-    const v = band[i];
-    if (isFinite(v)) {
-      if (v < minVal) minVal = v;
-      if (v > maxVal) maxVal = v;
-    }
-  }
-  if (!isFinite(minVal)) {
-    minVal = 0;
-    maxVal = 1;
-  }
-  const range = maxVal - minVal || 1;
-  const scale = 255 / range;
-
+function bandToImage(
+  band: ArrayLike<number>,
+  width: number,
+  height: number,
+  invert: boolean,
+  maxAlpha: number = SAT_MAX_ALPHA,
+  gamma: number = 1
+): string {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -352,20 +338,16 @@ export async function decodeTif(
   for (let i = 0; i < band.length; i++) {
     const pi = i * 4;
     const v = band[i];
-    if (isFinite(v)) {
-      const stretched = Math.max(0, Math.min(255, (v - minVal) * scale));
-      const g = invert ? 255 - stretched : stretched;
-      px[pi] = g;
-      px[pi + 1] = g;
-      px[pi + 2] = g;
-      // Alpha tracks brightness rather than being flat: bright cloud stays opaque,
-      // while dark pixels (clear sky, and the whole visible band at night) go
-      // transparent and let the map beneath show through. Scaled so the brightest
-      // pixel tops out at `maxAlpha` (higher for composites — see the constants above).
-      px[pi + 3] = (g * maxAlpha) / 255;
-    } else {
+    if (!isFinite(v) || v === 0) {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
+      continue;
     }
+    const grey = Math.pow((v - 1) / 254, gamma) * 255;
+    const g = invert ? 255 - grey : grey;
+    px[pi] = g;
+    px[pi + 1] = g;
+    px[pi + 2] = g;
+    px[pi + 3] = (g * maxAlpha) / 255;
   }
 
   ctx.putImageData(imageData, 0, 0);
@@ -375,10 +357,31 @@ export async function decodeTif(
   const outCtx = outCanvas.getContext("2d")!;
   outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, SAT_TEXTURE_SIZE, SAT_TEXTURE_SIZE);
   // WebP keeps the alpha channel (unlike JPEG) but compresses far better than the
-  // default PNG (~4x smaller here), so each cached entry is a fraction of the size.
-  // Falls back to the browser default if WebP isn't supported (a PNG data URL).
-  const imageDataUrl = outCanvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
-  return { imageDataUrl, bounds: [minLon, minLat, maxLon, maxLat] };
+  // default PNG (~4x smaller here). Falls back to the browser default if WebP isn't
+  // supported (a PNG data URL).
+  return outCanvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
+}
+
+export async function decodeTif(
+  buf: ArrayBuffer,
+  invert = false,
+  maxAlpha: number = SAT_MAX_ALPHA,
+  gamma: number = 1
+): Promise<TifLayerData> {
+  const image = await (await fromArrayBuffer(buf)).getImage();
+  const data = await image.readRasters();
+  const band = (Array.isArray(data) ? data[0] : data) as ArrayLike<number>;
+  // `missing_channels` is set by the API only on partial composite frames; empty/absent
+  // otherwise. Surfaced so the UI can flag a composite built from fewer than its members.
+  const meta = (await image.getGDALMetadata()) as { missing_channels?: string } | null;
+  const missingChannels = meta?.missing_channels
+    ? meta.missing_channels.split(",").filter(Boolean)
+    : undefined;
+  return {
+    imageDataUrl: bandToImage(band, image.getWidth(), image.getHeight(), invert, maxAlpha, gamma),
+    bounds: await readBounds(image),
+    missingChannels: missingChannels && missingChannels.length ? missingChannels : undefined
+  };
 }
 
 export async function fetchAndDecodeSatelliteTif(
@@ -390,7 +393,85 @@ export async function fetchAndDecodeSatelliteTif(
   const buf = await fetchSatelliteTif(channel, timestamp, latest, scope);
   if (!buf) return null;
   const maxAlpha = isCompositeChannel(channel) ? SAT_COMPOSITE_MAX_ALPHA : SAT_MAX_ALPHA;
-  return decodeTif(buf, shouldInvertChannel(channel), maxAlpha);
+  const gamma = isCompositeChannel(channel) ? SAT_COMPOSITE_GAMMA : 1;
+  return decodeTif(buf, shouldInvertChannel(channel), maxAlpha, gamma);
+}
+
+export const stackKey = (iso: string): string =>
+  new Date(iso).toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "_");
+
+export type SatelliteStack = {
+  channel: SatelliteChannel;
+  bands: Record<string, ArrayLike<number>>;
+  // Per-slot composite degradation (the band-level `missing_channels` tag the API writes on the
+  // stack). Only slots that were partial appear here; absent keys mean a complete frame.
+  missing: Record<string, string[]>;
+  width: number;
+  height: number;
+  bounds: TifLayerData["bounds"];
+};
+
+export async function fetchSatelliteStack(
+  channel: SatelliteChannel
+): Promise<SatelliteStack | null> {
+  await acquireRequestSlot();
+  let buf: ArrayBuffer | null;
+  try {
+    buf = await requestTifFromRoute(
+      `${API_PREFIX}/satellite/stack?channel=${encodeURIComponent(channel)}`
+    );
+  } finally {
+    releaseRequestSlot();
+  }
+  if (!buf) return null;
+
+  const image = await (await fromArrayBuffer(buf)).getImage();
+  const data = await image.readRasters();
+  const bands = (Array.isArray(data) ? data : [data]) as ArrayLike<number>[];
+  const meta = (await image.getGDALMetadata()) as { timestamps?: string } | null;
+  const slots = meta?.timestamps ? meta.timestamps.split(",") : [];
+  const frames: Record<string, ArrayLike<number>> = {};
+  const missing: Record<string, string[]> = {};
+  for (let i = 0; i < slots.length; i++) {
+    const ts = slots[i];
+    if (!bands[i]) continue;
+    frames[ts] = bands[i];
+    // Per-band tag (sample index i): the composite members this slot was blended without.
+    // Only present on partial slots, so most reads here come back empty.
+    const bandMeta = (await image.getGDALMetadata(i)) as { missing_channels?: string } | null;
+    const miss = bandMeta?.missing_channels
+      ? bandMeta.missing_channels.split(",").filter(Boolean)
+      : [];
+    if (miss.length) missing[ts] = miss;
+  }
+  return {
+    channel,
+    bands: frames,
+    missing,
+    width: image.getWidth(),
+    height: image.getHeight(),
+    bounds: await readBounds(image)
+  };
+}
+
+export function renderStackFrame(stack: SatelliteStack, key: string): TifLayerData | null {
+  const band = stack.bands[key];
+  if (!band) return null;
+  const maxAlpha = isCompositeChannel(stack.channel) ? SAT_COMPOSITE_MAX_ALPHA : SAT_MAX_ALPHA;
+  const gamma = isCompositeChannel(stack.channel) ? SAT_COMPOSITE_GAMMA : 1;
+  const missing = stack.missing[key];
+  return {
+    imageDataUrl: bandToImage(
+      band,
+      stack.width,
+      stack.height,
+      shouldInvertChannel(stack.channel),
+      maxAlpha,
+      gamma
+    ),
+    bounds: stack.bounds,
+    missingChannels: missing && missing.length ? missing : undefined
+  };
 }
 
 export function applyTifLayerToMap(
@@ -422,9 +503,16 @@ export function applyTifLayerToMap(
 
   const existingSource = map.getSource(sourceId) as mapboxgl.ImageSource | undefined;
   if (existingSource) {
-    existingSource.updateImage({ url: imageDataUrl, coordinates: coords });
+    existingSource.updateImage({
+      url: imageDataUrl,
+      coordinates: coords
+    });
   } else {
-    map.addSource(sourceId, { type: "image", url: imageDataUrl, coordinates: coords });
+    map.addSource(sourceId, {
+      type: "image",
+      url: imageDataUrl,
+      coordinates: coords
+    });
   }
 
   if (!map.getLayer(layerId)) {
@@ -442,24 +530,25 @@ export function applyTifLayerToMap(
         // every frame.
         layout: { visibility: "none" },
         paint: {
-          // Not a flat value any more: fades out as the map zooms in. The ramp is a zoom
-          // expression rather than anything we drive, so it tracks a pinch continuously.
+          // Fade out as the map zooms in.
           "raster-opacity": satOpacityExpression(channel),
+          "raster-contrast": 0.3,
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
-          "raster-fade-duration": 0
+          "raster-fade-duration": 1
         }
       },
       // Insert beneath the forecast/PV layers so clouds sit under them.
       beforeId && map.getLayer(beforeId) ? beforeId : undefined
     );
+  } else {
+    map.setPaintProperty(layerId, "raster-contrast", 0.3);
   }
 
   if (currentSwapToken(map, layerId) === token) {
     setSatelliteLayerVisibility(map, isVisible, channel);
   }
 }
-
 export function setSatelliteLayerVisibility(
   map: mapboxgl.Map,
   isVisible: boolean,

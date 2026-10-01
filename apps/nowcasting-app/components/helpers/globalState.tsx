@@ -172,6 +172,7 @@ export type FlatGlobalStateType = {
    */
   isSatelliteLoading: boolean;
   satelliteError: string | null;
+  satellitePartialComposite: string[] | null;
   /**
    * Enabled countries the map has nothing to draw for at the cursor. `pvLatestMap` writes it,
    * since it holds the per-country pipelines; the header renders it beside the country toggle,
@@ -313,6 +314,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     showPvLayer: true,
     isSatelliteLoading: false,
     satelliteError: null,
+    satellitePartialComposite: null,
     coverageGaps: [],
     chartSplitOverrides: getValidatedChartSplitOverrides()
   });

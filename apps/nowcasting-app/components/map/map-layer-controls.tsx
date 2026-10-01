@@ -121,38 +121,54 @@ export const SatelliteChannelSelect: FC = () => {
   const [showCloudLayer] = useGlobalState("showCloudLayer");
   const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
   const [satelliteError] = useGlobalState("satelliteError");
+  const [partialComposite] = useGlobalState("satellitePartialComposite");
 
   if (!showCloudLayer) return null;
 
   return (
-    <select
-      value={activeChannel}
-      onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
-      disabled={!!satelliteError}
-      aria-label="Satellite channel"
-      className="col-span-5 w-full cursor-pointer rounded border-none bg-surface-inner px-2 py-1 text-xs font-semibold text-content outline-none disabled:cursor-not-allowed disabled:opacity-70"
-    >
-      {satelliteError ? (
-        <option value={activeChannel}>{satelliteError}</option>
-      ) : (
-        <>
-          <optgroup label="Composites">
-            {SATELLITE_COMPOSITES.map((ch) => (
-              <option key={ch} value={ch}>
-                {SATELLITE_CHANNEL_LABELS[ch]}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Individual bands">
-            {SATELLITE_BANDS.map((ch) => (
-              <option key={ch} value={ch}>
-                {SATELLITE_CHANNEL_LABELS[ch]}
-              </option>
-            ))}
-          </optgroup>
-        </>
-      )}
-    </select>
+    <>
+      <select
+        value={activeChannel}
+        onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
+        disabled={!!satelliteError}
+        aria-label="Satellite channel"
+        className="col-span-5 w-full cursor-pointer rounded border-none bg-surface-inner px-2 py-1 text-xs font-semibold text-content outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {satelliteError ? (
+          <option value={activeChannel}>{satelliteError}</option>
+        ) : (
+          <>
+            <optgroup label="Composites">
+              {SATELLITE_COMPOSITES.map((ch) => (
+                <option key={ch} value={ch}>
+                  {SATELLITE_CHANNEL_LABELS[ch]}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Individual bands">
+              {SATELLITE_BANDS.map((ch) => (
+                <option key={ch} value={ch}>
+                  {SATELLITE_CHANNEL_LABELS[ch]}
+                </option>
+              ))}
+            </optgroup>
+          </>
+        )}
+      </select>
+
+      {/* Show partial composite warning */}
+      {!satelliteError && partialComposite && partialComposite.length > 0 ? (
+        <p
+          className="col-span-5 -mt-0.5 text-2xs leading-tight text-content-muted"
+          title={`This composite was built without: ${partialComposite.join(", ")}`}
+        >
+          Partial composite — missing{" "}
+          {partialComposite
+            .map((ch) => SATELLITE_CHANNEL_LABELS[ch as SatelliteChannel] ?? ch)
+            .join(", ")}
+        </p>
+      ) : null}
+    </>
   );
 };
 
