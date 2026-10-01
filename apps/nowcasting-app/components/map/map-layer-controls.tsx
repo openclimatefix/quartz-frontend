@@ -12,7 +12,8 @@ import {
 } from "./control-button";
 import useGlobalState from "../helpers/globalState";
 import {
-  SATELLITE_CHANNELS,
+  SATELLITE_BANDS,
+  SATELLITE_COMPOSITES,
   SATELLITE_CHANNEL_LABELS,
   SatelliteChannel
 } from "../helpers/satelliteLayer";
@@ -134,11 +135,22 @@ export const SatelliteChannelSelect: FC = () => {
       {satelliteError ? (
         <option value={activeChannel}>{satelliteError}</option>
       ) : (
-        SATELLITE_CHANNELS.map((ch) => (
-          <option key={ch} value={ch}>
-            {SATELLITE_CHANNEL_LABELS[ch]}
-          </option>
-        ))
+        <>
+          <optgroup label="Composites">
+            {SATELLITE_COMPOSITES.map((ch) => (
+              <option key={ch} value={ch}>
+                {SATELLITE_CHANNEL_LABELS[ch]}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="Individual bands">
+            {SATELLITE_BANDS.map((ch) => (
+              <option key={ch} value={ch}>
+                {SATELLITE_CHANNEL_LABELS[ch]}
+              </option>
+            ))}
+          </optgroup>
+        </>
       )}
     </select>
   );

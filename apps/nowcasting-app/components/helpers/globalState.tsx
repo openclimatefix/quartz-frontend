@@ -305,11 +305,11 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     nHourForecast: 4,
     pLevels: getValidatedPLevels(),
     showCloudLayer: false,
-    // VIS006 — the default satellite channel (see satelliteLayer.ts). Inlined as a
-    // literal rather than imported so this module's dependency on satelliteLayer stays
+    // COMPOSITE_VISIBLE — the default satellite channel (see satelliteLayer.ts). Inlined
+    // as a literal rather than imported so this module's dependency on satelliteLayer stays
     // type-only: a value import would pull geotiff (ESM) into every test that loads
     // global state, which Jest can't transform.
-    activeChannel: "VIS006",
+    activeChannel: "COMPOSITE_VISIBLE",
     showPvLayer: true,
     isSatelliteLoading: false,
     satelliteError: null,

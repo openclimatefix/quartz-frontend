@@ -22,7 +22,8 @@ export const DEFAULT_SATELLITE_SCOPE: Scope = {
   regionType: "national"
 };
 
-export const SATELLITE_CHANNELS = [
+// The individual SEVIRI bands the API serves, one single-band tif per channel.
+export const SATELLITE_BANDS = [
   "VIS006",
   "VIS008",
   "IR_016",
@@ -35,6 +36,19 @@ export const SATELLITE_CHANNELS = [
   "WV_062",
   "WV_073"
 ] as const;
+
+// Composites are blended server-side (see quartz-api's satellite service) and served
+// as one single-band tif on the same route, so to this frontend they are ordinary
+// channel keys: one fetch, one layer, decoded exactly like a band. The member channels
+// and the alpha/opacity blend all live in the API now — nothing is stacked here.
+export const SATELLITE_COMPOSITES = [
+  "COMPOSITE_VISIBLE",
+  "COMPOSITE_INFRARED",
+  "COMPOSITE_BLUE"
+] as const;
+
+// Everything the `/satellite/` route accepts as `channel`.
+export const SATELLITE_CHANNELS = [...SATELLITE_BANDS, ...SATELLITE_COMPOSITES] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
 // IR_016 (1.6um) is near-IR and *reflective* despite the "IR_" prefix. The "true"
@@ -55,12 +69,12 @@ const INVERTED_CHANNELS: SatelliteChannel[] = [...MIXED_CHANNELS];
 export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
   INVERTED_CHANNELS.includes(ch);
 
-// The channel shown by default is VIS006, the classic visible band and the most
-// interpretable view in daylight — the hours that matter for solar. (It is dark at
-// night, when the reflective bands see no sunlight; acceptable since generation is
-// zero then.) The literal lives in globalState's initial state rather than being
-// exported from here, so that module's import of this one can stay type-only — a
-// value import would pull geotiff (ESM) into every test that loads global state.
+// The channel shown by default is COMPOSITE_VISIBLE, the most legible view in daylight —
+// the hours that matter for solar. (It is dark at night, when the reflective bands see no
+// sunlight; acceptable since generation is zero then.) The literal lives in globalState's
+// initial state rather than being exported from here, so that module's import of this one
+// can stay type-only — a value import would pull geotiff (ESM) into every test that loads
+// global state.
 
 export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   VIS006: "Visible 0.6µm",
@@ -73,7 +87,10 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_120: "Infrared 12.0µm",
   IR_134: "Infrared 13.4µm",
   WV_062: "Water Vapour 6.2µm",
-  WV_073: "Water Vapour 7.3µm"
+  WV_073: "Water Vapour 7.3µm",
+  COMPOSITE_VISIBLE: "Visible Composite",
+  COMPOSITE_INFRARED: "Infrared Composite",
+  COMPOSITE_BLUE: "Water Vapour Composite"
 };
 
 export type TifLayerData = {
@@ -95,6 +112,11 @@ export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
 const SAT_OPACITY = 0.6;
+const SAT_COMPOSITE_MAX_ALPHA = 255;
+const SAT_COMPOSITE_OPACITY = 0.85;
+
+export const isCompositeChannel = (ch: SatelliteChannel): boolean =>
+  (SATELLITE_COMPOSITES as readonly SatelliteChannel[]).includes(ch);
 
 /**
  * Zooming *through* the clouds.
@@ -139,12 +161,12 @@ const SAT_OPACITY = 0.6;
 export const CLOUD_FADE_START_ZOOM = 6.5;
 export const CLOUD_FADE_END_ZOOM = 8;
 
-const satOpacityExpression = (): mapboxgl.Expression => [
+const satOpacityExpression = (channel: SatelliteChannel): mapboxgl.Expression => [
   "interpolate",
   ["linear"],
   ["zoom"],
   CLOUD_FADE_START_ZOOM,
-  SAT_OPACITY,
+  isCompositeChannel(channel) ? SAT_COMPOSITE_OPACITY : SAT_OPACITY,
   CLOUD_FADE_END_ZOOM,
   0
 ];
@@ -280,7 +302,11 @@ async function requestSatelliteTif(
   return null;
 }
 
-export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLayerData> {
+export async function decodeTif(
+  buf: ArrayBuffer,
+  invert = false,
+  maxAlpha: number = SAT_MAX_ALPHA
+): Promise<TifLayerData> {
   const tiff = await fromArrayBuffer(buf);
   const image = await tiff.getImage();
   const width = image.getWidth();
@@ -335,8 +361,8 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
       // Alpha tracks brightness rather than being flat: bright cloud stays opaque,
       // while dark pixels (clear sky, and the whole visible band at night) go
       // transparent and let the map beneath show through. Scaled so the brightest
-      // pixel tops out at SAT_MAX_ALPHA.
-      px[pi + 3] = (g * SAT_MAX_ALPHA) / 255;
+      // pixel tops out at `maxAlpha` (higher for composites — see the constants above).
+      px[pi + 3] = (g * maxAlpha) / 255;
     } else {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
     }
@@ -363,7 +389,8 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest, scope);
   if (!buf) return null;
-  return decodeTif(buf, shouldInvertChannel(channel));
+  const maxAlpha = isCompositeChannel(channel) ? SAT_COMPOSITE_MAX_ALPHA : SAT_MAX_ALPHA;
+  return decodeTif(buf, shouldInvertChannel(channel), maxAlpha);
 }
 
 export function applyTifLayerToMap(
@@ -417,7 +444,7 @@ export function applyTifLayerToMap(
         paint: {
           // Not a flat value any more: fades out as the map zooms in. The ramp is a zoom
           // expression rather than anything we drive, so it tracks a pinch continuously.
-          "raster-opacity": satOpacityExpression(),
+          "raster-opacity": satOpacityExpression(channel),
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
           "raster-fade-duration": 0
