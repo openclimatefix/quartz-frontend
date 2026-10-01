@@ -112,9 +112,16 @@ const API_PREFIX =
 export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
-const SAT_LAYER_OPACITY = 0.95;
+const SAT_LAYER_OPACITY = 0.8;
 const SAT_RENDER_MAX_ALPHA = 255;
-const SAT_RENDER_GAMMA = 1;
+
+type ToneCurve = { gain: number; gamma: number };
+const LINEAR_TONE: ToneCurve = { gain: 1, gamma: 1 };
+const REFLECTIVE_TONE: ToneCurve = { gain: 1.6, gamma: 0.5 };
+const REFLECTIVE_CHANNELS: SatelliteChannel[] = ["COMPOSITE_VISIBLE", "VIS006", "VIS008", "IR_016"];
+
+const toneFor = (ch: SatelliteChannel): ToneCurve =>
+  REFLECTIVE_CHANNELS.includes(ch) ? REFLECTIVE_TONE : LINEAR_TONE;
 
 export const isCompositeChannel = (ch: SatelliteChannel): boolean =>
   (SATELLITE_COMPOSITES as readonly SatelliteChannel[]).includes(ch);
@@ -172,7 +179,6 @@ const satOpacityExpression = (channel: SatelliteChannel): mapboxgl.Expression =>
   0
 ];
 
-const SAT_TEXTURE_SIZE = 512;
 // Alpha of the brightest pixel in a decoded texture. Everything darker scales
 // down from here, so the effective ceiling matches the old flat value.
 const SAT_MAX_ALPHA = 180;
@@ -180,6 +186,22 @@ const SAT_MAX_ALPHA = 180;
 // alpha; quality is a lossy/size trade — raise toward 1 if artefacts show. (Size
 // is largely alpha-bound, and WebP stores alpha losslessly, so quality has little
 // effect here — kept high for free colour fidelity.)
+// The data is only a few hundred pixels across (one pixel ~17 km), so on screen it reads as
+// blocks. A light blur at native resolution softens the cell edges; no upsampling needed.
+// `ctx.filter` is ignored where unsupported (older Safari), which just leaves it unblurred.
+const SAT_BLUR_PX = 1;
+
+function drawBlurred(dst: HTMLCanvasElement, src: CanvasImageSource, w: number, h: number): void {
+  // Assigning width/height reallocates the backing store, so only touch them when they change.
+  if (dst.width !== w) dst.width = w;
+  if (dst.height !== h) dst.height = h;
+  const ctx = dst.getContext("2d")!;
+  ctx.clearRect(0, 0, w, h);
+  ctx.filter = `blur(${SAT_BLUR_PX}px)`;
+  ctx.drawImage(src, 0, 0);
+  ctx.filter = "none";
+}
+
 const SAT_IMAGE_TYPE = "image/webp";
 const SAT_IMAGE_QUALITY = 0.9;
 
@@ -323,7 +345,7 @@ function bandToImage(
   height: number,
   invert: boolean,
   maxAlpha: number = SAT_MAX_ALPHA,
-  gamma: number = 1
+  tone: ToneCurve = LINEAR_TONE
 ): string {
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -339,7 +361,7 @@ function bandToImage(
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
       continue;
     }
-    const grey = Math.pow((v - 1) / 254, gamma) * 255;
+    const grey = Math.pow(Math.min(1, ((v - 1) / 254) * tone.gain), tone.gamma) * 255;
     const g = invert ? 255 - grey : grey;
     px[pi] = g;
     px[pi + 1] = g;
@@ -348,22 +370,19 @@ function bandToImage(
   }
 
   ctx.putImageData(imageData, 0, 0);
-  const outCanvas = document.createElement("canvas");
-  outCanvas.width = SAT_TEXTURE_SIZE;
-  outCanvas.height = SAT_TEXTURE_SIZE;
-  const outCtx = outCanvas.getContext("2d")!;
-  outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, SAT_TEXTURE_SIZE, SAT_TEXTURE_SIZE);
   // WebP keeps the alpha channel (unlike JPEG) but compresses far better than the
   // default PNG (~4x smaller here). Falls back to the browser default if WebP isn't
   // supported (a PNG data URL).
-  return outCanvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
+  const out = document.createElement("canvas");
+  drawBlurred(out, canvas, width, height);
+  return out.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
 }
 
 export async function decodeTif(
   buf: ArrayBuffer,
   invert = false,
   maxAlpha: number = SAT_MAX_ALPHA,
-  gamma: number = 1
+  tone: ToneCurve = LINEAR_TONE
 ): Promise<TifLayerData> {
   const image = await (await fromArrayBuffer(buf)).getImage();
   const data = await image.readRasters();
@@ -375,7 +394,7 @@ export async function decodeTif(
     ? meta.missing_channels.split(",").filter(Boolean)
     : undefined;
   return {
-    imageDataUrl: bandToImage(band, image.getWidth(), image.getHeight(), invert, maxAlpha, gamma),
+    imageDataUrl: bandToImage(band, image.getWidth(), image.getHeight(), invert, maxAlpha, tone),
     bounds: await readBounds(image),
     missingChannels: missingChannels && missingChannels.length ? missingChannels : undefined
   };
@@ -389,7 +408,7 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest, scope);
   if (!buf) return null;
-  return decodeTif(buf, shouldInvertChannel(channel), SAT_RENDER_MAX_ALPHA, SAT_RENDER_GAMMA);
+  return decodeTif(buf, shouldInvertChannel(channel), SAT_RENDER_MAX_ALPHA, toneFor(channel));
 }
 
 export const stackKey = (iso: string): string =>
@@ -449,22 +468,128 @@ export async function fetchSatelliteStack(
   };
 }
 
-export function renderStackFrame(stack: SatelliteStack, key: string): TifLayerData | null {
+const stackLayerId = (ch: SatelliteChannel) => `satellite-stack-layer-${ch}`;
+const stackSourceId = (ch: SatelliteChannel) => `satellite-stack-source-${ch}`;
+
+type StackCanvas = {
+  canvas: HTMLCanvasElement; // what Mapbox samples: the blurred frame
+  scratch: HTMLCanvasElement; // native-resolution pixels, refilled per slot
+  ctx: CanvasRenderingContext2D; // of `scratch`
+  image: ImageData;
+  pixels: Uint32Array;
+  lut: Uint32Array;
+};
+const stackCanvases = new WeakMap<mapboxgl.Map, Map<string, StackCanvas>>();
+
+function stackLut(channel: SatelliteChannel): Uint32Array {
+  const tone = toneFor(channel);
+  const invert = shouldInvertChannel(channel);
+  const lut = new Uint32Array(256); // index 0 = nodata -> fully transparent (0)
+  for (let v = 1; v < 256; v++) {
+    const grey = Math.pow(Math.min(1, ((v - 1) / 254) * tone.gain), tone.gamma) * 255;
+    const g = Math.round(invert ? 255 - grey : grey);
+    const a = Math.round((g * SAT_RENDER_MAX_ALPHA) / 255);
+    lut[v] = ((a << 24) | (g << 16) | (g << 8) | g) >>> 0; // little-endian RGBA
+  }
+  return lut;
+}
+
+export function removeStackLayer(map: mapboxgl.Map, channel: SatelliteChannel): void {
+  if (map.getLayer(stackLayerId(channel))) map.removeLayer(stackLayerId(channel));
+  if (map.getSource(stackSourceId(channel))) map.removeSource(stackSourceId(channel));
+  stackCanvases.get(map)?.delete(channel);
+}
+
+export function hideStackLayer(map: mapboxgl.Map, channel: SatelliteChannel): void {
+  if (map.getLayer(stackLayerId(channel))) {
+    map.setLayoutProperty(stackLayerId(channel), "visibility", "none");
+  }
+}
+
+// Draw one slot of the stack onto the channel's single stack layer (creating it on first use)
+// and show it. Returns false if the stack has no such slot.
+export function showStackFrame(
+  map: mapboxgl.Map,
+  stack: SatelliteStack,
+  key: string,
+  beforeId?: string
+): boolean {
   const band = stack.bands[key];
-  if (!band) return null;
-  const missing = stack.missing[key];
-  return {
-    imageDataUrl: bandToImage(
-      band,
-      stack.width,
-      stack.height,
-      shouldInvertChannel(stack.channel),
-      SAT_RENDER_MAX_ALPHA,
-      SAT_RENDER_GAMMA
-    ),
-    bounds: stack.bounds,
-    missingChannels: missing && missing.length ? missing : undefined
-  };
+  if (!band) return false;
+  const channel = stack.channel;
+  const sourceId = stackSourceId(channel);
+  const layerId = stackLayerId(channel);
+
+  let perMap = stackCanvases.get(map);
+  if (!perMap) {
+    perMap = new Map();
+    stackCanvases.set(map, perMap);
+  }
+  let sc = perMap.get(channel);
+  if (sc && (sc.scratch.width !== stack.width || sc.scratch.height !== stack.height)) {
+    removeStackLayer(map, channel);
+    sc = undefined;
+  }
+  if (!sc || !map.getSource(sourceId)) {
+    const canvas = document.createElement("canvas");
+    canvas.width = stack.width;
+    canvas.height = stack.height;
+    const scratch = document.createElement("canvas");
+    scratch.width = stack.width;
+    scratch.height = stack.height;
+    const ctx = scratch.getContext("2d")!;
+    const image = ctx.createImageData(stack.width, stack.height);
+    sc = {
+      canvas,
+      scratch,
+      ctx,
+      image,
+      pixels: new Uint32Array(image.data.buffer),
+      lut: stackLut(channel)
+    };
+    perMap.set(channel, sc);
+    const [minLon, minLat, maxLon, maxLat] = stack.bounds;
+    // `canvas` is a valid Mapbox source type that the bundled typings omit.
+    map.addSource(sourceId, {
+      type: "canvas",
+      canvas,
+      animate: false,
+      coordinates: [
+        [minLon, maxLat],
+        [maxLon, maxLat],
+        [maxLon, minLat],
+        [minLon, minLat]
+      ]
+    } as unknown as mapboxgl.AnySourceData);
+    map.addLayer(
+      {
+        id: layerId,
+        type: "raster",
+        source: sourceId,
+        maxzoom: CLOUD_FADE_END_ZOOM,
+        layout: { visibility: "none" },
+        paint: {
+          "raster-opacity": satOpacityExpression(channel),
+          "raster-contrast": 0.3,
+          "raster-opacity-transition": { duration: 0 },
+          "raster-fade-duration": 1
+        }
+      },
+      beforeId && map.getLayer(beforeId) ? beforeId : undefined
+    );
+  }
+
+  const { lut, pixels } = sc;
+  for (let i = 0; i < band.length; i++) pixels[i] = lut[band[i]];
+  sc.ctx.putImageData(sc.image, 0, 0);
+  drawBlurred(sc.canvas, sc.scratch, stack.width, stack.height);
+  // A static (animate: false) canvas source only re-uploads its texture while "playing";
+  // play() then pause() uploads the current canvas exactly once.
+  const src = map.getSource(sourceId) as mapboxgl.CanvasSource;
+  src.play();
+  src.pause();
+  map.setLayoutProperty(layerId, "visibility", "visible");
+  return true;
 }
 
 export function applyTifLayerToMap(

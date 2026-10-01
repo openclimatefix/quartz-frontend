@@ -21,14 +21,15 @@ import {
   TifLayerData,
   fetchAndDecodeSatelliteTif,
   fetchSatelliteStack,
-  renderStackFrame,
+  showStackFrame as drawStackFrame,
+  hideStackLayer,
+  removeStackLayer,
   stackKey,
   applyTifLayerToMap,
   setVisibleSatelliteChannels,
   setSatelliteLayerVisibility,
   positionSatelliteLayer,
-  satLayerId,
-  satSourceId
+  SATELLITE_CHANNELS
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
 import { useEnabledCountries } from "../../hooks/data/use-countries";
@@ -313,17 +314,9 @@ const Map: FC<IMap> = ({
   );
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
-  const renderedFramesRef = useRef<Record<string, TifLayerData>>({});
-  const stackFrameLayerIds = useRef<SatelliteChannel[]>([]);
-  const shownFrameLayerIds = useRef<SatelliteChannel[]>([]);
   const teardownStackFrames = () => {
     const m = map.current;
-    stackFrameLayerIds.current.forEach((id) => {
-      if (m?.getLayer(satLayerId(id))) m.removeLayer(satLayerId(id));
-      if (m?.getSource(satSourceId(id))) m.removeSource(satSourceId(id));
-    });
-    stackFrameLayerIds.current = [];
-    shownFrameLayerIds.current = [];
+    if (m) SATELLITE_CHANNELS.forEach((ch) => removeStackLayer(m, ch));
   };
   const [stackReadyTick, setStackReadyTick] = useState(0);
   const selectedTimeRef = useRef(selectedISOTime);
@@ -387,7 +380,6 @@ const Map: FC<IMap> = ({
     // all so the new channel starts clean (the stack effect refetches, the build effect re-uploads).
     teardownStackFrames();
     stackRef.current = null;
-    renderedFramesRef.current = {};
     // Hide layers dropped by the new selection before the fetch resolves.
     if (map.current) applySatelliteVisibility(map.current, showCloudRef.current);
   }, [activeChannel]);
@@ -398,38 +390,26 @@ const Map: FC<IMap> = ({
   // The per-channel cache key, also used as the in-flight request key.
   const satCacheKey = (ch: SatelliteChannel, ts: string) => `${ch}__${ts}`;
 
-  // Render one slot from the active channel's stack, memoised in `renderedFramesRef` (unbounded),
-  // or null if the stack doesn't cover it. The WebP encode happens once per slot, ever.
-  const renderFromStack = (ch: SatelliteChannel, satTs: string): TifLayerData | null => {
-    const stack = stackRef.current;
-    if (!stack || stack.channel !== ch) return null;
-    const k = stackKey(satTs);
-    if (!stack.bands[k]) return null;
-    const cached = renderedFramesRef.current[k];
-    if (cached) return cached;
-    const frame = renderStackFrame(stack, k);
-    if (frame) renderedFramesRef.current[k] = frame;
-    return frame;
-  };
-
   const stackCovers = (ch: SatelliteChannel, satTs: string) =>
     stackRef.current?.channel === ch && !!stackRef.current.bands[stackKey(satTs)];
 
-  const showStackFrame = (ts: string | undefined) => {
+  // Draw the cursor's slot from the active channel's stack onto its canvas layer: synchronous and
+  // network-free, so scrubbing the whole 48 h range is as fast as the cursor moves.
+  const showStackFrame = (ch: SatelliteChannel, ts: string): boolean => {
     const m = map.current;
-    if (!m) return;
-    shownFrameLayerIds.current.forEach((id) => setSatelliteLayerVisibility(m, false, id));
-    const suffix = ts ? `@${stackKey(satelliteTimestampFor(ts))}` : null;
-    shownFrameLayerIds.current = suffix
-      ? stackFrameLayerIds.current.filter((id) => id.endsWith(suffix))
-      : [];
-    shownFrameLayerIds.current.forEach((id) => setSatelliteLayerVisibility(m, true, id));
+    const stack = stackRef.current;
+    if (!m || !stack || stack.channel !== ch) return false;
+    return drawStackFrame(m, stack, stackKey(satelliteTimestampFor(ts)), getSatelliteBeforeId(m));
+  };
+
+  const hideStack = () => {
+    const m = map.current;
+    if (m) hideStackLayer(m, channelRef.current);
   };
 
   const slotHasStackLayer = (ch: SatelliteChannel, ts: string) => {
     if (ts === timeNow || ts === getCursorNow()) return false;
-    const id = `${ch}@${stackKey(satelliteTimestampFor(ts))}` as SatelliteChannel;
-    return stackFrameLayerIds.current.includes(id);
+    return stackCovers(ch, satelliteTimestampFor(ts));
   };
 
   const showFrameInstant = (ch: SatelliteChannel, ts: string) => {
@@ -438,7 +418,7 @@ const Map: FC<IMap> = ({
     requestedKeyRef.current = null;
     currentKeyRef.current = null;
     setSatelliteLayerVisibility(m, false, ch);
-    showStackFrame(ts);
+    showStackFrame(ch, ts);
     const miss = stackRef.current?.missing[stackKey(satelliteTimestampFor(ts))];
     setPartialDeduped(miss && miss.length ? miss : null);
     setErrorDeduped(null);
@@ -451,11 +431,6 @@ const Map: FC<IMap> = ({
     latest = false
   ): Promise<TifLayerData | null> => {
     if (!latest && isFutureTimestamp(satTs)) return null;
-    // Stack primary: render locally (cached unbounded per channel), no network.
-    if (!latest) {
-      const frame = renderFromStack(ch, satTs);
-      if (frame) return frame;
-    }
     // Network fallback (small LRU): a slot beyond the 48 h window, a gap, or stack not loaded yet.
     const key = satCacheKey(ch, satTs);
     if (!latest && tifCache.current.has(key)) return tifCache.current.get(key)!;
@@ -509,17 +484,10 @@ const Map: FC<IMap> = ({
     // Hot path — a frame already in memory: apply synchronously, no spinner, no await. This is
     // what makes scrubbing and playback smooth once the stack frames are rendered.
     if (!isNow) {
-      const ready = renderedFramesRef.current[stackKey(satTs)] ?? tifCache.current.get(key);
+      const ready = tifCache.current.get(key);
       if (ready) {
         if (!silent) setLoadingDeduped(false);
         applyFrame(channel, key, ready);
-        return;
-      }
-      if (stackCovers(channel, satTs)) {
-        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-        if (requestedKeyRef.current !== key) return;
-        if (!silent) setLoadingDeduped(false);
-        applyFrame(channel, key, renderFromStack(channel, satTs));
         return;
       }
     }
@@ -568,7 +536,7 @@ const Map: FC<IMap> = ({
       return;
     }
 
-    if (m) showStackFrame(undefined);
+    if (m) hideStack();
 
     let cancelled = false;
     (async () => {
@@ -635,76 +603,14 @@ const Map: FC<IMap> = ({
     };
   }, [activeChannel, isMapReady, title]);
 
+  // The stack just (re)loaded - first load for this channel, or the 15-minute refresh. If the
+  // cursor sits on a slot it covers, switch from the network fallback to the stack (or redraw it
+  // with the refreshed bands). Nothing is built per slot: the canvas layer is created on demand.
   useEffect(() => {
-    const m = map.current;
-    if (!m || title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady) return;
-    const stack = stackRef.current;
-    if (!stack || stack.channel !== activeChannel) return;
-
-    const beforeId = getSatelliteBeforeId(m);
-    const keys = Object.keys(stack.bands).sort(); // stackKey is chronological as a string
-
-    const live = new Set(keys);
-    const slotOf = (id: string) => id.slice(id.indexOf("@") + 1);
-    const stale = stackFrameLayerIds.current.filter((id) => !live.has(slotOf(id)));
-    if (stale.length) {
-      stale.forEach((id) => {
-        if (m.getLayer(satLayerId(id))) m.removeLayer(satLayerId(id));
-        if (m.getSource(satSourceId(id))) m.removeSource(satSourceId(id));
-        delete renderedFramesRef.current[slotOf(id)];
-      });
-      const isLive = (id: string) => live.has(slotOf(id));
-      stackFrameLayerIds.current = stackFrameLayerIds.current.filter(isLive);
-      shownFrameLayerIds.current = shownFrameLayerIds.current.filter(isLive);
-    }
-
-    const cursorKey = selectedTimeRef.current
-      ? stackKey(satelliteTimestampFor(selectedTimeRef.current))
-      : null;
-    const cursorIdx =
-      cursorKey && keys.includes(cursorKey) ? keys.indexOf(cursorKey) : keys.length - 1;
-    const pending = keys
-      .map((k, i) => ({ k, d: Math.abs(i - cursorIdx) }))
-      .filter(
-        ({ k }) => !stackFrameLayerIds.current.includes(`${activeChannel}@${k}` as SatelliteChannel)
-      )
-      .sort((a, b) => a.d - b.d)
-      .map(({ k }) => k);
-    if (!pending.length) return;
-
-    let cancelled = false;
-    let i = 0;
-    const ric = (window as Window & { requestIdleCallback?: (cb: () => void) => number })
-      .requestIdleCallback;
-    const schedule = (cb: () => void) => (ric ? ric(cb) : window.setTimeout(cb, 16));
-    const step = () => {
-      if (cancelled || !map.current || stackRef.current !== stack) return;
-      const stop = Math.min(i + 4, pending.length);
-      for (; i < stop; i++) {
-        const k = pending[i];
-        // Reuse a texture already encoded (by the fallback path, or before a clouds-off teardown)
-        // so re-enabling clouds re-uploads from memory instead of re-encoding every frame.
-        const frame = renderedFramesRef.current[k] ?? renderStackFrame(stack, k);
-        if (!frame) continue;
-        renderedFramesRef.current[k] = frame;
-        const id = `${activeChannel}@${k}` as SatelliteChannel;
-        applyTifLayerToMap(map.current, frame, id, false, beforeId);
-        stackFrameLayerIds.current.push(id);
-      }
-      const cursor = selectedTimeRef.current;
-      if (cursor && slotHasStackLayer(activeChannel, cursor)) {
-        const cursorId = `${activeChannel}@${stackKey(satelliteTimestampFor(cursor))}`;
-        if (!shownFrameLayerIds.current.includes(cursorId as SatelliteChannel)) {
-          showFrameInstant(activeChannel, cursor);
-        }
-      }
-      if (i < pending.length) schedule(step);
-    };
-    schedule(step);
-    return () => {
-      cancelled = true;
-    };
-  }, [stackReadyTick, activeChannel, showCloudLayer, isMapReady, title]);
+    const cursor = selectedTimeRef.current;
+    if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady || !cursor) return;
+    if (slotHasStackLayer(activeChannel, cursor)) showFrameInstant(activeChannel, cursor);
+  }, [stackReadyTick]);
 
   useEffect(() => () => teardownStackFrames(), []);
 
