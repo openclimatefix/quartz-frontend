@@ -112,10 +112,9 @@ const API_PREFIX =
 export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
-const SAT_OPACITY = 0.6;
-const SAT_COMPOSITE_MAX_ALPHA = 255;
-const SAT_COMPOSITE_OPACITY = 0.95;
-const SAT_COMPOSITE_GAMMA = 0.6;
+const SAT_LAYER_OPACITY = 0.95;
+const SAT_RENDER_MAX_ALPHA = 255;
+const SAT_RENDER_GAMMA = 1;
 
 export const isCompositeChannel = (ch: SatelliteChannel): boolean =>
   (SATELLITE_COMPOSITES as readonly SatelliteChannel[]).includes(ch);
@@ -168,9 +167,7 @@ const satOpacityExpression = (channel: SatelliteChannel): mapboxgl.Expression =>
   ["linear"],
   ["zoom"],
   CLOUD_FADE_START_ZOOM,
-  isCompositeChannel(channel.split("@")[0] as SatelliteChannel)
-    ? SAT_COMPOSITE_OPACITY
-    : SAT_OPACITY,
+  SAT_LAYER_OPACITY,
   CLOUD_FADE_END_ZOOM,
   0
 ];
@@ -392,9 +389,7 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest, scope);
   if (!buf) return null;
-  const maxAlpha = isCompositeChannel(channel) ? SAT_COMPOSITE_MAX_ALPHA : SAT_MAX_ALPHA;
-  const gamma = isCompositeChannel(channel) ? SAT_COMPOSITE_GAMMA : 1;
-  return decodeTif(buf, shouldInvertChannel(channel), maxAlpha, gamma);
+  return decodeTif(buf, shouldInvertChannel(channel), SAT_RENDER_MAX_ALPHA, SAT_RENDER_GAMMA);
 }
 
 export const stackKey = (iso: string): string =>
@@ -457,8 +452,6 @@ export async function fetchSatelliteStack(
 export function renderStackFrame(stack: SatelliteStack, key: string): TifLayerData | null {
   const band = stack.bands[key];
   if (!band) return null;
-  const maxAlpha = isCompositeChannel(stack.channel) ? SAT_COMPOSITE_MAX_ALPHA : SAT_MAX_ALPHA;
-  const gamma = isCompositeChannel(stack.channel) ? SAT_COMPOSITE_GAMMA : 1;
   const missing = stack.missing[key];
   return {
     imageDataUrl: bandToImage(
@@ -466,8 +459,8 @@ export function renderStackFrame(stack: SatelliteStack, key: string): TifLayerDa
       stack.width,
       stack.height,
       shouldInvertChannel(stack.channel),
-      maxAlpha,
-      gamma
+      SAT_RENDER_MAX_ALPHA,
+      SAT_RENDER_GAMMA
     ),
     bounds: stack.bounds,
     missingChannels: missing && missing.length ? missing : undefined
