@@ -506,7 +506,11 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   // `cursor` is the label the handle sits on, so it lines up with the chart's point for it.
   const cursor = clampToScale(toLabel(dragInstant ?? selectedISOTime), scale);
   const cursorFraction = fractionForInstant(cursor, scale);
-  const nowFraction = timeNow ? fractionForInstant(timeNow, scale) : null;
+  // The live mark goes through the same label conversion as the handle: `timeNow` is a cursor
+  // instant (the start of the period that is filling), and on a period-end country such as GB
+  // the handle for that period sits at its end. Drawn raw, the mark sat one slot behind the
+  // handle for GB and lined up only where labels are period-start.
+  const nowFraction = timeNow ? fractionForInstant(toLabel(timeNow), scale) : null;
   const cursorLabel = DateTime.fromISO(cursor, { zone: "utc" })
     .setZone(zone)
     .toFormat("ccc d LLL HH:mm");
