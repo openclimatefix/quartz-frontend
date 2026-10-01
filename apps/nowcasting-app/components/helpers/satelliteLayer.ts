@@ -37,81 +37,30 @@ export const SATELLITE_CHANNELS = [
 ] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
-// SEVIRI channels grouped by how they sense. IR_016 (1.6um) is near-IR and
-// *reflective* despite the "IR_" prefix, so it groups with the visible ones.
+// IR_016 (1.6um) is near-IR and *reflective* despite the "IR_" prefix. The "true"
+// emissive IR and water-vapour channels are already inverted by the API before
+// saving, so they arrive with cold cloud tops bright and need no client-side flip.
 //
-// STACK ORDER: every list here is ordered **bottom-most first** — the last entry
-// renders on top. This matters a lot, because each layer only contributes about
-// 0.42 effective alpha (texture alpha 180/255 x raster-opacity 0.6, the ramp's
-// peak — see CLOUD_FADE_START_ZOOM), so five
-// layers above something leave only (1-0.42)^5 ~= 7% of it visible. Anything
-// buried is effectively gone, and the stack averages out to flat grey. So the
-// crisp, high-contrast bands go last, and the flat ones go underneath.
-export const REFLECTIVE_CHANNELS: SatelliteChannel[] = [
-  "IR_016", // near-IR, useful for ice/water cloud discrimination
-  "VIS008",
-  "VIS006" // the classic visible band, most interpretable — keep it on top
-];
-
-// The "true" emissive IR channels. The API already inverts these before saving,
-// so they arrive with cold cloud tops bright and need no client-side flip.
-export const THERMAL_CHANNELS: SatelliteChannel[] = [
-  "IR_134",
-  "IR_097",
-  "IR_120",
-  "IR_087",
-  "IR_108" // the standard atmospheric window channel, most informative thermal
-];
-
-// Also emissive, and likewise already inverted API-side.
-export const WATER_VAPOUR_CHANNELS: SatelliteChannel[] = ["WV_073", "WV_062"];
-
 // IR_039 (3.9um) carries both reflected solar and emitted thermal signal, so the
 // two partly cancel in daylight. That makes it washed out, and makes its polarity
-// behave unlike the true IR channels the API inverts. Its genuine uses (night fog
-// / low cloud via the 3.9-10.8 difference, hotspot detection) aren't served by a
-// brightness composite, so it stays out of the composites and is offered only as
-// a single channel.
+// behave unlike the true IR channels the API inverts, so it is the one channel
+// that needs a client-side flip to line up with the rest.
 export const MIXED_CHANNELS: SatelliteChannel[] = ["IR_039"];
 
-// Only IR_039 needs a client-side flip, to line it up with the API-inverted
-// channels when viewed on its own.
+// Only IR_039 needs a client-side flip, to line it up with the API-inverted channels.
 //
-// TEMPORARY: this belongs in the API, done client-side only to try the composites.
+// TEMPORARY: this belongs in the API, done client-side only for now.
 const INVERTED_CHANNELS: SatelliteChannel[] = [...MIXED_CHANNELS];
 
 export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
   INVERTED_CHANNELS.includes(ch);
 
-// Selections that overlay several same-family channels into one combined view.
-// Keys are stored in global state, so renaming one invalidates a user's saved
-// selection — labels are free to change, keys are not. (A full visible+IR
-// composite was tried and dropped: greyscale-averaging reflective and thermal
-// bands muddied both and lost the per-band nuance, for little gain in a
-// daytime-centric solar app.)
-//
-// Labels name the bands they stack, matching how the single channels below are
-// listed. "Blue" was the odd one out — it described neither the instrument nor
-// the output, so it reads as Water Vapour instead.
-export const COMPOSITE_SELECTIONS = {
-  COMPOSITE_VISIBLE: { label: "Visible Composite", channels: REFLECTIVE_CHANNELS },
-  COMPOSITE_INFRARED: { label: "Infrared Composite", channels: THERMAL_CHANNELS },
-  COMPOSITE_BLUE: { label: "Water Vapour Composite", channels: WATER_VAPOUR_CHANNELS }
-};
-
-export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
-export type ChannelSelection = SatelliteChannel | CompositeSelection;
-
-// Resolve a dropdown selection to the actual channels to render.
-export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] =>
-  sel in COMPOSITE_SELECTIONS
-    ? COMPOSITE_SELECTIONS[sel as CompositeSelection].channels
-    : [sel as SatelliteChannel];
-
-// Widest composite, used to size the tif cache so a full selection still fits.
-export const MAX_COMPOSITE_CHANNELS = Math.max(
-  ...Object.values(COMPOSITE_SELECTIONS).map((c) => c.channels.length)
-);
+// The channel shown by default is VIS006, the classic visible band and the most
+// interpretable view in daylight — the hours that matter for solar. (It is dark at
+// night, when the reflective bands see no sunlight; acceptable since generation is
+// zero then.) The literal lives in globalState's initial state rather than being
+// exported from here, so that module's import of this one can stay type-only — a
+// value import would pull geotiff (ESM) into every test that loads global state.
 
 export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   VIS006: "Visible 0.6µm",
@@ -140,8 +89,8 @@ export type TifLayerData = {
 const API_PREFIX =
   process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
 
-// One layer/source per channel, so a composite can stack them. Kept here rather
-// than in map.tsx so the ids have a single home.
+// One layer/source per channel. Kept here rather than in map.tsx so the ids have
+// a single home.
 export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
@@ -181,10 +130,9 @@ const SAT_OPACITY = 0.6;
  *   renderer, so it tracks a pinch or a scroll continuously — a JS zoom handler would only fire
  *   at the end of the gesture and land as a pop;
  * - `maxzoom` on the layer is what makes it *free*. Opacity 0 still costs a draw every frame,
- *   which is the same reasoning the visibility comment below records, and at five stacked
- *   composite layers that is worth avoiding. Mapbox stops drawing a layer at or above its
- *   `maxzoom`, and since the ramp has already reached 0 at exactly that zoom, the cut is
- *   invisible.
+ *   which is the same reasoning the visibility comment below records, so it is worth avoiding.
+ *   Mapbox stops drawing a layer at or above its `maxzoom`, and since the ramp has already
+ *   reached 0 at exactly that zoom, the cut is invisible.
  *
  * Adjusting the feel is these two numbers and nothing else.
  */
@@ -213,8 +161,8 @@ const SAT_IMAGE_TYPE = "image/webp";
 const SAT_IMAGE_QUALITY = 0.9;
 
 // Per-map, per-layer counter, so a slow texture swap can't clobber a newer one on
-// the same layer. Must be per-layer: with a single counter, stacking N channels
-// means only the last one applied would pass the token check.
+// the same layer. Per-layer rather than global: each channel has its own layer, and
+// a stale swap on one must not be invalidated by a fresh swap on another.
 const swapTokenByMap = new WeakMap<mapboxgl.Map, Map<string, number>>();
 
 function nextSwapToken(map: mapboxgl.Map, layerId: string): number {
@@ -240,17 +188,16 @@ function mercToWgs84(x: number, y: number): [number, number] {
 }
 
 // /api/get_token is an Auth0 session round-trip on the Next server, not a cheap read,
-// and every channel fetch used to pay for its own. A composite with the +/-1 prefetch
-// meant ~15 of them per timestep, each one sitting in front of its tif request. Share
-// the app-wide cached token (lib/api/auth/token.ts) instead of keeping a private cache
-// here — same TTL/dedup reasoning, now shared with axiosFetcherAuth and the v1 client.
+// and every channel fetch used to pay for its own. Share the app-wide cached token
+// (lib/api/auth/token.ts) instead of keeping a private cache here — same TTL/dedup
+// reasoning, now shared with axiosFetcherAuth and the v1 client.
 
-// Cap concurrent satellite requests. A composite fetches one tif per channel and
-// the +/-1 prefetch triples that, so an uncapped selection can put ~15 requests
-// in flight — enough to trip the API's rate limit and drop the whole batch into
-// the 429 backoff path below, which is slower than simply queuing in the first
-// place. The visible frame is always requested before the prefetches (see
-// map.tsx), so it takes the slots first and can't be starved by speculative work.
+// Cap concurrent satellite requests. With the +/-1 prefetch a single step can put a
+// few requests in flight at once; capping them keeps a burst from tripping the API's
+// rate limit and dropping the whole batch into the 429 backoff path below, which is
+// slower than simply queuing in the first place. The visible frame is always
+// requested before the prefetches (see map.tsx), so it takes the slots first and
+// can't be starved by speculative work.
 const MAX_CONCURRENT_SAT_REQUESTS = 4;
 
 let activeRequests = 0;
@@ -385,11 +332,10 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
       px[pi] = g;
       px[pi + 1] = g;
       px[pi + 2] = g;
-      // Alpha tracks brightness rather than being flat, which turns a stack from
-      // "average everything" into roughly "brightest wins": bright cloud stays
-      // opaque and dominates, while dark pixels (clear sky, and the whole visible
-      // band at night) go transparent and let the layers beneath show through.
-      // Scaled so the brightest pixel still tops out at the previous flat value.
+      // Alpha tracks brightness rather than being flat: bright cloud stays opaque,
+      // while dark pixels (clear sky, and the whole visible band at night) go
+      // transparent and let the map beneath show through. Scaled so the brightest
+      // pixel tops out at SAT_MAX_ALPHA.
       px[pi + 3] = (g * SAT_MAX_ALPHA) / 255;
     } else {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
@@ -466,7 +412,7 @@ export function applyTifLayerToMap(
         maxzoom: CLOUD_FADE_END_ZOOM,
         // Hidden layers use layout visibility rather than zero opacity: Mapbox
         // skips a "none" layer entirely, whereas an opacity-0 layer is still drawn
-        // every frame — which matters once a composite stacks several of them.
+        // every frame.
         layout: { visibility: "none" },
         paint: {
           // Not a flat value any more: fades out as the map zooms in. The ramp is a zoom
@@ -504,21 +450,17 @@ export function setVisibleSatelliteChannels(map: mapboxgl.Map, visible: Satellit
   SATELLITE_CHANNELS.forEach((ch) => setSatelliteLayerVisibility(map, visibleSet.has(ch), ch));
 }
 
-// Restack the given channels, bottom-most first. Layers are created lazily — the
-// first time a composite containing them is selected — so creation order depends
-// on which selections the user happened to visit and can't be relied on. Moving
-// each layer in turn to just below the anchor reproduces the intended order
-// exactly, whatever the history. Cheap: a style reorder over at most a few layers.
-export function orderSatelliteLayers(
+// Move the satellite layer to just below the anchor. Layers are created lazily, and
+// applyTifLayerToMap only sets `beforeId` at creation time, so after a style reload —
+// or when the anchor layer is added after the satellite one — the layer can drift
+// above the forecast/PV layers. Re-asserting its position keeps the cloud beneath
+// them. A missing anchor means "move to the top of the stack". Cheap: one reorder.
+export function positionSatelliteLayer(
   map: mapboxgl.Map,
-  channels: SatelliteChannel[],
+  channel: SatelliteChannel,
   beforeId?: string
 ): void {
-  // A missing anchor means "move to the top of the stack", which still gives the
-  // right relative order when iterating bottom-most first.
   const anchor = beforeId && map.getLayer(beforeId) ? beforeId : undefined;
-  channels.forEach((ch) => {
-    const layerId = satLayerId(ch);
-    if (map.getLayer(layerId)) map.moveLayer(layerId, anchor);
-  });
+  const layerId = satLayerId(channel);
+  if (map.getLayer(layerId)) map.moveLayer(layerId, anchor);
 }
