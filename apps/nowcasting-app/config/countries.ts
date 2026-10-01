@@ -253,6 +253,18 @@ export type CountryConfig = {
    * of this file.
    */
   displayName: string;
+  /**
+   * Whether the country is on sale. Omitted means `"live"`. `"preview"` marks a country that is
+   * listed so prospects can see it exists but is not yet available to subscribe to: the header
+   * toggle explains that on hover with `previewMessage` instead of the generic entitlement
+   * wording. Declared here because "coming soon" is a product decision the API cannot make.
+   */
+  availability?: "preview" | "live";
+  /**
+   * What the header toggle says on hover for a `"preview"` country. Optional: without it the
+   * toggle builds "<displayName> coming soon. Contact us for early access.".
+   */
+  previewMessage?: string;
   /** IANA zone. Replaces the `Europe/London` hardcoded through every date helper. */
   timezone: string;
   /**
@@ -460,7 +472,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     //
     // Adjustment is the `adjusted` request parameter (always true; see `queries.ts`).
     nationalChartSeries: [
-      { key: "FORECAST", model: "blend", label: "Current" },
+      { key: "FORECAST", model: "blend", label: "OCF" },
       {
         key: "INTRADAY_ECMWF_ONLY",
         model: "ecmwf",
@@ -570,7 +582,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // available adjusted). Only the blend is charted: the second is the blend's single input, so drawing
     // both would be a comparison of a series against itself. Nobody has asked for the NL
     // comparison lines GB has; add them here when they do.
-    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "Current" }],
+    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "OCF" }],
     overlays: [],
     // NED publishes NL's generation (it is the source of the period-start convention above),
     // but no public attribution page has been confirmed for it — so the (i) states NL's
@@ -584,6 +596,8 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
   DE: {
     code: "DE",
     displayName: "Germany",
+    availability: "preview",
+    previewMessage: "Germany coming soon. Contact us for early access.",
     timezone: "Europe/Berlin",
     locale: "de-DE",
     // Forecast and ENTSO-E generation both arrive every 15 minutes.
@@ -646,7 +660,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // entries. Not charted: `ecmwf_pv` (two inputs, not one) and `pv`, which has no line
     // or colour yet.
     nationalChartSeries: [
-      { key: "FORECAST", model: "blend", label: "Current" },
+      { key: "FORECAST", model: "blend", label: "OCF" },
       {
         key: "INTRADAY_ECMWF_ONLY",
         model: "ecmwf",

@@ -3,7 +3,12 @@ import { useMemo } from "react";
 
 import { getCountryConfig } from "../../config/countries";
 import useGlobalState from "../../components/helpers/globalState";
-import { readEntitlementClaim, isEntitled } from "../../lib/api/auth/entitlement";
+import {
+  readEntitlementClaim,
+  isEntitled,
+  isOcfAdmin,
+  isTrialUser
+} from "../../lib/api/auth/entitlement";
 import * as queries from "../../lib/api/v1/queries";
 import { queryKey } from "../../lib/api/v1/queries";
 import { normaliseCountries } from "../../lib/domain/normalise";
@@ -86,6 +91,26 @@ export const useEntitledCountries = (): UseCountriesResult => {
     [countries]
   );
   return { countries: entitled, isLoading, error };
+};
+
+/**
+ * Whether the signed-in user is OCF staff (`isOcfAdmin`). Only staff choose which countries
+ * are enabled; for everyone else the enabled set is the entitled set. `false` while the user
+ * is still loading, so nothing admin-only appears before the claim is known.
+ */
+export const useIsOcfAdmin = (): boolean => {
+  const { user } = useUser();
+  return useMemo(() => isOcfAdmin(user), [user]);
+};
+
+/**
+ * Whether the signed-in user is on a trial (`trial_ends_at` on the session user). Sits beside
+ * entitlement so components explaining a missing country need not read the session themselves.
+ * `false` while the user is loading.
+ */
+export const useIsTrialUser = (): boolean => {
+  const { user } = useUser();
+  return useMemo(() => isTrialUser(user), [user]);
 };
 
 /**

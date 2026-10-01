@@ -3,7 +3,12 @@ import { MdKeyboardArrowDown } from "@react-icons/all-files/md/MdKeyboardArrowDo
 import { MdKeyboardArrowRight } from "@react-icons/all-files/md/MdKeyboardArrowRight";
 
 import useGlobalState, { toggleCountryEnabled } from "../helpers/globalState";
-import { useEnabledCountries, useEntitledCountries, useFocusedCountry } from "../../hooks/data";
+import {
+  useEnabledCountries,
+  useEntitledCountries,
+  useFocusedCountry,
+  useIsOcfAdmin
+} from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import Toggle from "../Toggle";
 import { CookieStorageKeys, setBooleanSettingInLocalStorage } from "../helpers/cookieStorage";
@@ -26,7 +31,10 @@ import { CookieStorageKeys, setBooleanSettingInLocalStorage } from "../helpers/c
  * what a demo of two countries needs. This is the "moving to a sidebar" control the layout
  * contract promised, in the map's own column because it is a question about the map.
  *
- * With one country entitled there is nothing to choose, so those rows do not render.
+ * With one country entitled there is nothing to choose, so those rows do not render. Nor do
+ * they for anyone but OCF staff (the `ocf-admin` product): a regular user's enabled set is
+ * every country they are entitled to, kept so by `useSyncEnabledCountries`, and switching
+ * countries off is a demo tool (Brad, 2026-09-29).
  */
 const MapExtrasDrawer: FC = () => {
   const [open, setOpen] = useState(false);
@@ -35,7 +43,8 @@ const MapExtrasDrawer: FC = () => {
   const overlays = getCountryConfig(focusedCountry)?.overlays ?? [];
   const enabled = useEnabledCountries();
   const { countries: entitled } = useEntitledCountries();
-  const countryRows = entitled.length > 1 ? entitled : [];
+  const isOcfAdmin = useIsOcfAdmin();
+  const countryRows = isOcfAdmin && entitled.length > 1 ? entitled : [];
 
   if (!overlays.length && !countryRows.length) return null;
 

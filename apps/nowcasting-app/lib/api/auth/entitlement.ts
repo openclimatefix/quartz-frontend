@@ -178,3 +178,36 @@ export const entitledCountryCodes = (user: unknown): string[] => {
   const claim = readEntitlementClaim(user);
   return configuredCountryCodes().filter((code) => isEntitled(code, claim));
 };
+
+/**
+ * The product key that marks an OCF staff account. Not a country's product, so it entitles
+ * nothing by itself (see `isOcfAdmin`).
+ */
+export const OCF_ADMIN_PRODUCT_KEY = "ocf-admin";
+
+/**
+ * Whether `user` is OCF staff: the `products` claim (either spelling, any case) contains
+ * `ocf-admin`. Staff may switch countries on and off for demos; for everyone else the enabled
+ * set is the entitled set (`hooks/data/use-sync-enabled-countries.ts`).
+ *
+ * Read from the ID-token claims like entitlement. The access token's `ocf:admin` permission
+ * says the same thing, but the UI never decodes the access token. Dev mode counts as admin,
+ * matching `isEntitled`. A missing or malformed claim is not admin.
+ *
+ * Note that `ocf-admin` makes the products claim non-empty, so the `countries` fallback in
+ * `readEntitlementClaim` no longer applies: an admin needs the country products too.
+ */
+export const isOcfAdmin = (user: unknown): boolean => {
+  if (isDevModeEntitlementBypass()) return true;
+  return readProductsClaim(user).includes(OCF_ADMIN_PRODUCT_KEY);
+};
+
+/**
+ * Whether the session user is on a trial: `trial_ends_at` present, read un-namespaced off the
+ * user exactly as `pages/api/get_token.ts` does. Presence is the test; whether the trial has
+ * expired is that endpoint's concern (it answers 403 `trial_expired`).
+ */
+export const isTrialUser = (user: unknown): boolean => {
+  const trialEndsAt = (user as { trial_ends_at?: unknown } | null | undefined)?.trial_ends_at;
+  return Boolean(trialEndsAt);
+};

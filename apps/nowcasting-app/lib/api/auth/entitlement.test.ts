@@ -9,6 +9,8 @@ import {
   entitledCountryCodes,
   isDevModeEntitlementBypass,
   isEntitled,
+  isOcfAdmin,
+  OCF_ADMIN_PRODUCT_KEY,
   readCountryClaim,
   readEntitlementClaim,
   readProductsClaim
@@ -250,5 +252,37 @@ describe("readEntitlementClaim and entitledCountryCodes", () => {
   test("a malformed products claim falls back to the countries claim", () => {
     const user = { [PRODUCTS_CLAIM_KEY]: "gb-solar", [COUNTRY_CLAIM_KEY]: ["NL"] };
     expect(entitledCountryCodes(user)).toEqual(["NL"]);
+  });
+});
+
+describe("isOcfAdmin", () => {
+  test("is true when the products claim contains ocf-admin, in either spelling and any case", () => {
+    expect(OCF_ADMIN_PRODUCT_KEY).toBe("ocf-admin");
+    expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY]: ["gb-solar", "ocf-admin"] })).toBe(true);
+    expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY_NAMESPACED]: [" OCF-Admin "] })).toBe(true);
+  });
+
+  test("is false for a user without it, and for no user", () => {
+    expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY]: ["gb-solar", "nl-solar"] })).toBe(false);
+    expect(isOcfAdmin({ [COUNTRY_CLAIM_KEY]: ["ocf-admin"] })).toBe(false);
+    expect(isOcfAdmin(null)).toBe(false);
+    expect(isOcfAdmin(undefined)).toBe(false);
+  });
+
+  test.each([["ocf-admin"], [{ 0: "ocf-admin" }], [[1, null, {}]], [null]])(
+    "a malformed products claim (%p) is not admin",
+    (claim) => {
+      expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY]: claim })).toBe(false);
+    }
+  );
+
+  test("dev mode counts as admin, as it counts as entitled", () => {
+    process.env.NEXT_PUBLIC_DEV_MODE = "true";
+    expect(isOcfAdmin(null)).toBe(true);
+  });
+
+  test("ocf-admin alone entitles no country, and stops the countries fallback", () => {
+    const user = { [PRODUCTS_CLAIM_KEY]: ["ocf-admin"], [COUNTRY_CLAIM_KEY]: ["GB"] };
+    expect(entitledCountryCodes(user)).toEqual([]);
   });
 });

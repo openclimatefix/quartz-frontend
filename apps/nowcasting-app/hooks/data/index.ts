@@ -19,6 +19,7 @@ export {
   useEnabledCountries,
   useEnabledCountryListings,
   useEntitledCountries,
+  useIsOcfAdmin,
   useFocusedCountry
 } from "./use-countries";
 export type { UseCountriesResult } from "./use-countries";

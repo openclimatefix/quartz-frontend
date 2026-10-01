@@ -420,10 +420,30 @@ const resnapCursorToGrid = (country: string | null | undefined): void => {
   setGlobalState("timeNow", cursorNow(cadence));
 };
 
-/** State plus cookie, so the two can never be written apart. */
+/**
+ * Whether the enabled set is derived from entitlement (a regular user) or chosen (an OCF admin).
+ *
+ * Set by `useSyncEnabledCountries` once it knows which. A derived set is not a preference, so
+ * it is never persisted: the cookie belongs to admins. Until the sync says otherwise the set
+ * counts as chosen, which is today's behaviour.
+ */
+let enabledCountriesDerived = false;
+
+/**
+ * Mark the enabled set as derived (`true`) or chosen (`false`). While derived, nothing writes
+ * the enabled-countries cookie. The cookie itself is left in place, for the day the user
+ * becomes an admin.
+ */
+export const setEnabledCountriesDerived = (derived: boolean): void => {
+  enabledCountriesDerived = derived;
+};
+
+/** State plus cookie, so the two can never be written apart — unless the set is derived. */
 const writeEnabledCountries = (codes: string[]): void => {
   setGlobalState("enabledCountries", codes);
-  setSettingInCookieStorage(CookieStorageKeys.ENABLED_COUNTRIES, codes);
+  if (!enabledCountriesDerived) {
+    setSettingInCookieStorage(CookieStorageKeys.ENABLED_COUNTRIES, codes);
+  }
   // No resnap: the grid follows the *focused* country now, and enabling or disabling another
   // country does not change it. `setEnabledCountries` resnaps only in the case where dropping
   // a country also moves focus.
