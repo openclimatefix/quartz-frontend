@@ -128,8 +128,17 @@ export const useIsTrialUser = (): boolean => {
  * The value is always a valid, enabled code: `getValidatedFocusedCountry` falls the cookie
  * back to `DEFAULT_COUNTRY_CODE` on load, and `setFocusedCountry` normalises whatever it is
  * given and enables it if it was not already.
+ *
+ * On `/sites` the answer is always GB, whatever the cookie says. Sites is GB-only (its v0
+ * backend ignores the scope) and has no country switcher, so a user whose dashboard was left
+ * on NL must not arrive at a GB sites map formatted in Dutch time. Pinned here rather than by
+ * writing focus, so the user's dashboard choice survives the visit untouched.
  */
-export const useFocusedCountry = (): string => useGlobalState("focusedCountry")[0];
+export const useFocusedCountry = (): string => {
+  const [focusedCountry] = useGlobalState("focusedCountry");
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  return isSitesChart ? DEFAULT_COUNTRY_CODE : focusedCountry;
+};
 
 /**
  * Every country currently drawn on the map, focused one included.

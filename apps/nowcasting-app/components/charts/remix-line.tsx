@@ -16,7 +16,6 @@ import {
 } from "recharts";
 import {
   convertToLocaleDateString,
-  dateToZonedDateTimeString,
   formatISODateString,
   formatISODateStringAsZonedTime,
   formatISODateStringHumanNumbersOnly,
@@ -1378,10 +1377,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
                   return <div></div>;
 
+                // Sites keys its rows by epoch millis, so the key is turned back into an ISO
+                // instant here and formatted by the same helper below as the dashboard's.
+                // (Pre-formatting it to a human string here fed that string back into the
+                // ISO formatter and the heading read "Invalid Date".)
                 let formattedDate = data?.formattedDate + ":00+00:00";
                 if (isSitesChart) {
-                  const date = new Date(Number(data?.formattedDate));
-                  formattedDate = dateToZonedDateTimeString(date, timezone, locale);
+                  formattedDate = new Date(Number(data?.formattedDate)).toISOString();
                 }
 
                 // The heading is the *span* the row's values cover, not the instant the country

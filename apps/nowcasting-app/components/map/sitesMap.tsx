@@ -471,13 +471,14 @@ const SitesMap: React.FC<SitesMapProps> = ({
             updateMapData: (map) => safelyUpdateMapData(map, updateMapData)
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
-            <>
+            // Inset below the header, which has no fill and so now sits over the map (sites.tsx).
+            <div className="relative pt-14">
               <ButtonGroup
                 rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
               />
               <Slider aggregation={currentAggregationLevel} setAggregation={setAggregationLevel} />
               {/* <ShowSiteCount /> */}
-            </>
+            </div>
           )}
           title={MAP_TITLE_SOLAR_SITES}
         ></MapComponent>

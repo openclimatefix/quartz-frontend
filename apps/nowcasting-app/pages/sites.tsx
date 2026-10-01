@@ -85,8 +85,10 @@ export default function Sites({ dashboardModeServer }: { dashboardModeServer: st
     // and so the same cookie-seeded country state the server cannot see. See `client-only.tsx`.
     <ClientOnly fallback={<BootScreen />}>
       <Layout>
+        {/* No top padding: the header has no fill, so the map runs up behind it as it does on
+            the dashboard. The chart column insets itself below the header instead (`pt-14`). */}
         <div
-          className={`h-full relative pt-16${
+          className={`h-full relative${
             combinedDashboardModeActive ? " @container dashboard-mode" : ""
           }`}
         >
@@ -109,7 +111,7 @@ export default function Sites({ dashboardModeServer }: { dashboardModeServer: st
               expand handle sites actually uses, not the info tooltip (SideLayout already hides
               that one for the Solar Sites view) or anything else D is reshaping. */}
           <div
-            className="h-full pt-16 absolute top-0 left-0 z-20"
+            className="h-full pt-14 absolute top-0 left-0 z-20"
             style={{ width: isChartOpen ? "90%" : closedWidth }}
           >
             <div className="focus:outline-none h-full text-content justify-between flex flex-col bg-surface-panel z-20">
