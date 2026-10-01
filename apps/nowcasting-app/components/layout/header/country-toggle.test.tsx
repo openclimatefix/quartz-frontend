@@ -70,7 +70,10 @@ import { resetTokenCache } from "../../../lib/api/auth/token";
 import { CookieStorageKeys } from "../../helpers/cookieStorage";
 import { DEFAULT_COUNTRY_CODE } from "../../helpers/countryState";
 import { getGlobalState, setGlobalState } from "../../helpers/globalState";
-import CountryToggle from "./country-toggle";
+import CountryToggle, {
+  SUBSCRIPTION_NOT_INCLUDED_MESSAGE,
+  TRIAL_NOT_INCLUDED_MESSAGE
+} from "./country-toggle";
 
 const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
 
@@ -378,5 +381,56 @@ describe("a country with something wrong (driven by mocking the status hook)", (
 
     expect(statusFor("NL")).toBeNull();
     expect(discFor("NL")).toBeNull();
+  });
+});
+
+describe("the tooltip on a disabled country", () => {
+  const unavailableFor = (code: string) =>
+    document.querySelector(`[data-test="country-unavailable-${code}"]`) as HTMLElement | null;
+
+  test("a preview country shows its config message", async () => {
+    const gb = (countriesFixture as { country: string }[])[0];
+    server.use(
+      http.get(COUNTRIES_URL, () =>
+        HttpResponse.json([gb, { ...gb, country: "DE", name: "Germany" }])
+      )
+    );
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "DE" })).toBeDisabled());
+
+    expect(unavailableFor("DE")).toHaveTextContent(
+      "Germany coming soon. Contact us for early access."
+    );
+  });
+
+  test("a live country names the trial for a trial user", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"], trial_ends_at: "2030-01-01" };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeDisabled());
+
+    expect(unavailableFor("NL")).toHaveTextContent(
+      TRIAL_NOT_INCLUDED_MESSAGE.replace("{name}", "Netherlands")
+    );
+  });
+
+  test("a live country names the subscription otherwise", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeDisabled());
+
+    expect(unavailableFor("NL")).toHaveTextContent(
+      SUBSCRIPTION_NOT_INCLUDED_MESSAGE.replace("{name}", "Netherlands")
+    );
+  });
+
+  test("an enabled country has no tooltip, and only the disabled wrapper is a tab stop", async () => {
+    mockUser = { [COUNTRY_CLAIM_KEY]: ["GB"] };
+    renderToggle();
+    await waitFor(() => expect(screen.getByRole("radio", { name: "NL" })).toBeDisabled());
+
+    expect(unavailableFor("GB")).toBeNull();
+    expect(screen.getByRole("radio", { name: "GB" }).parentElement).not.toHaveAttribute("tabIndex");
+    expect(unavailableFor("NL")?.parentElement).toHaveAttribute("tabIndex", "0");
   });
 });
