@@ -312,9 +312,13 @@ const addLayer = (map: mapboxgl.Map, spec: CountrySpec, geometry: FeatureCollect
   // which lets a string id take feature state. GB's are numeric gsp_ids and worked without
   // it; NL's are province names and drew nothing until it was declared.
   map.addSource(sourceId, { type: "geojson", data: geometry, promoteId: "id" });
+  // Polygons that joined no API region (`buildMapGeometry` leaves `regionName` empty) never
+  // get feature state, and every `coalesce(…, 1)` below would draw them fully on. Drop them.
+  const matched: mapboxgl.Expression = ["!=", ["get", "regionName"], ""];
   if (LAND_UNDERLAY) {
     map.addLayer({
       id: `${sourceId}-land`,
+      filter: matched,
       type: "fill",
       source: sourceId,
       paint: {
@@ -330,6 +334,7 @@ const addLayer = (map: mapboxgl.Map, spec: CountrySpec, geometry: FeatureCollect
   }
   map.addLayer({
     id: fillId,
+    filter: matched,
     type: "fill",
     source: sourceId,
     paint: {
@@ -354,6 +359,7 @@ const addLayer = (map: mapboxgl.Map, spec: CountrySpec, geometry: FeatureCollect
   });
   map.addLayer({
     id: borderId,
+    filter: matched,
     type: "line",
     source: sourceId,
     paint: {
