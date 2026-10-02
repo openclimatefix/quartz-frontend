@@ -56,7 +56,14 @@ const yellow = theme.extend.colors.solar.DEFAULT;
  * what the dashboard's basemap gives it — a 40 % yellow over grey reads lighter than over
  * black. `null` for the fill straight onto black.
  */
-const LAND_UNDERLAY: string | null = null; // try "#2a2a2a"
+const LAND_UNDERLAY: string | null = "#2a2a2a"; // null for the fill straight onto black
+/**
+ * The underlay fades with daylight so the night is still black: fully up between the two
+ * `noon`-curve values below (see `daylightFor`), gone outside them. 0.3 → 0.7 is roughly
+ * 04:40–08:30 UTC rising and the mirror in the evening.
+ */
+const UNDERLAY_DAWN = 0.3;
+const UNDERLAY_DAY = 0.7;
 /** Region borders, as the dashboard draws them (`pvLatestMap.tsx`). */
 const BORDER_COLOR = "#ffffff";
 const BORDER_WIDTH = 0.6;
@@ -80,11 +87,15 @@ const smoothstep = (x: number) => {
   const t = clamp01(x);
   return t * t * (3 - 2 * t);
 };
-const speedFor = (t: number) => {
+/** 1 at `NOON_UTC_HOURS`, 0 twelve hours from it, a cosine between. */
+const noonFor = (t: number) => {
   const hours = (t % DAY_MS) / 3_600_000;
-  const noon = (Math.cos(((hours - NOON_UTC_HOURS) / 24) * 2 * Math.PI) + 1) / 2; // 1 at noon
-  return SPEED_AT_NIGHT + (SPEED_AT_NOON - SPEED_AT_NIGHT) * Math.pow(noon, DAY_SHAPE);
+  return (Math.cos(((hours - NOON_UTC_HOURS) / 24) * 2 * Math.PI) + 1) / 2;
 };
+const speedFor = (t: number) =>
+  SPEED_AT_NIGHT + (SPEED_AT_NOON - SPEED_AT_NIGHT) * Math.pow(noonFor(t), DAY_SHAPE);
+const daylightFor = (t: number) =>
+  smoothstep((noonFor(t) - UNDERLAY_DAWN) / (UNDERLAY_DAY - UNDERLAY_DAWN));
 
 type Series = {
   /** Slot instants, ms since epoch, ascending. */
@@ -308,7 +319,12 @@ const addLayer = (map: mapboxgl.Map, spec: CountrySpec, geometry: FeatureCollect
       source: sourceId,
       paint: {
         "fill-color": LAND_UNDERLAY,
-        "fill-opacity": ["coalesce", ["feature-state", "a"], 1]
+        // `d` is daylight, 0..1, set alongside the value and the country fade.
+        "fill-opacity": [
+          "*",
+          ["coalesce", ["feature-state", "a"], 1],
+          ["coalesce", ["feature-state", "d"], 1]
+        ]
       }
     });
   }
@@ -592,6 +608,7 @@ const ForecastShowreel: React.FC = () => {
         const dt = nowPerf - lastPerf;
         lastPerf = nowPerf;
         const fade = Math.min(1, (nowPerf - started) / FADE_IN_MS);
+        const d = daylightFor(simulated) * fade;
 
         layers.forEach((layer) => {
           const { spec, sourceId, series } = layer;
@@ -608,7 +625,7 @@ const ForecastShowreel: React.FC = () => {
           const { lo, hi, w } = neighbours(series.times, simulated);
           series.byId.forEach((row, id) => {
             const v = (row[lo] * (1 - w) + row[hi] * w) * fade;
-            map.setFeatureState({ source: sourceId, id }, { v: Number.isFinite(v) ? v : 0, a });
+            map.setFeatureState({ source: sourceId, id }, { v: Number.isFinite(v) ? v : 0, a, d });
           });
         });
 
@@ -662,7 +679,7 @@ const ForecastShowreel: React.FC = () => {
         // Starts at 0 and fades up (if enabled) on its first frames; a feature with no state
         // yet draws at `a: 1`, so give every feature a state before the layer is visible.
         series.byId.forEach((_row, id) =>
-          map.setFeatureState({ source: ids.sourceId, id }, { v: 0, a: 0 })
+          map.setFeatureState({ source: ids.sourceId, id }, { v: 0, a: 0, d: 0 })
         );
         layers.push({ spec, ...ids, series, alpha: 0 });
         fitLoop();
