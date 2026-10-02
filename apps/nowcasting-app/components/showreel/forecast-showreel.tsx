@@ -704,7 +704,7 @@ const ForecastShowreel: React.FC = () => {
     <div className="fixed inset-0 bg-black">
       <div ref={containerRef} className="h-full w-full" />
       <div
-        className={`absolute bottom-3 left-3 select-none whitespace-pre font-mono text-xs text-white/50 transition-opacity duration-500 ${
+        className={`absolute bottom-10 left-3 select-none whitespace-pre font-mono text-xs text-white/50 transition-opacity duration-500 ${
           status || (hudVisible && mouseActive) ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
