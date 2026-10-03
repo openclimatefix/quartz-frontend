@@ -1,9 +1,12 @@
 import React from "react";
-import logout from "../../pages/logout";
 
 type LegendLineGraphIconProps = {
   className?: string;
   dashStyle?: "both" | "dashed" | "solid";
+  /** Icon stroke, for a series the chart draws at its own weight (the seasonal mean). */
+  strokeWidth?: number;
+  /** Matches a series the chart draws softened, so the swatch is not brighter than the line. */
+  strokeOpacity?: number;
 };
 
 type IconProps = {
@@ -16,7 +19,9 @@ type InfoIconProps = {
 
 export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
   className,
-  dashStyle = "solid"
+  dashStyle = "solid",
+  strokeWidth = 2,
+  strokeOpacity = 1
 }) => {
   let dash = "0";
   switch (dashStyle) {
@@ -40,7 +45,8 @@ export const LegendLineGraphIcon: React.FC<LegendLineGraphIconProps> = ({
     >
       <path
         d="M2.5 15.5C5.8 15.5 10 13 10.4 9.1C10.8 5.1 14.2 2.5 17.5 2.5"
-        strokeWidth={2}
+        strokeWidth={strokeWidth}
+        strokeOpacity={strokeOpacity}
         stroke="currentColor"
         strokeLinecap="round"
         strokeDasharray={dash}
@@ -78,13 +84,20 @@ export const CloseButtonIcon: React.FC<IconProps> = ({ className }) => (
     <path
       strokeWidth={0.5}
       d="M20.030 5.030l-1.061-1.061-6.97 6.97-6.97-6.97-1.061 1.061 6.97 6.97-6.97 6.97 1.061 1.061 6.97-6.97 6.97 6.97 1.061-1.061-6.97-6.97 6.97-6.97z"
-      fill="white"
+      fill="currentColor"
     />
   </svg>
 );
 
 export const ClockIcon: React.FC<IconProps> = ({ className }) => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg
+    width="14"
+    height="14"
+    className={className}
+    viewBox="0 0 14 14"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
     <path
       d="M7 12.3743C9.96813 12.3743 12.3743 9.96813 12.3743 7C12.3743 4.03187 9.96813 1.62573 7 1.62573C4.03187 1.62573 1.62573 4.03187 1.62573 7C1.62573 9.96813 4.03187 12.3743 7 12.3743Z"
       stroke="currentColor"
@@ -150,7 +163,8 @@ export const ExternalLinkIcon: React.FC<IconProps> = ({ className }) => (
 
 type DeltaIconProps = {
   className?: string;
-  size?: number;
+  /** Pixels, or any SVG length — `"100%"` fills a box sized in `em` to follow the text. */
+  size?: number | string;
 };
 
 export const UpArrow: React.FC<DeltaIconProps> = ({ className, size = 22 }) => (
@@ -230,37 +244,9 @@ export const Checkmark: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-export const SpinnerSmall = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg
-    className={`animate-spin fill-white ${props.className}`}
-    width={24}
-    height={24}
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <circle
-      cx={12}
-      cy={12}
-      r={10.5}
-      stroke="currentColor"
-      fill="none"
-      strokeOpacity={0.25}
-      strokeWidth={3}
-    />
-    <path
-      d="M12 1.5a10.5 10.5 0 019.988 7.26"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={3}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 export const SpinnerTextInline = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
-    className={`animate-spin fill-white ${props.className}`}
+    className={`animate-spin fill-content ${props.className}`}
     width={14}
     height={14}
     fill="none"
@@ -294,7 +280,7 @@ export const SpinnerTextInlineSmall = (
       height={10}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={`animate-spin fill-white ${props.className}`}
+      className={`animate-spin fill-content ${props.className}`}
     >
       <circle
         cx={5}
@@ -366,54 +352,16 @@ export const ClockInlineSmall = (props: React.SVGProps<SVGSVGElement> & { title:
   </span>
 );
 
-export const ZoomOutIcon = (props: React.SVGProps<SVGSVGElement> & { title: string }) => (
-  <span title={props.title || ""}>
-    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <defs>
-        <style>
-          {
-            ".cls-1,.cls-2{fill:none;}.cls-2{stroke:#FFFF;stroke-linecap:round;stroke-linejoin:round;}"
-          }
-        </style>
-      </defs>
-      <g data-name="Layer 2" id="Layer_2">
-        <g id="Workspace">
-          <rect className="cls-1" height={24} width={24} />
-          <circle className="cls-2" cx={11.5} cy={11.5} r={4.5} />
-          <line className="cls-2" x1={18} x2={14.68} y1={18} y2={14.68} />
-          <line className="cls-2" x1={9.5} x2={13.5} y1={11.5} y2={11.5} />
-        </g>
-      </g>
-    </svg>
-  </span>
-);
-
-export const DownloadIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className || ""}
-    xmlns="http://www.w3.org/2000/svg"
-    width={24}
-    height={24}
-    fill="none"
-  >
+/**
+ * Returned JSX rather than an HTML string, which is what it was while `map.tsx` injected it
+ * into a `div.innerHTML` for a Mapbox control. The button is React now
+ * (`components/shell/map-zoom-controls.tsx`), so the icon can be too.
+ */
+export const ResetIcon = () => (
+  <svg fill="currentColor" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
     <path
-      fill="currentColor"
       fillRule="evenodd"
-      d="m16.75 8.96-4.01 4.01-.707.708-.708-.707-4.01-4.01 1.414-1.415 2.304 2.303V2h2v7.85l2.303-2.304zM1 20.34v-9h6v2H3v5h18v-5h-4v-2h6v9H1"
-      clipRule="evenodd"
+      d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0"
     />
   </svg>
 );
-
-export const ResetIcon = () => {
-  return `<svg fill="#000000" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
-    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-    <g id="SVGRepo_iconCarrier">
-      <path d="M960 0v213.333c411.627 0 746.667 334.934 746.667 746.667S1371.627 1706.667 960 1706.667 213.333 1371.733 213.333 960c0-197.013 78.4-382.507 213.334-520.747v254.08H640V106.667H53.333V320h191.04C88.64 494.08 0 720.96 0 960c0 529.28 430.613 960 960 960s960-430.72 960-960S1489.387 0 960 0" fill-rule="evenodd">
-      </path>
-    </g>
-  </svg>`;
-};
-
-export default ZoomOutIcon;

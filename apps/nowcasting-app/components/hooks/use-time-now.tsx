@@ -1,15 +1,15 @@
 import { useEffect } from "react";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, { getCursorNow } from "../helpers/globalState";
 import { addMinutesToISODate } from "../helpers/utils";
 
 const useTimeNow = () => {
-  // This get the Time now, but rounded up to the nearest 30 minutes.
+  // Now, rounded up onto the cursor grid — the finest enabled country's cadence, not a fixed
+  // half hour. See `lib/time/cursor.ts`.
   // TODO add return type.
   const [timeNow, setTimeNow] = useGlobalState("timeNow");
   useEffect(() => {
     const interval = setInterval(() => {
-      const time30MinNow = get30MinNow();
-      setTimeNow(time30MinNow);
+      setTimeNow(getCursorNow());
     }, 1000 * 60);
     return () => {
       clearInterval(interval);

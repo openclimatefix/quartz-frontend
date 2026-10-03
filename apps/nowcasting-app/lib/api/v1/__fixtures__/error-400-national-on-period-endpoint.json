@@ -1,0 +1,3 @@
+{
+  "detail": "region_type='national' is not supported on the period endpoint (only sub-national region types are pre-warmed): ['gsp']. Use GET /GB/solar/regions/national/forecast for national-level data."
+}

@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { Analytics } from "@vercel/analytics/next";
-import { getViewTitle } from "../../constant";
-import { useProductStatuses } from "../hooks/useStatus";
+import { useEnabledCountries } from "../../hooks/data";
+import { statusProductsFor, useProductStatuses } from "../hooks/useStatus";
 import useGlobalState from "../helpers/globalState";
 import StatusBanner from "./StatusBanner";
 
@@ -11,22 +11,34 @@ interface ILayout {
 }
 
 const Layout = ({ children }: ILayout) => {
-  // Every product the user is entitled to, in one call. The banner is no longer scoped to
-  // the current view: an outage on a product the user is not looking at is still worth
-  // knowing about, and dropping the view dependency keeps this file out of the way of the
-  // Europe UI work, which replaces `view` with `isSitesChart` + `comparison`.
-  const statuses = useProductStatuses();
-  const [view] = useGlobalState("view");
-  const viewTitle = getViewTitle(view);
-  const pageTitle = view && viewTitle ? `Quartz Solar - ${viewTitle}` : "Quartz Solar";
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  // One Status API call; the rows kept are the enabled countries' products, or the sites
+  // product on /sites. See `statusProductsFor`.
+  const enabledCountries = useEnabledCountries();
+  const statuses = useProductStatuses(statusProductsFor(isSitesChart, enabledCountries));
+  const [comparison] = useGlobalState("comparison");
+  // Replaces `getViewTitle(view)` (Wave 4): the three titles it produced — "PV Forecast",
+  // "Delta", "Solar Sites" — now come from the two facts that used to be folded into `view`,
+  // route and comparison, rather than from a third piece of state mirroring both.
+  const viewTitle = isSitesChart ? "Solar Sites" : comparison ? "Delta" : "PV Forecast";
+  const pageTitle = `Quartz Solar - ${viewTitle}`;
 
   return (
     <>
       <Head>
         <title>{pageTitle}</title>
-        <link rel="icon" href="/favicon.ico" />
+        {/* `favicon.ico` carries 16/32/48px drawn from `ocf-icon-512x512.png`, for tabs and
+            anything that asks for `/favicon.ico` by name; the 512 PNG is there for high-DPI
+            uses that pick the largest; the touch icon is iOS's home-screen size. */}
+        <link rel="icon" href="/favicon.ico" sizes="48x48" />
+        <link rel="icon" type="image/png" href="/ocf-icon-512x512.png" sizes="512x512" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </Head>
-      <main className="flex flex-col h-screen">
+      {/* `overflow-x-hidden` is the backstop for the page, not the fix: the dashboard's stage
+          clips its own off-screen chrome (see `dashboard-shell.tsx`). This stops any future
+          floating pane that escapes its container from giving the whole page a horizontal
+          scrollbar, which is never what is wanted on a full-height app shell. */}
+      <main className="flex h-screen flex-col overflow-x-hidden">
         <StatusBanner statuses={statuses} />
         {children}
         <Analytics />

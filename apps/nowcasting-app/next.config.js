@@ -6,7 +6,11 @@
 const { withSentryConfig } = require("@sentry/nextjs");
 
 const moduleExports = {
-  // Your existing module.exports
+  eslint: {
+    // `next lint` otherwise only walks pages/components/lib/src/app, leaving the
+    // top-level `config/` registry and `hooks/` data layer unlinted.
+    dirs: ["pages", "components", "lib", "config", "hooks"]
+  }
 };
 
 const sentryWebpackPluginOptions = {

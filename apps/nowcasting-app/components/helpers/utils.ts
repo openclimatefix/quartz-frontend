@@ -1,14 +1,16 @@
 import axios from "axios";
-import { DELTA_BUCKET, getDeltaBucketKeys, MAX_NATIONAL_GENERATION_MW } from "../../constant";
+import { DateTime, Settings } from "luxon";
+import { DISPLAY_LOCALE } from "../../lib/time/display";
+import {
+  DELTA_BUCKET,
+  DELTA_PERCENTAGE_EDGES,
+  deltaBucketEdge,
+  getDeltaBucketKeys,
+  MAX_NATIONAL_GENERATION_MW
+} from "../../constant";
 import {
   Bucket,
-  CombinedData,
-  CombinedErrors,
-  CombinedLoading,
   CombinedSitesData,
-  CombinedValidating,
-  NationalEndpointLabel,
-  NationalEndpointStates,
   GspDeltaValue,
   LoadingState,
   SitesCombinedErrors,
@@ -18,12 +20,8 @@ import {
 } from "../types.d";
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
-import createClient from "openapi-fetch";
-import { paths } from "../../types/quartz-api";
-import { PathsWithMethod } from "openapi-typescript-helpers";
 import { ChartData } from "../charts/remix-line";
-
-export const isProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION === "true";
+import { getAccessToken } from "../../lib/api/auth/token";
 
 export const enableNHourView = process.env.NEXT_PUBLIC_4H_VIEW === "true";
 
@@ -44,117 +42,6 @@ export const getForecastAccessorForTimeHorizon = (selectedTimeHorizon: number) =
 
 export const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(" ");
-};
-
-export const computeLoadingState = (
-  combinedLoading: CombinedLoading,
-  combinedValidating: CombinedValidating,
-  combinedErrors: CombinedErrors,
-  combinedData: CombinedData
-): LoadingState<NationalEndpointStates> => {
-  let initialLoadComplete = Object.entries(combinedLoading).every(
-    ([key, loading]) => key === "nationalNHourLoading" || !loading
-  );
-  let showMessage = !initialLoadComplete;
-  let message = "Loading initial data";
-  if (initialLoadComplete) {
-    if (combinedValidating.nationalForecastValidating) {
-      message = `Loading latest ${NationalEndpointLabel.nationalForecast}`;
-      showMessage = true;
-    }
-    if (combinedValidating.pvRealDayInValidating) {
-      message = showMessage
-        ? "Loading latest data"
-        : `Loading latest ${NationalEndpointLabel.pvRealDayIn}`;
-      showMessage = true;
-    }
-    if (combinedValidating.pvRealDayAfterValidating) {
-      message = showMessage
-        ? "Loading latest data"
-        : `Loading latest ${NationalEndpointLabel.pvRealDayAfter}`;
-      showMessage = true;
-    }
-    if (combinedValidating.nationalNHourValidating) {
-      message = showMessage
-        ? "Loading latest data"
-        : `Loading latest ${NationalEndpointLabel.nationalNHour}`;
-      showMessage = true;
-    }
-    if (combinedValidating.allGspForecastValidating) {
-      message = showMessage
-        ? "Loading latest data"
-        : `Loading latest ${NationalEndpointLabel.allGspForecast}`;
-      showMessage = true;
-    }
-    if (combinedValidating.allGspRealValidating) {
-      message = showMessage
-        ? "Loading latest data"
-        : `Loading latest ${NationalEndpointLabel.allGspReal}`;
-      showMessage = true;
-    }
-
-    //   Check for any errors
-    if (Object.values(combinedErrors).some((error) => !!error)) {
-      message = "Error loading data. Waiting to retry...";
-      showMessage = true;
-    }
-  } else {
-    //   Check for any errors
-    if (Object.values(combinedErrors).some((error) => !!error)) {
-      message = "Error loading initial data. Waiting to retry...";
-      showMessage = true;
-    }
-  }
-  const checkAllGspForecastHasData = () => {
-    const d = combinedData.allGspForecastData;
-    if (!d) return false;
-    return Array.isArray(d) ? d.length > 0 : "forecasts" in d ? !!d.forecasts?.length : false;
-  };
-  const endpointStates: NationalEndpointStates = {
-    type: "national",
-    nationalForecast: {
-      loading: combinedLoading.nationalForecastLoading,
-      validating: combinedValidating.nationalForecastValidating,
-      error: combinedErrors.nationalForecastError,
-      hasData: !!combinedData.nationalForecastData?.length
-    },
-    pvRealDayIn: {
-      loading: combinedLoading.pvRealDayInLoading,
-      validating: combinedValidating.pvRealDayInValidating,
-      error: combinedErrors.pvRealDayInError,
-      hasData: !!combinedData.pvRealDayInData?.length
-    },
-    pvRealDayAfter: {
-      loading: combinedLoading.pvRealDayAfterLoading,
-      validating: combinedValidating.pvRealDayAfterValidating,
-      error: combinedErrors.pvRealDayAfterError,
-      hasData: !!combinedData.pvRealDayAfterData?.length
-    },
-    nationalNHour: {
-      loading: combinedLoading.nationalNHourLoading,
-      validating: combinedValidating.nationalNHourValidating,
-      error: combinedErrors.nationalNHourError,
-      hasData: !!combinedData.nationalNHourData?.length
-    },
-    allGspForecast: {
-      loading: combinedLoading.allGspForecastLoading,
-      validating: combinedValidating.allGspForecastValidating,
-      error: combinedErrors.allGspForecastError,
-      hasData: checkAllGspForecastHasData()
-    },
-    allGspReal: {
-      loading: combinedLoading.allGspRealLoading,
-      validating: combinedValidating.allGspRealValidating,
-      error: combinedErrors.allGspRealError,
-      hasData: !!combinedData.allGspRealData?.length
-    }
-  };
-  return {
-    initialLoadComplete,
-    showMessage,
-    message,
-    endpointStates
-  };
 };
 
 export const getSitesLoadingState = (
@@ -223,146 +110,235 @@ export const formatISODateString = (date: string) => {
   return dateid;
 };
 
-export const formatISODateAsLondonTime = (date: Date) => {
-  const date_london_time_str = date
-    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
-    .slice(0, 5);
+/**
+ * Rendering a UTC instant for a human needs a zone, and a country's zone is not GB's, so every
+ * helper below takes one — plus a locale wherever it formats day/month names or date order.
+ *
+ * The defaults keep today's GB output for call sites not yet wired to the country registry; a
+ * later Phase 3 agent passes `country.timezone` / `country.locale` explicitly, after which the
+ * defaults can go. Luxon (F5) replaces the `new Date()` + `toLocaleString` arithmetic these used
+ * to do, so the zone is an argument rather than whatever zone the viewer's browser happens to
+ * be in.
+ */
+export const DEFAULT_TIMEZONE = "Europe/London";
 
-  return date_london_time_str;
+/**
+ * Re-exported from `lib/time/display.ts`, which is the single seam a future user preference
+ * changes. Importing it here also applies Luxon's global default wherever formatting happens,
+ * including server rendering and non-React consumers, without depending on `_app.tsx`.
+ *
+ * Note this is a *display* default and says nothing about zones: a country's `timezone` is
+ * still its own, so an NL slot is shown at NL's wall-clock time — written the GB way.
+ */
+export const DEFAULT_LOCALE = DISPLAY_LOCALE;
+
+const TIME_ONLY: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
+const LONG_DATE: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric"
 };
-export const convertISODateStringToLondonTime = (date: string) => {
+const NUMERIC_DATE: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "numeric",
+  year: "numeric"
+};
+
+// The `new Date()` implementations these replace rendered an unparseable input as "Invalid Date"
+// through `toLocaleString` and then sliced the result, and callers put that straight on screen.
+// Reproduced verbatim so the Luxon migration changes no output. Phase 7 owns what a user should
+// actually see here.
+const INVALID_TIME = "Inval";
+const INVALID_HUMAN = "Invalid Date, Inval";
+const INVALID_HUMAN_NUMERIC = "Invalid Date Inval";
+const INVALID_DATE_ONLY = "Invalid Date ";
+
+/**
+ * `new Date(string)` semantics, which these helpers had before Luxon: a string carrying an offset
+ * is that instant, a date-only string is UTC midnight, and a zone-less date*time* is the viewer's
+ * local time. That last case is a latent viewer-dependency rather than something to preserve
+ * forever — Phase 4 removes it by passing canonical UTC instants from `lib/domain/time.ts` — but
+ * changing it here would be a behaviour change invisible to a UTC-pinned test process.
+ */
+// The zone is left unspecified rather than named as "system" so that it resolves through
+// Luxon's `Settings.defaultZone`, which *is* the system zone unless a test overrides it.
+// Behaviour is identical in the browser; the difference is that the viewer's zone becomes
+// injectable, and jest pins TZ=UTC — the one zone in which every viewer-zone bug in this
+// file is invisible. See utils.viewerZone.test.ts.
+const parseISOInViewerZone = (date: string): DateTime =>
+  DateTime.fromISO(date, date.includes("T") ? undefined : { zone: "utc" });
+
+const formatTime = (dt: DateTime) => dt.toLocaleString(TIME_ONLY);
+
+export const formatDateAsZonedTime = (
+  date: Date,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = DateTime.fromJSDate(date, { zone: timezone }).setLocale(locale);
+  if (!dt.isValid) return INVALID_TIME;
+  return formatTime(dt);
+};
+
+export const formatISODateStringAsZonedTime = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
   if (!date || date === ":00.000Z") return "00:00";
-  // Changes the ISO date string to Europe London time, and return time only
-  const d = new Date(date);
-  if (typeof d !== "object" || isNaN(d.getTime())) {
+  const dt = parseISOInViewerZone(date).setZone(timezone).setLocale(locale);
+  if (!dt.isValid) {
     throw new Error(`Invalid date: ${date}`);
   }
-  return formatISODateAsLondonTime(d);
+  return formatTime(dt);
 };
 
-export const convertToLocaleDateString = (date: string) => {
-  const localeDatetime = new Date(date);
-  if (isNaN(localeDatetime.getTime())) {
+/**
+ * The calendar date of an instant, in a given zone — `Thu 28 Aug`.
+ *
+ * The zone argument is not a nicety: near midnight the same instant is two different dates in
+ * GB and NL, so a date shown without one is a claim nobody can check. Every caller says which
+ * zone it means, and says so in the UI too.
+ *
+ * Returns the marker string rather than throwing, matching the tick formatters: this feeds a
+ * caption, and a caption is never worth a blank screen.
+ */
+export const formatISODateStringAsZonedDate = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  if (!date) return INVALID_TIME;
+  const dt = parseISOInViewerZone(date).setZone(timezone).setLocale(locale);
+  if (!dt.isValid) return INVALID_TIME;
+  return dt.toFormat("ccc d LLL");
+};
+
+/**
+ * Shifts the instant by the target zone's offset and then serialises it with a "Z" that is a lie
+ * everywhere except UTC, so downstream `new Date()` parsing reads the *wall clock* back. Kept as
+ * is because several chart call sites depend on exactly that; the timezone defaults to the
+ * viewer's zone, which is what it used before, and must not default to Europe/London or every
+ * existing call site would shift.
+ */
+export const convertToLocaleDateString = (date: string, timezone?: string) => {
+  // Defaulting through `Settings.defaultZone` rather than the literal "system" keeps the
+  // viewer's zone injectable for tests; it *is* the system zone in the browser. See
+  // parseISOInViewerZone above and utils.viewerZone.test.ts.
+  const dt = parseISOInViewerZone(date).setZone(timezone ?? Settings.defaultZone);
+  if (!dt.isValid) {
     throw new Error(`Invalid date: ${date}`);
   }
-  localeDatetime.setMinutes(localeDatetime.getMinutes() - localeDatetime.getTimezoneOffset());
-  return localeDatetime.toISOString();
+  return `${dt.toISO({ includeOffset: false })}Z`;
 };
 
-export const formatISODateStringHuman = (date: string) => {
-  // Change date to nice human readable format.
-  // Note that this converts the string to Europe London Time
-  // timezone and seconds are removed
+export const formatISODateStringHuman = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => dateToZonedDateTimeString(parseISOInViewerZone(date).toJSDate(), timezone, locale);
 
-  const d = new Date(date);
-
-  return dateToLondonDateTimeString(d);
+export const dateToZonedDateTimeString = (
+  date: Date,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = DateTime.fromJSDate(date, { zone: timezone }).setLocale(locale);
+  if (!dt.isValid) return INVALID_HUMAN;
+  return `${dt.toLocaleString(LONG_DATE)}, ${formatTime(dt)}`;
 };
 
-export const dateToLondonDateTimeString = (date: Date) => {
-  const date_london = date.toLocaleString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Europe/London"
-  });
-  const date_london_time = date
-    .toLocaleTimeString("en-GB", { timeZone: "Europe/London" })
-    .slice(0, 5);
-
-  return `${date_london}, ${date_london_time}`;
+// Note the trailing space, which callers concatenate onto.
+export const dateToZonedDateOnlyString = (
+  date: Date,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = DateTime.fromJSDate(date, { zone: timezone }).setLocale(locale);
+  if (!dt.isValid) return INVALID_DATE_ONLY;
+  return `${dt.toLocaleString(NUMERIC_DATE)} `;
 };
 
-export const dateToLondonDateTimeOnlyString = (date: Date) => {
-  const date_london = date.toLocaleString("en-GB", {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-    timeZone: "Europe/London"
-  });
-  return date_london + " ";
+export const formatISODateStringHumanNumbersOnly = (
+  date: string,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = parseISOInViewerZone(date).setZone(timezone).setLocale(locale);
+  if (!dt.isValid) return INVALID_HUMAN_NUMERIC;
+  return `${dt.toLocaleString(NUMERIC_DATE)} ${formatTime(dt)}`;
 };
 
-export const formatISODateStringHumanNumbersOnly = (date: string) => {
-  // Change date to nice human readable format.
-  // Note that this converts the string to Europe London Time
-  // timezone and seconds are removed
-
-  const d = new Date(date);
-
-  const date_london = d.toLocaleDateString("en-GB", { timeZone: "Europe/London" });
-  const date_london_time = d.toLocaleTimeString("en-GB", { timeZone: "Europe/London" }).slice(0, 5);
-
-  // further formatting could be done to make it yyyy/mm/dd HH:MM
-  return `${date_london} ${date_london_time}`;
+/**
+ * Phase 3 fix: this used to format in the *viewer's* zone with no `timeZone` option, unlike every
+ * neighbouring helper, and to test "is it today?" via `toDateString()` in that same zone. A
+ * late-evening UTC instant therefore labelled the previous day for a UK viewer. Both now use the
+ * passed zone, which is also the zone any per-day grouping buckets in — see the note on
+ * `getUtcHalfHourIndex` in chartUtils.ts for why the seasonal norms deliberately do not.
+ */
+export const prettyPrintDayLabelWithDate = (
+  d: string | number,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const dt = (typeof d === "number" ? DateTime.fromMillis(d) : parseISOInViewerZone(d))
+    .setZone(timezone)
+    .setLocale(locale);
+  // The epoch is treated as "no value", not as 1 January 1970.
+  if (!dt.isValid || dt.toMillis() === 0) return "Invalid date";
+  if (dt.hasSame(DateTime.now().setZone(timezone), "day")) return "Today";
+  return `${dt.toLocaleString({ weekday: "short" })} ${dt.toLocaleString({ day: "numeric" })}`;
 };
 
-export const prettyPrintDayLabelWithDate = (d: string | number) => {
-  const parsedDate = new Date(d);
-  // check if date is valid
-  if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date";
-  // if date is today, return "Today"
-  if (parsedDate.toDateString() === new Date().toDateString()) return "Today";
-  // otherwise return day of the week and short date
-  return `${parsedDate.toLocaleDateString("en-GB", {
-    weekday: "short"
-  })} ${parsedDate.toLocaleDateString("en-GB", { day: "numeric" })}`;
-};
-
-export function prettyPrintChartAxisLabelDate(x: string | number) {
-  // Check if x is a number, if so then it might be a UNIX timestamp
+/**
+ * Chart tick formatter, so it must never throw: anything it cannot read comes back as a marker
+ * string. It previously appended "+00:00" to any string longer than 16 characters, which threw on
+ * every `Z`-suffixed timestamp — the exact spelling v1 emits. It now parses whatever zone the
+ * string carries and falls back to UTC for the zone-less 16-character ticks the chart feeds it.
+ */
+export function prettyPrintChartAxisLabelDate(
+  x: string | number,
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) {
   if (typeof x === "number") {
-    if (!Number.isNaN(x)) {
-      if (!x) return "Invalid date 1";
-      const parsedDate = new Date(x);
-      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 2";
-      return convertISODateStringToLondonTime(parsedDate.toISOString());
-    }
-  } else {
-    // x is a string, check if it is a valid ISO date string
-    if (x.includes("T")) {
-      // check if it is a valid ISO date string
-      const parsedDate = new Date(x);
-      if (Number.isNaN(parsedDate.getTime()) || parsedDate.getTime() === 0) return "Invalid date 3";
-
-      if (x.includes("+")) {
-        return convertISODateStringToLondonTime(x);
-      } else if (x.length > 16) {
-        return convertISODateStringToLondonTime(x + "+00:00");
-      } else {
-        return convertISODateStringToLondonTime(x + ":00+00:00");
-      }
-    }
+    if (Number.isNaN(x)) return `Invalid datetime input: ${typeof x} – ${x}`;
+    if (!x) return "Invalid date 1";
+    const dt = DateTime.fromMillis(x).setZone(timezone).setLocale(locale);
+    if (!dt.isValid) return "Invalid date 2";
+    return formatTime(dt);
   }
-  return `Invalid datetime input: ${typeof x} – ${x}`;
+  if (!x.includes("T")) return `Invalid datetime input: ${typeof x} – ${x}`;
+  const dt = DateTime.fromISO(x, { zone: "utc", setZone: true })
+    .setZone(timezone)
+    .setLocale(locale);
+  if (!dt.isValid || dt.toMillis() === 0) return "Invalid date 3";
+  return formatTime(dt);
 }
 
 export const MWtoGW = (MW: number) => {
   return (MW / 1000).toFixed(1);
-};
-export const KWtoGW = (MW: number) => {
-  return (MW / 1000 / 1000).toFixed(1);
 };
 export const KWtoMW = (MW: number) => {
   return (MW / 1000).toFixed(1);
 };
 
 export const addMinutesToISODate = (date: string, munites: number) => {
-  var d = new Date(date);
-  d.setMinutes(d.getMinutes() + munites);
-  return d.toISOString();
+  // Epoch arithmetic: `setMinutes` steps in the viewer's local time, which skips or repeats an
+  // hour across a local clock change.
+  return new Date(Date.parse(date) + munites * 60_000).toISOString();
 };
 
-export const getRounded4HoursAgoString = () => {
-  const fourHoursAgo = new Date();
-  fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
-  if (fourHoursAgo.getMinutes() < 30) {
-    fourHoursAgo.setMinutes(0);
-  } else {
-    fourHoursAgo.setMinutes(30);
-  }
-  return convertISODateStringToLondonTime(fourHoursAgo.toISOString());
+// Rounds down to the half hour *in the display zone*, where it used to round in the viewer's zone
+// and then render the result elsewhere. The two only differ for a zone whose offset is not a whole
+// number of hours, and rounding in the zone the label is read in is the answer that makes sense.
+export const getRounded4HoursAgoString = (
+  timezone: string = DEFAULT_TIMEZONE,
+  locale: string = DEFAULT_LOCALE
+) => {
+  const fourHoursAgo = DateTime.now().setZone(timezone).setLocale(locale).minus({ hours: 4 });
+  return formatTime(fourHoursAgo.set({ minute: fourHoursAgo.minute < 30 ? 0 : 30 }));
 };
 
 export const getRoundedPv = (pv: number, round: boolean = true, roundingFactor: number = 100) => {
@@ -404,24 +380,7 @@ export const getOpacityValueFromPVNormalized = (val: number, round: boolean = tr
 
 export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
   try {
-    const response = await fetch("/api/get_token");
-    if (!response.ok) {
-      const body = await response.json().catch((parseErr) => {
-        Sentry.captureException(parseErr, { tags: { error: "get_token_parse_failure" } });
-        return {};
-      });
-      if (body.error === "trial_expired") {
-        Router.push(`/expired${body.email ? `?email=${encodeURIComponent(body.email)}` : ""}`);
-        throw new Error("trial_expired");
-      }
-      if (body.error === "access_denied") {
-        Router.push(`/auth/denied?error_description=${encodeURIComponent(body.message)}`);
-        throw new Error("access_denied");
-      }
-      const text = body.message || response.statusText;
-      throw new Error(`Failed to get access token (${response.status}): ${text}`);
-    }
-    const { accessToken } = await response.json();
+    const accessToken = await getAccessToken();
 
     const res = await axios(url as string, {
       headers: { Authorization: `Bearer ${accessToken}` }
@@ -441,26 +400,6 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
     // IMPORTANT: rethrow so SWR receives the error and onError/onErrorRetry can run
     throw err;
   }
-};
-
-// @ts-ignore
-export const openapiFetcherAuth = async (url: PathsWithMethod<paths, "get">) => {
-  // const response = await fetch("/api/get_token");
-  // const { accessToken } = await response.json();
-  // const router = Router;
-  const { GET, PUT } = createClient<paths>({
-    baseUrl: process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", ""),
-    fetch: axiosFetcherAuth
-  });
-
-  return GET(url, {});
-};
-
-// this is the previous fetcher
-export const axiosFetcher = (url: string) => {
-  return axios(url).then(async (res) => {
-    return res.data;
-  });
 };
 
 // round it up to the 'yMax_levels' so that the y major ticks look right.
@@ -486,20 +425,30 @@ export const getRoundedTickBoundary = (
   return yMax;
 };
 
-export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
+/**
+ * The megawatt bucket for one delta, on edges stretched to `mwTop` — the region's own country
+ * and tier's saturation point (`deltaTopFor`), so a DE TSO region's buckets step at ±750 MW
+ * rather than ±25. The bucket returned is still the enum member, an ordinal; only the edges it
+ * is compared against move. The default is the enum's own ±25…±100.
+ */
+export const getDeltaBucket: (delta: number, mwTop?: number) => DELTA_BUCKET = (
+  delta,
+  mwTop = DELTA_BUCKET.POS4
+) => {
   const deltaBucketKeys = getDeltaBucketKeys();
   let currentBucket = DELTA_BUCKET[deltaBucketKeys[0] as keyof typeof DELTA_BUCKET];
   for (const bucketKey of deltaBucketKeys) {
     let bucket = Number(DELTA_BUCKET[bucketKey as keyof typeof DELTA_BUCKET]);
+    const edge = deltaBucketEdge(bucket as DELTA_BUCKET, false, mwTop);
 
     if (delta < 0) {
-      if (delta <= bucket) {
+      if (delta <= edge) {
         return bucket as DELTA_BUCKET;
       }
     } else if (delta > 0) {
       if (bucket < 0) continue;
 
-      if (delta >= bucket) {
+      if (delta >= edge) {
         currentBucket = bucket;
         if (bucket === DELTA_BUCKET.POS4) {
           return bucket as DELTA_BUCKET;
@@ -510,14 +459,40 @@ export const getDeltaBucket: (delta: number) => DELTA_BUCKET = (delta) => {
   return DELTA_BUCKET.ZERO;
 };
 
+/**
+ * The same nine buckets, stepped on **delta as a fraction of installed capacity**.
+ *
+ * `DELTA_BUCKET`'s members are ordinals as far as anything downstream is concerned — the paint
+ * expression steps on them, the delta panel groups by them — and only `getDeltaBucket` above
+ * treats their *values* as megawatt thresholds. So percentage mode needs a second bucketer, not
+ * a second set of buckets: same nine outputs, same colours, same `step` expression, different
+ * quantity and different edges (`DELTA_PERCENTAGE_EDGES`, and see there for why).
+ *
+ * Boundary behaviour matches `getDeltaBucket` exactly: a magnitude *at* an edge belongs to the
+ * outer bucket (`|d| >= 2%` leaves neutral), and everything below the first edge is `ZERO`.
+ *
+ * `capacity <= 0` cannot produce a fraction, so callers pass `0` and land in `ZERO`. That is
+ * the honest answer — a region with no registered capacity has no percentage error — and it is
+ * distinct from "no delta", which `hasDelta` carries separately and which paints as nothing.
+ */
+export const getDeltaBucketNormalized: (fraction: number) => DELTA_BUCKET = (fraction) => {
+  const steps = DELTA_PERCENTAGE_EDGES.filter((edge) => Math.abs(fraction) >= edge).length;
+  if (steps === 0) return DELTA_BUCKET.ZERO;
+  const ladder =
+    fraction < 0
+      ? [DELTA_BUCKET.NEG1, DELTA_BUCKET.NEG2, DELTA_BUCKET.NEG3, DELTA_BUCKET.NEG4]
+      : [DELTA_BUCKET.POS1, DELTA_BUCKET.POS2, DELTA_BUCKET.POS3, DELTA_BUCKET.POS4];
+  return ladder[steps - 1];
+};
+
 export const createBucketObject: (
   deltaBucket: DELTA_BUCKET,
   deltaGroup: GspDeltaValue[]
 ) => Bucket = (deltaBucket: DELTA_BUCKET, deltaGroup: GspDeltaValue[]) => {
   let bucketColor = "bg-ocf-delta-500";
   let borderColor = "border-ocf-delta-500";
-  let textColor = "text-white";
-  let altTextColor = "text-ocf-gray-800";
+  let textColor = "text-content";
+  let altTextColor = "text-surface-panel";
   let text = deltaBucket.toString();
   let quantity = deltaGroup.length;
   let dataKey = DELTA_BUCKET[deltaBucket];
@@ -528,7 +503,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG4:
       bucketColor = "bg-ocf-delta-100";
       borderColor = "border-ocf-delta-100";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-100";
       lowerBound = -3000;
       upperBound = deltaBucket;
@@ -536,7 +511,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG3:
       bucketColor = "bg-ocf-delta-200";
       borderColor = "border-ocf-delta-200";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-200";
       lowerBound = DELTA_BUCKET.NEG4;
       upperBound = deltaBucket;
@@ -544,7 +519,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG2:
       bucketColor = "bg-ocf-delta-300";
       borderColor = "border-ocf-delta-300";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-300";
       lowerBound = DELTA_BUCKET.NEG3;
       upperBound = deltaBucket;
@@ -552,23 +527,23 @@ export const createBucketObject: (
     case DELTA_BUCKET.NEG1:
       bucketColor = "bg-ocf-delta-400";
       borderColor = "border-ocf-delta-400";
-      textColor = "text-white";
+      textColor = "text-content";
       altTextColor = "text-ocf-delta-400";
       lowerBound = DELTA_BUCKET.NEG2;
       upperBound = deltaBucket;
       break;
     case DELTA_BUCKET.ZERO:
       bucketColor = "bg-ocf-delta-500";
-      borderColor = "border-white";
-      textColor = "text-white";
-      altTextColor = "text-ocf-gray-800";
+      borderColor = "border-content";
+      textColor = "text-content";
+      altTextColor = "text-surface-panel";
       lowerBound = DELTA_BUCKET.NEG1;
       upperBound = DELTA_BUCKET.POS1;
       break;
     case DELTA_BUCKET.POS1:
       bucketColor = "bg-ocf-delta-600";
       borderColor = "border-ocf-delta-600";
-      textColor = "text-white";
+      textColor = "text-content";
       altTextColor = "text-ocf-delta-600";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS2;
@@ -576,7 +551,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.POS2:
       bucketColor = "bg-ocf-delta-700";
       borderColor = "border-ocf-delta-700";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-700";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS3;
@@ -584,7 +559,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.POS3:
       bucketColor = "bg-ocf-delta-800";
       borderColor = "border-ocf-delta-800";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-800";
       lowerBound = deltaBucket;
       upperBound = DELTA_BUCKET.POS4;
@@ -592,7 +567,7 @@ export const createBucketObject: (
     case DELTA_BUCKET.POS4:
       bucketColor = "bg-ocf-delta-900";
       borderColor = "border-ocf-delta-900";
-      textColor = "text-black";
+      textColor = "text-content-on-accent";
       altTextColor = "text-ocf-delta-900";
       lowerBound = deltaBucket;
       upperBound = 3000;

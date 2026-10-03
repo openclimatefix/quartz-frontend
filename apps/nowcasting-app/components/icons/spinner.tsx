@@ -8,7 +8,7 @@ const Spinner: React.FC<SpinnerProps> = ({ className = "" }) => {
   return (
     <svg
       role="status"
-      className={`w-8 h-8 mr-2 text-ocf-gray-700 m-auto self-center animate-spin dark:text-gray-600 fill-white ${className}`}
+      className={`w-8 h-8 mr-2 text-content-muted m-auto self-center animate-spin dark:text-content-secondary fill-content ${className}`}
       viewBox="0 0 100 101"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

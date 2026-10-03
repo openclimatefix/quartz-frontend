@@ -12,19 +12,20 @@ interface StatusBannerProps {
  * Per-level presentation. Full class strings, not interpolated fragments, so Tailwind's
  * scanner actually sees them.
  *
- * The rows share one dark background and are separated by a coloured left edge rather than
- * by a coloured fill: with several stacked at the top of a dark dashboard, full-bleed
+ * The rows share one sunken background and are separated by a coloured left edge rather than
+ * by a coloured fill: with several stacked at the top of the dashboard, full-bleed
  * severity colours read as an alert wall and swamp the chart below.
  */
 const LEVEL_STYLES: Record<Exclude<StatusLevel, "ok">, { emoji: string; accent: string }> = {
-  error: { emoji: "🚨", accent: "border-red-500" },
-  warning: { emoji: "⚠️", accent: "border-ocf-yellow-500" },
+  error: { emoji: "🚨", accent: "border-status-alert" },
+  warning: { emoji: "⚠️", accent: "border-status-warn" },
   // A check that cannot report on itself is worth surfacing, quietly — a grey edge says
   // "we don't know" without claiming something is broken.
-  unknown: { emoji: "❓", accent: "border-mapbox-black-400" },
-  // A deliberate notice with nothing degraded — planned maintenance, a heads-up. Blue and
-  // informational on purpose: reusing the warning yellow would cry wolf.
-  info: { emoji: "ℹ️", accent: "border-ocf-blue-500" }
+  unknown: { emoji: "❓", accent: "border-content-muted" },
+  // A deliberate notice with nothing degraded — planned maintenance, a heads-up. Reusing the
+  // warning colour would cry wolf. There is no informational role colour yet, so this is the
+  // brighter neutral, set apart from `unknown` by tone alone.
+  info: { emoji: "ℹ️", accent: "border-content-secondary" }
 };
 
 const StatusBanner = ({ statuses }: StatusBannerProps) => {
@@ -45,7 +46,7 @@ const StatusBanner = ({ statuses }: StatusBannerProps) => {
         return (
           <div
             key={statusDismissalId(status)}
-            className={`flex items-center gap-3 border-l-4 bg-mapbox-black px-4 py-2 text-ocf-gray-600 ${accent}`}
+            className={`flex items-center gap-3 border-l-4 bg-surface-sunken px-4 py-2 text-content-secondary ${accent}`}
           >
             {/* Left-aligned, not centred like the old single banner: the severity colour is
                 carried by the left edge, and a message centred half a screen away from it does
@@ -63,7 +64,7 @@ const StatusBanner = ({ statuses }: StatusBannerProps) => {
             <button
               type="button"
               onClick={() => dismiss(status)}
-              className="shrink-0 p-1 text-ocf-gray-800 hover:text-ocf-gray-600"
+              className="shrink-0 p-1 text-content-muted hover:text-content-secondary"
               aria-label={`Dismiss ${productLabel(status.key, status.name)} status message`}
             >
               <CrossInlineSmall title="Dismiss" />

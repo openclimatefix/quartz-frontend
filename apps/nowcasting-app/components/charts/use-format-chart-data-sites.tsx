@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { get30MinNow } from "../helpers/globalState";
+import { getCursorNow } from "../helpers/globalState";
 import { Site, SiteForecastValue, SitePvActual, SitePvForecast } from "../types";
 import { convertToLocaleDateString, formatISODateString, getDeltaBucket } from "../helpers/utils";
 import { ChartData } from "./remix-line";
@@ -56,7 +56,7 @@ const useFormatChartDataSites = ({
 }) => {
   const data = useMemo(() => {
     if ((pvForecastData || pvActualData) && timeTrigger) {
-      const timeNow = formatISODateString(get30MinNow());
+      const timeNow = formatISODateString(getCursorNow());
       const chartMap: Record<string, ChartData> = {};
       const siteIds: string[] = allSitesData?.map((site) => site.site_uuid) || [];
 
