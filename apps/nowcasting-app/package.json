@@ -14,7 +14,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cypress": "cypress run --browser chrome",
-    "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts"
+    "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts",
+    "build:geo": "node scripts/build-geo-assets.mjs"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",

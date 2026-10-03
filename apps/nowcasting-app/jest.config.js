@@ -45,7 +45,7 @@ module.exports = {
   workerIdleMemoryLimit: "2GB",
 
   // Keep the haste map crawl off build output and fixtures. `data/` alone is
-  // 133MB of GeoJSON and `.next/` is ~1.7GB — none of it is imported by a test,
+  // tens of MB of GeoJSON and `.next/` is ~1.7GB — none of it is imported by a test,
   // and none of it needs stat'ing on every run.
   modulePathIgnorePatterns: [
     "<rootDir>/.next/",
