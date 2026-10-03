@@ -402,13 +402,6 @@ export const axiosFetcherAuth = async (url: RequestInfo | URL) => {
   }
 };
 
-// this is the previous fetcher
-export const axiosFetcher = (url: string) => {
-  return axios(url).then(async (res) => {
-    return res.data;
-  });
-};
-
 // round it up to the 'yMax_levels' so that the y major ticks look right.
 export const getRoundedTickBoundary = (
   yMax: number,

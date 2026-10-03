@@ -4,13 +4,17 @@
  *
  * Drives the real `useProductStatuses` and `StatusBanner` against one `/products` payload in
  * which every product has an incident, so a row that shows was kept by the page's product
- * list and a row that does not was dropped by it. `useStatus` reads the Status API URL when
- * it is first loaded, so it is required after the variable is set.
+ * list and a row that does not was dropped by it. The payload is served by MSW over the
+ * real `fetchJson`, so the transport is under test too, not mocked away.
  */
-import { describe, expect, jest, test } from "@jest/globals";
+import { afterAll, afterEach, beforeAll, describe, expect, test } from "@jest/globals";
 import { render, screen, waitFor } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
+import { setupServer } from "msw/node";
 import { SWRConfig } from "swr";
 import type { ProductsResponse, ProductStatus } from "../types";
+import StatusBanner from "../layout/StatusBanner";
+import { statusProductsFor, useProductStatuses } from "./useStatus";
 
 const incident = (key: string, name: string): ProductStatus => ({
   key,
@@ -34,14 +38,19 @@ const PAYLOAD: ProductsResponse = {
   lastUpdated: "2026-09-29T09:00:00Z"
 };
 
-jest.mock("../helpers/utils", () => ({
-  __esModule: true,
-  axiosFetcher: () => Promise.resolve(PAYLOAD)
-}));
+const STATUS_URL = "https://status.test";
 
-process.env.NEXT_PUBLIC_STATUS_URL = "https://status.test";
-const { statusProductsFor, useProductStatuses } = require("./useStatus");
-const StatusBanner = require("../layout/StatusBanner").default;
+const server = setupServer(http.get(`${STATUS_URL}/products`, () => HttpResponse.json(PAYLOAD)));
+
+beforeAll(() => {
+  process.env.NEXT_PUBLIC_STATUS_URL = STATUS_URL;
+  server.listen({ onUnhandledRequest: "error" });
+});
+afterEach(() => server.resetHandlers());
+afterAll(() => {
+  delete process.env.NEXT_PUBLIC_STATUS_URL;
+  server.close();
+});
 
 const Banner = ({ isSitesChart, enabled }: { isSitesChart: boolean; enabled: string[] }) => {
   const statuses = useProductStatuses(statusProductsFor(isSitesChart, enabled));

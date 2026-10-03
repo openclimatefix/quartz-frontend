@@ -14,9 +14,9 @@
  * control: the app still works in all of them, because focus comes from the cookie rather
  * than the manifest.
  *
- * Newest is the status lamp. Its rendering is unreachable in production today, because
- * `useCountryStatus` is a stub — so the non-ok cases are driven here by mocking the hook, and
- * these tests are the only thing keeping that path honest until the endpoint exists.
+ * Newest is the status lamp. `useCountryStatus` reads it off the Status API's `/products`
+ * payload (hooks/data/use-country-status.ts, tested there); here the hook is mocked so these
+ * tests drive the rendering of each level directly, without a second MSW server.
  *
  * Everything is driven off the recorded `/countries` fixture — the same payload the contract
  * test validates against `v1-api.json`.
@@ -46,10 +46,9 @@ jest.mock("@auth0/nextjs-auth0/client", () => ({
   useUser: () => ({ user: mockUser, isLoading: false, error: undefined })
 }));
 
-// `useCountryStatus` returns "ok" for everything (see its doc comment — there is no
-// per-country status endpoint yet). Mocking it is the only way to reach the non-ok rendering,
-// and driving it from here is what stops that rendering being dead code nobody notices has
-// rotted before the endpoint lands.
+// `useCountryStatus` is mocked so each level's rendering can be driven directly. Its own
+// suite covers the Status API path; this one covers what the toggle does with the answer.
+// `ok = no lamp` is a product decision: an ok country gets no disc and no tooltip.
 let mockStatuses: Record<string, { level: string; message: string | null }> = {};
 const OK_STATUS = { level: "ok", message: null };
 jest.mock("../../../hooks/data/use-country-status", () => ({
