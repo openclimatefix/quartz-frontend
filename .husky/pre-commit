@@ -1,9 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+# Runs eslint --fix on staged files only; CI runs typecheck, lint and the full jest suite.
 cd apps/nowcasting-app || exit
-yarn lint
-
-# Now only runs unit tests, Cypress tests are run in the CI pipeline on PRs
-yarn test
-
+npx lint-staged

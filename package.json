@@ -21,8 +21,5 @@
     "husky": ">=6",
     "lint-staged": ">=10",
     "turbo": "^1.0.26"
-  },
-  "lint-staged": {
-    "**/*.(t|j)(s|sx)": "eslint --cache --fix"
   }
 }
