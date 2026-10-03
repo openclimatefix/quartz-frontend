@@ -1,9 +1,38 @@
 import React, { useRef, useEffect } from "react";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, {
+  getPlaybackStrideMinutes,
+  snapCursorToFocusedGrid
+} from "../helpers/globalState";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
-import { addMinutesToISODate, formatISODateString } from "../helpers/utils";
-import Ui from "./ui";
+import { addMinutesToISODate } from "../helpers/utils";
+import Ui, { SpeedControl } from "./ui";
 
+/**
+ * Phase 6 followup, Track P: the footer's play control, and the two-way mutual exclusion with
+ * "following now".
+ *
+ * There are two genuinely different ways the cursor moves on its own:
+ *
+ * - **playing** — this component walks it forward a slot at a time on its own `setInterval`,
+ *   with `isPlaying` in global state as the flag other components read;
+ * - **following now (live)** — `use-and-update-selected-time`'s 60-second interval pins the
+ *   cursor to the current slot. Its existence *is* the mode: it is recorded in the `intervals`
+ *   global (see `scrub-track.tsx`'s `isLive`), and `stopTime`/`resetTime` stop and start it.
+ *
+ * They must never both be true. `play()` already had one direction — it calls `stopTime()`
+ * before starting. The direction that was missing is the reverse: resuming following (the
+ * footer's `now` button, via `resetTime`) must stop playback. Rather than inventing a third
+ * notion of "moving on its own", this reads the same `intervals` global `scrub-track.tsx`
+ * already reads: a transition to a non-empty `intervals` array while `isPlaying` is true means
+ * following just resumed, and it wins — see the effect below.
+ *
+ * Speed control: `playbackSpeed` (1x/2x/4x, global state so both this instance and `/sites`'s
+ * agree) divides the interval's period, not the stride — `getCursorCadenceMinutes()` still
+ * decides how far each tick moves the cursor, so a faster speed plays the same window sooner
+ * rather than skipping slots. Changing it while playing must be felt immediately, so it does
+ * not go through `play()`: a separate effect keyed on `speed` tears down and rebuilds the
+ * running interval at the new period, and is a no-op while paused.
+ */
 type PlayButtonProps = {
   endTime: string;
   startTime: string;
@@ -11,26 +40,44 @@ type PlayButtonProps = {
 
 const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
   const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
+  const [speed, setSpeed] = useGlobalState("playbackSpeed");
   const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
-  const [view] = useGlobalState("view");
+  const [intervals] = useGlobalState("intervals");
   const { stopTime } = useStopAndResetTime();
   const intervalRef = useRef<any>();
+
+  // The one step function, shared by `play()`'s first interval and the speed-change effect's
+  // replacement one, so the two can never drift into stepping differently.
+  const tick = () => {
+    setSelectedISOTime((selectedISOTime) => {
+      // At or past the end, loop to the start. Compared as times: the stride is the finest
+      // enabled cadence, so it need not step onto `endTime` exactly, and an equality check let
+      // it walk past the end — where the chart reset it to now.
+      if (!selectedISOTime || Date.parse(selectedISOTime) >= Date.parse(endTime)) {
+        return startTime;
+      }
+      // Step by the *finest* cadence across the countries drawn, not the focused country's —
+      // playback is the one case where nobody is aiming at a step, so a coarse focus must not
+      // play a fine country at half its resolution. See `playbackStrideMinutes`. Speed changes
+      // the period between ticks, never this stride.
+      const next = addMinutesToISODate(selectedISOTime, getPlaybackStrideMinutes());
+      return Date.parse(next) > Date.parse(endTime) ? endTime : next;
+    });
+  };
+
   const pause = () => {
     clearInterval(intervalRef.current);
     setIsPlaying(false);
+    // Playback may have left the cursor between the focused country's slots. Stepping by hand
+    // expects that grid — the arrow keys and the scrub handle both move on it — so hand it back
+    // on the way out rather than leaving the next manual step to start from an odd instant.
+    snapCursorToFocusedGrid();
   };
 
   const play = () => {
     stopTime();
     setIsPlaying(true);
-    intervalRef.current = setInterval(() => {
-      setSelectedISOTime((selectedISOTime) => {
-        if (formatISODateString(selectedISOTime || "") === formatISODateString(endTime)) {
-          return startTime;
-        }
-        return addMinutesToISODate(selectedISOTime || "", 30);
-      });
-    }, 1000);
+    intervalRef.current = setInterval(tick, 1000 / speed);
   };
 
   useEffect(() => {
@@ -39,18 +86,68 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
     }
   }, [isPlaying]);
 
-  // Pause when tab changes
+  // The bug this task is mostly about: a speed change during playback has to reach the
+  // *running* interval, not just the next `play()`. Rebuilding here — rather than, say, a
+  // `setInterval`-with-cleared-remainder trick — is the same trade `play()`/`pause()` already
+  // make: the tick after a change lands a full new period later, not part-way through the old
+  // one, which is the simpler contract for a control someone can click repeatedly. A no-op
+  // while paused because there is no running interval to rebuild, and `setSpeed` never touches
+  // `isPlaying` or the cursor itself.
+  useEffect(() => {
+    if (isPlaying) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(tick, 1000 / speed);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speed]);
+
+  // The direction `play()` doesn't cover: following resumed (the `now` button's `resetTime`
+  // started a fresh interval) while this was mid-playback. Pausing here — rather than, say,
+  // `resetTime` reaching into `isPlaying` itself — keeps the two modes coordinated through the
+  // one piece of state that already names "following", instead of adding a second wire between
+  // them.
+  useEffect(() => {
+    if (intervals.length > 0 && isPlaying) {
+      pause();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intervals]);
+
+  // The interval is this instance's own. Without this it outlives an unmount (the chart swap
+  // between Forecast and Delta) and keeps walking the cursor with nothing left to stop it.
+  useEffect(() => {
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  // Pause on mount. Used to be keyed on `view`, back when the three dashboard views were
+  // mounted-but-hidden and this component stayed mounted across a tab switch — the dependency
+  // was what caught the "switched away while playing" case. Every owner of `PlayButton` now
+  // fully unmounts and remounts on the equivalent transitions (`pages/index.tsx` swaps
+  // `PvRemixChart`/`DeltaViewChart` on `comparison`, and `/sites` is a real route change), so
+  // this instance is always freshly mounted when it matters and an empty dependency array is
+  // the same edge, not a behaviour change.
   useEffect(() => {
     pause();
-  }, [view]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <Ui
-      onClick={() => {
-        isPlaying ? pause() : play();
-      }}
-      isPlaying={isPlaying}
-    ></Ui>
+    // Grows downward only, off the button's own top edge — `chart-scrubber.tsx`'s wrapper
+    // aligns that edge with the scrub track's strip (`self-start`), and a row alongside would
+    // push the speed control out to the side and off that line.
+    //
+    // `items-center` because the speed row is the wider of the two: the column is as wide as
+    // that row, and the button centres over it. `w-max` stops the column being sized by the
+    // flex row it sits in and letting the speeds spill sideways over the track's tick labels.
+    <div className="flex w-max flex-col items-center">
+      <Ui
+        onClick={() => {
+          isPlaying ? pause() : play();
+        }}
+        isPlaying={isPlaying}
+      ></Ui>
+      <SpeedControl speed={speed} onChange={setSpeed} />
+    </div>
   );
 };
 

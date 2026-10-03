@@ -1,0 +1,13 @@
+{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "query",
+        "region_type"
+      ],
+      "msg": "Field required",
+      "input": null
+    }
+  ]
+}

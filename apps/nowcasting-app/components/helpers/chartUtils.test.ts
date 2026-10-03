@@ -1,6 +1,13 @@
-import { getAvailablePLevels, getTicks, getZoomYMax } from "./chartUtils";
+import {
+  getAvailablePLevels,
+  getTicks,
+  getUtcHalfHourIndex,
+  getZoomYMax,
+  niceQuarterStep
+} from "./chartUtils";
 import { ChartData } from "../charts/remix-line";
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, test } from "@jest/globals";
+import { DateTime } from "luxon";
 
 describe("getTicks", () => {
   it("should return ticks for a yMax divisible by 3", () => {
@@ -186,5 +193,63 @@ describe("getAvailablePLevels", () => {
 
   it("should return an empty array when no pair has both bounds present", () => {
     expect(getAvailablePLevels({}, pLevels)).toEqual([]);
+  });
+});
+
+//////////////////////////////////////
+// getUtcHalfHourIndex //
+//////////////////////////////////////
+//
+// A 0-based positional index into data bucketed by UTC time-of-day, which is how
+// `data/national_metrics.json` (the seasonal norms) is generated.
+
+describe("getUtcHalfHourIndex", () => {
+  const index = (iso: string, zone = "utc") =>
+    getUtcHalfHourIndex(DateTime.fromISO(iso, { zone, setZone: true }) as DateTime);
+
+  test.each([
+    ["2025-01-15T00:00:00Z", 0],
+    ["2025-01-15T00:29:59Z", 0],
+    ["2025-01-15T00:30:00Z", 1],
+    ["2025-01-15T12:00:00Z", 24],
+    ["2025-01-15T12:30:00Z", 25], // the June peak slot in national_metrics.json
+    ["2025-01-15T23:30:00Z", 47],
+    ["2025-01-15T23:59:59Z", 47],
+    // BST: still counted from UTC midnight, so the numbers do not move
+    ["2025-07-15T00:00:00Z", 0],
+    ["2025-07-15T12:30:00Z", 25],
+    ["2025-07-15T23:30:00Z", 47]
+  ])("%s is index %i", (iso, expected) => {
+    expect(index(iso)).toBe(expected);
+  });
+
+  test("is 0..47 on both clock-change days — a UTC day is always 48 slots", () => {
+    for (const day of ["2025-03-30", "2025-10-26", "2026-03-29", "2026-10-25"]) {
+      expect(index(`${day}T00:00:00Z`)).toBe(0);
+      expect(index(`${day}T23:30:00Z`)).toBe(47);
+    }
+  });
+
+  test.each(["America/Los_Angeles", "Australia/Sydney", "Europe/London"])(
+    "ignores the zone the caller's DateTime carries (%s)",
+    (zone) => {
+      const dt = DateTime.fromISO("2025-07-15T12:30:00Z").setZone(zone);
+      expect(getUtcHalfHourIndex(dt as DateTime)).toBe(25);
+    }
+  );
+});
+
+describe("niceQuarterStep", () => {
+  test.each([
+    [16000, 4000],
+    [12500, 4000],
+    [12000, 3000],
+    [14000, 4000],
+    [250, 75],
+    [9, 2.5],
+    [0, 1]
+  ])("%d → step %d", (max, step) => {
+    expect(niceQuarterStep(max)).toBe(step);
+    if (max > 0) expect(niceQuarterStep(max) * 4).toBeGreaterThanOrEqual(max);
   });
 });

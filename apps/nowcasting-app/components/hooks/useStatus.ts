@@ -3,11 +3,13 @@ import { ProductStatus, ProductsResponse, StatusLevel } from "../types";
 import { axiosFetcher } from "../helpers/utils";
 import {
   KNOWN_LEVELS,
-  entitledStatusProducts,
+  SITES_STATUS_PRODUCT,
+  StatusProductKey,
   isKnownProduct,
   productOrder,
   severityRank
 } from "../../config/statusProducts";
+import { getCountryConfig } from "../../config/countries";
 
 /**
  * The status banner's one and only backend.
@@ -66,13 +68,33 @@ const normaliseProduct = (product: ProductStatus): ProductStatus => ({
 });
 
 /**
- * Every product status this user is entitled to see, normalised. `ok` rows are included —
- * filtering them out is the banner's call, not the transport's.
+ * Which products the banner reports on for the page in view.
+ *
+ * The sites page is about assets, so it shows `asset-solar` alone. Everywhere else it is
+ * each enabled country's `product`, in enabled order; a country without one, or whose product
+ * the status registry does not know (DE's `de-solar` today), or a code this build has no
+ * config for, adds nothing. For a regular user the enabled set is
+ * every country they are entitled to, so this is "all my countries' statuses".
+ */
+export const statusProductsFor = (
+  isSitesChart: boolean,
+  enabledCountries: string[]
+): StatusProductKey[] =>
+  isSitesChart
+    ? [SITES_STATUS_PRODUCT]
+    : enabledCountries.flatMap((code) => {
+        const product = getCountryConfig(code)?.product;
+        return product && isKnownProduct(product) ? [product] : [];
+      });
+
+/**
+ * The statuses of `shownProducts` (see `statusProductsFor`), normalised. `ok` rows are
+ * included — filtering them out is the banner's call, not the transport's.
  *
  * Returns `[]` when `NEXT_PUBLIC_STATUS_URL` is unset (the SWR key goes `null`, so nothing
  * is fetched) — the banner then renders nothing rather than the app erroring.
  */
-export const useProductStatuses = (): ProductStatus[] => {
+export const useProductStatuses = (shownProducts: StatusProductKey[]): ProductStatus[] => {
   const { data } = useSWR<ProductsResponse, Error>(
     STATUS_URL ? `${STATUS_URL}/products` : null,
     axiosFetcher,
@@ -93,17 +115,16 @@ export const useProductStatuses = (): ProductStatus[] => {
   const products = data?.products;
   if (!Array.isArray(products)) return [];
 
-  // The entitlement filter has exactly one home. Today it lets every *registered* product
-  // through; when the Europe UI locks it down to the token's `products` claim, this is the
-  // only caller that has to change.
+  // The one request still fetches every product; the page's list decides which are kept.
+  // This is the only filter: nothing here reads the token's `products` claim.
   //
-  // A product the API serves but config/statusProducts.ts does not know about is dropped
-  // rather than shown. That is the right way round once entitlement is real — we should
-  // never render a status we cannot attribute an entitlement to — and the cost is that a
-  // newly launched product needs one line of config before its banner appears.
-  const entitled = entitledStatusProducts() as string[];
+  // A product the API serves but config/statusProducts.ts does not know about is dropped.
+  // We should never render a status we cannot attribute to a country or to the sites page,
+  // and the cost is that a newly launched product needs one line of config before its
+  // banner appears.
+  const shown = shownProducts as string[];
   return products
-    .filter((product) => isKnownProduct(product.key) && entitled.includes(product.key))
+    .filter((product) => isKnownProduct(product.key) && shown.includes(product.key))
     .map(normaliseProduct);
 };
 

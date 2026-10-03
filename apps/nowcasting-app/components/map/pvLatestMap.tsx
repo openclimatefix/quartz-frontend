@@ -1,61 +1,156 @@
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
-import mapboxgl, { Expression, LngLatLike } from "mapbox-gl";
+import mapboxgl, { LngLatLike } from "mapbox-gl";
 
-import { FailedStateMap, LoadStateMap, Map, MeasuringUnit } from "./";
-import { ActiveUnit, NationalAggregation, SelectedData } from "./types";
-import { MAX_POWER_GENERATED, VIEWS } from "../../constant";
-import useGlobalState from "../helpers/globalState";
-import { formatISODateStringHuman } from "../helpers/utils";
-import { CombinedData, CombinedErrors, CombinedLoading, CombinedValidating } from "../types";
+import { FailedStateMap, LoadStateMap, Map } from "./";
+import { ActiveUnit, MAP_TITLE_MAIN } from "./types";
+import useGlobalState, { setGlobalState } from "../helpers/globalState";
+import { useFocusedCountry } from "../../hooks/data";
+import { getCountryConfig } from "../../config/countries";
+import {
+  displayDecimalsFor,
+  displayUnitFor,
+  NO_VALUE,
+  toDisplayPower
+} from "../../lib/domain/power-unit";
+import { loadGeoAsset } from "../../lib/geo/assets";
 import { theme } from "../../tailwind.config";
-import ColorGuideBar from "./color-guide-bar";
 import {
   getActiveUnitFromMap,
   getBoundingBoxFromPoint,
   safelyUpdateMapData,
   setActiveUnitOnMap
 } from "../helpers/mapUtils";
-import { components } from "../../types/quartz-api";
-import { generateGeoJsonForecastData } from "../helpers/data";
-import boundariesData from "../../data/ng_constraint_boundaries.json";
-import dynamic from "next/dynamic";
 import throttle from "lodash/throttle";
 import Spinner from "../icons/spinner";
 import { FeatureCollection } from "geojson";
 import * as turf from "@turf/turf";
+import useEnabledCountryMapData from "./use-enabled-country-map-data";
+import {
+  PV_SOURCE_ID,
+  applyFeatureStates,
+  deltaFillColorExpression,
+  deltaFillOpacityExpression,
+  fillColorExpression,
+  fillOpacityExpression
+} from "./feature-state";
+import { FEATURE_KEY_PROPERTY, REGION_COUNTRY_PROPERTY } from "./country-features";
+import { coverageGaps } from "./country-coverage";
+import type { MapFeatureState } from "../helpers/data";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const orange = theme.extend.colors["ocf-orange"].DEFAULT;
 
-const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
+/**
+ * What the PV source is created with, before any boundary file has arrived.
+ *
+ * Geometry became asynchronous in Phase 5, and the source is added **unconditionally** with
+ * this rather than being created once geometry exists. That is not defensiveness: layer
+ * order in Mapbox is creation order, and `map.tsx` inserts the satellite raster layers
+ * *beneath* whichever of the PV layers already exists (`getSatelliteBeforeId`). A source
+ * created conditionally means the PV layers are created late, after the satellite layers,
+ * and the yellow forecast fill ends up under the clouds instead of over them — intermittent,
+ * dependent on network timing, and invisible until someone turns clouds on.
+ *
+ * Module-level so the identity is stable: `appliedGeometryRef` compares by identity to
+ * decide whether `setData` is needed.
+ */
+const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features: [] };
+
+/** Used for the top-edge test until the popup has been on screen once and can be measured. */
+export const POPUP_HEIGHT_ESTIMATE_PX = 160;
+
+/**
+ * Which corner of the popup sits on the pointer.
+ *
+ * The visible map is the strip between the floating chart's right edge and the map's right
+ * edge — the same area Reset Zoom frames into (`frame-countries.ts`). In the left half of that
+ * strip, or under the chart itself, the popup opens to the right of the pointer; in the right
+ * half, to the left, as it always has. Near the top it opens downwards so it stays on screen.
+ *
+ * Mapbox's own automatic anchor (option omitted) is not enough: it only flips when the popup
+ * would overflow the map container, and the container runs underneath the chart, so over the
+ * left of the strip it still opens up-left, under the chart.
+ *
+ * `chartRightPx` is in map-container pixels, 0 when there is no chart.
+ */
+export const popupAnchorFor = (
+  point: { x: number; y: number },
+  mapWidthPx: number,
+  chartRightPx: number,
+  popupHeightPx: number
+): mapboxgl.Anchor => {
+  const stripLeft = Math.max(0, Math.min(chartRightPx, mapWidthPx));
+  const side = point.x < (stripLeft + mapWidthPx) / 2 ? "left" : "right";
+  const edge = point.y < popupHeightPx ? "top" : "bottom";
+  return `${edge}-${side}`;
+};
+
+/** The chart's right edge in the map container's pixels, measured the way `map.tsx` does. */
+const chartRightInMap = (map: mapboxgl.Map): number => {
+  const chart = document.querySelector('[aria-label="Chart"]')?.getBoundingClientRect();
+  if (!chart || chart.width === 0) return 0;
+  return chart.right - map.getContainer().getBoundingClientRect().left;
+};
+
+/**
+ * Show the hover popup at the pointer without it ever being drawn unplaced.
+ *
+ * `trackPointer().addTo(map)` on a closed popup builds a fresh container with no transform
+ * (Mapbox only places a pointer-tracking popup from a mousemove it receives itself, and the
+ * listener it registers in `addTo` misses the event already being dispatched). The container
+ * sits at the map's top-left corner until the next mousemove. Placing it at `lngLat` first
+ * means `addTo` positions it, and `trackPointer` then takes over from that spot.
+ *
+ * An open popup that is already tracking is left alone: re-adding it would rebuild the
+ * container, unplaced again, on every call.
+ */
+export const showPopupAtPointer = (
+  popup: mapboxgl.Popup,
+  map: mapboxgl.Map,
+  lngLat: mapboxgl.LngLatLike,
+  anchor: mapboxgl.Anchor
+) => {
+  // Read by Mapbox on its next placement, which for a tracking popup is the next mousemove.
+  popup.options.anchor = anchor;
+  const tracking = popup.getElement()?.classList.contains("mapboxgl-popup-track-pointer");
+  if (popup.isOpen() && tracking) return;
+  popup.setLngLat(lngLat);
+  if (!popup.isOpen()) popup.addTo(map);
+  popup.trackPointer();
+};
 
 type PvLatestMapProps = {
   className?: string;
-  combinedData: CombinedData;
-  combinedLoading: CombinedLoading;
-  combinedValidating: CombinedValidating;
-  combinedErrors: CombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
 
-const PvLatestMap: React.FC<PvLatestMapProps> = ({
-  className,
-  combinedData,
-  combinedLoading,
-  combinedValidating,
-  combinedErrors,
-  activeUnit,
-  setActiveUnit
-}) => {
+/**
+ * The dashboard's map — forecast fill or delta fill, one Mapbox instance either way.
+ *
+ * `deltaMap.tsx` used to be a second component, swapped in by `pages/index.tsx` when a
+ * comparison was selected. Each owned its own `<Map>`, so every switch constructed a
+ * `new mapboxgl.Map`: the GL context, the source, the parsed boundary geometry and any decoded
+ * satellite frames were torn down and rebuilt, which is the flash Brad described. They were
+ * never two maps — they agreed on the data hook, the source id, all three layer ids and the
+ * fact that both already updated paint through `setPaintProperty`. They were one map with two
+ * paint configurations, split by history.
+ *
+ * So `comparison` selects the paint expressions and adds a line to the popup, and nothing else
+ * about the instance changes. What the merge buys beyond the flash is everything the delta view
+ * was missing by accident rather than by intent (contract §2 says delta "differs by *what the
+ * map's fill encodes*", which makes the rest accident by definition): clouds, the constraints
+ * overlay, the PV fill toggle and a free aggregation level all now work in both modes, because
+ * they belong to the instance rather than to the encoding.
+ */
+const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setActiveUnit }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
-  const [shouldUpdateMap, setShouldUpdateMap] = useState(false);
-  const [mapDataLoading, setMapDataLoading] = useState(true);
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const country = useFocusedCountry();
   const [showConstraints] = useGlobalState("showConstraints");
   const [showPvLayer] = useGlobalState("showPvLayer");
-  const [showMap, setShowMap] = useState(true);
+  // The one thing that differs between the two modes. `null` is the forecast fill; any preset
+  // is the delta fill (contract §2).
+  const [comparison] = useGlobalState("comparison");
+  const isDelta = comparison !== null;
 
   const showConstraintsRef = useRef(showConstraints);
   useEffect(() => {
@@ -64,115 +159,157 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  const getSelectedDataFromActiveUnit = (activeUnit: ActiveUnit) => {
-    switch (activeUnit) {
-      case ActiveUnit.MW:
-        return SelectedData.expectedPowerGenerationMegawattsRounded;
-      case ActiveUnit.percentage:
-        return SelectedData.expectedPowerGenerationNormalizedRounded;
-      case ActiveUnit.capacity:
-        return SelectedData.installedCapacityMw;
+  // Every ENABLED country, not just the focused one (contract §1/§3). One instance of the
+  // value pipeline per country, merged into one source; `loaders` are those instances and
+  // must be rendered. See `use-enabled-country-map-data.tsx`.
+  const {
+    featureStates,
+    geometry,
+    capacityByCountry,
+    observerLabelByCountry,
+    hasValues,
+    isLoading,
+    error,
+    loaders,
+    countryStatus
+  } = useEnabledCountryMapData(selectedISOTime);
+
+  // Publish the per-country gaps for the header's pills. Compared by content, because
+  // `countryStatus` is rebuilt on every cursor move and a fresh array would re-render the header
+  // each time. Cleared on unmount so a page without this map shows no stale pills.
+  const metric = isDelta ? "delta" : "value";
+  const gaps = coverageGaps(countryStatus, metric);
+  const gapsKey = gaps.map((g) => `${g.code}:${g.state}:${g.metric}`).join(",");
+  useEffect(() => {
+    setGlobalState("coverageGaps", gaps);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `gapsKey` is `gaps` by content
+  }, [gapsKey]);
+  useEffect(() => () => setGlobalState("coverageGaps", []), []);
+
+  // The network constraint overlay. Fetched rather than imported since Phase 5 — it was
+  // 430 KB of GeoJSON in the bundle of every page that imports this module, for a layer that
+  // is off by default. The URL is the registry's, so a country with no constraints file
+  // simply never fetches one.
+  const constraintsUrl = getCountryConfig(country)?.overlays.find(
+    (overlay) => overlay.id === "constraints"
+  )?.url;
+  const [boundariesData, setBoundariesData] = useState<FeatureCollection | undefined>(undefined);
+  useEffect(() => {
+    if (!constraintsUrl) {
+      setBoundariesData(undefined);
+      return;
     }
-  };
-  const [selectedDataName, setSelectedDataName] = useState(
-    getSelectedDataFromActiveUnit(activeUnit)
-  );
+    let cancelled = false;
+    loadGeoAsset<FeatureCollection>(constraintsUrl)
+      .then((data) => {
+        if (!cancelled) setBoundariesData(data);
+      })
+      // A missing overlay must not take the map down with it: the constraints layer is
+      // decoration over the forecast, and the forecast is the page.
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [constraintsUrl]);
+
+  // The last geometry and value set actually pushed to Mapbox. Geometry is handed to
+  // `setData` only when its identity changes — i.e. when the aggregation level or the region
+  // list moves, never when a value does. Values go out through `setFeatureState`.
+  const appliedGeometryRef = useRef<FeatureCollection | null>(null);
+  const appliedStatesRef = useRef<Map<string | number, MapFeatureState> | null>(null);
+  const statesRef = useRef(featureStates);
+  statesRef.current = featureStates;
+  const appliedPaintRef = useRef<unknown>(null);
+  // Set on every `addSource`/`setData`, cleared by the first `sourcedata` that reports the
+  // source loaded. `setData` is asynchronous and `isSourceLoaded` can still be true for the
+  // *previous* data for a tick, so an apply made immediately after it can succeed against
+  // geometry that is about to be replaced — and Mapbox drops the state when the new data
+  // lands. This forces exactly one re-apply per geometry load. Re-applying is idempotent.
+  const pendingGeometryReloadRef = useRef(false);
+  const constraintHandlersRef = useRef(false);
 
   useEffect(() => {
-    setMapDataLoading(true);
-    setSelectedDataName(getSelectedDataFromActiveUnit(activeUnit));
     // Add unit to map container so that it can be accessed by popup in the map event listeners
-    const map: HTMLDivElement | null = document.querySelector(`#Map-${VIEWS.FORECAST}`);
+    const map: HTMLDivElement | null = document.querySelector(`#Map-${MAP_TITLE_MAIN}`);
     if (map) {
       setActiveUnitOnMap(map, activeUnit);
     }
   }, [activeUnit]);
 
-  const latestForecastValue = 0;
-  const isNormalized = activeUnit === ActiveUnit.percentage;
+  // Capacity per country, not one figure: the "% of national" popup on an NL province must
+  // divide by NL's installed capacity, and with both countries drawn a single value would
+  // silently report NL regions as a percentage of GB.
+  const capacityByCountryRef = useRef(capacityByCountry);
+  capacityByCountryRef.current = capacityByCountry;
 
-  const forecastLoading = false;
-  const initForecastData =
-    combinedData?.allGspForecastData as components["schemas"]["OneDatetimeManyForecastValues"][];
-  const forecastError = combinedErrors?.allGspForecastError;
+  // Same shape, same reason as capacity above: the popup names the observer its "actual" came
+  // from, and that is a per-country fact. Through a ref because the popup handler is built
+  // once, on the first effect run, and closes over whatever it can see at that moment.
+  const observerLabelByCountryRef = useRef(observerLabelByCountry);
+  observerLabelByCountryRef.current = observerLabelByCountry;
 
-  // Show loading spinner when selectedISOTime changes
-  useEffect(() => {
-    if (!combinedData?.allGspForecastData) return;
-
-    setMapDataLoading(true);
-  }, [selectedISOTime]);
-
-  // Update map data when forecast data is loaded
-  useEffect(() => {
-    if (!initForecastData) return;
-
-    setShouldUpdateMap(true);
-  }, [
-    initForecastData,
-    combinedData,
-    combinedLoading,
-    combinedValidating,
-    selectedISOTime,
-    nationalAggregationLevel
-  ]);
-
-  // Hide loading spinner if there is an error to prevent infinite loading
-  useEffect(() => {
-    if (combinedErrors.allGspForecastError) {
-      setMapDataLoading(false);
-    }
-  }, [combinedErrors.allGspForecastError]);
+  // Same reason again: the popup handler is registered once, on the effect run that creates the
+  // fill layer, so which mode is showing has to reach it through a ref rather than a closure.
+  // The unit does not need one — it is read off the container's data attribute at hover time
+  // (`getActiveUnitFromMap`), which is what that attribute exists for.
+  const isDeltaRef = useRef(isDelta);
+  isDeltaRef.current = isDelta;
 
   // Toggle constraints visibility on map
   useEffect(() => {
     if (mapRef.current) {
-      safelyUpdateMapData(mapRef.current, (m) => {
-        if (m.getLayer("boundary-data")) {
-          m.setLayoutProperty("boundary-data", "visibility", showConstraints ? "visible" : "none");
-        }
-        if (m.getLayer("boundary-data-labels")) {
-          m.setLayoutProperty(
-            "boundary-data-labels",
-            "visibility",
-            showConstraints ? "visible" : "none"
-          );
-        }
-      });
+      // Its own update kind, so a data update deferred alongside it does not replace it.
+      safelyUpdateMapData(
+        mapRef.current,
+        (m) => {
+          if (m.getLayer("boundary-data")) {
+            m.setLayoutProperty(
+              "boundary-data",
+              "visibility",
+              showConstraints ? "visible" : "none"
+            );
+          }
+          if (m.getLayer("boundary-data-labels")) {
+            m.setLayoutProperty(
+              "boundary-data-labels",
+              "visibility",
+              showConstraints ? "visible" : "none"
+            );
+          }
+        },
+        "constraints"
+      );
     }
-  }, [showConstraints, mapRef]);
+  }, [showConstraints]);
 
-  const maxPower =
-    nationalAggregationLevel === NationalAggregation.GSP ? MAX_POWER_GENERATED : 5000;
-
-  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the opacity will be 0
-    0,
-    0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : maxPower,
-    1
-  ];
-
-  const generatedGeoJsonForecastData = useMemo(() => {
-    return generateGeoJsonForecastData(
-      initForecastData,
-      selectedISOTime,
-      combinedData,
-      undefined,
-      nationalAggregationLevel
-    );
-  }, [
-    combinedData.allGspForecastData,
-    combinedLoading.allGspForecastLoading,
-    combinedValidating.allGspForecastValidating,
-    selectedISOTime,
-    combinedData.allGspSystemData,
-    nationalAggregationLevel
-  ]);
+  // The two paint configurations, as one memo.
+  //
+  // Forecast: the ten-times MW bands belong to the client-side rollups (GB's DNO / NG zone).
+  // That is a branch on the level's *kind*, not on its name — and since each drawn country is
+  // on its own level it is a per-FEATURE fact rather than a per-map one, carried as feature
+  // state and read inside the expression. See `feature-state.ts`.
+  //
+  // Delta: the sequential ramp becomes a diverging one, and both expressions step on the same
+  // bucket field, so they are built from one flag and must be pushed together — setting only
+  // the colour would draw percentage hues at megawatt strengths.
+  //
+  // One object rather than two values so `appliedPaintRef` has a single identity to compare:
+  // with a second axis (the mode) feeding the same two expressions, guarding on the opacity
+  // alone would have missed any change that moved the colour and not the opacity.
+  const paint = useMemo(() => {
+    if (isDelta) {
+      // Capacity cannot reach here — `setComparison` moves the active unit off it when a
+      // comparison is selected, and `UnitToggle` greys it out for as long as one is. The
+      // `=== percentage` test therefore falls back to MW as a defensive default, not as a
+      // claim that capacity means megawatts.
+      const normalized = activeUnit === ActiveUnit.percentage;
+      return {
+        color: deltaFillColorExpression(normalized),
+        opacity: deltaFillOpacityExpression(normalized)
+      };
+    }
+    return { color: fillColorExpression(activeUnit), opacity: fillOpacityExpression(activeUnit) };
+  }, [isDelta, activeUnit]);
 
   // Create a popup, but don't add it to the map yet.
   const popup = useMemo(() => {
@@ -184,61 +321,62 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     });
   }, []);
 
-  const nationalCapacityMW = useMemo(() => {
-    if (!combinedData.allGspSystemData) return 0;
-
-    let totalCapacityMW = 0;
-    combinedData.allGspSystemData.forEach((gsp) => {
-      // Skip the national capacity
-      if (gsp.gspId === 0) return;
-
-      totalCapacityMW += gsp.installedCapacityMw || 0;
-    });
-    return totalCapacityMW;
-  }, [combinedData.allGspSystemData]);
-
   const addOrUpdateMapData = (map: mapboxgl.Map) => {
-    const geoJsonHasData =
-      generatedGeoJsonForecastData.forecastGeoJson.features.length > 0 &&
-      typeof generatedGeoJsonForecastData.forecastGeoJson?.features?.[0]?.properties
-        ?.expectedPowerGenerationMegawatts === "number";
-    if (!geoJsonHasData) {
-      console.log("geoJsonForecastData empty, trying again...");
-      setShouldUpdateMap(true);
-      return;
-    }
-    setShouldUpdateMap(false);
-
     //////////////////////////
     // FORECAST DATA LAYERS //
     //////////////////////////
-    const forecastSource = map.getSource("latestPV") as unknown as mapboxgl.GeoJSONSource;
+    const forecastSource = map.getSource(PV_SOURCE_ID) as unknown as mapboxgl.GeoJSONSource;
+
+    // Undefined geometry is the pre-arrival state, not an absence of data. It draws as an
+    // empty collection so the source and its three layers exist from the first frame.
+    const data = geometry ?? EMPTY_GEOMETRY;
 
     if (!forecastSource) {
-      const { forecastGeoJson } = generatedGeoJsonForecastData;
-      map.addSource("latestPV", {
+      map.addSource(PV_SOURCE_ID, {
         type: "geojson",
-        data: forecastGeoJson,
-        promoteId: "id"
+        data,
+        // The country-qualified key, not the bare region id: one source carries every enabled
+        // country and GB's `5` is not Germany's `5`. See `country-features.ts`.
+        promoteId: FEATURE_KEY_PROPERTY
       });
-    } else {
-      forecastSource.setData(generatedGeoJsonForecastData.forecastGeoJson);
+      appliedGeometryRef.current = data;
+      appliedStatesRef.current = null;
+      pendingGeometryReloadRef.current = true;
+    } else if (appliedGeometryRef.current !== data) {
+      // Geometry genuinely changed (the boundary file landed, the aggregation level moved, or
+      // the region list arrived). This is the only path that re-parses boundaries; a scrub
+      // tick never reaches it.
+      forecastSource.setData(data);
+      appliedGeometryRef.current = data;
+      appliedStatesRef.current = null;
+      pendingGeometryReloadRef.current = true;
     }
-    console.log("latestPV source set");
+
+    // Feature state is (re)applied whenever EITHER side moved — values or geometry. Clearing
+    // `appliedStatesRef` above is what makes the geometry side count: a value set that
+    // arrived while the boundary file was still in flight was applied to an empty source and
+    // silently dropped by Mapbox, and this is what puts it back. `applyFeatureStates`
+    // returning false (source not loaded yet) leaves the ref alone so the `sourcedata`
+    // handler below retries.
+    if (appliedStatesRef.current !== statesRef.current) {
+      if (applyFeatureStates(map, statesRef.current, appliedStatesRef.current)) {
+        appliedStatesRef.current = statesRef.current;
+      }
+    }
 
     const pvForecastLayer = map.getLayer("latestPV-forecast");
     if (!pvForecastLayer) {
       map.addLayer({
         id: "latestPV-forecast",
         type: "fill",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         layout: { visibility: "visible" },
         paint: {
-          "fill-color": yellow,
-          "fill-opacity": getFillOpacity(selectedDataName, isNormalized)
+          "fill-color": paint.color,
+          "fill-opacity": paint.opacity
         }
       });
-      console.log("pvForecastLayer added");
+      appliedPaintRef.current = paint;
 
       // Also add map event listeners but only the first time
       const popupFunction = throttle(
@@ -251,80 +389,194 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
           map.getCanvas().style.cursor = "pointer";
           const currentActiveUnit = getActiveUnitFromMap(map);
 
-          const properties = e.features?.[0].properties;
-          if (!properties) return;
+          const feature = e.features?.[0];
+          if (!feature) return;
+          const properties = feature.properties;
+          const state = (feature.state ?? {}) as Partial<MapFeatureState>;
+          const capacity = state.capacity ?? 0;
+
+          // Hoisted above the figures below, which now all need it: a hovered region's unit is
+          // its own country's (`config/countries.ts`), not the dashboard's focused one — the map
+          // can show several countries at once.
+          const featureCountry = String(properties?.[REGION_COUNTRY_PROPERTY] ?? "").toUpperCase();
+          const displayUnit = displayUnitFor(featureCountry);
+          const displayDecimals = displayDecimalsFor(displayUnit);
+
+          // "not published yet", "reported nothing" and "zero" are three different answers
+          // and the popup says which one it is rather than printing 0 for all three.
+          const forecastText =
+            state.dataState === "value"
+              ? toDisplayPower(state.power ?? 0, displayUnit).toFixed(displayDecimals)
+              : state.dataState === "no-data"
+              ? "no data"
+              : "awaiting";
+          const forecastPercentText =
+            state.dataState === "value" ? ((state.normalized ?? 0) * 100).toFixed(0) : forecastText;
+          const actualText = state.actual === null || state.actual === undefined ? NO_VALUE : "";
+
+          // What the left-hand number actually is. Falls back to "Actual" only while the
+          // manifest is still in flight — never as a permanent name for it, which is the whole
+          // point of the change.
+          const actualLabel = observerLabelByCountryRef.current[featureCountry] ?? "Actual";
+
+          // A group whose members have not all published an actual at this slot. Its `actual`
+          // and `power` cover different members, so set side by side they read as a shortfall
+          // that is not there. Delta mode is the comparison, so there the pair is the matched
+          // figures the delta is computed from. Forecast mode keeps `power`, the value the
+          // region is painted with. Both say how many members are in.
+          const membersCompared = state.membersCompared ?? 0;
+          const membersTotal = state.membersTotal ?? 0;
+          const partialCoverage = membersCompared > 0 && membersCompared < membersTotal;
+          const showMatched =
+            partialCoverage &&
+            isDeltaRef.current &&
+            typeof state.comparedActual === "number" &&
+            typeof state.comparedForecast === "number";
+          const comparedCapacity = state.comparedCapacity ?? 0;
+
           let actualValue = "";
           let forecastValue = "";
           let unit = "";
           if (currentActiveUnit === ActiveUnit.MW) {
-            // Map in MW mode
-            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
-              ? properties?.[SelectedData.actualPowerGenerationMegawatts].toFixed(0)
-              : "-";
-            forecastValue =
-              properties?.[SelectedData.expectedPowerGenerationMegawatts]?.toFixed(0) || 0;
-            unit = "MW";
+            actualValue = showMatched
+              ? toDisplayPower(state.comparedActual as number, displayUnit).toFixed(displayDecimals)
+              : actualText ||
+                toDisplayPower(state.actual as number, displayUnit).toFixed(displayDecimals);
+            forecastValue = showMatched
+              ? toDisplayPower(state.comparedForecast as number, displayUnit).toFixed(
+                  displayDecimals
+                )
+              : forecastText;
+            unit = displayUnit;
           } else if (currentActiveUnit === ActiveUnit.percentage) {
-            // Map in % mode
-            actualValue = properties?.[SelectedData.actualPowerGenerationMegawatts]
-              ? (
-                  Number(
-                    properties?.[SelectedData.actualPowerGenerationMegawatts] /
-                      properties?.[SelectedData.installedCapacityMw] || 0
-                  ) * 100
-                ).toFixed(0)
-              : "-";
-            forecastValue =
-              (
-                Number(properties?.[SelectedData.expectedPowerGenerationNormalized] || 0) * 100
-              ).toFixed(0) || "-";
+            if (showMatched) {
+              actualValue =
+                comparedCapacity > 0
+                  ? (((state.comparedActual as number) / comparedCapacity) * 100).toFixed(0)
+                  : NO_VALUE;
+              forecastValue =
+                comparedCapacity > 0
+                  ? (((state.comparedForecast as number) / comparedCapacity) * 100).toFixed(0)
+                  : NO_VALUE;
+            } else {
+              actualValue =
+                actualText ||
+                (capacity > 0
+                  ? (((state.actual as number) / capacity) * 100).toFixed(0)
+                  : NO_VALUE);
+              forecastValue = forecastPercentText;
+            }
             unit = "%";
           } else if (currentActiveUnit === ActiveUnit.capacity) {
-            // Map in Capacity mode
+            // This region's own country's national capacity, off the feature.
+            const nationalCapacity = capacityByCountryRef.current[featureCountry] ?? 0;
             actualValue =
-              (
-                (Number(properties?.[SelectedData.installedCapacityMw] || 0) / nationalCapacityMW) *
-                100
-              ).toFixed(1) || "-";
-            forecastValue = "-";
-            unit = "MW";
+              nationalCapacity > 0 ? ((capacity / nationalCapacity) * 100).toFixed(1) : NO_VALUE;
+            forecastValue = NO_VALUE;
+            // Dead weight in practice — this branch's own block below overwrites
+            // `actualAndForecastSection` with its "% of National" markup and never reads `unit`
+            // — but set honestly all the same rather than left as a stray "MW".
+            unit = displayUnit;
           }
 
-          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Actual / Forecast</span>
+          // Was "Actual / Forecast", which named neither of GB's two observers and so let the
+          // in-day estimate read as "the actual". The heading is the stream's own label now.
+          let actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">${actualLabel} / Forecast</span>
               <div>
-                <span class="">${actualValue}</span>  /  
-                <span class="text-ocf-yellow">${forecastValue}</span>  <span class="text-2xs text-mapbox-black-300">${unit}</span>
-              </div>`;
+                <span class="">${actualValue}</span>  /
+                <span class="text-solar">${forecastValue}</span>  <span class="text-2xs text-content-muted">${unit}</span>
+              </div>${
+                partialCoverage
+                  ? `<span class="text-2xs text-content-muted">${membersCompared} of ${membersTotal} regions reporting</span>`
+                  : ""
+              }`;
           if (currentActiveUnit === ActiveUnit.capacity) {
-            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-mapbox-black-300">% of National</span>
-            <div><span>${actualValue}</span> <span class="text-2xs text-mapbox-black-300">%</span></div>`;
+            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">% of National</span>
+            <div><span>${actualValue}</span> <span class="text-2xs text-content-muted">%</span></div>`;
           }
 
-          const popupContent = `<div class="flex flex-col min-w-[16rem] text-white">
+          // The delta line, in delta mode only.
+          //
+          // One popup rather than two — the merged map has one hover target, and the old delta
+          // popup showed *only* the difference, so reading a delta meant knowing neither number
+          // it was the difference of. This is the forecast popup plus a line, which is why the
+          // forecast mode is unchanged: the difference is only worth a row when the user has
+          // asked to see differences.
+          //
+          // No delta is a different statement from a delta of zero: a future slot, or a region
+          // whose forecast or observed value has not published, has nothing to compare.
+          // Reported in whichever unit the toggle is on, and only that one — showing both would
+          // be the safer-looking choice and the wrong one, since the point of the unit control
+          // is that the user has said which question they are asking.
+          let deltaSection = "";
+          if (isDeltaRef.current) {
+            const asPercentage = currentActiveUnit === ActiveUnit.percentage;
+            const deltaValueMw = asPercentage
+              ? (state.deltaNormalized ?? 0) * 100
+              : state.delta ?? 0;
+            const deltaValue = asPercentage
+              ? deltaValueMw
+              : toDisplayPower(deltaValueMw, displayUnit);
+            // GB's own delta has always read to one decimal in MW; that stays exactly as it was.
+            // GW needs `displayDecimalsFor`'s extra place, or a sub-GW swing rounds to "0.0".
+            const deltaDecimals = asPercentage ? 1 : displayUnit === "MW" ? 1 : displayDecimals;
+            const deltaBody = !state.hasDelta
+              ? `<span class="text-content-muted">no delta yet</span>`
+              : `<span class="font-bold">${
+                  deltaValue > 0
+                    ? `<span class="up-arrow"></span>`
+                    : `<span class="down-arrow"></span>`
+                }</span>
+                <span class="mr-1 ${
+                  deltaValue > 0 ? "text-ocf-delta-900" : "text-ocf-delta-100"
+                }">${deltaValue.toFixed(deltaDecimals)}</span><small class="text-xs">${
+                  asPercentage ? "% of capacity" : displayUnit
+                }</small>`;
+
+            // Which observed stream the delta is measured against, and in which direction. The
+            // order matters and is easy to get backwards (it was, on first writing): the value
+            // is `generationMw - forecastMw` (`helpers/data.ts`), so **positive means the actual
+            // came in above the forecast** — an under-forecast. Stated as the subtraction itself
+            // rather than as "vs", because "forecast vs actual" does not say which way a `+`
+            // points and the colour ramp cannot say it either.
+            const deltaCaption = observerLabelByCountryRef.current[featureCountry]
+              ? `${observerLabelByCountryRef.current[featureCountry]} &minus; forecast`
+              : "Difference";
+            deltaSection = `<div class="mt-1 flex items-center justify-between gap-3 border-t border-content/10 pt-1 text-xs">
+            <span class="text-2xs uppercase tracking-wide text-content-muted">${deltaCaption}</span>
+            <div>${deltaBody}</div>
+          </div>`;
+          }
+
+          const popupContent = `<div class="flex flex-col min-w-[16rem] text-content">
           <div class="flex justify-between gap-3 items-center mb-1">
-          <!-- TODO – remove gsp_id when done testing zones -->
-            <div class="text-sm font-semibold">${properties?.gspDisplayName}</div>
-            <div class="text-xs text-mapbox-black-300">${properties?.id} ${
-            properties?.GSPs || ""
-          }</div>
+            <div class="text-sm font-semibold">${state.label || ""}</div>
+            <div class="text-xs text-content-muted">${properties?.GSPs || ""}</div>
           </div>
           <div class="flex justify-between items-center">
-            
+
             <div class="flex flex-col text-xs">
-              <span class="text-2xs uppercase tracking-wide text-mapbox-black-300">Capacity</span>
-              <div><span>${
-                properties?.[SelectedData.installedCapacityMw]
-              }</span> <span class="text-2xs text-mapbox-black-300">MW</span></div>
+              <span class="text-2xs uppercase tracking-wide text-content-muted">Capacity</span>
+              <div><span>${toDisplayPower(capacity, displayUnit).toFixed(
+                displayDecimals
+              )}</span> <span class="text-2xs text-content-muted">${displayUnit}</span></div>
             </div>
             <div class="flex flex-col text-xs items-end">
               ${actualAndForecastSection}
             </div>
           </div>
+          ${deltaSection}
         </div>`;
 
-          // Populate the popup and set its coordinates
-          // based on the feature found.
-          popup.setHTML(popupContent).trackPointer().addTo(map);
+          // Populate the popup, then place it at the pointer, opening away from the chart.
+          popup.setHTML(popupContent);
+          const anchor = popupAnchorFor(
+            e.point,
+            map.getContainer().clientWidth,
+            chartRightInMap(map),
+            popup.getElement()?.offsetHeight || POPUP_HEIGHT_ESTIMATE_PX
+          );
+          showPopupAtPointer(popup, map, e.lngLat, anchor);
         },
         32,
         {}
@@ -333,43 +585,47 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
 
       map.on("mouseleave", "latestPV-forecast", () => {
         map.getCanvas().style.cursor = "";
+        // A trailing throttled call would otherwise re-open the popup after the pointer left.
+        popupFunction.cancel();
         popup.remove();
       });
 
-      map.on("data", (e) => {
-        if (e.dataType === "source" && e.sourceId === "latestPV" && e.isSourceLoaded) {
-          setMapDataLoading(false);
-        }
-      });
-
+      // A GeoJSON source drops feature state set before it has finished loading, so re-apply
+      // once it reports loaded. Without this the very first paint after a geometry swap is
+      // unstyled and stays that way until the next value change — which, now that the
+      // boundary file arrives over the network well after the values do, is the normal case
+      // rather than a corner one.
       map.on("sourcedata", (e) => {
-        if (e.sourceId === "latestPV" && e.isSourceLoaded) {
-          setMapDataLoading(false);
+        if (e.sourceId !== PV_SOURCE_ID || !e.isSourceLoaded) return;
+        if (pendingGeometryReloadRef.current) {
+          pendingGeometryReloadRef.current = false;
+          appliedStatesRef.current = null;
+        }
+        if (appliedStatesRef.current === statesRef.current) return;
+        if (applyFeatureStates(map, statesRef.current, appliedStatesRef.current)) {
+          appliedStatesRef.current = statesRef.current;
         }
       });
-    } else {
-      if (generatedGeoJsonForecastData && forecastSource) {
-        const currentActiveUnit = getActiveUnitFromMap(map);
-        const isNormalized = currentActiveUnit === ActiveUnit.percentage;
-        forecastSource?.setData(generatedGeoJsonForecastData.forecastGeoJson);
-        map.setPaintProperty(
-          "latestPV-forecast",
-          "fill-opacity",
-          getFillOpacity(selectedDataName, isNormalized)
-        );
-        console.log("pvForecastLayer updated", generatedGeoJsonForecastData.forecastGeoJson);
-      } else {
-        console.log("pvForecastLayer not updated");
-      }
+    } else if (appliedPaintRef.current !== paint) {
+      // Only when the unit or the encoding changed. The `Map` wrapper re-invokes this on every
+      // render, so an unguarded pair of `setPaintProperty` calls would re-validate the style on
+      // every scrub tick for no reason.
+      //
+      // **This is the whole of switching between forecast and delta.** Two `setPaintProperty`
+      // calls against layers that already exist, over a source that is never touched — no new
+      // GL context, no re-parsed geometry, no re-decoded satellite frames, and the user's pan
+      // and zoom left exactly where they were.
+      map.setPaintProperty("latestPV-forecast", "fill-color", paint.color);
+      map.setPaintProperty("latestPV-forecast", "fill-opacity", paint.opacity);
+      appliedPaintRef.current = paint;
     }
-    console.log("pvForecastLayer set");
 
     const pvForecastBordersLayer = map.getLayer("latestPV-forecast-borders");
     if (!pvForecastBordersLayer) {
       map.addLayer({
         id: "latestPV-forecast-borders",
         type: "line",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         paint: {
           "line-color": "#ffffff",
           "line-width": 0.6,
@@ -383,14 +639,13 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       map.addLayer({
         id: "latestPV-forecast-select-borders",
         type: "line",
-        source: "latestPV",
+        source: PV_SOURCE_ID,
         paint: {
           "line-color": "#ffffff",
           "line-width": 2,
-          // "line-opacity": ["case", ["boolean", ["feature-state", "click"], false], 1, 0]
           "line-opacity": 1
         },
-        filter: ["in", "id", ""]
+        filter: ["in", FEATURE_KEY_PROPERTY, ""]
       });
     }
 
@@ -443,67 +698,52 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
       map.setLayoutProperty(
         "boundary-data-labels",
         "visibility",
-        showConstraints ? "visible" : "none"
+        showConstraintsRef.current ? "visible" : "none"
       );
 
-      map.on(
-        "mousemove",
-        "boundary-data",
-        throttle((e) => {
-          const bbox = getBoundingBoxFromPoint(e.point);
-          const features = map.queryRenderedFeatures(bbox, {
-            layers: ["boundary-data"]
-          });
-          if (features && features.length > 0) {
-            const feature = features[0];
-            const coordinates = (
-              "coordinates" in feature.geometry ? feature.geometry.coordinates[0] : [0, 0]
-            ) as LngLatLike;
-            const nearestPoint =
-              coordinates && feature.geometry.type === "LineString"
-                ? turf.nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
-                : null;
-            popup
-              .setLngLat((nearestPoint?.geometry.coordinates as LngLatLike) || [0, 50])
-              .setHTML(feature.properties?.id)
-              .addTo(map);
-          } else {
-            popup.remove();
-          }
-        }, 32)
-      );
-      map.on("mouseleave", "boundary-data", () => {
-        popup.remove();
-      });
+      // Registered once. `Map` re-invokes this whole function on every render, so an
+      // unguarded `map.on` accumulated a listener per render — harmless-looking, and it
+      // meant every mousemove ran the throttled `queryRenderedFeatures` N times. Now that
+      // the overlay arrives asynchronously the block is reached later but no more often, so
+      // the guard is what keeps it at one.
+      if (!constraintHandlersRef.current) {
+        constraintHandlersRef.current = true;
+        map.on(
+          "mousemove",
+          "boundary-data",
+          throttle((e) => {
+            const bbox = getBoundingBoxFromPoint(e.point);
+            const features = map.queryRenderedFeatures(bbox, {
+              layers: ["boundary-data"]
+            });
+            if (features && features.length > 0) {
+              const feature = features[0];
+              const coordinates = (
+                "coordinates" in feature.geometry ? feature.geometry.coordinates[0] : [0, 0]
+              ) as LngLatLike;
+              const nearestPoint =
+                coordinates && feature.geometry.type === "LineString"
+                  ? turf.nearestPointOnLine(feature.geometry, [e.lngLat.lng, e.lngLat.lat])
+                  : null;
+              popup
+                .setLngLat((nearestPoint?.geometry.coordinates as LngLatLike) || [0, 50])
+                .setHTML(feature.properties?.id)
+                .addTo(map);
+            } else {
+              popup.remove();
+            }
+          }, 32)
+        );
+        map.on("mouseleave", "boundary-data", () => {
+          popup.remove();
+        });
+      }
     }
   };
 
-  // if mapDataLoading has been true for 3 seconds, set it to false
-  const [mapDataLoadingTimeout, setMapDataLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
-  useEffect(() => {
-    if (mapDataLoadingTimeout) {
-      clearTimeout(mapDataLoadingTimeout);
-    }
-    if (mapDataLoading) {
-      setMapDataLoadingTimeout(
-        setTimeout(() => {
-          setMapDataLoading(false);
-        }, 3000)
-      );
-    }
-    return () => {
-      if (mapDataLoadingTimeout) {
-        clearTimeout(mapDataLoadingTimeout);
-      }
-    };
-  }, [mapDataLoading]);
-
-  // Debounce the spinner so it only shows for data loads, not the brief
-  // mapDataLoading rerender that happens when flipping between already-cached
-  // timesteps. If loading resolves within the threshold (cached re-render),
-  // the spinner never appears.
-  const isLoading =
-    !combinedData.allGspForecastData || combinedLoading.allGspForecastLoading || mapDataLoading;
+  // Debounce the spinner so it only shows for data loads, not the brief rerender that happens
+  // when flipping between already-cached timesteps. Scrubbing no longer refetches at all, so
+  // in practice this only fires on the first load and on a window roll-over.
   const [showSpinner, setShowSpinner] = useState(false);
   useEffect(() => {
     if (!isLoading) {
@@ -514,10 +754,28 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
     return () => clearTimeout(t);
   }, [isLoading]);
 
+  // Gated on `hasValues`, not `featureStates.size` — see the field's doc comment. The old guard
+  // could not fire once `/regions` had resolved, which is every case that matters.
+  //
+  // `loaders` is rendered on BOTH arms. It carries the per-country data hooks, so dropping it
+  // on the failure arm would unmount the pipeline that produced the error — clearing the
+  // error, re-rendering the normal arm, remounting, re-failing: a flicker loop rather than a
+  // failure state.
+  if (error && !hasValues) {
+    return (
+      <div className={`pv-map relative h-full w-full ${className}`}>
+        {loaders}
+        <FailedStateMap error="Failed to load" />
+      </div>
+    );
+  }
+
   return (
     <div className={`pv-map relative h-full w-full ${className}`}>
       {
         <>
+          {/* One per enabled country; they render nothing and exist for their hooks. */}
+          {loaders}
           {showSpinner && showPvLayer && (
             <LoadStateMap>
               <Spinner />
@@ -529,26 +787,18 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({
               safelyUpdateMapData(map.current, addOrUpdateMapData);
             }}
             updateData={{
-              newData: shouldUpdateMap,
+              newData: true,
               updateMapData: (map) => {
                 mapRef.current = map;
                 safelyUpdateMapData(map, addOrUpdateMapData);
               }
             }}
-            controlOverlay={(map: { current?: mapboxgl.Map }) => (
-              <>
-                <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
-                <MeasuringUnit
-                  activeUnit={activeUnit}
-                  setActiveUnit={setActiveUnit}
-                  isLoading={!initForecastData}
-                />
-              </>
-            )}
-            title={VIEWS.FORECAST}
-          >
-            <ColorGuideBar unit={activeUnit} />
-          </Map>
+            // The corner's own time readout went here (Wave 4); the zone stack in the map
+            // control dock says it now. The coverage pills that followed it moved to the header
+            // (see `coverageGaps` above), since the chart card covers this corner.
+            controlOverlay={() => null}
+            title={MAP_TITLE_MAIN}
+          ></Map>
         </>
       }
     </div>

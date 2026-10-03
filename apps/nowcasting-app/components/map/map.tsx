@@ -1,24 +1,23 @@
 import mapboxgl, { Expression } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import * as Sentry from "@sentry/nextjs";
-import { Dispatch, FC, SetStateAction, useEffect, useRef, useState } from "react";
-import { IMap } from "./types";
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
+import { IMap, MAP_TITLE_MAIN } from "./types";
 import useUpdateMapStateOnClick from "./use-update-map-state-on-click";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
+import useGlobalState, {
+  useCountryState,
+  getCursorCadenceMinutes,
+  getCursorNow
+} from "../helpers/globalState";
 import QuickLRU from "quick-lru";
-import { ResetIcon } from "../icons/icons";
 import {
   AGGREGATION_LEVEL_MIN_ZOOM,
   AGGREGATION_LEVELS,
-  MAX_POWER_GENERATED,
-  VIEWS
+  MAX_POWER_GENERATED
 } from "../../constant";
 import {
-  SATELLITE_CHANNELS,
-  SATELLITE_CHANNEL_LABELS,
   SatelliteChannel,
   ChannelSelection,
-  COMPOSITE_SELECTIONS,
   MAX_COMPOSITE_CHANNELS,
   channelsForSelection,
   TifLayerData,
@@ -28,16 +27,80 @@ import {
   orderSatelliteLayers
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
+import { useEnabledCountries } from "../../hooks/data/use-countries";
+import { getCountryConfig } from "../../config/countries";
+import { framePadding, unionBounds, type Bounds } from "./frame-countries";
 
-mapboxgl.accessToken =
-  "pk.eyJ1IjoiZmxvd2lydHoiLCJhIjoiY2tlcGhtMnFnMWRzajJ2bzhmdGs5ZXVveSJ9.Dq5iSpi54SaajfdMyM_8fQ";
+/**
+ * The enabled-country set this session has already framed the camera for, or `null` before the
+ * first framing. Module-level so it survives a remount of the map component — see the framing
+ * effect in `Map` for why that matters.
+ */
+let framedFor: string | null = null;
 
-// Yellow PV/GSP forecast fill layers added by pvLatestMap/deltaMap that can obscure the cloud layer
+// Moved to env by Phase 5 Track E — this was a hardcoded credential in source. See
+// `.env.example` / `docs/phase5-track-e-notes.md`.
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+
+// The region fill layers added by `pvLatestMap.tsx` that can obscure the cloud layer. Their ids
+// are unchanged by the delta merge: one set of layers, repainted, is what the merge is.
 const PV_LAYER_IDS = [
   "latestPV-forecast",
   "latestPV-forecast-borders",
   "latestPV-forecast-select-borders"
 ];
+
+/**
+ * The base style's label font, swapped for something nearer the brand's.
+ *
+ * **Mapbox does not use the page's fonts.** Labels are rendered from pre-generated SDF glyph
+ * atlases fetched from the style's `glyphs` URL, and `mapbox/dark-v10`'s points at Mapbox's own
+ * font namespace — so the only faces reachable without either uploading Matter to a Mapbox
+ * account or self-hosting our own glyph PBFs are the ones Mapbox hosts. This is the cheap half
+ * of that question: see whether the map's typography is worth the licensing work at all before
+ * anyone reads a font licence.
+ *
+ * `MAP_LABEL_FONT` is a Mapbox-hosted family name. Candidates, closest first by letterform —
+ * Matter is a geometric sans with a tall x-height and straight terminals:
+ *
+ *   "Work Sans"  — grotesque/geometric hybrid, tall x-height, straight terminals. Closest.
+ *   "Manrope"    — semi-geometric, tall x-height. Closer still if Mapbox hosts it.
+ *   "Rubik"      — geometric and warm, but its rounded corners are a tell Matter does not have.
+ *   "Poppins"    — monoline geometric; rounder and wider than Matter.
+ *   "Montserrat" — wide, which costs a lot of room in map labels.
+ *
+ * **If the labels vanish, the name is wrong.** Mapbox composites a font stack server-side, so a
+ * family it does not host 404s the whole glyph range rather than falling back — which is also
+ * why `Arial Unicode MS Regular` trails every stack below: it is Mapbox's universal fallback and
+ * carries the glyphs the Latin faces do not.
+ */
+const MAP_LABEL_FONT = "Manrope";
+
+/**
+ * The weight the layer already asked for, kept. dark-v10 uses several DIN Pro weights to
+ * separate countries from cities from water, and flattening them all to Regular would throw
+ * away a hierarchy the style spent them on.
+ */
+const matchingWeight = (existing: string): string => {
+  if (/bold/i.test(existing)) return "Bold";
+  if (/medium|semibold/i.test(existing)) return "Medium";
+  if (/light/i.test(existing)) return "Light";
+  return "Regular";
+};
+
+const applyBrandLabelFont = (m: mapboxgl.Map) => {
+  for (const layer of m.getStyle()?.layers ?? []) {
+    if (layer.type !== "symbol") continue;
+    const existing = (layer.layout as { "text-font"?: unknown })?.["text-font"];
+    // Only a plain array is safe to rewrite: `text-font` can also be a zoom expression, and
+    // replacing one of those with a flat stack would drop whatever it was varying.
+    if (!Array.isArray(existing) || typeof existing[0] !== "string") continue;
+    m.setLayoutProperty(layer.id, "text-font", [
+      `${MAP_LABEL_FONT} ${matchingWeight(existing[0])}`,
+      "Arial Unicode MS Regular"
+    ]);
+  }
+};
 
 const applyPvLayerVisibility = (m: mapboxgl.Map, visible: boolean) => {
   PV_LAYER_IDS.forEach((id) => {
@@ -112,26 +175,134 @@ const Map: FC<IMap> = ({
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
   const [isMapReady, setIsMapReady] = useState(false);
-  const [lng, setLng] = useGlobalState("lng");
-  const [lat, setLat] = useGlobalState("lat");
-  const [zoom, setZoom] = useGlobalState("zoom");
+  const [lng, setLng] = useCountryState("lng");
+  const [lat, setLat] = useCountryState("lat");
+  const [zoom, setZoom] = useCountryState("zoom");
   const [maps, setMaps] = useGlobalState("maps");
-  const [currentAggregation, setAggregation] = useGlobalState("aggregationLevel");
+  const [, setMapFramingModified] = useGlobalState("mapFramingModified");
+  const [, setResetMapFraming] = useGlobalState("resetMapFraming");
+  const [currentAggregation, setAggregation] = useCountryState("aggregationLevel");
   const [autoZoom] = useGlobalState("autoZoom");
-  const resetButtonDiv = useRef<HTMLDivElement | null>(null);
+  const [focusedCountry] = useGlobalState("focusedCountry");
+
+  // Read through a ref so panning (which writes lng/lat/zoom continuously) cannot re-run any
+  // camera effect below.
+  const viewportRef = useRef({ lng, lat, zoom });
+  viewportRef.current = { lng, lat, zoom };
+
+  /**
+   * The camera frames the countries that are **enabled**, and moves only when that set changes.
+   *
+   * It used to jump to the *focused* country's stored viewport whenever focus changed. Since
+   * Track F the map draws every enabled country at once, which made that wrong twice over: it
+   * threw away the view of the countries still on screen, and — because selecting a region in
+   * the other country sets focus (contract §1) — it fired on ordinary region clicks, yanking
+   * the camera to NL mid-interaction. Focus is now about whose numbers the chart shows, not
+   * where the camera points.
+   *
+   * Keyed on the enabled set alone, so nothing else moves the camera: not focus, not a region
+   * selection, not an aggregation-level change. Once framed, the view is the user's to pan.
+   *
+   * **`framedFor` is module state, not a ref, and that is the point** (2026-08-15). It was a
+   * `useRef`, which meant it died with the component — and `pages/index.tsx` used to swap
+   * `PvLatestMap` for `DeltaMap` on selecting a comparison, unmounting this map and building a new
+   * one. The fresh instance started at `null`, decided it had never framed anything, and threw
+   * away the user's pan and zoom on every switch between forecast and delta. The viewport itself
+   * was never lost: `lng`/`lat`/`zoom` are country-scoped global state and restore correctly;
+   * it was this effect overwriting them a moment later.
+   *
+   * "Have we already framed this enabled set?" is a fact about the *session*, not about a
+   * particular React instance, so it lives where a remount cannot reach it. It is deliberately
+   * not global state: nothing renders from it, and writing it in an effect would cost a render
+   * for something no one reads.
+   *
+   * The forecast/delta swap that exposed it is gone (the two maps are one component now), so
+   * that particular remount can no longer happen — but it would still be wrong to lose framing
+   * across any other remount, so the fix stands on its own.
+   */
+  const enabledCountries = useEnabledCountries();
+  const enabledKey = enabledCountries.join(",");
+
+  const frameToBounds = useCallback((bounds: Bounds, duration: number) => {
+    if (!map.current) return;
+
+    // Read at call time, not at mount: the chart is drag-resizable, so its width is only known
+    // now. Both callers go through here, so the toggle framing and the reset button always
+    // compensate for the same chart — the disagreement between them was exactly this sum being
+    // computed in one place and not the other.
+    const canvas = map.current.getContainer().getBoundingClientRect();
+    const chart = document.querySelector('[aria-label="Chart"]')?.getBoundingClientRect();
+
+    map.current.fitBounds(
+      [
+        [bounds[0], bounds[1]],
+        [bounds[2], bounds[3]]
+      ],
+      { padding: framePadding(chart?.width ?? 0, canvas.width), duration }
+    );
+  }, []);
+
+  /**
+   * The framing the "Reset Zoom" button performs. Held in a ref because that button is built
+   * once, inside the map-init effect, so anything it closes over is frozen at mount — which is
+   * precisely how it came to fly to a stale centre and zoom in the first place. A ref is read at
+   * click time, so it always frames the set that is enabled *now*.
+   */
+  const resetFramingRef = useRef<() => void>(() => {});
+  resetFramingRef.current = () => {
+    const union = unionBounds(enabledCountries);
+    if (union) frameToBounds(union, 1500);
+    setMapFramingModified(false);
+  };
+
+  /**
+   * Publish the framing action so the dock's reset button can call it.
+   *
+   * A holder around the *ref*, not around `resetFramingRef.current` — the ref is re-pointed on
+   * every render so it always frames the countries enabled now, and that was the whole reason
+   * it is a ref. Registering the current value instead would freeze the enabled set at mount,
+   * which is exactly the bug the ref exists to prevent.
+   */
+  useEffect(() => {
+    setResetMapFraming({ run: () => resetFramingRef.current() });
+    return () => setResetMapFraming(null);
+  }, [setResetMapFraming]);
+
+  useEffect(() => {
+    if (!map.current || !isMapReady) return;
+    if (framedFor === enabledKey) return;
+
+    const union = unionBounds(enabledCountries);
+    if (!union) return;
+
+    const isFirstFraming = framedFor === null;
+    framedFor = enabledKey;
+    setMapFramingModified(false);
+
+    // The first framing is the initial view and should not animate in; later ones are a response
+    // to the user toggling a country, where the movement is what explains the change.
+    frameToBounds(union, isFirstFraming ? 0 : 700);
+  }, [enabledKey, enabledCountries, isMapReady, frameToBounds, setMapFramingModified]);
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [showCloudLayer, setShowCloudLayer] = useGlobalState("showCloudLayer");
-  const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
-  const [showPvLayer, setShowPvLayer] = useGlobalState("showPvLayer");
+  // Setters for these three are no longer called here — the Clouds/PV buttons and the channel
+  // select that used to write them moved to `map-layer-controls.tsx` (Track I). Read-only here;
+  // this component still consumes the values to drive the fetch/decode pipeline and the PV fill
+  // layer's visibility.
+  const [showCloudLayer] = useGlobalState("showCloudLayer");
+  const [activeChannel] = useGlobalState("activeChannel");
+  const [showPvLayer] = useGlobalState("showPvLayer");
   const showPvRef = useRef(showPvLayer);
   const showCloudRef = useRef(showCloudLayer);
   const channelRef = useRef(activeChannel);
   const tifCache = useRef(new QuickLRU<string, TifLayerData>({ maxSize: TIF_CACHE_SIZE }));
   const currentKeyRef = useRef<string | null>(null);
   const requestedKeyRef = useRef<string | null>(null);
-  const [isSatelliteLoading, setIsSatelliteLoading] = useState(false);
-  const [satelliteError, setSatelliteError] = useState<string | null>(null);
+  // Lifted to global state (Phase 6 followup, Track I) so `map-layer-controls.tsx` — now
+  // mounted in the consolidated top-right panel rather than inside this component — can show
+  // the spinner and error text it used to render itself. See globalState.tsx's doc comment.
+  const [isSatelliteLoading, setIsSatelliteLoading] = useGlobalState("isSatelliteLoading");
+  const [satelliteError, setSatelliteError] = useGlobalState("satelliteError");
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
   // Show the selected channel(s) and hide the rest. A composite selection resolves
@@ -199,13 +370,13 @@ const Map: FC<IMap> = ({
     // `timeNow` and `selectedISOTime` are written by two independent 60s timers
     // (use-time-now, mounted via ForecastHeader, and use-and-update-selected-time
     // in pages/index) whose phase isn't locked — ForecastHeader unmounts on a view
-    // switch and restarts its timer at a fresh offset. Across a half-hour boundary
+    // switch and restarts its timer at a fresh offset. Across a slot boundary
     // that leaves a window where selectedISOTime has advanced but timeNow hasn't,
     // and trusting `timeNow` alone would read the new slot as a future timestamp:
     // clouds hidden behind "not yet available", healing itself a minute later.
     // Deriving the slot directly makes this path independent of that race.
     // Scrubbing to a genuinely future slot still fails the check, as it should.
-    const isNow = ts === timeNow || ts === get30MinNow();
+    const isNow = ts === timeNow || ts === getCursorNow();
     if (!isNow && isFutureTimestamp(satTs)) {
       applySatelliteVisibility(map.current, false);
       currentKeyRef.current = null;
@@ -260,7 +431,12 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     // Nothing satellite-related runs until the user actually enables clouds, so a
     // visitor who never turns the layer on pays no satellite requests at all.
-    if (title !== VIEWS.FORECAST || !showCloudLayer || !isMapReady || !selectedISOTime) return;
+    // The gate is `MAIN`, not "the forecast view": clouds are the dominant driver of forecast
+    // error, so they are if anything *more* useful under the delta fill than under the forecast
+    // one (FB-020, NESO — "attribute a change in forecast to a thickening or thinning of the
+    // cloud cover in a particular area", a delta-shaped question). What it still excludes is
+    // `sitesMap`, which has no satellite layers to drive.
+    if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady || !selectedISOTime) return;
     let cancelled = false;
     (async () => {
       // Load the frame the user is actually looking at first, then warm the
@@ -271,17 +447,21 @@ const Map: FC<IMap> = ({
       const channels = channelsForSelection(activeChannel);
       for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
         if (offset === 0) continue;
-        const satTs = satelliteTimestampFor(addMinutesToISODate(selectedISOTime, offset * 30));
+        // One cursor step per offset, not a fixed half hour — on a 15-minute grid the old
+        // stride prefetched every *other* neighbour and left the ones in between cold.
+        const satTs = satelliteTimestampFor(
+          addMinutesToISODate(selectedISOTime, offset * getCursorCadenceMinutes())
+        );
         if (isFutureTimestamp(satTs)) continue;
         channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
       }
     })();
 
     // Parked on "now": poll for a fresher image. Both selectedISOTime and timeNow
-    // only advance on the half hour (get30MinNow rounds to the slot, so the string
-    // is identical in between and React bails out of the re-render), which would
-    // otherwise leave the displayed frame up to 30 minutes behind imagery that
-    // lands every ~5. Silent, so the spinner doesn't flash on a wallboard.
+    // only advance one cursor slot at a time (`getCursorNow` rounds to the slot, so the
+    // string is identical in between and React bails out of the re-render), which would
+    // otherwise leave the displayed frame up to a whole slot behind imagery that lands
+    // every ~5 minutes. Silent, so the spinner doesn't flash on a wallboard.
     const refresh =
       selectedISOTime === timeNow
         ? setInterval(
@@ -339,7 +519,7 @@ const Map: FC<IMap> = ({
         center?.lat.toFixed(4) !== lat.toFixed(4); // Check if latitude has changed
 
       if (mapModified) {
-        resetButtonDiv.current?.style.setProperty("display", "block");
+        setMapFramingModified(true);
       }
     };
 
@@ -347,7 +527,7 @@ const Map: FC<IMap> = ({
     if (mapContainer.current) {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/dark-v10",
+        style: "mapbox://styles/bradbdf/cm7yvv7y400wk01sdfdi4ep7l",
         center: [lng, lat],
         boxZoom: false,
         zoom,
@@ -360,46 +540,14 @@ const Map: FC<IMap> = ({
       // Updater function to prevent state updates overriding each other in race condition on load
       setMaps((m) => [...m, map.current!]);
 
-      const nav = new mapboxgl.NavigationControl({ showCompass: false });
-      map.current.addControl(nav, "bottom-right");
-      map.current.addControl(
-        {
-          onAdd: function (m) {
-            const div = document.createElement("div");
-            div.className = "mapboxgl-ctrl mapboxgl-ctrl-group";
-            div.style.setProperty("display", "none");
-            div.innerHTML = `<button title="Reset Zoom" style="padding:7px;">${ResetIcon()}</button>`;
-            div.onclick = () => {
-              m.flyTo({
-                center: [lng, lat],
-                zoom: zoom,
-                pitch: 0,
-                bearing: 0,
-                duration: 1500,
-                essential: true
-              });
-              div.style.setProperty("display", "none");
-            };
-            resetButtonDiv.current = div;
-            return div;
-          },
-          onRemove: function () {}
-        },
-        "bottom-right"
-      );
+      // No `addControl` for zoom or reset. Mapbox would position them against the map, in a
+      // box the shell cannot see or lay out beside — see `map-zoom-controls.tsx`, which renders
+      // both in the control dock instead. The attribution stays Mapbox's, as it must.
 
       map.current.on("load", (event) => {
         setIsMapReady(true);
-        if (map.current?.getCanvas()?.width === 800) {
-          map.current?.resize();
-        }
+        if (map.current) applyBrandLabelFont(map.current);
         loadDataOverlay(map);
-      });
-
-      map.current.on("dataloading", () => {
-        if (map.current?.getCanvas()?.width === 400) {
-          map.current?.resize();
-        }
       });
 
       map.current.on("moveend", onMoveEnd);
@@ -416,12 +564,50 @@ const Map: FC<IMap> = ({
     };
   }, []);
 
+  /**
+   * Keep the canvas the size of its container.
+   *
+   * Mapbox sizes its canvas when it initialises and then never again on its own — it has no way
+   * to know the box around it moved. Every time the shell's layout changes height or width
+   * without the window changing (chrome mounting or unmounting, the chart being dragged, a
+   * banner appearing) the map keeps the canvas it was born with and renders short, leaving bare
+   * ground along whichever edge grew. That is not a hypothetical: it is what the scrub-placement
+   * spike hit the moment the cursor footer stopped rendering.
+   *
+   * This replaces two guesses that were doing the same job by coincidence — `resize()` calls on
+   * `load` and `dataloading`, each gated on the canvas being exactly 800 or 400 pixels wide.
+   * They fired when a mid-init canvas happened to match one of those numbers and did nothing at
+   * any other size, which is why the symptom came and went. A `ResizeObserver` on the element
+   * Mapbox actually renders into needs no such number.
+   *
+   * `requestAnimationFrame` coalesces the callback to one resize per frame: a pointer-driven
+   * chart drag fires the observer on every frame of the gesture, and `resize()` re-reads layout
+   * and repaints.
+   */
+  useEffect(() => {
+    const element = mapContainer.current;
+    if (!element) return;
+    let frame: number | null = null;
+    const observer = new ResizeObserver(() => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        map.current?.resize();
+      });
+    });
+    observer.observe(element);
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, []);
+
   if (!webGlSupported) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-ocf-black-500 p-6 text-center">
+      <div className="flex h-full w-full items-center justify-center bg-surface p-6 text-center">
         <div>
-          <h3 className="text-lg font-semibold text-ocf-yellow">Map Unavailable</h3>
-          <p className="mt-2 text-sm text-ocf-gray-600">
+          <h3 className="text-lg font-semibold text-status-alert">Map Unavailable</h3>
+          <p className="mt-2 text-sm text-content-secondary">
             Your browser does not support WebGL, which is required to display the map. <br />
             Please update your browser or use the latest version of Chrome.
           </p>
@@ -431,97 +617,15 @@ const Map: FC<IMap> = ({
   }
 
   return (
-    <div className="relative h-full overflow-hidden bg-ocf-gray-900">
+    <div className="relative h-full overflow-hidden bg-surface-raised">
+      {/* The Clouds/PV layer toggles and the satellite channel select used to render here —
+          moved to `map-layer-controls.tsx`, mounted inside the consolidated top-right panel
+          (Phase 6 followup, Track I). This component keeps the fetch/decode pipeline, since it
+          needs the live Mapbox instance; `showCloudLayer`/`activeChannel`/`showPvLayer` were
+          already global state for the same cross-component reason, and `isSatelliteLoading`/
+          `satelliteError` joined them so the panel can read what this effect is doing. */}
       <div className="absolute top-0 left-0 z-10 p-4 min-w-[20rem] w-full flex flex-col gap-1 pointer-events-none">
         <div className="pointer-events-auto">{controlOverlay(map)}</div>
-        {title === VIEWS.FORECAST && (
-          <div
-            className={`pointer-events-auto flex flex-row items-start justify-end gap-2 transition-all duration-300 mt-3`}
-          >
-            {showCloudLayer && (
-              <select
-                value={activeChannel}
-                onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
-                disabled={!!satelliteError}
-                className="min-w-[10rem] w-auto bg-black text-white text-xs font-semibold py-1 px-1.5 border-none outline-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {satelliteError ? (
-                  <option value={activeChannel}>{satelliteError}</option>
-                ) : (
-                  <>
-                    <optgroup label="Composites">
-                      {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
-                        <option key={key} value={key}>
-                          {label}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="Individual bands">
-                      {SATELLITE_CHANNELS.map((ch) => (
-                        <option key={ch} value={ch}>
-                          {SATELLITE_CHANNEL_LABELS[ch]}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </>
-                )}
-              </select>
-            )}
-
-            <div className="flex flex-row items-end gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const turningOff = showCloudLayer;
-                  setShowCloudLayer(!showCloudLayer);
-                  if (turningOff) setShowPvLayer(true);
-                }}
-                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-                  showCloudLayer
-                    ? "text-black bg-ocf-yellow"
-                    : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
-                }`}
-              >
-                {isSatelliteLoading && (
-                  <svg
-                    className="animate-spin -ml-1 mr-1.5 h-3.5 w-3.5 text-current"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                )}
-                Clouds
-              </button>
-
-              <button
-                type="button"
-                title="Toggle the yellow PV forecast overlay so clouds are easier to see"
-                onClick={() => setShowPvLayer((v) => !v)}
-                className={`relative inline-flex items-center px-3 py-0.5 text-sm dash:text-lg dash:tracking-wide font-extrabold transition-all active:scale-95 ${
-                  showPvLayer
-                    ? "text-black bg-ocf-yellow"
-                    : "text-white bg-black hover:bg-ocf-yellow hover:text-mapbox-black-700"
-                }`}
-              >
-                PV
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <div ref={mapContainer} id={`Map-${title}`} data-title={title} className="h-full w-full" />

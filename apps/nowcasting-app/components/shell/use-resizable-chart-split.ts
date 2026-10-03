@@ -1,0 +1,238 @@
+import { KeyboardEvent, PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+
+import { ChartContainerSizePx, ChartSplitPercent, clampChartSplit } from "./geometry";
+
+/** Keyboard resize stride, in percent of the container — a visible step per press. */
+const KEY_STEP_PERCENT = 3;
+
+/**
+ * Which dimensions a given grip moves.
+ *
+ * The corner drags both, as it always did; the right and bottom edges each drag one, which is
+ * the whole reason they exist — a user wanting the chart wider should not have to hold its
+ * height steady by hand on the diagonal. The axis is fixed per grip and captured at
+ * pointerdown, so a drag that wanders off-axis still only moves the edge that was grabbed.
+ */
+export type ResizeAxis = "both" | "x" | "y";
+
+/**
+ * Drag-to-resize for the floating chart panel — the override half of OPEN 5, replacing the
+ * expand handle.
+ *
+ * Follows `scrub-track.tsx`'s pattern for the reason it exists there: writing shared state on
+ * every `pointermove` re-renders the chart (Recharts) and the map underneath it on every pixel
+ * of movement, which Brad rejected on the cursor scrubber and would feel worse here, resizing
+ * the very component doing the expensive rendering. So a drag runs at two rates. `dragSplit` is
+ * the handle's own position, set on pointerdown, updated every `pointermove` in a render
+ * confined to whatever consumes this hook, and dropped on release; the size the rest of the app
+ * reads (`onCommit`) is coalesced to at most once per animation frame while dragging, and
+ * written exactly once, synchronously, on release, so a drag never leaves a frame's write
+ * pending after the pointer is already gone.
+ *
+ * The clamp (`clampChartSplit`) is re-applied on every move against the container's *live*
+ * measured size, not a size captured at drag start, so a window resize mid-drag (or the display
+ * rail opening, which changes the inset's width) cannot leave the handle proposing something
+ * unreachable.
+ */
+export function useResizableChartSplit({
+  seed,
+  override,
+  onCommit,
+  onReset
+}: {
+  /** The mode's `CHART_SPLIT` entry — what a mode with no stored override renders. */
+  seed: ChartSplitPercent;
+  /** The mode's stored override, if the user has sized this mode before. */
+  override: ChartSplitPercent | undefined;
+  /**
+   * Called with the clamped split — on each animation frame while dragging, and once more on
+   * release.
+   *
+   * `transient` marks the in-drag frames. They exist so the rest of the app tracks the size
+   * live, and they are cheap only if the consumer treats them as cheap: the drag fires ~60 of
+   * these a second, so anything with a real cost per call (writing a cookie, hitting storage,
+   * a network request) must wait for the `transient: false` call that always ends a gesture.
+   */
+  onCommit: (split: ChartSplitPercent, meta: { transient: boolean }) => void;
+  /** Called to clear the current mode's override, returning it to its seed. */
+  onReset: () => void;
+}) {
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const draggingRef = useRef(false);
+  const startRef = useRef<{
+    x: number;
+    y: number;
+    split: ChartSplitPercent;
+    axis: ResizeAxis;
+  } | null>(null);
+  const frameRef = useRef<number | null>(null);
+  const pendingRef = useRef<ChartSplitPercent | null>(null);
+  const [dragSplit, setDragSplit] = useState<ChartSplitPercent | null>(null);
+
+  // The resting (non-drag) container size, kept only so the steady-state render can be
+  // reclamped when the inset resizes under it — the display rail opening, a browser resize, a
+  // stored override from a previous, wider session. Drag handlers below measure live instead
+  // of reading this, so a fast drag is never a frame behind a `ResizeObserver` callback.
+  const [restingSize, setRestingSize] = useState<ChartContainerSizePx>({ widthPx: 0, heightPx: 0 });
+
+  useEffect(() => {
+    const container = panelRef.current?.offsetParent as HTMLElement | null;
+    if (!container || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      setRestingSize({ widthPx: entry.contentRect.width, heightPx: entry.contentRect.height });
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const committed = override ?? seed;
+
+  /** The container's size right now, queried live — used by the drag/keyboard handlers. */
+  const liveContainerSize = useCallback((): ChartContainerSizePx => {
+    const container = panelRef.current?.offsetParent as HTMLElement | null;
+    return { widthPx: container?.clientWidth ?? 0, heightPx: container?.clientHeight ?? 0 };
+  }, []);
+
+  const cancelPendingCommit = () => {
+    if (frameRef.current !== null) {
+      cancelAnimationFrame(frameRef.current);
+      frameRef.current = null;
+    }
+    pendingRef.current = null;
+  };
+  // A drag torn down mid-gesture (unmount) must not leave a frame pointing at a dead component.
+  useEffect(() => cancelPendingCommit, []);
+
+  const flushCommit = () => {
+    frameRef.current = null;
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    if (pending) onCommit(pending, { transient: true });
+  };
+  const scheduleCommit = (split: ChartSplitPercent) => {
+    pendingRef.current = split;
+    if (frameRef.current !== null) return;
+    frameRef.current = requestAnimationFrame(flushCommit);
+  };
+
+  const onPointerDown = (axis: ResizeAxis) => (event: PointerEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+    draggingRef.current = true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    startRef.current = { x: event.clientX, y: event.clientY, split: committed, axis };
+    setDragSplit(committed);
+  };
+
+  const onPointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (!draggingRef.current || !startRef.current) return;
+    const size = liveContainerSize();
+    if (size.widthPx <= 0 || size.heightPx <= 0) return;
+    const axis = startRef.current.axis;
+    const dxPercent =
+      axis === "y" ? 0 : ((event.clientX - startRef.current.x) / size.widthPx) * 100;
+    // The panel's fixed corner is top-left (`left`/`top` in `floating-chart.tsx`), so the handle
+    // sits bottom-right and both axes now read straight off the pointer: down and right grow.
+    // While the panel hung from the bottom edge this line carried a sign flip, because dragging
+    // *up* had to grow the height — the anchor move is what removed it.
+    const dyPercent =
+      axis === "x" ? 0 : ((event.clientY - startRef.current.y) / size.heightPx) * 100;
+    const proposed: ChartSplitPercent = {
+      width: startRef.current.split.width + dxPercent,
+      height: startRef.current.split.height + dyPercent
+    };
+    const clamped = clampChartSplit(proposed, size);
+    setDragSplit(clamped);
+    scheduleCommit(clamped);
+  };
+
+  const endDrag = (event: PointerEvent<HTMLElement>) => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+
+    // The drag always ends on its true final value, committed exactly once — the same handoff
+    // `scrub-track.tsx` uses, for the same reason: take whatever the last frame did not get to,
+    // cancel that frame, and write it here instead.
+    //
+    // Falling back to `dragSplit` matters now that this call is the one that persists. If the
+    // last frame already flushed, `pendingRef` is null — harmless when every call did the same
+    // thing, but it would mean a gesture that happened to end just after a frame never wrote a
+    // non-transient commit at all, and the size would be forgotten on reload. `pendingRef`
+    // first, since it holds the newer value when a move and the release land in one tick.
+    const finalSplit = pendingRef.current ?? dragSplit;
+    cancelPendingCommit();
+    if (finalSplit) onCommit(finalSplit, { transient: false });
+    setDragSplit(null);
+    startRef.current = null;
+
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  };
+
+  /**
+   * Arrow keys resize in `KEY_STEP_PERCENT` steps; Enter/Space reset to the mode's seed — the
+   * keyboard equivalent of the double-click reset, since a keyboard user cannot double-click.
+   */
+  const onKeyDown = (axis: ResizeAxis) => (event: KeyboardEvent<HTMLElement>) => {
+    let dWidth = 0;
+    let dHeight = 0;
+    switch (event.key) {
+      case "ArrowLeft":
+        dWidth = -KEY_STEP_PERCENT;
+        break;
+      case "ArrowRight":
+        dWidth = KEY_STEP_PERCENT;
+        break;
+      // Same direction as the drag: the free edge is the bottom one, so Down grows and Up
+      // shrinks. This is the reverse of what it was when the panel hung from the bottom.
+      case "ArrowDown":
+        dHeight = KEY_STEP_PERCENT;
+        break;
+      case "ArrowUp":
+        dHeight = -KEY_STEP_PERCENT;
+        break;
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        onReset();
+        return;
+      default:
+        return;
+    }
+    // An edge grip ignores the keys for the axis it does not own, rather than silently
+    // resizing the other dimension: pressing Down on the right edge should do nothing, the
+    // same as dragging it downward does.
+    if ((axis === "x" && dWidth === 0) || (axis === "y" && dHeight === 0)) return;
+    event.preventDefault();
+    const size = liveContainerSize();
+    const proposed: ChartSplitPercent = {
+      width: committed.width + dWidth,
+      height: committed.height + dHeight
+    };
+    // A keypress is a whole gesture, not a frame of one, so it persists like a release.
+    onCommit(clampChartSplit(proposed, size), { transient: false });
+  };
+
+  return {
+    /** The size to render this instant — drag-local while dragging, the clamped rest state otherwise. */
+    split: dragSplit ?? clampChartSplit(committed, restingSize),
+    isDragging: dragSplit !== null,
+    panelRef,
+    /**
+     * The event wiring for one grip. Every grip shares the same gesture — the axis is the only
+     * thing that differs, so it is a parameter rather than three copies of the handler set.
+     */
+    handlePropsFor: (axis: ResizeAxis) => ({
+      onPointerDown: onPointerDown(axis),
+      onPointerMove,
+      onPointerUp: endDrag,
+      onPointerCancel: endDrag,
+      onLostPointerCapture: endDrag,
+      onKeyDown: onKeyDown(axis),
+      onDoubleClick: onReset
+    })
+  };
+}

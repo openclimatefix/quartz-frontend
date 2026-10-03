@@ -1,20 +1,66 @@
 import RemixLine from "../remix-line";
 import useFormatChartData from "../use-format-chart-data";
 import {
-  convertISODateStringToLondonTime,
   formatISODateString,
-  getRoundedTickBoundary,
-  KWtoMW
+  formatISODateStringAsZonedTime,
+  getRoundedTickBoundary
 } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderGSP from "./forecast-header-gsp";
-import useGetGspData from "./use-get-gsp-data";
-import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
+import { useGspAggregateData, useGspRegionData, useGspRegionNames } from "./use-gsp-region-data";
+import {
+  useAggregationLevels,
+  useCurrentAggregationLevel,
+  useFocusedCountry
+} from "../../../hooks/data";
+import { getCountryConfig } from "../../../config/countries";
+import {
+  displayDecimalsFor,
+  displayUnitFor,
+  NO_VALUE,
+  toDisplayPower
+} from "../../../lib/domain/power-unit";
+import { formatRegionLabel } from "../../../lib/domain/region-label";
+import { useLevelGroupings } from "../../../hooks/data/use-map-geometry";
+import { groupRegionNames } from "../../helpers/data";
+import useGlobalState, { useCountryState } from "../../helpers/globalState";
+import {
+  cadenceMinutesFor,
+  cursorNow,
+  nextSlot,
+  periodForLabel,
+  slotForInstant
+} from "../../../lib/time/cursor";
 import Spinner from "../../icons/spinner";
-import { ForecastValue } from "../../types";
-import React, { FC } from "react";
-import { NationalAggregation } from "../../map/types";
+import React, { FC, useMemo } from "react";
 import { getTicks } from "../../helpers/chartUtils";
 import { Y_MAX_TICKS } from "../../../constant";
+import type { TimeSeries } from "../../../lib/domain/types";
+
+/**
+ * Plural of a region-type label, for "3 GSPs selected" / "3 Provinces selected".
+ *
+ * Naive on purpose — an `s` unless the label already ends in one. The labels this ever sees
+ * come from `config/countries.ts` or the API manifest and are short nouns ("GSP", "Province",
+ * "Zone"); a country whose label needs real inflection should carry the plural in the registry
+ * rather than have a rule guessed for it here.
+ */
+const pluralise = (label: string): string =>
+  label.length === 0 || label.endsWith("s") ? label : `${label}s`;
+
+/** What the header prints for a figure with no published value behind it. */
+
+/**
+ * The latest point that actually carries a reading. Mirrors `forecast-header/index.tsx`'s
+ * `latestReading` (not imported: that file is owned by another track, and this is six lines).
+ */
+const latestReading = (series?: TimeSeries) => {
+  if (!series) return undefined;
+  for (let i = series.values.length - 1; i >= 0; i -= 1) {
+    if (typeof series.values[i].powerMw === "number") return series.values[i];
+  }
+  return undefined;
+};
 
 const GspPvRemixChart: FC<{
   selectedRegions: string[];
@@ -35,102 +81,286 @@ const GspPvRemixChart: FC<{
   visibleLines,
   deltaView = false
 }) => {
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
-  let {
-    errors,
-    loading,
-    pvRealDataAfter,
-    pvRealDataIn,
-    gspLocationInfo,
-    gspForecastDataOneGSP,
-    gspNHourData
-  } = useGetGspData(selectedRegions);
-  // const gspData = fcAll?.forecasts.find((fc) => fc.location.gspId === gspId);
-  const gspInstalledCapacity =
-    gspLocationInfo?.reduce((acc, gsp) => acc + gsp.installedCapacityMw, 0) || 0;
-  const gspName = gspLocationInfo?.[0]?.regionName;
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
+  const { timezone, locale } = useCountryFormatting();
+  const focusedCountry = useFocusedCountry();
+  const displayUnit = displayUnitFor(focusedCountry);
+  const [show4hView] = useGlobalState("showNHourView");
+  const [nHourForecast] = useGlobalState("nHourForecast");
+
+  // v1 covers every selection. Exactly one selected GSP takes the cheap per-region path
+  // (`useGspRegionData`); a multi-select (shift-click) or a DNO/NG-zone/national grouping
+  // takes the roll-up path (`useGspAggregateData`), which sums `forecasts/period` /
+  // `generation/period` across the group's GSP ids at every timestamp with
+  // `rollUpRegionSeries`. The two never overlap and never double-fetch: each hook disables
+  // itself (a `null` scope) whenever the other one is the active path.
+  // `nationalAggregationLevel` is a region type name now, not the enum (Phase 5 seam 1). The
+  // single-region fast path (`useGspRegionData`) is GB-only — it resolves the click through the
+  // GB `gsp_id` bridge and requests `region_type=gsp` — so the check is a genuine identity match,
+  // not a stand-in for `derived`. Every other country's single click (an NL province, a DE
+  // control area) takes the roll-up path as a group of one. Deliberately left so (sweep,
+  // 2026-09-29): it draws the same chart, and at 12 and 4 regions over the pre-warmed `period`
+  // endpoint the heavier path costs next to nothing. Generalise the fast path if a country with
+  // hundreds of regions and no `gsp_id` arrives.
+  const isSingleGsp = nationalAggregationLevel === "gsp" && selectedRegions.length === 1;
+  const gspId = isSingleGsp ? Number(selectedRegions[0]) : undefined;
+  const nMinuteForecast = nHourForecast * 60;
+  const gspRegionData = useGspRegionData(gspId, isSingleGsp, {
+    show: !!(isSingleGsp && show4hView),
+    horizonMinutes: nMinuteForecast
+  });
+
+  // Resolves the active *group* selection to a flat list of v1 region names, whatever level
+  // it came from. `null` when a group selection isn't the active path.
+  //
+  // **The branch is on `level.derived`, not on the level's name.** A derived level (GB's DNO
+  // and NG zone) selects a *group*, and its Mapbox feature id is that group's key in the
+  // grouping file — so one lookup resolves it. A non-derived level selects regions directly,
+  // and at GSP level its feature ids are numeric, so they go through `useGspRegionNames`.
+  //
+  // That distinction is the fix for the regression this path carried through Phase 5. The old
+  // code looked the level up in a table keyed by `NationalAggregation`'s capitalised values
+  // ("DNO", "Zone"); when Track B changed the stored level to the registry's lowercase region
+  // type name ("dno", "zone") every lookup missed, `groupGspIds` returned `undefined`, and the
+  // grouped chart silently drew nothing — no error, no type error, just an empty panel. There
+  // is now no name-keyed table left to mismatch: `useLevelGroupings` resolves the URL from
+  // `config/countries.ts` using the level's own `regionType`, and the group name comes from
+  // the asset itself.
+  const level = useCurrentAggregationLevel();
+  const groupings = useLevelGroupings(level);
+
+  /**
+   * The finest level a country actually has regions at — GB's GSP, NL's province — whatever
+   * level is on screen right now. It names the national sum ("National GSP Sum") and pluralises
+   * a multi-select, both of which are statements about what is being summed rather than about
+   * the current view. `level > 0` excludes national (level 0 by construction) without needing
+   * to match its name, and `!derived` excludes GB's client-side DNO and zone groupings.
+   */
+  const levels = useAggregationLevels();
+  const regionLevelLabel = useMemo(() => {
+    const finest = levels
+      .filter((candidate) => !candidate.derived && candidate.level > 0)
+      .sort((a, b) => b.level - a.level)[0];
+    return finest?.label ?? "";
+  }, [levels]);
+
+  /**
+   * How this level's individual region names should be cased — declared per region type in the
+   * registry, because nothing can tell GB's `citr_1` from NL's `noord-brabant` by looking. A
+   * derived level has no region type of its own (it selects groups), so it never has a style.
+   */
+  const regionNameStyle = useMemo(() => {
+    if (!level || level.derived) return undefined;
+    return getCountryConfig(focusedCountry)?.geo[level.regionType]?.regionNameStyle;
+  }, [level, focusedCountry]);
+
+  const isGroupSelection = !isSingleGsp && !!level?.derived;
+  // The selected groups that resolve in the grouping file; a name missing from it is skipped.
+  const resolvedGroups = useMemo(
+    () =>
+      isGroupSelection
+        ? selectedRegions.filter((name) => !!groupRegionNames(groupings.data, name))
+        : [],
+    [isGroupSelection, selectedRegions, groupings.data]
+  );
+  const isMultiGroup = resolvedGroups.length > 1;
+  const groupName = !isGroupSelection
+    ? null
+    : isMultiGroup
+    ? `${resolvedGroups.length} ${pluralise(level?.label ?? "")}`
+    : resolvedGroups[0] ?? selectedRegions[0] ?? null;
+  // The union of the selected groups' members, each counted once: GB's DNO and NG-zone
+  // groupings share members (15 GSPs sit in two DNOs), so two selected groups can both list
+  // the same GSP, and summing it twice would double its generation and capacity.
+  const groupRegions = useMemo(() => {
+    if (resolvedGroups.length === 0) {
+      return groupName ? groupRegionNames(groupings.data, groupName) ?? null : null;
+    }
+    return Array.from(
+      new Set(resolvedGroups.flatMap((name) => groupRegionNames(groupings.data, name) ?? []))
+    );
+  }, [resolvedGroups, groupName, groupings.data]);
+
+  // A multi-select at a non-derived level: the feature ids are the map's, numeric at GSP
+  // level, so they need translating to region names before anything can be summed.
+  const multiSelectIds = useMemo(
+    () => (!isSingleGsp && !level?.derived && selectedRegions.length > 0 ? selectedRegions : null),
+    [isSingleGsp, level?.derived, selectedRegions]
+  );
+  const multiSelectNames = useGspRegionNames(multiSelectIds);
+
+  const selection = useMemo(
+    () =>
+      isGroupSelection
+        ? { regionNames: groupRegions, groupName }
+        : {
+            regionNames: multiSelectNames,
+            // Names the rolled-up series internally; not displayed (the title is built below).
+            // Off the level's label all the same, so a debug read of the series does not claim
+            // an NL province rollup is a GSP one.
+            groupName: multiSelectNames
+              ? `${selectedRegions.length} ${pluralise(regionLevelLabel)}`
+              : null
+          },
+    [
+      isGroupSelection,
+      groupRegions,
+      groupName,
+      multiSelectNames,
+      selectedRegions.length,
+      regionLevelLabel
+    ]
+  );
+
+  const gspAggregateData = useGspAggregateData(selection.regionNames, selection.groupName);
+
+  // This chart reads one country's regions, so "now" and "the next slot" are that country's,
+  // not the shared cursor's finest-enabled grid — see `lib/time/cursor.ts`.
+  const cadenceMinutes = cadenceMinutesFor(focusedCountry);
+  // `cursorNow` spells the period start; the data is keyed by the country's labels, so it goes
+  // through `slotForInstant` first (GB labels period-end), as `use-format-chart-data.tsx` does.
+  const nowSlot = formatISODateString(slotForInstant(cursorNow(cadenceMinutes), focusedCountry));
+
+  // The active series, whichever of the two paths is live. Both hooks always run (rules of
+  // hooks), so this is just picking which result feeds the chart and the header math below.
+  const activeForecast = isSingleGsp ? gspRegionData.forecast : gspAggregateData.forecast;
+  const activeGenerationSeries = isSingleGsp
+    ? gspRegionData.generationSeries
+    : gspAggregateData.generationSeries;
+  const activePrimaryGeneration = isSingleGsp
+    ? gspRegionData.primaryGeneration
+    : gspAggregateData.primaryGeneration;
+  const gspInstalledCapacity = isSingleGsp
+    ? gspRegionData.region?.capacityMw || 0
+    : gspAggregateData.capacityMw || 0;
+  const dataMissing = isSingleGsp
+    ? gspRegionData.isLoading || gspRegionData.hasError
+    : gspAggregateData.isLoading || gspAggregateData.hasError;
+
+  /**
+   * The title, off the level's own label rather than off the string `"gsp"`.
+   *
+   * Every branch of this ladder used to name GB: the single-region case required
+   * `nationalAggregationLevel === "gsp"`, the multi-select hardcoded "GSPs", and the national
+   * sum hardcoded "National GSP Sum". NL fell through all of it to `String(selectedRegions[0])`
+   * — the raw Mapbox feature id, lowercased for the boundary join, so a selected province
+   * titled the chart "noord-brabant" and a multi-select titled it after whichever one was
+   * clicked first.
+   *
+   * `regionLevelLabel` is the finest *real* level's label — "GSP" for GB, "Province" for NL —
+   * which reproduces GB's existing copy exactly ("National GSP Sum", "3 GSPs selected") while
+   * being right for any country. The casing of an individual region's name is a separate
+   * question the registry answers per region type; see `formatRegionLabel`.
+   */
+  let title: string;
+  let selectedGSPNames: string[] = [];
+  if (isSingleGsp) {
+    title = formatRegionLabel(
+      gspRegionData.region?.label || String(selectedRegions[0]),
+      regionNameStyle
+    );
+  } else if (isGroupSelection) {
+    // A derived level selects a named group — "UKPN (East)", "NE Scotland". Those names come
+    // from the grouping file already written the way they should read, so they are never put
+    // through `formatRegionLabel`: title-casing one would give "Ukpn (East)".
+    title = groupName || "";
+    // Several groups: the tooltip lists the selected groups, as a multi-select lists its regions.
+    if (isMultiGroup) selectedGSPNames = resolvedGroups;
+  } else if (nationalAggregationLevel === "national") {
+    title = `National ${regionLevelLabel} Sum`;
+  } else if (selectedRegions.length === 1) {
+    // A single region at a level this component has no dedicated per-region path for (NL's
+    // province). The rollup path is already resolving its label, so there is nothing to fetch.
+    title = formatRegionLabel(
+      gspAggregateData.memberLabels[0] || String(selectedRegions[0]),
+      regionNameStyle
+    );
+  } else if (selectedRegions.length > 1) {
+    title = `${selectedRegions.length} ${pluralise(regionLevelLabel)} selected`;
+    // Per-member display names for the tooltip, resolved inside `useGspAggregateData` from the
+    // `useRegions` data it already holds — no extra request. Labels ("City Road"), never the
+    // raw region names (`citr_1`).
+    selectedGSPNames = gspAggregateData.memberLabels.map((label) =>
+      formatRegionLabel(label, regionNameStyle)
+    );
+  } else {
+    title = "";
+  }
+
+  const latestGeneration = latestReading(activePrimaryGeneration);
+  const latestPvActualDatetime = latestGeneration?.timeUtc ?? timeNow;
+  const pvForecastDatetime = formatISODateString(latestPvActualDatetime);
+  const followingPvForecastDatetime = new Date(nextSlot(latestPvActualDatetime, cadenceMinutes));
+  const followingPvForecastDateString = formatISODateString(
+    followingPvForecastDatetime.toISOString()
+  );
+  // `null` when the slot is absent or unpublished, so the header can tell it from a real 0.
+  const forecastAt = (formattedDate: string): number | null =>
+    activeForecast?.values.find((v) => formatISODateString(v.timeUtc) === formattedDate)?.powerMw ??
+    null;
+
+  const pvTimeOnly = formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale);
+  /**
+   * The two headline times as the periods they name — the same treatment as the national header
+   * (`forecast-header/index.tsx`), for the same reason: a regional reading is an average over a
+   * settlement period too, and the country's labelling decides which side of the label it sits.
+   * `periodForLabel`, because both instants here are published timestamps rather than cursors.
+   */
+  const periodTimes = (instant: string): [string, string] => {
+    const period = periodForLabel(instant, focusedCountry);
+    return [
+      formatISODateStringAsZonedTime(period.start, timezone, locale),
+      formatISODateStringAsZonedTime(period.end, timezone, locale)
+    ];
+  };
+  const pvTimeRange = periodTimes(latestPvActualDatetime);
+  const forecastNextTimeRange = periodTimes(followingPvForecastDatetime.toISOString());
+  /**
+   * A headline reading in the country's display unit. GB's `MW` branch is the untouched
+   * pre-unit expression (one decimal), so its output is byte-for-byte what it always was; NL
+   * and DE go through `toDisplayPower`/`displayDecimalsFor` so a GW figure keeps the precision
+   * a much smaller number needs.
+   */
+  const formatHeadline = (valueMw: number | null): string =>
+    valueMw === null
+      ? NO_VALUE
+      : displayUnit === "MW"
+      ? valueMw.toFixed(1)
+      : toDisplayPower(valueMw, displayUnit).toFixed(displayDecimalsFor(displayUnit));
+
+  const pvValueMw = latestGeneration?.powerMw ?? null;
+  const forecastPvMw = forecastAt(pvForecastDatetime);
+  const forecastNextTimeOnly = formatISODateStringAsZonedTime(
+    followingPvForecastDatetime.toISOString(),
+    timezone,
+    locale
+  );
+  const forecastNextPvMw = forecastAt(followingPvForecastDateString);
+  const forecastAtSelectedTimeMw = forecastAt(nowSlot);
+  // In the country's unit, like every other figure in this header. `DeltaHeaderBlock` takes
+  // the unit alongside it and converts back to MW for its colour buckets, so the thresholds
+  // are unaffected by how the number is written.
+  const deltaValue =
+    dataMissing || pvValueMw === null || forecastPvMw === null
+      ? NO_VALUE
+      : displayUnit === "MW"
+      ? (pvValueMw - forecastPvMw).toFixed(1)
+      : toDisplayPower(pvValueMw - forecastPvMw, displayUnit).toFixed(
+          displayDecimalsFor(displayUnit)
+        );
+
   const chartData = useFormatChartData({
-    forecastData: gspForecastDataOneGSP,
-    fourHourData: gspNHourData,
-    pvRealDayInData: pvRealDataIn,
-    pvRealDayAfterData: pvRealDataAfter,
+    forecastSeries: activeForecast,
+    nHourSeries: isSingleGsp && show4hView ? gspRegionData.nHour : undefined,
+    generationSeries: activeGenerationSeries,
     timeTrigger: selectedTime,
     delta: deltaView,
     gsp: true
   });
-  const now30min = formatISODateString(get30MinNow());
-  const dataMissing =
-    !gspForecastDataOneGSP ||
-    !pvRealDataIn ||
-    !pvRealDataAfter ||
-    loading.gspForecastSelectedGSPsLoading ||
-    loading.pvRealInDayLoading ||
-    loading.pvRealDayAfterLoading ||
-    errors.length;
-  const forecastAtSelectedTime: NonNullable<typeof gspForecastDataOneGSP>[number] =
-    gspForecastDataOneGSP?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
-    ({} as any);
-  const pvPercentage = (forecastAtSelectedTime.expectedPowerGenerationNormalized || 0) * 100;
-
-  const fourHourForecastAtSelectedTime: ForecastValue =
-    gspNHourData?.find((fc) => formatISODateString(fc?.targetTime) === now30min) ||
-    ({} as ForecastValue);
-
-  //
-
-  // get the latest Actual pv value in GW
-  const latestPvActualInMW = KWtoMW(
-    pvRealDataIn?.[pvRealDataIn.length - 1]?.solarGenerationKw || 0
-  );
-
-  // get pv time
-  const latestPvActualDatetime = pvRealDataIn?.[pvRealDataIn.length - 1]?.datetimeUtc || timeNow;
-
-  // Use the same time for the Forecast historic
-  const pvForecastDatetime = formatISODateString(latestPvActualDatetime);
-
-  // Get the next OCF forecast following the latest PV actual datetime
-  const followingPvForecastDatetime = getNext30MinSlot(new Date(latestPvActualDatetime));
-  const followingPvForecastDateString = formatISODateString(
-    followingPvForecastDatetime.toISOString()
-  );
-
-  // Get the next OCF forecast for the last PV value time
-  const correspondingLatestPvForecast = gspForecastDataOneGSP?.find(
-    (fc) => formatISODateString(fc.targetTime) === pvForecastDatetime
-  );
-  const correspondingLatestPvForecastInMW =
-    correspondingLatestPvForecast?.expectedPowerGenerationMegawatts || 0;
-  // Get the next OCF forecast
-  const followingPvForecastInMW =
-    gspForecastDataOneGSP?.find(
-      (fc) => formatISODateString(fc.targetTime) === followingPvForecastDateString
-    )?.expectedPowerGenerationMegawatts || 0;
-
-  const deltaValue = dataMissing
-    ? "---"
-    : (Number(latestPvActualInMW) - Number(correspondingLatestPvForecastInMW)).toFixed(1);
-
-  //
 
   // set ymax to the installed capacity of the graph
   let yMax = gspInstalledCapacity || 100;
   yMax = getRoundedTickBoundary(yMax, Y_MAX_TICKS);
-
-  let title =
-    nationalAggregationLevel === NationalAggregation.GSP
-      ? gspName || ""
-      : String(selectedRegions[0]);
-  let selectedGSPNames =
-    selectedRegions.length > 1 ? gspLocationInfo?.map((gsp) => gsp.regionName) || [] : [];
-
-  if (selectedRegions.length > 1) {
-    title = `${selectedRegions.length} ${String(nationalAggregationLevel)}s selected`;
-  }
-
-  if (nationalAggregationLevel === NationalAggregation.national) {
-    title = "National GSP Sum";
-  }
 
   // If multiple GSPs are selected, hide the N-hour data, if any
   let filteredLines = visibleLines;
@@ -140,34 +370,40 @@ const GspPvRemixChart: FC<{
 
   return (
     <>
-      <div className="flex-initial">
+      <div className="flex-initial px-2 ">
         <ForecastHeaderGSP
           onClose={close}
           title={title}
-          mwpercent={Math.round(pvPercentage)}
-          pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime)}
-          pvValue={Number(latestPvActualInMW)?.toFixed(1)}
-          forecastPV={correspondingLatestPvForecastInMW?.toFixed(1)}
-          forecastNextTimeOnly={convertISODateStringToLondonTime(
-            followingPvForecastDatetime.toISOString()
+          mwpercent={Math.round(
+            ((forecastAtSelectedTimeMw ?? 0) / (gspInstalledCapacity || 1)) * 100
           )}
-          forecastNextPV={followingPvForecastInMW?.toFixed(1)}
+          pvTimeOnly={pvTimeOnly}
+          pvTimeRange={pvTimeRange}
+          pvValue={formatHeadline(pvValueMw)}
+          forecastPV={formatHeadline(forecastPvMw)}
+          forecastNextTimeOnly={forecastNextTimeOnly}
+          forecastNextTimeRange={forecastNextTimeRange}
+          forecastNextPV={formatHeadline(forecastNextPvMw)}
           deltaValue={deltaValue.toString()}
           deltaView={deltaView}
           titleTooltipText={selectedGSPNames}
+          unit={displayUnit}
         >
-          <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-ocf-yellow-500">
-            {Math.round(forecastAtSelectedTime.expectedPowerGenerationMegawatts || 0)}
+          <span className="text-lg font-medium leading-none text-solar md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
+            {displayUnit === "MW" && forecastAtSelectedTimeMw !== null
+              ? Math.round(forecastAtSelectedTimeMw)
+              : formatHeadline(forecastAtSelectedTimeMw)}
           </span>
 
-          <span className="font-semibold dash:3xl:text-5xl dash:xl:text-4xl xl:text-3xl lg:text-2xl md:text-xl text-lg leading-none text-white">
+          <span className="text-lg font-medium leading-none text-content md:text-xl lg:text-2xl xl:text-3xl dash:xl:text-4xl">
             {" "}
-            / {gspInstalledCapacity}
+            / {formatHeadline(gspInstalledCapacity)}
           </span>
-          <span className="text-xs dash:text-2xl text-ocf-gray-300"> MW</span>
+          <span className="text-xs dash:text-2xl text-content"> {displayUnit}</span>
         </ForecastHeaderGSP>
       </div>
-      <div className="flex-1 relative">
+      {/* Same well as the national chart — see `pv-remix-chart.tsx`. */}
+      <div className="relative mx-2 mb-2 flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
         {!!dataMissing && (
           <div className="h-full absolute flex pb-7 items-center justify-center inset-0 z-30">
             <Spinner />

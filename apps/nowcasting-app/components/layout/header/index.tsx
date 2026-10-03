@@ -1,36 +1,46 @@
-import { classNames, isProduction } from "../../helpers/utils";
+import { classNames } from "../../helpers/utils";
+import useSyncEnabledCountries from "../../../hooks/data/use-sync-enabled-countries";
 import ProfileDropDown from "./profile-dropdown";
+import CountryToggle from "./country-toggle";
+import CountryCoverageBanner from "../../map/country-coverage-banner";
+import DataInfoButton from "./data-info-button";
 import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Menu } from "@headlessui/react";
-import { getViewTitle, VIEWS } from "../../../constant";
-import { Dispatch, ReactNode, SetStateAction } from "react";
+import { ReactNode } from "react";
+import useGlobalState from "../../helpers/globalState";
 import { ExternalLinkIcon } from "../../icons/icons";
-import { CombinedData } from "../../types";
+
+/**
+ * The top nav — "what you are looking at", and only that (contract §6).
+ *
+ * It used to carry a three-way view switcher: Forecast, Solar Sites and Delta, hardcoded and
+ * shown for every country whether or not the country had the data. Phase 6 dissolves all three
+ * (§2). Delta was never a peer view, it was a *comparison*, and it now lives on the map
+ * cluster where the colour it changes is explained. Solar Sites was never a country view — it
+ * is tenancy-scoped, on a different backend, with different geometry — and it now has its own
+ * route, so what is left of it here is a link rather than a mode.
+ *
+ * That leaves navigation proper: where you are, which countries are drawn, and the account.
+ * Which country the chart reads is the focused one, chosen in `country-toggle.tsx`.
+ */
 
 type HeaderLinkProps = {
   url: string;
   text: string;
   className?: string;
   disabled?: boolean;
-  currentView?: VIEWS;
-  view?: VIEWS;
-  setViewFunc?: Dispatch<SetStateAction<VIEWS>>;
-  isLoggedIn?: boolean;
 };
-const HeaderLink: React.FC<HeaderLinkProps> = ({
-  url,
-  text,
-  className,
-  disabled = false,
-  currentView,
-  view,
-  setViewFunc
-}) => {
+
+const HeaderLink: React.FC<HeaderLinkProps> = ({ url, text, className, disabled = false }) => {
+  const { pathname } = useRouter();
   const computedClasses = classNames(
     className || "",
-    disabled ? "text-gray-500 cursor-not-allowed" : "cursor-pointer hover:text-ocf-yellow-400",
-    "flex px-1 sm:px-4 py-2 font-semibold text-xs sm:text-sm"
+    disabled
+      ? "text-content-muted cursor-not-allowed"
+      : "cursor-pointer hover:text-interactive-hover",
+    "flex mx-1 sm:mx-4 py-1 font-semibold text-xs sm:text-sm border-interactive"
   );
 
   // Denotes external link for styling
@@ -45,30 +55,21 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
     );
   }
 
-  if (setViewFunc && view) {
-    const isCurrentView = currentView === view;
-    let textColorClasses = isCurrentView ? "text-ocf-yellow" : "text-white";
-    if (disabled) textColorClasses = "text-gray-500 cursor-not-allowed";
-    return (
-      <Menu.Item>
-        <a
-          className={classNames(computedClasses, textColorClasses)}
-          onClick={() => {
-            if (!disabled) setViewFunc(view);
-          }}
-        >
-          {text}
-        </a>
-      </Menu.Item>
-    );
-  }
+  // The route itself says which one is current, rather than a `view` passed down from a page.
+  const isCurrent = pathname === url;
 
   return (
     <Menu.Item>
       {({ active }) => (
         <Link
           href={url}
-          className={classNames(computedClasses, active ? "text-ocf-yellow" : "text-white")}
+          aria-current={isCurrent ? "page" : undefined}
+          className={classNames(
+            computedClasses,
+            isCurrent || active
+              ? "text-selected border-b-2 border-selected-edge"
+              : "text-content-muted"
+          )}
         >
           {text}
         </Link>
@@ -78,81 +79,71 @@ const HeaderLink: React.FC<HeaderLinkProps> = ({
 };
 
 type HeaderProps = {
-  view: VIEWS;
-  setView: Dispatch<SetStateAction<VIEWS>>;
   isLoggedIn?: boolean;
-  combinedData?: CombinedData | null;
   children?: ReactNode;
 };
 
-const Header: React.FC<HeaderProps> = ({
-  view,
-  setView,
-  isLoggedIn = true,
-  combinedData = null,
-  children
-}) => {
+// Seeds the enabled set for a visitor who has never chosen one (see the hook's own doc
+// comment). A component of its own so the header can mount it only with a session: the hook
+// fetches `/countries`, and the logged-out pages render a header too.
+const SyncEnabledCountries: React.FC = () => {
+  useSyncEnabledCountries();
+  return null;
+};
+
+const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
+  // Sites is GB-only and `useFocusedCountry` pins it there, so a country switcher on `/sites`
+  // would offer a choice that changes nothing on this page and the dashboard behind it.
+  const [isSitesChart] = useGlobalState("isSitesChart");
   return (
-    <header className="h-16 text-white text-right sm:px-4 bg-black flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
+    <header className="h-14 text-content text-right sm:px-4 flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
         <a
-          className="flex h-8 self-center w-auto"
-          target="_blank"
-          href="https://quartz.solar/"
-          rel="noreferrer"
-        >
-          <img src="/QUARTZSOLAR_LOGO_ICON.svg" alt="quartz_logo" className="h-8 w-auto" />
-        </a>
-      </div>
-      <div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">
-        <a
-          className="flex h-6 w-auto"
+          className="flex h-6 self-center w-auto"
           target="_blank"
           href="https://quartz.solar/"
           rel="noreferrer"
         >
           <img
-            src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"
-            alt="quartz_logo"
-            className="h-8 w-auto"
+            src="/OCF-Orange-logomark.svg"
+            alt="ocf_logo"
+            // Neutral at rest so the mark is not competing with the data, brand orange on hover.
+            // A filter rather than a second asset: one file, and the colour stays the brand's.
+            className="h-6 w-auto"
+            // className="h-6 w-auto grayscale brightness-150 transition duration-150 hover:grayscale-0 hover:brightness-100"
           />
         </a>
-        <div className="mr-[6px] flex items-center">
-          <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>
-          <OCFlogo />
-        </div>
       </div>
-      <div className="grow text-center inline-flex px-2 sm:px-8 gap-2 sm:gap-5 items-center">
-        {isLoggedIn && (
-          <Menu>
-            <HeaderLink
-              url="/"
-              view={VIEWS.FORECAST}
-              currentView={view}
-              setViewFunc={setView}
-              text={getViewTitle(VIEWS.FORECAST)}
-            />
-            <HeaderLink
-              url="/"
-              view={VIEWS.SOLAR_SITES}
-              currentView={view}
-              setViewFunc={setView}
-              text={getViewTitle(VIEWS.SOLAR_SITES)}
-              disabled={isProduction}
-            />
-            <HeaderLink
-              url="/"
-              view={VIEWS.DELTA}
-              currentView={view}
-              setViewFunc={setView}
-              text={getViewTitle(VIEWS.DELTA)}
-            />
-          </Menu>
-        )}
-      </div>
+      {/*<div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">*/}
+      {/*  <a*/}
+      {/*    className="flex h-6 w-auto"*/}
+      {/*    target="_blank"*/}
+      {/*    href="https://quartz.solar/"*/}
+      {/*    rel="noreferrer"*/}
+      {/*  >*/}
+      {/*    <img*/}
+      {/*      src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"*/}
+      {/*      alt="quartz_logo"*/}
+      {/*      className="h-8 w-auto"*/}
+      {/*    />*/}
+      {/*  </a>*/}
+      {/*  <div className="mr-[6px] flex items-center">*/}
+      {/*    <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>*/}
+      {/*    <OCFlogo />*/}
+      {/*  </div>*/}
+      {/*</div>*/}
+      {/* The Forecast/Solar Sites switcher is gone (Brad, 2026-08-27): Sites serves a different
+          set of users from the dashboard's regulars, so a permanent two-item nav spent header
+          width on a destination most viewers never want. `/sites` still routes — it is reached
+          by URL rather than advertised. Restore the two `HeaderLink`s here if that changes. */}
+      <div className="grow" />
+      {isLoggedIn && <SyncEnabledCountries />}
       <div className="flex items-center gap-2">
+        {isLoggedIn && <CountryCoverageBanner />}
+        {isLoggedIn && !isSitesChart && <CountryToggle />}
+        {isLoggedIn && <DataInfoButton />}
         <div className="py-1">
-          {isLoggedIn && <ProfileDropDown view={view} combinedData={combinedData} />}
+          {isLoggedIn && <ProfileDropDown />}
           {children}
         </div>
       </div>

@@ -1,9 +1,34 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   preset: "ts-jest",
-  testEnvironment: "node",
-  globals: {
-    TZ: "UTC"
+
+  // One environment for everything: jsdom with Node's export conditions. See
+  // jest.environment.js for why the conditions have to be overridden.
+  //
+  // A per-file `/** @jest-environment jsdom */` docblock would have kept the faster
+  // `node` default for the pure-function suites, but the docblock takes a module name or
+  // a path relative to the test file — it does not expand <rootDir> — so every suite
+  // would carry a different ../../.. prefix to reach this environment. The dominant cost
+  // in this project is ts-jest building a full TypeScript program per worker (~3.4GB),
+  // next to which jsdom's overhead is noise, so a single environment is the better
+  // trade.
+  testEnvironment: "<rootDir>/jest.environment.js",
+
+  // Pins the process timezone to UTC before workers fork. See jest.globalSetup.ts.
+  globalSetup: "<rootDir>/jest.globalSetup.ts",
+
+  // Before the test framework: Fetch API globals jsdom does not provide but MSW needs.
+  setupFiles: ["<rootDir>/jest.polyfills.ts"],
+
+  // Per-worker setup: DOM matchers for the jsdom suites.
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+
+  // The app's tsconfig sets `jsx: "preserve"`, which is right for Next — the bundler
+  // does the JSX transform. ts-jest has no bundler behind it, so under that setting it
+  // emits raw JSX and the test file dies on `Unexpected token '<'`. Override to
+  // `react-jsx` for tests only, leaving the app build untouched.
+  transform: {
+    "^.+\\.tsx?$": ["ts-jest", { tsconfig: { jsx: "react-jsx" } }]
   },
 
   // ts-jest builds a full TypeScript program per worker, and this project's is
