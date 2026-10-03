@@ -56,4 +56,8 @@ yarn run storybook
 
 ```bash
 yarn test
+yarn typecheck  # tsc --noEmit
+yarn lint       # next lint
 ```
+
+The pre-commit hook only runs eslint (with `--fix`) on staged files; CI runs typecheck, lint and the full test suite on every PR.

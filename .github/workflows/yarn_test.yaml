@@ -15,16 +15,24 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: "yarn"
-    - name: install yarn
+    - name: install dependencies
+      # Run from the repo root so the workspace yarn.lock is the one being frozen.
+      run: yarn install --frozen-lockfile
+    - name: typecheck
       run: |
         cd apps/nowcasting-app
-        yarn install
+        yarn typecheck
+    - name: lint
+      # `next lint` exits non-zero on errors only; warnings do not fail the job.
+      run: |
+        cd apps/nowcasting-app
+        yarn lint
     - name: build app
       run: |
         cd apps/nowcasting-app
@@ -35,11 +43,19 @@ jobs:
     - name: run unit tests
       run: |
         cd apps/nowcasting-app
-        yarn test --clear-cache --coverage --coverageDirectory=../..
+        yarn test --clear-cache --coverage --coverageDirectory=coverage
     - name: Run cypress tests
       # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
       uses: cypress-io/github-action@v6
+      # Skip e2e for PRs from forks: secrets (Auth0 credentials, CYPRESS_RECORD_KEY) are not
+      # exposed to fork PRs, so the app cannot log in and `record: true` would fail the job.
+      # Same-repo PRs still run and record to Cypress Cloud. Dependabot PRs come from this
+      # repo but run with Dependabot-scoped secrets, so they are skipped too.
+      if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
       with:
+        # Dependencies are already installed by the root `yarn install --frozen-lockfile`
+        # above; the action's own install would otherwise run a second one.
+        install: false
         # Starts web server for E2E tests - replace with your own server invocation
         # https://docs.cypress.io/guides/continuous-integration/introduction#Boot-your-server
         working-directory: ./apps/nowcasting-app
@@ -74,5 +90,3 @@ env:
   NEXT_PUBLIC_4H_VIEW: 'true'
   NEXT_PUBLIC_CI: 'true'
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-
-
