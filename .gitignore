@@ -14,6 +14,12 @@ dist/
 # deliberately never committed.
 docs/feedback/
 
+# Working notes for the adaptive-eu-ui epic (phase/track notes, contracts, spikes, mocks).
+# Local design scratch, not repo documentation: kept on disk, never committed.
+# Only the PR templates under docs/ are tracked.
+docs/*
+!docs/PULL_REQUEST_TEMPLATE/
+
 # TypeScript incremental build state. Machine-local, rewritten by every typecheck,
 # and a permanent source of noise in `git status`.
 *.tsbuildinfo
