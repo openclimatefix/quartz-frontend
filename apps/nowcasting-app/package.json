@@ -9,6 +9,7 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "pre-commit": "pre-commit run",
     "test": "jest",
     "test:cypress": "cypress run --browser chrome"
@@ -89,6 +90,9 @@
     "tailwindcss": "^3.3.2",
     "ts-jest": "^29.1.1",
     "typescript": "^5.2.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": "eslint --cache --fix"
   },
   "prettier": {
     "trailingComma": "none",

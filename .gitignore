@@ -4,3 +4,5 @@ build/
 dist/
 .next/
 .env
+coverage/
+clover.xml
