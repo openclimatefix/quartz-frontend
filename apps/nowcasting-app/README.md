@@ -44,14 +44,6 @@ Open [http://localhost:3002](http://localhost:3002) with your browser to see the
 The app gets automatically deployed to Vercel, on each merge to the `development`, `staging`, and `main` branches.
 Any Pull Requests are deployed on their own respective Preview branches when granted an OCF Team member.
 
-## Storybook
-
-This part of the app is slightly unloved, but it is still possible to run Storybook to see the components in isolation.
-
-```bash
-yarn run storybook
-```
-
 ## How to run the tests
 
 ```bash
