@@ -14,8 +14,8 @@
   ],
   "devDependencies": {
     "@babel/eslint-parser": "^7.18.9",
-    "eslint": "8.10.0",
-    "eslint-config-next": "^12.3.0",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.35",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "husky": ">=6",
