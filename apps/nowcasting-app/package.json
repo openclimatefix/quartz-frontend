@@ -13,7 +13,6 @@
     "pre-commit": "pre-commit run",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cypress": "cypress run --browser chrome",
     "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts"
   },
   "dependencies": {
@@ -75,7 +74,6 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "cypress": "^13.6.4",
-    "cypress-real-events": "^1.13.0",
     "eslint": "^8.23.1",
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",
