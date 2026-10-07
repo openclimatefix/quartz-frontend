@@ -200,6 +200,7 @@ type RemixLineProps = {
   deltaView?: boolean;
   deltaYMaxOverride?: number;
   yTicks?: number[];
+  trialExpiredAt?: string;
 };
 /**
  * The handle on a reference line — the draggable cursor's time, and the LIVE marker you click to
@@ -340,7 +341,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
   zoomEnabled = true,
   deltaView = false,
   deltaYMaxOverride,
-  yTicks
+  yTicks,
+  trialExpiredAt = ""
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
@@ -514,6 +516,42 @@ const RemixLine: React.FC<RemixLineProps> = ({
    * timeline. `isSitesChart` uses its own numeric axis below and is untouched here.
    */
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
+  // The plot area as recharts laid it out (its clip rect), so the trial blur sits exactly on it.
+  const [plotBox, setPlotBox] = useState<{ x: number; y: number; w: number; h: number } | null>(
+    null
+  );
+  // Re-measured on every container resize frame, once more after it settles, and when something
+  // that moves the plot changes.
+  const selectedRegionCount = selectedMapRegionIds?.length ?? 0;
+  useEffect(() => {
+    const element = chartContainerRef.current;
+    if (!trialExpiredAt || !element) return;
+    const measure = () => {
+      const rect = element.querySelector(".recharts-surface clipPath rect");
+      if (!rect) return;
+      const [x, y, w, h] = ["x", "y", "width", "height"].map((name) =>
+        Number(rect.getAttribute(name))
+      );
+      if (![x, y, w, h].every(Number.isFinite) || w <= 0 || h <= 0) return;
+      setPlotBox((p) => (p?.x === x && p.y === y && p.w === w && p.h === h ? p : { x, y, w, h }));
+    };
+    let timer: ReturnType<typeof setTimeout>;
+    let frame: number;
+    const schedule = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+      clearTimeout(timer);
+      timer = setTimeout(measure, 100);
+    };
+    schedule();
+    const observer = new ResizeObserver(schedule);
+    observer.observe(element);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [trialExpiredAt, deltaView, selectedRegionCount, data.length]);
   const [chartWidthPx, setChartWidthPx] = useState(0);
   const previousTickDensityRef = useRef<TickDensity | null>(null);
 
@@ -801,6 +839,36 @@ const RemixLine: React.FC<RemixLineProps> = ({
     }
   }
 
+  const activeData = zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData;
+  // The blur starts 1h before "now" so its fade-in sits over the tail of the real data.
+  const blurStart = new Date(new Date(`${currentTime}:00Z`).getTime() - 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 16);
+  const teaserRows = trialExpiredAt
+    ? activeData.filter((d) => d.formattedDate > blurStart).length
+    : 0;
+  // First blurred row along the plot, 0 to 1: lines sit edge to edge, delta bars in equal bands.
+  const firstTeaserRow = activeData.length - teaserRows;
+  const teaserStart = deltaView
+    ? firstTeaserRow / (activeData.length || 1)
+    : firstTeaserRow / Math.max(activeData.length - 1, 1);
+  // How much of the trial message fits in the blurred region.
+  const teaserWidth = plotBox ? plotBox.w * (1 - teaserStart) : Infinity;
+  const teaserHeight = plotBox ? plotBox.h : Infinity;
+  const teaserLayout: "full" | "compact" | "minimal" =
+    teaserWidth >= 260 && teaserHeight >= 130
+      ? "full"
+      : teaserWidth >= 150 && teaserHeight >= 60
+      ? "compact"
+      : "minimal";
+  const trialEndedOn = trialExpiredAt
+    ? new Date(trialExpiredAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      })
+    : "";
+
   return (
     <div ref={chartContainerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
@@ -815,15 +883,64 @@ const RemixLine: React.FC<RemixLineProps> = ({
           </button>
         </div>
       )}
+      {teaserRows > 0 && plotBox && (
+        // pointer-events-auto on purpose: it swallows hover, click and zoom-drag over the made-up region.
+        <div
+          className="pointer-events-auto absolute z-20 flex items-center justify-center overflow-hidden"
+          style={{
+            top: plotBox.y,
+            height: plotBox.h,
+            left: plotBox.x + plotBox.w * teaserStart,
+            width: plotBox.w * (1 - teaserStart)
+          }}
+        >
+          {/* Blur fades in from the left edge, so there is no seam against the real data. */}
+          <div
+            className="absolute inset-0 backdrop-blur-sm"
+            style={{
+              maskImage: "linear-gradient(to right, transparent, black 20%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent, black 20%)"
+            }}
+          />
+          <div
+            className="absolute inset-0 backdrop-blur-md"
+            style={{
+              maskImage: "linear-gradient(to right, transparent 15%, black 50%)",
+              WebkitMaskImage: "linear-gradient(to right, transparent 15%, black 50%)"
+            }}
+          />
+          <div className="relative flex max-w-full flex-col items-center gap-2 px-2 text-center">
+            {teaserLayout === "full" && (
+              <p className="max-w-xs text-sm font-light text-content">
+                Your trial ended on <span className="font-medium">{trialEndedOn}</span>. Forecasts
+                beyond now are no longer available.
+              </p>
+            )}
+            {teaserLayout === "compact" && (
+              <p className="text-xs font-light text-content">
+                Trial ended <span className="font-medium">{trialEndedOn}</span>
+              </p>
+            )}
+            <a
+              href="mailto:support@quartz.solar?subject=Subscription%20request"
+              className={`whitespace-nowrap rounded-full bg-interactive font-medium text-content-on-accent transition-all duration-200 hover:bg-interactive-hover ${
+                teaserLayout === "minimal" ? "px-2.5 py-1 text-xs" : "px-4 py-2 text-sm"
+              }`}
+            >
+              {teaserLayout === "full" ? "Subscribe to get more →" : "Subscribe →"}
+            </a>
+          </div>
+        </div>
+      )}
       <div className="absolute inset-0">
-        <ResponsiveContainer debounce={100}>
+        <ResponsiveContainer debounce={trialExpiredAt ? 0 : 100}>
           <ComposedChart
             className="select-none"
             // No gap, so each delta bar is given its label's whole band; see `CustomBar`.
             barCategoryGap={0}
             width={500}
             height={400}
-            data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
+            data={activeData}
             margin={{
               top: 20,
               right: rightChartMargin,
@@ -1350,6 +1467,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               />
             )}
             <Tooltip
+              wrapperStyle={{ zIndex: 30 }}
               // The band above is the hover cursor now. Recharts' default is a vertical rule at
               // the hovered point — the "this instant" reading the selection band just stopped
               // making, and two of them at slightly different x is worse than either alone.

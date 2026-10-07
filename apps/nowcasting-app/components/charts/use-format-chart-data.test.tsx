@@ -943,3 +943,101 @@ describe("B6: the useMemo dependency array omits delta and gsp", () => {
     expect(at(view.result.current, "2025-07-01T10:00").DELTA).toBe(1);
   });
 });
+
+describe("the trial-expired teaser (mockValuesGenerator)", () => {
+  // Day-shaped curve (peak 1000 at 12:00, zero overnight), half-hourly from `from` to `to`.
+  const dayCurve = (from: string, to: string, factor = 1): [string, number][] => {
+    const points: [string, number][] = [];
+    for (
+      let t = DateTime.fromISO(from, { zone: "utc" });
+      t <= DateTime.fromISO(to, { zone: "utc" });
+      t = t.plus({ minutes: 30 })
+    ) {
+      const hour = t.hour + t.minute / 60;
+      points.push([
+        t.toISO({ suppressMilliseconds: true }) as string,
+        Math.max(0, 1000 - 200 * Math.abs(hour - 12)) * factor
+      ]);
+    }
+    return points;
+  };
+  // Yesterday in full, then today up to 10:00 at 80% of yesterday.
+  const history = (): [string, number][] => [
+    ...dayCurve("2025-06-30T00:00:00Z", "2025-06-30T23:30:00Z"),
+    ...dayCurve("2025-07-01T00:00:00Z", BEFORE_BST, 0.8)
+  ];
+  const withTeaser = (overrides: Partial<Props> = {}) =>
+    baseProps({
+      forecastSeries: ts(history(), { "10": 90, "90": 110 }),
+      appendTeaserForecast: true,
+      ...overrides
+    });
+  const teaser = (data: ChartData[]) =>
+    data
+      .filter((d) => d.formattedDate >= "2025-07-01T10:30")
+      .sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
+
+  beforeEach(() => {
+    mockedUseSeasonalNorms.mockReturnValue(undefined);
+  });
+
+  test("adds nothing unless asked, or without a day of history", () => {
+    expect(teaser(run(withTeaser({ appendTeaserForecast: false })))).toEqual([]);
+    const short = ts(dayCurve("2025-07-01T06:00:00Z", BEFORE_BST));
+    expect(teaser(run(withTeaser({ forecastSeries: short })))).toEqual([]);
+  });
+
+  test("also extends the regional (gsp) chart", () => {
+    expect(teaser(run(withTeaser({ gsp: true })))).toHaveLength(72);
+  });
+
+  test("runs 36 hours of slots from now, joining the past and future lines there", () => {
+    const rows = teaser(run(withTeaser()));
+    expect(rows).toHaveLength(72);
+    expect(rows[0].formattedDate).toBe("2025-07-01T10:30");
+    expect(rows[71].formattedDate).toBe("2025-07-02T22:00");
+    expect(rows[0].PAST_FORECAST).toBe(rows[0].FORECAST);
+  });
+
+  test("repeats yesterday's shape scaled to today's pace, on both days", () => {
+    const data = run(withTeaser());
+    expect(at(data, "2025-07-01T11:00").FORECAST).toBeCloseTo(800 * 0.8, 6);
+    expect(at(data, "2025-07-01T12:00").FORECAST).toBeCloseTo(1000 * 0.8, 6);
+    expect(at(data, "2025-07-02T12:00").FORECAST).toBeCloseTo(1000 * 0.8, 6);
+  });
+
+  test("lifts a true zero to 1% of the peak, bands and all", () => {
+    expect(at(run(withTeaser()), "2025-07-02T02:00").FORECAST).toBeCloseTo(10, 6);
+    const [lo, hi] = at(run(withTeaser()), "2025-07-01T12:00")[getPLevelRangeKey(10, 90)];
+    expect(lo).toBeCloseTo(90 * 0.8, 6);
+    expect(hi).toBeCloseTo(110 * 0.8, 6);
+  });
+
+  test("extends every line, not only the forecast, but never observed generation", () => {
+    mockedUseSeasonalNorms.mockReturnValue(nationalMetrics as ReturnType<typeof useSeasonalNorms>);
+    const data = run(
+      withTeaser({
+        nHourSeries: ts(dayCurve("2025-06-30T00:00:00Z", BEFORE_BST, 0.5)),
+        modelSeries: [{ key: "MET_OFFICE_ONLY", series: ts(history()) }],
+        generationSeries: [{ key: "GENERATION", series: ts(history()) }]
+      })
+    );
+    const row = at(data, "2025-07-01T12:00");
+    expect(row.N_HOUR_FORECAST).toBeGreaterThan(0);
+    expect(row.MET_OFFICE_ONLY).toBeGreaterThan(0);
+    expect(row.PROBABILISTIC_UPPER_BOUND).toBeCloseTo(110 * 0.8, 6);
+    expect(row.SEASONAL_MEAN).toBeDefined();
+    expect(row.GENERATION).toBeUndefined();
+    const now = at(data, "2025-07-01T10:30");
+    expect(now.N_HOUR_PAST_FORECAST).toBe(now.N_HOUR_FORECAST);
+  });
+
+  test("leaves the real curve from its last reading, then fades back to the plain repeat", () => {
+    const points = history();
+    points[points.length - 1] = [BEFORE_BST, points[points.length - 1][1] * 1.1];
+    const data = run(withTeaser({ forecastSeries: ts(points) }));
+    const last = at(data, BEFORE_BST.slice(0, 16)).PAST_FORECAST;
+    expect(at(data, "2025-07-01T10:30").FORECAST / last).toBeLessThan(1.25);
+    expect(at(data, "2025-07-02T21:00").FORECAST).toBe(at(data, "2025-07-01T21:00").FORECAST);
+  });
+});
