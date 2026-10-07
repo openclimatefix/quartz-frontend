@@ -25,6 +25,7 @@ jest.mock("@sentry/nextjs", () => ({
 
 // Imported after the mocks above so the module under test picks them up.
 import { getAccessToken, resetTokenCache } from "./token";
+import { getGlobalState } from "../../../components/helpers/globalState";
 
 let callCount = 0;
 let tokenValue = "token-1";
@@ -85,11 +86,16 @@ describe("getAccessToken", () => {
     expect(callCount).toBe(2);
   });
 
-  test("trial_expired redirects to /expired and throws", async () => {
+  test("an expired trial still resolves a token and records when it ended", async () => {
     respondWith = () =>
-      HttpResponse.json({ error: "trial_expired", email: "a@b.com" }, { status: 403 });
-    await expect(getAccessToken()).rejects.toThrow("trial_expired");
-    expect(push).toHaveBeenCalledWith("/expired?email=a%40b.com");
+      HttpResponse.json({
+        accessToken: "token-1",
+        trialExpired: true,
+        trialEndsAt: "2026-09-01T00:00:00Z"
+      });
+    await expect(getAccessToken()).resolves.toBe("token-1");
+    expect(getGlobalState("trialExpiredAt")).toBe("2026-09-01T00:00:00Z");
+    expect(push).not.toHaveBeenCalled();
   });
 
   test("access_denied redirects to /auth/denied and throws", async () => {

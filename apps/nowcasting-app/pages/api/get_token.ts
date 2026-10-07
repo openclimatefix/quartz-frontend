@@ -23,13 +23,16 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
         const accessToken = await getAccessToken(req, res);
         const session = await getSession(req, res);
         const trialEndsAt = session?.user?.trial_ends_at;
-        if (trialEndsAt && new Date(trialEndsAt) < new Date()) {
-          return res.status(403).json({ error: "trial_expired", email: session?.user?.email });
-        }
+        const trialExpired = !!trialEndsAt && new Date(trialEndsAt) < new Date();
         // Surfaced alongside the token so a client that only ever talks to this endpoint
         // still learns its entitlement. Read defensively via readCountryClaim: the claim
         // is not live on the tenant yet, so this is `[]` today and must stay non-fatal.
-        res.status(200).json({ ...accessToken, countries: readCountryClaim(session?.user) });
+        res.status(200).json({
+          ...accessToken,
+          countries: readCountryClaim(session?.user),
+          trialExpired,
+          trialEndsAt
+        });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
           return res.status(403).json({ error: "access_denied", message: error.message });

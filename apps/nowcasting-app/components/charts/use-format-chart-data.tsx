@@ -146,6 +146,89 @@ const getSeasonalMetricsForDate = (
   return seasonalMetrics;
 };
 
+const TEASER_HORIZON_MINUTES = 36 * 60;
+const DAY_MINUTES = 24 * 60;
+const ANCHOR_POINTS = 4;
+const JOIN_EASE_MINUTES = 3 * 60;
+const TEASER_FLOOR_SHARE = 0.01;
+
+const scaled = (value: unknown, scale: number, floor: number): unknown => {
+  const one = (v: number) => (v === 0 ? floor : v * scale);
+  return typeof value === "number"
+    ? one(value)
+    : Array.isArray(value) && value.every((v) => typeof v === "number")
+    ? value.map(one)
+    : value;
+};
+
+/**
+ * Extends every forecast line and range 36h past "now" with made-up data (trial-expired users),
+ * by repeating the series' own previous day, scaled to the latest readings. Needs a day of history.
+ */
+export const mockValuesGenerator = (
+  chartMap: Record<string, ChartData>,
+  timeNow: string,
+  cadenceMinutes: number
+) => {
+  const now = DateTime.fromISO(`${timeNow}:00.000Z`, { zone: "utc" });
+  const label = (date: DateTime) => formatISODateString(date.toISO() as string);
+  const past = new Map<string, ChartData>();
+  for (const point of Object.values(chartMap)) {
+    if (point.PAST_FORECAST !== undefined && point.formattedDate <= label(now)) {
+      past.set(point.formattedDate, point);
+    }
+  }
+  const dayBefore = (date: DateTime) => past.get(label(date.minus({ minutes: DAY_MINUTES })));
+  const peak = Math.max(0, ...Array.from(past.values(), (p) => p.PAST_FORECAST!));
+
+  // Latest readings with a bright enough same-time-yesterday counterpart to scale from.
+  const pairs = Array.from(past.values())
+    .sort((a, b) => b.formattedDate.localeCompare(a.formattedDate))
+    .flatMap((point) => {
+      const before = dayBefore(DateTime.fromISO(`${point.formattedDate}:00.000Z`, { zone: "utc" }));
+      return before && before.PAST_FORECAST! > peak * 0.1 ? [{ point, before }] : [];
+    })
+    .slice(0, ANCHOR_POINTS);
+  if (!pairs.length) return;
+  const scale =
+    pairs.reduce((sum, { point }) => sum + point.PAST_FORECAST!, 0) /
+    pairs.reduce((sum, { before }) => sum + before.PAST_FORECAST!, 0);
+  // The last reading's miss against the pooled scale, eased out so the join has no step.
+  const latestMs = Date.parse(`${pairs[0].point.formattedDate}:00Z`);
+  const gap = pairs[0].point.PAST_FORECAST! / (pairs[0].before.PAST_FORECAST! * scale);
+
+  // Starts on the "now" slot: the LIVE and cursor lines need a point there to render.
+  for (let minutes = 0; minutes < TEASER_HORIZON_MINUTES; minutes += cadenceMinutes) {
+    const slot = now.plus({ minutes });
+    // Whole days back to one already past: 24h for the first day, 48h for the second.
+    const source = dayBefore(
+      slot.minus({ minutes: DAY_MINUTES * Math.floor(minutes / DAY_MINUTES) })
+    );
+    if (!source) continue;
+
+    const point: Record<string, unknown> = { formattedDate: label(slot) };
+    const ease = Math.max(0, 1 - (slot.toMillis() - latestMs) / 60_000 / JOIN_EASE_MINUTES);
+    const joined = scale * (1 + (gap - 1) * ease);
+    for (const [key, value] of Object.entries(source)) {
+      if (key === "formattedDate" || key.startsWith("GENERATION") || key.startsWith("DELTA")) {
+        continue;
+      }
+      // `PAST_X` continues as `X`; other future-keyed columns are not carried.
+      const futureKey = key.replace(/^(N_HOUR_)?PAST_/, "$1");
+      const isPastKey = futureKey !== key;
+      if (!isPastKey && key.startsWith("N_HOUR_")) continue;
+      const carried = scaled(
+        value,
+        key.startsWith("SEASONAL_") ? 1 : joined,
+        peak * TEASER_FLOOR_SHARE
+      );
+      point[futureKey] = carried;
+      if (isPastKey && minutes === 0) point[key] = carried; // join the past and future lines
+    }
+    chartMap[slot.toISO({ suppressMilliseconds: true }) as string] = point as unknown as ChartData;
+  }
+};
+
 const useFormatChartData = ({
   forecastSeries,
   modelSeries,
@@ -153,7 +236,8 @@ const useFormatChartData = ({
   generationSeries,
   timeTrigger,
   delta = false,
-  gsp = false
+  gsp = false,
+  appendTeaserForecast = false
 }: {
   /** The primary forecast: writes `FORECAST`/`PAST_FORECAST` and supplies the p-levels. */
   forecastSeries?: TimeSeries;
@@ -169,6 +253,8 @@ const useFormatChartData = ({
   timeTrigger?: string;
   delta?: boolean;
   gsp?: boolean;
+  /** Trial-expired: extend the forecast past "now" with made-up data. */
+  appendTeaserForecast?: boolean;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
@@ -333,6 +419,9 @@ const useFormatChartData = ({
           )
         );
       }
+      if (appendTeaserForecast) {
+        mockValuesGenerator(chartMap, timeNow, cadenceMinutes);
+      }
       if (delta) {
         for (const chartDatum in chartMap) {
           if (typeof chartMap[chartDatum] === "object") {
@@ -360,7 +449,8 @@ const useFormatChartData = ({
     nHourForecast,
     pLevels,
     nationalMetrics,
-    cadenceMinutes
+    cadenceMinutes,
+    appendTeaserForecast
   ]);
 
   return data;
