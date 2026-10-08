@@ -36,3 +36,8 @@ yarn-error.log*
 # Sentry
 .sentryclirc
 
+
+# cypress
+cypress/snapshots/**/__diff_output__/
+cypress/screenshots/
+
