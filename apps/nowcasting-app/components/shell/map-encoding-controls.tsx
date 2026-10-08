@@ -89,6 +89,7 @@ const ComparisonOption: FC<{
   <button
     type="button"
     aria-pressed={active}
+    data-cy={`map-mode-${label.toLowerCase()}`}
     title={hint}
     onClick={() => setComparison(id)}
     className={`${CONTROL_BUTTON_BASE} ${CONTROL_BUTTON_GROW} ${
