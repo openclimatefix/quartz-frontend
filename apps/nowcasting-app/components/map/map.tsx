@@ -496,8 +496,6 @@ const Map: FC<IMap> = ({
   }, [updateData]);
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_CI === "true") return;
-
     // check if webgl is supported
     if (!mapboxgl.supported()) {
       setWebGlSupported(false);
