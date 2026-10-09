@@ -476,6 +476,9 @@ const Map: FC<IMap> = ({
     };
   }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer, timeNow, title]);
 
+  const loadDataOverlayRef = useRef(loadDataOverlay);
+  loadDataOverlayRef.current = loadDataOverlay;
+
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
   useEffect(() => {
@@ -493,8 +496,6 @@ const Map: FC<IMap> = ({
   }, [updateData]);
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_CI === "true") return;
-
     // check if webgl is supported
     if (!mapboxgl.supported()) {
       setWebGlSupported(false);
@@ -547,7 +548,7 @@ const Map: FC<IMap> = ({
       map.current.on("load", (event) => {
         setIsMapReady(true);
         if (map.current) applyBrandLabelFont(map.current);
-        loadDataOverlay(map);
+        loadDataOverlayRef.current(map);
       });
 
       map.current.on("moveend", onMoveEnd);

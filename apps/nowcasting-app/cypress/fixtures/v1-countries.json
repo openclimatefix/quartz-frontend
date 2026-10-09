@@ -1,0 +1,215 @@
+[
+  {
+    "country": "GB",
+    "name": "Great Britain",
+    "capacity_kW": 22532005,
+    "centroid": {
+      "lat": 54.142,
+      "lng": -2.738
+    },
+    "region_types": [
+      {
+        "type": "national",
+        "label": "National",
+        "level": 0,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_mo",
+            "label": "ECMWF + Met Office"
+          },
+          {
+            "name": "ecmwf_mo_sat_8h",
+            "label": "ECMWF + Met Office + Satellite (8h)"
+          },
+          {
+            "name": "ecmwf",
+            "label": "ECMWF"
+          },
+          {
+            "name": "sat_8h",
+            "label": "Satellite (8h)"
+          },
+          {
+            "name": "mo",
+            "label": "Met Office"
+          }
+        ],
+        "supports_adjusted": true
+      },
+      {
+        "type": "gsp",
+        "label": "Grid Supply Point",
+        "level": 10,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_mo_sat_8h",
+            "label": "ECMWF + Met Office + Satellite (8h)"
+          },
+          {
+            "name": "ecmwf_mo",
+            "label": "ECMWF + Met Office"
+          }
+        ],
+        "supports_adjusted": false
+      }
+    ],
+    "generation_sources": [
+      {
+        "source": "solar",
+        "name": "pvlive_in_day",
+        "label": "PV Live Estimated"
+      },
+      {
+        "source": "solar",
+        "name": "pvlive_day_after",
+        "label": "PV Live Updated"
+      }
+    ]
+  },
+  {
+    "country": "NL",
+    "name": "Nederland",
+    "capacity_kW": 25289328.203,
+    "centroid": {
+      "lat": 52.13,
+      "lng": 5.29
+    },
+    "region_types": [
+      {
+        "type": "national",
+        "label": "National",
+        "level": 0,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_mo_pv_sat_uncurtailed",
+            "label": "ECMWF + Met Office + PV + Satellite, Uncurtailed"
+          }
+        ],
+        "supports_adjusted": true
+      },
+      {
+        "type": "province",
+        "label": "Province",
+        "level": 10,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_mo_pv_sat_uncurtailed",
+            "label": "ECMWF + Met Office + PV + Satellite, Uncurtailed"
+          }
+        ],
+        "supports_adjusted": false
+      }
+    ],
+    "generation_sources": [
+      {
+        "source": "solar",
+        "name": "ned_nl",
+        "label": "NED NL Initial"
+      }
+    ]
+  },
+  {
+    "country": "DE",
+    "name": "Deutschland",
+    "capacity_kW": 58212000,
+    "centroid": {
+      "lat": 51.16,
+      "lng": 10.45
+    },
+    "region_types": [
+      {
+        "type": "national",
+        "label": "National",
+        "level": 0,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_pv",
+            "label": "ECMWF + PV"
+          },
+          {
+            "name": "ecmwf",
+            "label": "ECMWF"
+          },
+          {
+            "name": "mo",
+            "label": "Met Office"
+          },
+          {
+            "name": "sat_8h",
+            "label": "Satellite (8h)"
+          },
+          {
+            "name": "pv",
+            "label": "PV"
+          }
+        ],
+        "supports_adjusted": true
+      },
+      {
+        "type": "tso",
+        "label": "Transmission System Operator",
+        "level": 10,
+        "default_model": "blend",
+        "forecast_models": [
+          {
+            "name": "blend",
+            "label": "Blend"
+          },
+          {
+            "name": "ecmwf_pv",
+            "label": "ECMWF + PV"
+          },
+          {
+            "name": "ecmwf",
+            "label": "ECMWF"
+          },
+          {
+            "name": "mo",
+            "label": "Met Office"
+          },
+          {
+            "name": "sat_8h",
+            "label": "Satellite (8h)"
+          },
+          {
+            "name": "pv",
+            "label": "PV"
+          }
+        ],
+        "supports_adjusted": false
+      }
+    ],
+    "generation_sources": [
+      {
+        "source": "solar",
+        "name": "entsoe_de",
+        "label": "ENTSO-E DE"
+      }
+    ]
+  }
+]

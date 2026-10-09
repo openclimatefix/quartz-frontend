@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Nederland",
+    "type": "national",
+    "capacity_kW": 25289328.203,
+    "centroid": {
+      "lat": 52.13,
+      "lng": 5.29
+    },
+    "metadata": {}
+  }
+]

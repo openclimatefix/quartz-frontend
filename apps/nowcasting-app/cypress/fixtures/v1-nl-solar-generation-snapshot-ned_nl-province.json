@@ -1,0 +1,66 @@
+{
+  "time_utc": "2026-10-08T12:00:00Z",
+  "observer_name": "ned_nl",
+  "values": [
+    {
+      "region_name": "friesland",
+      "capacity_kW": 1348534.257,
+      "power_kW": 681504.284
+    },
+    {
+      "region_name": "drenthe",
+      "capacity_kW": 1621306.351,
+      "power_kW": 429105.764
+    },
+    {
+      "region_name": "overijssel",
+      "capacity_kW": 2084614.027,
+      "power_kW": 1053980.801
+    },
+    {
+      "region_name": "flevoland",
+      "capacity_kW": 1157376.731,
+      "power_kW": 453383.028
+    },
+    {
+      "region_name": "gelderland",
+      "capacity_kW": 3369894.033,
+      "power_kW": 1604181.878
+    },
+    {
+      "region_name": "utrecht",
+      "capacity_kW": 1365342.328,
+      "power_kW": 386938.015
+    },
+    {
+      "region_name": "noord-holland",
+      "capacity_kW": 2317449.254,
+      "power_kW": 911452.784
+    },
+    {
+      "region_name": "zuid-holland",
+      "capacity_kW": 3027027.259,
+      "power_kW": 1428151.459
+    },
+    {
+      "region_name": "zeeland",
+      "capacity_kW": 948402.476,
+      "power_kW": 281327.787
+    },
+    {
+      "region_name": "noord-brabant",
+      "capacity_kW": 4487431.838,
+      "power_kW": 2217838.425
+    },
+    {
+      "region_name": "limburg",
+      "capacity_kW": 1891128.338,
+      "power_kW": 489802.246
+    },
+    {
+      "region_name": "groningen",
+      "capacity_kW": 1670271.695,
+      "power_kW": 573961.014
+    }
+  ]
+}

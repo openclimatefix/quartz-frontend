@@ -1,0 +1,146 @@
+[
+  {
+    "name": "drenthe",
+    "type": "province",
+    "capacity_kW": 1621335.14,
+    "centroid": {
+      "lat": 52.86,
+      "lng": 6.62
+    },
+    "metadata": {
+      "region_id": 3
+    }
+  },
+  {
+    "name": "flevoland",
+    "type": "province",
+    "capacity_kW": 1157399.125,
+    "centroid": {
+      "lat": 52.53,
+      "lng": 5.6
+    },
+    "metadata": {
+      "region_id": 5
+    }
+  },
+  {
+    "name": "friesland",
+    "type": "province",
+    "capacity_kW": 1348587.779,
+    "centroid": {
+      "lat": 53.11,
+      "lng": 5.85
+    },
+    "metadata": {
+      "region_id": 2
+    }
+  },
+  {
+    "name": "gelderland",
+    "type": "province",
+    "capacity_kW": 3369949.161,
+    "centroid": {
+      "lat": 52.06,
+      "lng": 5.95
+    },
+    "metadata": {
+      "region_id": 6
+    }
+  },
+  {
+    "name": "groningen",
+    "type": "province",
+    "capacity_kW": 1670289.999,
+    "centroid": {
+      "lat": 53.22,
+      "lng": 6.74
+    },
+    "metadata": {
+      "region_id": 1
+    }
+  },
+  {
+    "name": "limburg",
+    "type": "province",
+    "capacity_kW": 1891134.474,
+    "centroid": {
+      "lat": 51.21,
+      "lng": 5.94
+    },
+    "metadata": {
+      "region_id": 12
+    }
+  },
+  {
+    "name": "noord-brabant",
+    "type": "province",
+    "capacity_kW": 4487574.637,
+    "centroid": {
+      "lat": 51.56,
+      "lng": 5.2
+    },
+    "metadata": {
+      "region_id": 11
+    }
+  },
+  {
+    "name": "noord-holland",
+    "type": "province",
+    "capacity_kW": 2317501.359,
+    "centroid": {
+      "lat": 52.58,
+      "lng": 4.87
+    },
+    "metadata": {
+      "region_id": 8
+    }
+  },
+  {
+    "name": "overijssel",
+    "type": "province",
+    "capacity_kW": 2084658.076,
+    "centroid": {
+      "lat": 52.45,
+      "lng": 6.45
+    },
+    "metadata": {
+      "region_id": 4
+    }
+  },
+  {
+    "name": "utrecht",
+    "type": "province",
+    "capacity_kW": 1365369.075,
+    "centroid": {
+      "lat": 52.08,
+      "lng": 5.17
+    },
+    "metadata": {
+      "region_id": 7
+    }
+  },
+  {
+    "name": "zeeland",
+    "type": "province",
+    "capacity_kW": 948415.301,
+    "centroid": {
+      "lat": 51.45,
+      "lng": 3.84
+    },
+    "metadata": {
+      "region_id": 10
+    }
+  },
+  {
+    "name": "zuid-holland",
+    "type": "province",
+    "capacity_kW": 3027106.18,
+    "centroid": {
+      "lat": 51.94,
+      "lng": 4.47
+    },
+    "metadata": {
+      "region_id": 9
+    }
+  }
+]

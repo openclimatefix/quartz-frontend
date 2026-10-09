@@ -13,7 +13,9 @@
     "pre-commit": "pre-commit run",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cypress": "cypress run --browser chrome",
+    "fixtures:update": "node cypress/scripts/update-fixtures.mjs",
+    "test:e2e": "TZ=Europe/London cypress run --browser electron",
+    "test:e2e:update": "TZ=Europe/London cypress run --browser electron --env updateSnapshots=true",
     "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts"
   },
   "dependencies": {
@@ -50,6 +52,7 @@
     "@babel/eslint-parser": "^7.19.1",
     "@jest/globals": "^29.7.0",
     "@openclimatefix/nowcasting-tsconfig": "*",
+    "@simonsmith/cypress-image-snapshot": "^10.0.3",
     "@storybook/addon-actions": "^8.0.8",
     "@storybook/addon-essentials": "^8.0.8",
     "@storybook/addon-links": "^8.0.8",
@@ -75,7 +78,6 @@
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "cypress": "^13.6.4",
-    "cypress-real-events": "^1.13.0",
     "eslint": "^8.23.1",
     "eslint-config-next": "^12.3.0",
     "eslint-config-prettier": "^8.5.0",
