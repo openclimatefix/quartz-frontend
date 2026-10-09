@@ -36,7 +36,7 @@ const TEST_USER = {
   email: "e2e@example.com",
   picture:
     "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='12' fill='%23888'/></svg>",
-  countries: ["GB", "NL"] // If adding a new country, add it here so the test user can access it.
+  countries: ["GB", "NL", "DE"] // If adding a new country, add it here so the test user can access it.
 };
 
 Cypress.Commands.add("login", () => {

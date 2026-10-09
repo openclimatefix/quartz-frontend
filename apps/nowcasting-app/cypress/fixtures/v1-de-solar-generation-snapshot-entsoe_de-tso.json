@@ -1,0 +1,26 @@
+{
+  "time_utc": "2026-10-08T12:00:00Z",
+  "observer_name": "entsoe_de",
+  "values": [
+    {
+      "region_name": "50hertz",
+      "capacity_kW": 15359000,
+      "power_kW": 2382692.92
+    },
+    {
+      "region_name": "amprion",
+      "capacity_kW": 13532069,
+      "power_kW": 5184586.55
+    },
+    {
+      "region_name": "tennet",
+      "capacity_kW": 21514000,
+      "power_kW": 6035394.353
+    },
+    {
+      "region_name": "transnetbw",
+      "capacity_kW": 7864000,
+      "power_kW": 854554.66
+    }
+  ]
+}

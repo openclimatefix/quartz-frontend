@@ -33,6 +33,7 @@ const start = now.minus({ days: 2 }).toISO({ suppressMilliseconds: true });
 // When adding a new country add a new entry here for a subregion of that country
 const gsp = "abha1"; //UK
 const province = "utrecht"; //NL
+const tso = "50hertz"; //DE
 
 //List of URL's, Update if query parameters change, or if new endpoints are added to the API.
 const urls = [
@@ -102,6 +103,33 @@ const urls = [
   [
     "v1",
     `/NL/solar/regions/${province}/generation?observer=ned_nl&start_utc=${start}&end_utc=${nowUtc}`
+  ],
+
+  ["v1", "/DE/solar/region-types"],
+  ["v1", "/DE/solar/generation-sources"],
+  ["v1", "/DE/solar/regions?region_type=national"],
+  ["v1", "/DE/solar/regions?region_type=tso"],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=blend`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=ecmwf`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=mo`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=sat_8h`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240`],
+  ["v1", "/DE/solar/regions/national/forecast/last-updated"],
+  [
+    "v1",
+    `/DE/solar/regions/national/generation?observer=entsoe_de&start_utc=${start}&end_utc=${nowUtc}`
+  ],
+  ["v1", `/DE/solar/forecasts/snapshot?region_type=tso&time_utc=${nowUtc}`],
+  ["v1", "/DE/solar/forecasts/period?region_type=tso"],
+  ["v1", `/DE/solar/generation/snapshot?region_type=tso&observer=entsoe_de&time_utc=${nowUtc}`],
+  ["v1", "/DE/solar/generation/period?region_type=tso&observer=entsoe_de"],
+
+  ["v1", `/DE/solar/regions/${tso}/forecast?start_utc=${start}`],
+  ["v1", `/DE/solar/regions/${tso}/forecast?start_utc=${start}&horizon_minutes=240`],
+  [
+    "v1",
+    `/DE/solar/regions/${tso}/generation?observer=entsoe_de&start_utc=${start}&end_utc=${nowUtc}`
   ],
 
   ["v0", "/solar/GB/status?UI=true"],

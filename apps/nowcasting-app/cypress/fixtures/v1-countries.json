@@ -2,7 +2,7 @@
   {
     "country": "GB",
     "name": "Great Britain",
-    "capacity_kW": 22532530,
+    "capacity_kW": 22532005,
     "centroid": {
       "lat": 54.142,
       "lng": -2.738
@@ -79,7 +79,7 @@
   {
     "country": "NL",
     "name": "Nederland",
-    "capacity_kW": 25286370.343,
+    "capacity_kW": 25289328.203,
     "centroid": {
       "lat": 52.13,
       "lng": 5.29

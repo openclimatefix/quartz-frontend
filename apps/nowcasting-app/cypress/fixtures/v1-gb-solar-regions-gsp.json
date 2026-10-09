@@ -2,7 +2,7 @@
   {
     "name": "abha1",
     "type": "gsp",
-    "capacity_kW": 229053,
+    "capacity_kW": 229047,
     "centroid": {
       "lat": 50.44,
       "lng": -3.764
@@ -16,7 +16,7 @@
   {
     "name": "abne_p",
     "type": "gsp",
-    "capacity_kW": 30070,
+    "capacity_kW": 30069,
     "centroid": {
       "lat": 56.319,
       "lng": -3.401
@@ -30,7 +30,7 @@
   {
     "name": "abth_1",
     "type": "gsp",
-    "capacity_kW": 106281,
+    "capacity_kW": 106279,
     "centroid": {
       "lat": 51.438,
       "lng": -3.352
@@ -100,7 +100,7 @@
   {
     "name": "alst_3|uskm_1",
     "type": "gsp",
-    "capacity_kW": 191740,
+    "capacity_kW": 191735,
     "centroid": {
       "lat": 51.652,
       "lng": -2.89
@@ -114,7 +114,7 @@
   {
     "name": "alve1",
     "type": "gsp",
-    "capacity_kW": 447326,
+    "capacity_kW": 447315,
     "centroid": {
       "lat": 50.894,
       "lng": -4.111
@@ -128,7 +128,7 @@
   {
     "name": "amem_1",
     "type": "gsp",
-    "capacity_kW": 136597,
+    "capacity_kW": 136594,
     "centroid": {
       "lat": 51.743,
       "lng": -0.864
@@ -156,7 +156,7 @@
   {
     "name": "ardk_p|clac_p",
     "type": "gsp",
-    "capacity_kW": 562,
+    "capacity_kW": 561,
     "centroid": {
       "lat": 56.228,
       "lng": -4.96
@@ -184,7 +184,7 @@
   {
     "name": "axmi1",
     "type": "gsp",
-    "capacity_kW": 122045,
+    "capacity_kW": 122042,
     "centroid": {
       "lat": 50.821,
       "lng": -2.876
@@ -198,7 +198,7 @@
   {
     "name": "axmi_h",
     "type": "gsp",
-    "capacity_kW": 147288,
+    "capacity_kW": 147284,
     "centroid": {
       "lat": 50.943,
       "lng": -2.511
@@ -310,7 +310,7 @@
   {
     "name": "bedd_1",
     "type": "gsp",
-    "capacity_kW": 43958,
+    "capacity_kW": 43957,
     "centroid": {
       "lat": 51.332,
       "lng": -0.077
@@ -352,7 +352,7 @@
   {
     "name": "berw",
     "type": "gsp",
-    "capacity_kW": 9476,
+    "capacity_kW": 9475,
     "centroid": {
       "lat": 55.761,
       "lng": -2.094
@@ -366,7 +366,7 @@
   {
     "name": "besw_1",
     "type": "gsp",
-    "capacity_kW": 290856,
+    "capacity_kW": 290850,
     "centroid": {
       "lat": 52.284,
       "lng": -1.53
@@ -380,7 +380,7 @@
   {
     "name": "bicf_1",
     "type": "gsp",
-    "capacity_kW": 296939,
+    "capacity_kW": 296932,
     "centroid": {
       "lat": 53.077,
       "lng": -0.222
@@ -394,7 +394,7 @@
   {
     "name": "birk_1",
     "type": "gsp",
-    "capacity_kW": 28823,
+    "capacity_kW": 28822,
     "centroid": {
       "lat": 53.355,
       "lng": -3.069
@@ -408,7 +408,7 @@
   {
     "name": "bisw_1",
     "type": "gsp",
-    "capacity_kW": 393756,
+    "capacity_kW": 393747,
     "centroid": {
       "lat": 52.218,
       "lng": -2.656
@@ -422,7 +422,7 @@
   {
     "name": "blytb1",
     "type": "gsp",
-    "capacity_kW": 36815,
+    "capacity_kW": 36814,
     "centroid": {
       "lat": 55.13,
       "lng": -1.717
@@ -464,7 +464,7 @@
   {
     "name": "boln_1",
     "type": "gsp",
-    "capacity_kW": 178638,
+    "capacity_kW": 178633,
     "centroid": {
       "lat": 51.018,
       "lng": -0.267
@@ -492,7 +492,7 @@
   {
     "name": "botw_1",
     "type": "gsp",
-    "capacity_kW": 70471,
+    "capacity_kW": 70469,
     "centroid": {
       "lat": 50.933,
       "lng": -1.24
@@ -520,7 +520,7 @@
   {
     "name": "brai_1",
     "type": "gsp",
-    "capacity_kW": 81959,
+    "capacity_kW": 81957,
     "centroid": {
       "lat": 51.865,
       "lng": 0.56
@@ -548,7 +548,7 @@
   {
     "name": "braw_1",
     "type": "gsp",
-    "capacity_kW": 56482,
+    "capacity_kW": 56481,
     "centroid": {
       "lat": 53.966,
       "lng": -1.95
@@ -562,7 +562,7 @@
   {
     "name": "bred_1",
     "type": "gsp",
-    "capacity_kW": 31952,
+    "capacity_kW": 31951,
     "centroid": {
       "lat": 53.392,
       "lng": -2.126
@@ -576,7 +576,7 @@
   {
     "name": "brfo_1|clt03",
     "type": "gsp",
-    "capacity_kW": 518587.999,
+    "capacity_kW": 518576,
     "centroid": {
       "lat": 52.217,
       "lng": 1.065
@@ -604,7 +604,7 @@
   {
     "name": "brim_1",
     "type": "gsp",
-    "capacity_kW": 40379,
+    "capacity_kW": 40378,
     "centroid": {
       "lat": 51.664,
       "lng": -0.063
@@ -618,7 +618,7 @@
   {
     "name": "brle_1",
     "type": "gsp",
-    "capacity_kW": 105355,
+    "capacity_kW": 105352,
     "centroid": {
       "lat": 51.406,
       "lng": -1.247
@@ -632,7 +632,7 @@
   {
     "name": "brle_1|flee_1",
     "type": "gsp",
-    "capacity_kW": 470555,
+    "capacity_kW": 470544,
     "centroid": {
       "lat": 51.271,
       "lng": -1.049
@@ -688,7 +688,7 @@
   {
     "name": "brwa1",
     "type": "gsp",
-    "capacity_kW": 216739,
+    "capacity_kW": 216734,
     "centroid": {
       "lat": 51.104,
       "lng": -2.873
@@ -716,7 +716,7 @@
   {
     "name": "burm_1",
     "type": "gsp",
-    "capacity_kW": 345524,
+    "capacity_kW": 345515,
     "centroid": {
       "lat": 52.251,
       "lng": 0.235
@@ -730,7 +730,7 @@
   {
     "name": "bush_1",
     "type": "gsp",
-    "capacity_kW": 56472,
+    "capacity_kW": 56470,
     "centroid": {
       "lat": 52.743,
       "lng": -2.129
@@ -744,7 +744,7 @@
   {
     "name": "bust_1",
     "type": "gsp",
-    "capacity_kW": 26579,
+    "capacity_kW": 26578,
     "centroid": {
       "lat": 52.563,
       "lng": -1.93
@@ -800,7 +800,7 @@
   {
     "name": "cantn1",
     "type": "gsp",
-    "capacity_kW": 137134,
+    "capacity_kW": 137130,
     "centroid": {
       "lat": 51.268,
       "lng": 0.961
@@ -814,7 +814,7 @@
   {
     "name": "capea1",
     "type": "gsp",
-    "capacity_kW": 36094,
+    "capacity_kW": 36093,
     "centroid": {
       "lat": 53.215,
       "lng": -2.863
@@ -828,7 +828,7 @@
   {
     "name": "care_1",
     "type": "gsp",
-    "capacity_kW": 39728,
+    "capacity_kW": 39727,
     "centroid": {
       "lat": 51.522,
       "lng": -3.145
@@ -842,7 +842,7 @@
   {
     "name": "carr_1",
     "type": "gsp",
-    "capacity_kW": 20532.42,
+    "capacity_kW": 20531.88,
     "centroid": {
       "lat": 53.427,
       "lng": -2.369
@@ -856,7 +856,7 @@
   {
     "name": "carr_1|fidf_1",
     "type": "gsp",
-    "capacity_kW": 76046,
+    "capacity_kW": 76044,
     "centroid": {
       "lat": 53.312,
       "lng": -2.46
@@ -884,7 +884,7 @@
   {
     "name": "caty",
     "type": "gsp",
-    "capacity_kW": 1941,
+    "capacity_kW": 1940,
     "centroid": {
       "lat": 55.846,
       "lng": -4.176
@@ -912,7 +912,7 @@
   {
     "name": "cell_1",
     "type": "gsp",
-    "capacity_kW": 191526,
+    "capacity_kW": 191522,
     "centroid": {
       "lat": 53.009,
       "lng": -2.263
@@ -968,7 +968,7 @@
   {
     "name": "chic_1",
     "type": "gsp",
-    "capacity_kW": 58254,
+    "capacity_kW": 58253,
     "centroid": {
       "lat": 50.722,
       "lng": -2.492
@@ -982,7 +982,7 @@
   {
     "name": "chsi_1",
     "type": "gsp",
-    "capacity_kW": 32274,
+    "capacity_kW": 32273,
     "centroid": {
       "lat": 51.378,
       "lng": -0.332
@@ -996,7 +996,7 @@
   {
     "name": "chte_1",
     "type": "gsp",
-    "capacity_kW": 441266,
+    "capacity_kW": 441256,
     "centroid": {
       "lat": 53.179,
       "lng": -1.316
@@ -1066,7 +1066,7 @@
   {
     "name": "cock",
     "type": "gsp",
-    "capacity_kW": 13229,
+    "capacity_kW": 13228,
     "centroid": {
       "lat": 55.912,
       "lng": -2.842
@@ -1080,7 +1080,7 @@
   {
     "name": "conqa1|sasa",
     "type": "gsp",
-    "capacity_kW": 144406,
+    "capacity_kW": 144402,
     "centroid": {
       "lat": 53.187,
       "lng": -3.29
@@ -1108,7 +1108,7 @@
   {
     "name": "cove_1",
     "type": "gsp",
-    "capacity_kW": 280253,
+    "capacity_kW": 280247,
     "centroid": {
       "lat": 52.407,
       "lng": -1.274
@@ -1122,7 +1122,7 @@
   {
     "name": "cowl_1",
     "type": "gsp",
-    "capacity_kW": 457047,
+    "capacity_kW": 457036,
     "centroid": {
       "lat": 51.746,
       "lng": -1.294
@@ -1164,7 +1164,7 @@
   {
     "name": "creb_1",
     "type": "gsp",
-    "capacity_kW": 247523,
+    "capacity_kW": 247517,
     "centroid": {
       "lat": 53.932,
       "lng": -0.494
@@ -1206,7 +1206,7 @@
   {
     "name": "cupa",
     "type": "gsp",
-    "capacity_kW": 17913,
+    "capacity_kW": 17912,
     "centroid": {
       "lat": 56.327,
       "lng": -2.993
@@ -1304,7 +1304,7 @@
   {
     "name": "drak_1",
     "type": "gsp",
-    "capacity_kW": 151198,
+    "capacity_kW": 151195,
     "centroid": {
       "lat": 52.79,
       "lng": -1.609
@@ -1346,7 +1346,7 @@
   {
     "name": "drum",
     "type": "gsp",
-    "capacity_kW": 3892,
+    "capacity_kW": 3891,
     "centroid": {
       "lat": 55.962,
       "lng": -4.37
@@ -1401,7 +1401,7 @@
   {
     "name": "dumf",
     "type": "gsp",
-    "capacity_kW": 13875,
+    "capacity_kW": 13874,
     "centroid": {
       "lat": 55.171,
       "lng": -3.798
@@ -1429,7 +1429,7 @@
   {
     "name": "dunf|towh",
     "type": "gsp",
-    "capacity_kW": 58243,
+    "capacity_kW": 58242,
     "centroid": {
       "lat": 56.09,
       "lng": -3.533
@@ -1485,7 +1485,7 @@
   {
     "name": "easo_1",
     "type": "gsp",
-    "capacity_kW": 305183,
+    "capacity_kW": 305176,
     "centroid": {
       "lat": 52.29,
       "lng": -0.214
@@ -1513,7 +1513,7 @@
   {
     "name": "ecla_1",
     "type": "gsp",
-    "capacity_kW": 218220,
+    "capacity_kW": 218215,
     "centroid": {
       "lat": 52.048,
       "lng": -1.019
@@ -1611,7 +1611,7 @@
   {
     "name": "ella_1",
     "type": "gsp",
-    "capacity_kW": 43733,
+    "capacity_kW": 43732,
     "centroid": {
       "lat": 53.658,
       "lng": -1.866
@@ -1625,7 +1625,7 @@
   {
     "name": "elst_1",
     "type": "gsp",
-    "capacity_kW": 48146,
+    "capacity_kW": 48145,
     "centroid": {
       "lat": 51.707,
       "lng": -0.345
@@ -1639,7 +1639,7 @@
   {
     "name": "ende_1",
     "type": "gsp",
-    "capacity_kW": 219240,
+    "capacity_kW": 219235,
     "centroid": {
       "lat": 52.657,
       "lng": -1.24
@@ -1667,7 +1667,7 @@
   {
     "name": "exet1",
     "type": "gsp",
-    "capacity_kW": 225412,
+    "capacity_kW": 225407,
     "centroid": {
       "lat": 50.816,
       "lng": -3.459
@@ -1709,7 +1709,7 @@
   {
     "name": "fawl_1",
     "type": "gsp",
-    "capacity_kW": 105163,
+    "capacity_kW": 105161,
     "centroid": {
       "lat": 50.713,
       "lng": -1.333
@@ -1723,7 +1723,7 @@
   {
     "name": "feck_6",
     "type": "gsp",
-    "capacity_kW": 411993,
+    "capacity_kW": 411984,
     "centroid": {
       "lat": 52.087,
       "lng": -1.834
@@ -1737,7 +1737,7 @@
   {
     "name": "ferra2",
     "type": "gsp",
-    "capacity_kW": 31347,
+    "capacity_kW": 31346,
     "centroid": {
       "lat": 53.664,
       "lng": -1.303
@@ -1751,7 +1751,7 @@
   {
     "name": "ferrb_m",
     "type": "gsp",
-    "capacity_kW": 61244,
+    "capacity_kW": 61242,
     "centroid": {
       "lat": 53.828,
       "lng": -1.328
@@ -1793,7 +1793,7 @@
   {
     "name": "fidf_1",
     "type": "gsp",
-    "capacity_kW": 55513.58,
+    "capacity_kW": 55512.119,
     "centroid": {
       "lat": 53.286,
       "lng": -2.476
@@ -1821,7 +1821,7 @@
   {
     "name": "flee_1",
     "type": "gsp",
-    "capacity_kW": 365200,
+    "capacity_kW": 365192,
     "centroid": {
       "lat": 51.196,
       "lng": -0.856
@@ -2003,7 +2003,7 @@
   {
     "name": "gren_1",
     "type": "gsp",
-    "capacity_kW": 402268,
+    "capacity_kW": 402259,
     "centroid": {
       "lat": 52.461,
       "lng": -0.764
@@ -2017,7 +2017,7 @@
   {
     "name": "griw_1",
     "type": "gsp",
-    "capacity_kW": 100880,
+    "capacity_kW": 100877,
     "centroid": {
       "lat": 53.585,
       "lng": -0.209
@@ -2073,7 +2073,7 @@
   {
     "name": "hack_6",
     "type": "gsp",
-    "capacity_kW": 10432,
+    "capacity_kW": 10431,
     "centroid": {
       "lat": 51.582,
       "lng": -0.039
@@ -2101,7 +2101,7 @@
   {
     "name": "hamhc1",
     "type": "gsp",
-    "capacity_kW": 160661,
+    "capacity_kW": 160657,
     "centroid": {
       "lat": 52.528,
       "lng": -1.687
@@ -2115,7 +2115,7 @@
   {
     "name": "hark_1|rrig",
     "type": "gsp",
-    "capacity_kW": 109735,
+    "capacity_kW": 109733,
     "centroid": {
       "lat": 54.729,
       "lng": -3.004
@@ -2129,7 +2129,7 @@
   {
     "name": "harm_6",
     "type": "gsp",
-    "capacity_kW": 142253,
+    "capacity_kW": 142250,
     "centroid": {
       "lat": 54.686,
       "lng": -1.313
@@ -2143,7 +2143,7 @@
   {
     "name": "hawi",
     "type": "gsp",
-    "capacity_kW": 4061,
+    "capacity_kW": 4059.999,
     "centroid": {
       "lat": 55.409,
       "lng": -2.677
@@ -2157,7 +2157,7 @@
   {
     "name": "hawp_6",
     "type": "gsp",
-    "capacity_kW": 27685,
+    "capacity_kW": 27684,
     "centroid": {
       "lat": 54.816,
       "lng": -1.407
@@ -2185,7 +2185,7 @@
   {
     "name": "heys_1|heys1|ormo",
     "type": "gsp",
-    "capacity_kW": 32435,
+    "capacity_kW": 32433.999,
     "centroid": {
       "lat": 54.039,
       "lng": -2.748
@@ -2213,7 +2213,7 @@
   {
     "name": "hurs_1",
     "type": "gsp",
-    "capacity_kW": 23704,
+    "capacity_kW": 23703,
     "centroid": {
       "lat": 51.441,
       "lng": 0.052
@@ -2227,7 +2227,7 @@
   {
     "name": "hutt_1",
     "type": "gsp",
-    "capacity_kW": 63249,
+    "capacity_kW": 63247,
     "centroid": {
       "lat": 54.476,
       "lng": -2.642
@@ -2254,7 +2254,7 @@
   {
     "name": "indq1",
     "type": "gsp",
-    "capacity_kW": 414499,
+    "capacity_kW": 414489,
     "centroid": {
       "lat": 50.317,
       "lng": -5.061
@@ -2296,7 +2296,7 @@
   {
     "name": "iroa1",
     "type": "gsp",
-    "capacity_kW": 359767,
+    "capacity_kW": 359759,
     "centroid": {
       "lat": 51.61,
       "lng": -2.377
@@ -2310,7 +2310,7 @@
   {
     "name": "ironb1",
     "type": "gsp",
-    "capacity_kW": 120759,
+    "capacity_kW": 120757,
     "centroid": {
       "lat": 52.605,
       "lng": -2.541
@@ -2338,7 +2338,7 @@
   {
     "name": "iver_1",
     "type": "gsp",
-    "capacity_kW": 26817,
+    "capacity_kW": 26816,
     "centroid": {
       "lat": 51.546,
       "lng": -0.582
@@ -2352,7 +2352,7 @@
   {
     "name": "iver_1|iver_6",
     "type": "gsp",
-    "capacity_kW": 36782,
+    "capacity_kW": 36781,
     "centroid": {
       "lat": 51.543,
       "lng": -0.566
@@ -2380,7 +2380,7 @@
   {
     "name": "john",
     "type": "gsp",
-    "capacity_kW": 6603,
+    "capacity_kW": 6602,
     "centroid": {
       "lat": 55.85,
       "lng": -4.627
@@ -2394,7 +2394,7 @@
   {
     "name": "jord_3",
     "type": "gsp",
-    "capacity_kW": 8443,
+    "capacity_kW": 8442,
     "centroid": {
       "lat": 53.323,
       "lng": -1.519
@@ -2408,7 +2408,7 @@
   {
     "name": "kaim",
     "type": "gsp",
-    "capacity_kW": 23908,
+    "capacity_kW": 23907,
     "centroid": {
       "lat": 55.73,
       "lng": -3.239
@@ -2422,7 +2422,7 @@
   {
     "name": "kead_1",
     "type": "gsp",
-    "capacity_kW": 241682,
+    "capacity_kW": 241676,
     "centroid": {
       "lat": 53.46,
       "lng": -0.381
@@ -2436,7 +2436,7 @@
   {
     "name": "kear_1",
     "type": "gsp",
-    "capacity_kW": 56920,
+    "capacity_kW": 56919,
     "centroid": {
       "lat": 53.577,
       "lng": -2.43
@@ -2464,7 +2464,7 @@
   {
     "name": "kems_1",
     "type": "gsp",
-    "capacity_kW": 88689,
+    "capacity_kW": 88687,
     "centroid": {
       "lat": 51.345,
       "lng": 0.793
@@ -2478,7 +2478,7 @@
   {
     "name": "kiby_1",
     "type": "gsp",
-    "capacity_kW": 37026,
+    "capacity_kW": 37025,
     "centroid": {
       "lat": 53.539,
       "lng": -2.976
@@ -2492,7 +2492,7 @@
   {
     "name": "kiby_g|wasf_1",
     "type": "gsp",
-    "capacity_kW": 20161,
+    "capacity_kW": 20160,
     "centroid": {
       "lat": 53.564,
       "lng": -2.804
@@ -2506,7 +2506,7 @@
   {
     "name": "kier",
     "type": "gsp",
-    "capacity_kW": 30381,
+    "capacity_kW": 30380,
     "centroid": {
       "lat": 55.958,
       "lng": -4.254
@@ -2520,7 +2520,7 @@
   {
     "name": "kiin_p",
     "type": "gsp",
-    "capacity_kW": 967,
+    "capacity_kW": 966,
     "centroid": {
       "lat": 56.46,
       "lng": -4.364
@@ -2604,7 +2604,7 @@
   {
     "name": "kino_1",
     "type": "gsp",
-    "capacity_kW": 44011,
+    "capacity_kW": 44010,
     "centroid": {
       "lat": 51.379,
       "lng": 0.468
@@ -2618,7 +2618,7 @@
   {
     "name": "kirkb1",
     "type": "gsp",
-    "capacity_kW": 22595,
+    "capacity_kW": 22594,
     "centroid": {
       "lat": 53.789,
       "lng": -1.592
@@ -2632,7 +2632,7 @@
   {
     "name": "kitw_1",
     "type": "gsp",
-    "capacity_kW": 33093,
+    "capacity_kW": 33092,
     "centroid": {
       "lat": 52.415,
       "lng": -1.973
@@ -2646,7 +2646,7 @@
   {
     "name": "knar",
     "type": "gsp",
-    "capacity_kW": 73489,
+    "capacity_kW": 73488,
     "centroid": {
       "lat": 54.137,
       "lng": -1.457
@@ -2702,7 +2702,7 @@
   {
     "name": "land1",
     "type": "gsp",
-    "capacity_kW": 157414,
+    "capacity_kW": 157410,
     "centroid": {
       "lat": 50.482,
       "lng": -4.301
@@ -2716,7 +2716,7 @@
   {
     "name": "lega_1",
     "type": "gsp",
-    "capacity_kW": 230258,
+    "capacity_kW": 230252,
     "centroid": {
       "lat": 52.776,
       "lng": -3.156
@@ -2730,7 +2730,7 @@
   {
     "name": "leve",
     "type": "gsp",
-    "capacity_kW": 9305,
+    "capacity_kW": 9304,
     "centroid": {
       "lat": 56.228,
       "lng": -2.868
@@ -2758,7 +2758,7 @@
   {
     "name": "linm",
     "type": "gsp",
-    "capacity_kW": 12906,
+    "capacity_kW": 12905,
     "centroid": {
       "lat": 55.58,
       "lng": -3.711
@@ -2786,7 +2786,7 @@
   {
     "name": "litt_c",
     "type": "gsp",
-    "capacity_kW": 14865,
+    "capacity_kW": 14864,
     "centroid": {
       "lat": 51.458,
       "lng": 0.174
@@ -2814,7 +2814,7 @@
   {
     "name": "lodr_6",
     "type": "gsp",
-    "capacity_kW": 5823,
+    "capacity_kW": 5822,
     "centroid": {
       "lat": 51.534,
       "lng": -0.169
@@ -2842,7 +2842,7 @@
   {
     "name": "love_1",
     "type": "gsp",
-    "capacity_kW": 289521,
+    "capacity_kW": 289514,
     "centroid": {
       "lat": 50.869,
       "lng": -0.853
@@ -2856,7 +2856,7 @@
   {
     "name": "luna_p",
     "type": "gsp",
-    "capacity_kW": 24675,
+    "capacity_kW": 24674,
     "centroid": {
       "lat": 56.721,
       "lng": -2.985
@@ -2898,7 +2898,7 @@
   {
     "name": "macd_p",
     "type": "gsp",
-    "capacity_kW": 4542,
+    "capacity_kW": 4541,
     "centroid": {
       "lat": 57.648,
       "lng": -2.517
@@ -2926,7 +2926,7 @@
   {
     "name": "mann_1",
     "type": "gsp",
-    "capacity_kW": 580093,
+    "capacity_kW": 580079,
     "centroid": {
       "lat": 50.9,
       "lng": -1.988
@@ -2954,7 +2954,7 @@
   {
     "name": "melk_1",
     "type": "gsp",
-    "capacity_kW": 659474,
+    "capacity_kW": 659458,
     "centroid": {
       "lat": 51.344,
       "lng": -2.011
@@ -2968,7 +2968,7 @@
   {
     "name": "milc_p",
     "type": "gsp",
-    "capacity_kW": 8424,
+    "capacity_kW": 8423,
     "centroid": {
       "lat": 56.511,
       "lng": -2.873
@@ -2996,7 +2996,7 @@
   {
     "name": "mity_1",
     "type": "gsp",
-    "capacity_kW": 527972,
+    "capacity_kW": 527959,
     "centroid": {
       "lat": 51.676,
       "lng": -1.796
@@ -3094,7 +3094,7 @@
   {
     "name": "newx_6",
     "type": "gsp",
-    "capacity_kW": 20337,
+    "capacity_kW": 20336,
     "centroid": {
       "lat": 51.477,
       "lng": -0.066
@@ -3108,7 +3108,7 @@
   {
     "name": "nfle",
     "type": "gsp",
-    "capacity_kW": 120274,
+    "capacity_kW": 120271,
     "centroid": {
       "lat": 51.261,
       "lng": 0.218
@@ -3136,7 +3136,7 @@
   {
     "name": "ninf_1",
     "type": "gsp",
-    "capacity_kW": 238550,
+    "capacity_kW": 238544,
     "centroid": {
       "lat": 50.962,
       "lng": 0.348
@@ -3150,7 +3150,7 @@
   {
     "name": "norl_3",
     "type": "gsp",
-    "capacity_kW": 8253,
+    "capacity_kW": 8252,
     "centroid": {
       "lat": 53.362,
       "lng": -1.525
@@ -3164,7 +3164,7 @@
   {
     "name": "norm_1|sall1",
     "type": "gsp",
-    "capacity_kW": 447364,
+    "capacity_kW": 447353,
     "centroid": {
       "lat": 52.67,
       "lng": 1.316
@@ -3178,7 +3178,7 @@
   {
     "name": "nort_1",
     "type": "gsp",
-    "capacity_kW": 227233,
+    "capacity_kW": 227227,
     "centroid": {
       "lat": 54.369,
       "lng": -1.673
@@ -3192,7 +3192,7 @@
   {
     "name": "nurs_1",
     "type": "gsp",
-    "capacity_kW": 167197,
+    "capacity_kW": 167193,
     "centroid": {
       "lat": 51.008,
       "lng": -1.461
@@ -3248,7 +3248,7 @@
   {
     "name": "osba_1",
     "type": "gsp",
-    "capacity_kW": 54182,
+    "capacity_kW": 54181,
     "centroid": {
       "lat": 54.215,
       "lng": -0.813
@@ -3262,7 +3262,7 @@
   {
     "name": "padib1",
     "type": "gsp",
-    "capacity_kW": 38353,
+    "capacity_kW": 38352,
     "centroid": {
       "lat": 53.934,
       "lng": -2.322
@@ -3332,7 +3332,7 @@
   {
     "name": "pelh_1",
     "type": "gsp",
-    "capacity_kW": 341361,
+    "capacity_kW": 341353,
     "centroid": {
       "lat": 51.999,
       "lng": 0.414
@@ -3346,7 +3346,7 @@
   {
     "name": "pemb_1",
     "type": "gsp",
-    "capacity_kW": 220926,
+    "capacity_kW": 220921,
     "centroid": {
       "lat": 51.824,
       "lng": -4.945
@@ -3360,7 +3360,7 @@
   {
     "name": "pene_1",
     "type": "gsp",
-    "capacity_kW": 73921,
+    "capacity_kW": 73919,
     "centroid": {
       "lat": 53.8,
       "lng": -2.63
@@ -3374,7 +3374,7 @@
   {
     "name": "penn_1",
     "type": "gsp",
-    "capacity_kW": 61333,
+    "capacity_kW": 61332,
     "centroid": {
       "lat": 52.524,
       "lng": -2.191
@@ -3388,7 +3388,7 @@
   {
     "name": "pent_1",
     "type": "gsp",
-    "capacity_kW": 51315,
+    "capacity_kW": 51314,
     "centroid": {
       "lat": 53.147,
       "lng": -3.889
@@ -3402,7 +3402,7 @@
   {
     "name": "penw_1|stah_1|wabo",
     "type": "gsp",
-    "capacity_kW": 105259,
+    "capacity_kW": 105257,
     "centroid": {
       "lat": 53.765,
       "lng": -2.814
@@ -3444,7 +3444,7 @@
   {
     "name": "poob",
     "type": "gsp",
-    "capacity_kW": 10663,
+    "capacity_kW": 10662,
     "centroid": {
       "lat": 55.862,
       "lng": -3.06
@@ -3500,7 +3500,7 @@
   {
     "name": "pyle_1",
     "type": "gsp",
-    "capacity_kW": 46538,
+    "capacity_kW": 46537,
     "centroid": {
       "lat": 51.505,
       "lng": -3.631
@@ -3528,7 +3528,7 @@
   {
     "name": "rain_1",
     "type": "gsp",
-    "capacity_kW": 49933,
+    "capacity_kW": 49932,
     "centroid": {
       "lat": 53.435,
       "lng": -2.711
@@ -3556,7 +3556,7 @@
   {
     "name": "rass_1",
     "type": "gsp",
-    "capacity_kW": 113017,
+    "capacity_kW": 113014,
     "centroid": {
       "lat": 52.037,
       "lng": -3.313
@@ -3570,7 +3570,7 @@
   {
     "name": "rats_1",
     "type": "gsp",
-    "capacity_kW": 142098,
+    "capacity_kW": 142095,
     "centroid": {
       "lat": 52.807,
       "lng": -1.101
@@ -3598,7 +3598,7 @@
   {
     "name": "rayl_1",
     "type": "gsp",
-    "capacity_kW": 552562,
+    "capacity_kW": 552549,
     "centroid": {
       "lat": 51.713,
       "lng": 0.729
@@ -3654,7 +3654,7 @@
   {
     "name": "rich_j|rich1",
     "type": "gsp",
-    "capacity_kW": 67537,
+    "capacity_kW": 67535,
     "centroid": {
       "lat": 51.298,
       "lng": 1.339
@@ -3668,7 +3668,7 @@
   {
     "name": "roch_1",
     "type": "gsp",
-    "capacity_kW": 26748,
+    "capacity_kW": 26747,
     "centroid": {
       "lat": 53.689,
       "lng": -2.17
@@ -3682,7 +3682,7 @@
   {
     "name": "rugeb1",
     "type": "gsp",
-    "capacity_kW": 90758,
+    "capacity_kW": 90756,
     "centroid": {
       "lat": 52.721,
       "lng": -1.897
@@ -3710,7 +3710,7 @@
   {
     "name": "saco",
     "type": "gsp",
-    "capacity_kW": 116014,
+    "capacity_kW": 116011,
     "centroid": {
       "lat": 55.742,
       "lng": -4.778
@@ -3724,7 +3724,7 @@
   {
     "name": "safo_1",
     "type": "gsp",
-    "capacity_kW": 112359,
+    "capacity_kW": 112356,
     "centroid": {
       "lat": 51.329,
       "lng": -2.803
@@ -3738,7 +3738,7 @@
   {
     "name": "salh_1",
     "type": "gsp",
-    "capacity_kW": 1584,
+    "capacity_kW": 1583,
     "centroid": {
       "lat": 54.629,
       "lng": -1.208
@@ -3780,7 +3780,7 @@
   {
     "name": "sbar",
     "type": "gsp",
-    "capacity_kW": 81316,
+    "capacity_kW": 81314,
     "centroid": {
       "lat": 52.954,
       "lng": -1.077
@@ -3794,7 +3794,7 @@
   {
     "name": "seab1",
     "type": "gsp",
-    "capacity_kW": 120543,
+    "capacity_kW": 120541,
     "centroid": {
       "lat": 51.31,
       "lng": -2.566
@@ -3808,7 +3808,7 @@
   {
     "name": "seab1|safo_1",
     "type": "gsp",
-    "capacity_kW": 232902,
+    "capacity_kW": 232897,
     "centroid": {
       "lat": 51.319,
       "lng": -2.679
@@ -3822,7 +3822,7 @@
   {
     "name": "sell_1",
     "type": "gsp",
-    "capacity_kW": 107714,
+    "capacity_kW": 107711,
     "centroid": {
       "lat": 51.116,
       "lng": 0.925
@@ -3906,7 +3906,7 @@
   {
     "name": "shrw_1",
     "type": "gsp",
-    "capacity_kW": 83848,
+    "capacity_kW": 83846,
     "centroid": {
       "lat": 52.665,
       "lng": -2.828
@@ -3948,7 +3948,7 @@
   {
     "name": "sklgb1",
     "type": "gsp",
-    "capacity_kW": 60247,
+    "capacity_kW": 60245,
     "centroid": {
       "lat": 53.753,
       "lng": -1.608
@@ -3976,7 +3976,7 @@
   {
     "name": "sman_1",
     "type": "gsp",
-    "capacity_kW": 25016,
+    "capacity_kW": 25015,
     "centroid": {
       "lat": 53.35,
       "lng": -2.251
@@ -4004,7 +4004,7 @@
   {
     "name": "spen_1",
     "type": "gsp",
-    "capacity_kW": 172316,
+    "capacity_kW": 172313,
     "centroid": {
       "lat": 54.648,
       "lng": -1.863
@@ -4032,7 +4032,7 @@
   {
     "name": "stal_1",
     "type": "gsp",
-    "capacity_kW": 47955,
+    "capacity_kW": 47953,
     "centroid": {
       "lat": 53.425,
       "lng": -1.968
@@ -4046,7 +4046,7 @@
   {
     "name": "stay_1",
     "type": "gsp",
-    "capacity_kW": 411369,
+    "capacity_kW": 411360,
     "centroid": {
       "lat": 53.156,
       "lng": -0.843
@@ -4102,7 +4102,7 @@
   {
     "name": "stir",
     "type": "gsp",
-    "capacity_kW": 18190,
+    "capacity_kW": 18189,
     "centroid": {
       "lat": 56.102,
       "lng": -3.954
@@ -4144,7 +4144,7 @@
   {
     "name": "stri_p",
     "type": "gsp",
-    "capacity_kW": 14779,
+    "capacity_kW": 14778,
     "centroid": {
       "lat": 57.531,
       "lng": -2.175
@@ -4158,7 +4158,7 @@
   {
     "name": "sund_1",
     "type": "gsp",
-    "capacity_kW": 238935,
+    "capacity_kW": 238929,
     "centroid": {
       "lat": 51.948,
       "lng": -0.589
@@ -4172,7 +4172,7 @@
   {
     "name": "swan_1",
     "type": "gsp",
-    "capacity_kW": 467083,
+    "capacity_kW": 467072,
     "centroid": {
       "lat": 52.033,
       "lng": -4.074
@@ -4186,7 +4186,7 @@
   {
     "name": "tarl_p",
     "type": "gsp",
-    "capacity_kW": 11037,
+    "capacity_kW": 11036,
     "centroid": {
       "lat": 57.102,
       "lng": -3.088
@@ -4200,7 +4200,7 @@
   {
     "name": "taun1",
     "type": "gsp",
-    "capacity_kW": 96690,
+    "capacity_kW": 96687,
     "centroid": {
       "lat": 51.078,
       "lng": -3.395
@@ -4256,7 +4256,7 @@
   {
     "name": "thom_6",
     "type": "gsp",
-    "capacity_kW": 80592,
+    "capacity_kW": 80590,
     "centroid": {
       "lat": 53.547,
       "lng": -1.124
@@ -4284,7 +4284,7 @@
   {
     "name": "thur_6",
     "type": "gsp",
-    "capacity_kW": 30909,
+    "capacity_kW": 30908,
     "centroid": {
       "lat": 53.406,
       "lng": -1.199
@@ -4298,7 +4298,7 @@
   {
     "name": "tilbb_1",
     "type": "gsp",
-    "capacity_kW": 95973,
+    "capacity_kW": 95971,
     "centroid": {
       "lat": 51.533,
       "lng": 0.431
@@ -4340,7 +4340,7 @@
   {
     "name": "traw_1",
     "type": "gsp",
-    "capacity_kW": 42390,
+    "capacity_kW": 42389,
     "centroid": {
       "lat": 52.872,
       "lng": -3.905
@@ -4368,7 +4368,7 @@
   {
     "name": "tyne_1|tyne_2",
     "type": "gsp",
-    "capacity_kW": 40108,
+    "capacity_kW": 40107,
     "centroid": {
       "lat": 55.024,
       "lng": -1.508
@@ -4382,7 +4382,7 @@
   {
     "name": "uppb_1|uppb_3",
     "type": "gsp",
-    "capacity_kW": 90781,
+    "capacity_kW": 90779,
     "centroid": {
       "lat": 51.648,
       "lng": -3.358
@@ -4396,7 +4396,7 @@
   {
     "name": "walh_1",
     "type": "gsp",
-    "capacity_kW": 125979,
+    "capacity_kW": 125976,
     "centroid": {
       "lat": 51.863,
       "lng": -2.304
@@ -4410,7 +4410,7 @@
   {
     "name": "walp_1",
     "type": "gsp",
-    "capacity_kW": 349280,
+    "capacity_kW": 349272,
     "centroid": {
       "lat": 52.661,
       "lng": 0.407
@@ -4424,7 +4424,7 @@
   {
     "name": "walp_b",
     "type": "gsp",
-    "capacity_kW": 221303,
+    "capacity_kW": 221298,
     "centroid": {
       "lat": 52.828,
       "lng": -0.15
@@ -4438,7 +4438,7 @@
   {
     "name": "warl_1",
     "type": "gsp",
-    "capacity_kW": 148564,
+    "capacity_kW": 148561,
     "centroid": {
       "lat": 51.598,
       "lng": 0.301
@@ -4452,7 +4452,7 @@
   {
     "name": "watfs_1",
     "type": "gsp",
-    "capacity_kW": 32913,
+    "capacity_kW": 32912,
     "centroid": {
       "lat": 51.691,
       "lng": -0.55
@@ -4466,7 +4466,7 @@
   {
     "name": "wbol_6",
     "type": "gsp",
-    "capacity_kW": 42554,
+    "capacity_kW": 42553,
     "centroid": {
       "lat": 54.936,
       "lng": -1.477
@@ -4480,7 +4480,7 @@
   {
     "name": "wbur_1",
     "type": "gsp",
-    "capacity_kW": 164020,
+    "capacity_kW": 164016,
     "centroid": {
       "lat": 53.229,
       "lng": -0.526
@@ -4494,7 +4494,7 @@
   {
     "name": "wfie",
     "type": "gsp",
-    "capacity_kW": 4176,
+    "capacity_kW": 4175,
     "centroid": {
       "lat": 56.13,
       "lng": -3.311
@@ -4536,7 +4536,7 @@
   {
     "name": "whga_1",
     "type": "gsp",
-    "capacity_kW": 26760,
+    "capacity_kW": 26759,
     "centroid": {
       "lat": 53.544,
       "lng": -2.151
@@ -4564,7 +4564,7 @@
   {
     "name": "wiba_3",
     "type": "gsp",
-    "capacity_kW": 2491,
+    "capacity_kW": 2490,
     "centroid": {
       "lat": 53.432,
       "lng": -1.409
@@ -4592,7 +4592,7 @@
   {
     "name": "will_1",
     "type": "gsp",
-    "capacity_kW": 128208,
+    "capacity_kW": 128205,
     "centroid": {
       "lat": 53.017,
       "lng": -1.595
@@ -4620,7 +4620,7 @@
   {
     "name": "wimbs1",
     "type": "gsp",
-    "capacity_kW": 31667,
+    "capacity_kW": 31666,
     "centroid": {
       "lat": 51.432,
       "lng": -0.196
@@ -4676,7 +4676,7 @@
   {
     "name": "wmel_1",
     "type": "gsp",
-    "capacity_kW": 53917,
+    "capacity_kW": 53916,
     "centroid": {
       "lat": 53.502,
       "lng": -1.596
@@ -4718,7 +4718,7 @@
   {
     "name": "wwey_1",
     "type": "gsp",
-    "capacity_kW": 60106,
+    "capacity_kW": 60105,
     "centroid": {
       "lat": 51.281,
       "lng": -0.451
@@ -4732,7 +4732,7 @@
   {
     "name": "wylf_1",
     "type": "gsp",
-    "capacity_kW": 122893,
+    "capacity_kW": 122890,
     "centroid": {
       "lat": 53.29,
       "lng": -4.382
@@ -4746,7 +4746,7 @@
   {
     "name": "wymom_1",
     "type": "gsp",
-    "capacity_kW": 74633,
+    "capacity_kW": 74631,
     "centroid": {
       "lat": 51.972,
       "lng": -0.142

@@ -1,0 +1,68 @@
+[
+  {
+    "type": "national",
+    "label": "National",
+    "level": 0,
+    "default_model": "blend",
+    "forecast_models": [
+      {
+        "name": "blend",
+        "label": "Blend"
+      },
+      {
+        "name": "ecmwf_pv",
+        "label": "ECMWF + PV"
+      },
+      {
+        "name": "ecmwf",
+        "label": "ECMWF"
+      },
+      {
+        "name": "mo",
+        "label": "Met Office"
+      },
+      {
+        "name": "sat_8h",
+        "label": "Satellite (8h)"
+      },
+      {
+        "name": "pv",
+        "label": "PV"
+      }
+    ],
+    "supports_adjusted": true
+  },
+  {
+    "type": "tso",
+    "label": "Transmission System Operator",
+    "level": 10,
+    "default_model": "blend",
+    "forecast_models": [
+      {
+        "name": "blend",
+        "label": "Blend"
+      },
+      {
+        "name": "ecmwf_pv",
+        "label": "ECMWF + PV"
+      },
+      {
+        "name": "ecmwf",
+        "label": "ECMWF"
+      },
+      {
+        "name": "mo",
+        "label": "Met Office"
+      },
+      {
+        "name": "sat_8h",
+        "label": "Satellite (8h)"
+      },
+      {
+        "name": "pv",
+        "label": "PV"
+      }
+    ],
+    "supports_adjusted": false
+  }
+]

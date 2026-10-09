@@ -1,0 +1,29 @@
+{
+  "time_utc": "2026-10-08T12:00:00Z",
+  "model_name": "blend",
+  "model_version": "1.4.0",
+  "last_updated_utc": "2026-10-08T11:58:00Z",
+  "latest_init_utc": "2026-10-08T11:45:00Z",
+  "values": [
+    {
+      "region_name": "50hertz",
+      "capacity_kW": 15359000,
+      "power_kW": 2687824.954
+    },
+    {
+      "region_name": "tennet",
+      "capacity_kW": 21514000,
+      "power_kW": 5601528.716
+    },
+    {
+      "region_name": "transnetbw",
+      "capacity_kW": 7864000,
+      "power_kW": 769623.487
+    },
+    {
+      "region_name": "amprion",
+      "capacity_kW": 13532069,
+      "power_kW": 5174663.268
+    }
+  ]
+}
