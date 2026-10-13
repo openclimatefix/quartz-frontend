@@ -134,6 +134,17 @@ export const UnitToggle: FC<{
         unavailable={unavailableUnits.includes(ActiveUnit.capacity)}
         unavailableReason={unavailableReason}
       />
+      <MapUIButton<ActiveUnit>
+        grow
+        id={"UnitButtonCapacityDensity"}
+        active={activeUnit === ActiveUnit.capacityDensity}
+        isLoading={isLoading}
+        onToggle={onToggleUnit}
+        text={"MW/km²"}
+        value={ActiveUnit.capacityDensity}
+        unavailable={unavailableUnits.includes(ActiveUnit.capacityDensity)}
+        unavailableReason={unavailableReason}
+      />
     </div>
   );
 };

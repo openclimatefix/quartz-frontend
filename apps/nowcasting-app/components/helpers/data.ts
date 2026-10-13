@@ -645,13 +645,13 @@ export const buildMapGeometry = ({
     // grouping name (`"UKPN (East)"`, `"NE Scotland"`), so the id is read straight off the
     // feature. `groupings` is not consulted here — it decides the *values*, not the shapes,
     // and a group with no polygon simply has nowhere to draw.
-    return {
+    return withRegionAreas({
       type: "FeatureCollection",
       features: shapes.features.map((feature) => {
         const id = feature.properties?.[joinProperty];
         return { ...feature, id, properties: { ...feature.properties, id } };
       })
-    };
+    });
   }
 
   const byFeatureKey = new Map<string, Region>();
@@ -661,7 +661,7 @@ export const buildMapGeometry = ({
   }
 
   let unmatched = 0;
-  return {
+  return withRegionAreas({
     type: "FeatureCollection",
     features: shapes.features.map((feature) => {
       const raw = feature.properties?.[joinProperty];
@@ -679,5 +679,20 @@ export const buildMapGeometry = ({
         }
       };
     })
+  });
+};
+
+/** A region can be several polygons, so give each one the whole region's `areaKm2`. */
+const withRegionAreas = (geometry: FeatureCollection): FeatureCollection => {
+  const areaById = new Map<unknown, number>();
+  for (const { id, properties } of geometry.features) {
+    areaById.set(id, (areaById.get(id) ?? 0) + (properties?.areaKm2 ?? 0));
+  }
+  return {
+    ...geometry,
+    features: geometry.features.map((feature) => ({
+      ...feature,
+      properties: { ...feature.properties, areaKm2: areaById.get(feature.id) }
+    }))
   };
 };

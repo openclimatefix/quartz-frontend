@@ -541,7 +541,8 @@ export const setComparison = (id: ComparisonSelection): void => {
   // Deliberately not restored on the way back to the forecast view. `activeUnit` is one shared
   // setting, and remembering what we switched away from means the unit can also change under
   // the user when they return — Brad's call: not worth the extra state.
-  if (id !== null && getGlobalState("activeUnit") === ActiveUnit.capacity) {
+  const unit = getGlobalState("activeUnit");
+  if (id !== null && (unit === ActiveUnit.capacity || unit === ActiveUnit.capacityDensity)) {
     setGlobalState("activeUnit", ActiveUnit.percentage);
   }
   setGlobalState("comparison", id);

@@ -155,6 +155,8 @@ export type MapBandsConfig = {
    * for a client-side rollup (`null` where the country has no grouped tier).
    */
   capacityTop: { region: number; grouped: number | null };
+  /** Where the MW/km² ramp saturates, per tier. */
+  capacityDensityTop: { region: number; grouped: number | null };
 };
 
 export type MapDefaults = {
@@ -406,7 +408,8 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       // a little headroom for a capacity register that only grows. The grouped figure is the
       // largest DNO licence area's share of the 22.6 GW total, rounded up — REVISIT when a
       // capacity-by-DNO number is to hand; it is an estimate, unlike the region one.
-      capacityTop: { region: 700, grouped: 4000 }
+      capacityTop: { region: 700, grouped: 4000 },
+      capacityDensityTop: { region: 1, grouped: 0.2 }
     },
     // PV Live Estimated — the in-day observer. This is what the map has always drawn (it was
     // `[0]` of the manifest); naming it changes no pixels, only who decided it.
@@ -543,6 +546,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // Noord-Brabant holds 4,437 MW of the 25.1 GW, so the capacity ramp tops out at 4.5 GW.
     mapBands: {
       capacityTop: { region: 4500, grouped: null },
+      capacityDensityTop: { region: 1, grouped: null },
       region: [400, 1200, 2000, 2800, 3600],
       // No `derivedRegionTypes`, so no grouped tier can ever be asked for. Explicitly absent
       // rather than inherited: see `MapBandsConfig`.
@@ -616,7 +620,8 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       region: [1500, 4500, 7500, 10500, 13500],
       grouped: null,
       // TenneT holds 21,514 MW of the 58.2 GW; 22 GW is that rounded up.
-      capacityTop: { region: 22000, grouped: null }
+      capacityTop: { region: 22000, grouped: null },
+      capacityDensityTop: { region: 0.4, grouped: null }
     },
     // DE's only observer.
     mapObserver: "entsoe_de",

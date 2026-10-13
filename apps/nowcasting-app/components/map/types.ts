@@ -3,7 +3,8 @@ import { ReactNode } from "react";
 export enum ActiveUnit {
   MW = "MW",
   percentage = "%",
-  capacity = "Capacity"
+  capacity = "Capacity",
+  capacityDensity = "MW/km2"
 }
 
 export enum SelectedData {

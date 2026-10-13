@@ -142,7 +142,9 @@ const MapEncodingControls: FC = () => {
         activeUnit={activeUnit}
         setActiveUnit={setActiveUnit}
         isLoading={false}
-        unavailableUnits={comparison === null ? [] : [ActiveUnit.capacity]}
+        unavailableUnits={
+          comparison === null ? [] : [ActiveUnit.capacity, ActiveUnit.capacityDensity]
+        }
         unavailableReason="Installed capacity has no delta"
       />
       <ColorGuideBar comparison={comparison} unit={activeUnit} />
