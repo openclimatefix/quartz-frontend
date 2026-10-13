@@ -16,6 +16,9 @@ import { buildMapGeometry } from "./data";
 import type { AggregationLevel } from "./aggregationLevels";
 import type { Region } from "../../lib/domain/types";
 import { it } from "@jest/globals";
+import { readFileSync } from "fs";
+import { join } from "path";
+import { COUNTRY_CONFIG } from "../../config/countries";
 
 // =========================================================================================
 // buildMapGeometry — pure since Phase 5
@@ -178,5 +181,35 @@ describe("buildMapGeometry — the region/feature join", () => {
     // mutating it here would corrupt the other map's geometry.
     expect(shapes.features[0].id).toBeUndefined();
     expect(shapes.features[0].properties).toEqual({ GSPs: "CITR_1" });
+  });
+
+  it("sets each feature's areaKm2 to its region's total area", () => {
+    const result = buildMapGeometry({
+      level: gspLevel,
+      shapes: collection(
+        point({ GSPs: "CITR_1", areaKm2: 10 }),
+        point({ GSPs: "CITR_1", areaKm2: 30 }),
+        point({ GSPs: "GREM_P", areaKm2: 5 })
+      ),
+      regions: [region("citr_1", { metadata: { gsp_id: 67 } })],
+      joinProperty: "GSPs",
+      joinTransform: "lowercase",
+      country: "GB"
+    });
+    expect(result.features.map((feature) => feature.properties?.areaKm2)).toEqual([40, 40, 5]);
+  });
+});
+
+describe("check shape areas are precomputed", () => {
+  const shapeUrls = Object.values(COUNTRY_CONFIG).flatMap((config) => [
+    ...Object.values(config.geo).map((layer) => layer.url),
+    ...Object.values(config.derivedRegionTypes).map((derived) => derived.geometry.url)
+  ]);
+
+  it.each(shapeUrls)("every region in %s has an areaKm2, else run `yarn shape-areas`", (url) => {
+    const shapes: FeatureCollection = JSON.parse(
+      readFileSync(join(__dirname, "../../public", url), "utf8")
+    );
+    expect(shapes.features.filter((f) => !(f.properties?.areaKm2 > 0))).toHaveLength(0);
   });
 });
