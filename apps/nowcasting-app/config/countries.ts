@@ -409,7 +409,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       // largest DNO licence area's share of the 22.6 GW total, rounded up — REVISIT when a
       // capacity-by-DNO number is to hand; it is an estimate, unlike the region one.
       capacityTop: { region: 700, grouped: 4000 },
-      capacityDensityTop: { region: 1, grouped: 0.2 }
+      capacityDensityTop: { region: 0.5, grouped: 0.3 }
     },
     // PV Live Estimated — the in-day observer. This is what the map has always drawn (it was
     // `[0]` of the manifest); naming it changes no pixels, only who decided it.
@@ -621,7 +621,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       grouped: null,
       // TenneT holds 21,514 MW of the 58.2 GW; 22 GW is that rounded up.
       capacityTop: { region: 22000, grouped: null },
-      capacityDensityTop: { region: 0.4, grouped: null }
+      capacityDensityTop: { region: 0.25, grouped: null }
     },
     // DE's only observer.
     mapObserver: "entsoe_de",
