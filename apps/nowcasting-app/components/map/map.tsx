@@ -498,6 +498,22 @@ const Map: FC<IMap> = ({
       const data = await fetchIntoCache(channel, satTs, isNow);
       // Bail if the channel or timestamp moved on while we were fetching.
       if (requestedKeyRef.current !== key || !map.current) return;
+      //Send logs to sentry to notify us if sat ui is down
+      if (!data && !isFutureTimestamp(satTs)) {
+        Sentry.captureMessage(`Satellite frame missing: ${channel} at ${satTs}`, {
+          level: "error",
+          tags: { satellite_channel: channel, satellite_latest: String(isNow) },
+          extra: {
+            eventType: "SatelliteMissing",
+            channel,
+            satelliteTimestamp: satTs,
+            cursorTimestamp: ts,
+            latest: isNow,
+            stackLoaded: stackRef.current?.channel === channel,
+            reportedAt: new Date().toISOString()
+          }
+        });
+      }
       applyFrame(channel, key, data);
     } catch (err) {
       Sentry.captureException(err, {
