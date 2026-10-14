@@ -35,7 +35,7 @@ jobs:
     - name: run unit tests
       run: |
         cd apps/nowcasting-app
-        yarn test --clear-cache --coverage --coverageDirectory=../..
+        yarn test --ci --coverage --coverageDirectory=../..
     - name: Run cypress tests
       # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
       uses: cypress-io/github-action@v6
