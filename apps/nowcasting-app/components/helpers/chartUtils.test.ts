@@ -1,6 +1,12 @@
-import { getAvailablePLevels, getTicks, getZoomYMax } from "./chartUtils";
+import {
+  getAvailablePLevels,
+  getSettlementPeriodForDate,
+  getTicks,
+  getZoomYMax
+} from "./chartUtils";
 import { ChartData } from "../charts/remix-line";
 import { describe, expect, it } from "@jest/globals";
+import { DateTime } from "luxon";
 
 describe("getTicks", () => {
   it("should return ticks for a yMax divisible by 3", () => {
@@ -186,5 +192,23 @@ describe("getAvailablePLevels", () => {
 
   it("should return an empty array when no pair has both bounds present", () => {
     expect(getAvailablePLevels({}, pLevels)).toEqual([]);
+  });
+});
+
+describe("getSettlementPeriodForDate", () => {
+  const inLondon = (iso: string) => DateTime.fromISO(iso, { zone: "Europe/London" });
+
+  it("uses the 48th settlement period at the end of long summer and short winter daylight days", () => {
+    expect(getSettlementPeriodForDate(inLondon("2024-06-21T23:30"))).toBe(48);
+    expect(getSettlementPeriodForDate(inLondon("2024-12-21T23:30"))).toBe(48);
+  });
+
+  it("accounts for the missing hour when British Summer Time starts", () => {
+    expect(getSettlementPeriodForDate(inLondon("2024-03-31T02:00"))).toBe(3);
+    expect(getSettlementPeriodForDate(inLondon("2024-03-31T23:30"))).toBe(46);
+  });
+
+  it("accounts for the repeated hour when British Summer Time ends", () => {
+    expect(getSettlementPeriodForDate(inLondon("2024-10-27T23:30"))).toBe(50);
   });
 });
