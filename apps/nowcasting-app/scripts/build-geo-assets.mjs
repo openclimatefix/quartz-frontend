@@ -69,7 +69,7 @@ const gspNameById = new Map(
 /**
  * Re-key a `Record<string, number[]>` grouping file to `Record<string, string[]>`.
  *
- * Duplicates are preserved exactly as they appear. GB's DNO file lists 15 GSP ids in two
+ * Duplicates are preserved exactly as they appear. GB's DNO file lists 21 GSP ids in two
  * licence areas each; whether a GSP feeding two areas is legitimate is an open question with
  * the API owner, so Phase 5 reproduces the double-count rather than quietly de-duplicating
  * it. See `data.reconciliation.test.ts`, which pins the resulting excess.
@@ -155,9 +155,10 @@ writeJson("/geo/gb/groupings-manifest.json", {
   generatedBy: "scripts/build-geo-assets.mjs",
   regionSource: "lib/api/v1/__fixtures__/gb-regions-gsp.json",
   regionCount: gspNameById.size,
-  // Phase 2 measured 348/349 and 306/317. Materially different numbers here are a finding,
-  // not something to tune the script until it matches.
-  expected: { "dno-groupings": "348/349", "zone-groupings": "306/317" },
+  // Phase 2 measured 348/349 and 306/317; PR #749 added the missing GSPs to the DNO groupings,
+  // taking DNO to 353/355. Materially different numbers here are a finding, not something to
+  // tune the script until it matches.
+  expected: { "dno-groupings": "353/355", "zone-groupings": "306/317" },
   files: { "dno-groupings.json": dno.report, "zone-groupings.json": zone.report }
 });
 console.log(
