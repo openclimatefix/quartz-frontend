@@ -1,6 +1,5 @@
 import React from "react";
 import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
-import useTimeNow from "../../hooks/use-time-now";
 import PlayButton from "../../play-button";
 import { PvRealData, ForecastData } from "../../types";
 import {
@@ -25,7 +24,7 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
   pvForecastData,
   deltaView
 }) => {
-  const timeNow = useTimeNow();
+  const [timeNow] = useGlobalState("timeNow");
 
   // get the latest Actual pv value in GW
   const selectedPvActualInGW = pvLiveData?.length

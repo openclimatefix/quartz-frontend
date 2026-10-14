@@ -61,7 +61,7 @@ export type GlobalStateType = {
   activeUnit: ActiveUnit;
   selectedISOTime: string;
   timeNow: string;
-  intervals: any[];
+  isFollowingNow: boolean;
   clickedGspId?: number | string;
   clickedMapRegionIds?: string[];
   selectedMapRegionIds?: string[];
@@ -112,7 +112,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     activeUnit: ActiveUnit.percentage,
     selectedISOTime: get30MinNow(),
     timeNow: get30MinNow(),
-    intervals: [],
+    isFollowingNow: true,
     clickedGspId: undefined,
     clickedMapRegionIds: undefined,
     selectedMapRegionIds: undefined,

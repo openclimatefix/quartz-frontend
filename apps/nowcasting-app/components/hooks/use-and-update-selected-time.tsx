@@ -5,51 +5,33 @@ import useGlobalState, {
   setGlobalState
 } from "../helpers/globalState";
 
-const intervals = (() => getGlobalState("intervals"))();
-const setIntervals = (newIntervals: any[]) => setGlobalState("intervals", newIntervals);
-const setSelectedISOTime = (newTime: string) => setGlobalState("selectedISOTime", newTime);
-const clearIntervals = () => {
-  console.log("clearing intervals");
-  getGlobalState("intervals").forEach((i) => {
-    console.log("clearing interval", i);
-    clearInterval(i);
-  });
-  console.log("cleared intervals");
-  setIntervals([]);
-  console.log("set intervals to empty");
-};
-const startNewInterval = () => {
-  const newInterval = setInterval(() => {
-    console.log("checking for new time");
-    const time30MinNow = get30MinNow();
-    setSelectedISOTime(time30MinNow);
-  }, 1000 * 60);
-  console.log("starting new interval: ", newInterval);
-  setIntervals([...intervals, newInterval]);
-};
 const useAndUpdateSelectedTime = () => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
   useEffect(() => {
-    if (intervals.length < 1) {
-      startNewInterval();
-    }
+    // This is the single clock for the page.  It remains active while a user is
+    // inspecting another timestamp, so every consumer agrees on what "now" is.
+    const interval = setInterval(() => {
+      const timeNow = get30MinNow();
+      setGlobalState("timeNow", timeNow);
+      if (getGlobalState("isFollowingNow")) {
+        setGlobalState("selectedISOTime", timeNow);
+      }
+    }, 1000 * 60);
     return () => {
-      clearIntervals();
+      clearInterval(interval);
     };
   }, []);
   return selectedISOTime;
 };
 export const useStopAndResetTime = () => {
-  const [, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const stopTime = () => {
-    console.log("stopping time");
-    clearIntervals();
+    setGlobalState("isFollowingNow", false);
   };
   const resetTime = () => {
-    console.log("restarting time");
-    clearIntervals();
-    setSelectedISOTime(get30MinNow());
-    startNewInterval();
+    const timeNow = get30MinNow();
+    setGlobalState("timeNow", timeNow);
+    setGlobalState("selectedISOTime", timeNow);
+    setGlobalState("isFollowingNow", true);
   };
   return { stopTime, resetTime };
 };
