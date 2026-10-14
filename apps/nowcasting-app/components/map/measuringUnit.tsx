@@ -44,15 +44,26 @@ const MeasuringUnit = ({
     isLoading: boolean;
     onToggle: (event: ReactMouseEvent<HTMLButtonElement>, unit: T) => Promise<void>;
     text: string;
+    title?: string;
     value: T;
   };
-  const MapUIButton = <T,>({ id, active, isLoading, onToggle, text, value }: ButtonProps<T>) => {
+  const MapUIButton = <T,>({
+    id,
+    active,
+    isLoading,
+    onToggle,
+    text,
+    title,
+    value
+  }: ButtonProps<T>) => {
     return (
       <button
+        aria-label={title || text}
         onClick={(event) => onToggle(event, value)}
         disabled={isLoading}
         id={id}
         type="button"
+        title={title}
         className={`${buttonClasses}  ${
           active ? "text-black bg-ocf-yellow" : "text-white bg-black"
         } ${isLoading ? "cursor-wait" : ""} border-r last:border-r-0`}
@@ -72,6 +83,7 @@ const MeasuringUnit = ({
             isLoading={isLoading}
             onToggle={onToggleUnit}
             text={"%"}
+            title={"Percent of installed solar capacity"}
             value={ActiveUnit.percentage}
           />
           <MapUIButton<ActiveUnit>
