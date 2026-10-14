@@ -18,7 +18,6 @@ import Tooltip from "../../tooltip";
 import { ChartInfo } from "../../../ChartInfo";
 import DeltaForecastLabel from "../../delta-forecast-label";
 import DeltaBuckets from "./delta-buckets-ui";
-import useTimeNow from "../../hooks/use-time-now";
 import { ChartLegend } from "../ChartLegend";
 import DataLoadingChartStatus from "../DataLoadingChartStatus";
 import { getTicks } from "../../helpers/chartUtils";
