@@ -177,11 +177,11 @@ const SolarSiteChart: FC<{
     }
   };
 
-  const allSitesYield = Array.from(aggregatedSitesData.national.values());
-  const nationalPVActual = allSitesYield[0]?.actualPV || 0;
-  const nationalPVExpected = allSitesYield[0]?.expectedPV || 0;
-  const allSitesSelectedTime = formatISODateString(selectedTime);
-  const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
+  const headerTime = formatISODateString(timeNow);
+  const allSiteUuids = (combinedSitesData.allSitesData || []).map((site) => site.site_uuid);
+  const nationalPVActual = getTotalPvActualGenerationForGroup(allSiteUuids, headerTime);
+  const nationalPVExpected = getTotalPvForecastGenerationForGroup(allSiteUuids, headerTime);
+  const headerDateTime = convertISODateStringToLondonTime(headerTime + ":00.000Z");
   const forecastEndTime =
     combinedSitesData.sitesPvForecastData?.[0]?.forecast_values?.[
       combinedSitesData.sitesPvForecastData[0]?.forecast_values?.length - 1
@@ -262,7 +262,7 @@ const SolarSiteChart: FC<{
               <div className="">
                 <ForecastHeadlineFigure
                   tip={`PV Actual / OCF Forecast`}
-                  time={allSitesChartDateTime}
+                  time={headerDateTime}
                   color="ocf-yellow"
                   unit={"KW"}
                 >
@@ -309,20 +309,20 @@ const SolarSiteChart: FC<{
             >
               <ForecastHeadlineFigure
                 tip={`PV Actual / OCF Forecast`}
-                time={allSitesChartDateTime}
+                time={headerDateTime}
                 color="ocf-yellow"
                 unit={"KW"}
               >
                 <span className="text-black">
                   {getTotalPvActualGenerationForGroup(
                     selectedSiteData.map((site) => site.site_uuid),
-                    selectedTime
+                    headerTime
                   ).toFixed(1) || "0"}
                 </span>
                 <span className="text-ocf-gray-300 mx-1"> / </span>
                 {getTotalPvForecastGenerationForGroup(
                   selectedSiteData.map((site) => site.site_uuid),
-                  selectedTime
+                  headerTime
                 ).toFixed(1) || "0"}
               </ForecastHeadlineFigure>
             </ForecastHeaderSite>
