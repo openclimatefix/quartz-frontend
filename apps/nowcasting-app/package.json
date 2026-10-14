@@ -14,7 +14,10 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cypress": "cypress run --browser chrome",
-    "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts"
+    "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts",
+    "sanitize-gsp-metrics": "node scripts/sanitize-gsp-metrics.mjs",
+    "generate-dno-metrics": "node scripts/generate-dno-metrics.mjs",
+    "prep-metrics": "yarn sanitize-gsp-metrics && yarn generate-dno-metrics"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^3.5.0",

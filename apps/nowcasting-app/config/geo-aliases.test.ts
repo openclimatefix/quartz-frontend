@@ -187,15 +187,16 @@ describe("the grouping files after the Phase 5 re-key", () => {
     }
   });
 
-  it("resolves the Phase 2 reference counts — 348/349 DNO and 306/317 zone", () => {
-    expect(manifest.files["dno-groupings.json"].resolved).toBe(348);
-    expect(manifest.files["dno-groupings.json"].refs).toBe(349);
+  it("resolves the reference counts — 353/355 DNO and 306/317 zone", () => {
+    // DNO was 348/349 at Phase 2; PR #749 added the missing GSPs to the DNO groupings.
+    expect(manifest.files["dno-groupings.json"].resolved).toBe(353);
+    expect(manifest.files["dno-groupings.json"].refs).toBe(355);
     expect(manifest.files["zone-groupings.json"].resolved).toBe(306);
     expect(manifest.files["zone-groupings.json"].refs).toBe(317);
   });
 
   it("reproduces the DNO double-count rather than de-duplicating it", () => {
-    // 15 GSPs sit in two licence areas each. This is a SEPARATE problem from the legacy
+    // 21 GSPs sit in two licence areas each (15 until PR #749 added the missing GSPs). This is a SEPARATE problem from the legacy
     // regions above and Brad's NESO rule does not touch it: these are ordinary GSPs
     // appearing twice in a grouping file, not duplicate spellings from the API. Still open
     // with the API owner; pinned, not fixed. See `data.reconciliation.test.ts`.
@@ -207,7 +208,7 @@ describe("the grouping files after the Phase 5 re-key", () => {
         seen.add(member);
       }
     }
-    expect(duplicated.size).toBe(15);
+    expect(duplicated.size).toBe(21);
   });
 
   it("has no duplicate across NG zone groupings — they are a partition", () => {
