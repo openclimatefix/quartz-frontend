@@ -1,13 +1,14 @@
 import React, { FC, useEffect } from "react";
 import RemixLine from "../remix-line";
-import { AGGREGATION_LEVELS, VIEWS } from "../../../constant";
-import useGlobalState, { get30MinNow } from "../../helpers/globalState";
+import { AGGREGATION_LEVELS } from "../../../constant";
+import useGlobalState, { useCountryState, getCursorNow } from "../../helpers/globalState";
 import {
-  convertISODateStringToLondonTime,
   convertToLocaleDateString,
   formatISODateString,
+  formatISODateStringAsZonedTime,
   getRoundedTickBoundary
 } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import { useStopAndResetTime } from "../../hooks/use-and-update-selected-time";
 import Spinner from "../../icons/spinner";
 import { InfoIcon, LegendLineGraphIcon } from "../../icons/icons";
@@ -35,12 +36,11 @@ const SolarSiteChart: FC<{
   date?: string;
   className?: string;
 }> = ({ combinedSitesData, aggregatedSitesData, className }) => {
-  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const [visibleLines] = useGlobalState("visibleLines");
-  const [aggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
+  const [aggregationLevel, setAggregationLevel] = useCountryState("aggregationLevel");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
   const [sitesLoadingState] = useGlobalState("sitesLoadingState");
   const { stopTime, resetTime } = useStopAndResetTime();
   const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
@@ -53,15 +53,24 @@ const SolarSiteChart: FC<{
     timeTrigger: selectedTime
   });
 
-  const [view] = useGlobalState("view");
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  const { timezone, locale } = useCountryFormatting();
   useEffect(() => {
-    const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z"))
+    // "UTC" is load-bearing: this value is a lookup key against `chartData.formattedDate`,
+    // which is a plain UTC epoch, so the conversion has to be a no-op. Unlike the sibling
+    // call in remix-line.tsx, the result keeps its "Z" and so parses as an absolute instant —
+    // there is no local re-parse to cancel a viewer-zone shift. On the default it missed by
+    // the viewer's offset, and the miss falls through to `setSelectedISOTime(getCursorNow())`,
+    // silently discarding the user's selected time on every mount for any non-UTC viewer.
+    const selectedTimestamp = new Date(convertToLocaleDateString(selectedTime + ":00.000Z", "UTC"))
       .getTime()
       .toString();
     if (!chartData.some((d: any) => String(d.formattedDate) === selectedTimestamp)) {
-      setSelectedISOTime(get30MinNow());
+      setSelectedISOTime(getCursorNow());
     }
-  }, [view]);
+    // Was keyed on `view` flipping FORECAST -> SOLAR_SITES on mount; `isSitesChart` flipping
+    // false -> true on mount is the same edge (Wave 4).
+  }, [isSitesChart]);
 
   const getSelectedSitesData = (
     sitesData: Site[],
@@ -102,28 +111,6 @@ const SolarSiteChart: FC<{
     600
   ];
   yMax = Math.ceil(getRoundedTickBoundary(yMax, yMax_levels));
-
-  const getExpectedPowerGenerationForSite = (site_uuid: string, targetTime: string) => {
-    const siteForecast = combinedSitesData.sitesPvForecastData.find(
-      (fc) => fc.site_uuid === site_uuid
-    );
-    return (
-      siteForecast?.forecast_values.find(
-        (fv) => formatISODateString(fv.target_datetime_utc) === formatISODateString(targetTime)
-      )?.expected_generation_kw || 0
-    );
-  };
-
-  const getPvActualGenerationForSite = (site_uuid: string, targetTime: string) => {
-    const siteForecast = combinedSitesData.sitesPvActualData.find(
-      (pv) => pv.site_uuid === site_uuid
-    );
-    return (
-      siteForecast?.pv_actual_values.find(
-        (pv) => formatISODateString(pv.datetime_utc) === formatISODateString(targetTime)
-      )?.actual_generation_kw || 0
-    );
-  };
 
   const getTotalPvActualGenerationForGroup = (site_uuids: string[], targetTime: string) => {
     const sitesActuals = combinedSitesData.sitesPvActualData.filter((pv) =>
@@ -181,7 +168,11 @@ const SolarSiteChart: FC<{
   const nationalPVActual = allSitesYield[0]?.actualPV || 0;
   const nationalPVExpected = allSitesYield[0]?.expectedPV || 0;
   const allSitesSelectedTime = formatISODateString(selectedTime);
-  const allSitesChartDateTime = convertISODateStringToLondonTime(allSitesSelectedTime + ":00.000Z");
+  const allSitesChartDateTime = formatISODateStringAsZonedTime(
+    allSitesSelectedTime + ":00.000Z",
+    timezone,
+    locale
+  );
   const forecastEndTime =
     combinedSitesData.sitesPvForecastData?.[0]?.forecast_values?.[
       combinedSitesData.sitesPvForecastData[0]?.forecast_values?.length - 1
@@ -201,18 +192,18 @@ const SolarSiteChart: FC<{
       <div className={`h-full flex ${className}`}>
         <div className="flex-1 flex flex-col justify-center items-center p-32">
           <div className={"flex-initial flex flex-col"}>
-            <h2 className="text-ocf-gray-300 text-4xl pb-6">Welcome to Site View.</h2>
-            <p className="text-ocf-gray-300 text-lg pb-3 font-semibold tracking-wide">
+            <h2 className="text-content text-4xl pb-6">Welcome to Site View.</h2>
+            <p className="text-content text-lg pb-3 font-semibold tracking-wide">
               It looks like you don&apos;t currently have any sites.
             </p>
             {/* TODO: add func. to create sites from UI */}
-            {/*<p className="text-ocf-gray-300 text-base pb-6">*/}
+            {/*<p className="text-content text-base pb-6">*/}
             {/*  To add a site, you can use the &quot;+&quot; button in the top left corner.*/}
             {/*</p>*/}
-            <p className="text-ocf-gray-300 text-base pb-6">
+            <p className="text-content text-base pb-6">
               To add a site, you can use our{" "}
               <Link
-                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
                 href={"https://api.quartz.solar/docs"}
               >
@@ -220,7 +211,7 @@ const SolarSiteChart: FC<{
               </Link>{" "}
               or our{" "}
               <Link
-                className={"underline underline-offset-4 decoration-ocf-yellow"}
+                className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
                 href={"https://api.quartz.solar/swagger"}
               >
@@ -228,12 +219,12 @@ const SolarSiteChart: FC<{
               </Link>
               .
             </p>
-            <blockquote className={"border-l-2 border-ocf-gray pl-3"}>
-              <p className="text-ocf-gray-300 text-base py-1">
+            <blockquote className={"border-l-2 border-content-secondary pl-3"}>
+              <p className="text-content text-base py-1">
                 If you think you should have sites here, have any questions or need some further
                 information, please get in touch at{" "}
                 <a
-                  className={"underline underline-offset-4 decoration-ocf-yellow"}
+                  className={"underline underline-offset-4 decoration-solar"}
                   href="mailto:quartz.support@openclimatefix.org"
                 >
                   quartz.support@openclimatefix.org
@@ -254,8 +245,8 @@ const SolarSiteChart: FC<{
     <div className={`flex flex-col flex-1 ${className || ""}`}>
       <div className="flex-1 flex flex-col">
         <div className="flex flex-col flex-1 relative">
-          <div className="flex content-between bg-ocf-gray-800 mb-4">
-            <div className="flex-1 justify-start text-white lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
+          <div className="flex content-between bg-surface-panel mb-4">
+            <div className="flex-1 justify-start text-content lg:text-2xl md:text-lg text-base font-black m-auto mx-3 flex">
               All Sites
             </div>
             <div className="flex justify-end flex-initial my-2 pr-6 pl-3">
@@ -263,11 +254,11 @@ const SolarSiteChart: FC<{
                 <ForecastHeadlineFigure
                   tip={`PV Actual / OCF Forecast`}
                   time={allSitesChartDateTime}
-                  color="ocf-yellow"
+                  color="solar"
                   unit={"KW"}
                 >
-                  <span className="text-black">{nationalPVActual?.toFixed(1)}</span>
-                  <span className="text-ocf-gray-300 mx-1"> / </span>
+                  <span className="text-solar-light">{nationalPVActual?.toFixed(1)}</span>
+                  <span className="text-content mx-1"> / </span>
                   {nationalPVExpected?.toFixed(1)}
                 </ForecastHeadlineFigure>
               </div>
@@ -276,11 +267,11 @@ const SolarSiteChart: FC<{
                 {/*  pv={forecastNextPV}*/}
                 {/*  time={`${forecastNextTimeOnly}`}*/}
                 {/*  tip={`Next OCF Forecast`}*/}
-                {/*  color="ocf-yellow"*/}
+                {/*  color="solar"*/}
                 {/*/>*/}
               </div>
             </div>
-            <PlayButton startTime={get30MinNow()} endTime={forecastEndTime} />
+            <PlayButton startTime={getCursorNow()} endTime={forecastEndTime} />
           </div>
           <div className="flex-1 relative">
             <DataLoadingChartStatus loadingState={sitesLoadingState} />
@@ -310,16 +301,16 @@ const SolarSiteChart: FC<{
               <ForecastHeadlineFigure
                 tip={`PV Actual / OCF Forecast`}
                 time={allSitesChartDateTime}
-                color="ocf-yellow"
+                color="solar"
                 unit={"KW"}
               >
-                <span className="text-black">
+                <span className="text-solar-light">
                   {getTotalPvActualGenerationForGroup(
                     selectedSiteData.map((site) => site.site_uuid),
                     selectedTime
                   ).toFixed(1) || "0"}
                 </span>
-                <span className="text-ocf-gray-300 mx-1"> / </span>
+                <span className="text-content mx-1"> / </span>
                 {getTotalPvForecastGenerationForGroup(
                   selectedSiteData.map((site) => site.site_uuid),
                   selectedTime
@@ -372,17 +363,17 @@ const SolarSiteChart: FC<{
           />
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 z-10 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-ocf-gray-300 py-3 bg-mapbox-black-500 overflow-y-visible">
+      <div className="absolute bottom-0 left-0 right-0 z-10 flex flex-none justify-between align-items:baseline px-4 text-xs tracking-wider text-content py-3 bg-surface-panel overflow-y-visible">
         <div
           className={`flex flex-col lg:flex-row flex-initial gap-x-6 justify-around max-w-2xl overflow-x-auto`}
         >
           <LegendItem
-            iconClasses={"text-ocf-black"}
+            iconClasses={"text-surface"}
             label={"PV Actual"}
             dataKey={`GENERATION_UPDATED`}
           />
           <LegendItem
-            iconClasses={"text-ocf-yellow"}
+            iconClasses={"text-solar"}
             symbolStyle={"both"}
             label={"OCF Forecast"}
             dataKey={`FORECAST`}
@@ -393,7 +384,7 @@ const SolarSiteChart: FC<{
           <Tooltip
             tip={
               <div className="w-64 rounded-md">
-                <ChartInfo />
+                <ChartInfo timezone={timezone} />
               </div>
             }
             position="top"

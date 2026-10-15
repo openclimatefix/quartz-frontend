@@ -1,8 +1,9 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { useUser } from "@auth0/nextjs-auth0/client";
 import pkg from "../../../package.json";
-import { classNames, formatISODateStringHumanNumbersOnly, isProduction } from "../../helpers/utils";
+import { classNames } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import Link from "next/link";
 import Tooltip from "../../tooltip";
 import useGlobalState from "../../helpers/globalState";
@@ -12,31 +13,96 @@ import {
   getBooleanSettingFromCookieStorage,
   setBooleanSettingInLocalStorage
 } from "../../helpers/cookieStorage";
-import { CombinedData } from "../../types";
-import { VIEWS } from "../../../constant";
-import { downloadNationalCsv } from "../../helpers/csvDownload";
+import { csvLabelsFor, downloadNationalCsv } from "../../helpers/csvDownload";
 import { CSVDownloadModal, CSVColumn } from "./csvDownloadModal";
-import { SettingsModal } from "./settingsModal";
+import {
+  NATIONAL_REGION_TYPE,
+  useFocusedCountry,
+  useGenerationSources,
+  useNationalForecast,
+  useNationalGeneration
+} from "../../../hooks/data";
+import type { Scope } from "../../../lib/domain/types";
+import { forecastSeriesModel, getCountryConfig } from "../../../config/countries";
 const { version } = pkg;
 
-interface IProfileDropDown {
-  view: VIEWS;
-  combinedData?: CombinedData | null;
-}
-
-const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
+const ProfileDropDown = () => {
   const { user } = useUser();
+  // Read rather than passed down: the header no longer knows or cares which view is showing
+  // since the three-way switcher went (contract §2), and this menu is the last thing in the
+  // header that asks "are we on the sites route" (`isSitesChart`) or "is a comparison active"
+  // (`comparison`) — the two facts `view` used to fold into one value.
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  const [comparison] = useGlobalState("comparison");
   const [showDownloadModal, setShowDownloadModal] = useState(false);
   const [showNHourView, setShowNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [dashboardMode, setDashboardMode] = useGlobalState("dashboardMode");
-  const [showConstraints, setShowConstraints] = useGlobalState("showConstraints");
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [pLevels] = useGlobalState("pLevels");
-  const canDownloadCsv = Boolean(combinedData && view !== VIEWS.SOLAR_SITES);
+  const { timezone } = useCountryFormatting();
+  const canDownloadCsv = !isSitesChart;
+
+  // The CSV's own fetches, per the data-layer contract's "call the hooks you need where you
+  // need them" — this is the last consumer of `CombinedData`'s national fields, so the prop
+  // deletes itself here rather than being threaded down from `Header`.
+  const focusedCountry = useFocusedCountry();
+  const countryConfig = getCountryConfig(focusedCountry);
+  // Same convention as the national chart and the delta view's top chart: the country's first
+  // configured series is the primary one the CSV's "Current Forecast" column reflects.
+  const primarySeries = countryConfig?.nationalChartSeries?.[0];
+  const nationalScope: Scope | null = focusedCountry
+    ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+    : null;
+
+  // Start only — see the note in `pv-remix-chart.tsx`. Pinning `end` here would clip the
+  // CSV's forward horizon to ~26h instead of the API's +48h. Same window the national chart
+  // pins, so these are the same SWR keys the chart has already warmed.
+
+  const forecast = useNationalForecast(nationalScope, {
+    model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
+  });
+
+  const generationSources = useGenerationSources(nationalScope);
+  const observers = useMemo(
+    () => (generationSources.data ?? []).map((source) => source.name),
+    [generationSources.data]
+  );
+  const csvLabels = useMemo(
+    () => csvLabelsFor(countryConfig, generationSources.data ?? []),
+    [countryConfig, generationSources.data]
+  );
+  const generationInitial = useNationalGeneration(
+    observers[0] === undefined ? null : nationalScope,
+    { observer: observers[0] }
+  );
+  const generationUpdated = useNationalGeneration(
+    observers[1] === undefined ? null : nationalScope,
+    { observer: observers[1] }
+  );
+
+  // Matches v0: the N-hour series is only fetched — and so only ever populates the CSV's
+  // N-hour column — while the N-hour view is switched on.
+  const nHour = useNationalForecast(showNHourView ? nationalScope : null, {
+    horizonMinutes: nHourForecast * 60
+  });
 
   const handleDownload = (selectedColumns: CSVColumn[]) => {
-    downloadNationalCsv(combinedData, selectedColumns, nHourForecast, pLevels);
+    // The CSV's datetimes and settlement periods are read as wall-clock time in the country
+    // the data is for, not in whatever zone the person downloading it happens to sit in.
+    downloadNationalCsv(
+      {
+        forecast: forecast.data,
+        generationInitial: generationInitial.data,
+        generationUpdated: generationUpdated.data,
+        nHour: nHour.data
+      },
+      selectedColumns,
+      nHourForecast,
+      pLevels,
+      timezone,
+      focusedCountry,
+      csvLabels
+    );
   };
 
   const toggleDashboardMode = () => {
@@ -46,10 +112,6 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
   const toggle4hView = () => {
     setShowNHourView(!showNHourView);
     setBooleanSettingInLocalStorage(CookieStorageKeys.N_HOUR_VIEW, !showNHourView);
-  };
-  const toggleConstraints = () => {
-    setShowConstraints(!showConstraints);
-    setBooleanSettingInLocalStorage(CookieStorageKeys.CONSTRAINTS, !showConstraints);
   };
   // Check cookies for the N-hour view setting and update the state if it's different
   // Doing this here on client-side because the user's cookies are not available on the server,
@@ -69,7 +131,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
     <>
       <Menu as="div" className="relative z-20 ml-3">
         <div>
-          <Menu.Button className="flex text-sm bg-white rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">
+          <Menu.Button className="flex text-sm bg-surface-raised rounded-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danube-500">
             <span className="sr-only">Open user menu</span>
             <img className="w-8 h-8" src={(user && user.picture) || ""} alt="" />
           </Menu.Button>
@@ -83,13 +145,13 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="absolute right-0 top-12 w-52 py-1 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Menu.Items className="absolute right-0 top-12 w-52 py-1 origin-top-right bg-surface-raised rounded-md shadow-lg ring-1 ring-edge focus:outline-none">
             <Menu.Item>
               {({ active }) => (
                 <div
                   className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                    active ? "bg-surface-panel" : "",
+                    "flex items-end justify-end px-4 py-2 text-sm text-content-secondary relative"
                   )}
                 >
                   {showNHourView && (
@@ -100,7 +162,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                   <button
                     id={"UserMenu-NhViewBtn"}
                     onClick={toggle4hView}
-                    className="ml-1 text-sm  font-medium text-ocf-black-600"
+                    className="ml-1 text-sm  font-medium text-content"
                   >
                     {`N-hour forecast`}
                   </button>
@@ -111,8 +173,8 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
               {({ active }) => (
                 <div
                   className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                    active ? "bg-surface-panel" : "",
+                    "flex items-end justify-end px-4 py-2 text-sm text-content-secondary relative"
                   )}
                 >
                   {dashboardMode && (
@@ -126,72 +188,32 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
                       e.preventDefault();
                       toggleDashboardMode();
                     }}
-                    className="ml-1 text-sm font-medium text-ocf-black-600"
+                    className="ml-1 text-sm font-medium text-content"
                   >
                     {`Dashboard mode`}
                   </button>
                 </div>
               )}
             </Menu.Item>
-            <Menu.Item>
-              {({ active }) => (
-                <div
-                  className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                  )}
-                >
-                  {showConstraints && (
-                    <span className="flex items-center">
-                      <Checkmark />
-                    </span>
-                  )}
-                  <button
-                    id={"UserMenu-ConstraintsBtn"}
-                    onClick={toggleConstraints}
-                    className="ml-1 text-sm  font-medium text-ocf-black-600"
-                  >
-                    {`Constraint Boundaries`}
-                  </button>
-                </div>
-              )}
-            </Menu.Item>
-
-            <div className="w-full border-t border-gray-300" />
-            <Menu.Item>
-              {({ active }) => (
-                <div
-                  className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
-                  )}
-                >
-                  <button
-                    id={"UserMenu-SettingsBtn"}
-                    onClick={() => setShowSettingsModal(true)}
-                    className="ml-1 text-sm font-medium text-ocf-black-600"
-                  >
-                    {`Settings`}
-                  </button>
-                </div>
-              )}
-            </Menu.Item>
+            {/* Constraint boundaries and the p-level settings modal both left this menu in
+                Phase 6: they are "how it is drawn", so they live in the display rail now
+                (contract §6). The modal held nothing else and is gone with them. */}
 
             {canDownloadCsv && (
               <>
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-edge" />
                 <Menu.Item>
                   {({ active }) => (
                     <div
                       className={classNames(
-                        active ? "bg-gray-100" : "",
-                        "flex items-end justify-end px-4 py-2 text-sm text-gray-700 relative"
+                        active ? "bg-surface-panel" : "",
+                        "flex items-end justify-end px-4 py-2 text-sm text-content-secondary relative"
                       )}
                     >
                       <button
                         id={"UserMenu-DownloadCsvBtn"}
                         onClick={() => setShowDownloadModal(true)}
-                        className="ml-1 text-sm font-medium text-ocf-black-600"
+                        className="ml-1 text-sm font-medium text-content"
                       >
                         {`Download CSV...`}
                       </button>
@@ -201,10 +223,10 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
               </>
             )}
 
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-edge" />
 
             <Menu.Item>
-              <div className="px-4 pt-3 text-ocf-black-600 text-right">
+              <div className="px-4 pt-3 text-content text-right">
                 <a
                   id={"UserMenu-DocumentationBtn"}
                   href="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
@@ -215,7 +237,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
               </div>
             </Menu.Item>
             <Menu.Item>
-              <div className="px-4 pt-3 text-ocf-black-600 text-right">
+              <div className="px-4 pt-3 text-content text-right">
                 <Tooltip
                   tip={
                     <div
@@ -244,7 +266,7 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
               </div>
             </Menu.Item>
             <Menu.Item>
-              <div className="px-4 py-3 text-ocf-black-600 text-right">
+              <div className="px-4 py-3 text-content text-right">
                 <a
                   id={"UserMenu-FeedbackBtn"}
                   href="https://docs.google.com/forms/d/e/1FAIpQLSf08XJPFwsNHxYiHUTV4g9CHWQzxAn0gSiAXXFkaI_3wjpNWw/viewform"
@@ -257,19 +279,19 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
               </div>
             </Menu.Item>
 
-            <div className="w-full border-t border-gray-300" />
+            <div className="w-full border-t border-edge" />
 
             <div className="px-4 pt-3">
               <p
                 id={"UserMenu-Version"}
-                className="text-xs font-medium text-ocf-black-300 truncate"
+                className="text-xs font-medium text-content-muted truncate"
               >
                 Version {version}
               </p>
             </div>
-            <div id={"UserMenu-SignedInText"} className="px-4 py-3 border-b border-gray-300">
-              <p className="text-xs text-ocf-black-300">Signed in as</p>
-              <p className="text-xs font-medium text-ocf-black-300 truncate">
+            <div id={"UserMenu-SignedInText"} className="px-4 py-3 border-b border-edge">
+              <p className="text-xs text-content-muted">Signed in as</p>
+              <p className="text-xs font-medium text-content-muted truncate">
                 {user && user.email}
               </p>
             </div>
@@ -278,8 +300,8 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
               {({ active }) => (
                 <div
                   className={classNames(
-                    active ? "bg-gray-100" : "",
-                    "block px-4 py-2 text-sm text-ocf-black-600"
+                    active ? "bg-surface-panel" : "",
+                    "block px-4 py-2 text-sm text-content"
                   )}
                 >
                   <Link href="/api/auth/logout" legacyBehavior>
@@ -297,10 +319,9 @@ const ProfileDropDown = ({ view, combinedData = null }: IProfileDropDown) => {
         onClose={() => setShowDownloadModal(false)}
         onDownload={handleDownload}
         nHourForecast={nHourForecast}
-        view={view}
+        comparisonActive={!!comparison}
+        labels={csvLabels}
       />
-
-      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
     </>
   );
 };

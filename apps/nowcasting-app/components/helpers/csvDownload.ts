@@ -1,9 +1,9 @@
-import { CombinedData } from "../types";
 import { DateTime } from "luxon";
 import { CSVColumn } from "../layout/header/csvDownloadModal";
-import { getSettlementPeriodForDate } from "./chartUtils";
+import { cadenceMinutesFor, periodForLabel } from "../../lib/time/cursor";
+import type { TimeSeries } from "../../lib/domain/types";
 
-interface CSVRow {
+export interface CSVRow {
   startDateTime: string;
   endDateTime: string;
   settlementPeriod: number | null;
@@ -17,22 +17,50 @@ interface CSVRow {
 
 export const getNHourForecastLabel = (nHourForecast: number) => `${nHourForecast}-hour forecast`;
 
+export type CsvLabels = {
+  periodLabel: string;
+  /** Header labels of the country's first and second observer; absent for a missing observer. */
+  observerLabels: [string | undefined, string | undefined];
+};
+
+export const DEFAULT_CSV_LABELS: CsvLabels = {
+  periodLabel: "Settlement Period",
+  observerLabels: ["PVLive Initial", "PVLive Updated"]
+};
+
+/**
+ * The period and observer labels the CSV file and its column-selection modal both show:
+ * the config override if present, else the manifest's label, else the observer's raw name.
+ */
+export const csvLabelsFor = (
+  config: { periodLabel?: string; csvObserverLabels?: Record<string, string> } | undefined,
+  sources: { name: string; label?: string }[]
+): CsvLabels => {
+  const labelOf = (source: { name: string; label?: string } | undefined) =>
+    source && (config?.csvObserverLabels?.[source.name] ?? (source.label || source.name));
+  return {
+    periodLabel: config?.periodLabel ?? "Period",
+    observerLabels: [labelOf(sources[0]), labelOf(sources[1])]
+  };
+};
+
 const getColumnConfig = (
-  nHourForecast: number
+  nHourForecast: number,
+  labels: CsvLabels
 ): Record<
   Exclude<CSVColumn, "pLevels">,
   { key: keyof Omit<CSVRow, "pLevelValues">; header: string }
 > => ({
   startDateTime: { key: "startDateTime", header: "Start DateTime" },
   endDateTime: { key: "endDateTime", header: "End DateTime" },
-  settlementPeriod: { key: "settlementPeriod", header: "Settlement Period" },
+  settlementPeriod: { key: "settlementPeriod", header: labels.periodLabel },
   solarGenerationPvliveInitial: {
     key: "solarGenerationPvliveInitial",
-    header: "Solar Generation PVLive Initial (MW)"
+    header: `Solar Generation ${labels.observerLabels[0]} (MW)`
   },
   solarGenerationPvliveUpdated: {
     key: "solarGenerationPvliveUpdated",
-    header: "Solar Generation PVLive Updated (MW)"
+    header: `Solar Generation ${labels.observerLabels[1]} (MW)`
   },
   delta: { key: "delta", header: "Delta (MW)" },
   solarForecast: { key: "solarForecast", header: "Solar Forecast (MW)" },
@@ -42,10 +70,23 @@ const getColumnConfig = (
   }
 });
 
-const createEmptyRow = (timestamp: string): CSVRow => {
-  const end = DateTime.fromISO(timestamp).setZone("Europe/London");
-  const start = end.minus({ minutes: 30 });
-  const settlementPeriod = getSettlementPeriodForDate(start);
+// Phase 3: the zone the export renders its datetimes in, and counts settlement periods from,
+// comes from the country registry. Defaulted so existing call sites are unchanged.
+export const DEFAULT_CSV_TIMEZONE = "Europe/London";
+// The country whose period length and timestamp labelling the export reads, defaulted like the
+// zone so existing call sites are unchanged.
+export const DEFAULT_CSV_COUNTRY = "GB";
+
+const createEmptyRow = (timestamp: string, timezone: string, country: string): CSVRow => {
+  // A published label names a period of the country's cadence, and names it by its start or its
+  // end according to the country's labelling. `periodForLabel` reads both from the registry.
+  const period = periodForLabel(timestamp, country);
+  const start = DateTime.fromISO(period.start).setZone(timezone);
+  const end = DateTime.fromISO(period.end).setZone(timezone);
+  // 1-indexed count of the country's periods since local midnight.
+  const settlementPeriod =
+    Math.floor(start.diff(start.startOf("day"), "minutes").minutes / cadenceMinutesFor(country)) +
+    1;
 
   return {
     startDateTime: start.toISO() || "",
@@ -60,37 +101,58 @@ const createEmptyRow = (timestamp: string): CSVRow => {
   };
 };
 
-const getOrCreateRow = (map: Map<string, CSVRow>, ts: string): CSVRow => {
+const getOrCreateRow = (
+  map: Map<string, CSVRow>,
+  ts: string,
+  timezone: string,
+  country: string
+): CSVRow => {
   if (!map.has(ts)) {
-    map.set(ts, createEmptyRow(ts));
+    map.set(ts, createEmptyRow(ts, timezone, country));
   }
   return map.get(ts)!;
 };
 
-export const downloadNationalCsv = (
-  combinedData: CombinedData | null,
-  selectedColumns: CSVColumn[],
-  nHourForecast: number,
-  pLevels: [number, number][]
-) => {
-  if (!combinedData) return;
+/**
+ * The v1 series the national CSV is built from — the same canonical `TimeSeries` shape the
+ * national chart and the delta view's top chart fetch, not `CombinedData`.
+ *
+ * `generationInitial`/`generationUpdated` are the country's first and second observer, in
+ * manifest order — GB's `pvlive_in_day`/`pvlive_day_after`, matching `GENERATION_CHART_KEYS`
+ * in `pv-remix-chart.tsx`. A single-observer country (NL) leaves `generationUpdated`
+ * undefined, and its column comes back empty rather than waiting forever.
+ */
+export type NationalCsvSeries = {
+  forecast?: TimeSeries;
+  generationInitial?: TimeSeries;
+  generationUpdated?: TimeSeries;
+  nHour?: TimeSeries;
+};
 
+/**
+ * Pure row-building half of the national CSV export: fans the configured series out into one
+ * row per timestamp, merged on the timestamp string.
+ */
+export const buildCsvRows = (
+  series: NationalCsvSeries,
+  pLevels: [number, number][],
+  timezone: string = DEFAULT_CSV_TIMEZONE,
+  country: string = DEFAULT_CSV_COUNTRY
+): CSVRow[] => {
   const dataByTimestamp = new Map<string, CSVRow>();
 
   // PV initial
-  combinedData.pvRealDayInData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc);
-    row.solarGenerationPvliveInitial = entry.solarGenerationKw
-      ? entry.solarGenerationKw / 1000
-      : null;
+  series.generationInitial?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
+    // absent ≠ null ≠ zero: `powerMw` is already `number | null` MW off the v1 boundary, so a
+    // genuine 0 MW overnight reading is preserved exactly, not coerced to a blank cell.
+    row.solarGenerationPvliveInitial = point.powerMw;
   });
 
   // PV updated
-  combinedData.pvRealDayAfterData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.datetimeUtc);
-    row.solarGenerationPvliveUpdated = entry.solarGenerationKw
-      ? entry.solarGenerationKw / 1000
-      : null;
+  series.generationUpdated?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
+    row.solarGenerationPvliveUpdated = point.powerMw;
   });
 
   const updateRowDelta = (row: CSVRow) => {
@@ -100,29 +162,42 @@ export const downloadNationalCsv = (
   };
 
   // Forecast
-  combinedData.nationalForecastData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.targetTime);
-    row.solarForecast = entry.expectedPowerGenerationMegawatts;
-    const plevelValues = entry.plevels as Record<string, number | undefined> | undefined;
+  series.forecast?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
+    row.solarForecast = point.powerMw;
     pLevels.flat().forEach((level) => {
-      row.pLevelValues[level] = plevelValues?.[`plevel_${level}`] ?? null;
+      row.pLevelValues[level] = point.plevelsMw?.[String(level)] ?? null;
     });
   });
 
   // N forecast
-  combinedData.nationalNHourData?.forEach((entry) => {
-    const row = getOrCreateRow(dataByTimestamp, entry.targetTime);
-    row.nForecast = entry.expectedPowerGenerationMegawatts;
+  series.nHour?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
+    row.nForecast = point.powerMw;
   });
 
   dataByTimestamp.forEach((row) => updateRowDelta(row));
 
   // sort + build rows
-  const csvRows = Array.from(dataByTimestamp.entries())
+  return Array.from(dataByTimestamp.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, row]) => row);
+};
 
-  const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels);
+export const downloadNationalCsv = (
+  series: NationalCsvSeries,
+  selectedColumns: CSVColumn[],
+  nHourForecast: number,
+  pLevels: [number, number][],
+  timezone: string = DEFAULT_CSV_TIMEZONE,
+  country: string = DEFAULT_CSV_COUNTRY,
+  labels: CsvLabels = DEFAULT_CSV_LABELS
+) => {
+  if (!series.forecast && !series.generationInitial && !series.generationUpdated && !series.nHour)
+    return;
+
+  const csvRows = buildCsvRows(series, pLevels, timezone, country);
+  const csv = generateCsv(csvRows, selectedColumns, nHourForecast, pLevels, labels);
 
   // download
   const blob = new Blob([csv], { type: "text/csv" });
@@ -140,13 +215,14 @@ export const downloadNationalCsv = (
   URL.revokeObjectURL(url);
 };
 
-function generateCsv(
+export function generateCsv(
   rows: CSVRow[],
   selectedColumns: CSVColumn[],
   nHourForecast: number,
-  pLevels: [number, number][]
+  pLevels: [number, number][],
+  labels: CsvLabels = DEFAULT_CSV_LABELS
 ): string {
-  const COLUMN_CONFIG = getColumnConfig(nHourForecast);
+  const COLUMN_CONFIG = getColumnConfig(nHourForecast, labels);
   const pLevelLevels = pLevels.flat();
 
   // "pLevels" is a single selectable column that expands to one header/value per selected band
@@ -160,8 +236,27 @@ function generateCsv(
       ? pLevelLevels.map((level) => row.pLevelValues[level] ?? "")
       : [row[COLUMN_CONFIG[col].key] ?? ""];
 
-  const headers = selectedColumns.flatMap(getHeaders);
-  const lines = rows.map((row) => selectedColumns.flatMap((col) => getValues(row, col)).join(","));
+  // A single-observer country has no second generation column, in the file as in the modal.
+  const columns = selectedColumns.filter(
+    (col) => col !== "solarGenerationPvliveUpdated" || labels.observerLabels[1] !== undefined
+  );
+  const headers = columns.flatMap(getHeaders);
+  const lines = rows.map((row) => joinCsvRow(columns.flatMap((col) => getValues(row, col))));
 
-  return [headers.join(","), ...lines].join("\n");
+  return [joinCsvRow(headers), ...lines].join("\n");
 }
+
+/**
+ * RFC 4180 escaping, applied at the single point where cells are joined: a cell containing a
+ * comma, a double quote, CR or LF is wrapped in quotes and its own quotes are doubled. Every cell
+ * is a number or an ISO datetime today, so nothing changes — but Phase 3 puts country and region
+ * labels into this file, and one label with a comma in it would silently shift every column after
+ * it on that row.
+ */
+const escapeCsvCell = (cell: number | string | null): string => {
+  const value = cell === null ? "" : String(cell);
+  return /["\r\n,]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+};
+
+const joinCsvRow = (cells: (number | string | null)[]): string =>
+  cells.map(escapeCsvCell).join(",");

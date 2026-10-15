@@ -1,583 +1,683 @@
-import { components } from "../../types/quartz-api";
-import {
-  CombinedData,
-  ForecastData,
-  GspDeltaValue,
-  GspZoneGroupings,
-  MapFeatureObject
-} from "../types";
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
-import gspShapeData from "../../data/GSP_regions_4326_20260209.json";
-import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
-import nationalShapeData from "../../data/national_gsp_shape.json";
-import ngGSPZoneGroupings from "../../data/ng_gsp_zone_groupings.json";
-import dnoGspGroupings from "../../data/dno_gsp_groupings.json";
-import nationalGspZone from "../../data/national_gsp_zone.json";
-import ngZones from "../../data/ng_zones.json";
-import { formatISODateString, getOpacityValueFromPVNormalized, getRoundedPv } from "./utils";
-import { get30MinNow } from "./globalState";
-import { NationalAggregation, SelectedData } from "../map/types";
+import { FeatureCollection } from "geojson";
 import { DateTime } from "luxon";
+import { getDeltaBucket, getDeltaBucketNormalized } from "./utils";
+import { DELTA_BUCKET } from "../../constant";
+import { regionSnapshotState } from "../../hooks/data";
+import type { RegionSnapshotState } from "../../hooks/data";
+import type { AggregationLevel } from "./aggregationLevels";
+import type { GeoJoinTransform } from "../../config/countries";
+import { getCountryConfig } from "../../config/countries";
+import { geoAliasesFor, isLegacyRegion } from "../../config/geo-aliases";
+import { formatRegionLabel } from "../../lib/domain/region-label";
+import { deltaTopFor } from "../../lib/domain/delta-ramp";
+import type {
+  Region,
+  RegionSeries,
+  RegionSeriesValues,
+  RegionSnapshot,
+  RegionSnapshotValue,
+  TimeSeries,
+  TimeSeriesPoint,
+  UtcInstant
+} from "../../lib/domain/types";
 
-const getGspActualValueMwForTime = (
-  gspRealData: components["schemas"]["GSPYieldGroupByDatetime"][],
-  targetTime: string,
-  gspId: number
-) => {
-  return (
-    Number(
-      gspRealData?.find((realData) => realData.datetimeUtc.slice(0, 16) === targetTime)
-        ?.generationKwByGspId?.[String(gspId)]
-    ) / 1000
-  );
+/*
+ * The `memoise`/`require` block that used to sit here is GONE (Phase 5, Track D).
+ *
+ * It lazily `require`d seven `data/*.json` files — ~36 MB of GeoJSON — and, because the
+ * paths were static literals, webpack put every byte of them in the client bundle whether
+ * or not a map ever rendered. That was the single largest line item in the 11.6 MB First
+ * Load JS on `/` and in the 4.83 MB floor paid by pages that draw no map at all.
+ *
+ * Everything below is now **pure**: geometry arrives as an argument. `lib/geo/assets.ts`
+ * fetches it from `public/geo/{country}/` and `hooks/data/use-map-geometry.ts` decides
+ * which URLs a level needs. Nothing in this file loads anything, and no `data/*.json`
+ * path is named here any more — deliberately, so the bundle cannot regress by accident.
+ */
+
+/*
+ * `getEarliestForecastTimestamp` and `floorToSixHoursUtc` used to live here. Moved to
+ * `lib/api/v1/series-window.ts` on 2026-08-17: the window is applied by the query layer now,
+ * so every region time-series gets it whether or not the caller remembers to ask, and the one
+ * consumer that needs the *value* (the scrub track's left edge) reads it from the same place
+ * the requests do. This file is the value pipeline; it had no business owning an API default.
+ */
+
+// =========================================================================================
+// The v1 value pipeline
+//
+// The v0 pipeline that used to sit above this line is gone (Phase 4, wave 4): it rebuilt the
+// whole FeatureCollection on every scrub tick and joined values onto it with a `.find()` per
+// region, and its last caller went with `pages/index.tsx`'s `/gsp/forecast/all` fetch.
+// `generateGeoJsonForecastData`, `mapGspFeatures`/`mapZoneFeatures`, `setFeatureObjectProps`
+// and the `filterCompact*`/`getOldestTimestamp*` family are all deleted along with the
+// `data.geo.test.ts` characterisation suite that pinned them.
+//
+// What replaces it:
+//
+//   geometry  — built once per aggregation level, never rebuilt when only the numbers move.
+//   values    — an O(1) lookup by region name into `RegionSeries.regions`, applied to the map
+//               with `setFeatureState` rather than `setData`.
+//
+// Everything here is MW: `normalise.ts` converted at the boundary, and nothing re-scales.
+// =========================================================================================
+
+/**
+ * The Mapbox feature-state a map region carries. Values must be primitives — Mapbox stores
+ * feature state as a flat JSON object and expressions read one key at a time.
+ *
+ * `dataState` is the whole point of the shape: `unpublished`, `no-data` and `value` are three
+ * different things and the map renders each differently. A region with `power: 0` and
+ * `dataState: "value"` is overnight solar and must show as a real (faint) value, not as a
+ * hole — that is audit B8's bug class, fixed rather than pinned.
+ */
+export type MapFeatureState = {
+  dataState: RegionSnapshotState;
+  /** Forecast power in MW. Meaningless unless `dataState === "value"`. */
+  power: number;
+  /** Forecast power as a fraction of installed capacity, 0..1. */
+  normalized: number;
+  /** Installed capacity in MW. Known independently of whether a value has published. */
+  capacity: number;
+  /** Observed generation in MW, or `null` when it has not published / reported. */
+  actual: number | null;
+  /** Observed minus forecast, in MW. `0` when no delta is computable — see `hasDelta`. */
+  delta: number;
+  /**
+   * The same delta as a fraction of installed capacity, signed. `0` when there is no delta or
+   * no capacity to divide by.
+   *
+   * Carried alongside the MW figure rather than derived at the point of use because the map
+   * reads it through a Mapbox expression, and expressions read one flat key at a time.
+   */
+  deltaNormalized: number;
+  /** The nine-step bucket of `delta`, on the MW edges of the region's country and tier. */
+  deltaBucket: number;
+  /**
+   * The nine-step bucket of `deltaNormalized`, on `DELTA_PERCENTAGE_EDGES`.
+   *
+   * Both are precomputed and both are pushed to every feature, so switching the unit repaints
+   * from feature state that is already there — no refetch, no value rebuild, and no chance of
+   * the two units disagreeing about which region is extreme.
+   */
+  deltaBucketNormalized: number;
+  /** False when the delta is not computable (future slot, or either side missing). */
+  hasDelta: boolean;
+  /** Human label — `Region.label` ("City Road"), never the raw `citr_1`. */
+  label: string;
+  /**
+   * Whether this feature belongs to a client-side rollup level (GB's DNO / NG zone), whose MW
+   * opacity bands are ten times the region-level ones.
+   *
+   * Not written here — the value join has no opinion about how a level is drawn. It is
+   * stamped per country by `namespaceFeatureStates` (`components/map/country-features.ts`),
+   * because since Phase 6 the map draws several countries at once and each picks its own
+   * aggregation level: GB can be on its DNO rollup while NL is on provinces in the same
+   * frame. `fillOpacityExpression` reads the flag rather than taking an argument, which is
+   * what lets one paint expression serve both. Absent means false, i.e. region-level bands.
+   */
+  grouped?: boolean;
+  /**
+   * Rollups only (`rollUpRegionValues`); absent on a single region, where the comparison set is
+   * the region itself. The actual and forecast of the group's members that have both at this
+   * slot (`hasDelta`), summed over that one set so the two can be read side by side. `null`
+   * when no member has both. `actual` and `power` stay whole-group sums over different sets.
+   */
+  comparedActual?: number | null;
+  comparedForecast?: number | null;
+  /** Capacity of the same compared set: the divisor of the rollup's `deltaNormalized`. */
+  comparedCapacity?: number;
+  /** How many members are in the compared set, and how many the group has. */
+  membersCompared?: number;
+  membersTotal?: number;
 };
-const getGspForecastForTime = (
-  gspForecastsDataByTimestamp: components["schemas"]["OneDatetimeManyForecastValues"][],
+
+/** One region's joined values, before it is flattened to feature state. */
+export type MapRegionValue = MapFeatureState & {
+  /** Mapbox feature id: the numeric GSP id at GSP level, the grouping name above it. */
+  featureId: string | number;
+  /** The v1 key, e.g. `citr_1`. */
+  regionName: string;
+};
+
+/**
+ * Minute-precision UTC key, the join key between a selected time and a `RegionSeries` axis.
+ *
+ * Parsed as UTC when the string carries no offset. `selectedISOTime` is written by
+ * `getCursorNow`, which is UTC throughout, and `RegionSeries.times` is canonicalised to
+ * `…Z` — so both sides land on the same key without a timezone ever entering it.
+ */
+export const utcMinuteKey = (instant: string): string => {
+  const parsed = DateTime.fromISO(instant, { zone: "utc" });
+  return parsed.isValid ? parsed.toUTC().toFormat("yyyy-MM-dd'T'HH:mm") : "";
+};
+
+/**
+ * Index of `targetTime` on a `RegionSeries` time axis, or `-1`.
+ *
+ * This is the whole of the join that `mapZoneFeatures` used to do with a full-array `.find()`
+ * *inside* the per-region loop — hundreds of scans and thousands of redundant date formats per
+ * render, for a predicate that never depended on the region.
+ */
+export const timeIndexOf = (times: UtcInstant[] | undefined, targetTime: string): number => {
+  if (!times || times.length === 0 || !targetTime) return -1;
+  const key = utcMinuteKey(targetTime);
+  if (!key) return -1;
+  for (let i = 0; i < times.length; i++) {
+    if (times[i].slice(0, 16) === key) return i;
+  }
+  return -1;
+};
+
+/**
+ * One slice of a `RegionSeries` as a `RegionSnapshot`, so `regionSnapshotState` applies to
+ * period data verbatim rather than being reimplemented against a different shape.
+ *
+ * A region absent from `series.regions`, or whose axis has no entry at this index, stays
+ * **absent** from the result — "has not published" is not "reported null", and neither is
+ * zero. When `targetTime` falls outside the fetched window every region is absent, which is
+ * the correct reading: nothing has been published for a slot we did not ask for.
+ */
+export const regionSeriesSnapshotAt = (
+  series: RegionSeries | undefined,
   targetTime: string
-) => {
-  return gspForecastsDataByTimestamp.find((fc) => fc.datetimeUtc.slice(0, 16) === targetTime);
-};
-const setFeatureObjectProps = (
-  existingProperties: any,
-  gspSystemInfo: any,
-  selectedFCValue: number | undefined,
-  selectedActualValueMW: number | undefined,
-  roundingFactor: number = 100
-) => {
+): RegionSnapshot | undefined => {
+  if (!series) return undefined;
+  const index = timeIndexOf(series.times, targetTime);
+  const regions: Record<string, RegionSnapshotValue> = {};
+  if (index >= 0) {
+    for (const name of Object.keys(series.regions)) {
+      const values = series.regions[name];
+      const powerMw = values.powerMw[index];
+      if (powerMw === undefined) continue;
+      regions[name] = { regionName: name, capacityMw: values.capacityMw, powerMw };
+    }
+  }
   return {
-    ...existingProperties,
-    [SelectedData.expectedPowerGenerationMegawatts]:
-      selectedFCValue && getRoundedPv(selectedFCValue, false, roundingFactor),
-    [SelectedData.expectedPowerGenerationMegawattsRounded]:
-      selectedFCValue && getRoundedPv(selectedFCValue, true, roundingFactor),
-    [SelectedData.expectedPowerGenerationNormalized]:
-      selectedFCValue &&
-      getOpacityValueFromPVNormalized(
-        (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0,
-        false
-      ),
-    [SelectedData.expectedPowerGenerationNormalizedRounded]:
-      selectedFCValue &&
-      getOpacityValueFromPVNormalized(
-        (selectedFCValue || 0) / (gspSystemInfo?.installedCapacityMw || 1) || 0
-      ),
-    [SelectedData.actualPowerGenerationMegawatts]:
-      selectedActualValueMW && getRoundedPv(Number(selectedActualValueMW), false, roundingFactor),
-    [SelectedData.installedCapacityMw]: getRoundedPv(
-      gspSystemInfo?.installedCapacityMw || 0,
-      false,
-      roundingFactor
-    ),
-    gspDisplayName: gspSystemInfo?.regionName || ""
+    timeUtc: series.times[index] ?? utcMinuteKey(targetTime),
+    regions,
+    forecast: series.forecast,
+    observerName: series.observerName
   };
 };
 
-const mapGspFeatures: (
-  features: Feature[],
-  combinedData?: CombinedData,
-  gspForecastsDataByTimestamp?: components["schemas"]["OneDatetimeManyForecastValues"][],
-  targetTime?: string,
-  gspDeltas?: Map<string, GspDeltaValue>
-) => Feature[] = (
-  features,
-  combinedData,
-  gspForecastsDataByTimestamp = [],
-  targetTime,
-  gspDeltas
-) => {
-  return features.map((featureObj, index) => {
-    const gspSystemInfo = combinedData?.allGspSystemData?.find(
-      (system) => system.gspName === featureObj?.properties?.GSPs
-    );
-    // TODO better handling for if gsp not found
-    const gspId = gspSystemInfo?.gspId || 1000;
-    let selectedFC;
-    let selectedFCValue;
-    let selectedActualValueMW: number | undefined;
-    const gspRealData =
-      combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][];
-    // If targetTime selected on chart, find the forecast/actuals data for that time
-    if (gspForecastsDataByTimestamp && targetTime) {
-      selectedFC = getGspForecastForTime(
-        gspForecastsDataByTimestamp,
-        formatISODateString(targetTime)
-      );
-      if (selectedFC && gspSystemInfo) selectedFCValue = selectedFC.forecastValues[gspId];
-      selectedActualValueMW = getGspActualValueMwForTime(
-        gspRealData,
-        formatISODateString(targetTime),
-        gspId
-      );
-    } else if (gspForecastsDataByTimestamp) {
-      // If no targetTime selected, find the latest forecast/actuals data
-      let latestTimestamp = get30MinNow();
-      selectedFCValue = getGspForecastForTime(gspForecastsDataByTimestamp, latestTimestamp)
-        ?.forecastValues[gspId];
-      selectedActualValueMW = getGspActualValueMwForTime(gspRealData, latestTimestamp, gspId);
-    }
-
-    // Update the feature object with the calculated forecast/actuals data
-    const updatedFeatureObj: MapFeatureObject = {
-      ...featureObj,
-      properties: setFeatureObjectProps(
-        { ...featureObj.properties, id: gspId },
-        gspSystemInfo,
-        selectedFCValue,
-        selectedActualValueMW
-      )
-    };
-    if (gspDeltas) {
-      const currentGspDelta: GspDeltaValue | undefined = gspDeltas.get(String(gspId));
-      updatedFeatureObj.properties = {
-        ...updatedFeatureObj.properties,
-        [SelectedData.expectedPowerGenerationMegawatts]: currentGspDelta?.delta || 0,
-        [SelectedData.expectedPowerGenerationMegawattsRounded]: currentGspDelta?.delta || 0,
-        [SelectedData.expectedPowerGenerationNormalized]:
-          Number(currentGspDelta?.deltaNormalized) || 0,
-        [SelectedData.expectedPowerGenerationNormalizedRounded]:
-          Number(currentGspDelta?.deltaNormalized) || 0,
-        [SelectedData.delta]: currentGspDelta?.delta || 0,
-        deltaBucket: currentGspDelta?.deltaBucket || 0
-      };
-    }
-
-    return updatedFeatureObj;
-  });
+/**
+ * ------------------------------------------------------------------------------------
+ * THE NUMERIC-ID BRIDGE — the one place a numeric GSP id meets a region name.
+ * ------------------------------------------------------------------------------------
+ *
+ * v1 keys every region by name (`citr_1`); GB's boundary file keys by the uppercase GSP
+ * code in `properties.GSPs`. `Region.metadata.gsp_id` reconciles those to the numeric id
+ * the rest of the app still speaks.
+ *
+ * **Phase 5 checked whether this could go, and it cannot.** The contract's condition was
+ * "survives only if something other than the groupings still needs the id". Two things do:
+ *
+ *  - `use-update-map-state-on-click.ts` coerces the clicked feature's `properties.id` with
+ *    `Number()` whenever the region type is `gsp`, and `gsp-pv-remix-chart` passes the
+ *    resulting selection to `useGspAggregateData` as `number[]`. A name-keyed GSP feature
+ *    id would silently become `NaN` there — no type error, no runtime throw, just an empty
+ *    chart. So GSP-level Mapbox feature ids stay numeric.
+ *  - `components/charts/delta-view/use-gsp-deltas.ts` publishes `gspId` on every
+ *    `GspDeltaValue`.
+ *
+ * What DID go is `byGspCode`: the geometry join no longer goes through the bridge. It is
+ * now a name join driven by the registry's `joinProperty`/`joinTransform` plus
+ * `config/geo-aliases.ts`, which is what makes it work for a country that has no such
+ * thing as a GSP. The remaining fields are id translation and nothing else.
+ */
+export type RegionBridge = {
+  byName: Map<string, Region>;
+  byGspId: Map<number, Region>;
+  gspIdFor: (regionName: string) => number | undefined;
 };
 
-const mapZoneFeatures: (
-  features: Feature[],
-  gspZoneGroupings: GspZoneGroupings,
-  combinedData?: CombinedData,
-  gspForecastsDataByTimestamp?: components["schemas"]["OneDatetimeManyForecastValues"][],
-  targetTime?: string,
-  gspDeltas?: Map<string, GspDeltaValue>,
-  idKey?: string
-) => Feature[] = (
-  features,
-  gspZoneGroupings,
-  combinedData,
-  gspForecastsDataByTimestamp = [],
+export const buildRegionBridge = (regions: Region[] | undefined): RegionBridge => {
+  const byName = new Map<string, Region>();
+  const byGspId = new Map<number, Region>();
+  for (const region of regions ?? []) {
+    byName.set(region.name, region);
+    const gspId = region.metadata?.gsp_id;
+    if (typeof gspId === "number") byGspId.set(gspId, region);
+  }
+  return {
+    byName,
+    byGspId,
+    gspIdFor: (regionName) => {
+      const gspId = byName.get(regionName)?.metadata?.gsp_id;
+      return typeof gspId === "number" ? gspId : undefined;
+    }
+  };
+};
+
+/**
+ * The Mapbox feature id a region is drawn under.
+ *
+ * The numeric `gsp_id` where the region has one, the region name where it does not (NL's
+ * provinces, and any future country the API does not assign numeric ids to). See
+ * `RegionBridge` above for who depends on the GSP case staying numeric.
+ */
+const featureIdFor = (region: Region): string | number => {
+  const gspId = region.metadata?.gsp_id;
+  return typeof gspId === "number" ? gspId : region.name;
+};
+
+const EMPTY_VALUE: MapFeatureState = {
+  dataState: "unpublished",
+  power: 0,
+  normalized: 0,
+  capacity: 0,
+  actual: null,
+  delta: 0,
+  deltaNormalized: 0,
+  deltaBucket: DELTA_BUCKET.ZERO,
+  deltaBucketNormalized: DELTA_BUCKET.ZERO,
+  hasDelta: false,
+  label: ""
+};
+
+export type RegionValueInputs = {
+  regions: Region[] | undefined;
+  /** Forecast for every region of the type, over the whole window. Fetched once. */
+  forecast: RegionSeries | undefined;
+  /** Observed generation for every region, over the whole window. Fetched once. */
+  generation: RegionSeries | undefined;
+  /** The scrub position. Only this changes as the user drags — no refetch. */
+  targetTime: string;
+  /** "Now", rounded to the current half-hour slot. Slots at or after it have no delta. */
+  timeNow: string;
+  /**
+   * Where these regions' MW delta scale saturates — `deltaTopFor(country, false)` — so their
+   * `deltaBucket` steps on the country's own edges. Omitted, the enum's global ±100.
+   */
+  deltaTop?: number;
+};
+
+/**
+ * Join forecast, generation and capacity onto every region, keyed by region name.
+ *
+ * O(regions), not O(regions x times x regions): the time index is resolved once for each
+ * series and `RegionSeries.regions` is a name-keyed record, so each region costs two hash
+ * lookups. This is the function that replaces `mapGspFeatures`' 349 x ~350 scan.
+ */
+export const buildRegionValues = ({
+  regions,
+  forecast,
+  generation,
   targetTime,
-  gspDeltas,
-  idKey = "id"
-) => {
-  if (!targetTime) return [];
-  // Loop through ng_zones data and aggregate the forecast and actuals
-  const newFeatures: Feature[] = features.map((feature) => {
-    const zoneId = feature.properties?.[idKey as keyof typeof gspZoneGroupings];
-    if (!zoneId) return feature;
-    const zoneGspIds: number[] = gspZoneGroupings[zoneId as keyof typeof gspZoneGroupings];
-    if (!zoneGspIds) return feature;
-    let zoneForecastTotal = 0;
-    let zoneActualTotal = 0;
-    let zoneInstalledCapacity = 0;
-    zoneGspIds.forEach((gsp: number) => {
-      zoneForecastTotal +=
-        gspForecastsDataByTimestamp.find(
-          (fc) => fc.datetimeUtc.slice(0, 16) === formatISODateString(targetTime)
-        )?.forecastValues[gsp] || 0;
-      zoneActualTotal += getGspActualValueMwForTime(
-        combinedData?.allGspRealData as components["schemas"]["GSPYieldGroupByDatetime"][],
-        formatISODateString(targetTime),
-        gsp
-      );
-      const gspSystemData = combinedData?.allGspSystemData?.find((system) => system.gspId === gsp);
-      zoneInstalledCapacity += Number(gspSystemData?.installedCapacityMw || 0);
+  timeNow,
+  deltaTop
+}: RegionValueInputs): Map<string, MapRegionValue> => {
+  const forecastSnapshot = regionSeriesSnapshotAt(forecast, targetTime);
+  const generationSnapshot = regionSeriesSnapshotAt(generation, targetTime);
+  // A slot at or after "now" has no observation to compare against, so it has no delta —
+  // it is not a delta of zero. `hasDelta` keeps the two apart; the v0 code collapsed them.
+  const isFutureSlot = utcMinuteKey(targetTime) >= utcMinuteKey(timeNow);
+
+  const values = new Map<string, MapRegionValue>();
+  for (const region of regions ?? []) {
+    const name = region.name;
+    const forecastState = regionSnapshotState(forecastSnapshot, name);
+    const generationState = regionSnapshotState(generationSnapshot, name);
+    const forecastMw = forecastState === "value" ? forecastSnapshot!.regions[name].powerMw! : null;
+    const generationMw =
+      generationState === "value" ? generationSnapshot!.regions[name].powerMw! : null;
+    const capacityMw = region.capacityMw ?? 0;
+
+    // A genuine 0 is a delta input like any other. The v0 path treated `!currentYield.yield`
+    // as "no reading" and forced the delta to 0, which silently erased every real overnight
+    // and heavily-clipped reading. B8's bug class again.
+    const hasDelta = !isFutureSlot && forecastMw !== null && generationMw !== null;
+    const delta = hasDelta ? generationMw! - forecastMw! : 0;
+    // Against this region's *own* capacity — the whole point of the percentage scale. A GSP
+    // with no registered capacity yields 0 and buckets neutral; see `getDeltaBucketNormalized`.
+    const deltaNormalized = hasDelta && capacityMw > 0 ? delta / capacityMw : 0;
+
+    values.set(name, {
+      featureId: name,
+      regionName: name,
+      dataState: forecastState,
+      power: forecastMw ?? 0,
+      normalized: forecastMw !== null && capacityMw > 0 ? forecastMw / capacityMw : 0,
+      capacity: capacityMw,
+      actual: generationMw,
+      delta,
+      deltaNormalized,
+      deltaBucket: hasDelta ? getDeltaBucket(delta, deltaTop) : DELTA_BUCKET.ZERO,
+      deltaBucketNormalized: hasDelta
+        ? getDeltaBucketNormalized(deltaNormalized)
+        : DELTA_BUCKET.ZERO,
+      hasDelta,
+      label: region.label
     });
-    return {
-      ...feature,
-      id: zoneId,
-      type: "Feature" as "Feature",
-      properties: setFeatureObjectProps(
-        { ...feature.properties, id: zoneId },
-        { regionName: zoneId, installedCapacityMw: zoneInstalledCapacity },
-        zoneForecastTotal,
-        zoneActualTotal,
-        1000
-      )
-    } as Feature<Geometry, GeoJsonProperties>;
-  });
-
-  // TODO Deltas
-
-  return newFeatures;
+  }
+  return values;
 };
 
 /**
- * `generateGeoJsonForecastData` is a function that generates the GeoJson feature collection for forecast data.
+ * Sum region values into a client-side grouping (GB's DNO and NG-zone levels).
  *
- * @param forecastData - An optional array of shapes representing different forecast values for a specific date and time.
- * @param targetTime - An optional String parameter that represents the time for which to generate the forecast data.
- * @param combinedData - An optional object that holds the combined data from different sources, the structure is defined by the `CombinedData` type.
- * @param gspDeltas - An optional Map where the keys are the GSP IDs and the values are `GspDeltaValue` objects.
- * @param aggregation - An optional NationalAggregation value to aggregate the data to a specific level.
+ * **The DNO groupings are not a partition.** 15 GSP ids appear in two groupings each, so a
+ * DNO total double-counts them — both the power and the capacity. That is a property of
+ * `data/dno_gsp_groupings.json`, not of this function, and Phase 5 owns regenerating those
+ * files by region name. It is left visible here rather than papered over: silently
+ * de-duplicating would change published DNO numbers without anyone deciding to.
  *
- * @returns An object containing the generated feature collection under the `forecastGeoJson` property.
- *
- * @remarks
- * This function is used to generate the forecast data in GeoJson format which can be utilized in map-based visualizations.
- * It combines different provided data sources and for each feature in the gspShapeJson dataset, it finds the corresponding data from the forecasts and combines them into a new feature object with updated properties.
- * If a `gspDeltas` Map is provided, the function also includes the corresponding delta values in the properties of each feature object.
- * The function then returns an object with the entire FeatureCollection of updated feature objects.
+ * A group's `dataState` is `"value"` when at least one member published, so a partially
+ * filled newest slot renders as a (low) real total rather than a hole. `no-data` is reserved
+ * for a group whose members all reported nothing.
  */
-export const generateGeoJsonForecastData: (
-  forecastData?: components["schemas"]["OneDatetimeManyForecastValues"][],
-  targetTime?: string,
-  combinedData?: CombinedData,
-  gspDeltas?: Map<string, GspDeltaValue>,
-  aggregation?: NationalAggregation
-) => { forecastGeoJson: FeatureCollection } = (
-  forecastData,
-  targetTime,
-  combinedData,
-  gspDeltas,
-  aggregation = NationalAggregation.GSP
-) => {
-  console.log("aggregation", aggregation);
-  const gspForecastsDataByTimestamp = forecastData || [];
-  const gspShapeJson = gspShapeData as FeatureCollection;
-  let features = gspShapeJson.features;
-  if (aggregation === NationalAggregation.GSP) {
-    features = mapGspFeatures(
-      gspShapeJson.features,
-      combinedData,
-      gspForecastsDataByTimestamp,
-      targetTime,
-      gspDeltas
-    );
-  } else if (aggregation === NationalAggregation.zone) {
-    console.log("aggregating to zone");
-    const ngZonesJson = ngZones as FeatureCollection;
-    features = mapZoneFeatures(
-      ngZonesJson.features as Feature<Geometry, GeoJsonProperties>[],
-      ngGSPZoneGroupings,
-      combinedData,
-      gspForecastsDataByTimestamp,
-      targetTime
-    );
-  } else if (aggregation === NationalAggregation.DNO) {
-    console.log("aggregating to DNO");
-    const dnoShapeJson = dnoShapeData as FeatureCollection;
-    features = mapZoneFeatures(
-      dnoShapeJson.features as Feature<Geometry, GeoJsonProperties>[],
-      dnoGspGroupings,
-      combinedData,
-      gspForecastsDataByTimestamp,
-      targetTime,
-      undefined,
-      "LongName"
-    );
-  } else if (aggregation === NationalAggregation.national) {
-    console.log("aggregating to national");
-    const nationalShapeJson = nationalShapeData as FeatureCollection;
-    features = mapZoneFeatures(
-      nationalShapeJson.features as Feature<Geometry, GeoJsonProperties>[],
-      nationalGspZone,
-      combinedData,
-      gspForecastsDataByTimestamp,
-      targetTime
-    );
+export const rollUpRegionValues = (
+  values: Map<string, MapRegionValue>,
+  groupings: Record<string, string[]>,
+  // The GROUPED tier's delta top (`deltaTopFor(country, true)`): a rollup's delta is the sum
+  // of its members', so it is bucketed on the rollup's scale, not a member's.
+  deltaTop?: number
+): Map<string, MapRegionValue> => {
+  const rolled = new Map<string, MapRegionValue>();
+  for (const groupName of Object.keys(groupings)) {
+    let power = 0;
+    let capacity = 0;
+    let actual: number | null = null;
+    let delta = 0;
+    let published = 0;
+    let reportedNothing = 0;
+    let hasDelta = false;
+    // The compared set: members with both an actual and a forecast at this slot. Everything
+    // that sets actual against forecast is summed over this one set; `power` is not.
+    let comparedActual = 0;
+    let comparedForecast = 0;
+    let comparedCapacity = 0;
+    let membersCompared = 0;
+    let membersTotal = 0;
+
+    for (const regionName of groupings[groupName]) {
+      const value = values.get(regionName);
+      if (!value) continue;
+      membersTotal += 1;
+      capacity += value.capacity;
+      if (value.dataState === "value") {
+        published += 1;
+        power += value.power;
+      } else if (value.dataState === "no-data") {
+        reportedNothing += 1;
+      }
+      if (value.actual !== null) actual = (actual ?? 0) + value.actual;
+      if (value.hasDelta) {
+        hasDelta = true;
+        delta += value.delta;
+        membersCompared += 1;
+        comparedActual += value.actual ?? 0;
+        comparedForecast += value.power;
+        comparedCapacity += value.capacity;
+      }
+    }
+
+    const dataState: RegionSnapshotState =
+      published > 0 ? "value" : reportedNothing > 0 ? "no-data" : "unpublished";
+    rolled.set(groupName, {
+      ...EMPTY_VALUE,
+      featureId: groupName,
+      regionName: groupName,
+      dataState,
+      power,
+      normalized: capacity > 0 ? power / capacity : 0,
+      capacity,
+      actual,
+      delta,
+      // The group's summed delta over the summed capacity of the members it was summed over —
+      // not an average of their percentages, which would weight a 5 MW GSP the same as a
+      // 500 MW one, and not the whole group's capacity, which fades a partly-published slot.
+      deltaNormalized: hasDelta && comparedCapacity > 0 ? delta / comparedCapacity : 0,
+      deltaBucket: hasDelta ? getDeltaBucket(delta, deltaTop) : DELTA_BUCKET.ZERO,
+      deltaBucketNormalized:
+        hasDelta && comparedCapacity > 0
+          ? getDeltaBucketNormalized(delta / comparedCapacity)
+          : DELTA_BUCKET.ZERO,
+      hasDelta,
+      label: groupName,
+      comparedActual: membersCompared > 0 ? comparedActual : null,
+      comparedForecast: membersCompared > 0 ? comparedForecast : null,
+      comparedCapacity,
+      membersCompared,
+      membersTotal
+    });
   }
-  const forecastGeoJson = {
-    type: "FeatureCollection" as "FeatureCollection",
-    features
+  return rolled;
+};
+
+/**
+ * The v1 region names behind one named group of a client-side aggregation level (a DNO, an
+ * NG zone) — `undefined` for an unrecognised group name, or when the grouping file for the
+ * level has not been fetched yet.
+ *
+ * Replaces `groupGspIds`, which resolved a `NationalAggregation` member against a table of
+ * `require`d grouping files. Both halves of that are gone: the level is now an
+ * `AggregationLevel` the caller already holds, and the grouping file is fetched by
+ * `useMapGeometry`, so it arrives as an argument rather than being looked up. The values are
+ * v1 region names (`"citr_1"`), not numeric gsp_ids — `scripts/build-geo-assets.mjs` re-keyed
+ * the shipped assets in Phase 5, which is what removed the `RegionBridge` hop.
+ *
+ * `undefined` and `[]` are different: the first means "no such group / not loaded", the
+ * second means "a group with no members", and only the first should disable a caller.
+ */
+export const groupRegionNames = (
+  groupings: Record<string, string[]> | undefined,
+  groupName: string
+): string[] | undefined => groupings?.[groupName];
+
+/**
+ * Time-series equivalent of `rollUpRegionValues`: sums a `RegionSeries` across a grouping's
+ * member GSP ids at EVERY timestamp, rather than at one instant — the primitive the GSP
+ * chart's DNO / NG-zone / multi-select paths need to plot a rolled-up series instead of being
+ * pinned to a single region.
+ *
+ * Follows `rollUpRegionValues`'s published/reportedNothing convention, applied once per
+ * timestamp: a member present in `series.regions` with a number contributes to `published` and
+ * to the sum; present with `null` contributes to `reportedNothing` alone; absent from
+ * `series.regions` entirely (the region was never in the fetched payload) contributes to
+ * neither. At each timestamp `powerMw` is the sum when at least one member published, and
+ * `null` otherwise. Unlike `RegionSnapshot`, `TimeSeriesPoint` carries no third state to keep
+ * "unplublished" distinct from "no-data" at a single instant — and it does not need to here,
+ * because `use-format-chart-data.tsx`'s `fromTimeSeries` already drops every `null` point
+ * regardless of which of the two it was, the same collapse the v0 dialect it replaces made.
+ *
+ * **The DNO groupings are not a partition — this function does NOT fix that, on purpose.**
+ * 15 GSPs appear in two DNO groupings each (see `rollUpRegionValues`'s comment, verbatim), so
+ * a DNO-level series double-counts their power at every timestamp it is used for. Phase 5
+ * regenerated the grouping assets name-keyed and **deliberately reproduced the duplication**:
+ * the question put to the API owner — whether a GSP feeding two licence areas is legitimately
+ * counted in both, or whether its capacity should be apportioned — is still unanswered, so
+ * there is no basis for choosing a number. Do not deduplicate, do not apportion.
+ * `data.reconciliation.test.ts` keeps documenting the excess and must not be flipped to an
+ * equality assertion until that answer arrives.
+ */
+export const rollUpRegionSeries = (
+  series: RegionSeries | undefined,
+  regionNames: string[],
+  groupName: string
+): TimeSeries | undefined => {
+  if (!series) return undefined;
+
+  const members: RegionSeriesValues[] = [];
+  for (const regionName of regionNames) {
+    const values = series.regions[regionName];
+    if (values) members.push(values);
+  }
+
+  const capacityMw = members.reduce((total, member) => total + (member.capacityMw ?? 0), 0);
+
+  const values: TimeSeriesPoint[] = series.times.map((timeUtc, index) => {
+    let power = 0;
+    let published = 0;
+    for (const member of members) {
+      const powerMw = member.powerMw[index];
+      if (powerMw === undefined || powerMw === null) continue;
+      published += 1;
+      power += powerMw;
+    }
+    return { timeUtc, powerMw: published > 0 ? power : null };
+  });
+
+  return {
+    regionName: groupName,
+    capacityMw: members.length > 0 ? capacityMw : null,
+    values,
+    // `RegionSeries.forecast` (from `forecasts/period`) carries no per-region horizon; `null`
+    // rather than omitting the field, matching `TimeSeries`'s "no reading" convention.
+    forecast: series.forecast ? { ...series.forecast, horizonMinutes: null } : undefined,
+    observerName: series.observerName
   };
-
-  return { forecastGeoJson };
 };
 
 /**
- * This function filters an array of historic data elements based on a specified date-time range.
+ * Region values keyed by **Mapbox feature id** for the given aggregation level.
  *
- * @template T - The type of the elements in the array to be filtered. This type must include a `datetimeUtc` string value and may optionally include `generationKwByGspId` and `forecastValues` fields.
- * @param {T[]} data - The array of data to be filtered.
- * @param {string} filterHistoricStart - The start point (ISO DateTime string) of the date-time range within which data elements are considered for inclusion.
- * @param {string} prev30MinFromNowISO - The end point (ISO DateTime string) of the date-time range within which data elements are considered for inclusion.
+ * A derived level (GB's DNO / NG zone) keys by the grouping name, which is what the
+ * derived level's own polygons carry in their join property. A non-derived level keys by
+ * `featureIdFor` — the numeric `gsp_id` where there is one, the region name otherwise.
  *
- * @returns {T[]} - Returns a new array containing only the elements from the original `data` array that fall within the specified date-time range.
- *
- * Note: This function treats any `datetimeUtc` values that are equal to `prev30MinFromNowISO` as falling within the range.
- *
- * Example Usage:
- * ```typescript
- * filterCompactHistoricData<
- *   components["schemas"]["OneDatetimeManyForecastValues"]
- * >(
- *   allGspForecastHistoricalDataCompact,
- *   "2023-12-05T17:00:00+00:00",
- *   "2023-12-07T14:00:00+00:00"
- * );
- * ```
+ * **A `LEGACY_REGIONS` region never gets a feature state.** It has no polygon in the
+ * definitive boundary file by definition, so a state keyed on it could only ever land on
+ * somebody else's ground; skipping it here means `applyFeatureStates` cannot paint one by
+ * accident if a future asset rebuild introduces a colliding key. Groupings exclude them
+ * already (`scripts/build-geo-assets.mjs` reports them as "regions in no group"), so the
+ * derived path needs no equivalent filter.
  */
-export const filterCompactHistoricData = <
-  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
->(
-  data: T[],
-  filterHistoricStart: string,
-  prev30MinFromNowISO: string
-): T[] => {
-  return (
-    data?.filter((fc) => {
-      if (!filterHistoricStart) return false;
-
-      if (fc.datetimeUtc < filterHistoricStart) return false;
-
-      return fc.datetimeUtc <= `${prev30MinFromNowISO}`;
-    }) || []
-  );
-};
-
-/**
- *
- * Filters future data from a compacted forecast array.
- *
- * This function returns a subset of the original data that has a `datetimeUtc` which is greater than `prev30MinFromNowISO`.
- *
- * If `prev30MinFromNowISO` is not set or empty, this function will always return an empty array.
- *
- * @template T - a generic type that extends a shape with a `datetimeUtc` property and optionally
- *              `generationKwByGspId` and `forecastValues` properties.
- *
- * @param {T[]} data - The forecast array. Each element must be of the provided generic type
- *                     which should include at least a `datetimeUtc` property.
- *
- * @param {string} prev30MinFromNowISO - The boundary datetime in ISO format.
- *                                       Items in the `data` whose `datetimeUtc` are strictly after this time will be included in the output.
- *
- * @returns {T[]} - the subset of the `data` array that falls within provided parameters.
- *
- * @example
- * // Filtering future data
- * const forecastData = [
- *   { datetimeUtc: '2023-12-05T12:00:00+00:00', forecastValues: { '1': 1 }, generationKwByGspId: { '1': 1 } },
- *   { datetimeUtc: '2023-12-06T12:00:00+00:00', forecastValues: { '2': 2 }, generationKwByGspId: { '2': 2 } }
- * ]
- * const futureData = filterCompactFutureData(forecastData, '2023-12-06T00:00:00+00:00');
- * console.log(futureData); // Outputs: [{ datetimeUtc: '2023-12-06T12:00:00+00:00', forecastValues: { '2': 2 }, generationKwByGspId: { '2': 2 } }]
- */
-export const filterCompactFutureData = <
-  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
->(
-  data: T[],
-  prev30MinFromNowISO: string
-): T[] => {
-  return data.filter((fc) => {
-    if (!prev30MinFromNowISO) return false;
-
-    return fc.datetimeUtc > `${prev30MinFromNowISO}`;
-  });
-};
-
-/**
- * This function gets the oldest date-time from an array of objects.
- *
- * The function accepts an array of objects, where each object `T`
- * needs at least one property `datetimeUtc` defined as a string.
- * In the array provided, objects can also optionally include properties `generationKwByGspId` and `forecastValues`.
- *
- * The function then sorts these objects based on the `datetimeUtc` property,
- * and returns the oldest (i.e., earliest) date-time string.
- * If the array is empty or no date-time is found, it defaults to return an empty string.
- *
- * @template T A type constraint that extends at least to objects having a `datetimeUtc` property.
- *
- * @example
- * // data set with dates
- * const data = [
- *   { datetimeUtc: "2023-12-25", ... },
- *   { datetimeUtc: "2023-12-24", ... },
- *   { datetimeUtc: "2023-12-26", ... }
- * ];
- * console.log(getOldestTimestampFromCompactForecastValues(data));
- * // Output: "2023-12-24"
- *
- * @param {T[]} data An array of objects containing at least the `datetimeUtc` property.
- *
- * @returns {string} The oldest date-time as a string, or an empty string if no date-time is found.
- */
-export const getOldestTimestampFromCompactForecastValues = <
-  T extends { datetimeUtc: string; generationKwByGspId?: any; forecastValues?: any }
->(
-  data: T[]
-): string => {
-  return (
-    data.sort((a, b) => {
-      return a.datetimeUtc > b.datetimeUtc ? 1 : -1;
-    })?.[0]?.datetimeUtc || ""
-  );
-};
-
-/**
- * Retrieves the oldest timestamp from a given `ForecastData` array.
- *
- * This function sorts the provided forecast data by the `targetTime` property in ascending order
- * and returns the earliest (oldest) timestamp. If the array is empty or no valid `targetTime` is found,
- * it defaults to returning an empty string.
- *
- * @param {ForecastData} forecastValues - An array of forecast data objects, each containing a `targetTime` property.
- * @returns {string} The oldest timestamp as a string, or an empty string if no valid timestamp is found.
- *
- * @example
- * const forecastValues = [
- *   { targetTime: "2023-12-25T12:00:00Z", ... },
- *   { targetTime: "2023-12-24T12:00:00Z", ... },
- *   { targetTime: "2023-12-26T12:00:00Z", ... }
- * ];
- * console.log(getOldestTimestampFromForecastValues(forecastValues));
- * // Output: "2023-12-24T12:00:00Z"
- */
-export const getOldestTimestampFromForecastValues = (forecastValues: ForecastData): string => {
-  const sortedForecast = [...forecastValues].sort((a, b) => {
-    return a.targetTime > b.targetTime ? 1 : -1;
-  });
-  return sortedForecast?.[0]?.targetTime || "";
-};
-
-/**
- * Calculates the earliest forecast timestamp based on the default behavior of the Quartz Solar API.
- *
- * This function determines the timestamp two days prior to the current time, rounds it down
- * to the nearest 6-hour interval (e.g., 00:00, 06:00, 12:00, 18:00) in local time, and finally
- * converts the result back to UTC as an ISO-8601 string.
- *
- * Key Features:
- * - Handles time zones correctly by rounding in the user's local timezone first.
- * - Ensures accurate rounding during Daylight Saving Time (DST) changes.
- *
- * @returns {string} The earliest forecast timestamp in UTC as an ISO-8601 string.
- *
- * @example
- * // Assuming the current time is 2025-12-07T14:45:00Z:
- * const result = getEarliestForecastTimestamp();
- * console.log(result); // Output: "2025-12-05T12:00:00.000Z"
- */
-
-export const getEarliestForecastTimestamp = (): string => {
-  // Get the current time in the user's local timezone
-  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
-  // so they might see slightly different data around the rounding times.
-  const now = DateTime.now(); // Defaults to the user's system timezone
-
-  // Two days ago in local time
-  const twoDaysAgoLocal = now.minus({ days: 2 });
-
-  // Round down to the nearest 6-hour interval in the user's local timezone
-  const roundedDownLocal = twoDaysAgoLocal.startOf("hour").minus({
-    hours: twoDaysAgoLocal.hour % 6 // Rounds down to the last multiple of 6
+export const buildMapFeatureStates = (
+  level: AggregationLevel | undefined,
+  inputs: RegionValueInputs,
+  options: { groupings?: Record<string, string[]>; country?: string | null } = {}
+): Map<string | number, MapFeatureState> => {
+  const byRegionName = buildRegionValues({
+    ...inputs,
+    deltaTop: deltaTopFor(options.country, false)
   });
 
-  // Convert the rounded timestamp back to UTC
-  const roundedDownUtc = roundedDownLocal.toUTC();
-
-  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
-};
-
-export const getFurthestForecastTimestamp = (): string => {
-  // Get the current time in the user's local timezone
-  // NB: if the user is not UK-based, this will not be the same as the Quartz API's UTC-based behavior,
-  // so they might see slightly different data around the rounding times.
-  const now = DateTime.now(); // Defaults to the user's system timezone
-
-  // One day from now in local time
-  const twoDaysFromNowLocal = now.plus({ days: 1 });
-
-  // Round up to the nearest 6-hour interval in the user's local timezone
-  const roundedDownLocal = twoDaysFromNowLocal.startOf("hour").plus({
-    hours: twoDaysFromNowLocal.hour % 6 // Rounds up to the last multiple of 6
-  });
-
-  // Convert the rounded timestamp back to UTC
-  const roundedDownUtc = roundedDownLocal.toUTC();
-
-  return roundedDownUtc.toISO(); // Return as an ISO-8601 UTC string
-};
-
-const MILLISECONDS_PER_MINUTE = 1000 * 60;
-
-/**
- * This function calculates the difference (interval duration) in minutes between two dates.
- * Specifically, it subtracts the timestamp of `dateTwo` from `dateOne` to get the difference in milliseconds
- * and then converts this into minutes.
- *
- * Note: This function makes use of the JavaScript `Date` object's `getTime` method, which gets
- * the number of milliseconds since the Unix Epoch (1970-01-01 00:00:00 UTC).
- * This is used to ensure an accurate and standardised measurement of time between the two dates provided.
- *
- * This function is used in conjunction with other datetime processing functions such as `calculateHistoricDataStartFromCompactValuesIntervalInMinutes`,
- * `getOldestTimestampFromCompactForecastValues`, `get30MinNow`, and `getNext30MinSlot` to process and analyze interval data.
- *
- * @example
- * const dateOne = new Date("2023-12-25T23:30:00");
- * const dateTwo = new Date("2023-12-25T23:00:00");
- * console.log(calculateIntervalDuration(dateOne, dateTwo));
- * // Output: 30
- *
- * @param {Date} dateOne The first date from which to measure the interval.
- * @param {Date} dateTwo The second date to which the interval is measured.
- *
- * @returns {number} The interval duration in minutes.
- */
-const calculateIntervalDuration = (dateOne: Date, dateTwo: Date): number => {
-  const durationMilliseconds = dateOne.getTime() - dateTwo.getTime();
-  return durationMilliseconds / MILLISECONDS_PER_MINUTE;
-};
-
-/**
- * This function calculates the backward historical interval in minutes.
- *
- * Given an array `data` of objects `T` where each object has a `datetimeUtc` field
- * (and optional `generationKwByGspId` and `forecastValues`), it determines the
- * oldest timestamp using the `getOldestTimestampFromCompactForecastValues` method.
- * It then creates a comparison date that is a rounded up 30 minutes from now
- * (using `get30MinNow` with an offset of -30 minutes). The interval duration
- * between the oldest timestamp and the comparison date is then calculated using
- * `calculateIntervalDuration`, and returned.
- *
- * If no oldest timestamp can be derived from the input data, the function defaults
- * to returning `0`.
- *
- * @template T The object type which must include a `datetimeUtc` field and can
- * optionally include `generationKwByGspId` and `forecastValues` fields.
- *
- * @example
- * // Example data set
- * const data = [
- *   { datetimeUtc: "2023-12-24T22:00:00" },
- *   { datetimeUtc: "2023-12-24T23:00:00" },
- *   { datetimeUtc: "2023-12-25T00:00:00" }
- * ];
- * console.log(calculateHistoricDataStartFromCompactValuesIntervalInMinutes(data));
- * // Output: 30 (assuming current time is 2023-12-25T00:30:00)
- *
- * @param {T[]} data An array of objects `T` that includes a `datetimeUtc` field.
- *
- * @returns {number} The calculated interval duration in minutes, or `0` if no oldest timestamp is found.
- */
-export const calculateHistoricDataStartFromCompactValuesIntervalInMinutes = <
-  T extends {
-    datetimeUtc: string;
-    generationKwByGspId?: any;
-    forecastValues?: any;
+  if (level?.derived) {
+    // No grouping file yet means no rollup is computable — an empty map, not a map of
+    // zeroes. The map draws its polygons unstyled until the asset lands.
+    return new Map<string | number, MapFeatureState>(
+      rollUpRegionValues(byRegionName, options.groupings ?? {}, deltaTopFor(options.country, true))
+    );
   }
->(
-  data: T[]
-): number => {
-  const oldestTimestamp = getOldestTimestampFromCompactForecastValues(data);
-  if (!oldestTimestamp) return 0;
 
-  const oldestDate = new Date(oldestTimestamp);
-  const comparisonDate = new Date(get30MinNow(-30));
-  return calculateIntervalDuration(oldestDate, comparisonDate);
+  // The map popups read `label` straight off feature state, so this is where the registry's
+  // casing rule has to land for them — the same `formatRegionLabel` the chart title uses
+  // (`gsp-pv-remix-chart/index.tsx`), so NL's `noord-brabant` reads "Noord-Brabant" in both.
+  // Derived levels are excluded above by construction: a group's label is its grouping-file
+  // name, already written, and title-casing it would give "Ukpn (East)".
+  const regionNameStyle = getCountryConfig(options.country)?.geo[level?.regionType ?? ""]
+    ?.regionNameStyle;
+
+  const byFeatureId = new Map<string | number, MapFeatureState>();
+  for (const region of inputs.regions ?? []) {
+    if (isLegacyRegion(options.country, region.name)) continue;
+    const value = byRegionName.get(region.name);
+    if (!value) continue;
+    byFeatureId.set(featureIdFor(region), {
+      ...value,
+      label: formatRegionLabel(value.label, regionNameStyle)
+    });
+  }
+  return byFeatureId;
 };
 
-export const calculateHistoricDataStartFromForecastValuesIntervalInMinutes = (
-  forecastValues: ForecastData
-): number => {
-  const oldestTimestamp = getOldestTimestampFromForecastValues(forecastValues);
-  if (!oldestTimestamp) return 0;
+/** The registry's join transform, applied to the GeoJSON feature's key. */
+const applyJoinTransform = (value: string, transform: GeoJoinTransform | undefined): string =>
+  transform === "lowercase"
+    ? value.toLowerCase()
+    : transform === "uppercase"
+    ? value.toUpperCase()
+    : value;
 
-  const oldestDate = new Date(oldestTimestamp);
-  const comparisonDate = new Date(get30MinNow(-30));
-  return calculateIntervalDuration(oldestDate, comparisonDate);
+export type MapGeometryInputs = {
+  level: AggregationLevel;
+  /** The fetched boundary file for this level. Never loaded here — see the note at the top. */
+  shapes: FeatureCollection;
+  /** Name-keyed grouping file. Derived levels only; ignored otherwise. */
+  groupings?: Record<string, string[]>;
+  regions: Region[] | undefined;
+  /** GeoJSON property carrying the region key, from the registry's `GeoLayerConfig`. */
+  joinProperty: string;
+  joinTransform?: GeoJoinTransform;
+  /**
+   * Country code, for the alias and legacy tables. Not in the contract's signature; added
+   * because `geoAliasesFor`/`isLegacyRegion` are country-keyed and there is nothing else in
+   * these arguments that identifies the country.
+   */
+  country?: string | null;
+};
+
+/**
+ * The boundary geometry for an aggregation level, with `properties.id` set and **no values
+ * on it**. Built once and handed to `setData` once; from then on only feature state moves.
+ *
+ * `properties.id` is what the source's `promoteId: "id"` promotes to the feature id, so it
+ * has to agree with `buildMapFeatureStates` exactly.
+ *
+ * **The region -> feature mapping is not 1:1 in either direction, and this must not assume
+ * it is.**
+ *  - One region can draw several features. GB's 362 GSP polygons carry only 335 distinct
+ *    keys because a multi-part GSP is legitimately several polygons; and `geoAliasesFor`
+ *    can return two feature keys for one region where the API and the boundary file spell
+ *    a real region differently. Both cases resolve the same way — several features share
+ *    one Mapbox id, and one `setFeatureState` paints all of them.
+ *  - Several features have no region at all. `off_nets(unassigned)` (five features, a
+ *    placeholder for unassigned network), `grem_p` and `seab1` are the current GB set. They
+ *    get **distinct negative ids** so feature state can never collide: the v0 code gave
+ *    every unmatched feature the same id (1000), which feature state cannot tolerate.
+ *  - A `LEGACY_REGIONS` region draws nothing. It is left out of the join index entirely
+ *    rather than being allowed to match: the API serves it only for backward compatibility,
+ *    the NESO file does not model it, and drawing it would paint the same ground twice.
+ */
+export const buildMapGeometry = ({
+  level,
+  shapes,
+  groupings,
+  regions,
+  joinProperty,
+  joinTransform,
+  country
+}: MapGeometryInputs): FeatureCollection => {
+  if (level.derived) {
+    // A derived level's polygons ARE its groups: the join property already holds the
+    // grouping name (`"UKPN (East)"`, `"NE Scotland"`), so the id is read straight off the
+    // feature. `groupings` is not consulted here — it decides the *values*, not the shapes,
+    // and a group with no polygon simply has nowhere to draw.
+    return {
+      type: "FeatureCollection",
+      features: shapes.features.map((feature) => {
+        const id = feature.properties?.[joinProperty];
+        return { ...feature, id, properties: { ...feature.properties, id } };
+      })
+    };
+  }
+
+  const byFeatureKey = new Map<string, Region>();
+  for (const region of regions ?? []) {
+    if (isLegacyRegion(country, region.name)) continue;
+    for (const key of geoAliasesFor(country, region.name)) byFeatureKey.set(key, region);
+  }
+
+  let unmatched = 0;
+  return {
+    type: "FeatureCollection",
+    features: shapes.features.map((feature) => {
+      const raw = feature.properties?.[joinProperty];
+      const key = typeof raw === "string" ? applyJoinTransform(raw, joinTransform) : undefined;
+      const region = key === undefined ? undefined : byFeatureKey.get(key);
+      const id = region ? featureIdFor(region) : --unmatched;
+      return {
+        ...feature,
+        id,
+        properties: {
+          ...feature.properties,
+          id,
+          regionName: region?.name ?? "",
+          gspDisplayName: region?.label ?? ""
+        }
+      };
+    })
+  };
 };

@@ -1,93 +1,223 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo } from "react";
 import RemixLine from "./remix-line";
 import ForecastHeader from "./forecast-header";
-import useGlobalState, { get30MinNow } from "../helpers/globalState";
-import useFormatChartData from "./use-format-chart-data";
+import ChartLegend from "./chart-legend";
+import ChartScrubber from "../shell/chart-scrubber";
+import { plottedKeyRange, usePlottedDomain } from "./plotted-domain";
+import useGlobalState, {
+  useCountryState,
+  getCursorCadenceMinutes,
+  getCursorNow
+} from "../helpers/globalState";
+import { periodForLabel, slotForInstant, snapToCadence } from "../../lib/time/cursor";
+import useFormatChartData, { type ChartSeriesInput } from "./use-format-chart-data";
 import { formatISODateString } from "../helpers/utils";
 import GspPvRemixChart from "./gsp-pv-remix-chart";
 import { useStopAndResetTime } from "../hooks/use-and-update-selected-time";
 import Spinner from "../icons/spinner";
-import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS, VIEWS } from "../../constant";
-import useHotKeyControlChart from "../hooks/use-hot-key-control-chart";
-import { CombinedData, CombinedErrors } from "../types";
-import { ChartLegend } from "./ChartLegend";
+import { MAX_NATIONAL_GENERATION_MW, Y_MAX_TICKS } from "../../constant";
 import DataLoadingChartStatus from "./DataLoadingChartStatus";
 import { calculateChartYMax } from "../helpers/utils";
 import { getTicks } from "../helpers/chartUtils";
+import {
+  NATIONAL_REGION_TYPE,
+  useFocusedCountry,
+  useGenerationSources,
+  useLoadingState,
+  useNationalForecast,
+  useNationalGeneration
+} from "../../hooks/data";
+import type { Scope } from "../../lib/domain/types";
+import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
+
+/**
+ * The `ChartData` keys the observed-generation lines are written under, in manifest observer
+ * order. **Positional, not name-based** — GB's `pvlive_in_day`/`pvlive_day_after` land on
+ * `GENERATION`/`GENERATION_UPDATED`, and NL's single `ned_nl` lands on `GENERATION` alone.
+ * A country with a third observer would need a third key here and a third `<Line>`; nothing
+ * assumes index 1 exists.
+ */
+export const GENERATION_CHART_KEYS = ["GENERATION", "GENERATION_UPDATED"] as const;
+
+/**
+ * How many forecast lines the chart can draw. GB uses six, NL one.
+ *
+ * The hook calls below are unrolled to this length rather than mapped over the country's
+ * series list, because the rules of hooks require a constant call count and the list length
+ * is a country fact that changes when the user switches country. An unused slot is passed a
+ * `null` scope, which the data layer turns into a disabled query: no request, no data, and
+ * `isLoading: false`.
+ */
+const MAX_FORECAST_SERIES = 8;
 
 const PvRemixChart: FC<{
-  combinedData: CombinedData;
-  combinedErrors: CombinedErrors;
   date?: string;
   className?: string;
-}> = ({ combinedData, combinedErrors, className }) => {
-  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+}> = ({ className }) => {
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
-  const [forecastCreationTime] = useGlobalState("forecastCreationTime");
+  const [showNHourView] = useGlobalState("showNHourView");
+  const [nHourForecast] = useGlobalState("nHourForecast");
   const { stopTime, resetTime } = useStopAndResetTime();
-  const selectedTime = formatISODateString(selectedISOTime || new Date().toISOString());
-  const [loadingState] = useGlobalState("loadingState");
-  const [globalZoomArea] = useGlobalState("globalZoomArea");
+  const cursorInstant = formatISODateString(selectedISOTime || new Date().toISOString());
 
-  const {
-    nationalForecastData,
-    nationalIntradayECMWFOnlyData,
-    nationalMetOfficeOnly,
-    nationalSatOnly,
-    nationalPvnetDayAhead,
-    nationalPvnetIntraday,
-    pvRealDayInData,
-    pvRealDayAfterData,
-    nationalNHourData,
-    allGspForecastData,
-    allGspRealData,
-    allGspSystemData,
-    gspDeltas
-  } = combinedData;
-  const {
-    nationalForecastError,
-    pvRealDayInError,
-    pvRealDayAfterError,
-    nationalNHourError,
-    allGspForecastError
-  } = combinedErrors;
+  const focusedCountry = useFocusedCountry();
+  const countryConfig = getCountryConfig(focusedCountry);
 
-  const chartLimits = useMemo(
-    () =>
-      nationalForecastData?.[0] && {
-        start: nationalForecastData[0].targetTime,
-        end: nationalForecastData[nationalForecastData.length - 1].targetTime
-      },
+  // The cursor is one instant; this chart reads one country. Playback can step it finer than
+  // the focused country publishes (see `playbackStrideMinutes`), which leaves instants this
+  // chart's series have no point at — so resolve the instant to *this* country's slot before
+  // anything looks it up or draws at it. `delta-view-chart.tsx` already does the same, for the
+  // same reason.
+  // `formatISODateString` because the chart's category keys are the trimmed
+  // `yyyy-MM-ddTHH:mm` form; `slotForInstant` hands back a full ISO instant.
+  const selectedTime = formatISODateString(slotForInstant(cursorInstant, focusedCountry));
 
-    [nationalForecastData]
+  // `timeNow` is a cursor value — a period start under the one shared rule — while the chart's
+  // x axis is keyed on this country's own labels. Resolve it the same way the cursor is, or the
+  // LIVE line sits a whole period early on a period-end country and matches no category at all.
+  const liveSlot = formatISODateString(slotForInstant(timeNow, focusedCountry));
+
+  const seriesConfig = useMemo(
+    () => (countryConfig?.nationalChartSeries ?? []).slice(0, MAX_FORECAST_SERIES),
+    [countryConfig]
   );
-  useHotKeyControlChart(chartLimits);
+
+  const scope: Scope | null = focusedCountry
+    ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }
+    : null;
+
+  // The window is no longer pinned here. `queries.forecast`/`queries.generation` apply the
+  // shared history default to every region time-series, so this chart and the sub-national ones
+  // cover the same stretch of past by construction rather than by each remembering to ask.
+  // See `lib/api/v1/series-window.ts` — including why the END is still never pinned.
+
+  // A slot with no configured series is disabled; a configured one asks for its model, or for
+  // no `model` parameter at all when the country wants the region type's default.
+  const slotScope = (index: number) => (seriesConfig[index] ? scope : null);
+  const slotModel = (index: number) =>
+    seriesConfig[index] ? forecastSeriesModel(seriesConfig[index]) : undefined;
+
+  const forecast0 = useNationalForecast(slotScope(0), { model: slotModel(0) });
+  const forecast1 = useNationalForecast(slotScope(1), { model: slotModel(1) });
+  const forecast2 = useNationalForecast(slotScope(2), { model: slotModel(2) });
+  const forecast3 = useNationalForecast(slotScope(3), { model: slotModel(3) });
+  const forecast4 = useNationalForecast(slotScope(4), { model: slotModel(4) });
+  const forecast5 = useNationalForecast(slotScope(5), { model: slotModel(5) });
+  const forecast6 = useNationalForecast(slotScope(6), { model: slotModel(6) });
+  const forecast7 = useNationalForecast(slotScope(7), { model: slotModel(7) });
+  const forecastResults = [
+    forecast0,
+    forecast1,
+    forecast2,
+    forecast3,
+    forecast4,
+    forecast5,
+    forecast6,
+    forecast7
+  ];
+
+  // Observers come from the manifest, never from a hardcoded pair. `useGenerationSources`
+  // is a slice of the hourly `/countries` response the header already fetches, so this
+  // costs no request.
+  const generationSources = useGenerationSources(scope);
+  const observers = useMemo(
+    () => (generationSources.data ?? []).map((source) => source.name),
+    [generationSources.data]
+  );
+
+  const generation0 = useNationalGeneration(observers[0] === undefined ? null : scope, {
+    observer: observers[0]
+  });
+  const generation1 = useNationalGeneration(observers[1] === undefined ? null : scope, {
+    observer: observers[1]
+  });
+  const generationResults = [generation0, generation1];
+
+  const nHourHorizonMinutes = showNHourView ? nHourForecast * 60 : undefined;
+  const nHour = useNationalForecast(nHourHorizonMinutes === undefined ? null : scope, {
+    horizonMinutes: nHourHorizonMinutes
+  });
+
+  // The staleness indicator calls these same hooks again. SWR dedupes on the cache key, so it
+  // costs nothing — PROVIDED the arguments match exactly. Scope, model, observers and the
+  // N-hour horizon are all passed straight through from the values used above for that reason.
+  const loadingState = useLoadingState({
+    scope: slotScope(0),
+    model: slotModel(0),
+    observers,
+    nHourHorizonMinutes
+  });
+
+  const forecastSeries = forecast0.data;
+  const modelSeries: ChartSeriesInput[] = useMemo(
+    () =>
+      seriesConfig
+        .slice(1)
+        .map((series, index) => ({ key: series.key, series: forecastResults[index + 1].data })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      seriesConfig,
+      forecast1.data,
+      forecast2.data,
+      forecast3.data,
+      forecast4.data,
+      forecast5.data,
+      forecast6.data,
+      forecast7.data
+    ]
+  );
+  const generationSeries: ChartSeriesInput[] = useMemo(
+    () =>
+      observers.slice(0, GENERATION_CHART_KEYS.length).map((_, index) => ({
+        key: GENERATION_CHART_KEYS[index],
+        series: generationResults[index].data
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [observers, generation0.data, generation1.data]
+  );
+
+  // The arrow-key cursor shortcut used to be bound here, clamped to this series' first and last
+  // point. It is `useCursorHotkeys` in `dashboard-shell.tsx` now — it writes shell state, and
+  // living here meant the delta view lost it on the chart swap. Its limits come from
+  // `useCursorRange`, the same window the scrub track uses, so `chartLimits` had no other reader
+  // and went with it.
 
   const chartData = useFormatChartData({
-    forecastData: nationalForecastData,
-    nationalIntradayECMWFOnlyData,
-    nationalMetOfficeOnly,
-    nationalSatOnly,
-    nationalPvnetDayAhead,
-    nationalPvnetIntraday,
-    probabilisticRangeData: nationalForecastData,
-    fourHourData: nationalNHourData,
-    pvRealDayInData,
-    pvRealDayAfterData,
+    forecastSeries,
+    modelSeries,
+    nHourSeries: nHour.data,
+    generationSeries,
     timeTrigger: selectedTime
   });
+
+  // The window the scrub track draws, taken off what this chart plots rather than derived a
+  // second time. See `plotted-domain.ts`.
+  const plottedDomain = usePlottedDomain(chartData);
 
   const yMax = useMemo(() => {
     return calculateChartYMax(chartData, MAX_NATIONAL_GENERATION_MW);
   }, [chartData]);
 
-  const hasError = Object.entries(combinedErrors).some(([, value]) => value !== null);
+  const hasError = [...forecastResults, ...generationResults, nHour].some(
+    (result) => !!result.error
+  );
+  const waitingForData =
+    !forecastSeries || generationSeries.some((series) => series.series === undefined);
 
+  // Click-to-set-time. The label comes off this country's axis, so it may sit between two
+  // slots of the shared cursor grid when a finer country is enabled — snap it, so the chart
+  // and the map are never a slot apart. On a single-cadence session this is a no-op.
+  //
+  // The label is a published timestamp and the cursor is an instant, so it goes through
+  // `periodForLabel`: writing the label itself selected the period *after* it wherever labels
+  // close their period (GB), because the chart reads the cursor back with `slotForInstant`.
   const setSelectedTime = (time: string) => {
     stopTime();
-    setSelectedISOTime(time + ":00.000Z");
+    const { start } = periodForLabel(`${time}:00.000Z`, focusedCountry);
+    setSelectedISOTime(snapToCadence(start, getCursorCadenceMinutes()));
   };
 
   let selectedRegions: string[] = [];
@@ -95,36 +225,55 @@ const PvRemixChart: FC<{
     selectedRegions = selectedMapRegionIds.map((id) => String(id));
   }
 
-  const [view] = useGlobalState("view");
+  // Used to be guarded on `view === VIEWS.FORECAST`; `pages/index.tsx` only ever mounts this
+  // component when `comparison` is null (Wave 4), so the guard was true on every render this
+  // effect could fire on, and dropped rather than swapped for an equivalent check.
+  // The test is "outside this chart's range", NOT "not an exact slot in it". The cursor is one
+  // instant on the finest *enabled* country's grid (Track B), and each country resolves its own
+  // slot from it — so with NL enabled the cursor steps every 15 minutes while GB's series is on
+  // 30. Half of those instants have no exact match here, and demanding one made this effect
+  // yank the cursor to "now" on every other scrub step, which then re-committed and fought back.
+  // Out of range still resets: that is a cursor pointing at nothing, which is what this guards.
+  //
+  // **Earliest and latest, not `chartData[0]` and `chartData[n - 1]`.** Those are positions in
+  // an array `useFormatChartData` never sorts — it inserts generation before the forecast, and
+  // generation covers less history, so position 0 is where the *observed* data starts and the
+  // forecast's earlier points sit further down. Reading position 0 as the lower bound made the
+  // chart's own first several hours test as out of range: dragging the scrub handle to the left
+  // end reset the cursor to now, which then re-committed and fought the drag — the same
+  // fight the paragraph above describes, from a different direction. See `plotted-domain.ts`.
   useEffect(() => {
-    if (view === VIEWS.FORECAST && chartData?.length) {
-      if (!chartData.some((d: any) => d.formattedDate === selectedTime)) {
-        setSelectedISOTime(get30MinNow());
-      }
+    const keys = plottedKeyRange(chartData);
+    if (!keys) return;
+    if (!selectedTime || selectedTime < keys.earliest || selectedTime > keys.latest) {
+      setSelectedISOTime(getCursorNow());
     }
-  }, [view, chartData, selectedTime, setSelectedISOTime]);
+  }, [chartData, selectedTime, setSelectedISOTime]);
 
   return (
     <>
       <div className={`flex flex-col flex-auto ${className || ""}`}>
-        <div className="flex flex-col flex-1 dash:h-auto">
+        <div className="flex flex-1 flex-col px-2 pt-1.5 pb-2 dash:h-auto">
           <ForecastHeader
-            pvForecastData={nationalForecastData || []}
-            pvLiveData={pvRealDayInData || []}
+            forecastSeries={forecastSeries}
+            generationSeries={generation0.data}
             deltaView={false}
           ></ForecastHeader>
-          {(!nationalForecastData || !pvRealDayInData || !pvRealDayAfterData) && !hasError && (
+          {waitingForData && !hasError && (
             <div
               className={`h-full absolute flex pb-7 items-center justify-center inset-0 z-30 ${className}`}
             >
               <Spinner></Spinner>
             </div>
           )}
-          <div className="flex-1 relative">
+          {/* The plot well: dark space cut into the card, so the chart reads as the thing
+              you look *into* and the header as the surface it is cut from. */}
+          <div className="relative flex-1 overflow-hidden rounded-md border-[0.5px] border-edge bg-plot-base shadow-well">
             <DataLoadingChartStatus loadingState={loadingState} />
             <RemixLine
+              national
               resetTime={resetTime}
-              timeNow={formatISODateString(timeNow)}
+              timeNow={liveSlot}
               timeOfInterest={selectedTime}
               setTimeOfInterest={setSelectedTime}
               data={chartData}
@@ -143,14 +292,21 @@ const PvRemixChart: FC<{
               setTimeOfInterest={setSelectedTime}
               selectedTime={selectedTime}
               selectedRegions={selectedRegions}
-              timeNow={formatISODateString(timeNow)}
+              timeNow={liveSlot}
               resetTime={resetTime}
               visibleLines={visibleLines}
             ></GspPvRemixChart>
           </div>
         )}
+        {/* The scrub track, above the legend and inset to the plot's own x-axis. See
+            `components/shell/chart-scrubber.tsx`. */}
+        <ChartScrubber domain={plottedDomain} />
+        {/* Below the well, not inside it: the key describes the plot rather than sitting on
+              it, and it is where most charting libraries put one. */}
+        <div className="flex px-2 pb-2 dash:h-auto">
+          <ChartLegend generationKeys={GENERATION_CHART_KEYS} />
+        </div>
       </div>
-      {!className?.includes("hidden") && <ChartLegend />}
     </>
   );
 };

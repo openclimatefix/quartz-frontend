@@ -36,40 +36,6 @@ export const getAvailablePLevels = (
       plevelValues[`plevel_${lo}`] !== undefined && plevelValues[`plevel_${hi}`] !== undefined
   );
 
-// Function not "in use" but useful for regenerating yMax levels as a constant array for the chart
-export const generateYMaxTickArray = () => {
-  // Generate yMax levels
-  // Small values
-  let yMax_levels = Array.from({ length: 4 }, (_, i) => i + 1);
-  // Multiples of 3
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 6 }, (_, i) => (i + 1) * 3)];
-  // Multiples of 5
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 6 }, (_, i) => (i + 1) * 5)];
-  // Multiples of 10
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 10)];
-  // Multiples of 15
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 6 }, (_, i) => (i + 1) * 15)];
-  // Multiples of 20
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 20)];
-  // Multiples of 25
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 3 }, (_, i) => (i + 1) * 25)];
-  // Multiples of 50
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 50)];
-  // Multiples of 100
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 100)];
-  // Multiples of 500
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 10 }, (_, i) => (i + 1) * 500)];
-  // Multiples of 1000
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 15 }, (_, i) => (i + 1) * 1000)];
-  // Multiples of 2500
-  yMax_levels = [...yMax_levels, ...Array.from({ length: 5 }, (_, i) => (i + 1) * 2500)];
-  // Remove duplicates
-  yMax_levels = [...new Set(yMax_levels)];
-  // Sort
-  yMax_levels.sort((a, b) => a - b);
-  return yMax_levels;
-};
-
 export const getTicks = (yMax: number, yMax_levels: number[]) => {
   if (yMax >= 13000 && yMax < 15000) {
     return [3000, 6000, 9000, 12000];
@@ -142,11 +108,44 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
   return ticks;
 };
 
-export const getSettlementPeriodForDate = (date: DateTime) => {
-  /**
-   * Compute the settlement period by duration since midnight, e.g. 00:00 is 1, 00:30 is 2, 01:00 is 3, etc.
-   */
-  const midnightBefore = date.set({ hour: 0, minute: 0, second: 0, millisecond: 0 });
-  const interval = date.diff(midnightBefore, "minutes").minutes;
-  return Math.floor(interval / 30) + 1; // 1-indexed, not 0-indexed;
+/**
+ * Positional index of a 0-based half-hour slot since **UTC** midnight: 00:00 UTC is 0, 00:30 is 1,
+ * 12:30 is 25, 23:30 is 47.
+ *
+ * This is NOT a settlement period, and must not be presented as one. It exists because the
+ * seasonal-norm dataset in `data/national_metrics.json` is bucketed by UTC time-of-day (its
+ * generator groups on `datetime_gmt`, so index 0 is the 00:00 UTC bucket), and indexing into that
+ * array is a different question from "which GB settlement period is this?". The two answers differ
+ * by two slots throughout BST.
+ *
+ * Use this for indexing UTC-bucketed data.
+ *
+ * Phase 3 deliberately left this UTC while parameterising every user-facing helper by the
+ * country's timezone. That asymmetry looks like an inconsistency and is not: day labels and
+ * per-day grouping bucket in the country's zone because a "day" is what a user reads, whereas
+ * `data/national_metrics.json` is a UTC-bucketed array and this is a positional index into it.
+ * Converting it to local time would shift every seasonal line by two slots throughout BST. See
+ * "B9: what the audit got wrong" in docs/adaptive-eu-ui.md.
+ */
+export const getUtcHalfHourIndex = (date: DateTime): number => {
+  const utcDate = date.toUTC();
+  const midnightBefore = utcDate.startOf("day");
+  return Math.floor(utcDate.diff(midnightBefore, "minutes").minutes / 30);
+};
+
+/** Tick steps that read as round numbers at any power of ten. */
+const NICE_STEPS = [1, 1.5, 2, 2.5, 3, 4, 5, 6, 7.5, 8, 10];
+
+/**
+ * The smallest round step `s` with `quarters * s >= max`, for an axis that has to sit on
+ * `quarters` equal intervals — the delta chart's generation axis, whose ticks must land on the
+ * delta axis's (−D, −D/2, 0, +D/2, +D). 12,500 → 4,000 (top 16,000); 16,000 → 4,000.
+ */
+export const niceQuarterStep = (max: number, quarters = 4): number => {
+  if (!(max > 0)) return 1;
+  const raw = max / quarters;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = NICE_STEPS.find((n) => n * magnitude >= raw - 1e-9) ?? 10;
+  // `toPrecision` strips the float tail a fractional step times a power of ten can leave.
+  return Number((step * magnitude).toPrecision(12));
 };

@@ -1,0 +1,1689 @@
+{
+  "time_utc": "2026-09-30T09:30:00Z",
+  "model_name": "blend",
+  "model_version": "1.3.0",
+  "last_updated_utc": "2026-09-30T09:41:00Z",
+  "latest_init_utc": "2026-09-30T09:30:00Z",
+  "values": [
+    {
+      "region_name": "barkr_c",
+      "capacity_kW": 1554,
+      "power_kW": 107.433
+    },
+    {
+      "region_name": "citr_1",
+      "capacity_kW": 4074,
+      "power_kW": 302.291
+    },
+    {
+      "region_name": "hack_6",
+      "capacity_kW": 10434,
+      "power_kW": 757.161
+    },
+    {
+      "region_name": "flee_1",
+      "capacity_kW": 365268,
+      "power_kW": 77802.084
+    },
+    {
+      "region_name": "hack_1",
+      "capacity_kW": 14387,
+      "power_kW": 1017.161
+    },
+    {
+      "region_name": "beddt1",
+      "capacity_kW": 11265,
+      "power_kW": 696.928
+    },
+    {
+      "region_name": "wimbn1",
+      "capacity_kW": 2261,
+      "power_kW": 160.983
+    },
+    {
+      "region_name": "rebr_3",
+      "capacity_kW": 7484,
+      "power_kW": 586.247
+    },
+    {
+      "region_name": "newx_6",
+      "capacity_kW": 20340,
+      "power_kW": 1455.666
+    },
+    {
+      "region_name": "hurs_1",
+      "capacity_kW": 23708,
+      "power_kW": 1533.117
+    },
+    {
+      "region_name": "isli_1",
+      "capacity_kW": 4863,
+      "power_kW": 399.901
+    },
+    {
+      "region_name": "wham_1",
+      "capacity_kW": 10440,
+      "power_kW": 747.504
+    },
+    {
+      "region_name": "lodr_6",
+      "capacity_kW": 5824,
+      "power_kW": 446.701
+    },
+    {
+      "region_name": "sjow_1",
+      "capacity_kW": 9028,
+      "power_kW": 718.629
+    },
+    {
+      "region_name": "actl_c",
+      "capacity_kW": 2093,
+      "power_kW": 171.556
+    },
+    {
+      "region_name": "wisd_6",
+      "capacity_kW": 1790,
+      "power_kW": 156.207
+    },
+    {
+      "region_name": "barkw3",
+      "capacity_kW": 19244,
+      "power_kW": 1456.771
+    },
+    {
+      "region_name": "wimbs1",
+      "capacity_kW": 31673,
+      "power_kW": 2400.813
+    },
+    {
+      "region_name": "wisd_1",
+      "capacity_kW": 11849,
+      "power_kW": 1032.048
+    },
+    {
+      "region_name": "actl_2|cbnk_h|gree_h|peri_h|powe_h|wesa_h",
+      "capacity_kW": 5449,
+      "power_kW": 497.494
+    },
+    {
+      "region_name": "actl_2|cbnk_h|gree_h|peri_h|wesa_h",
+      "capacity_kW": 5449,
+      "power_kW": 497.494
+    },
+    {
+      "region_name": "eali_6",
+      "capacity_kW": 14717,
+      "power_kW": 1437.36
+    },
+    {
+      "region_name": "iver_6",
+      "capacity_kW": 9967,
+      "power_kW": 1183.415
+    },
+    {
+      "region_name": "chsi_1",
+      "capacity_kW": 32280,
+      "power_kW": 3231.228
+    },
+    {
+      "region_name": "nhyd_6",
+      "capacity_kW": 13083,
+      "power_kW": 1358.451
+    },
+    {
+      "region_name": "iver_1",
+      "capacity_kW": 26821,
+      "power_kW": 3718.285
+    },
+    {
+      "region_name": "lale1sg003",
+      "capacity_kW": 25075,
+      "power_kW": 2820.102
+    },
+    {
+      "region_name": "wwey_1",
+      "capacity_kW": 60118,
+      "power_kW": 6578.913
+    },
+    {
+      "region_name": "boln_1",
+      "capacity_kW": 178671,
+      "power_kW": 12506.97
+    },
+    {
+      "region_name": "nfle",
+      "capacity_kW": 120296,
+      "power_kW": 9246.752
+    },
+    {
+      "region_name": "ninf_1",
+      "capacity_kW": 238594,
+      "power_kW": 13051.091
+    },
+    {
+      "region_name": "love_1",
+      "capacity_kW": 289576,
+      "power_kW": 64285.873
+    },
+    {
+      "region_name": "botw_1",
+      "capacity_kW": 70484,
+      "power_kW": 21067.668
+    },
+    {
+      "region_name": "fawl_1",
+      "capacity_kW": 105183,
+      "power_kW": 28991.941
+    },
+    {
+      "region_name": "brle_1",
+      "capacity_kW": 105374,
+      "power_kW": 38949.744
+    },
+    {
+      "region_name": "brle_1|flee_1",
+      "capacity_kW": 470641.999,
+      "power_kW": 116750.591
+    },
+    {
+      "region_name": "nurs_1",
+      "capacity_kW": 167229,
+      "power_kW": 57643.838
+    },
+    {
+      "region_name": "mann_1",
+      "capacity_kW": 580202,
+      "power_kW": 197771.515
+    },
+    {
+      "region_name": "chic_1",
+      "capacity_kW": 58265,
+      "power_kW": 19004.1
+    },
+    {
+      "region_name": "axmi_h",
+      "capacity_kW": 147315,
+      "power_kW": 53892.739
+    },
+    {
+      "region_name": "safo_1",
+      "capacity_kW": 112380,
+      "power_kW": 45914.721
+    },
+    {
+      "region_name": "seab1|safo_1",
+      "capacity_kW": 232946,
+      "power_kW": 93706.414
+    },
+    {
+      "region_name": "axmi1",
+      "capacity_kW": 122068,
+      "power_kW": 42011.737
+    },
+    {
+      "region_name": "brwa1",
+      "capacity_kW": 216780,
+      "power_kW": 84623.687
+    },
+    {
+      "region_name": "care_1",
+      "capacity_kW": 39735,
+      "power_kW": 14369.5
+    },
+    {
+      "region_name": "abth_1",
+      "capacity_kW": 106301,
+      "power_kW": 39767.204
+    },
+    {
+      "region_name": "pyle_1",
+      "capacity_kW": 46547,
+      "power_kW": 17798.021
+    },
+    {
+      "region_name": "taun1",
+      "capacity_kW": 96708,
+      "power_kW": 39998.429
+    },
+    {
+      "region_name": "exet1",
+      "capacity_kW": 225455,
+      "power_kW": 87070.723
+    },
+    {
+      "region_name": "abha1",
+      "capacity_kW": 229096,
+      "power_kW": 85032.801
+    },
+    {
+      "region_name": "land1",
+      "capacity_kW": 157445,
+      "power_kW": 49521.699
+    },
+    {
+      "region_name": "alve1",
+      "capacity_kW": 447410,
+      "power_kW": 169434.162
+    },
+    {
+      "region_name": "indq1",
+      "capacity_kW": 414578,
+      "power_kW": 153891.352
+    },
+    {
+      "region_name": "walp_1",
+      "capacity_kW": 349347,
+      "power_kW": 32710.523
+    },
+    {
+      "region_name": "swan_1",
+      "capacity_kW": 467170,
+      "power_kW": 168212.338
+    },
+    {
+      "region_name": "tong",
+      "capacity_kW": 1700,
+      "power_kW": 412.477
+    },
+    {
+      "region_name": "stha",
+      "capacity_kW": 4758,
+      "power_kW": 1012.661
+    },
+    {
+      "region_name": "coyl",
+      "capacity_kW": 7253,
+      "power_kW": 2074.116
+    },
+    {
+      "region_name": "clym",
+      "capacity_kW": 6778,
+      "power_kW": 1373.901
+    },
+    {
+      "region_name": "ekis",
+      "capacity_kW": 1448,
+      "power_kW": 338.301
+    },
+    {
+      "region_name": "ekil",
+      "capacity_kW": 7406,
+      "power_kW": 1689.309
+    },
+    {
+      "region_name": "dalm3",
+      "capacity_kW": 2573,
+      "power_kW": 551.823
+    },
+    {
+      "region_name": "chas",
+      "capacity_kW": 2904,
+      "power_kW": 611.486
+    },
+    {
+      "region_name": "hagr",
+      "capacity_kW": 1997,
+      "power_kW": 428.689
+    },
+    {
+      "region_name": "giff",
+      "capacity_kW": 6171,
+      "power_kW": 1621.739
+    },
+    {
+      "region_name": "kils",
+      "capacity_kW": 23243,
+      "power_kW": 7239.42
+    },
+    {
+      "region_name": "elde",
+      "capacity_kW": 2718,
+      "power_kW": 635.106
+    },
+    {
+      "region_name": "croo",
+      "capacity_kW": 5544,
+      "power_kW": 1434.233
+    },
+    {
+      "region_name": "kilt",
+      "capacity_kW": 8432,
+      "power_kW": 2703.299
+    },
+    {
+      "region_name": "nets",
+      "capacity_kW": 4142,
+      "power_kW": 1066.151
+    },
+    {
+      "region_name": "wylf_1",
+      "capacity_kW": 122915,
+      "power_kW": 48158.095
+    },
+    {
+      "region_name": "john",
+      "capacity_kW": 6604,
+      "power_kW": 1592.885
+    },
+    {
+      "region_name": "ayrr",
+      "capacity_kW": 4128,
+      "power_kW": 1342.013
+    },
+    {
+      "region_name": "kilw",
+      "capacity_kW": 11891,
+      "power_kW": 3725.054
+    },
+    {
+      "region_name": "mayb",
+      "capacity_kW": 3491,
+      "power_kW": 1013.205
+    },
+    {
+      "region_name": "saco",
+      "capacity_kW": 116034,
+      "power_kW": 32880.169
+    },
+    {
+      "region_name": "huer",
+      "capacity_kW": 261,
+      "power_kW": 63.762
+    },
+    {
+      "region_name": "gllu",
+      "capacity_kW": 4960,
+      "power_kW": 1596.128
+    },
+    {
+      "region_name": "duno_p",
+      "capacity_kW": 3695,
+      "power_kW": 885.445
+    },
+    {
+      "region_name": "ling",
+      "capacity_kW": 11598,
+      "power_kW": 915.082
+    },
+    {
+      "region_name": "kaim",
+      "capacity_kW": 23912,
+      "power_kW": 1890.642
+    },
+    {
+      "region_name": "chap",
+      "capacity_kW": 12416,
+      "power_kW": 1428.668
+    },
+    {
+      "region_name": "poob",
+      "capacity_kW": 10665,
+      "power_kW": 644.521
+    },
+    {
+      "region_name": "birk_1",
+      "capacity_kW": 28828,
+      "power_kW": 11574.442
+    },
+    {
+      "region_name": "lega_1",
+      "capacity_kW": 230301,
+      "power_kW": 101186.583
+    },
+    {
+      "region_name": "conqa1|sasa",
+      "capacity_kW": 144433,
+      "power_kW": 65490.737
+    },
+    {
+      "region_name": "baga",
+      "capacity_kW": 8251,
+      "power_kW": 778.344
+    },
+    {
+      "region_name": "dumf",
+      "capacity_kW": 13877,
+      "power_kW": 2854.036
+    },
+    {
+      "region_name": "near",
+      "capacity_kW": 12639,
+      "power_kW": 1475.393
+    },
+    {
+      "region_name": "linm",
+      "capacity_kW": 12908,
+      "power_kW": 2034.731
+    },
+    {
+      "region_name": "rave|wish",
+      "capacity_kW": 11338,
+      "power_kW": 2100.931
+    },
+    {
+      "region_name": "cafa|east|glle|keoo|tong1",
+      "capacity_kW": 5318,
+      "power_kW": 1217.29
+    },
+    {
+      "region_name": "pent_1",
+      "capacity_kW": 51325,
+      "power_kW": 21193.803
+    },
+    {
+      "region_name": "traw_1",
+      "capacity_kW": 42398,
+      "power_kW": 19117.258
+    },
+    {
+      "region_name": "ockh_1",
+      "capacity_kW": 6027,
+      "power_kW": 2397.942
+    },
+    {
+      "region_name": "oldb_1",
+      "capacity_kW": 10286,
+      "power_kW": 4226.86
+    },
+    {
+      "region_name": "bush_1",
+      "capacity_kW": 56482,
+      "power_kW": 23618.89
+    },
+    {
+      "region_name": "wien_1",
+      "capacity_kW": 7490,
+      "power_kW": 3021.965
+    },
+    {
+      "region_name": "macc_3",
+      "capacity_kW": 12343,
+      "power_kW": 2933.52
+    },
+    {
+      "region_name": "stal_1",
+      "capacity_kW": 47964,
+      "power_kW": 6641.415
+    },
+    {
+      "region_name": "stes_1",
+      "capacity_kW": 32409.999,
+      "power_kW": 1415.237
+    },
+    {
+      "region_name": "berw",
+      "capacity_kW": 9477,
+      "power_kW": 645.068
+    },
+    {
+      "region_name": "four_1",
+      "capacity_kW": 4852,
+      "power_kW": 242.277
+    },
+    {
+      "region_name": "roch_1",
+      "capacity_kW": 26753,
+      "power_kW": 3134.56
+    },
+    {
+      "region_name": "whga_1",
+      "capacity_kW": 26765,
+      "power_kW": 3833.64
+    },
+    {
+      "region_name": "bred_1",
+      "capacity_kW": 31958,
+      "power_kW": 5711.96
+    },
+    {
+      "region_name": "penn_1",
+      "capacity_kW": 61345,
+      "power_kW": 25128.957
+    },
+    {
+      "region_name": "cell_1",
+      "capacity_kW": 191562,
+      "power_kW": 79108.721
+    },
+    {
+      "region_name": "carr_1",
+      "capacity_kW": 20536.2,
+      "power_kW": 6773.523
+    },
+    {
+      "region_name": "padib1",
+      "capacity_kW": 38360,
+      "power_kW": 4529.037
+    },
+    {
+      "region_name": "kear_3",
+      "capacity_kW": 21761,
+      "power_kW": 4331.89
+    },
+    {
+      "region_name": "sman_1",
+      "capacity_kW": 25020,
+      "power_kW": 6451.824
+    },
+    {
+      "region_name": "eccl",
+      "capacity_kW": 9871,
+      "power_kW": 839.035
+    },
+    {
+      "region_name": "fidf_1",
+      "capacity_kW": 55523.8,
+      "power_kW": 18313.6
+    },
+    {
+      "region_name": "carr_1|fidf_1",
+      "capacity_kW": 76060,
+      "power_kW": 25087.123
+    },
+    {
+      "region_name": "kear_1",
+      "capacity_kW": 56931,
+      "power_kW": 11716.4
+    },
+    {
+      "region_name": "shrw_1",
+      "capacity_kW": 83864,
+      "power_kW": 38320.256
+    },
+    {
+      "region_name": "penw_1|stah_1|wabo",
+      "capacity_kW": 105279,
+      "power_kW": 30832.711
+    },
+    {
+      "region_name": "kiby_g|wasf_1",
+      "capacity_kW": 20164,
+      "power_kW": 6320.742
+    },
+    {
+      "region_name": "capea1",
+      "capacity_kW": 36101,
+      "power_kW": 14847.138
+    },
+    {
+      "region_name": "kiby_1",
+      "capacity_kW": 37033,
+      "power_kW": 12993.646
+    },
+    {
+      "region_name": "lisd_1",
+      "capacity_kW": 23309,
+      "power_kW": 9055.547
+    },
+    {
+      "region_name": "hark_1|rrig",
+      "capacity_kW": 109756,
+      "power_kW": 18885.35
+    },
+    {
+      "region_name": "gala",
+      "capacity_kW": 9567,
+      "power_kW": 865.495
+    },
+    {
+      "region_name": "cock",
+      "capacity_kW": 13231,
+      "power_kW": 809.737
+    },
+    {
+      "region_name": "hawi",
+      "capacity_kW": 4061,
+      "power_kW": 379.297
+    },
+    {
+      "region_name": "hutt_1",
+      "capacity_kW": 63260,
+      "power_kW": 9712.519
+    },
+    {
+      "region_name": "heys_1|heys1|ormo",
+      "capacity_kW": 32441,
+      "power_kW": 8064.833
+    },
+    {
+      "region_name": "frod_1",
+      "capacity_kW": 13357,
+      "power_kW": 5163.371
+    },
+    {
+      "region_name": "bisw_1",
+      "capacity_kW": 393828,
+      "power_kW": 168190.806
+    },
+    {
+      "region_name": "rain_1",
+      "capacity_kW": 49942,
+      "power_kW": 16502.502
+    },
+    {
+      "region_name": "pene_1",
+      "capacity_kW": 73935,
+      "power_kW": 17493.021
+    },
+    {
+      "region_name": "ironb1",
+      "capacity_kW": 120782,
+      "power_kW": 52073.146
+    },
+    {
+      "region_name": "easo_1",
+      "capacity_kW": 305241,
+      "power_kW": 44382.042
+    },
+    {
+      "region_name": "bicf_1",
+      "capacity_kW": 296994,
+      "power_kW": 39074.513
+    },
+    {
+      "region_name": "walp_b",
+      "capacity_kW": 221344,
+      "power_kW": 21942.569
+    },
+    {
+      "region_name": "griw_1",
+      "capacity_kW": 100898,
+      "power_kW": 25971.146
+    },
+    {
+      "region_name": "kead_1",
+      "capacity_kW": 241726,
+      "power_kW": 59520.998
+    },
+    {
+      "region_name": "gren_1",
+      "capacity_kW": 402344,
+      "power_kW": 78363.201
+    },
+    {
+      "region_name": "osba_1",
+      "capacity_kW": 54193,
+      "power_kW": 8669.073
+    },
+    {
+      "region_name": "stay_1",
+      "capacity_kW": 411445,
+      "power_kW": 72318.314
+    },
+    {
+      "region_name": "drax_1",
+      "capacity_kW": 10850,
+      "power_kW": 1653.54
+    },
+    {
+      "region_name": "lack_6",
+      "capacity_kW": 26630,
+      "power_kW": 5883.455
+    },
+    {
+      "region_name": "camb_01",
+      "capacity_kW": 6619,
+      "power_kW": 1252.535
+    },
+    {
+      "region_name": "wbur_1",
+      "capacity_kW": 164050,
+      "power_kW": 31158.563
+    },
+    {
+      "region_name": "creb_1",
+      "capacity_kW": 247568,
+      "power_kW": 48977.202
+    },
+    {
+      "region_name": "blyth132",
+      "capacity_kW": 18687,
+      "power_kW": 954.906
+    },
+    {
+      "region_name": "braw_1",
+      "capacity_kW": 56492,
+      "power_kW": 3873.468
+    },
+    {
+      "region_name": "rugeb1",
+      "capacity_kW": 90774,
+      "power_kW": 36073.587
+    },
+    {
+      "region_name": "bust_1",
+      "capacity_kW": 26584,
+      "power_kW": 10557.392
+    },
+    {
+      "region_name": "kitw_1",
+      "capacity_kW": 33099,
+      "power_kW": 13109.411
+    },
+    {
+      "region_name": "nece_1",
+      "capacity_kW": 22416,
+      "power_kW": 8592.053
+    },
+    {
+      "region_name": "ella_1",
+      "capacity_kW": 43741,
+      "power_kW": 3939.606
+    },
+    {
+      "region_name": "spen_1",
+      "capacity_kW": 172347,
+      "power_kW": 10536.146
+    },
+    {
+      "region_name": "blytb1",
+      "capacity_kW": 36822,
+      "power_kW": 823.585
+    },
+    {
+      "region_name": "sten_1",
+      "capacity_kW": 25132,
+      "power_kW": 496.776
+    },
+    {
+      "region_name": "nort_1",
+      "capacity_kW": 227275,
+      "power_kW": 9189.486
+    },
+    {
+      "region_name": "caad_p",
+      "capacity_kW": 5634,
+      "power_kW": 1586.722
+    },
+    {
+      "region_name": "pora_p",
+      "capacity_kW": 4257,
+      "power_kW": 1367.916
+    },
+    {
+      "region_name": "tott_1",
+      "capacity_kW": 17116,
+      "power_kW": 1423.481
+    },
+    {
+      "region_name": "milh_1",
+      "capacity_kW": 14261,
+      "power_kW": 1278.736
+    },
+    {
+      "region_name": "brim_1",
+      "capacity_kW": 40387,
+      "power_kW": 3292.887
+    },
+    {
+      "region_name": "wymom_1",
+      "capacity_kW": 74647,
+      "power_kW": 8900.411
+    },
+    {
+      "region_name": "elst_1",
+      "capacity_kW": 48155,
+      "power_kW": 5017.751
+    },
+    {
+      "region_name": "burm_1",
+      "capacity_kW": 345589,
+      "power_kW": 30204.478
+    },
+    {
+      "region_name": "ryeh_1",
+      "capacity_kW": 38023,
+      "power_kW": 3590.639
+    },
+    {
+      "region_name": "iver_1|iver_6",
+      "capacity_kW": 36788,
+      "power_kW": 4901.388
+    },
+    {
+      "region_name": "watfs_1",
+      "capacity_kW": 32919,
+      "power_kW": 4739.238
+    },
+    {
+      "region_name": "loud_h",
+      "capacity_kW": 8631,
+      "power_kW": 1628.957
+    },
+    {
+      "region_name": "pelh_1",
+      "capacity_kW": 341425,
+      "power_kW": 31695.621
+    },
+    {
+      "region_name": "amem_1",
+      "capacity_kW": 136622,
+      "power_kW": 30193.462
+    },
+    {
+      "region_name": "sund_1",
+      "capacity_kW": 238979,
+      "power_kW": 38467.653
+    },
+    {
+      "region_name": "ecla_h",
+      "capacity_kW": 14177,
+      "power_kW": 4393.452
+    },
+    {
+      "region_name": "ecla_1",
+      "capacity_kW": 218261,
+      "power_kW": 53233.858
+    },
+    {
+      "region_name": "cowl_1",
+      "capacity_kW": 457132,
+      "power_kW": 168026.489
+    },
+    {
+      "region_name": "besw_1",
+      "capacity_kW": 290909,
+      "power_kW": 97386.633
+    },
+    {
+      "region_name": "mity_1",
+      "capacity_kW": 528070,
+      "power_kW": 216015.84
+    },
+    {
+      "region_name": "feck_6",
+      "capacity_kW": 412070,
+      "power_kW": 160734.766
+    },
+    {
+      "region_name": "melk_1",
+      "capacity_kW": 659599,
+      "power_kW": 270479.562
+    },
+    {
+      "region_name": "walh_1",
+      "capacity_kW": 126002,
+      "power_kW": 50699.005
+    },
+    {
+      "region_name": "iroa1",
+      "capacity_kW": 359833,
+      "power_kW": 144305.031
+    },
+    {
+      "region_name": "alst_3|uskm_1",
+      "capacity_kW": 191776,
+      "power_kW": 70746.167
+    },
+    {
+      "region_name": "uppb_1|uppb_3",
+      "capacity_kW": 90798,
+      "power_kW": 34143.075
+    },
+    {
+      "region_name": "maga_6",
+      "capacity_kW": 4835,
+      "power_kW": 1827.952
+    },
+    {
+      "region_name": "rass_1",
+      "capacity_kW": 113038,
+      "power_kW": 42377.948
+    },
+    {
+      "region_name": "pemb_1",
+      "capacity_kW": 220968,
+      "power_kW": 78922.406
+    },
+    {
+      "region_name": "bedd_1",
+      "capacity_kW": 43966,
+      "power_kW": 2692.185
+    },
+    {
+      "region_name": "warl_1",
+      "capacity_kW": 148591,
+      "power_kW": 12248.852
+    },
+    {
+      "region_name": "barkr_a",
+      "capacity_kW": 3738,
+      "power_kW": 281.098
+    },
+    {
+      "region_name": "litt_c",
+      "capacity_kW": 14868,
+      "power_kW": 1096.267
+    },
+    {
+      "region_name": "litt_j",
+      "capacity_kW": 265,
+      "power_kW": 20.44
+    },
+    {
+      "region_name": "wthu31",
+      "capacity_kW": 2851,
+      "power_kW": 230.076
+    },
+    {
+      "region_name": "rich_j|rich1",
+      "capacity_kW": 67550,
+      "power_kW": 3661.21
+    },
+    {
+      "region_name": "norm_1|sall1",
+      "capacity_kW": 447448,
+      "power_kW": 34334.178
+    },
+    {
+      "region_name": "sell_1",
+      "capacity_kW": 107734,
+      "power_kW": 8740.819
+    },
+    {
+      "region_name": "kems_1",
+      "capacity_kW": 88706,
+      "power_kW": 7146.747
+    },
+    {
+      "region_name": "cantn1",
+      "capacity_kW": 137160,
+      "power_kW": 9953.244
+    },
+    {
+      "region_name": "brfo_1|clt03",
+      "capacity_kW": 518686,
+      "power_kW": 36913.152
+    },
+    {
+      "region_name": "rayl_1",
+      "capacity_kW": 552661,
+      "power_kW": 29585.786
+    },
+    {
+      "region_name": "brai_1",
+      "capacity_kW": 81974,
+      "power_kW": 5888.466
+    },
+    {
+      "region_name": "kino_1",
+      "capacity_kW": 44019,
+      "power_kW": 3788.568
+    },
+    {
+      "region_name": "tilbb_1",
+      "capacity_kW": 95991,
+      "power_kW": 7125.732
+    },
+    {
+      "region_name": "drak_1",
+      "capacity_kW": 151227,
+      "power_kW": 46008.296
+    },
+    {
+      "region_name": "hamhc1",
+      "capacity_kW": 160690,
+      "power_kW": 57162.79
+    },
+    {
+      "region_name": "norl_3",
+      "capacity_kW": 8254,
+      "power_kW": 849.061
+    },
+    {
+      "region_name": "jord_3",
+      "capacity_kW": 8444,
+      "power_kW": 969.653
+    },
+    {
+      "region_name": "will_1",
+      "capacity_kW": 128232,
+      "power_kW": 28138.376
+    },
+    {
+      "region_name": "sklgb1",
+      "capacity_kW": 60258,
+      "power_kW": 3498.981
+    },
+    {
+      "region_name": "wmel_1",
+      "capacity_kW": 53927,
+      "power_kW": 4702.434
+    },
+    {
+      "region_name": "kirkb1",
+      "capacity_kW": 22599,
+      "power_kW": 1291.909
+    },
+    {
+      "region_name": "neep_3",
+      "capacity_kW": 9053,
+      "power_kW": 865.467
+    },
+    {
+      "region_name": "tyne_1|tyne_2",
+      "capacity_kW": 40115,
+      "power_kW": 1631.343
+    },
+    {
+      "region_name": "salh_1",
+      "capacity_kW": 1584,
+      "power_kW": 219.754
+    },
+    {
+      "region_name": "ende_1",
+      "capacity_kW": 219281,
+      "power_kW": 46999.229
+    },
+    {
+      "region_name": "thur_6",
+      "capacity_kW": 30914,
+      "power_kW": 3070.791
+    },
+    {
+      "region_name": "popp_3",
+      "capacity_kW": 6969,
+      "power_kW": 514.08
+    },
+    {
+      "region_name": "thom_6",
+      "capacity_kW": 80607,
+      "power_kW": 10973.299
+    },
+    {
+      "region_name": "rats_1",
+      "capacity_kW": 142125,
+      "power_kW": 23834.361
+    },
+    {
+      "region_name": "sbar",
+      "capacity_kW": 81331,
+      "power_kW": 10464.589
+    },
+    {
+      "region_name": "cove_1",
+      "capacity_kW": 280304,
+      "power_kW": 71085.095
+    },
+    {
+      "region_name": "ferra2",
+      "capacity_kW": 31353,
+      "power_kW": 2602.299
+    },
+    {
+      "region_name": "harm_6",
+      "capacity_kW": 142278,
+      "power_kW": 14849.081
+    },
+    {
+      "region_name": "ferrb_m",
+      "capacity_kW": 61255,
+      "power_kW": 4022.412
+    },
+    {
+      "region_name": "temp_3",
+      "capacity_kW": 702,
+      "power_kW": 61.191
+    },
+    {
+      "region_name": "chte_1",
+      "capacity_kW": 441348,
+      "power_kW": 52020.217
+    },
+    {
+      "region_name": "wiba_3",
+      "capacity_kW": 2491,
+      "power_kW": 215.721
+    },
+    {
+      "region_name": "hawp_6",
+      "capacity_kW": 27690,
+      "power_kW": 2086.903
+    },
+    {
+      "region_name": "offe_3",
+      "capacity_kW": 8553,
+      "power_kW": 405.697
+    },
+    {
+      "region_name": "sshi_3",
+      "capacity_kW": 6922,
+      "power_kW": 329.718
+    },
+    {
+      "region_name": "wbol_6",
+      "capacity_kW": 42562,
+      "power_kW": 1867.053
+    },
+    {
+      "region_name": "knar",
+      "capacity_kW": 73503,
+      "power_kW": 3643.299
+    },
+    {
+      "region_name": "pits_3",
+      "capacity_kW": 5558,
+      "power_kW": 484.102
+    },
+    {
+      "region_name": "shec_3",
+      "capacity_kW": 2845,
+      "power_kW": 278.526
+    },
+    {
+      "region_name": "salt_1",
+      "capacity_kW": 13914,
+      "power_kW": 2573.626
+    },
+    {
+      "region_name": "sfeg_p",
+      "capacity_kW": 810,
+      "power_kW": 33.534
+    },
+    {
+      "region_name": "pehs_p",
+      "capacity_kW": 417,
+      "power_kW": 17.945
+    },
+    {
+      "region_name": "pehg_p",
+      "capacity_kW": 3829,
+      "power_kW": 167.838
+    },
+    {
+      "region_name": "fras_p",
+      "capacity_kW": 8216,
+      "power_kW": 370.268
+    },
+    {
+      "region_name": "clay_p",
+      "capacity_kW": 596,
+      "power_kW": 25.429
+    },
+    {
+      "region_name": "wiow_p",
+      "capacity_kW": 1262,
+      "power_kW": 62.259
+    },
+    {
+      "region_name": "pers_p",
+      "capacity_kW": 5329,
+      "power_kW": 226.483
+    },
+    {
+      "region_name": "dyce_p",
+      "capacity_kW": 8028,
+      "power_kW": 362.598
+    },
+    {
+      "region_name": "wohi_p",
+      "capacity_kW": 3689,
+      "power_kW": 165.759
+    },
+    {
+      "region_name": "redm_p",
+      "capacity_kW": 5917,
+      "power_kW": 279.677
+    },
+    {
+      "region_name": "crai_p",
+      "capacity_kW": 4382,
+      "power_kW": 198.505
+    },
+    {
+      "region_name": "stri_p",
+      "capacity_kW": 14781,
+      "power_kW": 690.273
+    },
+    {
+      "region_name": "macd_p",
+      "capacity_kW": 4542,
+      "power_kW": 298.409
+    },
+    {
+      "region_name": "thso_p",
+      "capacity_kW": 5544,
+      "power_kW": 546.454
+    },
+    {
+      "region_name": "fidd_p",
+      "capacity_kW": 7109,
+      "power_kW": 295.497
+    },
+    {
+      "region_name": "mybs_p",
+      "capacity_kW": 1978,
+      "power_kW": 171.097
+    },
+    {
+      "region_name": "fett_p|kint_p|roti3",
+      "capacity_kW": 35475,
+      "power_kW": 1926.292
+    },
+    {
+      "region_name": "arbr_p",
+      "capacity_kW": 25975,
+      "power_kW": 715.178
+    },
+    {
+      "region_name": "elgi_p",
+      "capacity_kW": 10925,
+      "power_kW": 1056.447
+    },
+    {
+      "region_name": "brid_p",
+      "capacity_kW": 6345,
+      "power_kW": 303.08
+    },
+    {
+      "region_name": "berb_p|caif_p|dall_p|glef_p|keit_p",
+      "capacity_kW": 17328,
+      "power_kW": 1439.957
+    },
+    {
+      "region_name": "milc_p",
+      "capacity_kW": 8425,
+      "power_kW": 251.065
+    },
+    {
+      "region_name": "dudh_p|glag_p",
+      "capacity_kW": 1886,
+      "power_kW": 69.971
+    },
+    {
+      "region_name": "lynd_p",
+      "capacity_kW": 3080,
+      "power_kW": 126.896
+    },
+    {
+      "region_name": "doun_p",
+      "capacity_kW": 590,
+      "power_kW": 80.968
+    },
+    {
+      "region_name": "bror_p",
+      "capacity_kW": 2249,
+      "power_kW": 339.149
+    },
+    {
+      "region_name": "dunb",
+      "capacity_kW": 7801,
+      "power_kW": 541.649
+    },
+    {
+      "region_name": "char_p",
+      "capacity_kW": 4660,
+      "power_kW": 194.943
+    },
+    {
+      "region_name": "luna_p",
+      "capacity_kW": 24680,
+      "power_kW": 1170.655
+    },
+    {
+      "region_name": "leve",
+      "capacity_kW": 9306,
+      "power_kW": 321.677
+    },
+    {
+      "region_name": "redh",
+      "capacity_kW": 13567,
+      "power_kW": 527.304
+    },
+    {
+      "region_name": "tarl_p",
+      "capacity_kW": 11039,
+      "power_kW": 1311.801
+    },
+    {
+      "region_name": "glro",
+      "capacity_kW": 4673,
+      "power_kW": 208.883
+    },
+    {
+      "region_name": "shru",
+      "capacity_kW": 1273,
+      "power_kW": 71.33
+    },
+    {
+      "region_name": "cupa",
+      "capacity_kW": 17916,
+      "power_kW": 655.726
+    },
+    {
+      "region_name": "cass_p",
+      "capacity_kW": 238,
+      "power_kW": 46.592
+    },
+    {
+      "region_name": "dewp",
+      "capacity_kW": 1142,
+      "power_kW": 62.81
+    },
+    {
+      "region_name": "alne_p",
+      "capacity_kW": 5644,
+      "power_kW": 824.4
+    },
+    {
+      "region_name": "gorg",
+      "capacity_kW": 474,
+      "power_kW": 24.506
+    },
+    {
+      "region_name": "glni",
+      "capacity_kW": 3232,
+      "power_kW": 153.305
+    },
+    {
+      "region_name": "whho",
+      "capacity_kW": 2897,
+      "power_kW": 187.243
+    },
+    {
+      "region_name": "telr",
+      "capacity_kW": 2898,
+      "power_kW": 152.918
+    },
+    {
+      "region_name": "lair_p",
+      "capacity_kW": 394,
+      "power_kW": 89.228
+    },
+    {
+      "region_name": "shin_p",
+      "capacity_kW": 564,
+      "power_kW": 108.232
+    },
+    {
+      "region_name": "wfie",
+      "capacity_kW": 4176,
+      "power_kW": 211.306
+    },
+    {
+      "region_name": "sigh",
+      "capacity_kW": 17807,
+      "power_kW": 1131.338
+    },
+    {
+      "region_name": "curr",
+      "capacity_kW": 2150,
+      "power_kW": 141.47
+    },
+    {
+      "region_name": "nair_p",
+      "capacity_kW": 9279,
+      "power_kW": 2286.655
+    },
+    {
+      "region_name": "inke",
+      "capacity_kW": 4714,
+      "power_kW": 257.542
+    },
+    {
+      "region_name": "brox",
+      "capacity_kW": 10018,
+      "power_kW": 615.439
+    },
+    {
+      "region_name": "coua_p",
+      "capacity_kW": 9066,
+      "power_kW": 570.554
+    },
+    {
+      "region_name": "inne_p",
+      "capacity_kW": 9933,
+      "power_kW": 2155.792
+    },
+    {
+      "region_name": "drcr",
+      "capacity_kW": 1636,
+      "power_kW": 132.461
+    },
+    {
+      "region_name": "dunf|towh",
+      "capacity_kW": 58253,
+      "power_kW": 3159.254
+    },
+    {
+      "region_name": "abne_p",
+      "capacity_kW": 30075,
+      "power_kW": 1396.482
+    },
+    {
+      "region_name": "bain",
+      "capacity_kW": 2086,
+      "power_kW": 154.642
+    },
+    {
+      "region_name": "devo",
+      "capacity_kW": 16385,
+      "power_kW": 1056.286
+    },
+    {
+      "region_name": "bumu_p",
+      "capacity_kW": 8504,
+      "power_kW": 461.484
+    },
+    {
+      "region_name": "grmo",
+      "capacity_kW": 6690,
+      "power_kW": 500.635
+    },
+    {
+      "region_name": "boag_p",
+      "capacity_kW": 4612,
+      "power_kW": 1071.675
+    },
+    {
+      "region_name": "beau_p|orri_p",
+      "capacity_kW": 8325,
+      "power_kW": 1633.642
+    },
+    {
+      "region_name": "sfil_p",
+      "capacity_kW": 551,
+      "power_kW": 38.46
+    },
+    {
+      "region_name": "tumb_p",
+      "capacity_kW": 3633,
+      "power_kW": 411.498
+    },
+    {
+      "region_name": "fasn_p",
+      "capacity_kW": 157,
+      "power_kW": 25.01
+    },
+    {
+      "region_name": "stir",
+      "capacity_kW": 18193,
+      "power_kW": 1640.402
+    },
+    {
+      "region_name": "cean_p",
+      "capacity_kW": 117,
+      "power_kW": 19.048
+    },
+    {
+      "region_name": "bonn",
+      "capacity_kW": 7970,
+      "power_kW": 775.481
+    },
+    {
+      "region_name": "cumb",
+      "capacity_kW": 6020,
+      "power_kW": 655.779
+    },
+    {
+      "region_name": "coat",
+      "capacity_kW": 8261,
+      "power_kW": 1247.136
+    },
+    {
+      "region_name": "faug_p",
+      "capacity_kW": 1031,
+      "power_kW": 200.495
+    },
+    {
+      "region_name": "caty",
+      "capacity_kW": 1941,
+      "power_kW": 395.64
+    },
+    {
+      "region_name": "grub_p",
+      "capacity_kW": 2096,
+      "power_kW": 438.343
+    },
+    {
+      "region_name": "pord",
+      "capacity_kW": 2069,
+      "power_kW": 372.144
+    },
+    {
+      "region_name": "wgeo",
+      "capacity_kW": 109,
+      "power_kW": 23.704
+    },
+    {
+      "region_name": "finn",
+      "capacity_kW": 76,
+      "power_kW": 15.942
+    },
+    {
+      "region_name": "sanx",
+      "capacity_kW": 1498,
+      "power_kW": 320.772
+    },
+    {
+      "region_name": "eerh",
+      "capacity_kW": 12052,
+      "power_kW": 1911.045
+    },
+    {
+      "region_name": "kiin_p",
+      "capacity_kW": 967,
+      "power_kW": 123.325
+    },
+    {
+      "region_name": "kier",
+      "capacity_kW": 30386,
+      "power_kW": 5070.41
+    },
+    {
+      "region_name": "part",
+      "capacity_kW": 1468,
+      "power_kW": 282.394
+    },
+    {
+      "region_name": "gova",
+      "capacity_kW": 1432,
+      "power_kW": 310.076
+    },
+    {
+      "region_name": "quoi_p",
+      "capacity_kW": 10,
+      "power_kW": 0
+    },
+    {
+      "region_name": "brac_p",
+      "capacity_kW": 14989,
+      "power_kW": 1075.211
+    },
+    {
+      "region_name": "kilb",
+      "capacity_kW": 1917,
+      "power_kW": 386.403
+    },
+    {
+      "region_name": "brap",
+      "capacity_kW": 2347,
+      "power_kW": 508.673
+    },
+    {
+      "region_name": "drum",
+      "capacity_kW": 3892,
+      "power_kW": 659.045
+    },
+    {
+      "region_name": "pais",
+      "capacity_kW": 2656,
+      "power_kW": 632.571
+    },
+    {
+      "region_name": "stor_p",
+      "capacity_kW": 2085,
+      "power_kW": 561.491
+    },
+    {
+      "region_name": "kinl_p",
+      "capacity_kW": 475,
+      "power_kW": 77.362
+    },
+    {
+      "region_name": "ersk",
+      "capacity_kW": 5094,
+      "power_kW": 1113.209
+    },
+    {
+      "region_name": "sloy_p",
+      "capacity_kW": 302,
+      "power_kW": 37.961
+    },
+    {
+      "region_name": "stle",
+      "capacity_kW": 7331,
+      "power_kW": 1040.513
+    },
+    {
+      "region_name": "rann_p",
+      "capacity_kW": 187,
+      "power_kW": 22.764
+    },
+    {
+      "region_name": "devm",
+      "capacity_kW": 2797,
+      "power_kW": 640.047
+    },
+    {
+      "region_name": "hele",
+      "capacity_kW": 3627,
+      "power_kW": 714.398
+    },
+    {
+      "region_name": "spav",
+      "capacity_kW": 1866,
+      "power_kW": 425.697
+    },
+    {
+      "region_name": "ardk_p|clac_p",
+      "capacity_kW": 562,
+      "power_kW": 115.173
+    },
+    {
+      "region_name": "broa_p",
+      "capacity_kW": 2197,
+      "power_kW": 390.846
+    },
+    {
+      "region_name": "dugr_p",
+      "capacity_kW": 1552,
+      "power_kW": 380.964
+    },
+    {
+      "region_name": "fwil_p",
+      "capacity_kW": 4773,
+      "power_kW": 957.146
+    },
+    {
+      "region_name": "tayn_p",
+      "capacity_kW": 5927,
+      "power_kW": 1498.938
+    },
+    {
+      "region_name": "armo_p|harg_p",
+      "capacity_kW": 1064,
+      "power_kW": 232.342
+    }
+  ]
+}
