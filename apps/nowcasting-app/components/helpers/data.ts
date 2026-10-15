@@ -357,7 +357,7 @@ export const buildRegionValues = ({
 /**
  * Sum region values into a client-side grouping (GB's DNO and NG-zone levels).
  *
- * **The DNO groupings are not a partition.** 15 GSP ids appear in two groupings each, so a
+ * **The DNO groupings are not a partition.** 21 GSP ids appear in two groupings each, so a
  * DNO total double-counts them — both the power and the capacity. That is a property of
  * `data/dno_gsp_groupings.json`, not of this function, and Phase 5 owns regenerating those
  * files by region name. It is left visible here rather than papered over: silently
@@ -483,7 +483,7 @@ export const groupRegionNames = (
  * regardless of which of the two it was, the same collapse the v0 dialect it replaces made.
  *
  * **The DNO groupings are not a partition — this function does NOT fix that, on purpose.**
- * 15 GSPs appear in two DNO groupings each (see `rollUpRegionValues`'s comment, verbatim), so
+ * 21 GSPs appear in two DNO groupings each (see `rollUpRegionValues`'s comment, verbatim), so
  * a DNO-level series double-counts their power at every timestamp it is used for. Phase 5
  * regenerated the grouping assets name-keyed and **deliberately reproduced the duplication**:
  * the question put to the API owner — whether a GSP feeding two licence areas is legitimately

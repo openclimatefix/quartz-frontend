@@ -163,6 +163,12 @@ export type GspAggregateData = {
    * dropped, so the tooltip's length always matches the selection's.
    */
   memberLabels: string[];
+  /**
+   * The members' GB `gsp_id`s and installed capacities, for the per-GSP seasonal metrics
+   * (`useGspSeasonalMetrics`). Members with no numeric `gsp_id` (every non-GB region) are left
+   * out, so this is empty outside GB.
+   */
+  memberGsps: { gspId: number; installedCapacityMw: number }[];
   isLoading: boolean;
   hasError: boolean;
 };
@@ -298,6 +304,17 @@ export const useGspAggregateData = (
     return regionNames.map((name) => bridge.byName.get(name)?.label ?? name);
   }, [enabled, regionNames, regionsResult.data]);
 
+  const memberGsps = useMemo(() => {
+    if (!enabled || !regionNames) return [];
+    const bridge = buildRegionBridge(regionsResult.data);
+    return regionNames.flatMap((name) => {
+      const gspId = bridge.gspIdFor(name);
+      return gspId === undefined
+        ? []
+        : [{ gspId, installedCapacityMw: bridge.byName.get(name)?.capacityMw ?? 0 }];
+    });
+  }, [enabled, regionNames, regionsResult.data]);
+
   const isLoading =
     enabled &&
     (!regionsResult.data ||
@@ -316,6 +333,7 @@ export const useGspAggregateData = (
     generationSeries,
     primaryGeneration: rollUp(generation0.data),
     memberLabels,
+    memberGsps,
     isLoading: !!isLoading,
     hasError
   };

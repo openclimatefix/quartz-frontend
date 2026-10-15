@@ -6,7 +6,7 @@
  * groupings ARE a partition (no region appears in two zones — verified against the shipped
  * `public/geo/gb/*-groupings.json` below).
  *
- * DNO groupings are NOT a partition — 15 GSPs appear in two DNO groupings each, and the DNO
+ * DNO groupings are NOT a partition — 21 GSPs appear in two DNO groupings each, and the DNO
  * file additionally carries regions outside the zone partition entirely. That is a known,
  * unresolved bug (see `rollUpRegionValues` and `rollUpRegionSeries` in `data.ts`), deliberately
  * reproduced rather than fixed here. The DNO assertions below document the excess explicitly
@@ -18,7 +18,7 @@
  * must not be done: the question put to the API owner — whether a GSP feeding two licence areas
  * is legitimately counted in both, or whether its capacity should be apportioned — has not been
  * answered. Until it is, there is no basis for choosing a number, so
- * `scripts/build-geo-assets.mjs` translates gsp_id -> v1 region name one-for-one and the 15
+ * `scripts/build-geo-assets.mjs` translates gsp_id -> v1 region name one-for-one and the 21
  * duplicates stay duplicated in `public/geo/gb/dno-groupings.json`. `config/geo-aliases.test.ts`
  * pins the duplicate count on the shipped asset from the other side.
  *
@@ -37,7 +37,7 @@ const ZONE_GROUPINGS = ngZoneGroupings as Record<string, string[]>;
 const DNO_GROUPINGS = dnoGroupings as Record<string, string[]>;
 
 /**
- * The 15 GSPs appearing in two DNO licence areas each, now named rather than numbered.
+ * The 21 GSPs appearing in two DNO licence areas each, now named rather than numbered.
  * `config/geo-aliases.test.ts` pins the count on the shipped asset from the other side.
  */
 const KNOWN_DUPLICATE_DNO_REGIONS = [...new Set(Object.values(DNO_GROUPINGS).flat())].filter(
@@ -177,7 +177,7 @@ describe("rollUpRegionSeries reconciliation", () => {
     });
   });
 
-  it("the DNO excess is explained exactly by the 15 known duplicates plus DNO-only regions", () => {
+  it("the DNO excess is explained exactly by the 21 known duplicates plus DNO-only regions", () => {
     const dnoSeries = Object.keys(DNO_GROUPINGS).map(
       (name) => rollUpRegionSeries(series, groupRegionNames(DNO_GROUPINGS, name)!, name)!
     );
@@ -185,9 +185,10 @@ describe("rollUpRegionSeries reconciliation", () => {
     const dnoCounts = new Map<string, number>();
     for (const name of dnoNames) dnoCounts.set(name, (dnoCounts.get(name) ?? 0) + 1);
 
-    // The re-keyed asset must still carry exactly 15 regions in two licence areas: Phase 5
-    // translated gsp_id -> region name one-for-one and did not de-duplicate.
-    expect(KNOWN_DUPLICATE_DNO_REGIONS).toHaveLength(15);
+    // The re-keyed asset must still carry exactly 21 regions in two licence areas (15 until
+    // PR #749 added the missing GSPs): Phase 5 translated gsp_id -> region name one-for-one
+    // and did not de-duplicate.
+    expect(KNOWN_DUPLICATE_DNO_REGIONS).toHaveLength(21);
 
     const nationalNameSet = new Set(nationalNames);
     TIMES.forEach((_, index) => {

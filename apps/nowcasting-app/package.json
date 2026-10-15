@@ -15,6 +15,9 @@
     "test:watch": "jest --watch",
     "test:cypress": "cypress run --browser chrome",
     "gen:api": "openapi-typescript v1-api.json -o lib/api/v1/schema.d.ts",
+    "sanitize-gsp-metrics": "node scripts/sanitize-gsp-metrics.mjs",
+    "generate-dno-metrics": "node scripts/generate-dno-metrics.mjs",
+    "prep-metrics": "yarn sanitize-gsp-metrics && yarn generate-dno-metrics",
     "build:geo": "node scripts/build-geo-assets.mjs"
   },
   "dependencies": {
