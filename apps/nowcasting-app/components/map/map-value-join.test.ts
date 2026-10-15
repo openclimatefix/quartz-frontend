@@ -300,13 +300,13 @@ describe("buildMapFeatureStates against the recorded GB fixtures", () => {
       targetTime: forecast.times[20],
       timeNow: forecast.times[47]
     });
-    // City Road is gsp_id 67 and 1.538 MW at index 20 (1538 kW on the wire).
+    // City Road is gsp_id 67 and 1.724796 MW at index 20 (1724.796 kW on the wire).
     expect(states.size).toBe(338);
     const cityRoad = states.get(67)!;
     expect(cityRoad.label).toBe("City Road");
     expect(cityRoad.dataState).toBe("value");
-    expect(cityRoad.power).toBeCloseTo(1.538, 6);
-    expect(cityRoad.capacity).toBeCloseTo(3.982, 6);
+    expect(cityRoad.power).toBeCloseTo(1.724796, 6);
+    expect(cityRoad.capacity).toBeCloseTo(4.074, 6);
   });
 
   // The recorded fixture carries 5 of the 338 regions, which is exactly the shape the

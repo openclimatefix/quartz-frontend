@@ -107,10 +107,10 @@ describe("useGspDeltas", () => {
     expect(row).toBeDefined();
     expect(row.gspId).toBe(67);
     expect(row.gspRegion).toBe("City Road"); // Region.label, never the raw "citr_1"
-    expect(row.forecast).toBeCloseTo(1.538, 6);
-    expect(row.currentYield).toBeCloseTo(1.599, 6);
-    expect(row.delta).toBeCloseTo(0.061, 6);
-    expect(row.gspInstalledCapacity).toBeCloseTo(3.982, 6);
+    expect(row.forecast).toBeCloseTo(1.724796, 6);
+    expect(row.currentYield).toBeCloseTo(1.536034, 6);
+    expect(row.delta).toBeCloseTo(-0.188762, 6);
+    expect(row.gspInstalledCapacity).toBeCloseTo(4.074, 6);
     expect(row.deltaBucketKey).toBe("ZERO");
   });
 
@@ -127,7 +127,7 @@ describe("useGspDeltas", () => {
     expect(countRequests("/GB/solar/regions")).toBe(1);
 
     view.rerender({ targetTime: SECOND });
-    expect(view.result.current.gspDeltas.get("citr_1")!.delta).toBeCloseTo(0.263, 6);
+    expect(view.result.current.gspDeltas.get("citr_1")!.delta).toBeCloseTo(-0.170022, 6);
     expect(countRequests("/GB/solar/forecasts/period")).toBe(1);
     expect(countRequests("/GB/solar/generation/period")).toBe(1);
   });

@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 // Re-runnable recorder for lib/api/v1/__fixtures__/*.json
 //
-// Records VERBATIM responses from the live v1 API (production only — the
-// QUARTZ_API_V1_TOKEN in .env.local is signed by a different Auth0 tenant
-// than the dev hosts, so this only works against https://api.quartz.solar/v1).
+// Records VERBATIM responses from the live v1 API. Default host is production
+// (https://api.quartz.solar/v1), authenticated with QUARTZ_API_V1_TOKEN_PROD from
+// .env.local when that key is present, else QUARTZ_API_V1_TOKEN. QUARTZ_API_V1_TOKEN is
+// signed by the dev Auth0 tenant, so on its own it is rejected by production. With
+// `--base-from-env` the host comes from NEXT_PUBLIC_API_V1_PREFIX and QUARTZ_API_V1_TOKEN
+// (the dev token) is always used.
 //
 // Usage:
 //   node lib/api/v1/__fixtures__/record.mjs
@@ -44,13 +47,24 @@ function loadEnvLocal() {
 }
 
 const env = loadEnvLocal();
-const TOKEN = env.QUARTZ_API_V1_TOKEN;
+const FROM_ENV = process.argv.includes("--base-from-env");
+const TOKEN = FROM_ENV
+  ? env.QUARTZ_API_V1_TOKEN
+  : env.QUARTZ_API_V1_TOKEN_PROD || env.QUARTZ_API_V1_TOKEN;
 if (!TOKEN) {
-  console.error("QUARTZ_API_V1_TOKEN not found in .env.local");
+  console.error("No API token found in .env.local");
   process.exit(1);
 }
 
-const BASE = "https://api.quartz.solar/v1";
+// Default is production. `--base-from-env` takes the base URL from NEXT_PUBLIC_API_V1_PREFIX
+// in .env.local instead, for a token issued by the tenant that host trusts.
+const BASE = FROM_ENV
+  ? (env.NEXT_PUBLIC_API_V1_PREFIX ?? "").replace(/^["']|["']$/g, "").replace(/\/+$/, "")
+  : "https://api.quartz.solar/v1";
+if (!/^https:\/\//.test(BASE)) {
+  console.error("Base URL must be https");
+  process.exit(1);
+}
 const OUT_DIR = __dirname;
 
 // Last full UTC day — recent enough that caches are warm, old enough to be
@@ -68,6 +82,15 @@ function lastFullUtcDayWindow() {
 }
 
 const { start_utc, end_utc } = lastFullUtcDayWindow();
+
+// pvlive_day_after publishes late: the last full day can come back with no values at all
+// (seen 2026-09-30). Record it for the day before.
+const dayAfter = {
+  start_utc: new Date(new Date(start_utc).getTime() - 24 * 3600_000)
+    .toISOString()
+    .replace(/\.\d{3}Z$/, "Z"),
+  end_utc: start_utc
+};
 
 // Five GB gsp region_names chosen to include one pipe-joined composite name
 // (fact 1) and confirmed to carry metadata.gsp_id (fact 2).
@@ -199,22 +222,23 @@ const manifest = [
   {
     file: "gb-national-forecast.json",
     request: () =>
-      `GET /GB/solar/regions/national/forecast?start_utc=${start_utc}&end_utc=${end_utc} ` +
+      `GET /GB/solar/regions/national/forecast?start_utc=${start_utc}&end_utc=${end_utc}&adjusted=true ` +
       `(default model, full time series for one day)`,
-    url: () => `${BASE}/GB/solar/regions/national/forecast${qs({ start_utc, end_utc })}`
+    url: () =>
+      `${BASE}/GB/solar/regions/national/forecast${qs({ start_utc, end_utc, adjusted: "true" })}`
   },
   {
     file: "gb-national-forecast-last-updated.json",
-    request: () => `GET /GB/solar/regions/national/forecast/last-updated`,
-    url: () => `${BASE}/GB/solar/regions/national/forecast/last-updated`
+    request: () => `GET /GB/solar/regions/national/forecast/last-updated?adjusted=true`,
+    url: () => `${BASE}/GB/solar/regions/national/forecast/last-updated${qs({ adjusted: "true" })}`
   },
   {
     file: "gb-national-generation-pvlive_in_day.json",
     request: () =>
-      `GET /GB/solar/regions/national/generation?observer=pvlive_in_day&start_utc=${start_utc}&end_utc=${end_utc}`,
+      `GET /GB/solar/regions/national/generation?observer_name=pvlive_in_day&start_utc=${start_utc}&end_utc=${end_utc}`,
     url: () =>
       `${BASE}/GB/solar/regions/national/generation${qs({
-        observer: "pvlive_in_day",
+        observer_name: "pvlive_in_day",
         start_utc,
         end_utc
       })}`
@@ -222,21 +246,22 @@ const manifest = [
   {
     file: "gb-national-generation-pvlive_day_after.json",
     request: () =>
-      `GET /GB/solar/regions/national/generation?observer=pvlive_day_after&start_utc=${start_utc}&end_utc=${end_utc}`,
+      `GET /GB/solar/regions/national/generation?observer_name=pvlive_day_after&start_utc=${dayAfter.start_utc}&end_utc=${dayAfter.end_utc}` +
+      ` (the day before the other windows: day-after values publish late and yesterday can be empty)`,
     url: () =>
       `${BASE}/GB/solar/regions/national/generation${qs({
-        observer: "pvlive_day_after",
-        start_utc,
-        end_utc
+        observer_name: "pvlive_day_after",
+        start_utc: dayAfter.start_utc,
+        end_utc: dayAfter.end_utc
       })}`
   },
   {
     file: "nl-national-generation-ned_nl.json",
     request: () =>
-      `GET /NL/solar/regions/national/generation?observer=ned_nl&start_utc=${start_utc}&end_utc=${end_utc}`,
+      `GET /NL/solar/regions/national/generation?observer_name=ned_nl&start_utc=${start_utc}&end_utc=${end_utc}`,
     url: () =>
       `${BASE}/NL/solar/regions/national/generation${qs({
-        observer: "ned_nl",
+        observer_name: "ned_nl",
         start_utc,
         end_utc
       })}`
@@ -258,7 +283,7 @@ const manifest = [
   {
     file: "gb-gsp-generation-period.json",
     request: () =>
-      `GET /GB/solar/generation/period?region_type=gsp&observer=pvlive_in_day&start_utc=${start_utc}&end_utc=${end_utc}` +
+      `GET /GB/solar/generation/period?region_type=gsp&observer_name=pvlive_in_day&start_utc=${start_utc}&end_utc=${end_utc}` +
       GB_GSP_SAMPLE_NAMES.map((n) => `&region_names=${encodeURIComponent(n)}`).join("") +
       ` (server-side trim to 5 region_names, full time axis). NOTE: the forecast and ` +
       `generation period caches are independent and warm separately — one can be hot ` +
@@ -267,7 +292,7 @@ const manifest = [
     url: () =>
       `${BASE}/GB/solar/generation/period${qs({
         region_type: "gsp",
-        observer: "pvlive_in_day",
+        observer_name: "pvlive_in_day",
         start_utc,
         end_utc,
         region_names: GB_GSP_SAMPLE_NAMES
@@ -289,8 +314,8 @@ const manifest = [
   {
     file: "gb-gsp-forecasts-snapshot.json",
     request: () =>
-      `GET /GB/solar/forecasts/snapshot?region_type=gsp (one instant, all ~336 regions, ~22KB)`,
-    url: () => `${BASE}/GB/solar/forecasts/snapshot${qs({ region_type: "gsp" })}`
+      `GET /GB/solar/forecasts/snapshot?region_type=gsp&adjusted=true (one instant, all ~336 regions, ~22KB)`,
+    url: () => `${BASE}/GB/solar/forecasts/snapshot${qs({ region_type: "gsp", adjusted: "true" })}`
   },
   {
     // Pinned to a settled slot on purpose. Left to default to the latest instant, this
@@ -299,11 +324,11 @@ const manifest = [
     // back with a fraction of the regions. See finding 6 in README.md.
     file: "gb-gsp-generation-snapshot.json",
     request: () =>
-      `GET /GB/solar/generation/snapshot?region_type=gsp&observer=pvlive_in_day&time_utc=... (a settled slot: all 336 regions, ~33KB)`,
+      `GET /GB/solar/generation/snapshot?region_type=gsp&observer_name=pvlive_in_day&time_utc=... (a settled slot: all 336 regions, ~33KB)`,
     url: () =>
       `${BASE}/GB/solar/generation/snapshot${qs({
         region_type: "gsp",
-        observer: "pvlive_in_day",
+        observer_name: "pvlive_in_day",
         // Several hours back, so the slot has certainly finished publishing.
         time_utc: settledSlotUtc()
       })}`

@@ -105,7 +105,7 @@ const server = setupServer(
   json("/GB/solar/regions/national/forecast", gbNationalForecast),
   http.get(`${V1}/GB/solar/regions/national/generation`, ({ request }) => {
     record(request);
-    const observer = new URL(request.url).searchParams.get("observer");
+    const observer = new URL(request.url).searchParams.get("observer_name");
     return HttpResponse.json(
       observer === "pvlive_day_after" ? gbNationalGenerationDayAfter : gbNationalGenerationInDay
     );
@@ -168,11 +168,11 @@ describe("the forecast series are driven by the country's config, not by the com
 
     const path = "/GB/solar/regions/national/forecast";
     const configured = COUNTRY_CONFIG.GB.nationalChartSeries.map(forecastSeriesModel);
-    expect(queryValues(path, "model")).toEqual([...configured].sort());
+    expect(queryValues(path, "model_name")).toEqual([...configured].sort());
     expect(seen(path)).toHaveLength(configured.length);
   });
 
-  // The whole reason the list is curated rather than derived: GB national offers twelve
+  // The whole reason the list is curated rather than derived: GB national offers six
   // models and the chart draws four of them. It drew six until `pvnet_day_ahead` and
   // `pvnet_intraday` were removed — fetched on every load with no legend entry and no line to
   // draw them on, and close enough to the blend they mostly make up to add nothing.
@@ -183,19 +183,20 @@ describe("the forecast series are driven by the country's config, not by the com
     const manifestModels = (countriesFixture as any[])
       .find((c) => c.country === "GB")
       .region_types.find((rt: any) => rt.type === "national").forecast_models;
-    expect(manifestModels.length).toBe(12);
+    expect(manifestModels.length).toBe(6);
     expect(seen("/GB/solar/regions/national/forecast").length).toBe(4);
   });
 
-  // v1 has no `trend_adjuster_on`; it exposes `_adjust` model variants instead, and the
-  // instruction is to run on the non-adjusted ones until the API settles. If someone flips
-  // NATIONAL_FORECAST_MODEL_SUFFIX, this and the config test move together.
-  test("no request asks for an _adjust variant", async () => {
+  // Adjustment is the `adjusted` parameter, not a model-name suffix.
+  test("no request asks for an _adjust variant, and every forecast request sets adjusted=true", async () => {
     const view = renderChart();
     await settled(view, 6);
-    for (const model of queryValues("/GB/solar/regions/national/forecast", "model")) {
+    for (const model of queryValues("/GB/solar/regions/national/forecast", "model_name")) {
       expect(model).not.toMatch(/_adjust$/);
     }
+    const adjusted = queryValues("/GB/solar/regions/national/forecast", "adjusted");
+    expect(adjusted.length).toBeGreaterThan(0);
+    expect(adjusted.every((value) => value === "true")).toBe(true);
   });
 
   /**
@@ -269,7 +270,7 @@ describe("observers are per country and there may be exactly one", () => {
     const view = renderChart();
     await settled(view, 6);
 
-    expect(queryValues("/GB/solar/regions/national/generation", "observer")).toEqual([
+    expect(queryValues("/GB/solar/regions/national/generation", "observer_name")).toEqual([
       "pvlive_day_after",
       "pvlive_in_day"
     ]);
@@ -287,7 +288,9 @@ describe("observers are per country and there may be exactly one", () => {
       rerender(view);
       expect(seen("/NL/solar/regions/national/generation")).toHaveLength(1);
     });
-    expect(queryValues("/NL/solar/regions/national/generation", "observer")).toEqual(["ned_nl"]);
+    expect(queryValues("/NL/solar/regions/national/generation", "observer_name")).toEqual([
+      "ned_nl"
+    ]);
     // ...and one forecast line, not GB's four.
     expect(seen("/NL/solar/regions/national/forecast")).toHaveLength(1);
     expect(seen("/GB/solar/regions/national/generation")).toHaveLength(0);
@@ -307,7 +310,7 @@ describe("observers are per country and there may be exactly one", () => {
 describe("the chart's own key", () => {
   // Track G deleted `ChartLegend` and this block asserted its absence. The key is back
   // (`chart-legend.tsx`), so what is worth pinning has moved: it names *drawn* series only, and
-  // it is inert. Both are the properties that stop it becoming the display rail drawn twice.
+  // it only opens the drawer. Both are the properties that stop it becoming the display rail drawn twice.
   test("GB: it names the drawn series and not the ones switched off", async () => {
     const view = renderChart();
     await settled(view, 6);
@@ -323,7 +326,7 @@ describe("the chart's own key", () => {
     }
   });
 
-  test("GB: the key is inert — it holds no controls", async () => {
+  test("GB: the key only opens the drawer — one labelled button per entry, no toggles", async () => {
     const view = renderChart();
     await settled(view, 6);
     await waitFor(() => {
@@ -332,7 +335,12 @@ describe("the chart's own key", () => {
     });
 
     const legend = screen.getByLabelText("Chart series");
-    expect(legend.querySelectorAll("button, input, [role='button']")).toHaveLength(0);
+    expect(legend.querySelectorAll("input, [role='button']")).toHaveLength(0);
+    const buttons = legend.querySelectorAll("button");
+    expect(buttons.length).toBe(legend.querySelectorAll("li").length);
+    buttons.forEach((button) =>
+      expect(button.getAttribute("aria-label")).toMatch(/chart settings/)
+    );
   });
 
   test("NL: the key follows the country's own series", async () => {

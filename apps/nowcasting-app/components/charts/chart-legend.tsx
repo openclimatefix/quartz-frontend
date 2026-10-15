@@ -3,6 +3,7 @@ import { FC, ReactNode } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry, useGenerationSources } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
+import { useDisplayPanel } from "../shell/display-panel";
 import { LegendAreaGraphIcon, LegendLineGraphIcon } from "../icons/icons";
 
 /**
@@ -10,8 +11,8 @@ import { LegendAreaGraphIcon, LegendLineGraphIcon } from "../icons/icons";
  * chart's bottom edge — where a legend sits in most charting libraries, and where it does not
  * compete with the headline figures for the eye.
  *
- * **Inert.** It names lines, it does not switch them: that is open question 2 in the doc,
- * answered "inert" here. The display rail owns `visibleLines`; a second control bound to the
+ * **It does not switch lines.** Clicking an entry opens the settings drawer (when there is one)
+ * and does nothing else: open question 2 in the doc, answered "no toggling" here. The display rail owns `visibleLines`; a second control bound to the
  * same state is what got the old `ChartLegend` deleted in the first place.
  *
  * **Drawn series only.** An entry appears when its key is in `visibleLines`, so switching a
@@ -54,6 +55,7 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
   const [visibleLines] = useGlobalState("visibleLines");
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const { attract } = useDisplayPanel();
   const focusedCountry = useFocusedCountry();
   const seriesConfig = getCountryConfig(focusedCountry)?.nationalChartSeries ?? [];
   const generationSources = useGenerationSources(
@@ -61,7 +63,7 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
   );
 
   const entries: LegendEntry[] = [
-    { key: "FORECAST", label: "Current", iconClasses: "text-solar", symbolStyle: "both" },
+    { key: "FORECAST", label: "OCF", iconClasses: "text-solar", symbolStyle: "both" },
     // N-hour is in `visibleLines` by default but only drawn in the N-hour view, so it needs
     // the same second condition the chart itself uses.
     ...(showNHourView
@@ -117,8 +119,16 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
     >
       {drawn.map((entry) => (
         <li key={`legend-${entry.key}`} className="flex items-center gap-1">
-          <Swatch entry={entry} />
-          <span className="whitespace-nowrap">{entry.label}</span>
+          <button
+            type="button"
+            aria-label={`${entry.label}: open chart settings`}
+            title="Open chart settings"
+            onClick={attract}
+            className="flex items-center gap-1 rounded px-1 py-0.5 transition-colors hover:bg-surface-raised hover:text-content focus:outline-none focus-visible:ring-1 focus-visible:ring-interactive"
+          >
+            <Swatch entry={entry} />
+            <span className="whitespace-nowrap">{entry.label}</span>
+          </button>
         </li>
       ))}
     </ul>

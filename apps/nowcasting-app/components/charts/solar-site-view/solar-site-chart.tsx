@@ -257,7 +257,7 @@ const SolarSiteChart: FC<{
                   color="solar"
                   unit={"KW"}
                 >
-                  <span className="text-content-on-accent">{nationalPVActual?.toFixed(1)}</span>
+                  <span className="text-solar-light">{nationalPVActual?.toFixed(1)}</span>
                   <span className="text-content mx-1"> / </span>
                   {nationalPVExpected?.toFixed(1)}
                 </ForecastHeadlineFigure>
@@ -304,7 +304,7 @@ const SolarSiteChart: FC<{
                 color="solar"
                 unit={"KW"}
               >
-                <span className="text-content-on-accent">
+                <span className="text-solar-light">
                   {getTotalPvActualGenerationForGroup(
                     selectedSiteData.map((site) => site.site_uuid),
                     selectedTime

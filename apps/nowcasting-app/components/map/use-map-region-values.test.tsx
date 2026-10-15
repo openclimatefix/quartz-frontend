@@ -161,8 +161,8 @@ describe("useMapRegionValues", () => {
     view.rerender({ targetTime: SECOND });
     const at21 = view.result.current.featureStates.get(67)!.power;
 
-    expect(at20).toBeCloseTo(1.538, 6);
-    expect(at21).toBeCloseTo(1.312, 6);
+    expect(at20).toBeCloseTo(1.724796, 6);
+    expect(at21).toBeCloseTo(1.877028, 6);
     expect(countRequests("/GB/solar/forecasts/period")).toBe(1);
   });
 
