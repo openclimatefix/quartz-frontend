@@ -1,4 +1,4 @@
-import { fromArrayBuffer } from "geotiff";
+import { fromArrayBuffer, GeoTIFFImage } from "geotiff";
 import { getAccessToken } from "../../lib/api/auth/token";
 import type { Scope } from "../../lib/domain/types";
 
@@ -22,7 +22,8 @@ export const DEFAULT_SATELLITE_SCOPE: Scope = {
   regionType: "national"
 };
 
-export const SATELLITE_CHANNELS = [
+// The individual SEVIRI bands the API serves, one single-band tif per channel.
+export const SATELLITE_BANDS = [
   "VIS006",
   "VIS008",
   "IR_016",
@@ -35,83 +36,45 @@ export const SATELLITE_CHANNELS = [
   "WV_062",
   "WV_073"
 ] as const;
+
+// Composites are blended server-side (see quartz-api's satellite service) and served
+// as one single-band tif on the same route, so to this frontend they are ordinary
+// channel keys: one fetch, one layer, decoded exactly like a band. The member channels
+// and the alpha/opacity blend all live in the API now — nothing is stacked here.
+export const SATELLITE_COMPOSITES = [
+  "COMPOSITE_VISIBLE",
+  "COMPOSITE_INFRARED",
+  "COMPOSITE_BLUE"
+] as const;
+
+// Everything the `/satellite/` route accepts as `channel`.
+export const SATELLITE_CHANNELS = [...SATELLITE_BANDS, ...SATELLITE_COMPOSITES] as const;
 export type SatelliteChannel = (typeof SATELLITE_CHANNELS)[number];
 
-// SEVIRI channels grouped by how they sense. IR_016 (1.6um) is near-IR and
-// *reflective* despite the "IR_" prefix, so it groups with the visible ones.
+// IR_016 (1.6um) is near-IR and *reflective* despite the "IR_" prefix. The "true"
+// emissive IR and water-vapour channels are already inverted by the API before
+// saving, so they arrive with cold cloud tops bright and need no client-side flip.
 //
-// STACK ORDER: every list here is ordered **bottom-most first** — the last entry
-// renders on top. This matters a lot, because each layer only contributes about
-// 0.42 effective alpha (texture alpha 180/255 x raster-opacity 0.6, the ramp's
-// peak — see CLOUD_FADE_START_ZOOM), so five
-// layers above something leave only (1-0.42)^5 ~= 7% of it visible. Anything
-// buried is effectively gone, and the stack averages out to flat grey. So the
-// crisp, high-contrast bands go last, and the flat ones go underneath.
-export const REFLECTIVE_CHANNELS: SatelliteChannel[] = [
-  "IR_016", // near-IR, useful for ice/water cloud discrimination
-  "VIS008",
-  "VIS006" // the classic visible band, most interpretable — keep it on top
-];
-
-// The "true" emissive IR channels. The API already inverts these before saving,
-// so they arrive with cold cloud tops bright and need no client-side flip.
-export const THERMAL_CHANNELS: SatelliteChannel[] = [
-  "IR_134",
-  "IR_097",
-  "IR_120",
-  "IR_087",
-  "IR_108" // the standard atmospheric window channel, most informative thermal
-];
-
-// Also emissive, and likewise already inverted API-side.
-export const WATER_VAPOUR_CHANNELS: SatelliteChannel[] = ["WV_073", "WV_062"];
-
 // IR_039 (3.9um) carries both reflected solar and emitted thermal signal, so the
 // two partly cancel in daylight. That makes it washed out, and makes its polarity
-// behave unlike the true IR channels the API inverts. Its genuine uses (night fog
-// / low cloud via the 3.9-10.8 difference, hotspot detection) aren't served by a
-// brightness composite, so it stays out of the composites and is offered only as
-// a single channel.
+// behave unlike the true IR channels the API inverts, so it is the one channel
+// that needs a client-side flip to line up with the rest.
 export const MIXED_CHANNELS: SatelliteChannel[] = ["IR_039"];
 
-// Only IR_039 needs a client-side flip, to line it up with the API-inverted
-// channels when viewed on its own.
+// Only IR_039 needs a client-side flip, to line it up with the API-inverted channels.
 //
-// TEMPORARY: this belongs in the API, done client-side only to try the composites.
+// TEMPORARY: this belongs in the API, done client-side only for now.
 const INVERTED_CHANNELS: SatelliteChannel[] = [...MIXED_CHANNELS];
 
 export const shouldInvertChannel = (ch: SatelliteChannel): boolean =>
   INVERTED_CHANNELS.includes(ch);
 
-// Selections that overlay several same-family channels into one combined view.
-// Keys are stored in global state, so renaming one invalidates a user's saved
-// selection — labels are free to change, keys are not. (A full visible+IR
-// composite was tried and dropped: greyscale-averaging reflective and thermal
-// bands muddied both and lost the per-band nuance, for little gain in a
-// daytime-centric solar app.)
-//
-// Labels name the bands they stack, matching how the single channels below are
-// listed. "Blue" was the odd one out — it described neither the instrument nor
-// the output, so it reads as Water Vapour instead.
-export const COMPOSITE_SELECTIONS = {
-  COMPOSITE_VISIBLE: { label: "Visible Composite", channels: REFLECTIVE_CHANNELS },
-  COMPOSITE_INFRARED: { label: "Infrared Composite", channels: THERMAL_CHANNELS },
-  COMPOSITE_BLUE: { label: "Water Vapour Composite", channels: WATER_VAPOUR_CHANNELS }
-};
-
-export type CompositeSelection = keyof typeof COMPOSITE_SELECTIONS;
-export type ChannelSelection = SatelliteChannel | CompositeSelection;
-
-// Resolve a dropdown selection to the actual channels to render.
-export const channelsForSelection = (sel: ChannelSelection): SatelliteChannel[] =>
-  sel in COMPOSITE_SELECTIONS
-    ? COMPOSITE_SELECTIONS[sel as CompositeSelection].channels
-    : [sel as SatelliteChannel];
-
-// Widest composite, used to size the tif cache so a full selection still fits.
-export const MAX_COMPOSITE_CHANNELS = Math.max(
-  ...Object.values(COMPOSITE_SELECTIONS).map((c) => c.channels.length)
-);
+// The channel shown by default is COMPOSITE_VISIBLE, the most legible view in daylight —
+// the hours that matter for solar. (It is dark at night, when the reflective bands see no
+// sunlight; acceptable since generation is zero then.) The literal lives in globalState's
+// initial state rather than being exported from here, so that module's import of this one
+// can stay type-only — a value import would pull geotiff (ESM) into every test that loads
+// global state.
 
 export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   VIS006: "Visible 0.6µm",
@@ -124,12 +87,16 @@ export const SATELLITE_CHANNEL_LABELS: Record<SatelliteChannel, string> = {
   IR_120: "Infrared 12.0µm",
   IR_134: "Infrared 13.4µm",
   WV_062: "Water Vapour 6.2µm",
-  WV_073: "Water Vapour 7.3µm"
+  WV_073: "Water Vapour 7.3µm",
+  COMPOSITE_VISIBLE: "Visible Composite",
+  COMPOSITE_INFRARED: "Infrared Composite",
+  COMPOSITE_BLUE: "Water Vapour Composite"
 };
 
 export type TifLayerData = {
   imageDataUrl: string;
   bounds: [number, number, number, number];
+  missingChannels?: string[];
 };
 
 // Satellite is on **neither v0 nor v1** — stripping `/v0` leaves the API root, so requests go to
@@ -140,12 +107,24 @@ export type TifLayerData = {
 const API_PREFIX =
   process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
 
-// One layer/source per channel, so a composite can stack them. Kept here rather
-// than in map.tsx so the ids have a single home.
+// One layer/source per channel. Kept here rather than in map.tsx so the ids have
+// a single home.
 export const satLayerId = (ch: SatelliteChannel) => `satellite-layer-${ch}`;
 export const satSourceId = (ch: SatelliteChannel) => `satellite-source-${ch}`;
 
-const SAT_OPACITY = 0.6;
+const SAT_LAYER_OPACITY = 0.8;
+const SAT_RENDER_MAX_ALPHA = 255;
+
+type ToneCurve = { gain: number; gamma: number };
+const LINEAR_TONE: ToneCurve = { gain: 1, gamma: 1 };
+const REFLECTIVE_TONE: ToneCurve = { gain: 1.6, gamma: 0.5 };
+const REFLECTIVE_CHANNELS: SatelliteChannel[] = ["COMPOSITE_VISIBLE", "VIS006", "VIS008", "IR_016"];
+
+const toneFor = (ch: SatelliteChannel): ToneCurve =>
+  REFLECTIVE_CHANNELS.includes(ch) ? REFLECTIVE_TONE : LINEAR_TONE;
+
+export const isCompositeChannel = (ch: SatelliteChannel): boolean =>
+  (SATELLITE_COMPOSITES as readonly SatelliteChannel[]).includes(ch);
 
 /**
  * Zooming *through* the clouds.
@@ -181,27 +160,25 @@ const SAT_OPACITY = 0.6;
  *   renderer, so it tracks a pinch or a scroll continuously — a JS zoom handler would only fire
  *   at the end of the gesture and land as a pop;
  * - `maxzoom` on the layer is what makes it *free*. Opacity 0 still costs a draw every frame,
- *   which is the same reasoning the visibility comment below records, and at five stacked
- *   composite layers that is worth avoiding. Mapbox stops drawing a layer at or above its
- *   `maxzoom`, and since the ramp has already reached 0 at exactly that zoom, the cut is
- *   invisible.
+ *   which is the same reasoning the visibility comment below records, so it is worth avoiding.
+ *   Mapbox stops drawing a layer at or above its `maxzoom`, and since the ramp has already
+ *   reached 0 at exactly that zoom, the cut is invisible.
  *
  * Adjusting the feel is these two numbers and nothing else.
  */
 export const CLOUD_FADE_START_ZOOM = 6.5;
 export const CLOUD_FADE_END_ZOOM = 8;
 
-const satOpacityExpression = (): mapboxgl.Expression => [
+const satOpacityExpression = (channel: SatelliteChannel): mapboxgl.Expression => [
   "interpolate",
   ["linear"],
   ["zoom"],
   CLOUD_FADE_START_ZOOM,
-  SAT_OPACITY,
+  SAT_LAYER_OPACITY,
   CLOUD_FADE_END_ZOOM,
   0
 ];
 
-const SAT_TEXTURE_SIZE = 512;
 // Alpha of the brightest pixel in a decoded texture. Everything darker scales
 // down from here, so the effective ceiling matches the old flat value.
 const SAT_MAX_ALPHA = 180;
@@ -209,12 +186,28 @@ const SAT_MAX_ALPHA = 180;
 // alpha; quality is a lossy/size trade — raise toward 1 if artefacts show. (Size
 // is largely alpha-bound, and WebP stores alpha losslessly, so quality has little
 // effect here — kept high for free colour fidelity.)
+// The data is only a few hundred pixels across (one pixel ~17 km), so on screen it reads as
+// blocks. A light blur at native resolution softens the cell edges; no upsampling needed.
+// `ctx.filter` is ignored where unsupported (older Safari), which just leaves it unblurred.
+const SAT_BLUR_PX = 1;
+
+function drawBlurred(dst: HTMLCanvasElement, src: CanvasImageSource, w: number, h: number): void {
+  // Assigning width/height reallocates the backing store, so only touch them when they change.
+  if (dst.width !== w) dst.width = w;
+  if (dst.height !== h) dst.height = h;
+  const ctx = dst.getContext("2d")!;
+  ctx.clearRect(0, 0, w, h);
+  ctx.filter = `blur(${SAT_BLUR_PX}px)`;
+  ctx.drawImage(src, 0, 0);
+  ctx.filter = "none";
+}
+
 const SAT_IMAGE_TYPE = "image/webp";
 const SAT_IMAGE_QUALITY = 0.9;
 
 // Per-map, per-layer counter, so a slow texture swap can't clobber a newer one on
-// the same layer. Must be per-layer: with a single counter, stacking N channels
-// means only the last one applied would pass the token check.
+// the same layer. Per-layer rather than global: each channel has its own layer, and
+// a stale swap on one must not be invalidated by a fresh swap on another.
 const swapTokenByMap = new WeakMap<mapboxgl.Map, Map<string, number>>();
 
 function nextSwapToken(map: mapboxgl.Map, layerId: string): number {
@@ -240,17 +233,16 @@ function mercToWgs84(x: number, y: number): [number, number] {
 }
 
 // /api/get_token is an Auth0 session round-trip on the Next server, not a cheap read,
-// and every channel fetch used to pay for its own. A composite with the +/-1 prefetch
-// meant ~15 of them per timestep, each one sitting in front of its tif request. Share
-// the app-wide cached token (lib/api/auth/token.ts) instead of keeping a private cache
-// here — same TTL/dedup reasoning, now shared with axiosFetcherAuth and the v1 client.
+// and every channel fetch used to pay for its own. Share the app-wide cached token
+// (lib/api/auth/token.ts) instead of keeping a private cache here — same TTL/dedup
+// reasoning, now shared with axiosFetcherAuth and the v1 client.
 
-// Cap concurrent satellite requests. A composite fetches one tif per channel and
-// the +/-1 prefetch triples that, so an uncapped selection can put ~15 requests
-// in flight — enough to trip the API's rate limit and drop the whole batch into
-// the 429 backoff path below, which is slower than simply queuing in the first
-// place. The visible frame is always requested before the prefetches (see
-// map.tsx), so it takes the slots first and can't be starved by speculative work.
+// Cap concurrent satellite requests. With the +/-1 prefetch a single step can put a
+// few requests in flight at once; capping them keeps a burst from tripping the API's
+// rate limit and dropping the whole batch into the 429 backoff path below, which is
+// slower than simply queuing in the first place. The visible frame is always
+// requested before the prefetches (see map.tsx), so it takes the slots first and
+// can't be starved by speculative work.
 const MAX_CONCURRENT_SAT_REQUESTS = 4;
 
 let activeRequests = 0;
@@ -288,23 +280,12 @@ export async function fetchSatelliteTif(
   }
 }
 
-async function requestSatelliteTif(
-  channel: SatelliteChannel,
-  timestamp: string,
-  latest: boolean,
-  // Accepted, not yet consumed — see DEFAULT_SATELLITE_SCOPE's doc comment above.
-  scope: Scope = DEFAULT_SATELLITE_SCOPE
-): Promise<ArrayBuffer | null> {
-  void scope;
+async function requestTifFromRoute(routeUrl: string): Promise<ArrayBuffer | null> {
   const token = await getAccessToken();
-  const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
-    channel
-  )}&timestamp=${encodeURIComponent(timestamp)}${latest ? "&latest=true" : ""}`;
-
   const maxRetries = 5;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const apiRes = await fetch(apiUrl, {
+    const apiRes = await fetch(routeUrl, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
@@ -333,42 +314,39 @@ async function requestSatelliteTif(
   return null;
 }
 
-export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLayerData> {
-  const tiff = await fromArrayBuffer(buf);
-  const image = await tiff.getImage();
-  const width = image.getWidth();
-  const height = image.getHeight();
-  const data = await image.readRasters();
-  let minLon: number, minLat: number, maxLon: number, maxLat: number;
+async function requestSatelliteTif(
+  channel: SatelliteChannel,
+  timestamp: string,
+  latest: boolean,
+  // Accepted, not yet consumed — see DEFAULT_SATELLITE_SCOPE's doc comment above.
+  scope: Scope = DEFAULT_SATELLITE_SCOPE
+): Promise<ArrayBuffer | null> {
+  void scope;
+  const apiUrl = `${API_PREFIX}/satellite/?channel=${encodeURIComponent(
+    channel
+  )}&timestamp=${encodeURIComponent(timestamp)}${latest ? "&latest=true" : ""}`;
+  return requestTifFromRoute(apiUrl);
+}
+
+// The extent a tif draws over: its `bounds_wgs84` tag if present, else its projected bbox.
+async function readBounds(image: GeoTIFFImage): Promise<TifLayerData["bounds"]> {
   const meta = (await image.getGDALMetadata()) as { bounds_wgs84?: string } | null;
   const tag = meta?.bounds_wgs84?.split(",").map(Number);
   if (tag && tag.length === 4 && tag.every((n) => isFinite(n))) {
-    [minLon, minLat, maxLon, maxLat] = tag as [number, number, number, number];
-  } else {
-    const [minX, minY, maxX, maxY] = image.getBoundingBox();
-    [minLon, minLat] = mercToWgs84(minX, minY);
-    [maxLon, maxLat] = mercToWgs84(maxX, maxY);
+    return tag as TifLayerData["bounds"];
   }
+  const [minX, minY, maxX, maxY] = image.getBoundingBox();
+  return [...mercToWgs84(minX, minY), ...mercToWgs84(maxX, maxY)];
+}
 
-  const bands = Array.isArray(data) ? data : [data];
-  const band = bands[0] as Float32Array | Uint16Array | Uint8Array;
-
-  let minVal = Infinity;
-  let maxVal = -Infinity;
-  for (let i = 0; i < band.length; i++) {
-    const v = band[i];
-    if (isFinite(v)) {
-      if (v < minVal) minVal = v;
-      if (v > maxVal) maxVal = v;
-    }
-  }
-  if (!isFinite(minVal)) {
-    minVal = 0;
-    maxVal = 1;
-  }
-  const range = maxVal - minVal || 1;
-  const scale = 255 / range;
-
+function bandToImage(
+  band: ArrayLike<number>,
+  width: number,
+  height: number,
+  invert: boolean,
+  maxAlpha: number = SAT_MAX_ALPHA,
+  tone: ToneCurve = LINEAR_TONE
+): string {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -379,34 +357,47 @@ export async function decodeTif(buf: ArrayBuffer, invert = false): Promise<TifLa
   for (let i = 0; i < band.length; i++) {
     const pi = i * 4;
     const v = band[i];
-    if (isFinite(v)) {
-      const stretched = Math.max(0, Math.min(255, (v - minVal) * scale));
-      const g = invert ? 255 - stretched : stretched;
-      px[pi] = g;
-      px[pi + 1] = g;
-      px[pi + 2] = g;
-      // Alpha tracks brightness rather than being flat, which turns a stack from
-      // "average everything" into roughly "brightest wins": bright cloud stays
-      // opaque and dominates, while dark pixels (clear sky, and the whole visible
-      // band at night) go transparent and let the layers beneath show through.
-      // Scaled so the brightest pixel still tops out at the previous flat value.
-      px[pi + 3] = (g * SAT_MAX_ALPHA) / 255;
-    } else {
+    if (!isFinite(v) || v === 0) {
       px[pi] = px[pi + 1] = px[pi + 2] = px[pi + 3] = 0;
+      continue;
     }
+    const grey = Math.pow(Math.min(1, ((v - 1) / 254) * tone.gain), tone.gamma) * 255;
+    const g = invert ? 255 - grey : grey;
+    px[pi] = g;
+    px[pi + 1] = g;
+    px[pi + 2] = g;
+    px[pi + 3] = (g * maxAlpha) / 255;
   }
 
   ctx.putImageData(imageData, 0, 0);
-  const outCanvas = document.createElement("canvas");
-  outCanvas.width = SAT_TEXTURE_SIZE;
-  outCanvas.height = SAT_TEXTURE_SIZE;
-  const outCtx = outCanvas.getContext("2d")!;
-  outCtx.drawImage(canvas, 0, 0, width, height, 0, 0, SAT_TEXTURE_SIZE, SAT_TEXTURE_SIZE);
   // WebP keeps the alpha channel (unlike JPEG) but compresses far better than the
-  // default PNG (~4x smaller here), so each cached entry is a fraction of the size.
-  // Falls back to the browser default if WebP isn't supported (a PNG data URL).
-  const imageDataUrl = outCanvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
-  return { imageDataUrl, bounds: [minLon, minLat, maxLon, maxLat] };
+  // default PNG (~4x smaller here). Falls back to the browser default if WebP isn't
+  // supported (a PNG data URL).
+  const out = document.createElement("canvas");
+  drawBlurred(out, canvas, width, height);
+  return out.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
+}
+
+export async function decodeTif(
+  buf: ArrayBuffer,
+  invert = false,
+  maxAlpha: number = SAT_MAX_ALPHA,
+  tone: ToneCurve = LINEAR_TONE
+): Promise<TifLayerData> {
+  const image = await (await fromArrayBuffer(buf)).getImage();
+  const data = await image.readRasters();
+  const band = (Array.isArray(data) ? data[0] : data) as ArrayLike<number>;
+  // `missing_channels` is set by the API only on partial composite frames; empty/absent
+  // otherwise. Surfaced so the UI can flag a composite built from fewer than its members.
+  const meta = (await image.getGDALMetadata()) as { missing_channels?: string } | null;
+  const missingChannels = meta?.missing_channels
+    ? meta.missing_channels.split(",").filter(Boolean)
+    : undefined;
+  return {
+    imageDataUrl: bandToImage(band, image.getWidth(), image.getHeight(), invert, maxAlpha, tone),
+    bounds: await readBounds(image),
+    missingChannels: missingChannels && missingChannels.length ? missingChannels : undefined
+  };
 }
 
 export async function fetchAndDecodeSatelliteTif(
@@ -417,7 +408,188 @@ export async function fetchAndDecodeSatelliteTif(
 ): Promise<TifLayerData | null> {
   const buf = await fetchSatelliteTif(channel, timestamp, latest, scope);
   if (!buf) return null;
-  return decodeTif(buf, shouldInvertChannel(channel));
+  return decodeTif(buf, shouldInvertChannel(channel), SAT_RENDER_MAX_ALPHA, toneFor(channel));
+}
+
+export const stackKey = (iso: string): string =>
+  new Date(iso).toISOString().slice(0, 19).replace(/[-:]/g, "").replace("T", "_");
+
+export type SatelliteStack = {
+  channel: SatelliteChannel;
+  bands: Record<string, ArrayLike<number>>;
+  // Per-slot composite degradation (the band-level `missing_channels` tag the API writes on the
+  // stack). Only slots that were partial appear here; absent keys mean a complete frame.
+  missing: Record<string, string[]>;
+  width: number;
+  height: number;
+  bounds: TifLayerData["bounds"];
+};
+
+export async function fetchSatelliteStack(
+  channel: SatelliteChannel
+): Promise<SatelliteStack | null> {
+  await acquireRequestSlot();
+  let buf: ArrayBuffer | null;
+  try {
+    buf = await requestTifFromRoute(
+      `${API_PREFIX}/satellite/stack?channel=${encodeURIComponent(channel)}`
+    );
+  } finally {
+    releaseRequestSlot();
+  }
+  if (!buf) return null;
+
+  const image = await (await fromArrayBuffer(buf)).getImage();
+  const data = await image.readRasters();
+  const bands = (Array.isArray(data) ? data : [data]) as ArrayLike<number>[];
+  const meta = (await image.getGDALMetadata()) as { timestamps?: string } | null;
+  const slots = meta?.timestamps ? meta.timestamps.split(",") : [];
+  const frames: Record<string, ArrayLike<number>> = {};
+  const missing: Record<string, string[]> = {};
+  for (let i = 0; i < slots.length; i++) {
+    const ts = slots[i];
+    if (!bands[i]) continue;
+    frames[ts] = bands[i];
+    // Per-band tag (sample index i): the composite members this slot was blended without.
+    // Only present on partial slots, so most reads here come back empty.
+    const bandMeta = (await image.getGDALMetadata(i)) as { missing_channels?: string } | null;
+    const miss = bandMeta?.missing_channels
+      ? bandMeta.missing_channels.split(",").filter(Boolean)
+      : [];
+    if (miss.length) missing[ts] = miss;
+  }
+  return {
+    channel,
+    bands: frames,
+    missing,
+    width: image.getWidth(),
+    height: image.getHeight(),
+    bounds: await readBounds(image)
+  };
+}
+
+const stackLayerId = (ch: SatelliteChannel) => `satellite-stack-layer-${ch}`;
+const stackSourceId = (ch: SatelliteChannel) => `satellite-stack-source-${ch}`;
+
+type StackCanvas = {
+  canvas: HTMLCanvasElement; // what Mapbox samples: the blurred frame
+  scratch: HTMLCanvasElement; // native-resolution pixels, refilled per slot
+  ctx: CanvasRenderingContext2D; // of `scratch`
+  image: ImageData;
+  pixels: Uint32Array;
+  lut: Uint32Array;
+};
+const stackCanvases = new WeakMap<mapboxgl.Map, Map<string, StackCanvas>>();
+
+function stackLut(channel: SatelliteChannel): Uint32Array {
+  const tone = toneFor(channel);
+  const invert = shouldInvertChannel(channel);
+  const lut = new Uint32Array(256); // index 0 = nodata -> fully transparent (0)
+  for (let v = 1; v < 256; v++) {
+    const grey = Math.pow(Math.min(1, ((v - 1) / 254) * tone.gain), tone.gamma) * 255;
+    const g = Math.round(invert ? 255 - grey : grey);
+    const a = Math.round((g * SAT_RENDER_MAX_ALPHA) / 255);
+    lut[v] = ((a << 24) | (g << 16) | (g << 8) | g) >>> 0; // little-endian RGBA
+  }
+  return lut;
+}
+
+export function removeStackLayer(map: mapboxgl.Map, channel: SatelliteChannel): void {
+  if (map.getLayer(stackLayerId(channel))) map.removeLayer(stackLayerId(channel));
+  if (map.getSource(stackSourceId(channel))) map.removeSource(stackSourceId(channel));
+  stackCanvases.get(map)?.delete(channel);
+}
+
+export function hideStackLayer(map: mapboxgl.Map, channel: SatelliteChannel): void {
+  if (map.getLayer(stackLayerId(channel))) {
+    map.setLayoutProperty(stackLayerId(channel), "visibility", "none");
+  }
+}
+
+// Draw one slot of the stack onto the channel's single stack layer (creating it on first use)
+// and show it. Returns false if the stack has no such slot.
+export function showStackFrame(
+  map: mapboxgl.Map,
+  stack: SatelliteStack,
+  key: string,
+  beforeId?: string
+): boolean {
+  const band = stack.bands[key];
+  if (!band) return false;
+  const channel = stack.channel;
+  const sourceId = stackSourceId(channel);
+  const layerId = stackLayerId(channel);
+
+  let perMap = stackCanvases.get(map);
+  if (!perMap) {
+    perMap = new Map();
+    stackCanvases.set(map, perMap);
+  }
+  let sc = perMap.get(channel);
+  if (sc && (sc.scratch.width !== stack.width || sc.scratch.height !== stack.height)) {
+    removeStackLayer(map, channel);
+    sc = undefined;
+  }
+  if (!sc || !map.getSource(sourceId)) {
+    const canvas = document.createElement("canvas");
+    canvas.width = stack.width;
+    canvas.height = stack.height;
+    const scratch = document.createElement("canvas");
+    scratch.width = stack.width;
+    scratch.height = stack.height;
+    const ctx = scratch.getContext("2d")!;
+    const image = ctx.createImageData(stack.width, stack.height);
+    sc = {
+      canvas,
+      scratch,
+      ctx,
+      image,
+      pixels: new Uint32Array(image.data.buffer),
+      lut: stackLut(channel)
+    };
+    perMap.set(channel, sc);
+    const [minLon, minLat, maxLon, maxLat] = stack.bounds;
+    // `canvas` is a valid Mapbox source type that the bundled typings omit.
+    map.addSource(sourceId, {
+      type: "canvas",
+      canvas,
+      animate: false,
+      coordinates: [
+        [minLon, maxLat],
+        [maxLon, maxLat],
+        [maxLon, minLat],
+        [minLon, minLat]
+      ]
+    } as unknown as mapboxgl.AnySourceData);
+    map.addLayer(
+      {
+        id: layerId,
+        type: "raster",
+        source: sourceId,
+        maxzoom: CLOUD_FADE_END_ZOOM,
+        layout: { visibility: "none" },
+        paint: {
+          "raster-opacity": satOpacityExpression(channel),
+          "raster-contrast": 0.3,
+          "raster-opacity-transition": { duration: 0 },
+          "raster-fade-duration": 1
+        }
+      },
+      beforeId && map.getLayer(beforeId) ? beforeId : undefined
+    );
+  }
+
+  const { lut, pixels } = sc;
+  for (let i = 0; i < band.length; i++) pixels[i] = lut[band[i]];
+  sc.ctx.putImageData(sc.image, 0, 0);
+  drawBlurred(sc.canvas, sc.scratch, stack.width, stack.height);
+  // A static (animate: false) canvas source only re-uploads its texture while "playing";
+  // play() then pause() uploads the current canvas exactly once.
+  const src = map.getSource(sourceId) as mapboxgl.CanvasSource;
+  src.play();
+  src.pause();
+  map.setLayoutProperty(layerId, "visibility", "visible");
+  return true;
 }
 
 export function applyTifLayerToMap(
@@ -449,9 +621,16 @@ export function applyTifLayerToMap(
 
   const existingSource = map.getSource(sourceId) as mapboxgl.ImageSource | undefined;
   if (existingSource) {
-    existingSource.updateImage({ url: imageDataUrl, coordinates: coords });
+    existingSource.updateImage({
+      url: imageDataUrl,
+      coordinates: coords
+    });
   } else {
-    map.addSource(sourceId, { type: "image", url: imageDataUrl, coordinates: coords });
+    map.addSource(sourceId, {
+      type: "image",
+      url: imageDataUrl,
+      coordinates: coords
+    });
   }
 
   if (!map.getLayer(layerId)) {
@@ -466,27 +645,28 @@ export function applyTifLayerToMap(
         maxzoom: CLOUD_FADE_END_ZOOM,
         // Hidden layers use layout visibility rather than zero opacity: Mapbox
         // skips a "none" layer entirely, whereas an opacity-0 layer is still drawn
-        // every frame — which matters once a composite stacks several of them.
+        // every frame.
         layout: { visibility: "none" },
         paint: {
-          // Not a flat value any more: fades out as the map zooms in. The ramp is a zoom
-          // expression rather than anything we drive, so it tracks a pinch continuously.
-          "raster-opacity": satOpacityExpression(),
+          // Fade out as the map zooms in.
+          "raster-opacity": satOpacityExpression(channel),
+          "raster-contrast": 0.3,
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
-          "raster-fade-duration": 0
+          "raster-fade-duration": 1
         }
       },
       // Insert beneath the forecast/PV layers so clouds sit under them.
       beforeId && map.getLayer(beforeId) ? beforeId : undefined
     );
+  } else {
+    map.setPaintProperty(layerId, "raster-contrast", 0.3);
   }
 
   if (currentSwapToken(map, layerId) === token) {
     setSatelliteLayerVisibility(map, isVisible, channel);
   }
 }
-
 export function setSatelliteLayerVisibility(
   map: mapboxgl.Map,
   isVisible: boolean,
@@ -504,21 +684,17 @@ export function setVisibleSatelliteChannels(map: mapboxgl.Map, visible: Satellit
   SATELLITE_CHANNELS.forEach((ch) => setSatelliteLayerVisibility(map, visibleSet.has(ch), ch));
 }
 
-// Restack the given channels, bottom-most first. Layers are created lazily — the
-// first time a composite containing them is selected — so creation order depends
-// on which selections the user happened to visit and can't be relied on. Moving
-// each layer in turn to just below the anchor reproduces the intended order
-// exactly, whatever the history. Cheap: a style reorder over at most a few layers.
-export function orderSatelliteLayers(
+// Move the satellite layer to just below the anchor. Layers are created lazily, and
+// applyTifLayerToMap only sets `beforeId` at creation time, so after a style reload —
+// or when the anchor layer is added after the satellite one — the layer can drift
+// above the forecast/PV layers. Re-asserting its position keeps the cloud beneath
+// them. A missing anchor means "move to the top of the stack". Cheap: one reorder.
+export function positionSatelliteLayer(
   map: mapboxgl.Map,
-  channels: SatelliteChannel[],
+  channel: SatelliteChannel,
   beforeId?: string
 ): void {
-  // A missing anchor means "move to the top of the stack", which still gives the
-  // right relative order when iterating bottom-most first.
   const anchor = beforeId && map.getLayer(beforeId) ? beforeId : undefined;
-  channels.forEach((ch) => {
-    const layerId = satLayerId(ch);
-    if (map.getLayer(layerId)) map.moveLayer(layerId, anchor);
-  });
+  const layerId = satLayerId(channel);
+  if (map.getLayer(layerId)) map.moveLayer(layerId, anchor);
 }
