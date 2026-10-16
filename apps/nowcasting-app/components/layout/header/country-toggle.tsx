@@ -235,6 +235,7 @@ const CountryOption = React.forwardRef<
         ref={ref}
         type="button"
         role="radio"
+        data-cy={`country-toggle-${country.code}`}
         disabled={!selectable}
         aria-checked={focused}
         tabIndex={focused ? 0 : -1}

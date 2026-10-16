@@ -1,0 +1,42 @@
+[
+  {
+    "name": "50hertz",
+    "type": "tso",
+    "capacity_kW": 15359000,
+    "centroid": {
+      "lat": 52.5,
+      "lng": 13.5
+    },
+    "metadata": {}
+  },
+  {
+    "name": "amprion",
+    "type": "tso",
+    "capacity_kW": 13532069,
+    "centroid": {
+      "lat": 51.5,
+      "lng": 7.5
+    },
+    "metadata": {}
+  },
+  {
+    "name": "tennet",
+    "type": "tso",
+    "capacity_kW": 21514000,
+    "centroid": {
+      "lat": 51,
+      "lng": 10.5
+    },
+    "metadata": {}
+  },
+  {
+    "name": "transnetbw",
+    "type": "tso",
+    "capacity_kW": 7864000,
+    "centroid": {
+      "lat": 48.5,
+      "lng": 9
+    },
+    "metadata": {}
+  }
+]
