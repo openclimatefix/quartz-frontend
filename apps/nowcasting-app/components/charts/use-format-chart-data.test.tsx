@@ -961,10 +961,10 @@ describe("the trial-expired teaser (mockValuesGenerator)", () => {
     }
     return points;
   };
-  // Yesterday in full, then today up to 10:00 at 80% of yesterday.
+  // Yesterday in full, then today up to and including "now" (10:30) at 80% of yesterday.
   const history = (): [string, number][] => [
     ...dayCurve("2025-06-30T00:00:00Z", "2025-06-30T23:30:00Z"),
-    ...dayCurve("2025-07-01T00:00:00Z", BEFORE_BST, 0.8)
+    ...dayCurve("2025-07-01T00:00:00Z", BOUNDARY_BST, 0.8)
   ];
   const withTeaser = (overrides: Partial<Props> = {}) =>
     baseProps({
@@ -974,7 +974,7 @@ describe("the trial-expired teaser (mockValuesGenerator)", () => {
     });
   const teaser = (data: ChartData[]) =>
     data
-      .filter((d) => d.formattedDate >= "2025-07-01T10:30")
+      .filter((d) => d.formattedDate > "2025-07-01T10:30")
       .sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
 
   beforeEach(() => {
@@ -988,15 +988,35 @@ describe("the trial-expired teaser (mockValuesGenerator)", () => {
   });
 
   test("also extends the regional (gsp) chart", () => {
-    expect(teaser(run(withTeaser({ gsp: true })))).toHaveLength(72);
+    expect(teaser(run(withTeaser({ gsp: true })))).toHaveLength(71);
   });
 
   test("runs 36 hours of slots from now, joining the past and future lines there", () => {
     const rows = teaser(run(withTeaser()));
-    expect(rows).toHaveLength(72);
-    expect(rows[0].formattedDate).toBe("2025-07-01T10:30");
-    expect(rows[71].formattedDate).toBe("2025-07-02T22:00");
-    expect(rows[0].PAST_FORECAST).toBe(rows[0].FORECAST);
+    expect(rows).toHaveLength(71);
+    expect(rows[0].formattedDate).toBe("2025-07-01T11:00");
+    expect(rows[70].formattedDate).toBe("2025-07-02T22:00");
+    // The real "now" row carries both keys, so the past and future lines join there.
+    const now = at(run(withTeaser()), "2025-07-01T10:30");
+    expect(now.PAST_FORECAST).toBe(now.FORECAST);
+  });
+
+  test("keeps a real reading at now: the teaser only starts after it", () => {
+    const withNow: [string, number][] = [...history(), [BOUNDARY_BST, 777]];
+    const data = run(
+      withTeaser({
+        forecastSeries: ts(withNow, { "10": 90, "90": 110 }),
+        generationSeries: [{ key: "GENERATION", series: ts([[BOUNDARY_BST, 500]]) }]
+      })
+    );
+    const now = at(data, "2025-07-01T10:30");
+    expect(now.PAST_FORECAST).toBe(777);
+    expect(now.FORECAST).toBe(777);
+    expect(now.GENERATION).toBe(500);
+    const next = at(data, "2025-07-01T11:00");
+    expect(next.FORECAST).toBeGreaterThan(0);
+    expect(next.PAST_FORECAST).toBeUndefined();
+    expect(next.GENERATION).toBeUndefined();
   });
 
   test("repeats yesterday's shape scaled to today's pace, on both days", () => {
@@ -1034,10 +1054,10 @@ describe("the trial-expired teaser (mockValuesGenerator)", () => {
 
   test("leaves the real curve from its last reading, then fades back to the plain repeat", () => {
     const points = history();
-    points[points.length - 1] = [BEFORE_BST, points[points.length - 1][1] * 1.1];
+    points[points.length - 1] = [BOUNDARY_BST, points[points.length - 1][1] * 1.1];
     const data = run(withTeaser({ forecastSeries: ts(points) }));
-    const last = at(data, BEFORE_BST.slice(0, 16)).PAST_FORECAST;
-    expect(at(data, "2025-07-01T10:30").FORECAST / last).toBeLessThan(1.25);
+    const last = at(data, BOUNDARY_BST.slice(0, 16)).PAST_FORECAST;
+    expect(at(data, "2025-07-01T11:00").FORECAST / last).toBeLessThan(1.25);
     expect(at(data, "2025-07-02T21:00").FORECAST).toBe(at(data, "2025-07-01T21:00").FORECAST);
   });
 });

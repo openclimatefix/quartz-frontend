@@ -197,8 +197,9 @@ export const mockValuesGenerator = (
   const latestMs = Date.parse(`${pairs[0].point.formattedDate}:00Z`);
   const gap = pairs[0].point.PAST_FORECAST! / (pairs[0].before.PAST_FORECAST! * scale);
 
-  // Starts on the "now" slot: the LIVE and cursor lines need a point there to render.
-  for (let minutes = 0; minutes < TEASER_HORIZON_MINUTES; minutes += cadenceMinutes) {
+  // Starts one slot after "now": the real "now" row is left untouched, and its own FORECAST
+  // (written alongside PAST_FORECAST at now) is where the teaser line picks up.
+  for (let minutes = cadenceMinutes; minutes < TEASER_HORIZON_MINUTES; minutes += cadenceMinutes) {
     const slot = now.plus({ minutes });
     // Whole days back to one already past: 24h for the first day, 48h for the second.
     const source = dayBefore(
@@ -223,7 +224,6 @@ export const mockValuesGenerator = (
         peak * TEASER_FLOOR_SHARE
       );
       point[futureKey] = carried;
-      if (isPastKey && minutes === 0) point[key] = carried; // join the past and future lines
     }
     chartMap[slot.toISO({ suppressMilliseconds: true }) as string] = point as unknown as ChartData;
   }
