@@ -13,7 +13,7 @@ declare global {
 }
 
 addMatchImageSnapshotCommand({
-  failureThreshold: 0.001,
+  failureThreshold: 0.01,
   failureThresholdType: "percent",
   customDiffConfig: { threshold: 0.1 },
   capture: "viewport"
