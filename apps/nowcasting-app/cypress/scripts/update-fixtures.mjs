@@ -44,92 +44,113 @@ const urls = [
   ["v1", "/GB/solar/generation-sources"],
   ["v1", "/GB/solar/regions?region_type=national"],
   ["v1", "/GB/solar/regions?region_type=gsp"],
-  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}`],
-  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model=blend`],
-  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model=pvnet_ecmwf`],
-  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model=pvnet_ukv`],
-  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model=pvnet_sat`],
-  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240`],
-  ["v1", "/GB/solar/regions/national/forecast/last-updated"],
+  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&adjusted=true`],
+  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model_name=blend&adjusted=true`],
+  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model_name=ecmwf&adjusted=true`],
+  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model_name=mo&adjusted=true`],
+  ["v1", `/GB/solar/regions/national/forecast?start_utc=${start}&model_name=sat_8h&adjusted=true`],
+  [
+    "v1",
+    `/GB/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240&adjusted=true`
+  ],
+  ["v1", "/GB/solar/regions/national/forecast/last-updated?adjusted=true"],
   // Generation ends at "now": the header shows the latest reading, which must match the clock.
   [
     "v1",
-    `/GB/solar/regions/national/generation?observer=pvlive_in_day&start_utc=${start}&end_utc=${nowUtc}`
+    `/GB/solar/regions/national/generation?observer_name=pvlive_in_day&start_utc=${start}&end_utc=${nowUtc}`
   ],
   [
     "v1",
-    `/GB/solar/regions/national/generation?observer=pvlive_day_after&start_utc=${start}&end_utc=${nowUtc}`
+    `/GB/solar/regions/national/generation?observer_name=pvlive_day_after&start_utc=${start}&end_utc=${nowUtc}`
   ],
-  ["v1", `/GB/solar/forecasts/snapshot?region_type=gsp&time_utc=${nowUtc}`],
+  ["v1", `/GB/solar/forecasts/snapshot?region_type=gsp&time_utc=${nowUtc}&adjusted=true`],
   ["v1", "/GB/solar/forecasts/period?region_type=gsp"],
-  ["v1", `/GB/solar/generation/snapshot?region_type=gsp&observer=pvlive_in_day&time_utc=${nowUtc}`],
   [
     "v1",
-    `/GB/solar/generation/snapshot?region_type=gsp&observer=pvlive_day_after&time_utc=${nowUtc}`
+    `/GB/solar/generation/snapshot?region_type=gsp&observer_name=pvlive_in_day&time_utc=${nowUtc}`
   ],
-  ["v1", "/GB/solar/generation/period?region_type=gsp&observer=pvlive_in_day"],
-  ["v1", "/GB/solar/generation/period?region_type=gsp&observer=pvlive_day_after"],
+  [
+    "v1",
+    `/GB/solar/generation/snapshot?region_type=gsp&observer_name=pvlive_day_after&time_utc=${nowUtc}`
+  ],
+  ["v1", "/GB/solar/generation/period?region_type=gsp&observer_name=pvlive_in_day"],
+  ["v1", "/GB/solar/generation/period?region_type=gsp&observer_name=pvlive_day_after"],
 
-  ["v1", `/GB/solar/regions/${gsp}/forecast?start_utc=${start}`],
-  ["v1", `/GB/solar/regions/${gsp}/forecast?start_utc=${start}&horizon_minutes=240`],
+  ["v1", `/GB/solar/regions/${gsp}/forecast?start_utc=${start}&adjusted=true`],
+  ["v1", `/GB/solar/regions/${gsp}/forecast?start_utc=${start}&horizon_minutes=240&adjusted=true`],
   [
     "v1",
-    `/GB/solar/regions/${gsp}/generation?observer=pvlive_in_day&start_utc=${start}&end_utc=${nowUtc}`
+    `/GB/solar/regions/${gsp}/generation?observer_name=pvlive_in_day&start_utc=${start}&end_utc=${nowUtc}`
   ],
   [
     "v1",
-    `/GB/solar/regions/${gsp}/generation?observer=pvlive_day_after&start_utc=${start}&end_utc=${nowUtc}`
+    `/GB/solar/regions/${gsp}/generation?observer_name=pvlive_day_after&start_utc=${start}&end_utc=${nowUtc}`
   ],
 
   ["v1", "/NL/solar/region-types"],
   ["v1", "/NL/solar/generation-sources"],
   ["v1", "/NL/solar/regions?region_type=national"],
   ["v1", "/NL/solar/regions?region_type=province"],
-  ["v1", `/NL/solar/regions/national/forecast?start_utc=${start}`],
-  ["v1", `/NL/solar/regions/national/forecast?start_utc=${start}&model=blend`],
-  ["v1", `/NL/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240`],
-  ["v1", "/NL/solar/regions/national/forecast/last-updated"],
+  ["v1", `/NL/solar/regions/national/forecast?start_utc=${start}&adjusted=true`],
+  ["v1", `/NL/solar/regions/national/forecast?start_utc=${start}&model_name=blend&adjusted=true`],
   [
     "v1",
-    `/NL/solar/regions/national/generation?observer=ned_nl&start_utc=${start}&end_utc=${nowUtc}`
+    `/NL/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240&adjusted=true`
   ],
-  ["v1", `/NL/solar/forecasts/snapshot?region_type=province&time_utc=${nowUtc}`],
-  ["v1", "/NL/solar/forecasts/period?region_type=province"],
-  ["v1", `/NL/solar/generation/snapshot?region_type=province&observer=ned_nl&time_utc=${nowUtc}`],
-  ["v1", "/NL/solar/generation/period?region_type=province&observer=ned_nl"],
-
-  ["v1", `/NL/solar/regions/${province}/forecast?start_utc=${start}`],
-  ["v1", `/NL/solar/regions/${province}/forecast?start_utc=${start}&horizon_minutes=240`],
+  ["v1", "/NL/solar/regions/national/forecast/last-updated?adjusted=true"],
   [
     "v1",
-    `/NL/solar/regions/${province}/generation?observer=ned_nl&start_utc=${start}&end_utc=${nowUtc}`
+    `/NL/solar/regions/national/generation?observer_name=ned_nl&start_utc=${start}&end_utc=${nowUtc}`
+  ],
+  ["v1", `/NL/solar/forecasts/snapshot?region_type=province&time_utc=${nowUtc}&adjusted=true`],
+  ["v1", "/NL/solar/forecasts/period?region_type=province"],
+  [
+    "v1",
+    `/NL/solar/generation/snapshot?region_type=province&observer_name=ned_nl&time_utc=${nowUtc}`
+  ],
+  ["v1", "/NL/solar/generation/period?region_type=province&observer_name=ned_nl"],
+
+  ["v1", `/NL/solar/regions/${province}/forecast?start_utc=${start}&adjusted=true`],
+  [
+    "v1",
+    `/NL/solar/regions/${province}/forecast?start_utc=${start}&horizon_minutes=240&adjusted=true`
+  ],
+  [
+    "v1",
+    `/NL/solar/regions/${province}/generation?observer_name=ned_nl&start_utc=${start}&end_utc=${nowUtc}`
   ],
 
   ["v1", "/DE/solar/region-types"],
   ["v1", "/DE/solar/generation-sources"],
   ["v1", "/DE/solar/regions?region_type=national"],
   ["v1", "/DE/solar/regions?region_type=tso"],
-  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}`],
-  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=blend`],
-  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=ecmwf`],
-  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=mo`],
-  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model=sat_8h`],
-  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240`],
-  ["v1", "/DE/solar/regions/national/forecast/last-updated"],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&adjusted=true`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model_name=blend&adjusted=true`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model_name=ecmwf&adjusted=true`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model_name=mo&adjusted=true`],
+  ["v1", `/DE/solar/regions/national/forecast?start_utc=${start}&model_name=sat_8h&adjusted=true`],
   [
     "v1",
-    `/DE/solar/regions/national/generation?observer=entsoe_de&start_utc=${start}&end_utc=${nowUtc}`
+    `/DE/solar/regions/national/forecast?start_utc=${start}&horizon_minutes=240&adjusted=true`
   ],
-  ["v1", `/DE/solar/forecasts/snapshot?region_type=tso&time_utc=${nowUtc}`],
-  ["v1", "/DE/solar/forecasts/period?region_type=tso"],
-  ["v1", `/DE/solar/generation/snapshot?region_type=tso&observer=entsoe_de&time_utc=${nowUtc}`],
-  ["v1", "/DE/solar/generation/period?region_type=tso&observer=entsoe_de"],
-
-  ["v1", `/DE/solar/regions/${tso}/forecast?start_utc=${start}`],
-  ["v1", `/DE/solar/regions/${tso}/forecast?start_utc=${start}&horizon_minutes=240`],
+  ["v1", "/DE/solar/regions/national/forecast/last-updated?adjusted=true"],
   [
     "v1",
-    `/DE/solar/regions/${tso}/generation?observer=entsoe_de&start_utc=${start}&end_utc=${nowUtc}`
+    `/DE/solar/regions/national/generation?observer_name=entsoe_de&start_utc=${start}&end_utc=${nowUtc}`
+  ],
+  ["v1", `/DE/solar/forecasts/snapshot?region_type=tso&time_utc=${nowUtc}&adjusted=true`],
+  ["v1", "/DE/solar/forecasts/period?region_type=tso"],
+  [
+    "v1",
+    `/DE/solar/generation/snapshot?region_type=tso&observer_name=entsoe_de&time_utc=${nowUtc}`
+  ],
+  ["v1", "/DE/solar/generation/period?region_type=tso&observer_name=entsoe_de"],
+
+  ["v1", `/DE/solar/regions/${tso}/forecast?start_utc=${start}&adjusted=true`],
+  ["v1", `/DE/solar/regions/${tso}/forecast?start_utc=${start}&horizon_minutes=240&adjusted=true`],
+  [
+    "v1",
+    `/DE/solar/regions/${tso}/generation?observer_name=entsoe_de&start_utc=${start}&end_utc=${nowUtc}`
   ],
 
   ["v0", "/solar/GB/status?UI=true"],
