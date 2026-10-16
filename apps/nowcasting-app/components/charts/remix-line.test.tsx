@@ -94,7 +94,7 @@ describe("RemixLine tooltip", () => {
 
     test("readings of 10 GW and above keep one decimal place", () => {
       const tooltip = renderTooltip(true);
-      expect(rowValue(tooltip, "Current")).toBe("21.4");
+      expect(rowValue(tooltip, "OCF")).toBe("21.4");
       expect(rowValue(tooltip, "PV Live Actual")).toBe("21.1");
       expect(rowValue(tooltip, "OCF P10")).toBe("18.2");
       expect(rowValue(tooltip, "OCF P90")).toBe("24.6");
@@ -106,7 +106,7 @@ describe("RemixLine tooltip", () => {
       const tooltip = renderTooltip(false);
       expect(tooltip.getByText("MW")).toBeTruthy();
       expect(rowValue(tooltip, "Delta")).toBe("-350");
-      expect(rowValue(tooltip, "Current")).toBe("21,437");
+      expect(rowValue(tooltip, "OCF")).toBe("21,437");
       expect(rowValue(tooltip, "OCF P90")).toBe("24,567");
     });
   });

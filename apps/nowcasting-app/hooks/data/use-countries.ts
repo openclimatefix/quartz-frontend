@@ -3,7 +3,12 @@ import { useMemo } from "react";
 
 import { getCountryConfig } from "../../config/countries";
 import useGlobalState from "../../components/helpers/globalState";
-import { readCountryClaim, isEntitled } from "../../lib/api/auth/entitlement";
+import {
+  readEntitlementClaim,
+  isEntitled,
+  isOcfAdmin,
+  isTrialUser
+} from "../../lib/api/auth/entitlement";
 import * as queries from "../../lib/api/v1/queries";
 import { queryKey } from "../../lib/api/v1/queries";
 import { normaliseCountries } from "../../lib/domain/normalise";
@@ -53,7 +58,7 @@ export const useCountries = (): UseCountriesResult => {
     manifestSwrOptions
   );
 
-  const claim = useMemo(() => readCountryClaim(user), [user]);
+  const claim = useMemo(() => readEntitlementClaim(user), [user]);
 
   const countries = useMemo<CountryListing[]>(
     () =>
@@ -89,6 +94,26 @@ export const useEntitledCountries = (): UseCountriesResult => {
 };
 
 /**
+ * Whether the signed-in user is OCF staff (`isOcfAdmin`). Only staff choose which countries
+ * are enabled; for everyone else the enabled set is the entitled set. `false` while the user
+ * is still loading, so nothing admin-only appears before the claim is known.
+ */
+export const useIsOcfAdmin = (): boolean => {
+  const { user } = useUser();
+  return useMemo(() => isOcfAdmin(user), [user]);
+};
+
+/**
+ * Whether the signed-in user is on a trial (`trial_ends_at` on the session user). Sits beside
+ * entitlement so components explaining a missing country need not read the session themselves.
+ * `false` while the user is loading.
+ */
+export const useIsTrialUser = (): boolean => {
+  const { user } = useUser();
+  return useMemo(() => isTrialUser(user), [user]);
+};
+
+/**
  * The country the chart, the headline figures, the level selector and the CSV follow.
  *
  * One of the two halves `useCurrentCountry` split into (`docs/phase6-layout-contract.md`
@@ -103,8 +128,17 @@ export const useEntitledCountries = (): UseCountriesResult => {
  * The value is always a valid, enabled code: `getValidatedFocusedCountry` falls the cookie
  * back to `DEFAULT_COUNTRY_CODE` on load, and `setFocusedCountry` normalises whatever it is
  * given and enables it if it was not already.
+ *
+ * On `/sites` the answer is always GB, whatever the cookie says. Sites is GB-only (its v0
+ * backend ignores the scope) and has no country switcher, so a user whose dashboard was left
+ * on NL must not arrive at a GB sites map formatted in Dutch time. Pinned here rather than by
+ * writing focus, so the user's dashboard choice survives the visit untouched.
  */
-export const useFocusedCountry = (): string => useGlobalState("focusedCountry")[0];
+export const useFocusedCountry = (): string => {
+  const [focusedCountry] = useGlobalState("focusedCountry");
+  const [isSitesChart] = useGlobalState("isSitesChart");
+  return isSitesChart ? DEFAULT_COUNTRY_CODE : focusedCountry;
+};
 
 /**
  * Every country currently drawn on the map, focused one included.

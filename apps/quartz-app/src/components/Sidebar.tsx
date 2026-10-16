@@ -20,6 +20,7 @@ import MiniCard from "./sidebar-components/mini-card";
 import { DateTime } from "luxon";
 import { FC } from "react";
 import { get } from "http";
+import { KWtoMW } from "@/src/helpers/formatHelpers";
 
 type SidebarProps = {
   title: string;
@@ -85,10 +86,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   let formattedSidebarData: {
     timestamp: number;
     time?: string;
-    solar_forecast?: number;
-    wind_forecast?: number;
-    solar_generation?: number;
-    wind_generation?: number;
+    solar_forecast?: number | null;
+    wind_forecast?: number | null;
+    solar_generation?: number | null;
+    wind_generation?: number | null;
   }[] = [];
 
   if (windForecastData?.values) {
@@ -96,11 +97,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
       if (existingData) {
-        existingData.wind_forecast = value.PowerKW / 1000;
+        existingData.wind_forecast = KWtoMW(value.PowerKW);
       } else {
         formattedSidebarData.push({
           timestamp,
-          wind_forecast: value.PowerKW / 1000
+          wind_forecast: KWtoMW(value.PowerKW)
         });
       }
     }
@@ -113,12 +114,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
       if (existingData) {
-        existingData.solar_forecast = value.PowerKW / 1000;
+        existingData.solar_forecast = KWtoMW(value.PowerKW);
       } else {
         formattedSidebarData.push({
           timestamp,
           time,
-          solar_forecast: value.PowerKW / 1000
+          solar_forecast: KWtoMW(value.PowerKW)
         });
       }
     }
@@ -129,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
       if (existingData && (existingData.solar_forecast || existingData.wind_forecast)) {
-        existingData.solar_generation = value.PowerKW / 1000;
+        existingData.solar_generation = KWtoMW(value.PowerKW);
       }
     }
   }
@@ -139,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       const timestamp = convertDatestampToEpoch(value.Time);
       const existingData = formattedSidebarData?.find((data) => data.timestamp === timestamp);
       if (existingData && (existingData.solar_forecast || existingData.wind_forecast)) {
-        existingData.wind_generation = value.PowerKW / 1000;
+        existingData.wind_generation = KWtoMW(value.PowerKW);
       }
     }
   }

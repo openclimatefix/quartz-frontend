@@ -33,12 +33,12 @@ const AggregationButton: React.FC<AggregationLevelProps> = ({
         <div
           className={classNames(
             computedClasses,
-            "text-content-muted hover:text-interactive transition-colors cursor-pointer flex items-center gap-3 justify-between",
+            "transition-colors cursor-pointer flex items-center gap-3 justify-between",
             isCurrentAggregation
-              ? `ease-in duration-100 text-interactive text-sm border-b-2 border-interactive-hover bg-surface-inset${
+              ? `ease-in duration-100 text-content text-sm border-b-2 border-interactive-hover bg-surface-inset${
                   autoSetting ? "" : " border-l-4"
                 }`
-              : "bg-ocf-delta-950 opacity-30 text-content hover:opacity-75 hover:bg-opacity-25 hover:bg-surface-inset"
+              : "bg-surface-panel text-content-muted hover:text-content hover:bg-surface-inset"
           )}
           onClick={() => setAggregationFunc(aggregation)}
         >
@@ -109,7 +109,7 @@ const Slider: React.FC<SliderProps> = ({ aggregation, setAggregation }) => {
             className={`flex items-center justify-between gap-1 px-4 py-2 font-semibold ease-in border-b-2 border-content-muted duration-100 text-sm cursor-pointer ${
               autoZoom
                 ? "text-content border-l-4 border-l-interactive-hover bg-surface-inset"
-                : "bg-ocf-delta-950 opacity-30 text-content hover:opacity-100 hover:bg-opacity-25 hover:bg-surface-inset"
+                : "bg-surface-panel text-content-muted hover:text-content hover:bg-surface-inset"
             }`}
             onClick={() => setAutoZoom(true)}
           >

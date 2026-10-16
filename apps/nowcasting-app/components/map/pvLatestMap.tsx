@@ -55,6 +55,69 @@ const orange = theme.extend.colors["ocf-orange"].DEFAULT;
  */
 const EMPTY_GEOMETRY: FeatureCollection = { type: "FeatureCollection", features: [] };
 
+/** Used for the top-edge test until the popup has been on screen once and can be measured. */
+export const POPUP_HEIGHT_ESTIMATE_PX = 160;
+
+/**
+ * Which corner of the popup sits on the pointer.
+ *
+ * The visible map is the strip between the floating chart's right edge and the map's right
+ * edge — the same area Reset Zoom frames into (`frame-countries.ts`). In the left half of that
+ * strip, or under the chart itself, the popup opens to the right of the pointer; in the right
+ * half, to the left, as it always has. Near the top it opens downwards so it stays on screen.
+ *
+ * Mapbox's own automatic anchor (option omitted) is not enough: it only flips when the popup
+ * would overflow the map container, and the container runs underneath the chart, so over the
+ * left of the strip it still opens up-left, under the chart.
+ *
+ * `chartRightPx` is in map-container pixels, 0 when there is no chart.
+ */
+export const popupAnchorFor = (
+  point: { x: number; y: number },
+  mapWidthPx: number,
+  chartRightPx: number,
+  popupHeightPx: number
+): mapboxgl.Anchor => {
+  const stripLeft = Math.max(0, Math.min(chartRightPx, mapWidthPx));
+  const side = point.x < (stripLeft + mapWidthPx) / 2 ? "left" : "right";
+  const edge = point.y < popupHeightPx ? "top" : "bottom";
+  return `${edge}-${side}`;
+};
+
+/** The chart's right edge in the map container's pixels, measured the way `map.tsx` does. */
+const chartRightInMap = (map: mapboxgl.Map): number => {
+  const chart = document.querySelector('[aria-label="Chart"]')?.getBoundingClientRect();
+  if (!chart || chart.width === 0) return 0;
+  return chart.right - map.getContainer().getBoundingClientRect().left;
+};
+
+/**
+ * Show the hover popup at the pointer without it ever being drawn unplaced.
+ *
+ * `trackPointer().addTo(map)` on a closed popup builds a fresh container with no transform
+ * (Mapbox only places a pointer-tracking popup from a mousemove it receives itself, and the
+ * listener it registers in `addTo` misses the event already being dispatched). The container
+ * sits at the map's top-left corner until the next mousemove. Placing it at `lngLat` first
+ * means `addTo` positions it, and `trackPointer` then takes over from that spot.
+ *
+ * An open popup that is already tracking is left alone: re-adding it would rebuild the
+ * container, unplaced again, on every call.
+ */
+export const showPopupAtPointer = (
+  popup: mapboxgl.Popup,
+  map: mapboxgl.Map,
+  lngLat: mapboxgl.LngLatLike,
+  anchor: mapboxgl.Anchor
+) => {
+  // Read by Mapbox on its next placement, which for a tracking popup is the next mousemove.
+  popup.options.anchor = anchor;
+  const tracking = popup.getElement()?.classList.contains("mapboxgl-popup-track-pointer");
+  if (popup.isOpen() && tracking) return;
+  popup.setLngLat(lngLat);
+  if (!popup.isOpen()) popup.addTo(map);
+  popup.trackPointer();
+};
+
 type PvLatestMapProps = {
   className?: string;
   activeUnit: ActiveUnit;
@@ -505,9 +568,15 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
           ${deltaSection}
         </div>`;
 
-          // Populate the popup and set its coordinates
-          // based on the feature found.
-          popup.setHTML(popupContent).trackPointer().addTo(map);
+          // Populate the popup, then place it at the pointer, opening away from the chart.
+          popup.setHTML(popupContent);
+          const anchor = popupAnchorFor(
+            e.point,
+            map.getContainer().clientWidth,
+            chartRightInMap(map),
+            popup.getElement()?.offsetHeight || POPUP_HEIGHT_ESTIMATE_PX
+          );
+          showPopupAtPointer(popup, map, e.lngLat, anchor);
         },
         32,
         {}
@@ -516,6 +585,8 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
 
       map.on("mouseleave", "latestPV-forecast", () => {
         map.getCanvas().style.cursor = "";
+        // A trailing throttled call would otherwise re-open the popup after the pointer left.
+        popupFunction.cancel();
         popup.remove();
       });
 

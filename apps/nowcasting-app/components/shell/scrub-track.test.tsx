@@ -395,7 +395,7 @@ describe("the live control", () => {
     setGlobalState("selectedISOTime", "2026-08-11T06:00:00.000Z");
     render(<ScrubTrack zone="UTC" />);
 
-    const live = screen.getByRole("button", { name: "Return to now" });
+    const live = screen.getByRole("button", { name: "Return to live" });
     expect(live).toHaveAttribute("aria-pressed", "false");
   });
 
@@ -405,7 +405,7 @@ describe("the live control", () => {
     render(<ScrubTrack zone="UTC" />);
 
     act(() => {
-      fireEvent.click(screen.getByRole("button", { name: "Return to now" }));
+      fireEvent.click(screen.getByRole("button", { name: "Return to live" }));
     });
 
     // Not compared against the `timeNow` global: `resetTime` derives now from the real clock,
@@ -424,6 +424,6 @@ describe("the live control", () => {
     // While live the cursor sits on the now mark, so the label lands on top of the handle and
     // hides the thing you would grab. It is a destination, and there is nowhere to go — so it
     // is not rendered at all. The tag's live dot is what says you are following.
-    expect(screen.queryByRole("button", { name: /now/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /live/i })).not.toBeInTheDocument();
   });
 });

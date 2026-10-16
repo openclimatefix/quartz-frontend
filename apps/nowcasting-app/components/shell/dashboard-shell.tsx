@@ -2,7 +2,7 @@ import { FC, ReactNode, useMemo, useState } from "react";
 
 import Header from "../layout/header";
 import DeprecatedDomainNotice from "../layout/deprecated-domain-notice";
-import DisplayPanel from "./display-panel";
+import DisplayPanel, { DisplayPanelContext } from "./display-panel";
 import FloatingChart from "./floating-chart";
 import MapControlDock from "./map-control-dock";
 import MapEncodingControls from "./map-encoding-controls";
@@ -77,60 +77,76 @@ const DashboardShell: FC<{
   );
   useCursorHotkeys(hotkeyLimits);
 
+  const [panelNudge, setPanelNudge] = useState(0);
+  const displayPanel = useMemo(
+    () => ({
+      open: displayPanelOpen,
+      setOpen: setDisplayPanelOpen,
+      attract: () => {
+        if (displayPanelOpen) setPanelNudge((count) => count + 1);
+        else setDisplayPanelOpen(true);
+      }
+    }),
+    [displayPanelOpen]
+  );
+
   return (
-    // No `pt-14` any more: the header carries no fill, so the map runs edge to edge behind it
+    <DisplayPanelContext.Provider value={displayPanel}>
+      {/* No `pt-14` any more: the header carries no fill, so the map runs edge to edge behind it
     // and the header's four controls float over the floor the way the control dock does. The
     // things that must NOT go under it inset themselves instead — the floating layer and the
     // display rail, both `top-14` below. `Header` still positions itself absolutely, so the
-    // pages which are not this one keep laying out unchanged.
-    <div
-      className={`relative flex min-h-0 flex-1 flex-col${
-        dashboardModeActive ? " @container dashboard-mode" : ""
-      }`}
-    >
-      <Header />
+    // pages which are not this one keep laying out unchanged. */}
+      <div
+        className={`relative flex min-h-0 flex-1 flex-col${
+          dashboardModeActive ? " @container dashboard-mode" : ""
+        }`}
+      >
+        <Header />
 
-      {/* `overflow-hidden` is structural, not cosmetic: the chart's resize handle hangs
+        {/* `overflow-hidden` is structural, not cosmetic: the chart's resize handle hangs
           outside its own box, which widens the document and gives the page a horizontal
           scrollbar unless the stage clips it. Clipping here rather than on `body` keeps the
           fix next to the thing that overflows. */}
-      <div className="relative min-h-0 flex-1 overflow-hidden">
-        <div className="absolute inset-0">{map}</div>
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+          <div className="absolute inset-0">{map}</div>
 
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0"
-          style={{ top: `calc(3.5rem - ${STAGE_GUTTER_PX}px)` }}
-        >
-          <FloatingChart
-            comparisonActive={comparisonActive}
-            panel={
-              dashboardModeActive ? undefined : (
-                <DisplayPanel
-                  attached
-                  open={displayPanelOpen}
-                  onToggle={() => setDisplayPanelOpen((open) => !open)}
-                />
-              )
-            }
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0"
+            style={{ top: `calc(3.5rem - ${STAGE_GUTTER_PX}px)` }}
           >
-            {chart}
-          </FloatingChart>
-          <MapControlDock>
-            <MapEncodingControls />
-            <MapExtrasDrawer />
-            {/* The map's own camera controls, which used to be Mapbox's and sat outside this
+            <FloatingChart
+              comparisonActive={comparisonActive}
+              panel={
+                dashboardModeActive ? undefined : (
+                  <DisplayPanel
+                    attached
+                    open={displayPanelOpen}
+                    nudge={panelNudge}
+                    onToggle={() => setDisplayPanelOpen((open) => !open)}
+                  />
+                )
+              }
+            >
+              {chart}
+            </FloatingChart>
+            <MapControlDock>
+              <MapEncodingControls />
+              <MapExtrasDrawer />
+              {/* The map's own camera controls, which used to be Mapbox's and sat outside this
                 column entirely — see `map-zoom-controls.tsx`. `mt-auto` on that group bottom-
                 anchors it and the zone stack together. */}
-            <MapZoomControls />
-            {/* The zone stack, which the cursor footer used to carry. Bottom of the column,
+              <MapZoomControls />
+              {/* The zone stack, which the cursor footer used to carry. Bottom of the column,
                 diagonally opposite the chart. */}
-            <ZoneStack />
-          </MapControlDock>
+              <ZoneStack />
+            </MapControlDock>
+          </div>
         </div>
-      </div>
 
-      <DeprecatedDomainNotice />
-    </div>
+        <DeprecatedDomainNotice />
+      </div>
+    </DisplayPanelContext.Provider>
   );
 };
 

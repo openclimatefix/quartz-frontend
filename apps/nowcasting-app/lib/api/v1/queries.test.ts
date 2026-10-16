@@ -112,7 +112,8 @@ describe("forecast", () => {
           end_utc: "2024-01-02T00:00:00Z",
           creation_limit_utc: "2024-01-01T06:00:00Z",
           horizon_minutes: 60,
-          model: "pvnet_intraday"
+          model_name: "pvnet_intraday",
+          adjusted: true
         }
       }
     });
@@ -124,7 +125,10 @@ describe("forecast", () => {
     // silently got a series with no history — which is exactly what happened to the
     // selected-GSP chart. The default lives in `series-window.ts` now and is applied here.
     const descriptor = forecast({ ...scopes.GB, region: "1" });
-    expect(descriptor.params.query).toEqual({ start_utc: toUtcInstant(defaultSeriesStart()) });
+    expect(descriptor.params.query).toEqual({
+      start_utc: toUtcInstant(defaultSeriesStart()),
+      adjusted: true
+    });
   });
 
   test("the default start is on a 6-hour UTC boundary, so the cache key survives scrubbing", () => {
@@ -166,14 +170,14 @@ describe("forecastLastUpdated", () => {
       path: "/{country}/{source}/regions/{region}/forecast/last-updated",
       params: {
         path: { country: scope.country, source: scope.source, region: scope.region },
-        query: { model: "blend" }
+        query: { model_name: "blend", adjusted: true }
       }
     });
   });
 
   test("omits model when not supplied", () => {
     const descriptor = forecastLastUpdated({ ...scopes.GB, region: "1" });
-    expect(descriptor.params.query).toEqual({});
+    expect(descriptor.params.query).toEqual({ adjusted: true });
   });
 });
 
@@ -193,6 +197,7 @@ describe("forecastSnapshot", () => {
           region_type: scope.regionType,
           model_name: "blend",
           model_version: "1.2.3",
+          adjusted: true,
           time_utc: "2024-01-01T00:00:00Z"
         }
       }
@@ -240,7 +245,7 @@ describe("generation", () => {
       params: {
         path: { country: scope.country, source: scope.source, region: scope.region },
         query: {
-          observer: "pvlive_in_day",
+          observer_name: "pvlive_in_day",
           start_utc: "2024-01-01T00:00:00Z",
           end_utc: "2024-01-02T00:00:00Z"
         }
@@ -262,7 +267,7 @@ describe("generationSnapshot", () => {
         path: { country: scope.country, source: scope.source },
         query: {
           region_type: scope.regionType,
-          observer: "pvlive_day_after",
+          observer_name: "pvlive_day_after",
           time_utc: "2024-01-01T00:00:00Z"
         }
       }
@@ -285,7 +290,7 @@ describe("generationPeriod", () => {
         path: { country: scope.country, source: scope.source },
         query: {
           region_type: scope.regionType,
-          observer: "pvlive_in_day",
+          observer_name: "pvlive_in_day",
           start_utc: "2024-01-01T00:00:00Z",
           end_utc: "2024-01-02T00:00:00Z",
           region_names: ["a"]

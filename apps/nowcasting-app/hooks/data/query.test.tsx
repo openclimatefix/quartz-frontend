@@ -20,7 +20,9 @@ import gbGenDayAfter from "../../lib/api/v1/__fixtures__/gb-national-generation-
 import { resetTokenCache } from "../../lib/api/auth/token";
 import * as queries from "../../lib/api/v1/queries";
 import type { Scope, TimeSeries } from "../../lib/domain/types";
-import { continuityKey } from "./query";
+import { FetchJsonError } from "../../lib/api/fetch-json";
+import { ApiV1Error } from "../../lib/api/v1/client";
+import { continuityKey, isNonRetryableError } from "./query";
 import { useNationalForecast } from "./use-forecast";
 import { useNationalGeneration } from "./use-generation";
 
@@ -246,4 +248,38 @@ test("switching GB -> NL -> GB returns GB's cached data and never NL's", async (
     if (render.data === undefined) continue;
     expect(render.data.regionName).toBe(render.scope === "GB" ? "Great Britain" : "Nederland");
   }
+});
+
+/**
+ * The retry policy's "stop retrying fast" switch, across both error kinds SWR sees. The v1
+ * rule (403 only) is unchanged; the `FetchJsonError` rule is the plain HTTP one.
+ */
+describe("isNonRetryableError", () => {
+  test.each<[number, boolean]>([
+    [400, true],
+    [404, true],
+    [408, false],
+    [429, false],
+    [500, false],
+    [503, false]
+  ])("a FetchJsonError %i -> non-retryable: %s", (status, expected) => {
+    expect(
+      isNonRetryableError(new FetchJsonError("https://status.test/products", status, null))
+    ).toBe(expected);
+  });
+
+  test.each<[number, boolean]>([
+    [403, true],
+    [404, false],
+    [422, false],
+    [503, false]
+  ])("an ApiV1Error %i keeps the v1 rule -> non-retryable: %s", (status, expected) => {
+    expect(isNonRetryableError(new ApiV1Error(status, null))).toBe(expected);
+  });
+
+  test("anything else is retryable", () => {
+    expect(isNonRetryableError(new TypeError("Failed to fetch"))).toBe(false);
+    expect(isNonRetryableError(new Error("normaliser bug"))).toBe(false);
+    expect(isNonRetryableError(undefined)).toBe(false);
+  });
 });
