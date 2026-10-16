@@ -16,7 +16,6 @@ import {
 } from "recharts";
 import {
   convertToLocaleDateString,
-  dateToZonedDateTimeString,
   formatISODateString,
   formatISODateStringAsZonedTime,
   formatISODateStringHumanNumbersOnly,
@@ -150,8 +149,8 @@ const GENERATION_KEYS = ["GENERATION", "GENERATION_UPDATED"] as const;
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Live Actual",
-  FORECAST: "Current",
-  PAST_FORECAST: "Current",
+  FORECAST: "OCF",
+  PAST_FORECAST: "OCF",
   INTRADAY_ECMWF_ONLY: "ECMWF-only",
   PAST_INTRADAY_ECMWF_ONLY: "ECMWF-only",
   MET_OFFICE_ONLY: "Met Office-only",
@@ -1154,19 +1153,32 @@ const RemixLine: React.FC<RemixLineProps> = ({
             )}
 
             {cursorPeriod ? (
-              <ReferenceArea
-                x1={cursorPeriod.start}
-                x2={cursorPeriod.end}
-                yAxisId={"y-axis"}
-                xAxisId={"x-axis"}
-                fill={plot.cursor}
-                fillOpacity={0.22}
-                stroke={plot.cursor}
-                strokeOpacity={0.45}
-                strokeWidth={1}
-                ifOverflow="hidden"
-                shape={periodShape}
-              />
+              <>
+                {/* The selection is the hover band made definite (Brad, 2026-09-29): a heavier
+                    fill and no edges, plus a line at the instant the period is labelled with.
+                    The line is back because that instant is the one the readings are keyed to,
+                    and the band alone did not say where in the period it sat. */}
+                <ReferenceArea
+                  x1={cursorPeriod.start}
+                  x2={cursorPeriod.end}
+                  yAxisId={"y-axis"}
+                  xAxisId={"x-axis"}
+                  fill={plot.cursor}
+                  fillOpacity={0.3}
+                  strokeWidth={0}
+                  ifOverflow="hidden"
+                  shape={periodShape}
+                />
+                <ReferenceLine
+                  x={timeOfInterest}
+                  yAxisId={"y-axis"}
+                  xAxisId={"x-axis"}
+                  stroke={plot.cursor}
+                  strokeOpacity={0.9}
+                  strokeWidth={2}
+                  ifOverflow="hidden"
+                />
+              </>
             ) : (
               /* No period resolved — the sites chart's numeric axis, or a cursor outside the
                  plotted range. The line is the fallback so the cursor never disappears. */
@@ -1483,10 +1495,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
                   return <div></div>;
 
+                // Sites keys its rows by epoch millis, so the key is turned back into an ISO
+                // instant here and formatted by the same helper below as the dashboard's.
+                // (Pre-formatting it to a human string here fed that string back into the
+                // ISO formatter and the heading read "Invalid Date".)
                 let formattedDate = data?.formattedDate + ":00+00:00";
                 if (isSitesChart) {
-                  const date = new Date(Number(data?.formattedDate));
-                  formattedDate = dateToZonedDateTimeString(date, timezone, locale);
+                  formattedDate = new Date(Number(data?.formattedDate)).toISOString();
                 }
 
                 // The heading is the *span* the row's values cover, not the instant the country

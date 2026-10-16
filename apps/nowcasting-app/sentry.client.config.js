@@ -39,6 +39,17 @@ Sentry.init({
   // sessions when an error occurs.
   replaysOnErrorSampleRate: 1.0,
 
+  // TMP remove it after v1 merge
+  // suppress known noisy/expected errors
+  ignoreErrors: [
+    /Failed to get access token/,
+    /Failed to get auth token/,
+    /Hydration failed/,
+    /Failed to fetch/,
+    /NetworkError when attempting to fetch resource/,
+    /The operation was aborted/
+  ],
+
   integrations: (integrations) => {
     return [
       ...integrations,

@@ -33,7 +33,7 @@ Sentry.init({
         // Add a tag to all ErrorEvents
         event.tags = {
           ...event.tags,
-          error_event: "true",
+          error_event: "true"
         };
       }
     }
@@ -41,5 +41,5 @@ Sentry.init({
   },
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
-  debug: false,
+  debug: false
 });

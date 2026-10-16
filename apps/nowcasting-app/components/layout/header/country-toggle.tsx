@@ -5,7 +5,8 @@ import { sortCountryCodes } from "../../../config/countries";
 import {
   useCountries,
   useEnabledCountries,
-  useFocusedCountry
+  useFocusedCountry,
+  useIsTrialUser
 } from "../../../hooks/data/use-countries";
 import { useCountryStatus } from "../../../hooks/data/use-country-status";
 import type { CountryStatus } from "../../../hooks/data/use-country-status";
@@ -97,7 +98,37 @@ const SEGMENT_BASE = `${CONTROL_BUTTON_BASE.replace(
 )} gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-content`;
 const SEGMENT_ON = CONTROL_BUTTON_ACTIVE;
 const SEGMENT_OFF = CONTROL_BUTTON_IDLE;
-const SEGMENT_UNAVAILABLE = `${CONTROL_BUTTON_UNAVAILABLE} pointer-events-none`;
+// `CONTROL_BUTTON_UNAVAILABLE` drew the label in `surface-panel` on `surface-inset`, one ramp
+// step apart and close to invisible. `content-muted` is what an enabled idle country wears, so
+// a disabled one takes it at 60%: legible, and still dimmer than every selectable segment.
+const SEGMENT_UNAVAILABLE = `${CONTROL_BUTTON_UNAVAILABLE.replace(
+  "text-surface-panel hover:text-surface-panel",
+  "text-content-muted/60 hover:text-content-muted/60"
+)} pointer-events-none`;
+
+// Draft wording for the owner to edit. `{name}` is the country's display name.
+export const TRIAL_NOT_INCLUDED_MESSAGE =
+  "{name} is not included in your trial. Contact us to add it.";
+export const SUBSCRIPTION_NOT_INCLUDED_MESSAGE =
+  "{name} is not in your subscription. Contact us to add it.";
+const PREVIEW_FALLBACK_MESSAGE = "{name} coming soon. Contact us for early access.";
+
+/**
+ * Why a disabled country is disabled, in words. A `preview` country says so from its config;
+ * an unconfigured one keeps the build reason; otherwise it is entitlement, worded for a trial
+ * user or a subscriber.
+ */
+const disabledMessage = (country: CountryListing, trialUser: boolean): string => {
+  const name = country.config?.displayName ?? country.name;
+  if (country.config?.availability === "preview") {
+    return country.config.previewMessage ?? PREVIEW_FALLBACK_MESSAGE.replace("{name}", name);
+  }
+  if (!country.configured) return unselectableReason(country);
+  return (trialUser ? TRIAL_NOT_INCLUDED_MESSAGE : SUBSCRIPTION_NOT_INCLUDED_MESSAGE).replace(
+    "{name}",
+    name
+  );
+};
 
 /**
  * Status, and only status. The lamp that used to sit on every segment was carrying two things
@@ -171,6 +202,8 @@ const CountryOption = React.forwardRef<
   // about the API.
   const reportable = selectable && status.level !== "ok" && status.message !== null;
   const statusId = `country-status-${country.code}`;
+  const trialUser = useIsTrialUser();
+  const disabledText = selectable ? null : disabledMessage(country, trialUser);
 
   const stateClasses = !selectable ? SEGMENT_UNAVAILABLE : focused ? SEGMENT_ON : SEGMENT_OFF;
 
@@ -180,13 +213,24 @@ const CountryOption = React.forwardRef<
     ? "shown in the chart"
     : "show in the chart";
 
+  // The tooltip hangs from the item's right edge: the toggle sits at the top right of the
+  // header, so a centred tooltip on the last country ran off the screen.
   // The tooltip is a *sibling* of the button rather than a child. Anything inside a button
   // joins its accessible name, so a message rendered in there would have a screen reader
   // announce the whole incident where it should say "GB". Outside and referenced by
   // `aria-describedby` it is a description instead — and `aria-describedby` resolves text from
   // `display: none` nodes, so one element serves the eye on hover and the reader always.
   return (
-    <span className="group relative inline-flex">
+    // A disabled button fires no mouse events in some browsers, and it is not focusable, so a
+    // disabled country's wrapper carries the hover and focus and the button stays disabled. The
+    // wrapper's `tabIndex` is a plain tab stop: the enabled radios keep their roving tabindex,
+    // and arrow keys pressed on it bubble to the group handler, which steps from the focused one.
+    <span
+      className="group relative inline-flex"
+      tabIndex={disabledText ? 0 : undefined}
+      aria-label={disabledText ? country.name : undefined}
+      aria-describedby={disabledText ? `country-unavailable-${country.code}` : undefined}
+    >
       <button
         ref={ref}
         type="button"
@@ -204,12 +248,22 @@ const CountryOption = React.forwardRef<
         )}
         {country.code}
       </button>
+      {disabledText && (
+        <span
+          id={`country-unavailable-${country.code}`}
+          role="tooltip"
+          data-test={`country-unavailable-${country.code}`}
+          className="pointer-events-none absolute right-0 top-full z-20 mt-1 hidden w-max max-w-xs rounded bg-surface-sunken px-2 py-1 text-xs font-normal text-content ring-1 ring-inset ring-surface-raised group-hover:block group-focus:block"
+        >
+          {disabledText}
+        </span>
+      )}
       {reportable && (
         <span
           id={statusId}
           role="tooltip"
           data-test={`country-status-${country.code}`}
-          className="pointer-events-none absolute left-1/2 top-full z-20 mt-1 hidden w-max max-w-xs -translate-x-1/2 rounded bg-surface-sunken px-2 py-1 text-xs font-normal text-content ring-1 ring-inset ring-surface-raised group-hover:block"
+          className="pointer-events-none absolute right-0 top-full z-20 mt-1 hidden w-max max-w-xs rounded bg-surface-sunken px-2 py-1 text-xs font-normal text-content ring-1 ring-inset ring-surface-raised group-hover:block"
         >
           {status.message}
         </span>

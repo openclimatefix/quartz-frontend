@@ -83,14 +83,20 @@ describe("normalise over recorded v1 payloads", () => {
     expect(gb.capacityMw).toBeGreaterThan(1_000);
     expect(gb.centroid).toEqual({ lat: expect.any(Number), lng: expect.any(Number) });
 
-    // Fact 6: models are per region type, not per country, and the defaults differ.
+    // Fact 6: models are per region type, not per country.
     const gbRegionTypes = Object.fromEntries(gb.regionTypes.map((r) => [r.type, r]));
     expect(gbRegionTypes.national.level).toBe(0);
     expect(gbRegionTypes.gsp.level).toBe(10);
     expect(gbRegionTypes.national.forecastModels.length).toBeGreaterThan(
       gbRegionTypes.gsp.forecastModels.length
     );
-    expect(gbRegionTypes.national.defaultModel).not.toBe(gbRegionTypes.gsp.defaultModel);
+    // The defaults used to differ (`blend_adjust` vs `blend`); adjustment is now the `adjusted`
+    // parameter, so both default to `blend` and the offered model lists are what differ.
+    expect(gbRegionTypes.national.defaultModel).toBe("blend");
+    expect(gbRegionTypes.gsp.defaultModel).toBe("blend");
+    expect(gbRegionTypes.national.forecastModels.map((m) => m.name)).not.toEqual(
+      gbRegionTypes.gsp.forecastModels.map((m) => m.name)
+    );
 
     // Fact 5: NL has one observer where GB has two, so chart series must be manifest-driven.
     const nl = result.find((c) => c.code === "NL")!;
@@ -225,7 +231,9 @@ describe("normalise over recorded v1 payloads", () => {
       gbGspGenerationSnapshotPartial as Parameters<typeof normaliseGenerationSnapshot>[0]
     );
 
-    expect(forecast.timeUtc).toBe(partial.timeUtc);
+    // The partial recording (2026-08-05) can no longer be re-recorded, so it is not the same
+    // slot as the current forecast snapshot; pin the slot it was caught at instead.
+    expect(partial.timeUtc).toBe("2026-08-05T15:00:00Z");
 
     const forecastRegions = Object.keys(forecast.regions);
     const publishedRegions = new Set(Object.keys(partial.regions));
