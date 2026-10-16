@@ -1,7 +1,7 @@
 import { getAccessToken, getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { readCountryClaim } from "../../lib/api/auth/entitlement";
+import { entitledCountryCodes, readProductsClaim } from "../../lib/api/auth/entitlement";
 
 export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
   ? async function token(req: NextApiRequest, res: NextApiResponse) {
@@ -27,9 +27,15 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
           return res.status(403).json({ error: "trial_expired", email: session?.user?.email });
         }
         // Surfaced alongside the token so a client that only ever talks to this endpoint
-        // still learns its entitlement. Read defensively via readCountryClaim: the claim
-        // is not live on the tenant yet, so this is `[]` today and must stay non-fatal.
-        res.status(200).json({ ...accessToken, countries: readCountryClaim(session?.user) });
+        // still learns its entitlement. `products` is the cleaned claim; `countries` is the
+        // countries it entitles under the same rule the UI applies, changeover fallback
+        // included (see `readEntitlementClaim`). Both degrade to `[]`, never an error.
+        const user = session?.user;
+        res.status(200).json({
+          ...accessToken,
+          products: readProductsClaim(user),
+          countries: entitledCountryCodes(user)
+        });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
           return res.status(403).json({ error: "access_denied", message: error.message });

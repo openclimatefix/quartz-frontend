@@ -7,6 +7,7 @@ import {
   isNonRetryableApiV1Error
 } from "../../lib/api/v1/client";
 import { queryKey, type RequestDescriptor } from "../../lib/api/v1/queries";
+import { FetchJsonError } from "../../lib/api/fetch-json";
 import type { components, paths } from "../../lib/api/v1/schema";
 
 /**
@@ -78,7 +79,16 @@ export const MAX_RETRIES = 6;
  *
  * Everything else (network blips, 429, 5xx, a 422 from a since-fixed caller bug) retries.
  *
- * Once the fast retries are spent, or at once for a 403, the query is re-asked at the
+ * A `FetchJsonError` (lib/api/fetch-json.ts, the unauthenticated Status API) has no 403
+ * semantics to lean on, so for it the rule is the plain HTTP one: a 4xx is the client's own
+ * mistake — a misconfigured `NEXT_PUBLIC_STATUS_URL` answering 404, a bad path answering
+ * 400 — and six fast retries would not change the answer, so it skips them. Like a 403 it
+ * is still re-asked at the refresh interval: a fixed URL ships with a deploy, which a
+ * long-lived tab only ever picks up this way. 408 (timeout) and 429 (rate limited) are the
+ * two 4xx a retry *can* fix, so they stay on the fast path.
+ *
+ * Once the fast retries are spent, or at once for a non-retryable error
+ * (`isNonRetryableError`), the query is re-asked at the
  * refresh interval (at most five minutes) for as long as it keeps failing. SWR 2.2.5's own
  * polling skips a key whose cache holds an error (`execute()` in swr/dist/core/index.mjs), so
  * without this an outage longer than the fast retries froze the screen until a focus event
@@ -91,6 +101,16 @@ const slowRetryDelay = (refreshInterval: SWRConfiguration["refreshInterval"]): n
     ? Math.min(refreshInterval, FIVE_MINUTES_MS)
     : FIVE_MINUTES_MS;
 
+const RETRYABLE_4XX: readonly number[] = [408, 429];
+
+/** Skip the fast retries for this error? See the retry policy above for the reasoning. */
+export const isNonRetryableError = (error: unknown): boolean =>
+  isNonRetryableApiV1Error(error) ||
+  (error instanceof FetchJsonError &&
+    error.status >= 400 &&
+    error.status < 500 &&
+    !RETRYABLE_4XX.includes(error.status));
+
 export const apiV1SwrOptions: SWRConfiguration = {
   refreshInterval: FIVE_MINUTES_MS,
   dedupingInterval: TWO_MINUTES_MS,
@@ -100,7 +120,7 @@ export const apiV1SwrOptions: SWRConfiguration = {
   shouldRetryOnError: true,
   onErrorRetry: (error, _key, config, revalidate, { retryCount }) => {
     const delay =
-      isNonRetryableApiV1Error(error) || retryCount >= MAX_RETRIES
+      isNonRetryableError(error) || retryCount >= MAX_RETRIES
         ? slowRetryDelay(config.refreshInterval)
         : Math.min(RETRY_BASE_MS * 2 ** (retryCount - 1), RETRY_CAP_MS);
     setTimeout(() => revalidate({ retryCount }), delay);

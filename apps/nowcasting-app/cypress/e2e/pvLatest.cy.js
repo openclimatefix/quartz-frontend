@@ -1,6 +1,13 @@
 import "cypress-real-events/support";
 
-describe("Load the page", () => {
+// SKIPPED: this spec describes the pre-adaptive-UI header and no longer matches the shell on
+// this branch. It is skipped rather than deleted so the post-release Cypress revamp (owner:
+// Suvan) can rewrite it in place against the new shell without a merge conflict. Stale
+// assertions, as they stand:
+//  - the header nav items "PV Forecast" / "Solar Sites" / "Delta" no longer exist
+//  - the active-nav class `text-ocf-yellow` no longer exists
+//  - the `[data-test="forecast-headline-figures"]` hook no longer exists
+describe.skip("Load the page", () => {
   beforeEach(function () {
     // cy.visit("http://localhost:3002/");
     cy.loginToAuth0(Cypress.env("auth0_username"), Cypress.env("auth0_password"));

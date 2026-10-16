@@ -1,4 +1,5 @@
 import type { RegionNameStyle } from "../lib/domain/region-label";
+import type { ProductKey } from "../lib/api/auth/entitlement";
 
 // The static half of a country's configuration.
 //
@@ -200,7 +201,7 @@ export type OverlayConfig = {
 export type ForecastSeriesConfig = {
   /** `ChartData` key, e.g. `"FORECAST"`, `"SAT_ONLY"`. */
   key: string;
-  /** v1 model name without the `_adjust` suffix, or `null` for the region type's default. */
+  /** v1 model name, or `null` for the region type's default. */
   model: string | null;
   /** Human label — the legend and tooltip text for this line. */
   label: string;
@@ -226,26 +227,9 @@ export type ForecastInput = "ECMWF" | "MET_OFFICE" | "SAT";
 /** How power figures are written. Stored values are always MW. */
 export type PowerUnit = "MW" | "GW";
 
-/**
- * Appended to every `ForecastSeriesConfig.model` below. **This is the one-line swap.**
- *
- * v0 asked for trend adjustment with `trend_adjuster_on=true` alongside a plain model name.
- * v1 has no such parameter: it currently exposes the adjusted variants as separate models
- * (`blend_adjust`, `pvnet_ukv_adjust`, …). Brad's instruction is to run on the NON-adjusted
- * models for now, because the API is about to change again — an `adjust` boolean like v0's,
- * plus simplified model names — and amend once that settles.
- *
- * **Consequence, expected and agreed:** production is trend-adjusted and this is not, so the
- * national chart's values will not match production. That is not a regression to chase.
- *
- * To move the whole chart onto the adjusted models today, set this to `"_adjust"`. When the
- * `adjust` boolean lands, delete this and add the flag to the forecast window instead.
- */
-export const NATIONAL_FORECAST_MODEL_SUFFIX = "";
-
-/** The model name to send for a series, i.e. `series.model` plus the suffix above. */
+/** The model name to send for a series, or `undefined` for the region type's default. */
 export const forecastSeriesModel = (series: ForecastSeriesConfig): string | undefined =>
-  series.model === null ? undefined : `${series.model}${NATIONAL_FORECAST_MODEL_SUFFIX}`;
+  series.model ?? undefined;
 
 /**
  * Whether a timestamp names the end or the start of the period it covers.
@@ -271,6 +255,18 @@ export type CountryConfig = {
    * of this file.
    */
   displayName: string;
+  /**
+   * Whether the country is on sale. Omitted means `"live"`. `"preview"` marks a country that is
+   * listed so prospects can see it exists but is not yet available to subscribe to: the header
+   * toggle explains that on hover with `previewMessage` instead of the generic entitlement
+   * wording. Declared here because "coming soon" is a product decision the API cannot make.
+   */
+  availability?: "preview" | "live";
+  /**
+   * What the header toggle says on hover for a `"preview"` country. Optional: without it the
+   * toggle builds "<displayName> coming soon. Contact us for early access.".
+   */
+  previewMessage?: string;
   /** IANA zone. Replaces the `Europe/London` hardcoded through every date helper. */
   timezone: string;
   /**
@@ -362,6 +358,14 @@ export type CountryConfig = {
    * which is the point. Split it per region type when a country needs two.
    */
   displayUnit: PowerUnit;
+  /**
+   * This country's product key. It decides entitlement — a user may use the country when
+   * their Auth0 `products` claim contains it (lib/api/auth/entitlement.ts) — and which status
+   * the banner shows for it. Optional: a country without one is never entitled by products.
+   * A product the Status API does not report on (DE's today) contributes no status row. See
+   * `config/statusProducts.ts`.
+   */
+  product?: ProductKey;
   /** Auth0 role id granting this country; the country claim is derived from these. */
   auth0Role: string;
 };
@@ -459,23 +463,22 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       }
     },
     // The six lines the GB chart drew under v0, in the same order, with the v1 model names.
+    // The API owner confirmed the names on 2026-09-29.
     //
     //   v0 (+ trend_adjuster_on=true)        v1
     //   blend                             -> blend
-    //   pvnet_intraday_ecmwf_only         -> pvnet_ecmwf
+    //   pvnet_intraday_ecmwf_only         -> ecmwf
     //   pvnet_day_ahead                   -> pvnet_day_ahead
     //   pvnet_intraday                    -> pvnet_intraday
-    //   pvnet_intraday_met_office_only    -> pvnet_ukv     (UNCONFIRMED inference: the
-    //       manifest labels `pvnet_ukv` "PVNet Intraday (Met Office)" and UKV is the Met
-    //       Office's model, but no one has confirmed it is the same series v0 served.)
-    //   pvnet_intraday_sat_only           -> pvnet_sat
+    //   pvnet_intraday_met_office_only    -> mo
+    //   pvnet_intraday_sat_only           -> sat_8h
     //
-    // See NATIONAL_FORECAST_MODEL_SUFFIX above for the `_adjust` situation.
+    // Adjustment is the `adjusted` request parameter (always true; see `queries.ts`).
     nationalChartSeries: [
-      { key: "FORECAST", model: "blend", label: "Current" },
+      { key: "FORECAST", model: "blend", label: "OCF" },
       {
         key: "INTRADAY_ECMWF_ONLY",
-        model: "pvnet_ecmwf",
+        model: "ecmwf",
         label: "ECMWF-only",
         legend: { iconClasses: "text-series-ecmwf", tooltipInputs: ["ECMWF"] }
       },
@@ -487,13 +490,13 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       // a reader gains nothing for the extra ink.
       {
         key: "MET_OFFICE_ONLY",
-        model: "pvnet_ukv",
+        model: "mo",
         label: "Met Office-only",
         legend: { iconClasses: "text-series-metOffice", tooltipInputs: ["MET_OFFICE"] }
       },
       {
         key: "SAT_ONLY",
-        model: "pvnet_sat",
+        model: "sat_8h",
         label: "Satellite-only",
         legend: { iconClasses: "text-series-satellite", tooltipInputs: ["SAT"] }
       }
@@ -502,6 +505,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: { name: "PV_Live", url: "https://www.solar.sheffield.ac.uk/pvlive/" },
     seasonalNorms: "/data/gb/national-metrics.json",
     displayUnit: "MW",
+    product: "gb-solar",
     auth0Role: "GB_ROLE_ID"
   },
   NL: {
@@ -578,11 +582,11 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // No client-side groupings: the API's province level is the only sub-national one NL
     // has, and `ned_nl` is its single generation observer.
     derivedRegionTypes: {},
-    // NL national offers `blend` and `ecmwf_mo_sat_uncurtailed` (each with an `_adjust`
-    // twin). Only the blend is charted: the second is the blend's single input, so drawing
+    // NL national offers `blend` and `ecmwf_mo_sat_uncurtailed` (each also
+    // available adjusted). Only the blend is charted: the second is the blend's single input, so drawing
     // both would be a comparison of a series against itself. Nobody has asked for the NL
     // comparison lines GB has; add them here when they do.
-    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "Current" }],
+    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "OCF" }],
     overlays: [],
     // NED publishes NL's generation (it is the source of the period-start convention above),
     // but no public attribution page has been confirmed for it — so the (i) states NL's
@@ -590,11 +594,14 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: null,
     seasonalNorms: null,
     displayUnit: "GW",
+    product: "nl-solar",
     auth0Role: "NL_ROLE_ID"
   },
   DE: {
     code: "DE",
     displayName: "Germany",
+    availability: "preview",
+    previewMessage: "Germany coming soon. Contact us for early access.",
     timezone: "Europe/Berlin",
     locale: "de-DE",
     // Forecast and ENTSO-E generation both arrive every 15 minutes.
@@ -658,7 +665,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // entries. Not charted: `ecmwf_pv` (two inputs, not one) and `pv`, which has no line
     // or colour yet.
     nationalChartSeries: [
-      { key: "FORECAST", model: "blend", label: "Current" },
+      { key: "FORECAST", model: "blend", label: "OCF" },
       {
         key: "INTRADAY_ECMWF_ONLY",
         model: "ecmwf",
@@ -682,6 +689,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     publisher: { name: "ENTSO-E", url: "https://transparency.entsoe.eu/" },
     seasonalNorms: null,
     displayUnit: "GW",
+    product: "de-solar",
     auth0Role: "DE_ROLE_ID"
   }
 };

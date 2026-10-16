@@ -2,7 +2,7 @@
   {
     "country": "GB",
     "name": "Great Britain",
-    "capacity_kW": 21904641,
+    "capacity_kW": 22536728,
     "centroid": {
       "lat": 54.142,
       "lng": -2.738
@@ -12,57 +12,34 @@
         "type": "national",
         "label": "National",
         "level": 0,
-        "default_model": "blend_adjust",
+        "default_model": "blend",
         "forecast_models": [
           {
             "name": "blend",
             "label": "Blend"
           },
           {
-            "name": "blend_adjust",
-            "label": "Blend (Trend Adjusted)"
+            "name": "ecmwf_mo",
+            "label": "ECMWF + Met Office"
           },
           {
-            "name": "pvnet_ecmwf",
-            "label": "PVNet Intraday (ECMWF)"
+            "name": "ecmwf_mo_sat_8h",
+            "label": "ECMWF + Met Office + Satellite (8h)"
           },
           {
-            "name": "pvnet_ecmwf_adjust",
-            "label": "PVNet Intraday (ECMWF, Trend Adjusted)"
+            "name": "ecmwf",
+            "label": "ECMWF"
           },
           {
-            "name": "pvnet_sat",
-            "label": "PVNet Intraday (Satellite)"
+            "name": "sat_8h",
+            "label": "Satellite (8h)"
           },
           {
-            "name": "pvnet_sat_adjust",
-            "label": "PVNet Intraday (Satellite, Trend Adjusted)"
-          },
-          {
-            "name": "pvnet_ukv",
-            "label": "PVNet Intraday (Met Office)"
-          },
-          {
-            "name": "pvnet_ukv_adjust",
-            "label": "PVNet Intraday (Met Office, Trend Adjusted)"
-          },
-          {
-            "name": "pvnet_intraday",
-            "label": "PVNet Intraday"
-          },
-          {
-            "name": "pvnet_intraday_adjust",
-            "label": "PVNet Intraday (Trend Adjusted)"
-          },
-          {
-            "name": "pvnet_day_ahead",
-            "label": "PVNet Day Ahead"
-          },
-          {
-            "name": "pvnet_day_ahead_adjust",
-            "label": "PVNet Day Ahead (Trend Adjusted)"
+            "name": "mo",
+            "label": "Met Office"
           }
-        ]
+        ],
+        "supports_adjusted": true
       },
       {
         "type": "gsp",
@@ -75,14 +52,15 @@
             "label": "Blend"
           },
           {
-            "name": "pvnet_intraday",
-            "label": "PVNet Intraday"
+            "name": "ecmwf_mo_sat_8h",
+            "label": "ECMWF + Met Office + Satellite (8h)"
           },
           {
-            "name": "pvnet_day_ahead",
-            "label": "PVNet Day Ahead"
+            "name": "ecmwf_mo",
+            "label": "ECMWF + Met Office"
           }
-        ]
+        ],
+        "supports_adjusted": false
       }
     ],
     "generation_sources": [
@@ -101,7 +79,7 @@
   {
     "country": "NL",
     "name": "Nederland",
-    "capacity_kW": 25098183.853,
+    "capacity_kW": 25264535.926,
     "centroid": {
       "lat": 52.13,
       "lng": 5.29
@@ -111,25 +89,18 @@
         "type": "national",
         "label": "National",
         "level": 0,
-        "default_model": "blend_adjust",
+        "default_model": "blend",
         "forecast_models": [
           {
             "name": "blend",
             "label": "Blend"
           },
           {
-            "name": "blend_adjust",
-            "label": "Blend (Trend Adjusted)"
-          },
-          {
-            "name": "ecmwf_mo_sat_uncurtailed",
-            "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed"
-          },
-          {
-            "name": "ecmwf_mo_sat_uncurtailed_adjust",
-            "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed (Trend Adjusted)"
+            "name": "ecmwf_mo_pv_sat_uncurtailed",
+            "label": "ECMWF + Met Office + PV + Satellite, Uncurtailed"
           }
-        ]
+        ],
+        "supports_adjusted": true
       },
       {
         "type": "province",
@@ -142,10 +113,11 @@
             "label": "Blend"
           },
           {
-            "name": "ecmwf_mo_sat_uncurtailed",
-            "label": "PV + ECMWF + Met Office + Satellite, Uncurtailed"
+            "name": "ecmwf_mo_pv_sat_uncurtailed",
+            "label": "ECMWF + Met Office + PV + Satellite, Uncurtailed"
           }
-        ]
+        ],
+        "supports_adjusted": false
       }
     ],
     "generation_sources": [
