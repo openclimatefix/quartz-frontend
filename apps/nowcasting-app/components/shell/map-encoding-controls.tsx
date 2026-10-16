@@ -1,12 +1,8 @@
 import { FC } from "react";
 
 import useGlobalState, { setComparison } from "../helpers/globalState";
-import {
-  COMPARISON_PRESETS,
-  ComparisonSelection,
-  NO_COMPARISON_LABEL
-} from "../helpers/comparison";
-import { UnitToggle, AggregationLevelToggle } from "../map/measuringUnit";
+import { COMPARISON_PRESETS, NO_COMPARISON_LABEL } from "../helpers/comparison";
+import { UnitToggle, AggregationLevelToggle, type UnitOption } from "../map/measuringUnit";
 import { ActiveUnit } from "../map/types";
 import ColorGuideBar from "../map/color-guide-bar";
 import {
@@ -35,7 +31,8 @@ import MapLayerControls, { SatelliteChannelSelect } from "../map/map-layer-contr
  * the layer controls joined it. One panel does not have to mean one flat stack, so it splits
  * into two blocks, divided by a rule:
  *
- * - **What the colour means**: "Map shows" (which encoding), `UnitToggle` (%/MW/Capacity) and
+ * - **What the colour means**: "Map shows" (Forecast/Delta/Capacity), `UnitToggle` (that
+ *   mode's units — %/MW, or MW/MW/km² for capacity) and
  *   `ColorGuideBar` (the legend). These are one conversation, in order — select the encoding,
  *   pick the unit it is shown in, read what the current colours mean — so they stack, and the
  *   unit toggle sits directly above the legend whose numbers it changes.
@@ -80,17 +77,30 @@ import MapLayerControls, { SatelliteChannelSelect } from "../map/map-layer-contr
  * inherit. Granularity is live in both modes.
  */
 
-const ComparisonOption: FC<{
-  id: ComparisonSelection;
+const OUTPUT_UNITS: readonly UnitOption[] = [
+  { unit: ActiveUnit.percentage, label: "%" },
+  { unit: ActiveUnit.MW, label: "MW" }
+];
+
+const CAPACITY_UNITS: readonly UnitOption[] = [
+  { unit: ActiveUnit.capacity, label: "MW" },
+  { unit: ActiveUnit.capacityDensity, label: "MW/km²" }
+];
+
+const isCapacityUnit = (unit: ActiveUnit) =>
+  unit === ActiveUnit.capacity || unit === ActiveUnit.capacityDensity;
+
+const ModeOption: FC<{
   label: string;
   active: boolean;
   hint: string;
-}> = ({ id, label, active, hint }) => (
+  onClick: () => void;
+}> = ({ label, active, hint, onClick }) => (
   <button
     type="button"
     aria-pressed={active}
     title={hint}
-    onClick={() => setComparison(id)}
+    onClick={onClick}
     className={`${CONTROL_BUTTON_BASE} ${CONTROL_BUTTON_GROW} ${
       active ? CONTROL_BUTTON_ACTIVE : CONTROL_BUTTON_IDLE
     }`}
@@ -102,6 +112,17 @@ const ComparisonOption: FC<{
 const MapEncodingControls: FC = () => {
   const [comparison] = useGlobalState("comparison");
   const [activeUnit, setActiveUnit] = useGlobalState("activeUnit");
+  // Capacity has no delta, so capacity mode is the forecast view showing a capacity unit.
+  const capacityMode = comparison === null && isCapacityUnit(activeUnit);
+
+  const showForecast = () => {
+    setComparison(null);
+    if (isCapacityUnit(activeUnit)) setActiveUnit(ActiveUnit.percentage);
+  };
+  const showCapacity = () => {
+    setComparison(null);
+    if (!isCapacityUnit(activeUnit)) setActiveUnit(ActiveUnit.capacity);
+  };
 
   return (
     <div className="flex shrink-0 flex-col gap-1.5 rounded-lg border border-content/10 bg-surface-panel/95 p-2 text-content shadow-2xl">
@@ -109,18 +130,18 @@ const MapEncodingControls: FC = () => {
         PV Forecast Map
       </span>
       <div className={CONTROL_ROW} role="group" aria-label="Map shows">
-        <ComparisonOption
-          id={null}
+        <ModeOption
           label={NO_COMPARISON_LABEL}
-          active={comparison === null}
+          active={comparison === null && !capacityMode}
           hint="Colour regions by forecast output"
+          onClick={showForecast}
         />
         {COMPARISON_PRESETS.map((preset) => (
-          <ComparisonOption
+          <ModeOption
             key={preset.id}
-            id={preset.id}
             label={preset.label}
             active={comparison === preset.id}
+            onClick={() => setComparison(preset.id)}
             // The title is optional, so the qualifying clause is too — otherwise a
             // preset without one leaves a trailing em dash pointing at nothing.
             hint={
@@ -130,22 +151,21 @@ const MapEncodingControls: FC = () => {
             }
           />
         ))}
+        <ModeOption
+          label="Capacity"
+          active={capacityMode}
+          hint="Colour regions by installed capacity"
+          onClick={showCapacity}
+        />
       </div>
       {/* The unit control's own loading gate was the map's fetch state, which the dock does not
           have and should not learn. Nothing it does is unsafe mid-fetch — it writes a display
           unit and an aggregation level — so it is simply never disabled here. */}
-      {/* Installed capacity has no delta, so the unit is greyed rather than quietly showing
-          megawatts under a control that reads "Capacity". `setComparison` has already moved the
-          active unit off it by the time this renders — this states the rule, it does not
-          enforce it. */}
       <UnitToggle
+        options={capacityMode ? CAPACITY_UNITS : OUTPUT_UNITS}
         activeUnit={activeUnit}
         setActiveUnit={setActiveUnit}
         isLoading={false}
-        unavailableUnits={
-          comparison === null ? [] : [ActiveUnit.capacity, ActiveUnit.capacityDensity]
-        }
-        unavailableReason="Installed capacity has no delta"
       />
       <ColorGuideBar comparison={comparison} unit={activeUnit} />
 
