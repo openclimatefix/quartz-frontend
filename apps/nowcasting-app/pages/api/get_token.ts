@@ -1,10 +1,7 @@
 import { getAccessToken, getSession, withApiAuthRequired } from "@auth0/nextjs-auth0";
 import { NextApiRequest, NextApiResponse } from "next";
 
-import {
-  entitledCountryCodes,
-  readProductsClaim,
-} from "../../lib/api/auth/entitlement";
+import { entitledCountryCodes, readProductsClaim } from "../../lib/api/auth/entitlement";
 
 export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
   ? async function token(req: NextApiRequest, res: NextApiResponse) {
@@ -19,10 +16,7 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
         res.status(error.status || 400).end(error.message);
       }
     }
-  : withApiAuthRequired(async function token(
-      req: NextApiRequest,
-      res: NextApiResponse,
-    ) {
+  : withApiAuthRequired(async function token(req: NextApiRequest, res: NextApiResponse) {
       if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
         return res.status(200).json({ accessToken: "FAKE_TOKEN" });
       }
@@ -40,13 +34,13 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
           products: readProductsClaim(user),
           countries: entitledCountryCodes(user),
           trialExpired,
-          trialEndsAt,
+          trialEndsAt
         });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
           return res.status(403).json({
             error: "access_denied",
-            message: error.message,
+            message: error.message
           });
         }
 
