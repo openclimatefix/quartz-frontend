@@ -1,5 +1,6 @@
 import { FC } from "react";
 
+import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { DEFAULT_TIMEZONE } from "../helpers/utils";
@@ -59,7 +60,14 @@ const ChartScrubber: FC<{ domain?: CursorRange | null; insetRightPx?: number }> 
   const rangeData = useCursorRange();
   // Play walks the same window the track beside it is drawn against, between the same stops.
   const playRange = domain ?? rangeData?.range;
-  const playBounds = playRange ? selectableCursorRange(playRange, focusedCountry) : null;
+  const [timeNow] = useGlobalState("timeNow");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
+  const selectableBounds = playRange ? selectableCursorRange(playRange, focusedCountry) : null;
+  // Trial-expired: play stops at live, like the track.
+  const playBounds =
+    selectableBounds && trialExpiredAt && Date.parse(timeNow) < Date.parse(selectableBounds.end)
+      ? { ...selectableBounds, end: timeNow }
+      : selectableBounds;
 
   return (
     <div

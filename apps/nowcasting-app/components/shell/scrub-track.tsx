@@ -230,6 +230,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
 }) => {
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
   const [timeNow] = useGlobalState("timeNow");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
   const [isPlaying, setIsPlaying] = useGlobalState("isPlaying");
   const focusedCountry = useFocusedCountry();
   /**
@@ -275,8 +276,14 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   // Drawn against the whole window; stops only where a whole period fits inside it.
   const scale = useMemo(() => {
     if (!range?.start || !range?.end) return null;
-    return scrubScale(range, cadenceMinutes, selectableLabelRange(range, focusedCountry));
-  }, [range, cadenceMinutes, focusedCountry]);
+    const selectable = selectableLabelRange(range, focusedCountry);
+    // Trial-expired: drawn against all of it, but the handle may not stop past live.
+    const live = slotForInstant(timeNow, focusedCountry);
+    return scrubScale(range, cadenceMinutes, {
+      ...selectable,
+      end: trialExpiredAt && Date.parse(live) < Date.parse(selectable.end) ? live : selectable.end
+    });
+  }, [range, cadenceMinutes, focusedCountry, trialExpiredAt, timeNow]);
 
   // The scale is in **label** space — the window is the chart's first and last published
   // timestamp, and the track is drawn against the chart's axis — while the cursor is an

@@ -109,6 +109,7 @@ export type FlatGlobalStateType = {
   activeUnit: ActiveUnit;
   selectedISOTime: string;
   timeNow: string;
+  trialExpiredAt: string;
   intervals: any[];
   /**
    * True only on `/sites` (`pages/sites.tsx` sets it on mount, clears it on unmount). The
@@ -280,6 +281,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     activeUnit: ActiveUnit.percentage,
     selectedISOTime: INITIAL_CURSOR,
     timeNow: INITIAL_CURSOR,
+    trialExpiredAt: "",
     intervals: [],
     isSitesChart: false,
     visibleLines: getValidatedVisibleLines(),
