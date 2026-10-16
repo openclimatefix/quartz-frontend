@@ -4,7 +4,7 @@
 The code is as open source as we can possibly make it (safely) and is powered by various forecast APIs, which are also available as services under the same Quartz umbrella.
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-8-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 Head to [quartz.solar](https://quartz.solar) to find out more or to get in touch about using our Production services.
@@ -99,6 +99,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rachel-labri-tipton"><img src="https://avatars.githubusercontent.com/u/86949265?v=4?s=100" width="100px;" alt="rachel tipton"/><br /><sub><b>rachel tipton</b></sub></a><br /><a href="https://github.com/openclimatefix/quartz-frontend/pulls?q=is%3Apr+reviewed-by%3Arachel-labri-tipton" title="Reviewed Pull Requests">👀</a> <a href="https://github.com/openclimatefix/quartz-frontend/commits?author=rachel-labri-tipton" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://suvanbanerjee.me"><img src="https://avatars.githubusercontent.com/u/104707806?v=4?s=100" width="100px;" alt="Suvan Banerjee"/><br /><sub><b>Suvan Banerjee</b></sub></a><br /><a href="https://github.com/openclimatefix/quartz-frontend/commits?author=suvanbanerjee" title="Code">💻</a> <a href="https://github.com/openclimatefix/quartz-frontend/issues?q=author%3Asuvanbanerjee" title="Bug reports">🐛</a></td>
     </tr>
   </tbody>
 </table>

@@ -78,6 +78,16 @@
         "review",
         "code"
       ]
+    },
+    {
+      "login": "suvanbanerjee",
+      "name": "Suvan Banerjee",
+      "avatar_url": "https://avatars.githubusercontent.com/u/104707806?v=4",
+      "profile": "http://suvanbanerjee.me",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7,
