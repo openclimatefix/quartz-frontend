@@ -10,6 +10,7 @@ import { getCountryConfig } from "../../config/countries";
 import { geoAliasesFor, isLegacyRegion } from "../../config/geo-aliases";
 import { formatRegionLabel } from "../../lib/domain/region-label";
 import { deltaTopFor } from "../../lib/domain/delta-ramp";
+import { area } from "@turf/turf";
 import type {
   Region,
   RegionSeries,
@@ -631,7 +632,10 @@ export type MapGeometryInputs = {
  *    rather than being allowed to match: the API serves it only for backward compatibility,
  *    the NESO file does not model it, and drawing it would paint the same ground twice.
  */
-export const buildMapGeometry = ({
+export const buildMapGeometry = (inputs: MapGeometryInputs): FeatureCollection =>
+  withRegionAreas(joinShapes(inputs), inputs.shapes);
+
+const joinShapes = ({
   level,
   shapes,
   groupings,
@@ -645,13 +649,13 @@ export const buildMapGeometry = ({
     // grouping name (`"UKPN (East)"`, `"NE Scotland"`), so the id is read straight off the
     // feature. `groupings` is not consulted here — it decides the *values*, not the shapes,
     // and a group with no polygon simply has nowhere to draw.
-    return withRegionAreas({
+    return {
       type: "FeatureCollection",
       features: shapes.features.map((feature) => {
         const id = feature.properties?.[joinProperty];
         return { ...feature, id, properties: { ...feature.properties, id } };
       })
-    });
+    };
   }
 
   const byFeatureKey = new Map<string, Region>();
@@ -661,7 +665,7 @@ export const buildMapGeometry = ({
   }
 
   let unmatched = 0;
-  return withRegionAreas({
+  return {
     type: "FeatureCollection",
     features: shapes.features.map((feature) => {
       const raw = feature.properties?.[joinProperty];
@@ -679,15 +683,23 @@ export const buildMapGeometry = ({
         }
       };
     })
-  });
+  };
 };
 
+// Measured once per boundary file: `loadGeoAsset` hands every caller the same object.
+const areaCache = new WeakMap<FeatureCollection, number[]>();
+
 /** A region can be several polygons, so give each one the whole region's `areaKm2`. */
-const withRegionAreas = (geometry: FeatureCollection): FeatureCollection => {
-  const areaById = new Map<unknown, number>();
-  for (const { id, properties } of geometry.features) {
-    areaById.set(id, (areaById.get(id) ?? 0) + (properties?.areaKm2 ?? 0));
+const withRegionAreas = (geometry: FeatureCollection, shapes: FeatureCollection) => {
+  let areas = areaCache.get(shapes);
+  if (!areas) {
+    areas = shapes.features.map((feature) => area(feature) / 1_000_000);
+    areaCache.set(shapes, areas);
   }
+  const areaById = new Map<unknown, number>();
+  geometry.features.forEach(({ id }, i) => {
+    areaById.set(id, (areaById.get(id) ?? 0) + areas[i]);
+  });
   return {
     ...geometry,
     features: geometry.features.map((feature) => ({
