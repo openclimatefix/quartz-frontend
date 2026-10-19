@@ -236,10 +236,17 @@ export function generateCsv(
       ? pLevelLevels.map((level) => row.pLevelValues[level] ?? "")
       : [row[COLUMN_CONFIG[col].key] ?? ""];
 
-  // A single-observer country has no second generation column, in the file as in the modal.
-  const columns = selectedColumns.filter(
-    (col) => col !== "solarGenerationPvliveUpdated" || labels.observerLabels[1] !== undefined
-  );
+  // A generation column with no observer label is dropped, in the file as in the modal: a
+  // single-observer country has no second one, and neither has a label before the generation
+  // sources have loaded.
+  const observerIndex: Partial<Record<CSVColumn, 0 | 1>> = {
+    solarGenerationPvliveInitial: 0,
+    solarGenerationPvliveUpdated: 1
+  };
+  const columns = selectedColumns.filter((col) => {
+    const index = observerIndex[col];
+    return index === undefined || labels.observerLabels[index] !== undefined;
+  });
   const headers = columns.flatMap(getHeaders);
   const lines = rows.map((row) => joinCsvRow(columns.flatMap((col) => getValues(row, col))));
 
