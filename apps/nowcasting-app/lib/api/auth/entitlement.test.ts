@@ -5,7 +5,6 @@ import {
   COUNTRY_CLAIM_KEY,
   EntitlementClaim,
   PRODUCTS_CLAIM_KEY,
-  PRODUCTS_CLAIM_KEY_NAMESPACED,
   entitledCountryCodes,
   isDevModeEntitlementBypass,
   isEntitled,
@@ -122,23 +121,6 @@ describe("readProductsClaim", () => {
     ]);
   });
 
-  test("reads the namespaced spelling too", () => {
-    // The whole point of the dual read: Auth0 silently drops non-namespaced custom claims
-    // added by an Action, so the bare spelling may not survive and we cannot tell from here.
-    expect(readProductsClaim({ [PRODUCTS_CLAIM_KEY_NAMESPACED]: ["asset-solar"] })).toEqual([
-      "asset-solar"
-    ]);
-  });
-
-  test("prefers the bare spelling when a token somehow carries both", () => {
-    expect(
-      readProductsClaim({
-        [PRODUCTS_CLAIM_KEY]: ["gb-solar"],
-        [PRODUCTS_CLAIM_KEY_NAMESPACED]: ["nl-solar"]
-      })
-    ).toEqual(["gb-solar"]);
-  });
-
   test("normalises casing and whitespace, and drops empties", () => {
     expect(readProductsClaim({ products: [" GB-Solar ", "", "   "] })).toEqual(["gb-solar"]);
   });
@@ -204,10 +186,6 @@ describe("readEntitlementClaim and entitledCountryCodes", () => {
     expect(entitledCountryCodes({ [PRODUCTS_CLAIM_KEY]: [" NL-Solar "] })).toEqual(["NL"]);
   });
 
-  test("read the namespaced products key", () => {
-    expect(entitledCountryCodes({ [PRODUCTS_CLAIM_KEY_NAMESPACED]: ["gb-solar"] })).toEqual(["GB"]);
-  });
-
   test("a non-empty products claim decides alone, ignoring the countries claim", () => {
     const user = { [PRODUCTS_CLAIM_KEY]: ["nl-solar"], [COUNTRY_CLAIM_KEY]: ["GB", "DE"] };
     expect(readEntitlementClaim(user)).toEqual(byProducts(["nl-solar"]));
@@ -256,10 +234,10 @@ describe("readEntitlementClaim and entitledCountryCodes", () => {
 });
 
 describe("isOcfAdmin", () => {
-  test("is true when the products claim contains ocf-admin, in either spelling and any case", () => {
+  test("is true when the products claim contains ocf-admin, in any case", () => {
     expect(OCF_ADMIN_PRODUCT_KEY).toBe("ocf-admin");
     expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY]: ["gb-solar", "ocf-admin"] })).toBe(true);
-    expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY_NAMESPACED]: [" OCF-Admin "] })).toBe(true);
+    expect(isOcfAdmin({ [PRODUCTS_CLAIM_KEY]: [" OCF-Admin "] })).toBe(true);
   });
 
   test("is false for a user without it, and for no user", () => {
