@@ -60,13 +60,15 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   return (
     <div className={HEADER_ROW}>
       <div className={HEADER_TITLE}>
-        <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
+        <span className="min-w-0 text-base leading-tight text-content lg:text-lg dash:text-2xl">
           {titleTooltipText.length ? (
             <ForecastLabel className="" position={"left"} tip={titleTooltipContent}>
-              {title}
+              <span className="truncate">{title}</span>
             </ForecastLabel>
           ) : (
-            title
+            <span className="block truncate" title={title}>
+              {title}
+            </span>
           )}
         </span>
       </div>
