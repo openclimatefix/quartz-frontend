@@ -129,9 +129,9 @@ describe("apiV1Client on 401", () => {
     await apiV1Client.GET("/unauthorised" as any);
     expect(push).toHaveBeenCalledTimes(1);
 
-    // A successful response ends the episode, so a later expiry redirects again.
+    // A successful response ends the episode, so a later expiry redirects again — in the same
+    // page load, with no fresh module state to lean on.
     await apiV1Client.GET("/countries");
-    resetLoginRedirectState();
     await apiV1Client.GET("/unauthorised" as any);
     expect(push).toHaveBeenCalledTimes(2);
   });
