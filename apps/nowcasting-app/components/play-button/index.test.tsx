@@ -295,4 +295,31 @@ describe("reaching the end", () => {
     });
     expect(getGlobalState("selectedISOTime")).toBe(START);
   });
+
+  test("a range that moves mid-playback is the one the loop uses", () => {
+    // A data refresh while playing shifts the chart's window; the running interval must loop
+    // over the new one, not the window as it stood when play was pressed.
+    const newStart = addMinutesToISODate(START, 60);
+    const newEnd = addMinutesToISODate(END, 60);
+    const { rerender } = render(<PlayButton startTime={START} endTime={END} />);
+    act(() => setGlobalState("selectedISOTime", END));
+
+    act(() => {
+      fireEvent.click(screen.getByRole("button", { name: "Play" }));
+    });
+    rerender(<PlayButton startTime={newStart} endTime={newEnd} />);
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    // Old END sits inside the new window, so it steps on instead of looping to the old START.
+    expect(getGlobalState("selectedISOTime")).toBe(
+      addMinutesToISODate(END, getPlaybackStrideMinutes())
+    );
+
+    act(() => setGlobalState("selectedISOTime", newEnd));
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(getGlobalState("selectedISOTime")).toBe(newStart);
+  });
 });
