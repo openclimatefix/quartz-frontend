@@ -101,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
         <a
           className="flex h-6 self-center w-auto"
           target="_blank"
-          href="https://quartz.solar/"
+          href="https://openclimatefix.org/"
           rel="noreferrer"
         >
           <img

@@ -207,7 +207,7 @@ export const downloadNationalCsv = (
   a.href = url;
 
   const now = DateTime.now().toLocal().toFormat("yyyy-MM-dd_HH-mm-ssZZZ");
-  a.download = `Quartz_National_${now}.csv`;
+  a.download = `OCF_Energy_National_${now}.csv`;
 
   document.body.appendChild(a);
   a.click();

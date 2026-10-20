@@ -225,9 +225,9 @@ const SolarSiteChart: FC<{
                 information, please get in touch at{" "}
                 <a
                   className={"underline underline-offset-4 decoration-solar"}
-                  href="mailto:quartz.support@openclimatefix.org"
+                  href="mailto:support@ocf.energy"
                 >
-                  quartz.support@openclimatefix.org
+                  support@ocf.energy
                 </a>
               </p>
             </blockquote>
