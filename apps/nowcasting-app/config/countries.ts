@@ -1,0 +1,738 @@
+import type { RegionNameStyle } from "../lib/domain/region-label";
+import type { ProductKey } from "../lib/api/auth/entitlement";
+
+// The static half of a country's configuration.
+//
+// The split is deliberate and the rule is one-way: anything `GET /countries` can tell us
+// (display name, capacity, centroid, region types, hierarchy levels, forecast models,
+// generation observers) is read from the manifest at runtime and must never appear here.
+// What lands here is only what the API cannot know — the viewer's timezone and locale, the
+// map's default view, where the boundary assets live, which client-side groupings exist,
+// and which Auth0 role grants access.
+//
+// Adding a country should be one entry in `COUNTRY_CONFIG` plus its geo assets. That is the
+// property Phase 6 (Germany) is a test of, so resist putting anything country-conditional
+// anywhere else.
+//
+// **We do not discriminate between countries in code.** A country is added by configuration
+// and displayed from configuration plus the manifest — no `if (country === "DE")`, no
+// per-country component, no per-country branch in a hook, no country name in a `switch`.
+//
+// Country-specific *config* is the sanctioned lever and belongs here: `geo.gsp.label` is
+// GB-only and entirely correct, because it is declared data — visible in review, inert for
+// every other country. The line is declared data versus executed branching. If something
+// cannot be expressed as a field in this file, that is the signal the abstraction is too
+// narrow: widen the config rather than special-casing the country at the call site.
+
+/**
+ * How a region name from the API is transformed before it is matched against the GeoJSON
+ * feature property. GB v1 region names are lowercase codes (`citr_1`, and pipe-joined
+ * composites like `actl_2|cbnk_h`) while `properties.GSPs` spells the same scheme in
+ * uppercase, so a plain case fold matches 345/349 features whole-string — no pipe-splitting
+ * and no fuzzy matching (verified against the live API, 2026-08-04).
+ */
+export type GeoJoinTransform = "lowercase" | "uppercase" | "none";
+
+/**
+ * Boundary geometry for one region type. `url` is a declaration, not a promise that the
+ * file exists yet — Phase 5 moves the boundaries under `public/geo/{country}/`; until then
+ * these paths 404 and nothing fetches them.
+ */
+export type GeoLayerConfig = {
+  url: string;
+  /** GeoJSON feature property carrying the region key. */
+  joinProperty: string;
+  joinTransform?: GeoJoinTransform;
+  /**
+   * Display label, overriding the manifest's for this country's region type.
+   *
+   * The manifest is normally authoritative for labels, and countries that want its wording
+   * simply omit this. It exists because a label is a *product* decision the API cannot make:
+   * GB says "GSP" throughout, where the manifest spells the type "Grid Supply Point".
+   *
+   * Being registry-side also makes it available synchronously. A label taken from the
+   * manifest cannot render until the manifest loads, so a control that shows one flashes the
+   * `fallbackLabel` derivation first ("Gsp") and then swaps — which is what this avoids.
+   */
+  label?: string;
+  /**
+   * How this region type's *individual region names* are written for display.
+   *
+   * `Region.label` comes from the API's `metadata.full_name`, falling back to the raw `name`.
+   * The fallback is right for a region type whose names are codes — GB's `citr_1` is not a
+   * word, and casing it produces "Citr_1" rather than English — and wrong for one whose names
+   * are already the English, served lowercased because that is the boundary join's key. NL's
+   * provinces are the latter: `noord-brabant` is a proper noun the API happens to lowercase.
+   *
+   * Nothing can distinguish those two by inspection, which is why it is declared here rather
+   * than guessed at the point of display. Omitted means `"raw"`, so this is invisible to every
+   * region type that does not opt in. See `lib/domain/region-label.ts`.
+   */
+  regionNameStyle?: RegionNameStyle;
+  /** Map zoom band this region type occupies. See `minZoom`/`maxZoom` note below. */
+  minZoom?: number;
+  maxZoom?: number;
+};
+
+/**
+ * A region type the API does not model, synthesised client-side by grouping members of a
+ * real one. GB's DNO and NG-zone levels are the only instances; v1 offers `national`,
+ * `gsp` and `province` and nothing else. Keeping them here rather than in the generic
+ * layer is what stops the GB grid hierarchy leaking back into the shared model.
+ */
+export type DerivedRegionTypeConfig = {
+  /** Region type whose regions are grouped, e.g. `"gsp"`. */
+  source: string;
+  /** Name-keyed grouping file (regenerated from gsp_id in Phase 5). */
+  groupings: string;
+  label: string;
+  /**
+   * Hierarchy depth on the manifest's scale. `level` is sparse there by design — 0 for
+   * national, 10 for gsp/province — precisely to leave room for these in between.
+   */
+  level: number;
+  /**
+   * Boundary geometry for the derived level's own polygons.
+   *
+   * Required, not optional: a derived level with a grouping file and no polygons to draw it
+   * on cannot be rendered, so the type refuses to express one. GB's DNO and NG-zone shapes
+   * had nowhere to be declared before Phase 5 — they were `require`d straight into the
+   * bundle from `data/` — which is why this field arrives with the assets rather than with
+   * the registry.
+   */
+  geometry: GeoLayerConfig;
+  minZoom?: number;
+  maxZoom?: number;
+};
+
+/**
+ * The five MW thresholds the map's six opacity bands step at.
+ *
+ * A tuple, not `number[]`, because the band count is fixed by `BAND_OPACITIES` in
+ * `components/map/feature-state.ts` (six opacities, five boundaries between them) and the
+ * legend draws one pill per band. A country that supplied four or six would produce a map and
+ * a legend that quietly disagreed about which band a value is in, which is exactly the class
+ * of failure this whole field exists to remove. The type refuses it instead.
+ */
+export type MapBandThresholds = readonly [number, number, number, number, number];
+
+/**
+ * How much power makes a region dark, per country.
+ *
+ * These used to be two constants in `feature-state.ts` (`MW_THRESHOLDS_GSP`,
+ * `MW_THRESHOLDS_GROUPED`) applied to every country, and they were calibrated to GB: a single
+ * GSP tops out around 450 MW, a DNO/zone grouping around 4.5 GW. Since Phase 6 Track F the map
+ * draws every enabled country at once, so NL's provinces were banded on GB's GSP scale — a
+ * province producing 1.3 GW normally landed in the same top band as everything else and the
+ * whole country rendered flat, reading as "producing almost nothing". Percentage mode was
+ * unaffected, because a fraction of capacity is genuinely country-agnostic.
+ *
+ * Two tiers, because a country can be shown at two magnitudes:
+ *
+ *  - `region` — one region as the API serves it (a GB GSP, an NL province).
+ *  - `grouped` — a client-side rollup of many of them (GB's DNO and NG-zone levels), or
+ *    `null` for a country with no `derivedRegionTypes`.
+ *
+ * `null` rather than an omitted field, and rather than falling back to `region`: a country
+ * without a grouped tier can never have a grouped feature on the map (the flag comes from
+ * `AggregationLevel.derived`, and the levels come from this same registry), so the honest
+ * value is "there is no such thing here". Writing it explicitly is what stops the next country
+ * silently inheriting GB's 4.5 GW ceiling the way NL inherited its 450 MW one.
+ *
+ * MW mode and capacity mode no longer share one scale. They did, on the reasoning that both
+ * are megawatts of the same region — but output peaks at a fraction of capacity, so a ramp
+ * sized to output saturates on every region the moment it is asked to draw capacity. DE made
+ * it plain: a 13.5 GW top against four TSOs holding 7.9-21.5 GW painted the whole country one
+ * flat colour. `capacityTop` is where the capacity ramp saturates instead — the country's
+ * largest region, rounded up.
+ */
+export type MapBandsConfig = {
+  /** Thresholds for one API-served region. */
+  region: MapBandThresholds;
+  /** Thresholds for a client-side grouping, or `null` where the country has none. */
+  grouped: MapBandThresholds | null;
+  /**
+   * Where the CAPACITY ramp saturates, in MW: `region` for an API-served region, `grouped`
+   * for a client-side rollup (`null` where the country has no grouped tier).
+   */
+  capacityTop: { region: number; grouped: number | null };
+};
+
+export type MapDefaults = {
+  center: { lng: number; lat: number };
+  zoom: number;
+  minZoom: number;
+  maxZoom: number;
+  /**
+   * The country's extent, `[west, south, east, north]`, for framing the *enabled set*.
+   *
+   * `center`/`zoom` frame one country and cannot be combined: two countries' centres average
+   * to a point in the sea at a zoom that fits neither. A bounding box unions, so the camera
+   * can fit whatever the user has enabled.
+   *
+   * Config rather than computed from the geometry, because the geometry is fetched on demand
+   * (Phase 5) and the camera should not wait on ~9 MB of boundaries to know where a country
+   * is. Approximate on purpose: it frames a view, it never decides what is drawn or joined.
+   */
+  bounds: [number, number, number, number];
+};
+
+/** A non-data map layer, e.g. GB's network constraints. */
+export type OverlayConfig = {
+  id: string;
+  url: string;
+  label?: string;
+};
+
+/**
+ * One forecast line on the national chart.
+ *
+ * `key` is the `ChartData` key the series is written under, which is also the `dataKey` the
+ * `<Line>`s in `remix-line.tsx` and the legend items in `ChartLegend.tsx` bind to. `model` is
+ * the v1 model name, or `null` to send no `model` parameter at all and let the API apply the
+ * region type's default (see "No hook defaults model from the manifest" in the contract).
+ *
+ * This is a **curated** list, deliberately not derived from the manifest: GB's national region
+ * type offers 12 models and the chart shows six chosen ones, in a chosen order, with chosen
+ * colours. Deriving it would put every model on the chart.
+ */
+export type ForecastSeriesConfig = {
+  /** `ChartData` key, e.g. `"FORECAST"`, `"SAT_ONLY"`. */
+  key: string;
+  /** v1 model name, or `null` for the region type's default. */
+  model: string | null;
+  /** Human label — the legend and tooltip text for this line. */
+  label: string;
+  /**
+   * Legend presentation. Omitted for a series that is fetched and charted but has no legend
+   * entry of its own — which is the case today for the two PVNet comparison series, exactly
+   * as it was before this migration.
+   *
+   * The primary series (the first entry) also omits it: its legend entry is fixed, because it
+   * is rendered twice at different breakpoints with different copy.
+   */
+  legend?: {
+    /** Tailwind text colour, matching this line's stroke in `remix-line.tsx`. */
+    iconClasses: string;
+    /** Weather inputs ticked in the legend tooltip. */
+    tooltipInputs: ForecastInput[];
+  };
+};
+
+/** The weather inputs a forecast model can consume. Mirrors `DataInput` in the legend tooltip. */
+export type ForecastInput = "ECMWF" | "MET_OFFICE" | "SAT";
+
+/** How power figures are written. Stored values are always MW. */
+export type PowerUnit = "MW" | "GW";
+
+/** The model name to send for a series, or `undefined` for the region type's default. */
+export const forecastSeriesModel = (series: ForecastSeriesConfig): string | undefined =>
+  series.model ?? undefined;
+
+/**
+ * Whether a timestamp names the end or the start of the period it covers.
+ *
+ * GB labels period-end, following PV_Live — a slot labelled 16:00 covers 15:30–16:00, which
+ * is what `ChartInfo.tsx`'s legend tooltip tells users. It is a per-country convention rather
+ * than a universal one, and it decides which way `lib/time/cursor.ts` rounds the shared
+ * cursor onto a country's grid: period-end rounds up, period-start rounds down. Getting it
+ * wrong is off by a whole period and looks entirely plausible on screen, so it is declared
+ * here rather than assumed at the call site.
+ */
+export type SlotLabelling = "period-end" | "period-start";
+
+export type CountryConfig = {
+  /** ISO code as the API spells it, uppercase. Matches `CountryCapability.code`. */
+  code: string;
+  /**
+   * The country's name in full, for headings that name what you are looking at. The chart
+   * header used to say "National", which is true of every country and so identifies none —
+   * and it sat next to a country picker doing the identifying instead.
+   *
+   * Config rather than a lookup in a component, per the no-country-branching rule at the top
+   * of this file.
+   */
+  displayName: string;
+  /**
+   * Whether the country is on sale. Omitted means `"live"`. `"preview"` marks a country that is
+   * listed so prospects can see it exists but is not yet available to subscribe to: the header
+   * toggle explains that on hover with `previewMessage` instead of the generic entitlement
+   * wording. Declared here because "coming soon" is a product decision the API cannot make.
+   */
+  availability?: "preview" | "live";
+  /**
+   * What the header toggle says on hover for a `"preview"` country. Optional: without it the
+   * toggle builds "<displayName> coming soon. Contact us for early access.".
+   */
+  previewMessage?: string;
+  /** IANA zone. Replaces the `Europe/London` hardcoded through every date helper. */
+  timezone: string;
+  /**
+   * Minutes between the country's published values — its step on the time axis.
+   *
+   * A per-country fact, not an app-wide constant: GB publishes every 30 minutes, NL every 15
+   * (`lib/api/v1/__fixtures__/gb-gsp-forecasts-period.json`,
+   * `nl-province-forecasts-period.json`). The shared cursor runs on the *finest* enabled
+   * country's cadence and each country resolves it to its own slot; see `lib/time/cursor.ts`.
+   *
+   * **Must divide 60.** The grid is anchored to the UTC hour, so a cadence that does not
+   * divide an hour would drift across the day. Pinned in `cursor.test.ts`.
+   */
+  cadenceMinutes: number;
+  /** See `SlotLabelling`. Decides which way the cursor rounds onto this country's grid. */
+  slotLabelling: SlotLabelling;
+  /**
+   * What this country's market calls one period of its cadence, used as the CSV export's period
+   * column header. Optional: a country without it gets "Period". Set only where the term is
+   * confirmed (GB's "Settlement Period").
+   */
+  periodLabel?: string;
+  /**
+   * Observer name (the manifest's generation source `name`) to the label used in the CSV
+   * export's generation column headers. Exists so that a country's exported headers stay stable
+   * for people who parse the file. A country without it, or an observer missing from it, uses
+   * the manifest's label.
+   */
+  csvObserverLabels?: Record<string, string>;
+  /** BCP-47 tag for number and date formatting at the render boundary. */
+  locale: string;
+  map: MapDefaults;
+  /** The map's opacity bands, in MW. See `MapBandsConfig`. */
+  mapBands: MapBandsConfig;
+  /**
+   * Which generation observer the map paints against, by its manifest `name`.
+   *
+   * The map shows one instant, and every region in that instant must be read against the
+   * *same* observer or the frame is not comparable with itself — so this is one name per
+   * country, not a per-region preference.
+   *
+   * It exists because the map used to take `generationSources.data[0]` — "first in the
+   * manifest", which nobody chose and which happens to be `pvlive_in_day` (PV Live Estimated)
+   * for GB. That made a serving order into a data decision: adding a GB observer, or the API
+   * reordering its list, would silently repaint every delta on the map with no diff anywhere
+   * to explain it. NL has one observer, which is why it never bit.
+   *
+   * Naming it here does not make the choice *right* — GB's "most up-to-date actual" is
+   * sometimes Updated rather than Estimated, and the chart already resolves it that way
+   * (`docs/forecast-delta-merge.md` Part 2). It makes the choice *visible*, and it is what
+   * the legend and popup now name on screen, so the map can no longer be read as showing an
+   * actual it is not showing. Choosing per timestep is Delta v2's job.
+   *
+   * A name the manifest does not carry falls back to the first entry rather than sending an
+   * observer the API will 400 on — see `resolveMapObserver`.
+   */
+  mapObserver: string;
+  /** Keyed by region type as the manifest spells it. */
+  geo: Record<string, GeoLayerConfig>;
+  /** Keyed by the synthetic region type name. Empty for countries with no groupings. */
+  derivedRegionTypes: Record<string, DerivedRegionTypeConfig>;
+  /**
+   * The forecast lines the national chart draws, in the order they are fetched and merged.
+   *
+   * The first entry is the primary series: it writes `FORECAST`/`PAST_FORECAST` and is the
+   * one the p-level bands, the header numbers and the staleness indicator are taken from.
+   * Everything after it is a comparison model.
+   *
+   * The observed-generation lines are NOT here — they come from `useGenerationSources(scope)`
+   * at runtime, because observers are a manifest fact (GB has two, NL has one).
+   */
+  nationalChartSeries: ForecastSeriesConfig[];
+  overlays: OverlayConfig[];
+  /**
+   * Who publishes the observed generation, for attribution in the "how to read this" (i).
+   * `null` where no public attribution has been confirmed — the (i) then states the country's
+   * period convention without naming a source, rather than borrowing another country's.
+   */
+  publisher: { name: string; url: string } | null;
+  /** Seasonal norm dataset, or `null` where one has not been produced. */
+  seasonalNorms: string | null;
+  /**
+   * The unit every power figure is *shown* in for this country. Values stay MW everywhere
+   * inside the app; this is a display decision and nothing else.
+   *
+   * GB's GSPs peak in the hundreds of MW, where NL's provinces and DE's TSOs run to
+   * thousands — "13,500 MW" is a number you have to count the digits of. One setting per
+   * country for now: it keeps the map, the chart and the headline saying the same thing,
+   * which is the point. Split it per region type when a country needs two.
+   */
+  displayUnit: PowerUnit;
+  /**
+   * This country's product key. It decides entitlement — a user may use the country when
+   * their Auth0 `products` claim contains it (lib/api/auth/entitlement.ts) — and which status
+   * the banner shows for it. Optional: a country without one is never entitled by products.
+   * A product the Status API does not report on (DE's today) contributes no status row. See
+   * `config/statusProducts.ts`.
+   */
+  product?: ProductKey;
+  /** Auth0 role id granting this country; the country claim is derived from these. */
+  auth0Role: string;
+};
+
+// The zoom bands below mirror `AGGREGATION_LEVEL_MIN_ZOOM`/`MAX_ZOOM` in `constant.ts`,
+// which are GB-shaped enums. They are duplicated rather than imported because the enums
+// are keyed by GB aggregation level (NATIONAL/REGION/GSP/SITE) and are due to be replaced
+// by a country-derived `{ regionType, level, label, minZoom, maxZoom }` list built from
+// this registry plus the manifest. Deriving that list is a later agent's job; expressing
+// the bands per region type here is what makes it possible.
+export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
+  GB: {
+    code: "GB",
+    displayName: "Great Britain",
+    timezone: "Europe/London",
+    locale: "en-GB",
+    cadenceMinutes: 30,
+    // The settlement period, and PV_Live's convention: 16:00 covers 15:30-16:00. Stated to
+    // users in `ChartInfo.tsx`'s legend tooltip.
+    slotLabelling: "period-end",
+    periodLabel: "Settlement Period",
+    csvObserverLabels: {
+      pvlive_in_day: "PVLive Initial",
+      pvlive_day_after: "PVLive Updated"
+    },
+    // The centre and zoom currently hardcoded in `globalState.tsx`'s initial state.
+    map: {
+      center: { lng: -2.3175601, lat: 54.70534432 },
+      zoom: 5,
+      minZoom: 0,
+      maxZoom: 14,
+      // Mainland GB plus the Northern Isles; excludes NI, which the GSP set does not cover.
+      bounds: [-8.65, 49.86, 1.77, 60.86]
+    },
+    // Unchanged from the constants these replaced, so the GB map looks exactly as it did.
+    // For the record of how they were arrived at (`lib/api/v1/__fixtures__/gb-regions-gsp.json`,
+    // 338 GSPs, 22.6 GW installed): the largest GSP carries 654 MW and the 99th percentile
+    // 507 MW, so a 450 MW top band saturates the handful of biggest GSPs at midday and the
+    // steps below it spread the rest. The grouped set is exactly ten times the region set.
+    mapBands: {
+      region: [50, 150, 250, 350, 450],
+      grouped: [500, 1500, 2500, 3500, 4500],
+      // The largest GSP holds 654 MW (the 99th percentile 507), so 700 covers every GSP with
+      // a little headroom for a capacity register that only grows. The grouped figure is the
+      // largest DNO licence area's share of the 22.6 GW total, rounded up — REVISIT when a
+      // capacity-by-DNO number is to hand; it is an estimate, unlike the region one.
+      capacityTop: { region: 700, grouped: 4000 }
+    },
+    // PV Live Estimated — the in-day observer. This is what the map has always drawn (it was
+    // `[0]` of the manifest); naming it changes no pixels, only who decided it.
+    mapObserver: "pvlive_in_day",
+    geo: {
+      national: {
+        url: "/geo/gb/national.json",
+        joinProperty: "name",
+        minZoom: 0,
+        maxZoom: 5
+      },
+      gsp: {
+        url: "/geo/gb/gsp.json",
+        joinProperty: "GSPs",
+        joinTransform: "lowercase",
+        // Brad's call: GB reads "GSP" throughout, not the manifest's "Grid Supply Point".
+        label: "GSP",
+        minZoom: 7,
+        maxZoom: 8.5
+      }
+    },
+    derivedRegionTypes: {
+      dno: {
+        source: "gsp",
+        groupings: "/geo/gb/dno-groupings.json",
+        label: "DNO",
+        level: 5,
+        // The 14 licence-area polygons carry `LongName` ("UKPN (East)"), which is spelled
+        // exactly as `dno-groupings.json` keys its groups — hence no transform. The
+        // adjacent `Name` field is the single-letter GSP-group code (`_A`) and joins
+        // nothing.
+        geometry: { url: "/geo/gb/dno.json", joinProperty: "LongName" },
+        minZoom: 5,
+        maxZoom: 7
+      },
+      zone: {
+        source: "gsp",
+        groupings: "/geo/gb/zone-groupings.json",
+        label: "Zone",
+        level: 6,
+        // 19 NG zones keyed on `id` ("NE Scotland"), again matching the grouping keys
+        // verbatim. Both grouping files key on the human-readable name because they predate
+        // v1 entirely; only their *values* were numeric gsp_ids, and Phase 5 re-keyed those.
+        geometry: { url: "/geo/gb/zone.json", joinProperty: "id" },
+        minZoom: 5,
+        maxZoom: 7
+      }
+    },
+    // The six lines the GB chart drew under v0, in the same order, with the v1 model names.
+    // The API owner confirmed the names on 2026-09-29.
+    //
+    //   v0 (+ trend_adjuster_on=true)        v1
+    //   blend                             -> blend
+    //   pvnet_intraday_ecmwf_only         -> ecmwf
+    //   pvnet_day_ahead                   -> pvnet_day_ahead
+    //   pvnet_intraday                    -> pvnet_intraday
+    //   pvnet_intraday_met_office_only    -> mo
+    //   pvnet_intraday_sat_only           -> sat_8h
+    //
+    // Adjustment is the `adjusted` request parameter (always true; see `queries.ts`).
+    nationalChartSeries: [
+      { key: "FORECAST", model: "blend", label: "OCF" },
+      {
+        key: "INTRADAY_ECMWF_ONLY",
+        model: "ecmwf",
+        label: "ECMWF-only",
+        legend: { iconClasses: "text-series-ecmwf", tooltipInputs: ["ECMWF"] }
+      },
+      // `pvnet_day_ahead` and `pvnet_intraday` used to sit here, carried over from v0's six.
+      // Neither had a `legend` block (so the rail never offered them) and neither had a `<Line>`
+      // in `remix-line.tsx` (so nothing could draw them) — two requests per national load whose
+      // responses were parsed and discarded. Removed rather than completed, on Brad's call: they
+      // are most of what the blend is made of, so they track the yellow line closely enough that
+      // a reader gains nothing for the extra ink.
+      {
+        key: "MET_OFFICE_ONLY",
+        model: "mo",
+        label: "Met Office-only",
+        legend: { iconClasses: "text-series-metOffice", tooltipInputs: ["MET_OFFICE"] }
+      },
+      {
+        key: "SAT_ONLY",
+        model: "sat_8h",
+        label: "Satellite-only",
+        legend: { iconClasses: "text-series-satellite", tooltipInputs: ["SAT"] }
+      }
+    ],
+    overlays: [{ id: "constraints", url: "/geo/gb/ng-constraints.json", label: "Constraints" }],
+    publisher: { name: "PV_Live", url: "https://www.solar.sheffield.ac.uk/pvlive/" },
+    seasonalNorms: "/data/gb/national-metrics.json",
+    displayUnit: "MW",
+    product: "gb-solar",
+    auth0Role: "GB_ROLE_ID"
+  },
+  NL: {
+    code: "NL",
+    displayName: "Netherlands",
+    timezone: "Europe/Amsterdam",
+    locale: "nl-NL",
+    cadenceMinutes: 15,
+    // **Confirmed** by the data provider (NED, via Peter): NL timestamps label the *start* of
+    // their period, the opposite of GB. NL's 16:00 covers 16:00–16:15; GB's 16:00 covers
+    // 15:30–16:00. This field was previously assumed to match GB, which was the no-change
+    // answer rather than a finding, and made every NL lookup one 15-minute slot late —
+    // plausible on screen, wrong. `lib/time/cursor.ts` turns the field into floor-vs-ceiling,
+    // so flipping it here is the whole change.
+    slotLabelling: "period-start",
+    // Centred on the manifest's NL centroid (52.13, 5.29) at a zoom that fits the whole
+    // country — NL is roughly a quarter of GB's span, hence the tighter default.
+    map: {
+      center: { lng: 5.29, lat: 52.13 },
+      zoom: 6.5,
+      minZoom: 0,
+      maxZoom: 14,
+      // Mainland NL; excludes the Caribbean municipalities, which carry no solar regions.
+      bounds: [3.31, 50.75, 7.23, 53.56]
+    },
+    // GB's region bands times eight, which is the ratio between the two countries' largest
+    // single regions. NL has 12 provinces holding 25.1 GW (more than GB's 22.6 GW over 338
+    // GSPs), so a province is a DNO-sized object, not a GSP-sized one.
+    //
+    // Derivation, from `lib/api/v1/__fixtures__/nl-regions-province.json` and
+    // `nl-province-forecasts-period.json`:
+    //   - Installed capacity per province runs 943 MW (Zeeland) to 4,437 MW (Noord-Brabant).
+    //   - Peak output in the recorded day is ~0.8 x capacity (Noord-Brabant 3,654 MW,
+    //     Drenthe 1,313 MW, Zeeland 753 MW), so the biggest province peaks near 3.6 GW.
+    //   - 3,600 / 450 = 8, so the whole GB shape scales by 8 and keeps its proportions:
+    //     the top band saturates the largest province at midday, and the twelve provinces'
+    //     midday values spread across bands two to five rather than piling into one.
+    // Capacity mode uses the same numbers: 943-4,437 MW also spans these bands sensibly.
+    //
+    // The ratio is the claim here, not five hand-picked numbers — if NL's installed base
+    // grows, rescale from the largest province's peak the same way.
+    // Noord-Brabant holds 4,437 MW of the 25.1 GW, so the capacity ramp tops out at 4.5 GW.
+    mapBands: {
+      capacityTop: { region: 4500, grouped: null },
+      region: [400, 1200, 2000, 2800, 3600],
+      // No `derivedRegionTypes`, so no grouped tier can ever be asked for. Explicitly absent
+      // rather than inherited: see `MapBandsConfig`.
+      grouped: null
+    },
+    // NL's only observer, so this names what the fallback would have picked anyway. Stated
+    // rather than left to the fallback: a second NL observer should be a config decision, not
+    // a silent change of meaning the day the manifest grows one.
+    mapObserver: "ned_nl",
+    geo: {
+      national: {
+        url: "/geo/nl/national.json",
+        joinProperty: "name",
+        minZoom: 0,
+        maxZoom: 6
+      },
+      province: {
+        url: "/geo/nl/province.json",
+        joinProperty: "name",
+        joinTransform: "lowercase",
+        // v1 serves these names lowercased ("noord-brabant") and supplies no `full_name`, so
+        // `Region.label` falls back to the raw name and a province reached the chart title in
+        // lower case. They are proper nouns, unlike GB's GSP codes — hence the opt-in.
+        regionNameStyle: "titleCase",
+        minZoom: 6,
+        maxZoom: 14
+      }
+    },
+    // No client-side groupings: the API's province level is the only sub-national one NL
+    // has, and `ned_nl` is its single generation observer.
+    derivedRegionTypes: {},
+    // NL national offers `blend` and `ecmwf_mo_sat_uncurtailed` (each also
+    // available adjusted). Only the blend is charted: the second is the blend's single input, so drawing
+    // both would be a comparison of a series against itself. Nobody has asked for the NL
+    // comparison lines GB has; add them here when they do.
+    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "OCF" }],
+    overlays: [],
+    // NED publishes NL's generation (it is the source of the period-start convention above),
+    // but no public attribution page has been confirmed for it — so the (i) states NL's
+    // convention without a link rather than inventing one.
+    publisher: null,
+    seasonalNorms: null,
+    displayUnit: "GW",
+    product: "nl-solar",
+    auth0Role: "NL_ROLE_ID"
+  },
+  DE: {
+    code: "DE",
+    displayName: "Germany",
+    availability: "preview",
+    previewMessage: "Germany coming soon. Contact us for early access.",
+    timezone: "Europe/Berlin",
+    locale: "de-DE",
+    // Forecast and ENTSO-E generation both arrive every 15 minutes.
+    cadenceMinutes: 15,
+    // **UNCONFIRMED.** Period-start is what ENTSO-E's Transparency Platform (and entsoe-py)
+    // label by, and matches NL, but nobody has said how the DE pipeline stores it. A wrong
+    // value here is one slot out everywhere and looks fine on screen; see NL's note.
+    slotLabelling: "period-start",
+    // Centred on the manifest's DE centroid (51.16, 10.45). DE is about 2.4x NL's width, so
+    // the default zoom is NL's 6.5 less log2(2.4). Bounds are the TSO boundary file's extent.
+    map: {
+      center: { lng: 10.45, lat: 51.16 },
+      zoom: 5.25,
+      minZoom: 0,
+      maxZoom: 14,
+      bounds: [5.87, 47.27, 15.04, 55.06]
+    },
+    // Scaled from GB's region bands the same way NL's were: by the largest region's peak.
+    // TenneT holds 21.5 GW of the 58.2 GW, and DE's national peak runs about 0.65 of
+    // capacity (38.0 GW in ENTSO-E's 2026-09-16 day), so TenneT peaks near 14 GW:
+    // 13,500 / 450 = 30. The other TSOs (7.9-15.4 GW installed) spread across the lower bands.
+    mapBands: {
+      region: [1500, 4500, 7500, 10500, 13500],
+      grouped: null,
+      // TenneT holds 21,514 MW of the 58.2 GW; 22 GW is that rounded up.
+      capacityTop: { region: 22000, grouped: null }
+    },
+    // DE's only observer.
+    mapObserver: "entsoe_de",
+    // Boundaries: SMARD's control-area files (BNetzA, 2012, GeoNutzV licence), simplified.
+    // The national outline is the four areas dissolved.
+    geo: {
+      national: {
+        url: "/geo/de/national.json",
+        joinProperty: "name",
+        minZoom: 0,
+        maxZoom: 5
+      },
+      tso: {
+        url: "/geo/de/tso.json",
+        // Features are named as SMARD writes them ("TenneT"); v1 serves them lowercased.
+        joinProperty: "name",
+        joinTransform: "lowercase",
+        label: "TSO",
+        // v1 serves no `full_name`, and title case would give "Tennet" and "Transnetbw".
+        regionNameStyle: {
+          names: {
+            "50hertz": "50Hertz",
+            amprion: "Amprion",
+            tennet: "TenneT",
+            transnetbw: "TransnetBW"
+          }
+        },
+        minZoom: 5,
+        maxZoom: 14
+      }
+    },
+    derivedRegionTypes: {},
+    // The single-source lines reuse GB's keys, so they share GB's colours and legend
+    // entries. Not charted: `ecmwf_pv` (two inputs, not one) and `pv`, which has no line
+    // or colour yet.
+    nationalChartSeries: [
+      { key: "FORECAST", model: "blend", label: "OCF" },
+      {
+        key: "INTRADAY_ECMWF_ONLY",
+        model: "ecmwf",
+        label: "ECMWF-only",
+        legend: { iconClasses: "text-series-ecmwf", tooltipInputs: ["ECMWF"] }
+      },
+      {
+        key: "MET_OFFICE_ONLY",
+        model: "mo",
+        label: "Met Office-only",
+        legend: { iconClasses: "text-series-metOffice", tooltipInputs: ["MET_OFFICE"] }
+      },
+      {
+        key: "SAT_ONLY",
+        model: "sat_8h",
+        label: "Satellite-only",
+        legend: { iconClasses: "text-series-satellite", tooltipInputs: ["SAT"] }
+      }
+    ],
+    overlays: [],
+    publisher: { name: "ENTSO-E", url: "https://transparency.entsoe.eu/" },
+    seasonalNorms: null,
+    displayUnit: "GW",
+    product: "de-solar",
+    auth0Role: "DE_ROLE_ID"
+  }
+};
+
+/**
+ * Registry lookup, case-insensitive on the code.
+ *
+ * Returns `undefined` rather than throwing or falling back to GB: `/countries` returns
+ * *all* countries by design (so prospects can see what exists), so the manifest can legally
+ * name a country this build has no entry for. That country must stay discoverable — listed,
+ * flagged as unconfigured — not crash the app.
+ */
+export const getCountryConfig = (code: string | null | undefined): CountryConfig | undefined => {
+  if (typeof code !== "string") return undefined;
+  return COUNTRY_CONFIG[code.toUpperCase()];
+};
+
+/** Codes this build carries configuration for. Not the same as the entitled set. */
+export const configuredCountryCodes = (): string[] => Object.keys(COUNTRY_CONFIG);
+
+/**
+ * The order countries are listed in, everywhere they are listed.
+ *
+ * One rule for the header toggle, the chart's country picker and the footer's zone stack.
+ * Before this they had three: the header took the manifest's order, the picker took the order
+ * the user happened to enable them in — so it *reordered as you used it* — and the footer
+ * sorted by UTC offset. Three surfaces, three answers, on the same screen.
+ *
+ * The registry's declaration order is the source, so the answer is stable, reviewable in one
+ * file, and does not move when a user toggles something or when the API changes what it
+ * returns. It reads west to east today (GB, then NL), and it should stay that way as countries
+ * are added — but the *order in this file* is what decides, not the offsets: a rule derived
+ * from offsets silently reorders itself twice a year at DST, which is not something a
+ * navigation control should do.
+ *
+ * Codes with no registry entry sort last, alphabetically. The header lists every country the
+ * API serves — including ones this build cannot draw — so that case is real, not defensive.
+ */
+const REGISTRY_ORDER = Object.keys(COUNTRY_CONFIG);
+
+export const countryOrderIndex = (code: string | null | undefined): number => {
+  const index = REGISTRY_ORDER.indexOf((code ?? "").toUpperCase());
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+};
+
+/** `codes` in registry order, unconfigured ones last. Does not mutate the input. */
+export const sortCountryCodes = <T>(items: readonly T[], codeOf: (item: T) => string): T[] =>
+  [...items].sort((a, b) => {
+    const byRegistry = countryOrderIndex(codeOf(a)) - countryOrderIndex(codeOf(b));
+    return byRegistry !== 0 ? byRegistry : codeOf(a).localeCompare(codeOf(b));
+  });

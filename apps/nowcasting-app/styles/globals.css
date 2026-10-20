@@ -1,40 +1,102 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "./toastify.css";
+@import "./tokens.css";
 
 .recharts-surface {
   overflow: visible;
 }
 
 .btn {
-  @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-mapbox-black bg-ocf-yellow hover:bg-ocf-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ocf-delta-500;
+  @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-content bg-surface-raised ring-1 ring-inset ring-edge hover:bg-interactive hover:text-content-on-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-interactive;
 }
 
 .btn.btn-outline {
-  @apply inline-flex items-center justify-center px-4 py-2 border border-ocf-gray-700 rounded-full shadow-sm text-sm font-medium text-ocf-gray-700 bg-transparent hover:text-ocf-yellow hover:border-ocf-yellow focus:outline-none;
+  @apply inline-flex items-center justify-center px-4 py-2 border border-content-muted rounded-full shadow-sm text-sm font-medium text-content-muted bg-transparent hover:text-interactive hover:border-interactive focus:outline-none;
 }
 
-.pv-map a.mapboxgl-ctrl-logo, .delta-map a.mapboxgl-ctrl-logo {
+.pv-map a.mapboxgl-ctrl-logo {
   margin-left: 0.5rem;
 }
 
-.pv-map .mapboxgl-popup-content, .delta-map .mapboxgl-popup-content {
-  background: rgba(0,0,0,0.75);
+.pv-map .mapboxgl-popup-content {
+  background: rgba(0, 0, 0, 0.75);
   color: white;
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem 0.5rem 0 0.5rem;
+  border-radius: 0.5rem;
 }
 
-.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip, .delta-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip {
-  border-top-color: rgba(0,0,0,0.5);
+/* The popup anchors on whichever side keeps it clear of the chart and the top edge, so the
+   tip can point any of four ways. Each tip takes the body's colour, and the body squares off
+   the corner the tip meets. */
+.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-content {
+  border-bottom-right-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-content {
+  border-bottom-left-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-top-right .mapboxgl-popup-content {
+  border-top-right-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-top-left .mapboxgl-popup-content {
+  border-top-left-radius: 0;
+}
+.pv-map .mapboxgl-popup-anchor-bottom-right .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-bottom-left .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+  border-top-color: rgba(0, 0, 0, 0.75);
+}
+.pv-map .mapboxgl-popup-anchor-top-right .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-top-left .mapboxgl-popup-tip,
+.pv-map .mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+  border-bottom-color: rgba(0, 0, 0, 0.75);
 }
 
 .mapboxgl-canvas {
   outline: none;
 }
 
-.up-arrow, .down-arrow {
+/* ---- Mapbox's own chrome -------------------------------------------------------------
+ * Only the attribution now. The zoom pair and the reset button were also styled here — a
+ * `--surface` ground, a border, and two `background-image` data URIs re-drawing Mapbox's zoom
+ * glyphs in a hand-copied `#FFFBF5` because a data URI cannot read a CSS variable. All of it
+ * has gone with the buttons themselves, which are React in the control dock now
+ * (`components/shell/map-zoom-controls.tsx`) and inherit the oat from `--interactive` like
+ * every other control.
+ */
+
+/* Attribution. Mapbox's own bar is a translucent white block with a rounded corner, which on
+ * this basemap is a bright card stuck to the bottom edge. No card at all: the text sits
+ * directly on the map at the muted weight, which is where an attribution belongs. It stays
+ * legible — that is a Mapbox terms requirement, not a preference — but it stops being an
+ * object. The logo alongside it keeps Mapbox's own mark untouched. */
+.pv-map .mapboxgl-ctrl-attrib {
+  background: none !important;
+  padding: 0 5px;
+}
+
+.pv-map .mapboxgl-ctrl-attrib.mapboxgl-compact {
+  min-height: 0;
+  border-radius: 0;
+}
+
+.pv-map .mapboxgl-ctrl-attrib-inner,
+.pv-map .mapboxgl-ctrl-attrib a {
+  color: rgb(var(--content-muted));
+  font-size: 10px;
+}
+
+.pv-map .mapboxgl-ctrl-attrib a:hover {
+  color: rgb(var(--content));
+  text-decoration: underline;
+}
+
+.pv-map .mapboxgl-ctrl-attrib-button {
+  display: none;
+}
+
+.up-arrow,
+.down-arrow {
   content: "";
   display: inline-block;
   height: 0;
@@ -45,12 +107,12 @@
 
 .up-arrow {
   border-width: 0 0.4rem 0.7rem;
-  border-bottom-color: theme('colors.ocf-delta.900');
+  border-bottom-color: theme("colors.ocf-delta.900");
 }
 
 .down-arrow {
   border-width: 0.7rem 0.4rem 0;
-  border-top-color: theme('colors.ocf-delta.100');
+  border-top-color: theme("colors.ocf-delta.100");
 }
 
 .chart-data-loading-message:hover .chart-data-loading-endpoints {
@@ -71,15 +133,28 @@
   }
 }
 
+/*
+ * Off is a dark well inside a light rim; on fills that well with solar yellow, since every
+ * toggle today switches a solar layer — revisit when a second source arrives. The track's own
+ * ring is light grey when off and solar when on. The knob is 8px, the height of the inner
+ * track, so it sits flush inside the track's own ring.
+ *
+ * The knob's ring is 1px of the track's own dark surface colour, the same in both
+ * states, so the knob reads as set into a groove in the track. The light grey ring it replaced
+ * sat well on a dark track and smudged on the yellow one (Brad, 2026-10-01).
+ */
 .toggle {
-  @apply inline-flex items-center relative w-4 h-2 rounded-full bg-ocf-yellow
-  border border-ocf-yellow/0 transition-all duration-100 ease-in-out delay-0 cursor-pointer
-  bg-opacity-25 checked:bg-opacity-100 after:-ml-0.5 checked:after:ml-0 checked:after:-mr-1
-  checked:bg-none checked:text-ocf-yellow
+  @apply inline-flex items-center relative w-5 h-2.5 rounded-full bg-surface-sunken
+  border border-content-muted transition-all duration-100 ease-in-out delay-0 cursor-pointer
+  checked:bg-solar checked:border-solar checked:bg-opacity-100
+  after:ml-0
+  checked:bg-none checked:text-solar checked:after:bg-content
   focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-offset-transparent focus:ring-transparent
   after:will-change-transform after:transition-all after:duration-200 after:ease-in-out after:inline-flex
-  after:content-[''] after:bg-white after:border-ocf-gray-300 after:border after:rounded-full after:h-2 after:w-2
-  checked:after:translate-x-full checked:after:border-white;
+  after:content-[''] after:bg-content-secondary after:border-surface-sunken after:border after:rounded-full after:h-[8px] after:w-[8px]
+  /* The travel is the gap the knob leaves: 18px of inner track less its own 8px. A
+     `translate-x-full` moved it by its own width and overshot the end. */
+  checked:after:translate-x-[10px];
 }
 
 .custom-select {
@@ -93,7 +168,7 @@
   height: 100%;
   padding: 0.25em 0.5em 0.25em 0.5em;
   background: transparent;
-  border: 1px solid #FF9736;
+  border: 1px solid #ff9736;
   border-radius: 0.25rem;
   cursor: pointer;
 }
@@ -130,7 +205,7 @@
 /* Works on Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: theme(colors.mapbox-black.700) theme(colors.mapbox-black.600);
+  scrollbar-color: theme(colors.surface.raised) theme(colors.surface.panel);
 }
 
 /* Works on Chrome, Edge, and Safari */
@@ -139,11 +214,11 @@
 }
 
 *::-webkit-scrollbar-track {
-  background: theme(colors.mapbox-black.600);
+  background: theme(colors.surface.panel);
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: theme(colors.mapbox-black.700);
+  background-color: theme(colors.surface.raised);
   border-radius: 20px;
-  border: 3px solid theme(colors.mapbox-black.600);
+  border: 3px solid theme(colors.surface.panel);
 }

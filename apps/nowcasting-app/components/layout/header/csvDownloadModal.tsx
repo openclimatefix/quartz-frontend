@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getNHourForecastLabel } from "../../helpers/csvDownload";
-import { VIEWS } from "../../../constant";
+import { CsvLabels, DEFAULT_CSV_LABELS, getNHourForecastLabel } from "../../helpers/csvDownload";
 import Toggle from "../../Toggle";
 import { CloseButtonIcon } from "../../icons/icons";
 
@@ -21,7 +20,7 @@ const SELECTABLE_COLUMNS: { id: CSVColumn; label: string }[] = [
   { id: "settlementPeriod", label: "Settlement Period" },
   { id: "solarGenerationPvliveInitial", label: "PVLive Initial" },
   { id: "solarGenerationPvliveUpdated", label: "PVLive Updated" },
-  { id: "solarForecast", label: "Current Forecast" },
+  { id: "solarForecast", label: "OCF Forecast" },
   { id: "pLevels", label: "Forecast P-levels" },
   { id: "nForecast", label: "N Forecast" },
   { id: "delta", label: "Delta" }
@@ -32,7 +31,10 @@ interface Props {
   onClose: () => void;
   onDownload: (cols: CSVColumn[]) => void;
   nHourForecast: number;
-  view: VIEWS;
+  /** Whether a comparison is active — the delta column only makes sense against a B side. */
+  comparisonActive: boolean;
+  /** The period and observer labels the file uses, so the modal and the file agree. */
+  labels?: CsvLabels;
 }
 
 export const CSVDownloadModal: React.FC<Props> = ({
@@ -40,21 +42,31 @@ export const CSVDownloadModal: React.FC<Props> = ({
   onClose,
   onDownload,
   nHourForecast,
-  view
+  comparisonActive,
+  labels = DEFAULT_CSV_LABELS
 }) => {
   const selectableColumns = useMemo(
     () =>
-      SELECTABLE_COLUMNS.map((column) =>
-        column.id === "nForecast"
-          ? { ...column, label: `${getNHourForecastLabel(nHourForecast)}` }
-          : column
-      ),
-    [nHourForecast]
+      SELECTABLE_COLUMNS.flatMap((column) => {
+        if (column.id === "nForecast")
+          return [{ ...column, label: `${getNHourForecastLabel(nHourForecast)}` }];
+        if (column.id === "settlementPeriod") return [{ ...column, label: labels.periodLabel }];
+        // A single-observer country has no second generation column.
+        if (
+          column.id === "solarGenerationPvliveInitial" ||
+          column.id === "solarGenerationPvliveUpdated"
+        ) {
+          const label = labels.observerLabels[column.id === "solarGenerationPvliveInitial" ? 0 : 1];
+          return label === undefined ? [] : [{ ...column, label }];
+        }
+        return [column];
+      }),
+    [nHourForecast, labels]
   );
 
   const availableSelectableColumns = useMemo(
-    () => selectableColumns.filter((column) => column.id !== "delta" || view === VIEWS.DELTA),
-    [selectableColumns, view]
+    () => selectableColumns.filter((column) => column.id !== "delta" || comparisonActive),
+    [selectableColumns, comparisonActive]
   );
 
   const allSelectableIds = useMemo(
@@ -87,18 +99,18 @@ export const CSVDownloadModal: React.FC<Props> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-surface-inset/40" onClick={onClose} />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
-        <div className="w-full max-w-[25rem] max-h-[85vh] overflow-y-auto rounded-2xl border border-white/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
+        <div className="w-full max-w-[25rem] max-h-[85vh] overflow-y-auto rounded-2xl border border-content/35 bg-[#1d1e20] shadow-[0_14px_40px_rgba(0,0,0,0.45)]">
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between border-b border-white/35 bg-[#1d1e20] px-4 py-2">
-            <h2 className="font-semibold text-white">Select Data for Download</h2>
+          <div className="sticky top-0 flex items-center justify-between border-b border-content/35 bg-[#1d1e20] px-4 py-2">
+            <h2 className="font-semibold text-content">Select Data for Download</h2>
             <button
               type="button"
               aria-label="Close download modal"
               onClick={onClose}
-              className="leading-none opacity-70 hover:opacity-100"
+              className="leading-none text-content opacity-70 hover:opacity-100"
             >
               <CloseButtonIcon />
             </button>
@@ -110,12 +122,12 @@ export const CSVDownloadModal: React.FC<Props> = ({
               <div className="-ml-2">
                 <Toggle onClick={toggleAll} visible={allSelected} />
               </div>
-              <span className="text-sm font-medium text-white/65">Select All</span>
+              <span className="text-sm font-medium text-content/65">Select All</span>
             </div>
 
             {/* Column rows */}
             {selectableColumns.map((col) => {
-              const isDisabled = col.id === "delta" && view !== VIEWS.DELTA;
+              const isDisabled = col.id === "delta" && !comparisonActive;
               return (
                 <div key={col.id} className="flex items-center gap-3">
                   <div className="-ml-2">
@@ -126,7 +138,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
                   </div>
                   <span
                     className={`text-sm ${
-                      isDisabled ? "font-medium text-white/35" : "font-semibold text-white"
+                      isDisabled ? "font-medium text-content/35" : "font-semibold text-content"
                     }`}
                   >
                     {col.label}
@@ -143,8 +155,8 @@ export const CSVDownloadModal: React.FC<Props> = ({
               disabled={!selected.length}
               className={`h-11 w-full rounded-[10px] text-sm font-semibold tracking-[0.01em] transition-colors ${
                 selected.length
-                  ? "bg-ocf-yellow text-black hover:brightness-95"
-                  : "bg-ocf-yellow/30 text-black/40 cursor-not-allowed"
+                  ? "bg-surface-raised text-content ring-1 ring-inset ring-edge hover:bg-interactive hover:text-content-on-accent"
+                  : "bg-surface-raised/40 text-content-muted/50 cursor-not-allowed"
               }`}
             >
               Download CSV
