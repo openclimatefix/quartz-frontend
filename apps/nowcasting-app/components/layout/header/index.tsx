@@ -4,7 +4,6 @@ import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
 import CountryCoverageBanner from "../../map/country-coverage-banner";
 import DataInfoButton from "./data-info-button";
-import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Menu } from "@headlessui/react";
@@ -114,24 +113,6 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
           />
         </a>
       </div>
-      {/*<div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">*/}
-      {/*  <a*/}
-      {/*    className="flex h-6 w-auto"*/}
-      {/*    target="_blank"*/}
-      {/*    href="https://quartz.solar/"*/}
-      {/*    rel="noreferrer"*/}
-      {/*  >*/}
-      {/*    <img*/}
-      {/*      src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"*/}
-      {/*      alt="quartz_logo"*/}
-      {/*      className="h-8 w-auto"*/}
-      {/*    />*/}
-      {/*  </a>*/}
-      {/*  <div className="mr-[6px] flex items-center">*/}
-      {/*    <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>*/}
-      {/*    <OCFlogo />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
       {/* The Forecast/Solar Sites switcher is gone (Brad, 2026-08-27): Sites serves a different
           set of users from the dashboard's regulars, so a permanent two-item nav spent header
           width on a destination most viewers never want. `/sites` still routes — it is reached

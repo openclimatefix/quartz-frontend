@@ -1,6 +1,6 @@
 # OCF Energy UI
 
-This is the main OCF Energy UI, hosted at [app.quartz.solar](app.quartz.solar).
+This is the main OCF Energy UI, hosted at [app.ocf.energy](https://app.ocf.energy) (redirected from app.quartz.solar).
 It is used by customers to log in and view their forecasts.
 
 ## Getting Started
