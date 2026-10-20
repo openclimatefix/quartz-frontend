@@ -25,9 +25,7 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
   return (
     <>
       <Head>
-        <title>
-          {isEmailVerification ? "Email Verification" : "Access Denied"} | OCF Energy
-        </title>
+        <title>{isEmailVerification ? "Email Verification" : "Access Denied"} | OCF Energy</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
