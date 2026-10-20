@@ -1,4 +1,5 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DateTime } from "luxon";
 import {
   Area,
   Bar,
@@ -15,28 +16,78 @@ import {
 } from "recharts";
 import {
   convertToLocaleDateString,
-  dateToLondonDateTimeString,
+  formatISODateString,
+  formatISODateStringAsZonedTime,
   formatISODateStringHumanNumbersOnly,
   getRoundedTickBoundary,
-  prettyPrintChartAxisLabelDate,
-  prettyPrintDayLabelWithDate
+  prettyPrintChartAxisLabelDate
 } from "../helpers/utils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
+import { useFocusedCountry } from "../../hooks/data/use-countries";
+import { displayUnitFor, NO_VALUE } from "../../lib/domain/power-unit";
+import { useGenerationSources } from "../../hooks/data/use-regions";
+import { periodForLabel, slotLabellingFor } from "../../lib/time/cursor";
 import { theme } from "../../tailwind.config";
-import useGlobalState, { getNext30MinSlot } from "../helpers/globalState";
-import { DELTA_BUCKET, VIEWS } from "../../constant";
-import { getZoomYMax } from "../helpers/chartUtils";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
+import { DELTA_BUCKET } from "../../constant";
+import { getZoomYMax, niceQuarterStep } from "../helpers/chartUtils";
+import { useTokens } from "../helpers/colour";
+import { selectAxisTicks, TickDensity, tickLabels, type TickLabel } from "../../lib/time/ticks";
+import { DELTA_COOL, DELTA_WARM } from "../../lib/domain/delta-ramp";
 import { ZoomOutIcon } from "@heroicons/react/solid";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
-const orange = theme.extend.colors["ocf-orange"].DEFAULT;
-const ecmwfOnly = theme.extend.colors["ocf-teal"]["500"];
-const metOfficeOnly = theme.extend.colors["metOffice"].DEFAULT;
-const satOnly = theme.extend.colors["ocf-yellow"]["200"];
-const pvnetDayAhead = theme.extend.colors["ocf-delta"]["100"];
-const pvnetIntraday = theme.extend.colors["ocf-teal"]["600"];
-const seasonal = "#ffdfd1";
-const deltaNeg = theme.extend.colors["ocf-delta"]["100"];
-const deltaPos = theme.extend.colors["ocf-delta"]["900"];
+/**
+ * The plot area's insets, published so chrome *outside* the chart can line up with the x-axis.
+ *
+ * Recharts gives no way to ask where the plot area starts once it has laid out, so anything
+ * that wants to sit under the axis and agree with it has to reconstruct the sum: the Y axis's
+ * width, plus the chart's left margin. Both were implicit before — the margin was a literal in
+ * the `margin` prop and the width was recharts' undeclared 60px default — which is fine while
+ * nothing else depends on them and a silent misalignment the moment something does.
+ *
+ * So `YAxis` below now names its width instead of inheriting it, the margins read from here,
+ * and `PLOT_INSET_LEFT_PX` is the one number external chrome measures from. Changing a margin
+ * moves the scrub track with the axis rather than away from it.
+ *
+ * **The right edge differs in delta view**, which mounts a second `YAxis` on the right and
+ * changes its right margin to fit it. That axis names its width too, and `plotInsetRightPx`
+ * answers the inset for either chart, so the chart hands the scrub track its right edge the way
+ * it hands over its domain — the track still does not know which chart it sits under.
+ */
+export const CHART_Y_AXIS_WIDTH_PX = 60;
+export const CHART_MARGIN_LEFT_PX = 4;
+export const CHART_MARGIN_RIGHT_PX = 16;
+export const PLOT_INSET_LEFT_PX = CHART_Y_AXIS_WIDTH_PX + CHART_MARGIN_LEFT_PX;
+export const PLOT_INSET_RIGHT_PX = CHART_MARGIN_RIGHT_PX;
+/** The delta view's right-hand `YAxis`, named for the same reason as the left one. */
+export const CHART_DELTA_Y_AXIS_WIDTH_PX = 60;
+
+/** Delta view's right margin: room for the regional chart's close control when one is open. */
+const deltaChartMarginRightPx = (hasSelection: boolean): number => (hasSelection ? 15 : 0);
+
+/** Where the plot area ends, in px from the chart's right edge — plain or delta chart. */
+export const plotInsetRightPx = (deltaView: boolean, hasSelection: boolean): number =>
+  deltaView
+    ? CHART_DELTA_Y_AXIS_WIDTH_PX + deltaChartMarginRightPx(hasSelection)
+    : PLOT_INSET_RIGHT_PX;
+
+const yellow = theme.extend.colors.solar.DEFAULT;
+const orange = theme.extend.colors.series.nHour;
+const ecmwfOnly = theme.extend.colors.series.ecmwf;
+const metOfficeOnly = theme.extend.colors.series.metOffice;
+const satOnly = theme.extend.colors.series.satellite;
+const seasonal = theme.extend.colors.series.seasonal;
+// The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
+// colour the map paints a region that came in under forecast, and one above it the colour it
+// paints a region that came in over.
+const deltaNeg = DELTA_COOL;
+const deltaPos = DELTA_WARM;
+
+// Matter SemiMono is the brand's face for values. Recharts writes its ticks and axis labels
+// as SVG attributes rather than classed elements, so they cannot take `font-mono` and name
+// the variable directly instead. Everything numeric in the chart chrome — axes, tooltip
+// figures, the cursor pill — uses it, so the chart agrees with the readouts around it.
+const MONO = "var(--font-matter-semi-mono)";
 // Target combined opacity for overlapping p-level bands, independent of band count.
 const P_LEVEL_BAND_COMBINED_OPACITY = 0.4;
 const deltaMaxTicks = [2000, 2500, 3000, 3500, 4000, 4500, 5000];
@@ -58,7 +109,6 @@ export const getPLevelRangeKey = (lower: number, upper: number): PLevelRangeKey 
 
 export type ChartDataBase = {
   formattedDate: string; // "2022-05-16T15:00",
-  SETTLEMENT_PERIOD?: number | undefined;
 
   GENERATION_UPDATED?: number;
   GENERATION?: number;
@@ -85,11 +135,22 @@ export type ChartDataBase = {
 };
 export type ChartData = ChartDataBase & SeasonalScalars & SeasonalBound & PLevelBounds;
 
+/**
+ * `pv-remix-chart.tsx`'s `GENERATION_CHART_KEYS`, duplicated rather than imported: that file
+ * imports this one. Observers land on these keys in manifest order.
+ */
+const GENERATION_KEYS = ["GENERATION", "GENERATION_UPDATED"] as const;
+
+/**
+ * The generation entries are fallbacks only: the dashboard charts replace them with the
+ * focused country's observer labels from the manifest, as the legend does. These are GB's,
+ * and used to be shown for every country.
+ */
 const toolTiplabels: Record<string, string> = {
   GENERATION: "PV Live estimate",
   GENERATION_UPDATED: "PV Live Actual",
-  FORECAST: "Current",
-  PAST_FORECAST: "Current",
+  FORECAST: "OCF",
+  PAST_FORECAST: "OCF",
   INTRADAY_ECMWF_ONLY: "ECMWF-only",
   PAST_INTRADAY_ECMWF_ONLY: "ECMWF-only",
   MET_OFFICE_ONLY: "Met Office-only",
@@ -105,8 +166,10 @@ const toolTiplabels: Record<string, string> = {
 };
 
 const toolTipColors: Record<string, string> = {
-  GENERATION_UPDATED: "white",
-  GENERATION: "white",
+  // The actual is the lighter half of the solar pair — same hue as the forecast it is
+  // being compared against, which is the brand's "mono-coloured comparative graph".
+  GENERATION_UPDATED: theme.extend.colors.solar.light,
+  GENERATION: theme.extend.colors.solar.light,
   FORECAST: yellow,
   PAST_FORECAST: yellow,
   INTRADAY_ECMWF_ONLY: ecmwfOnly,
@@ -128,6 +191,8 @@ type RemixLineProps = {
   setTimeOfInterest?: (t: string) => void;
   yMax: number | string;
   timeNow: string;
+  /** Set by the national charts, whose figures are gigawatts for every country. */
+  national?: boolean;
   resetTime?: () => void;
   visibleLines: string[];
   zoomEnabled?: boolean;
@@ -135,6 +200,32 @@ type RemixLineProps = {
   deltaYMaxOverride?: number;
   yTicks?: number[];
 };
+/**
+ * The handle on a reference line — the draggable cursor's time, and the LIVE marker you click to
+ * return to now.
+ *
+ * Both are **controls**, so they wear `--interactive`. They used to wear `solar`, which
+ * says "this is the PV forecast" about a thing that is not data at all — the loose end
+ * `docs/colour-rationalisation.md` leaves open under "one honest wrinkle in (a)". Settled here in
+ * favour of treating them as controls, which is what they are.
+ *
+ * Two states, one escalation, no second colour:
+ * One appearance, no states: a dark body, an oat edge, oat lettering, comfortably WCAG AA
+ * against the plot well.
+ *
+ * It briefly carried an "on the live instant" variant — first as a filled chip, then as white
+ * lettering. Both are gone. The fill was far too heavy a block at this size, and the white
+ * variant was too quiet to be worth the second rule; the footer's pulsing dot carries
+ * following-mode, so the chip was saying a third time what two other things already said.
+ *
+ * **LIVE no longer hides when the cursor reaches it.** It used to, because the cursor was a 2px
+ * line and two lines at one x is a mess. The cursor is a band now, so LIVE is a boundary drawn
+ * across it and there is nothing to collide with — and a marker that vanishes exactly when you
+ * arrive at it takes away the confirmation that you did.
+ *
+ * The body is `surface`, not black-black: on a `#141515` plot well a true black chip has no edge
+ * of its own, and the hairline is what gives it one.
+ */
 const CustomizedLabel: FC<any> = ({
   value,
   offset,
@@ -143,11 +234,13 @@ const CustomizedLabel: FC<any> = ({
   solidLine,
   onClick
 }) => {
-  const yy = -9;
+  const yy = 10;
+  const pillWidth = Math.max(40, String(value ?? "").length * 7.2 + 14);
+
   return (
     <g>
       <line
-        stroke="white"
+        className={solidLine ? "stroke-interactive" : "stroke-content"}
         strokeWidth={solidLine ? "2" : "1"}
         strokeDasharray={solidLine ? "" : "3 3"}
         fill="none"
@@ -157,9 +250,52 @@ const CustomizedLabel: FC<any> = ({
         x2={x}
         y2={yy}
       ></line>
-      <g className={`fill-white ${className || ""}`} onClick={onClick}>
-        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
+      {/*
+        Recharts binds click, mousedown, mousemove and mouseup on the chart itself — mousedown
+        opens a zoom selection and mouseup commits `setTimeOfInterest` to wherever the pointer
+        was. A label handler alone therefore lost every race: LIVE's `resetTime` ran and was
+        immediately overwritten by the chart's own mouseup. So the group stops the pointer here
+        rather than trying to out-order it.
+      */}
+      <g
+        className={className || ""}
+        style={{ pointerEvents: "all" }}
+        onMouseDown={(e) => {
+          if (!onClick) return;
+          e.stopPropagation();
+        }}
+        onMouseUp={(e) => {
+          if (!onClick) return;
+          e.stopPropagation();
+        }}
+        onClick={(e) => {
+          if (!onClick) return;
+          e.stopPropagation();
+          onClick();
+        }}
+      >
+        {/* Sized from the text rather than a constant 40. The pill used to hold one time
+            ("10:00"); it now holds a period ("09:30–10:00"), and a fixed rect either clipped the
+            span or left a hole around a short label. 7.2px is the advance width of Matter Semi
+            Mono at `text-xs` — it is a monospace face, so a character count is an exact
+            measurement here, not an estimate. */}
+        <rect
+          x={x - pillWidth / 2}
+          y={yy}
+          width={pillWidth}
+          height="20"
+          rx="4"
+          offset={offset}
+          className="fill-surface stroke-interactive"
+          strokeWidth="1"
+        ></rect>
+        <text
+          x={x}
+          y={yy + 14}
+          className="fill-interactive font-mono font-medium tabular-nums text-xs"
+          id="time-now"
+          textAnchor="middle"
+        >
           {value}
         </text>
       </g>
@@ -167,19 +303,29 @@ const CustomizedLabel: FC<any> = ({
   );
 };
 
-const DateLabel: FC<any> = ({ value, offset, viewBox: { x }, className, solidLine, onClick }) => {
-  const yy = -9;
-  return (
-    <g>
-      <g className={`fill-white ${className || ""}`} onClick={onClick}>
-        <rect x={x - 24} y={yy} width="48" height="21" offset={offset} fill={"inherit"}></rect>
-        <text x={x} y={yy + 15} fill="black" className="text-xs" id="time-now" textAnchor="middle">
-          {value}
-        </text>
-      </g>
-    </g>
-  );
+/**
+ * A period band on a chart whose x axis is a band scale.
+ *
+ * A `<Bar>` turns the category axis into bands, and `ReferenceArea` then spans from the *start*
+ * of `x1`'s band to the *end* of `x2`'s, while the lines pass through band centres. A period's
+ * two ends are adjacent categories, so that is two bands wide where the period is one: the delta
+ * view drew every selection and hover band twice the width of the forecast view's. The period
+ * runs centre to centre, so trim half a band — a quarter of the drawn width — off each side.
+ * On the point scale the other charts use, bands have no width and the default is already right.
+ */
+const DELTA_BAR_WIDTH_PX = 3;
+
+/** The parts of a Recharts chart mouse event `periodLabelAt` reads. */
+type ChartPointerEvent = {
+  activeLabel?: string;
+  activeTooltipIndex?: number;
+  activeCoordinate?: { x: number };
+  chartX?: number;
 };
+
+const periodBandShape = (props: any) => (
+  <Rectangle {...props} x={props.x + props.width / 4} width={props.width / 2} />
+);
 
 const RemixLine: React.FC<RemixLineProps> = ({
   timeOfInterest,
@@ -187,6 +333,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   setTimeOfInterest,
   yMax,
   timeNow,
+  national = false,
   resetTime,
   visibleLines,
   zoomEnabled = true,
@@ -196,10 +343,50 @@ const RemixLine: React.FC<RemixLineProps> = ({
 }) => {
   // Set the y max. If national then set to 12000, for gsp plot use 'auto'
   const preppedData = data.sort((a, b) => a.formattedDate.localeCompare(b.formattedDate));
+  // Plot furniture resolved from the role tokens rather than imported as literals, so the
+  // chart's own surfaces follow the theme the way the rest of the app does. Fallbacks are the
+  // dark values — the default theme — so the server render matches and nothing flashes.
+  // Dark values as the fallbacks — dark is the default theme, so the server render and the
+  // first client frame match it and nothing flashes. Recharts takes these as attribute values,
+  // so they must be real colours: a `rgb(var(--x) / <alpha-value>)` template is invalid CSS and
+  // is dropped without an error.
+  const plot = useTokens({
+    bandA: { name: "--plot-band-a", alpha: 0.3, fallback: "rgb(12 13 13 / 0.3)" },
+    bandB: { name: "--plot-band-b", alpha: 0.3, fallback: "rgb(20 21 21 / 0.3)" },
+    stroke: { name: "--content", alpha: 0.1, fallback: "rgb(255 255 255 / 0.1)" },
+    // Axis ticks, axis labels and the reference lines. Chrome, not data — so it follows the
+    // theme rather than sitting at a fixed white.
+    axis: { name: "--content", alpha: 1, fallback: "rgb(255 255 255)" },
+    // The cursor's own line, in the interactive colour — the same token the pill around it and
+    // the scrub handle wear, so the three read as one object. That token is oat now, which is
+    // close to the LIVE line's white; the two are told apart by solid-versus-dashed and by the
+    // pill, which is how they were told apart before the orange went anyway.
+    cursor: { name: "--interactive", alpha: 1, fallback: "rgb(255 251 245)" }
+  });
+
   const [showNHourView] = useGlobalState("showNHourView");
-  const [view] = useGlobalState("view");
+  const [isSitesChart] = useGlobalState("isSitesChart");
   const [largeScreenMode] = useGlobalState("dashboardMode");
-  const currentTime = getNext30MinSlot(new Date()).toISOString().slice(0, 16);
+  // The LIVE line sits on the label of the period in progress, which the caller resolves for its
+  // country. This used to read `getCursorNow()`, a period start, and ignore the prop — so on a
+  // period-end country (GB) LIVE sat one period early, and the delta tooltip blanked the last
+  // finished period instead of the one in progress.
+  const currentTime = timeNow.slice(0, 16);
+
+  // Deliberately NOT given the country's zone, unlike the display helpers below.
+  //
+  // This value is not shown to anyone: it is turned into epoch millis and matched against the
+  // solar-sites chart's `formattedDate` keys, which `use-format-chart-data-sites.tsx` builds
+  // as plain UTC epochs. This is correct in every viewer zone, but only by cancellation, so
+  // do not "tidy" it: the conversion shifts the instant into the viewer's zone and stamps a
+  // false "Z", then `.slice(0, 16)` strips that "Z" again, so `new Date()` re-reads the value
+  // as *local* — and the two shifts cancel exactly.
+  //
+  // Passing a zone here breaks it (Europe/London is an hour out in BST, America/Los_Angeles
+  // seven). The sibling call in solar-site-chart.tsx looks identical but keeps its "Z", so it
+  // parses as absolute with nothing to cancel the shift, and genuinely does need "UTC".
+  // utils.viewerZone.test.ts pins all three shapes across zones; jest's TZ=UTC hides the
+  // whole class otherwise.
   const localeTimeOfInterest = convertToLocaleDateString(timeOfInterest + "Z").slice(0, 16);
   const defaultZoom = { x1: "", x2: "" };
   const [filteredPreppedData, setFilteredPreppedData] = useState(preppedData);
@@ -208,25 +395,238 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [globalIsZoomed, setGlobalIsZoomed] = useGlobalState("globalChartIsZoomed");
   const [temporaryZoomArea, setTemporaryZoomArea] = useState(defaultZoom);
   const [nHourForecast] = useGlobalState("nHourForecast");
-  const [selectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
+  const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [pLevels] = useGlobalState("pLevels");
+  const { timezone, locale } = useCountryFormatting();
 
+  /**
+   * The cursor names a *period*, not an instant — GB's 10:00 is the half hour that ended then,
+   * NL's is the quarter hour that starts there. The line the user drags stays on the label,
+   * because that is the value they are picking; the band behind it is the span that label is
+   * about, which is the part the convention hides.
+   *
+   * `periodForLabel`, **not** `periodForInstant`: what arrives here is already resolved to this
+   * country's published label (`pv-remix-chart` runs the cursor through `slotForInstant` before
+   * anything is drawn or looked up). Asking the cursor question about a label returns the period
+   * *after* the right one on a period-end country — which is how the chart and the scrub bar
+   * came to draw two different windows for one cursor.
+   *
+   * **Both ends are then cut to the axis' category format**, which is not what they arrive in.
+   * `periodForLabel` returns full ISO instants (`2026-09-02T13:00:00.000Z`); the axis' categories
+   * are `formattedDate`, a 16-character slice (`2026-09-02T13:00`). A category axis matches
+   * `x1`/`x2` by exact value and `ifOverflow="hidden"` drops an area whose ends are not in the
+   * domain, so full ISO ends silently rendered nothing at all — which is what the band did from
+   * the day it was written until this was found. `formatISODateString` is the same cut the axis
+   * itself applies, so the two agree by construction rather than by coincidence.
+   *
+   * Addressing the axis by a boundary only works because a period boundary is always a point
+   * this country publishes — the band is one cadence wide by construction.
+   */
+  const focusedCountry = useFocusedCountry();
+  // The sites chart is always KW, untouched by the country registry; every other line here
+  // reads the country's `MW`/`GW` field, so GB's `MW` divides by 1 and is unchanged.
+  // The national chart is always gigawatts: a country's output is that order of magnitude
+  // whoever it is, and the headline above the chart has always read GW. Only the sub-national
+  // charts take the country's own unit, which is where GB and NL/DE genuinely differ.
+  const displayUnit = national ? "GW" : displayUnitFor(focusedCountry);
+  const displayDivisionFactor = displayUnit === "GW" ? 1000 : 1;
+  const generationSources = useGenerationSources(
+    !isSitesChart && focusedCountry ? { country: focusedCountry, source: "solar" } : null
+  );
+  const tooltipLabels = useMemo(() => {
+    const labels = { ...toolTiplabels };
+    (generationSources.data ?? []).slice(0, GENERATION_KEYS.length).forEach((source, index) => {
+      labels[GENERATION_KEYS[index]] = source.label;
+    });
+    return labels;
+  }, [generationSources.data]);
+  // Only a chart with bars draws its categories as bands; see `periodBandShape`.
+  const periodShape = deltaView ? periodBandShape : undefined;
+  const cursorPeriod = useMemo(() => {
+    if (isSitesChart) return null;
+    const period = periodForLabel(timeOfInterest, focusedCountry);
+    return {
+      start: formatISODateString(period.start),
+      end: formatISODateString(period.end)
+    };
+  }, [isSitesChart, timeOfInterest, focusedCountry]);
+
+  /**
+   * The period under the pointer — the one a click is about to select.
+   *
+   * Drawn the same way as `cursorPeriod` and from the same call, so the thing you are about to
+   * pick and the thing you have picked are the same shape and cannot drift apart. It is fainter,
+   * which is the whole distinction between them: an intention, not a selection.
+   *
+   * **Held as a label, not as pixels.** A custom Recharts `cursor` element would have to rebuild
+   * the period rule in pixel space — a band width, and which side of the point it falls on,
+   * which is the country's labelling convention all over again (see `lib/time/cursor.ts`). This
+   * asks `periodForLabel` instead, exactly as the selection does.
+   *
+   * **And it only re-renders once per category.** `onMouseMove` fires per pixel, so the write is
+   * guarded on the label actually changing — the same rate Recharts already updates the tooltip
+   * at. The ref is what lets the guard read the current value without the handler depending on
+   * the state it sets.
+   */
+  const [hoverLabel, setHoverLabel] = useState<string | null>(null);
+  const hoverLabelRef = useRef<string | null>(null);
+  const setHoverLabelIfChanged = useCallback((label: string | null) => {
+    if (hoverLabelRef.current === label) return;
+    hoverLabelRef.current = label;
+    setHoverLabel(label);
+  }, []);
+
+  /**
+   * The hover dots, drawn at the hovered period's label.
+   *
+   * Recharts' own active dots sit on its nearest label, which is not always the hovered period's
+   * (`periodLabelAt`), so they jumped between the band's two edges. Drawn here instead they always
+   * sit on the edge the country labels: right for GB, left for NL. The sites chart has no hover
+   * label and keeps Recharts' dots (`activeDot={isSitesChart}`).
+   */
+  const hoverDot = (props: any): React.ReactElement => {
+    const { cx, cy, stroke, payload, key } = props;
+    const isHovered = !!hoverLabel && payload?.formattedDate === hoverLabel;
+    if (!isHovered || !Number.isFinite(cx) || !Number.isFinite(cy)) return <g key={key} />;
+    return <circle key={key} cx={cx} cy={cy} r={4} fill={stroke} stroke="#fff" strokeWidth={2} />;
+  };
+
+  const hoverPeriod = useMemo(() => {
+    if (isSitesChart || !hoverLabel) return null;
+    const period = periodForLabel(hoverLabel, focusedCountry);
+    return {
+      start: formatISODateString(period.start),
+      end: formatISODateString(period.end)
+    };
+  }, [isSitesChart, hoverLabel, focusedCountry]);
+
+  /**
+   * The x axis's tick labels — 6-hourly (00:00/06:00/12:00/18:00) with room, midnight/midday
+   * only when there is not. `lib/time/ticks.ts` holds the rule (shared with the scrub track)
+   * and the hysteresis that keeps a resize from relabelling every frame; this only measures the
+   * chart's own width, which moves independently of the browser window (`CHART_SPLIT`, the
+   * display rail, dashboard mode) so a `window.innerWidth` breakpoint would be wrong here.
+   *
+   * The category axis (national/GSP/delta charts) needs the chosen instants translated back
+   * into `formattedDate` strings that actually appear in the data, because Recharts' `ticks`
+   * prop on a category axis has to name real category values, not arbitrary points on the
+   * timeline. `isSitesChart` uses its own numeric axis below and is untouched here.
+   */
+  const chartContainerRef = useRef<HTMLDivElement | null>(null);
+  const [chartWidthPx, setChartWidthPx] = useState(0);
+  const previousTickDensityRef = useRef<TickDensity | null>(null);
+
+  useEffect(() => {
+    const element = chartContainerRef.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width;
+      if (width !== undefined) setChartWidthPx(width);
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  // The category axis' domain — whatever is actually plotted, zoomed or not — is what the tick
+  // instants have to be found inside and translated back to.
+  const displayedChartData = zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData;
+
+  /**
+   * The label of the period under the pointer.
+   *
+   * Recharts' `activeLabel` is the *nearest* label, which covers half a step either side of its
+   * point, while the label's period runs a whole step to one side of it: back where labels close
+   * their period (GB), forward where they open it (NL). So half the time the pointer sat outside
+   * the band it lit, on opposite sides for the two. Past the point on a period-end country, or
+   * before it on a period-start one, the pointer is in the neighbouring label's period instead.
+   * `preppedData` is sorted, so the neighbour by index is the neighbour in time.
+   */
+  const periodLabelAt = (e?: ChartPointerEvent): string | undefined => {
+    const label = e?.activeLabel;
+    if (!label || isSitesChart) return label;
+    const index = e?.activeTooltipIndex;
+    const pointX = e?.activeCoordinate?.x;
+    if (typeof index !== "number" || typeof pointX !== "number" || typeof e?.chartX !== "number")
+      return label;
+    const closesPeriod = slotLabellingFor(focusedCountry) !== "period-start";
+    const step = closesPeriod ? (e.chartX > pointX ? 1 : 0) : e.chartX < pointX ? -1 : 0;
+    return displayedChartData[index + step]?.formattedDate ?? label;
+  };
+
+  const categoryTicks = useMemo(() => {
+    if (isSitesChart || displayedChartData.length === 0) return undefined;
+    const startMs = DateTime.fromISO(displayedChartData[0].formattedDate, {
+      zone: "utc"
+    }).toMillis();
+    const endMs = DateTime.fromISO(
+      displayedChartData[displayedChartData.length - 1].formattedDate,
+      {
+        zone: "utc"
+      }
+    ).toMillis();
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs <= startMs) return undefined;
+
+    const selection = selectAxisTicks({
+      startMs,
+      endMs,
+      zone: timezone,
+      widthPx: chartWidthPx,
+      previousDensity: previousTickDensityRef.current
+    });
+    previousTickDensityRef.current = selection.density;
+
+    // Only instants the data actually has an entry for can be a Recharts category tick — a
+    // 00:00/06:00/etc boundary always lands on a real point (both GB and NL sit on whole-hour
+    // UTC offsets, so a local day boundary is always on the cadence grid), but this still guards
+    // against a gap or a window that does not reach a boundary.
+    const available = new Set(displayedChartData.map((d) => d.formattedDate));
+    const keys = selection.ticks
+      .map((ms) => DateTime.fromMillis(ms, { zone: "utc" }).toFormat("yyyy-LL-dd'T'HH:mm"))
+      .filter((key) => available.has(key));
+    return keys.length > 0 ? keys : undefined;
+  }, [isSitesChart, displayedChartData, timezone, chartWidthPx]);
+
+  // Axis ticks drop the decimals from 10 up; a reading (tooltip, p-levels) passes
+  // `decimalsAtAnySize` to keep them, or 21.4 GW reads "21".
   function prettyPrintYNumberWithCommas(
     x: string | number,
     showDecimals: number = 2,
-    divisionFactor: number = 1
+    divisionFactor: number = 1,
+    decimalsAtAnySize: boolean = false
   ) {
     const xNumber = Number(x) / divisionFactor;
     const isSmallNumber = xNumber !== 0 && (xNumber < 0 ? xNumber > -10 : xNumber < 10);
     const roundedNumber =
-      showDecimals > 0 && isSmallNumber ? xNumber.toFixed(showDecimals) : Math.round(xNumber);
+      showDecimals > 0 && (isSmallNumber || decimalsAtAnySize)
+        ? xNumber.toFixed(showDecimals)
+        : Math.round(xNumber);
     return roundedNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
-  const CustomBar = (props: { DELTA: number }) => {
-    const { DELTA } = props;
-    let fill = DELTA > 0 ? deltaPos : deltaNeg;
-    return <Rectangle {...props} fill={fill} />;
+  /**
+   * A delta bar, drawn in the middle of the period it measures.
+   *
+   * A delta is a whole period's value, and the selection and hover bands now show that period,
+   * so a bar on the band's edge could belong to either neighbour. With no category gap and no
+   * fixed `barSize`, Recharts hands each bar its label's whole band: `x` is the band's start and
+   * `width` its width, and the lines pass through the band's centre, at the label. The period
+   * runs from that centre one band back where labels close their period (GB), so its middle is
+   * the band's start; where they open it (NL), one band forward, so its middle is the band's
+   * end. The lines stay on the labels.
+   */
+  const periodMiddleOffset = slotLabellingFor(focusedCountry) === "period-start" ? 1 : 0;
+  const CustomBar = (props: { DELTA: number; x: number; width: number }) => {
+    const { DELTA, x, width } = props;
+    const fill = DELTA > 0 ? deltaPos : deltaNeg;
+    const middle = x + width * periodMiddleOffset;
+    return (
+      <Rectangle
+        {...props}
+        x={middle - DELTA_BAR_WIDTH_PX / 2}
+        width={DELTA_BAR_WIDTH_PX}
+        fill={fill}
+      />
+    );
   };
 
   const deltaMax = data
@@ -244,17 +644,74 @@ const RemixLine: React.FC<RemixLineProps> = ({
     getRoundedTickBoundary(Math.max(Number(deltaMax), 0 - Number(deltaMin)) || 0, deltaMaxTicks);
 
   const roundTickMax = deltaYMax % 1000 === 0;
-  const isGSP = !!deltaYMaxOverride && deltaYMaxOverride < 1000;
   const now = new Date();
   const offsets = [-24, -18, -12, -6, 0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60];
   const ticks = offsets.map((o) => {
     return new Date(now).setHours(o, 0, 0, 0);
   });
-  const timeOffsets = [-10, 13, 37, 61];
-  const timeTicks = timeOffsets.map((o) => {
-    return new Date(now).setHours(o, 0, 0, 0);
-  });
 
+  /**
+   * Axis labels, in the footer's format: `ccc HH:mm` on the first tick of each day, bare
+   * `HH:mm` on the rest.
+   *
+   * This replaces a second axis (`x-axis-3`) that printed the date on its own row beneath the
+   * times. That row cost ~18px of plot height and, because it was a separate tick set at a
+   * different interval, it repeated a date once per group — "Thu 27" twice, "Today" twice. One
+   * row cannot repeat a day, because the day is only printed when it changes.
+   *
+   * Built as a lookup rather than computed inside the formatter: "has the day changed" is a
+   * property of a tick's *position in the sequence*, and Recharts calls the formatter per tick
+   * with no reliable ordering guarantee.
+   */
+  /**
+   * The sites chart's x tick: Recharts' own, except that a day label starts at its midnight line
+   * where the rest are centred on their instant — see `axisTickLabels`.
+   */
+  const sitesTick = (props: any): React.ReactElement => {
+    const { payload, textAnchor, x, y } = props;
+    const label = axisTickLabels[String(payload?.value)];
+    const startsDay = !!label?.startsDay;
+    return (
+      <text
+        x={x}
+        y={y}
+        // What Recharts' own `Text` does for a tick below the axis: hang it from its top.
+        dy="0.71em"
+        dx={startsDay ? 4 : 0}
+        fill={plot.axis}
+        style={{ fontSize: "10px", fontFamily: MONO }}
+        textAnchor={startsDay ? "start" : textAnchor}
+      >
+        {startsDay ? label.day : label?.day ? `${label.day} ${label.time}` : label?.time}
+        {/* An offset, not a space: a monospace space is a whole character wide. */}
+        {startsDay && <tspan dx={2}>→</tspan>}
+      </text>
+    );
+  };
+
+  const axisTickLabels = useMemo(() => {
+    const source: (string | number)[] = (isSitesChart ? ticks : categoryTicks) ?? [];
+    const valid = source
+      .map((value) => ({
+        value,
+        ms:
+          typeof value === "number"
+            ? value
+            : DateTime.fromISO(value, { zone: "utc", setZone: true }).toMillis()
+      }))
+      .filter(({ ms }) => Number.isFinite(ms));
+    const labels = tickLabels(
+      valid.map(({ ms }) => ms),
+      timezone,
+      locale
+    );
+    const byValue: Record<string, TickLabel> = {};
+    valid.forEach(({ value }, i) => {
+      byValue[String(value)] = labels[i];
+    });
+    return byValue;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSitesChart, ticks.join(","), categoryTicks?.join(","), timezone, locale]);
   //get Y axis boundary
 
   const yMaxZoom_Levels = [
@@ -303,39 +760,55 @@ const RemixLine: React.FC<RemixLineProps> = ({
   }) => {
     return (
       <g transform={`translate(${x},${y})`}>
-        <text className="fill-white text-xs text-right" x={0} y={0} dy={3} textAnchor={"start"}>
-          {`${payload.value > 0 ? "+" : ""}${prettyPrintYNumberWithCommas(payload.value)}`}
+        <text
+          className="fill-content font-mono tabular-nums text-xs text-right"
+          x={0}
+          y={0}
+          dy={3}
+          textAnchor={"start"}
+        >
+          {/* In the chart's display unit, like the generation axis beside it: the bars were
+              read in MW against lines in GW. Same one-decimal, no-".0" rule as that axis. */}
+          {`${payload.value > 0 ? "+" : ""}${prettyPrintYNumberWithCommas(
+            payload.value,
+            1,
+            displayDivisionFactor
+          ).replace(/\.0$/, "")}`}
         </text>
       </g>
     );
   };
 
-  let rightChartMargin = 16;
+  // In delta view the generation axis sits on quarters, like the delta axis beside it (−D, −D/2,
+  // 0, +D/2, +D), so every gridline carries a label on both sides. `getTicks` picks thirds or
+  // fifths or a special case, which the delta axis's labels fell between. The top rounds up to
+  // four round steps, so the quarters stay round numbers. Zoom keeps its own domain.
+  const quarterStep = deltaView && !isSitesChart ? niceQuarterStep(Number(yMax)) : 0;
+  const leftTop = quarterStep ? quarterStep * 4 : yMax;
+  const leftTicks = quarterStep ? [1, 2, 3, 4].map((k) => k * quarterStep) : yTicks;
+
+  let rightChartMargin = CHART_MARGIN_RIGHT_PX;
   let deltaLabelOffset = roundTickMax ? -20 : -10;
   if (deltaView) {
+    rightChartMargin = deltaChartMarginRightPx(!!selectedMapRegionIds?.length);
     if (selectedMapRegionIds?.length) {
-      rightChartMargin = 15;
       if (roundTickMax) {
         deltaLabelOffset = 0;
       } else {
         deltaLabelOffset = -5;
       }
-    } else {
-      rightChartMargin = 0;
     }
   }
-  console.log("chartData", data);
-  console.log("DELTA", deltaView);
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div ref={chartContainerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
       {zoomEnabled && globalIsZoomed && (
         <div className={`absolute top-5 z-10 ${deltaView ? `right-16 mr-3` : `right-4`}`}>
           <button
             type="button"
             onClick={handleZoomOut}
             style={{ position: "relative", top: "0", left: "20" }}
-            className="flex font-bold items-center p-1.5 border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+            className="flex font-bold items-center p-1.5 border-surface-panel text-content bg-surface-panel hover:bg-content-muted focus:z-10 focus:text-content h-auto"
           >
             <ZoomOutIcon className="w-8 h-8" />
           </button>
@@ -345,24 +818,27 @@ const RemixLine: React.FC<RemixLineProps> = ({
         <ResponsiveContainer debounce={100}>
           <ComposedChart
             className="select-none"
+            // No gap, so each delta bar is given its label's whole band; see `CustomBar`.
+            barCategoryGap={0}
             width={500}
             height={400}
             data={zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData}
             margin={{
               top: 20,
               right: rightChartMargin,
-              bottom: -10,
-              left: 16
+              bottom: -4,
+              left: CHART_MARGIN_LEFT_PX
             }}
-            onClick={(e?: { activeLabel?: string }) => {
+            onClick={(e?: ChartPointerEvent) => {
               if (globalIsZooming) return;
 
-              if (setTimeOfInterest && e?.activeLabel) {
-                view === VIEWS.SOLAR_SITES
+              const label = periodLabelAt(e);
+              if (setTimeOfInterest && label) {
+                isSitesChart
                   ? setTimeOfInterest(
-                      new Date(Number(e.activeLabel))?.toISOString() || new Date().toISOString()
+                      new Date(Number(label))?.toISOString() || new Date().toISOString()
                     )
-                  : setTimeOfInterest(e.activeLabel);
+                  : setTimeOfInterest(label);
               }
             }}
             onMouseDown={(e?: { activeLabel?: string }) => {
@@ -374,7 +850,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 setGlobalZoomArea({ x1: xValue, x2: xValue });
               }
             }}
-            onMouseMove={(e?: { activeLabel?: string }) => {
+            onMouseMove={(e?: ChartPointerEvent) => {
+              setHoverLabelIfChanged(periodLabelAt(e) ?? null);
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -383,7 +860,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 setGlobalZoomArea((zoom) => ({ ...zoom, x2: xValue || "" }));
               }
             }}
-            onMouseUp={(e?: { activeLabel?: string }) => {
+            onMouseLeave={() => setHoverLabelIfChanged(null)}
+            onMouseUp={(e?: ChartPointerEvent) => {
               if (!zoomEnabled) return;
 
               if (globalIsZooming) {
@@ -393,7 +871,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   setTimeOfInterest
                 ) {
                   setGlobalZoomArea(temporaryZoomArea);
-                  setTimeOfInterest(e?.activeLabel);
+                  setTimeOfInterest(periodLabelAt(e) ?? e.activeLabel);
                 } else if (globalZoomArea?.x1?.length && globalZoomArea?.x2?.length) {
                   let { x1 } = globalZoomArea;
                   let x2 = e?.activeLabel || "";
@@ -407,79 +885,76 @@ const RemixLine: React.FC<RemixLineProps> = ({
               }
             }}
           >
-            <CartesianGrid verticalFill={["#545454", "#6C6C6C"]} fillOpacity={0.5} />
+            <CartesianGrid
+              verticalFill={[plot.bandA, plot.bandB]}
+              // Alpha lives in the token requests above, not here: a blanket fillOpacity
+              // composites the bands against whatever is behind them, so the value you set is
+              // never the value you see.
+              fillOpacity={1}
+              stroke={plot.stroke}
+              strokeOpacity={1}
+            />
+            {/* The tick formatters are wrapped rather than passed by reference because recharts
+                calls them with (value, index), and index would land in the timezone argument
+                these helpers take. The wrapper is what makes passing the country's zone here
+                safe — a bare `tickFormatter={prettyPrintChartAxisLabelDate}` would silently
+                format ticks in whatever zone the tick's array index named. */}
             <XAxis
               dataKey="formattedDate"
               xAxisId={"x-axis"}
-              tickFormatter={prettyPrintChartAxisLabelDate}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
-              tickLine={true}
-              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
-            />
-            <XAxis
-              className="select-none"
-              dataKey="formattedDate"
-              xAxisId={"x-axis-2"}
-              tickFormatter={prettyPrintChartAxisLabelDate}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
-              tickLine={true}
-              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? ticks : undefined}
-              domain={view === VIEWS.SOLAR_SITES ? [ticks[0], ticks[ticks.length - 1]] : undefined}
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 11}
-              orientation="top"
-              padding="no-gap"
-              hide={true}
-            />
-            <XAxis
-              dataKey="formattedDate"
-              xAxisId={"x-axis-3"}
-              tickFormatter={prettyPrintDayLabelWithDate}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
-              tickLine={false}
-              type={view === VIEWS.SOLAR_SITES ? "number" : "category"}
-              ticks={view === VIEWS.SOLAR_SITES ? timeTicks : undefined}
-              domain={
-                view === VIEWS.SOLAR_SITES
-                  ? [timeTicks[0], timeTicks[timeTicks.length - 1]]
-                  : undefined
+              // Only the sites chart names days (`sitesTick` draws them). The dashboard's charts sit
+              // above the scrub track, whose labels already name them.
+              tickFormatter={(x) =>
+                axisTickLabels[String(x)]?.time ??
+                prettyPrintChartAxisLabelDate(x, timezone, locale)
               }
-              interval={view === VIEWS.SOLAR_SITES ? undefined : 47}
-              orientation="bottom"
-              axisLine={false}
-              tickMargin={-12}
-              hide={false}
+              scale={isSitesChart ? "time" : "auto"}
+              tick={
+                isSitesChart
+                  ? sitesTick
+                  : { fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }
+              }
+              tickLine={true}
+              // The labels used to sit tight under the rule because a second row carried the
+              // date below them and closed the gap. With that row gone they were the last thing
+              // on the axis and read as crowding it. `height` grows with the margin so the extra
+              // space is inside the axis box rather than clipped off the bottom of it.
+              tickMargin={8}
+              height={34}
+              type={isSitesChart ? "number" : "category"}
+              ticks={isSitesChart ? ticks : categoryTicks}
+              domain={isSitesChart ? [ticks[0], ticks[ticks.length - 1]] : undefined}
+              interval={isSitesChart ? undefined : categoryTicks ? 0 : 11}
             />
 
             <YAxis
+              // Named rather than left to recharts' 60px default, so `PLOT_INSET_LEFT_PX` above
+              // is a fact about this chart and not a guess about the library.
+              width={CHART_Y_AXIS_WIDTH_PX}
               tickFormatter={
-                view === VIEWS.SOLAR_SITES
+                isSitesChart
                   ? undefined
-                  : (val, i) => prettyPrintYNumberWithCommas(val)
+                  : // One decimal, and none at all where it would be a zero: the ticks are round
+                    // numbers in MW, so in GW they come out as "9" or "3.5" and never "9.00".
+                    (val, i) =>
+                      prettyPrintYNumberWithCommas(val, 1, displayDivisionFactor).replace(
+                        /\.0$/,
+                        ""
+                      )
               }
               yAxisId={"y-axis"}
-              tick={{ fill: "white", style: { fontSize: "12px" } }}
+              tick={{ fill: plot.axis, style: { fontSize: "10px", fontFamily: MONO } }}
               tickLine={false}
-              ticks={yTicks}
-              domain={
-                globalIsZoomed && view !== VIEWS.SOLAR_SITES
-                  ? [0, Number(zoomYMax * 1.1)]
-                  : [0, yMax]
-              }
+              ticks={leftTicks}
+              domain={globalIsZoomed && !isSitesChart ? [0, Number(zoomYMax * 1.1)] : [0, leftTop]}
               label={{
-                value: view === VIEWS.SOLAR_SITES ? "Generation (KW)" : "Generation (MW)",
+                value: isSitesChart ? "Generation (KW)" : `Generation (${displayUnit})`,
                 angle: 270,
                 position: "outsideLeft",
-                fill: "white",
-                style: { fontSize: "12px" },
+                fill: plot.axis,
+                style: { fontSize: "10px", fontFamily: MONO },
                 offset: 0,
-                dx: -26,
+                dx: -10,
                 dy: 0
               }}
             />
@@ -495,17 +970,23 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   tickCount={5}
                   tickLine={false}
                   yAxisId={"delta"}
+                  width={CHART_DELTA_Y_AXIS_WIDTH_PX}
                   scale={"auto"}
                   orientation="right"
                   label={{
-                    value: `Delta (MW)`,
+                    value: `Actual − Forecast (${displayUnit})`,
                     angle: 90,
-                    position: "insideRight",
-                    fill: "white",
-                    style: { fontSize: "11px" },
+                    // Centred on the axis at any length, like the generation title opposite.
+                    // `insideRight` anchors rotated text at its END, so it ran up from the
+                    // midpoint and needed a `dy` tuned to one string ("Delta (MW)"); the longer
+                    // title ran off the top. `center` anchors the middle; `dx` adds half the
+                    // axis width back so it sits where `insideRight` put it across.
+                    position: "center",
+                    fill: plot.axis,
+                    style: { fontSize: "10px", fontFamily: MONO },
                     offset: 0,
-                    dx: deltaLabelOffset,
-                    dy: 29
+                    dx: CHART_DELTA_Y_AXIS_WIDTH_PX / 2 + deltaLabelOffset,
+                    dy: 0
                   }}
                   domain={[-deltaYMax, deltaYMax]}
                   padding={{ top: 0, bottom: 0 }}
@@ -514,51 +995,104 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   yAxisId={"delta"}
                   xAxisId={"x-axis"}
                   y={0}
-                  stroke="white"
+                  stroke={plot.axis}
                   strokeWidth={0.1}
                 />
               </>
             )}
 
+            {/* The cursor carries no label and no grip. The period reads once, in the footer,
+                tethered to the scrub handle; the grip collided with the LIVE marker, both being
+                `--interactive` objects at the top of a reference line. Click-to-set-time
+                (`onClick`/`activeLabel` above) is untouched — that is the interaction layout
+                contract §4 protects — and dragging is the footer track's job. */}
+            {/* The cursor IS the period.
+                The 2px line is gone and the band it used to sit inside carries the cursor on its
+                own, spanning the whole span the reading covers. A line says "this instant",
+                which is not what the cursor means — every value on this chart is an average over
+                a settlement period, and the line was drawing one edge of it (which edge depended
+                on the country's labelling). The band draws the thing itself.
+
+                Kept low. As the only mark it competes with the series rather than sitting behind
+                them, and the two dials are `fillOpacity` (the block) and `strokeOpacity` (its
+                edges). The edges are what stop it reading as a smudge — they are where the period
+                starts and stops, and at this width that is most of the information. */}
+            {/* The period you are about to select. Under half the
+                selection's alpha and no edges — edges would make it a second definite mark, and
+                this one is provisional. Suppressed while it coincides with the selection, where
+                two stacked fills would read as a third, brighter state that means nothing. */}
+            {hoverPeriod && hoverPeriod.start !== cursorPeriod?.start && (
+              <ReferenceArea
+                x1={hoverPeriod.start}
+                x2={hoverPeriod.end}
+                yAxisId={"y-axis"}
+                xAxisId={"x-axis"}
+                fill={plot.cursor}
+                fillOpacity={0.09}
+                strokeWidth={0}
+                ifOverflow="hidden"
+                shape={periodShape}
+              />
+            )}
+
+            {cursorPeriod ? (
+              <>
+                {/* The selection is the hover band made definite (Brad, 2026-09-29): a heavier
+                    fill and no edges, plus a line at the instant the period is labelled with.
+                    The line is back because that instant is the one the readings are keyed to,
+                    and the band alone did not say where in the period it sat. */}
+                <ReferenceArea
+                  x1={cursorPeriod.start}
+                  x2={cursorPeriod.end}
+                  yAxisId={"y-axis"}
+                  xAxisId={"x-axis"}
+                  fill={plot.cursor}
+                  fillOpacity={0.3}
+                  strokeWidth={0}
+                  ifOverflow="hidden"
+                  shape={periodShape}
+                />
+                <ReferenceLine
+                  x={timeOfInterest}
+                  yAxisId={"y-axis"}
+                  xAxisId={"x-axis"}
+                  stroke={plot.cursor}
+                  strokeOpacity={0.9}
+                  strokeWidth={2}
+                  ifOverflow="hidden"
+                />
+              </>
+            ) : (
+              /* No period resolved — the sites chart's numeric axis, or a cursor outside the
+                 plotted range. The line is the fallback so the cursor never disappears. */
+              <ReferenceLine
+                x={isSitesChart ? new Date(localeTimeOfInterest).getTime() : timeOfInterest}
+                stroke={plot.cursor}
+                strokeOpacity={0.6}
+                strokeWidth={2}
+                yAxisId={"y-axis"}
+                xAxisId={"x-axis"}
+                scale={isSitesChart ? "time" : "auto"}
+              />
+            )}
+
+            {/* LIVE is declared after both bands so it paints over them: reference elements
+                render in JSX order with no `z-index` to appeal to, and the bands were covering
+                the pill. A period is the ground a boundary is drawn across. */}
             <ReferenceLine
-              x={
-                view === VIEWS.SOLAR_SITES
-                  ? new Date(currentTime + ":00.000Z").getTime()
-                  : currentTime
-              }
-              stroke="white"
-              strokeWidth={currentTime === timeOfInterest ? 2 : 1}
+              x={isSitesChart ? new Date(currentTime + ":00.000Z").getTime() : currentTime}
+              stroke={plot.axis}
+              strokeWidth={1}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
+              scale={isSitesChart ? "time" : "auto"}
               strokeDasharray="3 3"
-              className={currentTime !== timeOfInterest ? "" : "hidden"}
               label={
                 <CustomizedLabel
-                  className={`fill-amber-400 cursor-pointer text-sm`}
+                  className="cursor-pointer z-30 text-sm"
                   value={"LIVE"}
                   onClick={resetTime}
                 />
-              }
-            />
-
-            <ReferenceLine
-              x={
-                view === VIEWS.SOLAR_SITES
-                  ? new Date(localeTimeOfInterest).getTime()
-                  : timeOfInterest
-              }
-              stroke="white"
-              strokeWidth={2}
-              yAxisId={"y-axis"}
-              xAxisId={"x-axis"}
-              scale={view === VIEWS.SOLAR_SITES ? "time" : "auto"}
-              label={
-                <CustomizedLabel
-                  className={`text-sm ${currentTime === timeOfInterest ? "fill-amber-400" : ""}`}
-                  value={prettyPrintChartAxisLabelDate(timeOfInterest)}
-                  solidLine={true}
-                ></CustomizedLabel>
               }
             />
 
@@ -568,9 +1102,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 dataKey="DELTA"
                 yAxisId={"delta"}
                 xAxisId={"x-axis"}
+                // Every other mark on this chart says the same: Recharts re-runs a series'
+                // entry animation whenever its props change identity, and hovering changes
+                // them every frame, so the bars grew up from the axis again on each mouse
+                // move. The lines were given this at the same time and for the same reason.
+                isAnimationActive={false}
                 // @ts-ignore
                 shape={<CustomBar />}
-                barSize={3}
               />
             )}
             {showNHourView && (
@@ -578,25 +1116,27 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 <Line
                   type="monotone"
                   dataKey="N_HOUR_FORECAST"
-                  dot={false}
+                  dot={hoverDot}
+                  activeDot={isSitesChart}
                   yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   strokeDasharray="5 5"
                   strokeDashoffset={3}
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 2}
+                  strokeWidth={largeScreenMode ? 4 : 1.5}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="N_HOUR_PAST_FORECAST"
-                  dot={false}
+                  dot={hoverDot}
+                  activeDot={isSitesChart}
                   yAxisId={"y-axis"}
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 2}
+                  strokeWidth={largeScreenMode ? 4 : 1.5}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
@@ -608,7 +1148,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 key={`${lower}-${upper}`}
                 type="monotone"
                 dataKey={getPLevelRangeKey(lower, upper)}
-                dot={false}
+                dot={hoverDot}
+                activeDot={isSitesChart}
                 xAxisId={"x-axis"}
                 yAxisId={"y-axis"}
                 stroke={yellow}
@@ -624,13 +1165,20 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="SEASONAL_MEAN"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={seasonal}
               fill="transparent"
               fillOpacity={50}
-              strokeWidth={largeScreenMode ? 3 : 2}
+              // A wide, soft band rather than a line: the seasonal mean is the backdrop the
+              // day is read against, not another series competing with the forecast. Weight
+              // and opacity do that where colour could not — it sits close to the observed
+              // line's hue and the palette has no free slot.
+              strokeWidth={largeScreenMode ? 5 : 3}
+              strokeOpacity={0.5}
+              strokeLinecap="round"
               hide={!visibleLines.includes("SEASONAL_MEAN")}
               isAnimationActive={false}
             />
@@ -642,11 +1190,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     key={`SEASONAL_BOUND_${boundPair.join("_")}`}
                     dataKey={`SEASONAL_BOUND_${boundPair.join("_")}`}
                     type="monotone"
-                    dot={false}
+                    dot={hoverDot}
+                    activeDot={isSitesChart}
                     xAxisId={"x-axis"}
                     yAxisId={"y-axis"}
-                    stroke={"#ffdfd1"}
-                    fill={"#ffdfd1"}
+                    stroke={seasonal}
+                    fill={seasonal}
                     fillOpacity={
                       (1 /
                         (Number(boundPair[1].replace("P", "")) -
@@ -663,20 +1212,22 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="PAST_INTRADAY_ECMWF_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={ecmwfOnly} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("INTRADAY_ECMWF_ONLY")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
               dataKey="INTRADAY_ECMWF_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -690,7 +1241,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="PAST_SAT_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={satOnly}
@@ -703,7 +1255,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="SAT_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -717,7 +1270,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="PAST_MET_OFFICE_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={metOfficeOnly}
@@ -730,7 +1284,8 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="MET_OFFICE_ONLY"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
@@ -744,11 +1299,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="GENERATION"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
-              stroke="black"
-              strokeWidth={largeScreenMode ? 4 : 2}
+              stroke={toolTipColors.GENERATION}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
               isAnimationActive={false}
@@ -756,39 +1312,42 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="GENERATION_UPDATED"
-              strokeWidth={largeScreenMode ? 4 : 2}
-              stroke="black"
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              stroke={toolTipColors.GENERATION_UPDATED}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               hide={!visibleLines.includes("GENERATION_UPDATED")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
               dataKey="PAST_FORECAST"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               connectNulls={true}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
             <Line
               type="monotone"
               dataKey="FORECAST"
-              dot={false}
+              dot={hoverDot}
+              activeDot={isSitesChart}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               strokeDasharray="5 5"
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 2}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
@@ -796,23 +1355,54 @@ const RemixLine: React.FC<RemixLineProps> = ({
               <ReferenceArea
                 x1={globalZoomArea?.x1}
                 x2={globalZoomArea?.x2}
-                fill="#FFD053"
-                fillOpacity={0.3}
+                className="fill-interactive"
+                fillOpacity={0.2}
                 xAxisId={"x-axis"}
                 yAxisId={"y-axis"}
               />
             )}
             <Tooltip
+              // The band above is the hover cursor now. Recharts' default is a vertical rule at
+              // the hovered point — the "this instant" reading the selection band just stopped
+              // making, and two of them at slightly different x is worse than either alone.
+              cursor={isSitesChart ? undefined : false}
               content={({ payload, label }) => {
-                const data = payload && payload[0]?.payload;
+                // The row for the period under the pointer, which is not always Recharts' active
+                // one; see `periodLabelAt`.
+                const hoveredRow =
+                  !isSitesChart && hoverLabel
+                    ? displayedChartData.find((d) => d.formattedDate === hoverLabel)
+                    : undefined;
+                const data: any = hoveredRow ?? (payload && payload[0]?.payload);
                 if (!data || (data["GENERATION"] === 0 && data["FORECAST"] === 0))
                   return <div></div>;
 
+                // Sites keys its rows by epoch millis, so the key is turned back into an ISO
+                // instant here and formatted by the same helper below as the dashboard's.
+                // (Pre-formatting it to a human string here fed that string back into the
+                // ISO formatter and the heading read "Invalid Date".)
                 let formattedDate = data?.formattedDate + ":00+00:00";
-                if (view === VIEWS.SOLAR_SITES) {
-                  const date = new Date(Number(data?.formattedDate));
-                  formattedDate = dateToLondonDateTimeString(date);
+                if (isSitesChart) {
+                  formattedDate = new Date(Number(data?.formattedDate)).toISOString();
                 }
+
+                // The heading is the *span* the row's values cover, not the instant the country
+                // happens to name it by — the same reading the cursor band draws and the footer
+                // spells out. `periodForLabel`, not `periodForInstant`: `formattedDate` is a
+                // published data key, and asking the cursor question about a label returns the
+                // period after the right one on a period-end country (`lib/time/cursor.ts`).
+                // Date on the start only; a period never spans two dates, so repeating it would
+                // double the width of the heading to say nothing.
+                const tooltipPeriod = isSitesChart
+                  ? null
+                  : periodForLabel(formattedDate, focusedCountry);
+                const tooltipHeading = tooltipPeriod
+                  ? `${formatISODateStringHumanNumbersOnly(
+                      tooltipPeriod.start,
+                      timezone,
+                      locale
+                    )}–${formatISODateStringAsZonedTime(tooltipPeriod.end, timezone, locale)}`
+                  : formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale);
 
                 // Show the p-levels in the tooltip higher ones above the current and lower below
                 const pLevelRows = pLevels
@@ -832,7 +1422,14 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   <li key={level} className="font-sans text-2xs" style={{ color: yellow }}>
                     <div className="flex justify-between">
                       <div>{`OCF P${level}`}:</div>
-                      <div className="ml-4">{prettyPrintYNumberWithCommas(String(value), 1)}</div>
+                      <div className="ml-4 font-mono tabular-nums">
+                        {prettyPrintYNumberWithCommas(
+                          String(value),
+                          1,
+                          displayDivisionFactor,
+                          displayUnit === "GW"
+                        )}
+                      </div>
                     </div>
                   </li>
                 );
@@ -840,15 +1437,13 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 const lowerRows = pLevelRows.filter(([level]) => level < 50).map(pLevelRow);
 
                 return (
-                  <div className="px-3 py-2 bg-mapbox-black bg-opacity-80 shadow">
+                  <div className="px-3 py-2 bg-surface-raised bg-opacity-80 shadow">
                     <ul className="">
-                      <li className={`flex justify-between pb-2 text-xs text-white font-sans`}>
-                        <div className="pr-3">
-                          {formatISODateStringHumanNumbersOnly(formattedDate)}
-                        </div>
-                        <div>{view === VIEWS.SOLAR_SITES ? "KW" : "MW"}</div>
+                      <li className={`flex justify-between pb-2 text-xs text-content font-sans`}>
+                        <div className="pr-3 font-mono tabular-nums">{tooltipHeading}</div>
+                        <div>{isSitesChart ? "KW" : displayUnit}</div>
                       </li>
-                      {Object.entries(toolTiplabels)
+                      {Object.entries(tooltipLabels)
                         .filter(
                           ([key]) =>
                             (data[key] !== undefined &&
@@ -895,12 +1490,20 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               ? deltaPos
                               : deltaNeg
                             : toolTipColors[key];
+                          // Every row reads in the heading's unit, DELTA included. A delta is
+                          // small beside the readings, so in GW it keeps two decimal places
+                          // (-350 MW is "-0.35"); in MW it reads as it always has.
                           const computedValue =
                             key === "DELTA" &&
                             !showNHourView &&
                             `${data["formattedDate"]}:00.000Z` >= currentTime
-                              ? "-"
-                              : prettyPrintYNumberWithCommas(String(value), 1);
+                              ? NO_VALUE
+                              : prettyPrintYNumberWithCommas(
+                                  String(value),
+                                  key === "DELTA" && displayUnit === "GW" ? 2 : 1,
+                                  displayDivisionFactor,
+                                  displayUnit === "GW"
+                                );
                           let title = name;
                           if (key.includes("N_HOUR")) {
                             title = title.replace("N-hour", `${nHourForecast}-hour`);
@@ -916,7 +1519,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                                   className={`flex justify-between ${textClass} ${pvLiveTextClass}`}
                                 >
                                   <div>{title}:</div>
-                                  <div className={`font-sans ml-4`}>
+                                  <div className={`font-mono tabular-nums ml-4`}>
                                     {(showNHourView || key !== "DELTA") && sign}
                                     {computedValue}{" "}
                                   </div>

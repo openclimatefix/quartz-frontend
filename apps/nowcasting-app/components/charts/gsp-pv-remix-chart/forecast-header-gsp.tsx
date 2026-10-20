@@ -1,5 +1,11 @@
 import { CloseButtonIcon, DownArrow, UpArrow } from "../../icons/icons";
-import { ForecastHeadlineFigure } from "../forecast-header/ui";
+import { NO_VALUE } from "../../../lib/domain/power-unit";
+import {
+  ForecastHeadlineFigure,
+  HEADER_FIGURES,
+  HEADER_ROW,
+  HEADER_TITLE
+} from "../forecast-header/ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
 import React, { FC } from "react";
 import ForecastLabel from "../../national_forecast_labels";
@@ -11,12 +17,20 @@ type ForecastHeaderGSPProps = {
   deltaView?: boolean;
   deltaValue?: string;
   pvTimeOnly: string;
+  /** The period that instant names, stacked under the clock. See `ForecastHeadlineFigure`. */
+  pvTimeRange?: [string, string];
   pvValue?: string;
   forecastPV?: string;
   forecastNextTimeOnly?: string;
+  forecastNextTimeRange?: [string, string];
   forecastNextPV?: string;
   children?: React.ReactNode;
   titleTooltipText?: string[];
+  /**
+   * The country's display unit for the readings below, the delta chip included. The chip
+   * converts back to MW for its colour buckets, so the thresholds do not move with it.
+   */
+  unit?: "MW" | "GW";
 };
 
 const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
@@ -25,72 +39,79 @@ const ForecastHeaderGSP: FC<ForecastHeaderGSPProps> = ({
   deltaValue,
   forecastPV,
   pvTimeOnly,
+  pvTimeRange,
   pvValue,
   forecastNextPV,
   forecastNextTimeOnly,
+  forecastNextTimeRange,
   onClose,
-  titleTooltipText = []
+  titleTooltipText = [],
+  unit = "MW"
 }) => {
-  const height = title.length < 12 ? "dash:h-[4.25rem]" : "dash:h-[5.5rem]";
   const titleTooltipContent = (
     <ul className="text-left">
       {titleTooltipText.map((gspName) => (
-        <li key={gspName} className="text-ocf-gray-300 text-xs font-normal">
+        <li key={gspName} className="text-content text-xs font-normal">
           {gspName}
         </li>
       ))}
     </ul>
   );
   return (
-    <div className={`flex content-between bg-ocf-gray-800 h-12 mb-4 ${height}`}>
-      <div className="dash:xl:text-2xl dash:2xl:text-3xl dash:3xl:text-4xl text-white lg:text-xl md:text-lg text-lg font-black m-auto ml-5 flex justify-evenly">
-        {titleTooltipText.length ? (
-          <ForecastLabel className="" position={"left"} tip={titleTooltipContent}>
-            {title}
-          </ForecastLabel>
-        ) : (
-          title
-        )}
+    <div className={HEADER_ROW}>
+      <div className={HEADER_TITLE}>
+        <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
+          {titleTooltipText.length ? (
+            <ForecastLabel className="" position={"left"} tip={titleTooltipContent}>
+              {title}
+            </ForecastLabel>
+          ) : (
+            title
+          )}
+        </span>
       </div>
-      <div className="flex justify-between items-center flex-2 my-2 dash:3xl:my-3 px-2 2xl:px-4 3xl:px-6">
+      <div className={HEADER_FIGURES}>
         {forecastPV && (
           <>
-            <div className={deltaView ? "" : "pr-2 xl:pr-4 3xl:pr-6"}>
+            <div>
               <ForecastHeadlineFigure
                 gsp={true}
                 tip={"Latest PV Actual / OCF Forecast"}
                 time={pvTimeOnly}
-                unit={"MW"}
-                color={"ocf-yellow"}
+                times={pvTimeRange}
+                unit={unit}
+                color={"solar"}
               >
-                <span className="text-black">{pvValue}</span>
-                <span className="text-ocf-gray-300 mx-1"> / </span>
+                <span className="text-solar-light">{pvValue}</span>
+                <span className="text-content mx-1"> / </span>
                 {forecastPV}
               </ForecastHeadlineFigure>
             </div>
-            <div>
-              {!deltaView && forecastNextPV && (
+            {!deltaView && forecastNextPV && (
+              <div>
                 <ForecastHeadlineFigure
                   gsp={true}
                   tip={"Next OCF Forecast"}
                   time={forecastNextTimeOnly}
-                  unit={"MW"}
-                  color={"ocf-yellow"}
+                  times={forecastNextTimeRange}
+                  unit={unit}
+                  color={"solar"}
                 >
-                  {/*<span className="text-black">{actualPV}</span>*/}
-                  {/*<span className="text-ocf-gray-300 mx-1"> / </span>*/}
                   {forecastNextPV}
                 </ForecastHeadlineFigure>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
+        {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || NO_VALUE} unit={unit} gsp />}
       </div>
-      {deltaView && <DeltaHeaderBlock deltaValue={deltaValue || "-"} unit={"MW"} />}
       <button
         type="button"
         onClick={onClose}
-        className="font-bold items-center p-2 text-2xl border-ocf-gray-800 text-white bg-ocf-gray-800 hover:bg-ocf-gray-700 focus:z-10 focus:text-white h-auto"
+        aria-label="Close regional chart"
+        // `-my-2` gives back the padding's height, so the hit area stays but the button no
+        // longer sets the row's height above the national header's.
+        className="flex items-center self-center rounded-md p-2 -my-2 -mr-3 leading-none transition-colors text-interactive focus:z-10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-interactive"
       >
         <CloseButtonIcon />
       </button>

@@ -1,30 +1,84 @@
 import { useEffect, useRef } from "react";
-import useGlobalState from "../helpers/globalState";
-import { NationalAggregation } from "./types";
+import useGlobalState, {
+  focusAndSelectRegions,
+  setCountryState,
+  useCountryState
+} from "../helpers/globalState";
+import { useFocusedCountry } from "../../hooks/data/use-countries";
 import { PointLike } from "mapbox-gl";
+import {
+  FEATURE_KEY_PROPERTY,
+  REGION_COUNTRY_PROPERTY,
+  featureKeyFor,
+  regionIdOfFeatureKey
+} from "./country-features";
 
 type UseUpdateMapStateOnClickProps = {
   map?: mapboxgl.Map;
   isMapReady: boolean;
 };
 
-const setMapFilterSelectedIds = (map: mapboxgl.Map, ids: string[] | number[]) => {
+/**
+ * The feature property naming the country a region belongs to, and the country-qualified
+ * feature key. Both are stamped by `country-features.ts` — re-exported here because this is
+ * the module that reads them, and Track A's notes name `REGION_COUNTRY_PROPERTY` from here.
+ *
+ * Contract §1: every enabled country's regions are clickable and clicking one focuses its
+ * country — one gesture, no inert map. Since Phase 6 Track F the map draws every enabled
+ * country, so the cross-country branch below is live and the fallback to the focused country
+ * is only reached for a feature from some other source.
+ */
+export { REGION_COUNTRY_PROPERTY, FEATURE_KEY_PROPERTY };
+
+const SELECT_BORDERS_LAYER = "latestPV-forecast-select-borders";
+
+/**
+ * Outline the selected regions.
+ *
+ * The filter matches on `featureKey`, not on `id`: with several countries in one source a
+ * bare region id can name a region in each of them, and outlining both is a silent wrong
+ * answer rather than a visible fault. Building the key from the country the selection belongs
+ * to is what confines the outline to that country — and since selection always follows focus
+ * (contract §1), that country is always the focused one.
+ *
+ * Keys are strings, always, which is why the old `Number(id)` coercion for the GSP level has
+ * gone: it existed because `["in", "id", "5"]` does not match a numeric `5`, and
+ * `featureKeyFor` normalises both spellings to `"GB:5"`.
+ */
+const setMapFilterSelectedIds = (map: mapboxgl.Map, country: string, ids: string[]) => {
   if (!map) return;
 
-  const selectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+  const selectBordersLayer = map.getLayer(SELECT_BORDERS_LAYER);
   if (!selectBordersLayer) return;
 
   if (ids.length === 0) {
-    map.setFilter("latestPV-forecast-select-borders", ["in", "id", ""]);
+    map.setFilter(SELECT_BORDERS_LAYER, ["in", FEATURE_KEY_PROPERTY, ""]);
     return;
   }
-  map.setFilter("latestPV-forecast-select-borders", ["in", "id", ...ids]);
+  map.setFilter(SELECT_BORDERS_LAYER, [
+    "in",
+    FEATURE_KEY_PROPERTY,
+    ...ids.map((id) => featureKeyFor(country, id))
+  ]);
 };
 
+/** The region ids currently outlined, read back off the filter. */
+const selectedIdsFromFilter = (filter: unknown): string[] =>
+  Array.isArray(filter)
+    ? (filter.slice(2) as string[]).map((key) => regionIdOfFeatureKey(String(key)))
+    : [];
+
+/**
+ * A clicked feature's region id, as the string every selection holds. GB GSP features carry a
+ * numeric `gsp_id` here, and a selection mixing `"5"` and `5` can neither match nor deselect.
+ */
+const regionIdOfFeature = (feature: { properties?: Record<string, unknown> | null }): string =>
+  String(feature.properties?.id);
+
 const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickProps) => {
-  const [clickedMapRegionIds, setClickedMapRegionIds] = useGlobalState("clickedMapRegionIds");
-  const [selectedMapRegionIds, setSelectedMapRegionIds] = useGlobalState("selectedMapRegionIds");
-  const [nationalAggregationLevel] = useGlobalState("nationalAggregationLevel");
+  const [clickedMapRegionIds, setClickedMapRegionIds] = useCountryState("clickedMapRegionIds");
+  const [selectedMapRegionIds, setSelectedMapRegionIds] = useCountryState("selectedMapRegionIds");
+  const [nationalAggregationLevel] = useCountryState("nationalAggregationLevel");
   const [, setVisibleLines] = useGlobalState("visibleLines");
 
   const clickedMapRegionIdsRef = useRef(clickedMapRegionIds);
@@ -32,29 +86,33 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
   const selectedMapRegionIdsRef = useRef(selectedMapRegionIds);
   selectedMapRegionIdsRef.current = selectedMapRegionIds;
   const isEventRegistertedRef = useRef(false);
-  const nationalAggregationLevelRef = useRef(nationalAggregationLevel);
-  nationalAggregationLevelRef.current = nationalAggregationLevel;
+  // The level ref this used to carry is gone with the numeric-id coercion it existed for.
+  // Read through a ref because the click handler is
+  // registered once and would otherwise close over the country the map had on first render.
+  const focusedCountry = useFocusedCountry();
+  const focusedCountryRef = useRef(focusedCountry);
+  focusedCountryRef.current = focusedCountry;
 
   useEffect(() => {
     if (!map || !clickedMapRegionIds) return;
 
-    const selectBordersLayer = map.getLayer("latestPV-forecast-select-borders");
+    const selectBordersLayer = map.getLayer(SELECT_BORDERS_LAYER);
     if (!selectBordersLayer) return;
 
-    let currentlySelectedIds = map.getFilter("latestPV-forecast-select-borders");
+    const currentlySelectedIds = map.getFilter(SELECT_BORDERS_LAYER);
     if (!currentlySelectedIds) return;
-    if (
-      selectedMapRegionIds?.join() == currentlySelectedIds?.slice(2).join() &&
-      !clickedMapRegionIds
-    )
-      return;
+    // The filter now holds country-qualified keys, so it is un-namespaced before being
+    // compared with — or written back into — `selectedMapRegionIds`, which is country-scoped
+    // state and speaks bare region ids.
+    const outlinedIds = selectedIdsFromFilter(currentlySelectedIds);
+    if (selectedMapRegionIds?.join() == outlinedIds.join() && !clickedMapRegionIds) return;
 
     if (selectedMapRegionIds?.length === 0 && !clickedMapRegionIds.length) {
-      setMapFilterSelectedIds(map, []);
+      setMapFilterSelectedIds(map, focusedCountryRef.current, []);
       return;
     }
 
-    let selectedIds = (currentlySelectedIds?.slice(2) as string[]) || [];
+    let selectedIds = outlinedIds;
 
     if (clickedMapRegionIds) {
       for (const id of clickedMapRegionIds) {
@@ -74,22 +132,34 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
     if (!map) return;
     if (!selectedMapRegionIds) return;
 
-    // Force ids to be numbers if national aggregation level is GSP for the map filter
-    if (nationalAggregationLevel === NationalAggregation.GSP) {
-      setMapFilterSelectedIds(
-        map,
-        selectedMapRegionIds.map((id) => Number(id))
-      );
-    } else {
-      setMapFilterSelectedIds(map, selectedMapRegionIds);
-    }
-  }, [selectedMapRegionIds]);
+    // The selection always belongs to the focused country — contract §1's "selection sets
+    // focus" is what guarantees it, and `focusAndSelectRegions` is what enforces it.
+    setMapFilterSelectedIds(map, focusedCountry, selectedMapRegionIds);
+  }, [selectedMapRegionIds, focusedCountry]);
 
+  /**
+   * A level change invalidates the selection — but only *within* one country.
+   *
+   * Region ids belong to a level, so switching GB from GSP to DNO must drop what was selected.
+   * `nationalAggregationLevel` is the **focused country's** level, though, so it also changes
+   * when focus moves between countries on different levels (GB `gsp` → NL `province`) — and
+   * that is precisely when a selection has just been made deliberately. Clicking a region in
+   * the unfocused country calls `focusAndSelectRegions`, which sets focus and that country's
+   * selection together; this effect then saw the level change and wiped it, so only the
+   * country focused at load could ever hold a selection. The country is part of the identity
+   * of "the level changed", so compare the pair, not the level alone.
+   */
+  const lastLevelKeyRef = useRef<string | null>(null);
   useEffect(() => {
     if (!map) return;
-
+    const key = `${focusedCountry}:${nationalAggregationLevel}`;
+    const previous = lastLevelKeyRef.current;
+    lastLevelKeyRef.current = key;
+    // First run has nothing to invalidate, and a focus change carries its own fresh selection.
+    if (previous === null || previous.split(":")[0] !== focusedCountry) return;
+    if (previous === key) return;
     setSelectedMapRegionIds([]);
-  }, [nationalAggregationLevel]);
+  }, [nationalAggregationLevel, focusedCountry]);
 
   useEffect(() => {
     if (map && isMapReady && !isEventRegistertedRef.current) {
@@ -97,6 +167,23 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
       map.on("click", "latestPV-forecast", (e) => {
         const clickedFeature = e.features && e.features[0];
         if (clickedFeature) {
+          // Whose region was clicked. Stamped onto every feature by `country-features.ts`
+          // since Phase 6 Track F; the fallback is now only reached for a feature that did
+          // not come through the map's own geometry path.
+          const featureCountry = String(
+            clickedFeature.properties?.[REGION_COUNTRY_PROPERTY] ?? focusedCountryRef.current
+          );
+
+          // A click on another country's region focuses it and starts that country's
+          // selection fresh — including under shift, because a selection spanning two
+          // countries is exactly what contract §1 makes unreachable. `focusAndSelectRegions`
+          // owns the focus-then-select ordering; doing it by hand here would silently drop
+          // the click.
+          if (featureCountry.toUpperCase() !== focusedCountryRef.current.toUpperCase()) {
+            focusAndSelectRegions(featureCountry, [regionIdOfFeature(clickedFeature)]);
+            return;
+          }
+
           if (e.originalEvent.shiftKey) {
             const bbox: [PointLike, PointLike] = [
               [e.point.x - 5, e.point.y - 5],
@@ -105,7 +192,18 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
             const clickedFeatures = map.queryRenderedFeatures([e.point.x, e.point.y], {
               layers: ["latestPV-forecast"]
             });
-            const clickedIds = clickedFeatures.map((feature) => feature.properties?.id);
+            // Confined to the focused country's features. `queryRenderedFeatures` answers for
+            // the whole layer, which now carries every enabled country, and a point where two
+            // countries' polygons overlap would otherwise build a selection spanning both —
+            // the state contract §1 makes unreachable, arriving through the back door.
+            const clickedIds = clickedFeatures
+              .filter(
+                (feature) =>
+                  String(
+                    feature.properties?.[REGION_COUNTRY_PROPERTY] ?? featureCountry
+                  ).toUpperCase() === featureCountry.toUpperCase()
+              )
+              .map(regionIdOfFeature);
             if (clickedIds.length > 0) {
               const newSelectedMapRegionIds = clickedMapRegionIdsRef?.current
                 ? [...clickedMapRegionIdsRef.current]
@@ -117,27 +215,44 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
                   newSelectedMapRegionIds.push(id);
                 }
               });
-              setClickedMapRegionIds(newSelectedMapRegionIds);
-            } else {
-              console.log("no features clicked");
+              // Named country, not the hook setter — see the note on the plain-click branch.
+              setCountryState("clickedMapRegionIds", newSelectedMapRegionIds, featureCountry);
             }
           } else {
-            let ids: string[] | number[];
-            if (nationalAggregationLevelRef.current === NationalAggregation.GSP) {
-              ids = [Number(clickedFeature.properties?.id)];
-            } else {
-              ids = [String(clickedFeature.properties?.id)];
-            }
+            // Ids are strings throughout now. The numeric branch this used to carry existed
+            // only so the `["in", "id", …]` filter would match a numeric `gsp_id`; the filter
+            // matches on `featureKey`, which `featureKeyFor` normalises, so there is nothing
+            // left for the coercion to fix. `selectedMapRegionIds` was already string-valued.
+            let ids: string[] = [regionIdOfFeature(clickedFeature)];
             //  if there is one selected region, and it is the same as the clicked region, then deselect it
             if (
               selectedMapRegionIdsRef.current &&
               selectedMapRegionIdsRef.current.length === 1 &&
-              selectedMapRegionIdsRef.current[0] === String(clickedFeature.properties?.id)
+              selectedMapRegionIdsRef.current[0] === regionIdOfFeature(clickedFeature)
             ) {
               ids = [];
             }
-            setMapFilterSelectedIds(map, ids);
-            setSelectedMapRegionIds([...ids.map((id) => String(id))]);
+            setMapFilterSelectedIds(map, featureCountry, ids);
+            // **`setCountryState` with the country named, not `useCountryState`'s setter.**
+            //
+            // This handler is registered once (`isEventRegistertedRef`, deps `[map, isMapReady]`)
+            // and so closes over that render's values for the whole session — which is why
+            // `focusedCountry` and `clickedMapRegionIds` are read through refs above. The hook
+            // *setters* have the same problem and do not look like it: `useCountryState` memoises
+            // its setter on `[setRecord, focusedCountry, key]` and writes through
+            // `writeCountryScoped(previous, focusedCountry, next)`, so the one captured here
+            // writes to whichever country was focused at registration, for ever.
+            //
+            // The failure was silent and looked like three unrelated faults: the clicked country
+            // never selected (its slice was never written), a country nobody had clicked
+            // accumulated a selection, and the outline flashed on and vanished — the direct
+            // `setFilter` above painted it, then the effect that re-derives the filter from
+            // `selectedMapRegionIds` found that state unchanged and cleared it again.
+            //
+            // `featureCountry` is the click's own answer to "whose region is this", and by here
+            // it always equals the focused country (the cross-country case returned above), so
+            // naming it costs nothing and cannot go stale.
+            setCountryState("selectedMapRegionIds", ids, featureCountry);
           }
         }
       });
