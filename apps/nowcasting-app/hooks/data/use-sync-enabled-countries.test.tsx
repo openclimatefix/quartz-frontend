@@ -43,7 +43,7 @@ import useSyncEnabledCountries from "./use-sync-enabled-countries";
 
 const server = setupServer(
   http.get("/api/get_token", () => HttpResponse.json({ accessToken: "test-token" })),
-  http.get("https://api.quartz.solar/v1/countries", () => HttpResponse.json(countriesFixture))
+  http.get("https://api.ocf.energy/v1/countries", () => HttpResponse.json(countriesFixture))
 );
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));

@@ -74,7 +74,7 @@ const GSP_LEVEL: AggregationLevel = {
   derived: false
 };
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 let requests: { path: string; url: URL }[] = [];
 const countRequests = (path: string) => requests.filter((r) => r.path === path).length;

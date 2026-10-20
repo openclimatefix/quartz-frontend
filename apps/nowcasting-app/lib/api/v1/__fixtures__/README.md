@@ -1,7 +1,7 @@
 # v1 API fixtures
 
 Recorded verbatim from the live v1 API (spec 1.0.72). The recorder defaults to
-**production** (`https://api.quartz.solar/v1`) with `QUARTZ_API_V1_TOKEN_PROD` from
+**production** (`https://api.ocf.energy/v1`) with `QUARTZ_API_V1_TOKEN_PROD` from
 `.env.local` (falling back to `QUARTZ_API_V1_TOKEN`, the dev-tenant token, which production
 rejects with 401). With `--base-from-env` the host comes from `NEXT_PUBLIC_API_V1_PREFIX` and
 the dev token is used. The current set was recorded on 2026-09-30 from production.

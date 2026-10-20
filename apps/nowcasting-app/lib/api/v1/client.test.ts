@@ -32,17 +32,17 @@ const server = setupServer(
     tokenCallCount++;
     return HttpResponse.json({ accessToken: "shared-token" });
   }),
-  http.get("https://api.quartz.solar/v1/countries", ({ request }) => {
+  http.get("https://api.ocf.energy/v1/countries", ({ request }) => {
     return HttpResponse.json([{ authHeader: request.headers.get("authorization"), country: "GB" }]);
   }),
-  http.get("https://api.quartz.solar/v1/forbidden", () =>
+  http.get("https://api.ocf.energy/v1/forbidden", () =>
     HttpResponse.json({ detail: "not allowed" }, { status: 403 })
   ),
-  http.get("https://api.quartz.solar/v1/unauthorised", () =>
+  http.get("https://api.ocf.energy/v1/unauthorised", () =>
     HttpResponse.json({ detail: "bad token" }, { status: 401 })
   ),
-  http.get("https://api.quartz.solar/v1/unreachable", () => HttpResponse.error()),
-  http.get("https://api.quartz.solar/v1/validation-error", () =>
+  http.get("https://api.ocf.energy/v1/unreachable", () => HttpResponse.error()),
+  http.get("https://api.ocf.energy/v1/validation-error", () =>
     HttpResponse.json(
       { detail: [{ loc: ["query", "country"], msg: "field required", type: "value_error" }] },
       { status: 422 }

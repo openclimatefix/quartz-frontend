@@ -17,7 +17,7 @@ const links = [
     title: "API Reference",
     description: "A complete API reference for our library",
     icon: ViewListIcon,
-    url: "https://api.quartz.solar/docs"
+    url: "https://api.ocf.energy/docs"
   },
   {
     title: "Support",

@@ -39,7 +39,7 @@ import {
   useApiQuery
 } from "./query";
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (

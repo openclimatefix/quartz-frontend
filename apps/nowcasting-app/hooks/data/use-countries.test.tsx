@@ -48,7 +48,7 @@ import {
   useFocusedCountry
 } from "./use-countries";
 
-const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
+const COUNTRIES_URL = "https://api.ocf.energy/v1/countries";
 
 let countriesRequestCount = 0;
 
