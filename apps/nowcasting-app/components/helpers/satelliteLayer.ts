@@ -572,7 +572,7 @@ export function showStackFrame(
           "raster-opacity": satOpacityExpression(channel),
           "raster-contrast": 0.3,
           "raster-opacity-transition": { duration: 0 },
-          "raster-fade-duration": 1
+          "raster-fade-duration": 0
         }
       },
       beforeId && map.getLayer(beforeId) ? beforeId : undefined
@@ -653,7 +653,7 @@ export function applyTifLayerToMap(
           "raster-contrast": 0.3,
           "raster-opacity-transition": { duration: 0 },
           // Disable the cross-fade between old and new textures.
-          "raster-fade-duration": 1
+          "raster-fade-duration": 0
         }
       },
       // Insert beneath the forecast/PV layers so clouds sit under them.
