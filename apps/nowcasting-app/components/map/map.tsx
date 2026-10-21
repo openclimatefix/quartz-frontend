@@ -377,8 +377,8 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     channelRef.current = activeChannel;
     currentKeyRef.current = null;
-    // The stack, its rendered textures, and its uploaded frame layers are per-channel; drop them
-    // all so the new channel starts clean (the stack effect refetches, the build effect re-uploads).
+    // The stack and its canvas layer are per-channel; drop both so the new channel starts clean
+    // (the stack effect refetches, and the layer is recreated on the next draw).
     teardownStackFrames();
     stackRef.current = null;
     // Hide layers dropped by the new selection before the fetch resolves.
@@ -572,7 +572,7 @@ const Map: FC<IMap> = ({
           addMinutesToISODate(selectedISOTime, offset * getCursorCadenceMinutes())
         );
         if (isFutureTimestamp(satTs)) continue;
-        // Skip slots the stack covers — the idle build uploads them as frame layers, so a network
+        // Skip slots the stack covers — they're drawn from it without a request, so a network
         // prefetch would be wasted work. Only warm genuine fallbacks.
         if (stackCovers(activeChannel, satTs)) continue;
         fetchIntoCache(activeChannel, satTs).catch(() => {});
@@ -608,8 +608,8 @@ const Map: FC<IMap> = ({
           // Guard against a channel switch or unmount during the fetch/decode.
           if (cancelled || !stack || channelRef.current !== channel) return;
           stackRef.current = stack;
-          // Wake the idle frame-layer build (a ref assignment alone wouldn't). On a refresh it
-          // prunes aged-out frames, keeps the uploaded ones, and only builds genuinely new slots.
+          // A ref assignment alone wouldn't re-render; the tick lets the effect below redraw the
+          // cursor's slot from the new stack.
           setStackReadyTick((n) => n + 1);
         })
         .catch(() => {});
