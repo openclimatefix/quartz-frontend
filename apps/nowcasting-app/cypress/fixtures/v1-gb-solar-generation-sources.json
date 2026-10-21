@@ -1,0 +1,12 @@
+[
+  {
+    "source": "solar",
+    "name": "pvlive_in_day",
+    "label": "PV Live Estimated"
+  },
+  {
+    "source": "solar",
+    "name": "pvlive_day_after",
+    "label": "PV Live Updated"
+  }
+]
