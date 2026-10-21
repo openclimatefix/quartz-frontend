@@ -794,6 +794,12 @@ describe("generateCsv — headers come from config and manifest labels", () => {
     expect(csv).toBe("Period,Solar Generation NED (MW)");
   });
 
+  test("before the generation sources load, no generation column is written", () => {
+    const labels = csvLabelsFor(getCountryConfig("GB"), []);
+    const csv = generateCsv([], generationColumns, 4, [], labels);
+    expect(csv).toBe("Settlement Period");
+  });
+
   test("an observer with no manifest label falls back to its raw name", () => {
     expect(csvLabelsFor({}, [{ name: "ned_nl", label: "" }]).observerLabels[0]).toBe("ned_nl");
   });

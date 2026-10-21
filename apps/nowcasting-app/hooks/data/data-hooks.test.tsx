@@ -59,7 +59,7 @@ import {
 } from "./use-generation";
 import { useGenerationSources, useRegionTypes, useRegions } from "./use-regions";
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 const GB_NATIONAL: Scope = { country: "GB", source: "solar", regionType: "national" };
 const GB_GSP: Scope = { country: "GB", source: "solar", regionType: "gsp" };

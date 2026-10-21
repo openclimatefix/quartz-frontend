@@ -77,7 +77,7 @@ class ResizeObserverStub {
 }
 (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = ResizeObserverStub;
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 let requests: { path: string; url: URL }[] = [];
 const seen = (path: string) => requests.filter((r) => r.path === path);

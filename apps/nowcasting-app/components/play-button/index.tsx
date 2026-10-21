@@ -45,11 +45,20 @@ const PlayButton: React.FC<PlayButtonProps> = ({ endTime, startTime }) => {
   const [intervals] = useGlobalState("intervals");
   const { stopTime } = useStopAndResetTime();
   const intervalRef = useRef<any>();
+  // Read through refs: the running interval keeps the `tick` it was started with, so a range
+  // captured in that closure would go on looping the window as it stood when play was pressed,
+  // even after a data refresh moves it.
+  const startTimeRef = useRef(startTime);
+  const endTimeRef = useRef(endTime);
+  startTimeRef.current = startTime;
+  endTimeRef.current = endTime;
 
   // The one step function, shared by `play()`'s first interval and the speed-change effect's
   // replacement one, so the two can never drift into stepping differently.
   const tick = () => {
     setSelectedISOTime((selectedISOTime) => {
+      const startTime = startTimeRef.current;
+      const endTime = endTimeRef.current;
       // At or past the end, loop to the start. Compared as times: the stride is the finest
       // enabled cadence, so it need not step onto `endTime` exactly, and an equality check let
       // it walk past the end — where the chart reset it to now.

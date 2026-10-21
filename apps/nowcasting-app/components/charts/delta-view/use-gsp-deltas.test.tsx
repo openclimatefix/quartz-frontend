@@ -44,7 +44,7 @@ import { resetTokenCache } from "../../../lib/api/auth/token";
 import { setFocusedCountry } from "../../helpers/globalState";
 import { useGspDeltas } from "./use-gsp-deltas";
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 let requests: { path: string; url: URL }[] = [];
 const countRequests = (path: string) => requests.filter((r) => r.path === path).length;

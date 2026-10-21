@@ -21,7 +21,7 @@ const Layout = ({ children }: ILayout) => {
   // "Delta", "Solar Sites" — now come from the two facts that used to be folded into `view`,
   // route and comparison, rather than from a third piece of state mirroring both.
   const viewTitle = isSitesChart ? "Solar Sites" : comparison ? "Delta" : "PV Forecast";
-  const pageTitle = `Quartz Solar - ${viewTitle}`;
+  const pageTitle = `OCF Energy - ${viewTitle}`;
 
   return (
     <>
