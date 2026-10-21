@@ -289,6 +289,11 @@ const SequentialBands: React.FC<{
     // National level draws one polygon per country and has no useful band scale; it showed
     // nothing before and shows nothing now.
     if (!currentLevel || currentLevel.level <= 0) return undefined;
+    // MW per 1km x 1km is not a power, so no display-unit conversion.
+    if (unit === ActiveUnit.capacityDensity) {
+      const top = capacityTopFor(country, currentLevel.derived, "capacityDensityTop");
+      return top === undefined ? undefined : [top];
+    }
     // Capacity has its own saturation point (`capacityTop`), because installed capacity runs
     // several times the output a region reaches — see `MapBandsConfig`. The ramp needs only
     // where it ends, so capacity mode hands over a single value.
@@ -314,6 +319,7 @@ const SequentialBands: React.FC<{
   if (unit === ActiveUnit.capacity) {
     unitText = displayUnit;
   }
+  if (unit === ActiveUnit.capacityDensity) unitText = "MW/km²";
   return (
     // Positioning only: this used to anchor itself to the map's bottom-left corner
     // (`absolute bottom-12 left-0 ml-12 z-20`), which is where the floating chart now sits. It
