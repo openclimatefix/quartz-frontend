@@ -52,7 +52,8 @@ export function isNonRetryableApiV1Error(error: unknown): error is ApiV1Error {
 // Once only. The module flag covers a burst of 401s from one page load; the sessionStorage
 // marker covers the page load after the login round trip, so if the API still answers 401
 // the user stays put with an error instead of looping through login. Any successful v1
-// response clears the marker, so a later expiry redirects again.
+// response clears both, so a later expiry redirects again — including in that same page
+// load, where the marker stopped the redirect but the flag was already set.
 const LOGIN_REDIRECT = "/api/auth/logout?redirectToLogin=true";
 const LOGIN_REDIRECT_MARKER = "apiV1LoginRedirect";
 const LOGGED_OUT_PATH = /^\/(logout|expired|auth)(\/|$)/;
@@ -72,7 +73,8 @@ function redirectToLoginOnce(): void {
   Router.push(LOGIN_REDIRECT);
 }
 
-function clearLoginRedirectMarker(): void {
+function clearLoginRedirectState(): void {
+  loginRedirected = false;
   try {
     window.sessionStorage.removeItem(LOGIN_REDIRECT_MARKER);
   } catch {
@@ -99,7 +101,7 @@ const authMiddleware: Middleware = {
   },
   onResponse(res) {
     if (res.status === 401) redirectToLoginOnce();
-    else if (res.ok && typeof window !== "undefined") clearLoginRedirectMarker();
+    else if (res.ok && typeof window !== "undefined") clearLoginRedirectState();
     return undefined;
   }
 };

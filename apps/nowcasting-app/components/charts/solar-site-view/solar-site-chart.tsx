@@ -205,7 +205,7 @@ const SolarSiteChart: FC<{
               <Link
                 className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
-                href={"https://api.quartz.solar/docs"}
+                href={"https://api.ocf.energy/docs"}
               >
                 API
               </Link>{" "}
@@ -213,7 +213,7 @@ const SolarSiteChart: FC<{
               <Link
                 className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
-                href={"https://api.quartz.solar/swagger"}
+                href={"https://api.ocf.energy/swagger"}
               >
                 Swagger UI
               </Link>
@@ -225,9 +225,9 @@ const SolarSiteChart: FC<{
                 information, please get in touch at{" "}
                 <a
                   className={"underline underline-offset-4 decoration-solar"}
-                  href="mailto:quartz.support@openclimatefix.org"
+                  href="mailto:support@ocf.energy"
                 >
-                  quartz.support@openclimatefix.org
+                  support@ocf.energy
                 </a>
               </p>
             </blockquote>
