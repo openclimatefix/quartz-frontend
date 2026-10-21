@@ -596,7 +596,7 @@ const Map: FC<IMap> = ({
   }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer, timeNow, title]);
 
   useEffect(() => {
-    if (title !== MAP_TITLE_MAIN || !isMapReady) return;
+    if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady) return;
     const channel = activeChannel;
     let cancelled = false;
     const load = () => {
@@ -617,7 +617,7 @@ const Map: FC<IMap> = ({
       cancelled = true;
       clearInterval(refresh);
     };
-  }, [activeChannel, isMapReady, title]);
+  }, [activeChannel, isMapReady, showCloudLayer, title]);
 
   // The stack just (re)loaded - first load for this channel, or the 15-minute refresh. If the
   // cursor sits on a slot it covers, switch from the network fallback to the stack (or redraw it
