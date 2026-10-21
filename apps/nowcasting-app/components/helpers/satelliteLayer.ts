@@ -138,7 +138,7 @@ export type TifLayerData = {
 // versioning scheme entirely. Whether that is a deliberate exemption or an oversight is a
 // question for the API side, worth settling before EU satellite coverage is planned on top of it.
 const API_PREFIX =
-  process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.quartz.solar";
+  process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.ocf.energy";
 
 // One layer/source per channel, so a composite can stack them. Kept here rather
 // than in map.tsx so the ids have a single home.

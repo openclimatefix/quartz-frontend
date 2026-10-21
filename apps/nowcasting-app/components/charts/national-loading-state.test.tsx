@@ -47,7 +47,7 @@ import { resetTokenCache } from "../../lib/api/auth/token";
 import { useLoadingState } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 const GB_NATIONAL: Scope = { country: "GB", source: "solar", regionType: "national" };
 const GB_GSP: Scope = { country: "GB", source: "solar", regionType: "gsp" };

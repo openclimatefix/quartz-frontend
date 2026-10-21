@@ -26,7 +26,7 @@ import { continuityKey, isNonRetryableError } from "./query";
 import { useNationalForecast } from "./use-forecast";
 import { useNationalGeneration } from "./use-generation";
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 const GB: Scope = { country: "GB", source: "solar", regionType: "national" };
 const NL: Scope = { country: "NL", source: "solar", regionType: "national" };
 const DE: Scope = { country: "DE", source: "solar", regionType: "national" };

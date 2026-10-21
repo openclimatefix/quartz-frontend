@@ -30,23 +30,11 @@ import type { StatusProductKey } from "../../../config/statusProducts";
 export type ProductKey = StatusProductKey | "de-solar";
 
 /**
- * Bare spelling, no namespace — what is actually set on the Auth0 dev tenant, following the
- * `trial_ends_at` precedent read straight off `session.user` in pages/api/get_token.ts.
+ * Bare spelling, no namespace — as the Auth0 Action sets it, following the `trial_ends_at`
+ * precedent read straight off `session.user` in pages/api/get_token.ts. A namespaced
+ * `https://quartz.solar/products` was also read until the Action shipped; it was never used.
  */
 export const PRODUCTS_CLAIM_KEY = "products";
-
-/**
- * Namespaced spelling, per Auth0's custom-claim convention.
- *
- * Both are read because the bare one may not survive. Auth0 silently drops non-namespaced
- * custom claims that an Action adds to a token; `trial_ends_at` works un-namespaced in
- * production, but most likely arrives by another route (a root profile attribute rather than
- * an Action-set claim), so it is not proof that `products` will. Reading both costs a line
- * and removes the question.
- *
- * Delete whichever spelling turns out to be unused once the Action ships.
- */
-export const PRODUCTS_CLAIM_KEY_NAMESPACED = "https://quartz.solar/products";
 
 /**
  * The claim's key, un-namespaced — as the Auth0 Action sets it, following the existing
@@ -109,7 +97,7 @@ export const readProductsClaim = (user: unknown): string[] => {
   if (user === null || typeof user !== "object") return [];
 
   const record = user as Record<string, unknown>;
-  const raw = record[PRODUCTS_CLAIM_KEY] ?? record[PRODUCTS_CLAIM_KEY_NAMESPACED];
+  const raw = record[PRODUCTS_CLAIM_KEY];
   if (!Array.isArray(raw)) return [];
 
   const keys = raw

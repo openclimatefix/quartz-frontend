@@ -36,3 +36,6 @@ yarn-error.log*
 # Sentry
 .sentryclirc
 
+
+# eslint --cache (lint-staged)
+.eslintcache
