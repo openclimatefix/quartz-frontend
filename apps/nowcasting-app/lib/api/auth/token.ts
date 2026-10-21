@@ -1,6 +1,8 @@
 import Router from "next/router";
 import * as Sentry from "@sentry/nextjs";
 
+import { setGlobalState } from "../../../components/helpers/globalState";
+
 // Single shared, cached access token for the whole app.
 //
 // Before this, every API call (axiosFetcherAuth, satelliteLayer's tif fetches, and now
@@ -25,10 +27,6 @@ async function fetchToken(): Promise<string> {
       Sentry.captureException(parseErr, { tags: { error: "get_token_parse_failure" } });
       return {};
     });
-    if (body.error === "trial_expired") {
-      Router.push(`/expired${body.email ? `?email=${encodeURIComponent(body.email)}` : ""}`);
-      throw new Error("trial_expired");
-    }
     if (body.error === "access_denied") {
       Router.push(`/auth/denied?error_description=${encodeURIComponent(body.message)}`);
       throw new Error("access_denied");
@@ -36,7 +34,8 @@ async function fetchToken(): Promise<string> {
     const text = body.message || response.statusText;
     throw new Error(`Failed to get access token (${response.status}): ${text}`);
   }
-  const { accessToken } = await response.json();
+  const { accessToken, trialExpired, trialEndsAt } = await response.json();
+  setGlobalState("trialExpiredAt", trialExpired && trialEndsAt ? String(trialEndsAt) : "");
   return accessToken as string;
 }
 
