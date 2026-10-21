@@ -1,6 +1,6 @@
-# Quartz Solar UI
+# OCF Energy UI
 
-This is the main Quartz Solar UI, hosted at [app.quartz.solar](app.quartz.solar).
+This is the main OCF Energy UI, hosted at [app.ocf.energy](https://app.ocf.energy) (redirected from app.quartz.solar).
 It is used by customers to log in and view their forecasts.
 
 ## Getting Started
@@ -43,25 +43,19 @@ Open [http://localhost:3002](http://localhost:3002) with your browser to see the
 The app gets automatically deployed to Vercel, on each merge to the `development`, `staging`, and `main` branches.
 Any Pull Requests are deployed on their own respective Preview branches when granted an OCF Team member.
 
-## Storybook
-
-This part of the app is slightly unloved, but it is still possible to run Storybook to see the components in isolation.
-
-```bash
-yarn run storybook
-```
-
 ## How to run the tests
 
 ```bash
 yarn test
+yarn typecheck  # tsc --noEmit
+yarn lint       # next lint
 ```
 
-Other useful checks and generators:
+The pre-commit hook only runs eslint (with `--fix`) on staged files; CI runs typecheck, lint and the full test suite on every PR.
+
+Other useful generators:
 
 ```bash
-yarn typecheck   # tsc --noEmit
-yarn lint        # next lint
 yarn gen:api     # regenerate lib/api/v1/schema.d.ts from v1-api.json
 ```
 

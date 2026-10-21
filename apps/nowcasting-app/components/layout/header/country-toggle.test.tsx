@@ -74,7 +74,7 @@ import CountryToggle, {
   TRIAL_NOT_INCLUDED_MESSAGE
 } from "./country-toggle";
 
-const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
+const COUNTRIES_URL = "https://api.ocf.energy/v1/countries";
 
 const server = setupServer(
   http.get("/api/get_token", () => HttpResponse.json({ accessToken: "test-token" })),
