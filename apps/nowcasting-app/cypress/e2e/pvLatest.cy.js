@@ -36,8 +36,8 @@ describe.skip("Load the page", () => {
     cy.get("header").contains("PV Forecast").should("have.class", "text-ocf-yellow");
     cy.get("header").contains("Solar Sites").should("not.have.class", "text-ocf-yellow");
     //
-    cy.get("header a[href='https://quartz.solar/']").should("exist");
-    cy.get("header a[href='https://quartz.solar/']").should("be.visible");
+    cy.get("header a[href='https://openclimatefix.org/']").should("exist");
+    cy.get("header a[href='https://openclimatefix.org/']").should("be.visible");
     cy.get("header").should("contain", "powered by");
     cy.get("header").contains("powered by").should("exist");
     cy.get("header").contains("powered by").should("be.visible");

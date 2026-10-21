@@ -7,7 +7,7 @@ const NotFoundPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Not found | Quartz Solar UI</title>
+        <title>Not found | OCF Energy</title>
       </Head>
       <div className="bg-surface-sunken flex flex-col min-h-screen pt-16">
         <Header isLoggedIn={false} />

@@ -2,7 +2,7 @@
 // Re-runnable recorder for lib/api/v1/__fixtures__/*.json
 //
 // Records VERBATIM responses from the live v1 API. Default host is production
-// (https://api.quartz.solar/v1), authenticated with QUARTZ_API_V1_TOKEN_PROD from
+// (https://api.ocf.energy/v1), authenticated with QUARTZ_API_V1_TOKEN_PROD from
 // .env.local when that key is present, else QUARTZ_API_V1_TOKEN. QUARTZ_API_V1_TOKEN is
 // signed by the dev Auth0 tenant, so on its own it is rejected by production. With
 // `--base-from-env` the host comes from NEXT_PUBLIC_API_V1_PREFIX and QUARTZ_API_V1_TOKEN
@@ -60,7 +60,7 @@ if (!TOKEN) {
 // in .env.local instead, for a token issued by the tenant that host trusts.
 const BASE = FROM_ENV
   ? (env.NEXT_PUBLIC_API_V1_PREFIX ?? "").replace(/^["']|["']$/g, "").replace(/\/+$/, "")
-  : "https://api.quartz.solar/v1";
+  : "https://api.ocf.energy/v1";
 if (!/^https:\/\//.test(BASE)) {
   console.error("Base URL must be https");
   process.exit(1);

@@ -11,19 +11,19 @@ const links = [
     title: "Documentation",
     description: "Learn how to integrate our tools with your app",
     icon: BookOpenIcon,
-    url: "https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
+    url: "https://openclimatefix.notion.site/OCF-Energy-Documentation-0d718915650e4f098470d695aa3494bf"
   },
   {
     title: "API Reference",
     description: "A complete API reference for our library",
     icon: ViewListIcon,
-    url: "https://api.quartz.solar/docs"
+    url: "https://api.ocf.energy/docs"
   },
   {
     title: "Support",
     description: "Get help with any problems you encounter",
     icon: SupportIcon,
-    url: "mailto:support@quartz.solar?subject=Quartz%20Solar%20Support%20Request"
+    url: "mailto:support@ocf.energy?subject=OCF%20Energy%20Support%20Request"
   }
 ];
 
@@ -31,7 +31,7 @@ const LogoutPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Logged out | Quartz Solar UI</title>
+        <title>Logged out | OCF Energy</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

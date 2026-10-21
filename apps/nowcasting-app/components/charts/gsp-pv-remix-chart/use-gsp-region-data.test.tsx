@@ -53,7 +53,7 @@ import dnoGroupings from "../../../public/geo/gb/dno-groupings.json";
 import { groupRegionNames } from "../../helpers/data";
 import { useGspAggregateData, useGspRegionData, useGspRegionNames } from "./use-gsp-region-data";
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 // City Road: gsp_id 67 -> region name "citr_1", per the recorded fixture.
 const CITR_1_GSP_ID = 67;
