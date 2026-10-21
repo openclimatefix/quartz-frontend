@@ -137,6 +137,7 @@ const STACK_REFRESH_MS = 15 * 60 * 1000;
 // see the showCloudLayer effect.) Kept modest as each decoded entry is ~0.5MB and
 // this runs on always-on wallboards.
 const TIF_CACHE_SIZE = 6;
+let satelliteMissingReported = false;
 
 const setAggregationLevelByCurrentZoom = (
   currentZoom: number,
@@ -499,7 +500,8 @@ const Map: FC<IMap> = ({
       // Bail if the channel or timestamp moved on while we were fetching.
       if (requestedKeyRef.current !== key || !map.current) return;
       //Send logs to sentry to notify us if sat ui is down
-      if (!data && !isFutureTimestamp(satTs)) {
+      if (!data && !isFutureTimestamp(satTs) && !satelliteMissingReported) {
+        satelliteMissingReported = true;
         Sentry.captureMessage(`Satellite frame missing: ${channel} at ${satTs}`, {
           level: "error",
           fingerprint: ["satellite_frame_missing"],
