@@ -502,6 +502,7 @@ const Map: FC<IMap> = ({
       if (!data && !isFutureTimestamp(satTs)) {
         Sentry.captureMessage(`Satellite frame missing: ${channel} at ${satTs}`, {
           level: "error",
+          fingerprint: ["satellite_frame_missing"],
           tags: { satellite_channel: channel, satellite_latest: String(isNow) },
           extra: {
             eventType: "SatelliteMissing",
