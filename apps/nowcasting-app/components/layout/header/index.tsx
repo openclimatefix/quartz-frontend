@@ -4,11 +4,11 @@ import ProfileDropDown from "./profile-dropdown";
 import CountryToggle from "./country-toggle";
 import CountryCoverageBanner from "../../map/country-coverage-banner";
 import DataInfoButton from "./data-info-button";
-import { OCFlogo } from "../../icons/logo";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Menu } from "@headlessui/react";
 import { ReactNode } from "react";
+import useGlobalState from "../../helpers/globalState";
 import { ExternalLinkIcon } from "../../icons/icons";
 
 /**
@@ -91,13 +91,16 @@ const SyncEnabledCountries: React.FC = () => {
 };
 
 const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
+  // Sites is GB-only and `useFocusedCountry` pins it there, so a country switcher on `/sites`
+  // would offer a choice that changes nothing on this page and the dashboard behind it.
+  const [isSitesChart] = useGlobalState("isSitesChart");
   return (
     <header className="h-14 text-content text-right sm:px-4 flex absolute top-0 w-full overflow-y-visible p-1 text-sm items-center z-30">
       <div className="flex-grow-0 -mt-0.5 flex-shrink-0">
         <a
           className="flex h-6 self-center w-auto"
           target="_blank"
-          href="https://quartz.solar/"
+          href="https://openclimatefix.org/"
           rel="noreferrer"
         >
           <img
@@ -110,24 +113,6 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
           />
         </a>
       </div>
-      {/*<div className="p-1 mt-0.5 mb-1.5 items-end flex flex-col">*/}
-      {/*  <a*/}
-      {/*    className="flex h-6 w-auto"*/}
-      {/*    target="_blank"*/}
-      {/*    href="https://quartz.solar/"*/}
-      {/*    rel="noreferrer"*/}
-      {/*  >*/}
-      {/*    <img*/}
-      {/*      src="/QUARTZSOLAR_LOGO_TEXTONLY_WHITE.svg"*/}
-      {/*      alt="quartz_logo"*/}
-      {/*      className="h-8 w-auto"*/}
-      {/*    />*/}
-      {/*  </a>*/}
-      {/*  <div className="mr-[6px] flex items-center">*/}
-      {/*    <span className="block mr-[1px] font-light tracking-wide text-[10px]">powered by</span>*/}
-      {/*    <OCFlogo />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
       {/* The Forecast/Solar Sites switcher is gone (Brad, 2026-08-27): Sites serves a different
           set of users from the dashboard's regulars, so a permanent two-item nav spent header
           width on a destination most viewers never want. `/sites` still routes — it is reached
@@ -136,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn = true, children }) => {
       {isLoggedIn && <SyncEnabledCountries />}
       <div className="flex items-center gap-2">
         {isLoggedIn && <CountryCoverageBanner />}
-        {isLoggedIn && <CountryToggle />}
+        {isLoggedIn && !isSitesChart && <CountryToggle />}
         {isLoggedIn && <DataInfoButton />}
         <div className="py-1">
           {isLoggedIn && <ProfileDropDown />}

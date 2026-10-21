@@ -38,7 +38,7 @@ import {
   setFocusedCountry,
   setGlobalState
 } from "../../components/helpers/globalState";
-import { COUNTRY_CLAIM_KEY } from "../../lib/api/auth/entitlement";
+import { COUNTRY_CLAIM_KEY, PRODUCTS_CLAIM_KEY } from "../../lib/api/auth/entitlement";
 import { resetTokenCache } from "../../lib/api/auth/token";
 import {
   useCountries,
@@ -48,7 +48,7 @@ import {
   useFocusedCountry
 } from "./use-countries";
 
-const COUNTRIES_URL = "https://api.quartz.solar/v1/countries";
+const COUNTRIES_URL = "https://api.ocf.energy/v1/countries";
 
 let countriesRequestCount = 0;
 
@@ -115,6 +115,17 @@ describe("useCountries", () => {
     expect(result.current.countries.map((c) => [c.code, c.entitled])).toEqual([
       ["GB", true],
       ["NL", false]
+    ]);
+  });
+
+  test("a products claim decides over a countries claim on the same user", async () => {
+    mockUser = { [PRODUCTS_CLAIM_KEY]: ["nl-solar"], [COUNTRY_CLAIM_KEY]: ["GB"] };
+    const { result } = renderCountries();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.countries.map((c) => [c.code, c.entitled])).toEqual([
+      ["GB", false],
+      ["NL", true]
     ]);
   });
 

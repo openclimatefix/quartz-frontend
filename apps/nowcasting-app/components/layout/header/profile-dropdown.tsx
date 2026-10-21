@@ -229,7 +229,7 @@ const ProfileDropDown = () => {
               <div className="px-4 pt-3 text-content text-right">
                 <a
                   id={"UserMenu-DocumentationBtn"}
-                  href="https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf"
+                  href="https://openclimatefix.notion.site/OCF-Energy-Documentation-0d718915650e4f098470d695aa3494bf"
                 >
                   Documentation{" "}
                   <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />
@@ -242,13 +242,13 @@ const ProfileDropDown = () => {
                   tip={
                     <div
                       onClick={() => {
-                        var copyText = "support@quartz.solar";
+                        var copyText = "support@ocf.energy";
                         navigator.clipboard.writeText(copyText);
                       }}
                       className="cursor-pointer"
                       title="Copy Email to Clipboard"
                     >
-                      Click to email OCF at <span>support@quartz.solar</span>
+                      Click to email OCF at <span>support@ocf.energy</span>
                     </div>
                   }
                   position="middle"
@@ -257,7 +257,7 @@ const ProfileDropDown = () => {
                 >
                   <a
                     id={"UserMenu-ContactBtn"}
-                    href="mailto:support@quartz.solar?subject=Quartz%20Solar%20Support%20Request"
+                    href="mailto:support@ocf.energy?subject=OCF%20Energy%20Support%20Request"
                   >
                     Contact{" "}
                     <ExternalLinkIcon className="inline-block w-3 h-3 ml-[6px] mb-[1px] self-center text-inherit color-black" />

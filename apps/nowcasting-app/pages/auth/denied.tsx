@@ -25,9 +25,7 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
   return (
     <>
       <Head>
-        <title>
-          {isEmailVerification ? "Email Verification" : "Access Denied"} | Quartz Solar UI
-        </title>
+        <title>{isEmailVerification ? "Email Verification" : "Access Denied"} | OCF Energy</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -54,12 +52,12 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
                   I&apos;ve verified, continue<span aria-hidden="true"> &rarr;</span>
                 </Link>
                 <p className="text-sm text-content-muted">
-                  If you think this is a mistake, please contact the Quartz Solar team at{" "}
+                  If you think this is a mistake, please contact the OCF Energy team at{" "}
                   <a
-                    href="mailto:support@quartz.solar"
+                    href="mailto:support@ocf.energy"
                     className="text-danube-600 underline hover:text-danube-800"
                   >
-                    support@quartz.solar
+                    support@ocf.energy
                   </a>
                   .
                 </p>
@@ -70,15 +68,15 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
                   Access denied.
                 </h1>
                 <p className="font-light">
-                  Your account does not currently have access to Quartz Solar.
+                  Your account does not currently have access to OCF Energy.
                 </p>
                 <p className="text-sm text-content-muted">
                   If you think this is a mistake, please contact us at{" "}
                   <a
-                    href="mailto:support@quartz.solar"
+                    href="mailto:support@ocf.energy"
                     className="text-danube-600 underline hover:text-danube-800"
                   >
-                    support@quartz.solar
+                    support@ocf.energy
                   </a>
                   .
                 </p>

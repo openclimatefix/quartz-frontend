@@ -21,11 +21,11 @@ export interface paths {
      *
      * Returns one entry per country the API has data for. Each entry includes:
      *
-     * - **region_types** — the region granularities available for that country (e.g. national,
+     * - **region_types**: the region granularities available for that country (e.g. national,
      *   GSP), including the forecast models valid for each type.
-     * - **generation_sources** — the observed-generation observers available (e.g.
+     * - **generation_sources**: the observed-generation observers available (e.g.
      *   `pvlive_in_day`, `pvlive_day_after`).
-     * - **capacity_kW** and **centroid** — installed capacity and geographic centre.
+     * - **capacity_kW** and **centroid**: installed capacity and geographic centre.
      *
      * Use the `country` value (e.g. `GB`, `NL`) as the `{country}` path segment in all other
      * v1 routes.
@@ -38,14 +38,14 @@ export interface paths {
      * @description List available region types for a country and energy source.
      *
      * Region types define the geographic granularity at which forecasts and generation
-     * data are available — for example `national` or `gsp` for Great Britain.
+     * data are available, for example `national` or `gsp` for Great Britain.
      *
      * Each entry includes:
      *
-     * - **type** — the slug used as the `region_type` query parameter throughout the API.
-     * - **level** — hierarchical depth (lower = coarser; 0 = national).
-     * - **forecast_models** — the models available for that region type, with the model
-     *   `name` used as the `model` parameter on forecast endpoints. The first listed model
+     * - **type**: the slug used as the `region_type` query parameter throughout the API.
+     * - **level**: hierarchical depth (lower = coarser; 0 = national).
+     * - **forecast_models**: the models available for that region type, with the model
+     *   `name` used as the `model_name` parameter on forecast endpoints. The first listed model
      *   is the default.
      */
     get: operations["get_region_types__country___source__region_types_get"];
@@ -56,8 +56,8 @@ export interface paths {
      * @description List available observed-generation sources for a country and energy source.
      *
      * Generation sources represent the different observers that produce actual (measured)
-     * generation data — for example PV_Live in-day estimates vs finalised day-after values.
-     * Use the `name` field as the `observer` parameter on generation endpoints.
+     * generation data, for example PV_Live in-day estimates vs finalised day-after values.
+     * Use the `name` field as the `observer_name` parameter on generation endpoints.
      */
     get: operations["get_generation_sources__country___source__generation_sources_get"];
   };
@@ -67,10 +67,10 @@ export interface paths {
      * @description List regions for a country, optionally filtered by type, parent, and/or name.
      *
      * Filter behavior:
-     * - No filters — returns every region across all configured region types.
-     * - `region_type` — restricts results to one granularity level (e.g. `gsp`).
-     * - `parent` — returns the direct children of the specified parent region.
-     * - `name` — case-insensitive substring search across region names.
+     * - No filters: returns every region across all configured region types.
+     * - `region_type`: restricts results to one granularity level (e.g. `gsp`).
+     * - `parent`: returns the direct children of the specified parent region.
+     * - `name`: case-insensitive substring search across region names.
      */
     get: operations["get_country_regions__country___source__regions_get"];
   };
@@ -89,10 +89,11 @@ export interface paths {
      * Get Forecast
      * @description Get the solar generation forecast for a specific region.
      *
-     * Returns a time series of forecast values — power in kW at 30-minute resolution —
-     * along with model metadata (name, version, creation time, initialisation time).
+     * Returns a time series of forecast values (power in kW) along with model metadata
+     * (name, version, creation time, initialisation time).
      *
-     * By default the window runs from **now** to **48 hours ahead**. Use `start_utc` /
+     * By default the window runs from **now** to **up to 48 hours ahead**, though a
+     * response reaches only as far as the latest model run does. Use `start_utc` /
      * `end_utc` to override. Historical data is available up to 1 year back.
      */
     get: operations["get_forecast__country___source__regions__region__forecast_get"];
@@ -113,7 +114,7 @@ export interface paths {
      * Get Forecasts at Timestamp
      * @description Get forecasts for all regions of a given type at a specific time.
      *
-     * Returns a `ForecastSnapshot` — a single point in time with one forecast value per
+     * Returns a `ForecastSnapshot`: a single point in time with one forecast value per
      * region. Useful for rendering a map of forecast output across an entire country at
      * a glance.
      */
@@ -121,10 +122,10 @@ export interface paths {
   };
   "/{country}/{source}/forecasts/period": {
     /**
-     * Get Forecasts for Period
+     * Get Forecasts for Current Period
      * @description Get forecasts for all (or selected) regions across a time window.
      *
-     * Returns a `RegionForecastMatrix` — a compact columnar structure with a shared
+     * Returns a `RegionForecastMatrix`: a compact columnar structure with a shared
      * `times` array and one `power_kW` series per region. Designed for efficiently
      * loading all-region forecast data for charts or grid-management tools in a single
      * request.
@@ -132,15 +133,18 @@ export interface paths {
      * This endpoint is served entirely from a pre-warmed cache (one key per region).
      * It does not make live data-platform calls per request. If the cache has not yet
      * been populated after startup, the endpoint returns **503** with a `Retry-After: 60`
-     * header — retry after a minute. The cache covers a ±2-day window around now,
+     * header, so retry after a minute. The cache covers a ±2-day window around now,
      * refreshed every 24 hours (or on demand via `POST /{country}/{source}/forecasts/refresh`).
      *
      * Time-window and region filtering are applied in-memory from the cached data.
      * This endpoint fetches only the default forecast model for the selected
      * country + region type.
      *
-     * Model and horizon filters are **not** supported on this endpoint — use
+     * Model and horizon filters are **not** supported on this endpoint; use
      * `GET /{country}/{source}/regions/{region}/forecast` for per-region model selection.
+     *
+     * Not available to intraday-only subscriptions: this endpoint serves the pre-warmed
+     * blend, and there is no intraday equivalent to fall back to.
      */
     get: operations["get_forecasts_period__country___source__forecasts_period_get"];
   };
@@ -149,20 +153,20 @@ export interface paths {
      * Get Generation
      * @description Get observed solar generation for a specific region.
      *
-     * Returns a time series of measured generation values — power in kW — from the
+     * Returns a time series of measured generation values (power in kW) from the
      * specified observer. The default window is the **last 24 hours**; use `start_utc` /
      * `end_utc` to extend or shift it. Historical data is available up to 1 year back.
      *
      * Two observers are available for GB solar:
      *
-     * - **pvlive_in_day** (default) — PV_Live in-day estimates, updated every 30 minutes.
+     * - **pvlive_in_day** (default): PV_Live in-day estimates, updated every 30 minutes.
      *   These are the most recent values but may be revised later.
-     * - **pvlive_day_after** — PV_Live day-after final values, available from the following
+     * - **pvlive_day_after**: PV_Live day-after final values, available from the following
      *   morning. Use these when accuracy is more important than latency.
      *
      * NL currently has one observer for solar:
      *
-     * - **ned_nl** — NED NL estimated solar generation for provinces / national including curtailment.
+     * - **ned_nl**: NED NL estimated solar generation for provinces / national including curtailment.
      */
     get: operations["get_generation__country___source__regions__region__generation_get"];
   };
@@ -171,7 +175,7 @@ export interface paths {
      * Get Generation at Timestamp
      * @description Get observed generation for all regions of a given type at a specific time.
      *
-     * Returns a `GenerationSnapshot` — a single point in time with one observed generation
+     * Returns a `GenerationSnapshot`: a single point in time with one observed generation
      * value per region. Useful for rendering a map of current solar output across an entire
      * country.
      *
@@ -183,17 +187,17 @@ export interface paths {
   };
   "/{country}/{source}/generation/period": {
     /**
-     * Get Generation for Period
+     * Get Generation for Current Period
      * @description Get observed generation for all (or selected) regions across a time window.
      *
-     * Returns a `RegionGenerationMatrix` — a compact columnar structure with a shared
+     * Returns a `RegionGenerationMatrix`: a compact columnar structure with a shared
      * `times` array and one `power_kW` series per region. Analogous to the forecast
      * period endpoint but for observed (actual) generation data.
      *
      * This endpoint is served entirely from a pre-warmed cache (one key per region).
      * It does not make live data-platform calls per request. If the cache has not yet
      * been populated after startup, the endpoint returns **503** with a `Retry-After: 60`
-     * header — retry after a minute. The cache covers a ±2-day window around now,
+     * header, so retry after a minute. The cache covers a ±2-day window around now,
      * refreshed every 24 hours (or on demand via `POST /{country}/{source}/generation/refresh`).
      *
      * Time-window and region filtering are applied in-memory from the cached data.
@@ -218,7 +222,7 @@ export interface components {
     };
     /**
      * CountryDetail
-     * @description Full capability manifest for a country — region types, models, and generation sources.
+     * @description Full capability manifest for a country: region types, models, and generation sources.
      */
     CountryDetail: {
       /** Country */
@@ -240,6 +244,20 @@ export interface components {
       generation_sources?: components["schemas"]["GenerationSource"][];
     };
     /**
+     * DetailLevel
+     * @description How much per-value metadata a time-series response carries.
+     * @enum {string}
+     */
+    DetailLevel: "values" | "runs" | "full";
+    /**
+     * ErrorDetail
+     * @description The body of every error this API returns.
+     */
+    ErrorDetail: {
+      /** Detail */
+      detail: string;
+    };
+    /**
      * ForecastModel
      * @description A forecaster (model) available for a region type.
      */
@@ -252,22 +270,51 @@ export interface components {
     /**
      * ForecastResponse
      * @description Forecast time series for a region, with shared metadata.
+     *
+     * The data platform stitches the latest-run value for each target time, so a response
+     * normally spans several model runs. The fields below describe the response as a whole;
+     * use `detail=runs` for each value's own run.
      */
     ForecastResponse: {
       /** Region Name */
       region_name: string;
-      /** Capacity Kw */
+      /**
+       * Capacity Kw
+       * @description Effective capacity at the last target time in the response. Capacity varies over time, so on a long window earlier values may have had a different one; use `detail=runs` for per-value capacity.N.B. this is now `effective` rather than the `installed` that was provided through the v0 API; this is still available if needed through metadata, but prefer this value as this is what we use internally to train and normalize by.
+       */
       capacity_kW: number;
-      /** Model Name */
+      /**
+       * Model Name
+       * @description Model that produced the response.
+       */
       model_name?: string | null;
-      /** Model Version */
+      /**
+       * Model Version
+       * @description Version of that model.
+       */
       model_version?: string | null;
-      /** Last Updated Utc */
+      /**
+       * Last Updated Utc
+       * @description When the most recent run contributing to this response was created. Earlier values may come from earlier runs.
+       */
       last_updated_utc?: string | null;
-      /** Latest Init Utc */
+      /**
+       * Latest Init Utc
+       * @description Init time of that most recent run.
+       */
       latest_init_utc?: string | null;
-      /** Horizon Minutes */
+      /**
+       * Horizon Minutes
+       * @description Echo of the requested `horizon_minutes` filter, if any.
+       */
       horizon_minutes?: number | null;
+      /**
+       * Metadata
+       * @description Region-level extras, returned only when `detail=full`. Carries `installed_capacity_kW` where the platform has one: the capacity before degradation, which is what v0 reported as `installedCapacityMw` and what PV Live publishes. It is a few percent higher than `capacity_kW` (effective) and is **not** what the forecast is normalised against, so prefer `capacity_kW`. Retained for convenient reference and migration from v0.
+       */
+      metadata?: {
+        [key: string]: unknown;
+      } | null;
       /** Values */
       values: components["schemas"]["ForecastValue"][];
     };
@@ -279,15 +326,28 @@ export interface components {
       /**
        * Time Utc
        * Format: date-time
+       * @description The single target time every value in this snapshot is for.
        */
       time_utc: string;
-      /** Model Name */
+      /**
+       * Model Name
+       * @description Model that produced the snapshot.
+       */
       model_name?: string | null;
-      /** Model Version */
+      /**
+       * Model Version
+       * @description Version of that model.
+       */
       model_version?: string | null;
-      /** Last Updated Utc */
+      /**
+       * Last Updated Utc
+       * @description When the most recent run contributing to this snapshot was created. Regions are forecasted independently, so others may come from earlier runs.
+       */
       last_updated_utc?: string | null;
-      /** Latest Init Utc */
+      /**
+       * Latest Init Utc
+       * @description Init time of that most recent run.
+       */
       latest_init_utc?: string | null;
       /** Values */
       values: components["schemas"]["RegionForecastValue"][];
@@ -295,6 +355,9 @@ export interface components {
     /**
      * ForecastValue
      * @description A single forecast value at a point in time.
+     *
+     * Everything below `plevels_kW` is populated only when `detail` is raised above
+     * `values`. See `DetailLevel`.
      */
     ForecastValue: {
       /**
@@ -308,6 +371,23 @@ export interface components {
       plevels_kW?: {
         [key: string]: number;
       };
+      /** Last Updated Utc */
+      last_updated_utc?: string | null;
+      /** Latest Init Utc */
+      latest_init_utc?: string | null;
+      /** Model Name */
+      model_name?: string | null;
+      /** Model Version */
+      model_version?: string | null;
+      /** Capacity Kw */
+      capacity_kW?: number | null;
+      /**
+       * Metadata
+       * @description The forecaster's own metadata, including when each input data source was last ingested. Keys vary by model and are not a stable contract, and will be replaced by a typed structure once all models run through one pipeline. Passed through as the forecaster wrote it, with two exceptions: `app_version` is parsed from the string the pipeline emits into an object, and any model name is given as the name this API uses for it rather than the platform's internal one. Returned only when `detail=full`.
+       */
+      metadata?: {
+        [key: string]: unknown;
+      } | null;
     };
     /**
      * GenerationResponse
@@ -316,10 +396,23 @@ export interface components {
     GenerationResponse: {
       /** Region Name */
       region_name: string;
-      /** Capacity Kw */
+      /**
+       * Capacity Kw
+       * @description Effective capacity at the last target time in the response. Capacity varies over time; use `detail=runs` for per-value capacity.
+       */
       capacity_kW: number;
-      /** Observer Name */
+      /**
+       * Observer Name
+       * @description Observer the values were recorded by, e.g. `pvlive_in_day`.
+       */
       observer_name?: string | null;
+      /**
+       * Metadata
+       * @description Region-level extras, returned only when `detail=full`. Carries `installed_capacity_kW` where the platform has one: the capacity before degradation, which is what v0 reported as `installedCapacityMw` and what PV Live publishes. It is a few percent higher than `capacity_kW` and is **not** what the forecast is normalised against, so prefer `capacity_kW`. Retained for migration from v0.
+       */
+      metadata?: {
+        [key: string]: unknown;
+      } | null;
       /** Values */
       values: components["schemas"]["GenerationValue"][];
     };
@@ -353,6 +446,9 @@ export interface components {
     /**
      * GenerationValue
      * @description A single observed generation value at a point in time.
+     *
+     * `capacity_kW` is populated only when `detail` is raised above `values`. Observed
+     * values carry no model run, so there is nothing further for `detail=full` to add.
      */
     GenerationValue: {
       /**
@@ -362,6 +458,8 @@ export interface components {
       time_utc: string;
       /** Power Kw */
       power_kW: number;
+      /** Capacity Kw */
+      capacity_kW?: number | null;
     };
     /** HTTPValidationError */
     HTTPValidationError: {
@@ -387,7 +485,7 @@ export interface components {
     };
     /**
      * RegionForecast
-     * @description Forecast time series for one region — used in matrix responses.
+     * @description Forecast time series for one region, used in matrix responses.
      */
     RegionForecast: {
       /** Region Name */
@@ -423,7 +521,7 @@ export interface components {
     };
     /**
      * RegionForecastValue
-     * @description A single forecast value for one region — used in snapshot responses.
+     * @description A single forecast value for one region, used in snapshot responses.
      */
     RegionForecastValue: {
       /** Region Name */
@@ -439,7 +537,7 @@ export interface components {
     };
     /**
      * RegionGeneration
-     * @description Generation time series for one region — used in matrix responses.
+     * @description Generation time series for one region, used in matrix responses.
      */
     RegionGeneration: {
       /** Region Name */
@@ -465,7 +563,7 @@ export interface components {
     };
     /**
      * RegionGenerationValue
-     * @description A single observed generation value for one region — used in snapshot responses.
+     * @description A single observed generation value for one region, used in snapshot responses.
      */
     RegionGenerationValue: {
       /** Region Name */
@@ -493,6 +591,11 @@ export interface components {
        * @default []
        */
       forecast_models?: components["schemas"]["ForecastModel"][];
+      /**
+       * Supports Adjusted
+       * @default false
+       */
+      supports_adjusted?: boolean;
     };
     /**
      * Source
@@ -545,6 +648,24 @@ export interface operations {
           "application/json": components["schemas"]["Source"][];
         };
       };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
     };
   };
   /**
@@ -553,11 +674,11 @@ export interface operations {
    *
    * Returns one entry per country the API has data for. Each entry includes:
    *
-   * - **region_types** — the region granularities available for that country (e.g. national,
+   * - **region_types**: the region granularities available for that country (e.g. national,
    *   GSP), including the forecast models valid for each type.
-   * - **generation_sources** — the observed-generation observers available (e.g.
+   * - **generation_sources**: the observed-generation observers available (e.g.
    *   `pvlive_in_day`, `pvlive_day_after`).
-   * - **capacity_kW** and **centroid** — installed capacity and geographic centre.
+   * - **capacity_kW** and **centroid**: installed capacity and geographic centre.
    *
    * Use the `country` value (e.g. `GB`, `NL`) as the `{country}` path segment in all other
    * v1 routes.
@@ -570,6 +691,24 @@ export interface operations {
           "application/json": components["schemas"]["CountryDetail"][];
         };
       };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
     };
   };
   /**
@@ -577,14 +716,14 @@ export interface operations {
    * @description List available region types for a country and energy source.
    *
    * Region types define the geographic granularity at which forecasts and generation
-   * data are available — for example `national` or `gsp` for Great Britain.
+   * data are available, for example `national` or `gsp` for Great Britain.
    *
    * Each entry includes:
    *
-   * - **type** — the slug used as the `region_type` query parameter throughout the API.
-   * - **level** — hierarchical depth (lower = coarser; 0 = national).
-   * - **forecast_models** — the models available for that region type, with the model
-   *   `name` used as the `model` parameter on forecast endpoints. The first listed model
+   * - **type**: the slug used as the `region_type` query parameter throughout the API.
+   * - **level**: hierarchical depth (lower = coarser; 0 = national).
+   * - **forecast_models**: the models available for that region type, with the model
+   *   `name` used as the `model_name` parameter on forecast endpoints. The first listed model
    *   is the default.
    */
   get_region_types__country___source__region_types_get: {
@@ -603,10 +742,34 @@ export interface operations {
           "application/json": components["schemas"]["RegionType"][];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region type. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -616,8 +779,8 @@ export interface operations {
    * @description List available observed-generation sources for a country and energy source.
    *
    * Generation sources represent the different observers that produce actual (measured)
-   * generation data — for example PV_Live in-day estimates vs finalised day-after values.
-   * Use the `name` field as the `observer` parameter on generation endpoints.
+   * generation data, for example PV_Live in-day estimates vs finalised day-after values.
+   * Use the `name` field as the `observer_name` parameter on generation endpoints.
    */
   get_generation_sources__country___source__generation_sources_get: {
     parameters: {
@@ -635,10 +798,34 @@ export interface operations {
           "application/json": components["schemas"]["GenerationSource"][];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region type. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -648,15 +835,15 @@ export interface operations {
    * @description List regions for a country, optionally filtered by type, parent, and/or name.
    *
    * Filter behavior:
-   * - No filters — returns every region across all configured region types.
-   * - `region_type` — restricts results to one granularity level (e.g. `gsp`).
-   * - `parent` — returns the direct children of the specified parent region.
-   * - `name` — case-insensitive substring search across region names.
+   * - No filters: returns every region across all configured region types.
+   * - `region_type`: restricts results to one granularity level (e.g. `gsp`).
+   * - `parent`: returns the direct children of the specified parent region.
+   * - `name`: case-insensitive substring search across region names.
    */
   get_country_regions__country___source__regions_get: {
     parameters: {
       query?: {
-        /** @description Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific — see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
+        /** @description Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
         region_type?: "gsp" | "national" | "province";
         /** @description List children of a specific parent region (name or `national`). */
         parent?: string | null;
@@ -677,10 +864,34 @@ export interface operations {
           "application/json": components["schemas"]["RegionDetail"][];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region type. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -699,7 +910,7 @@ export interface operations {
         source: "solar";
         /** @description Country code according to ISO 3166-1 alpha-2 codes, case insensitive. */
         country: "GB" | "NL";
-        /** @description Region identifier — `national`, or region_name (case-insensitive). Use `GET /{country}/{source}/regions` to browse available regions. */
+        /** @description Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions. */
         region: string;
       };
     };
@@ -710,10 +921,40 @@ export interface operations {
           "application/json": components["schemas"]["RegionDetail"];
         };
       };
+      /** @description A parameter was rejected, e.g. an observer or model not available here. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No such region in this country. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -722,48 +963,48 @@ export interface operations {
    * Get Forecast
    * @description Get the solar generation forecast for a specific region.
    *
-   * Returns a time series of forecast values — power in kW at 30-minute resolution —
-   * along with model metadata (name, version, creation time, initialisation time).
+   * Returns a time series of forecast values (power in kW) along with model metadata
+   * (name, version, creation time, initialisation time).
    *
-   * By default the window runs from **now** to **48 hours ahead**. Use `start_utc` /
+   * By default the window runs from **now** to **up to 48 hours ahead**, though a
+   * response reaches only as far as the latest model run does. Use `start_utc` /
    * `end_utc` to override. Historical data is available up to 1 year back.
    */
   get_forecast__country___source__regions__region__forecast_get: {
     parameters: {
       query?: {
-        /** @description Start of window (UTC). */
+        /** @description Start of window (UTC). History reaches 1 year back, and a single request may span at most 3 months; split a longer range across requests. */
         start_utc?: string | null;
-        /** @description End of forecast window (UTC). Defaults to 48 hours from now. */
+        /** @description End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months. */
         end_utc?: string | null;
         /** @description Only include forecasts created at or before this time (UTC). Use to retrieve the forecast 'as it was' at a point in time. */
         creation_limit_utc?: string | null;
         /** @description Forecast horizon filter in minutes. For example, `60` returns only the 1-hour-ahead forecast value for each target timestep. */
         horizon_minutes?: number | null;
-        model?:
+        /** @description How much metadata to return. `values` (default): the values only. `runs`: adds to each value which model run produced it (run and init time, model name and version) plus that value's own capacity; the top-level fields describe only the latest run in the response. `full`: adds the forecaster's own metadata to each value, including when each input data source was last ingested, with keys that vary by model. It also adds a top-level `metadata` object carrying `installed_capacity_kW` where the platform has one. */
+        detail?: components["schemas"]["DetailLevel"];
+        model_name?:
           | (
               | "blend"
-              | "blend_adjust"
-              | "ecmwf_mo_sat_uncurtailed"
-              | "ecmwf_mo_sat_uncurtailed_adjust"
-              | "pvnet_day_ahead"
-              | "pvnet_day_ahead_adjust"
-              | "pvnet_ecmwf"
-              | "pvnet_ecmwf_adjust"
-              | "pvnet_intraday"
-              | "pvnet_intraday_adjust"
-              | "pvnet_sat"
-              | "pvnet_sat_adjust"
-              | "pvnet_ukv"
-              | "pvnet_ukv_adjust"
+              | "ecmwf"
+              | "ecmwf_mo"
+              | "ecmwf_mo_pv_sat_uncurtailed"
+              | "ecmwf_mo_sat_8h"
+              | "mo"
+              | "sat_8h"
             )
           | null;
+        /** @description Forecast model version. If omitted, the latest version of the selected model is used. */
+        model_version?: string | null;
+        /** @description Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`). */
+        adjusted?: boolean;
       };
       path: {
         /** @description The energy source type. Currently only 'solar' is supported. */
         source: "solar";
         /** @description Country code according to ISO 3166-1 alpha-2 codes, case insensitive. */
         country: "GB" | "NL";
-        /** @description Region identifier — `national`, or region_name (case-insensitive). Use `GET /{country}/{source}/regions` to browse available regions. */
+        /** @description Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions. */
         region: string;
       };
     };
@@ -774,10 +1015,40 @@ export interface operations {
           "application/json": components["schemas"]["ForecastResponse"];
         };
       };
+      /** @description A parameter was rejected, e.g. an observer or model not available here. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No such region in this country. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -793,31 +1064,28 @@ export interface operations {
   get_forecast_last_updated_timestamp__country___source__regions__region__forecast_last_updated_get: {
     parameters: {
       query?: {
-        model?:
+        model_name?:
           | (
               | "blend"
-              | "blend_adjust"
-              | "ecmwf_mo_sat_uncurtailed"
-              | "ecmwf_mo_sat_uncurtailed_adjust"
-              | "pvnet_day_ahead"
-              | "pvnet_day_ahead_adjust"
-              | "pvnet_ecmwf"
-              | "pvnet_ecmwf_adjust"
-              | "pvnet_intraday"
-              | "pvnet_intraday_adjust"
-              | "pvnet_sat"
-              | "pvnet_sat_adjust"
-              | "pvnet_ukv"
-              | "pvnet_ukv_adjust"
+              | "ecmwf"
+              | "ecmwf_mo"
+              | "ecmwf_mo_pv_sat_uncurtailed"
+              | "ecmwf_mo_sat_8h"
+              | "mo"
+              | "sat_8h"
             )
           | null;
+        /** @description Forecast model version. If omitted, the latest version of the selected model is used. */
+        model_version?: string | null;
+        /** @description Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`). */
+        adjusted?: boolean;
       };
       path: {
         /** @description The energy source type. Currently only 'solar' is supported. */
         source: "solar";
         /** @description Country code according to ISO 3166-1 alpha-2 codes, case insensitive. */
         country: "GB" | "NL";
-        /** @description Region identifier — `national`, or region_name (case-insensitive). Use `GET /{country}/{source}/regions` to browse available regions. */
+        /** @description Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions. */
         region: string;
       };
     };
@@ -828,10 +1096,40 @@ export interface operations {
           "application/json": string;
         };
       };
+      /** @description A parameter was rejected, e.g. an observer or model not available here. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No such region in this country. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -840,36 +1138,31 @@ export interface operations {
    * Get Forecasts at Timestamp
    * @description Get forecasts for all regions of a given type at a specific time.
    *
-   * Returns a `ForecastSnapshot` — a single point in time with one forecast value per
+   * Returns a `ForecastSnapshot`: a single point in time with one forecast value per
    * region. Useful for rendering a map of forecast output across an entire country at
    * a glance.
    */
   get_forecasts_at_time__country___source__forecasts_snapshot_get: {
     parameters: {
       query: {
-        /** @description Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific — see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
+        /** @description Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
         region_type: "gsp" | "national" | "province";
         model_name?:
           | (
               | "blend"
-              | "blend_adjust"
-              | "ecmwf_mo_sat_uncurtailed"
-              | "ecmwf_mo_sat_uncurtailed_adjust"
-              | "pvnet_day_ahead"
-              | "pvnet_day_ahead_adjust"
-              | "pvnet_ecmwf"
-              | "pvnet_ecmwf_adjust"
-              | "pvnet_intraday"
-              | "pvnet_intraday_adjust"
-              | "pvnet_sat"
-              | "pvnet_sat_adjust"
-              | "pvnet_ukv"
-              | "pvnet_ukv_adjust"
+              | "ecmwf"
+              | "ecmwf_mo"
+              | "ecmwf_mo_pv_sat_uncurtailed"
+              | "ecmwf_mo_sat_8h"
+              | "mo"
+              | "sat_8h"
             )
           | null;
-        /** @description Forecast model version. */
+        /** @description Forecast model version. If omitted, the latest version of the selected model is used. */
         model_version?: string | null;
-        /** @description Forecast target time (UTC). Defaults to now floored to 30 minutes. */
+        /** @description Apply the trend adjuster, which corrects the forecast using the last week of observed error. On by default. Ignored for region types with no adjusted model variants (e.g. GB `gsp`). */
+        adjusted?: boolean;
+        /** @description Forecast target time (UTC). Rounded down to the country's time step (e.g. 30 minutes for GB, 15 for NL); the `time_utc` in the response is the timestamp actually used. Defaults to now. */
         time_utc?: string | null;
       };
       path: {
@@ -886,19 +1179,43 @@ export interface operations {
           "application/json": components["schemas"]["ForecastSnapshot"];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region type. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
     };
   };
   /**
-   * Get Forecasts for Period
+   * Get Forecasts for Current Period
    * @description Get forecasts for all (or selected) regions across a time window.
    *
-   * Returns a `RegionForecastMatrix` — a compact columnar structure with a shared
+   * Returns a `RegionForecastMatrix`: a compact columnar structure with a shared
    * `times` array and one `power_kW` series per region. Designed for efficiently
    * loading all-region forecast data for charts or grid-management tools in a single
    * request.
@@ -906,24 +1223,27 @@ export interface operations {
    * This endpoint is served entirely from a pre-warmed cache (one key per region).
    * It does not make live data-platform calls per request. If the cache has not yet
    * been populated after startup, the endpoint returns **503** with a `Retry-After: 60`
-   * header — retry after a minute. The cache covers a ±2-day window around now,
+   * header, so retry after a minute. The cache covers a ±2-day window around now,
    * refreshed every 24 hours (or on demand via `POST /{country}/{source}/forecasts/refresh`).
    *
    * Time-window and region filtering are applied in-memory from the cached data.
    * This endpoint fetches only the default forecast model for the selected
    * country + region type.
    *
-   * Model and horizon filters are **not** supported on this endpoint — use
+   * Model and horizon filters are **not** supported on this endpoint; use
    * `GET /{country}/{source}/regions/{region}/forecast` for per-region model selection.
+   *
+   * Not available to intraday-only subscriptions: this endpoint serves the pre-warmed
+   * blend, and there is no intraday equivalent to fall back to.
    */
   get_forecasts_period__country___source__forecasts_period_get: {
     parameters: {
       query: {
-        /** @description Region type slug (e.g. 'gsp'). Only sub-national types are supported — national-level data is not pre-warmed. Valid values are country-specific — see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
+        /** @description Region type slug (e.g. 'gsp'). Only sub-national types are supported; national-level data is not pre-warmed. Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
         region_type: "gsp" | "province";
         /** @description Start of window (UTC). Defaults to 2 days before now (floored to the nearest 6 hours). */
         start_utc?: string | null;
-        /** @description End of window (UTC). Defaults to 2 days after now (floored to the nearest 6 hours). */
+        /** @description End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months. */
         end_utc?: string | null;
         /** @description Limit to specific region names (e.g. `?region_names=GSP1&region_names=GSP2`). */
         region_names?: string[] | null;
@@ -942,10 +1262,40 @@ export interface operations {
           "application/json": components["schemas"]["RegionForecastMatrix"];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region name. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The pre-warmed cache is still filling. Carries a `Retry-After` header. */
+      503: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -954,29 +1304,31 @@ export interface operations {
    * Get Generation
    * @description Get observed solar generation for a specific region.
    *
-   * Returns a time series of measured generation values — power in kW — from the
+   * Returns a time series of measured generation values (power in kW) from the
    * specified observer. The default window is the **last 24 hours**; use `start_utc` /
    * `end_utc` to extend or shift it. Historical data is available up to 1 year back.
    *
    * Two observers are available for GB solar:
    *
-   * - **pvlive_in_day** (default) — PV_Live in-day estimates, updated every 30 minutes.
+   * - **pvlive_in_day** (default): PV_Live in-day estimates, updated every 30 minutes.
    *   These are the most recent values but may be revised later.
-   * - **pvlive_day_after** — PV_Live day-after final values, available from the following
+   * - **pvlive_day_after**: PV_Live day-after final values, available from the following
    *   morning. Use these when accuracy is more important than latency.
    *
    * NL currently has one observer for solar:
    *
-   * - **ned_nl** — NED NL estimated solar generation for provinces / national including curtailment.
+   * - **ned_nl**: NED NL estimated solar generation for provinces / national including curtailment.
    */
   get_generation__country___source__regions__region__generation_get: {
     parameters: {
       query?: {
-        /** @description The observer source name. */
-        observer?: "ned_nl" | "pvlive_day_after" | "pvlive_in_day";
-        /** @description Start of window (UTC). */
+        /** @description The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`). */
+        observer_name?: "ned_nl" | "pvlive_day_after" | "pvlive_in_day";
+        /** @description How much metadata to return. `values` (default): the values only. `runs`: adds each value's own capacity. Observations have no model run, so there is no run or init time to add here as there is on a forecast. `full`: adds nothing further per value, and adds a top-level `metadata` object carrying `installed_capacity_kW` where the platform has one. Accepted so one request shape works across forecast and generation routes. */
+        detail?: components["schemas"]["DetailLevel"];
+        /** @description Start of window (UTC). History reaches 1 year back, and a single request may span at most 3 months; split a longer range across requests. */
         start_utc?: string | null;
-        /** @description End of generation window (UTC). Defaults to now. */
+        /** @description End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months. */
         end_utc?: string | null;
       };
       path: {
@@ -984,7 +1336,7 @@ export interface operations {
         source: "solar";
         /** @description Country code according to ISO 3166-1 alpha-2 codes, case insensitive. */
         country: "GB" | "NL";
-        /** @description Region identifier — `national`, or region_name (case-insensitive). Use `GET /{country}/{source}/regions` to browse available regions. */
+        /** @description Region identifier: `national`, a region `name` (case-insensitive), or a UUID. Use `GET /{country}/{source}/regions` to browse available regions. */
         region: string;
       };
     };
@@ -995,10 +1347,40 @@ export interface operations {
           "application/json": components["schemas"]["GenerationResponse"];
         };
       };
+      /** @description A parameter was rejected, e.g. an observer or model not available here. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No such region in this country. */
+      404: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };
@@ -1007,7 +1389,7 @@ export interface operations {
    * Get Generation at Timestamp
    * @description Get observed generation for all regions of a given type at a specific time.
    *
-   * Returns a `GenerationSnapshot` — a single point in time with one observed generation
+   * Returns a `GenerationSnapshot`: a single point in time with one observed generation
    * value per region. Useful for rendering a map of current solar output across an entire
    * country.
    *
@@ -1018,11 +1400,11 @@ export interface operations {
   get_generation_at_timestamp__country___source__generation_snapshot_get: {
     parameters: {
       query: {
-        /** @description Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific — see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
+        /** @description Region type slug (e.g. 'gsp', 'national'). Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
         region_type: "gsp" | "national" | "province";
-        /** @description The observer source name. */
-        observer?: "ned_nl" | "pvlive_day_after" | "pvlive_in_day";
-        /** @description Observation target time (UTC). Defaults to the most recent available timestamp within the last 6 hours. */
+        /** @description The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`). */
+        observer_name?: "ned_nl" | "pvlive_day_after" | "pvlive_in_day";
+        /** @description Observation target time (UTC). Rounded down to the country's time step (e.g. 30 minutes for GB, 15 for NL); the `time_utc` in the response is the timestamp actually used. Defaults to the most recent available timestamp within the last 6 hours. */
         time_utc?: string | null;
       };
       path: {
@@ -1039,26 +1421,50 @@ export interface operations {
           "application/json": components["schemas"]["GenerationSnapshot"];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region type. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
         };
       };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
     };
   };
   /**
-   * Get Generation for Period
+   * Get Generation for Current Period
    * @description Get observed generation for all (or selected) regions across a time window.
    *
-   * Returns a `RegionGenerationMatrix` — a compact columnar structure with a shared
+   * Returns a `RegionGenerationMatrix`: a compact columnar structure with a shared
    * `times` array and one `power_kW` series per region. Analogous to the forecast
    * period endpoint but for observed (actual) generation data.
    *
    * This endpoint is served entirely from a pre-warmed cache (one key per region).
    * It does not make live data-platform calls per request. If the cache has not yet
    * been populated after startup, the endpoint returns **503** with a `Retry-After: 60`
-   * header — retry after a minute. The cache covers a ±2-day window around now,
+   * header, so retry after a minute. The cache covers a ±2-day window around now,
    * refreshed every 24 hours (or on demand via `POST /{country}/{source}/generation/refresh`).
    *
    * Time-window and region filtering are applied in-memory from the cached data.
@@ -1066,13 +1472,13 @@ export interface operations {
   get_generation_period__country___source__generation_period_get: {
     parameters: {
       query: {
-        /** @description Region type slug (e.g. 'gsp'). Only sub-national types are supported — national-level data is not pre-warmed. Valid values are country-specific — see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
+        /** @description Region type slug (e.g. 'gsp'). Only sub-national types are supported; national-level data is not pre-warmed. Valid values are country-specific; see `/{country}/{source}/region-types`. The enum lists all types across all countries. */
         region_type: "gsp" | "province";
-        /** @description The observer source name. */
-        observer?: "ned_nl" | "pvlive_day_after" | "pvlive_in_day";
+        /** @description The observer source name. If omitted, the country's first configured observer is used (see `/{country}/{source}/generation-sources`). */
+        observer_name?: "ned_nl" | "pvlive_day_after" | "pvlive_in_day";
         /** @description Start of window (UTC). Defaults to 2 days before now (floored to the nearest 6 hours). */
         start_utc?: string | null;
-        /** @description End of window (UTC). Defaults to 2 days after now (floored to the nearest 6 hours). */
+        /** @description End of window (UTC). The default depends on the endpoint; see its description. A single request may span at most 3 months. */
         end_utc?: string | null;
         /** @description Limit to specific region names (e.g. `?region_names=GSP1&region_names=GSP2`). */
         region_names?: string[] | null;
@@ -1091,10 +1497,40 @@ export interface operations {
           "application/json": components["schemas"]["RegionGenerationMatrix"];
         };
       };
+      /** @description A parameter was rejected, e.g. an unknown region name. */
+      400: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description No bearer token, or one that could not be verified. */
+      401: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The token is valid but lacks access to this country or model. */
+      403: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
       /** @description Validation Error */
       422: {
         content: {
           "application/json": components["schemas"]["HTTPValidationError"];
+        };
+      };
+      /** @description Rate limit exceeded. Carries a `Retry-After` header. */
+      429: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
+        };
+      };
+      /** @description The pre-warmed cache is still filling. Carries a `Retry-After` header. */
+      503: {
+        content: {
+          "application/json": components["schemas"]["ErrorDetail"];
         };
       };
     };

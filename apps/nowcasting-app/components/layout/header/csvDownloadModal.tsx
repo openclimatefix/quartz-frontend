@@ -20,7 +20,7 @@ const SELECTABLE_COLUMNS: { id: CSVColumn; label: string }[] = [
   { id: "settlementPeriod", label: "Settlement Period" },
   { id: "solarGenerationPvliveInitial", label: "PVLive Initial" },
   { id: "solarGenerationPvliveUpdated", label: "PVLive Updated" },
-  { id: "solarForecast", label: "Current Forecast" },
+  { id: "solarForecast", label: "OCF Forecast" },
   { id: "pLevels", label: "Forecast P-levels" },
   { id: "nForecast", label: "N Forecast" },
   { id: "delta", label: "Delta" }

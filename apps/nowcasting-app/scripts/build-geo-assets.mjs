@@ -52,10 +52,11 @@ const stripCrs = (fc) => {
 //
 // This is a captured live-API response (338 GB GSP regions, 2026-08), the same shape
 // `buildRegionBridge` consumes at runtime, and it is the only artefact in the repo carrying
-// BOTH `metadata.gsp_id` and the v1 `name`. `data/gsp-regions.json` and
-// `data/grid-supply-points.json` are pre-v1: the former is 2022 boundary geometry, the
-// latter a spreadsheet export keyed on "GSP ID" (`ABNE_P`) with no gsp_id at all. Neither
-// can perform the id -> v1 name translation, so the fixture it is.
+// BOTH `metadata.gsp_id` and the v1 `name`. The pre-v1 GSP files that used to live in
+// `data/` (`gsp-regions.json`, 2022 boundary geometry, and `gsp_regions_20220314.json`, the
+// 2022 vintage sitesMap bundled) carried no gsp_id and have been removed; the only remaining
+// GSP boundary source is `GSP_regions_4326_20260209.json`, which is geometry keyed on the
+// `GSPs` name alone. None of them can perform the id -> v1 name translation, so the fixture it is.
 // ---------------------------------------------------------------------------------------
 const GB_REGIONS = readJson(join(APP, "lib/api/v1/__fixtures__/gb-regions-gsp.json"));
 const gspNameById = new Map(
@@ -178,7 +179,7 @@ writeJson("/data/gb/national-metrics.json", readJson(join(DATA, "national_metric
 // against site/GSP data, so there is nothing here to key or alias.
 //
 //  - GSP boundaries: sitesMap originally used `data/gsp_regions_20220314.json`, a 2022
-//    vintage. Per Brad's decision, the sites view now draws the same canonical GSP file
+//    vintage. The sites view now draws the same canonical GSP file
 //    as the region view (`gsp.json`, from `GSP_regions_4326_20260209.json`, emitted
 //    above) — there is exactly one GSP boundary asset in the repo. The 2022 file and its
 //    build step are gone; nothing reads `data/gsp_regions_20220314.json` any more.

@@ -74,7 +74,7 @@ const GSP_LEVEL: AggregationLevel = {
   derived: false
 };
 
-const V1 = "https://api.quartz.solar/v1";
+const V1 = "https://api.ocf.energy/v1";
 
 let requests: { path: string; url: URL }[] = [];
 const countRequests = (path: string) => requests.filter((r) => r.path === path).length;
@@ -161,8 +161,8 @@ describe("useMapRegionValues", () => {
     view.rerender({ targetTime: SECOND });
     const at21 = view.result.current.featureStates.get(67)!.power;
 
-    expect(at20).toBeCloseTo(1.538, 6);
-    expect(at21).toBeCloseTo(1.312, 6);
+    expect(at20).toBeCloseTo(1.724796, 6);
+    expect(at21).toBeCloseTo(1.877028, 6);
     expect(countRequests("/GB/solar/forecasts/period")).toBe(1);
   });
 

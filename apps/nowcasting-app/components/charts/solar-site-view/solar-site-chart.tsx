@@ -205,7 +205,7 @@ const SolarSiteChart: FC<{
               <Link
                 className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
-                href={"https://api.quartz.solar/docs"}
+                href={"https://api.ocf.energy/docs"}
               >
                 API
               </Link>{" "}
@@ -213,7 +213,7 @@ const SolarSiteChart: FC<{
               <Link
                 className={"underline underline-offset-4 decoration-solar"}
                 target={"_blank"}
-                href={"https://api.quartz.solar/swagger"}
+                href={"https://api.ocf.energy/swagger"}
               >
                 Swagger UI
               </Link>
@@ -225,9 +225,9 @@ const SolarSiteChart: FC<{
                 information, please get in touch at{" "}
                 <a
                   className={"underline underline-offset-4 decoration-solar"}
-                  href="mailto:quartz.support@openclimatefix.org"
+                  href="mailto:support@ocf.energy"
                 >
-                  quartz.support@openclimatefix.org
+                  support@ocf.energy
                 </a>
               </p>
             </blockquote>
@@ -257,7 +257,7 @@ const SolarSiteChart: FC<{
                   color="solar"
                   unit={"KW"}
                 >
-                  <span className="text-content-on-accent">{nationalPVActual?.toFixed(1)}</span>
+                  <span className="text-solar-light">{nationalPVActual?.toFixed(1)}</span>
                   <span className="text-content mx-1"> / </span>
                   {nationalPVExpected?.toFixed(1)}
                 </ForecastHeadlineFigure>
@@ -304,7 +304,7 @@ const SolarSiteChart: FC<{
                 color="solar"
                 unit={"KW"}
               >
-                <span className="text-content-on-accent">
+                <span className="text-solar-light">
                   {getTotalPvActualGenerationForGroup(
                     selectedSiteData.map((site) => site.site_uuid),
                     selectedTime
