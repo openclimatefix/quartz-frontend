@@ -186,22 +186,6 @@ const SAT_MAX_ALPHA = 180;
 // alpha; quality is a lossy/size trade — raise toward 1 if artefacts show. (Size
 // is largely alpha-bound, and WebP stores alpha losslessly, so quality has little
 // effect here — kept high for free colour fidelity.)
-// The data is only a few hundred pixels across (one pixel ~17 km), so on screen it reads as
-// blocks. A light blur at native resolution softens the cell edges; no upsampling needed.
-// `ctx.filter` is ignored where unsupported (older Safari), which just leaves it unblurred.
-const SAT_BLUR_PX = 1;
-
-function drawBlurred(dst: HTMLCanvasElement, src: CanvasImageSource, w: number, h: number): void {
-  // Assigning width/height reallocates the backing store, so only touch them when they change.
-  if (dst.width !== w) dst.width = w;
-  if (dst.height !== h) dst.height = h;
-  const ctx = dst.getContext("2d")!;
-  ctx.clearRect(0, 0, w, h);
-  ctx.filter = `blur(${SAT_BLUR_PX}px)`;
-  ctx.drawImage(src, 0, 0);
-  ctx.filter = "none";
-}
-
 const SAT_IMAGE_TYPE = "image/webp";
 const SAT_IMAGE_QUALITY = 0.9;
 
@@ -373,9 +357,7 @@ function bandToImage(
   // WebP keeps the alpha channel (unlike JPEG) but compresses far better than the
   // default PNG (~4x smaller here). Falls back to the browser default if WebP isn't
   // supported (a PNG data URL).
-  const out = document.createElement("canvas");
-  drawBlurred(out, canvas, width, height);
-  return out.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
+  return canvas.toDataURL(SAT_IMAGE_TYPE, SAT_IMAGE_QUALITY);
 }
 
 export async function decodeTif(
@@ -472,9 +454,8 @@ const stackLayerId = (ch: SatelliteChannel) => `satellite-stack-layer-${ch}`;
 const stackSourceId = (ch: SatelliteChannel) => `satellite-stack-source-${ch}`;
 
 type StackCanvas = {
-  canvas: HTMLCanvasElement; // what Mapbox samples: the blurred frame
-  scratch: HTMLCanvasElement; // native-resolution pixels, refilled per slot
-  ctx: CanvasRenderingContext2D; // of `scratch`
+  canvas: HTMLCanvasElement; // what Mapbox samples, refilled per slot
+  ctx: CanvasRenderingContext2D; // of `canvas`
   image: ImageData;
   pixels: Uint32Array;
   lut: Uint32Array;
@@ -526,7 +507,7 @@ export function showStackFrame(
     stackCanvases.set(map, perMap);
   }
   let sc = perMap.get(channel);
-  if (sc && (sc.scratch.width !== stack.width || sc.scratch.height !== stack.height)) {
+  if (sc && (sc.canvas.width !== stack.width || sc.canvas.height !== stack.height)) {
     removeStackLayer(map, channel);
     sc = undefined;
   }
@@ -534,14 +515,10 @@ export function showStackFrame(
     const canvas = document.createElement("canvas");
     canvas.width = stack.width;
     canvas.height = stack.height;
-    const scratch = document.createElement("canvas");
-    scratch.width = stack.width;
-    scratch.height = stack.height;
-    const ctx = scratch.getContext("2d")!;
+    const ctx = canvas.getContext("2d")!;
     const image = ctx.createImageData(stack.width, stack.height);
     sc = {
       canvas,
-      scratch,
       ctx,
       image,
       pixels: new Uint32Array(image.data.buffer),
@@ -582,7 +559,6 @@ export function showStackFrame(
   const { lut, pixels } = sc;
   for (let i = 0; i < band.length; i++) pixels[i] = lut[band[i]];
   sc.ctx.putImageData(sc.image, 0, 0);
-  drawBlurred(sc.canvas, sc.scratch, stack.width, stack.height);
   // A static (animate: false) canvas source only re-uploads its texture while "playing";
   // play() then pause() uploads the current canvas exactly once.
   const src = map.getSource(sourceId) as mapboxgl.CanvasSource;
