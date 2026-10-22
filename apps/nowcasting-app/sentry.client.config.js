@@ -31,13 +31,10 @@ Sentry.init({
     // Default sample rate
     return 0.01;
   },
-  // This sets the sample rate to be 10%. You may want this to be 100% while
-  // in development and sample at a lower rate in production
-  replaysSessionSampleRate: 0.1,
-
-  // If the entire session is not sampled, use the below sample rate to sample
-  // sessions when an error occurs.
-  replaysOnErrorSampleRate: 1.0,
+  // Don't record random sessions: dashboards left open all day used up the replay quota
+  // with idle recordings. Only record when an error happens, and only in production.
+  replaysSessionSampleRate: 0,
+  replaysOnErrorSampleRate: process.env.NEXT_PUBLIC_SENTRY_ENV_LABEL === "production" ? 1.0 : 0,
 
   // TMP remove it after v1 merge
   // suppress known noisy/expected errors
