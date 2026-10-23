@@ -17,14 +17,19 @@ import {
 } from "../../constant";
 import {
   SatelliteChannel,
-  ChannelSelection,
-  MAX_COMPOSITE_CHANNELS,
-  channelsForSelection,
+  SatelliteStack,
   TifLayerData,
   fetchAndDecodeSatelliteTif,
+  fetchSatelliteStack,
+  showStackFrame as drawStackFrame,
+  hideStackLayer,
+  removeStackLayer,
+  stackKey,
   applyTifLayerToMap,
   setVisibleSatelliteChannels,
-  orderSatelliteLayers
+  setSatelliteLayerVisibility,
+  positionSatelliteLayer,
+  SATELLITE_CHANNELS
 } from "../helpers/satelliteLayer";
 import { addMinutesToISODate } from "../helpers/utils";
 import { useEnabledCountries } from "../../hooks/data/use-countries";
@@ -124,14 +129,15 @@ const PREFETCH_STEPS = 1;
 // roughly every 5 minutes, so polling faster mostly re-decodes an image we
 // already have.
 const LATEST_REFRESH_MS = 5 * 60 * 1000;
+const STACK_REFRESH_MS = 15 * 60 * 1000;
 
-// Retain roughly this many distinct timesteps of scrub history. A selection costs
-// up to MAX_COMPOSITE_CHANNELS entries per timestep, so the cache is sized to fit.
-// (QuickLRU keeps up to 2x maxSize resident, and the cache is cleared when the
-// cloud layer is switched off — see the showCloudLayer effect.) Kept modest as
-// each decoded entry is ~0.5MB and this runs on always-on wallboards.
-const CACHE_TIMESTEPS = 6;
-const TIF_CACHE_SIZE = MAX_COMPOSITE_CHANNELS * CACHE_TIMESTEPS;
+// Retain roughly this many distinct timesteps of scrub history — one decoded entry
+// per timestep, since one channel is shown at a time. (QuickLRU keeps up to 2x
+// maxSize resident, and the cache is cleared when the cloud layer is switched off —
+// see the showCloudLayer effect.) Kept modest as each decoded entry is ~0.5MB and
+// this runs on always-on wallboards.
+const TIF_CACHE_SIZE = 6;
+let satelliteMissingReported = false;
 
 const setAggregationLevelByCurrentZoom = (
   currentZoom: number,
@@ -298,17 +304,51 @@ const Map: FC<IMap> = ({
   const tifCache = useRef(new QuickLRU<string, TifLayerData>({ maxSize: TIF_CACHE_SIZE }));
   const currentKeyRef = useRef<string | null>(null);
   const requestedKeyRef = useRef<string | null>(null);
+  const stackRef = useRef<SatelliteStack | null>(null);
   // Lifted to global state (Phase 6 followup, Track I) so `map-layer-controls.tsx` — now
   // mounted in the consolidated top-right panel rather than inside this component — can show
   // the spinner and error text it used to render itself. See globalState.tsx's doc comment.
   const [isSatelliteLoading, setIsSatelliteLoading] = useGlobalState("isSatelliteLoading");
   const [satelliteError, setSatelliteError] = useGlobalState("satelliteError");
+  const [satellitePartialComposite, setSatellitePartialComposite] = useGlobalState(
+    "satellitePartialComposite"
+  );
   const [webGlSupported, setWebGlSupported] = useState<boolean>(true);
 
-  // Show the selected channel(s) and hide the rest. A composite selection resolves
-  // to several channels, each with its own layer, so they stack.
+  const teardownStackFrames = () => {
+    const m = map.current;
+    if (m) SATELLITE_CHANNELS.forEach((ch) => removeStackLayer(m, ch));
+  };
+  const [stackReadyTick, setStackReadyTick] = useState(0);
+  const selectedTimeRef = useRef(selectedISOTime);
+  selectedTimeRef.current = selectedISOTime;
+
+  const lastLoadingRef = useRef(isSatelliteLoading);
+  const lastErrorRef = useRef<string | null>(satelliteError);
+  const lastPartialRef = useRef<string>(satellitePartialComposite?.join(",") ?? "");
+  const setLoadingDeduped = (v: boolean) => {
+    if (lastLoadingRef.current !== v) {
+      lastLoadingRef.current = v;
+      setIsSatelliteLoading(v);
+    }
+  };
+  const setErrorDeduped = (e: string | null) => {
+    if (lastErrorRef.current !== e) {
+      lastErrorRef.current = e;
+      setSatelliteError(e);
+    }
+  };
+  const setPartialDeduped = (missing: string[] | null) => {
+    const k = missing && missing.length ? missing.join(",") : "";
+    if (lastPartialRef.current !== k) {
+      lastPartialRef.current = k;
+      setSatellitePartialComposite(missing && missing.length ? missing : null);
+    }
+  };
+
+  // Show the selected channel and hide the rest.
   const applySatelliteVisibility = (m: mapboxgl.Map, visible: boolean) => {
-    setVisibleSatelliteChannels(m, visible ? channelsForSelection(channelRef.current) : []);
+    setVisibleSatelliteChannels(m, visible ? [channelRef.current] : []);
   };
 
   useEffect(() => {
@@ -321,8 +361,10 @@ const Map: FC<IMap> = ({
       // but we stop holding decoded frames a user has chosen not to see. Reset the
       // keys so re-enabling re-applies the currently-selected timestep afresh.
       tifCache.current.clear();
+      teardownStackFrames();
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
+      setPartialDeduped(null);
     }
   }, [showCloudLayer]);
 
@@ -335,6 +377,10 @@ const Map: FC<IMap> = ({
   useEffect(() => {
     channelRef.current = activeChannel;
     currentKeyRef.current = null;
+    // The stack and its canvas layer are per-channel; drop both so the new channel starts clean
+    // (the stack effect refetches, and the layer is recreated on the next draw).
+    teardownStackFrames();
+    stackRef.current = null;
     // Hide layers dropped by the new selection before the fetch resolves.
     if (map.current) applySatelliteVisibility(map.current, showCloudRef.current);
   }, [activeChannel]);
@@ -342,8 +388,43 @@ const Map: FC<IMap> = ({
   const satelliteTimestampFor = (ts: string) => addMinutesToISODate(ts, -15);
   const isFutureTimestamp = (ts: string) => new Date(ts).getTime() > Date.now();
 
-  // Doubles as the per-channel cache key and the per-selection request key.
-  const satCacheKey = (sel: ChannelSelection, ts: string) => `${sel}__${ts}`;
+  // The per-channel cache key, also used as the in-flight request key.
+  const satCacheKey = (ch: SatelliteChannel, ts: string) => `${ch}__${ts}`;
+
+  const stackCovers = (ch: SatelliteChannel, satTs: string) =>
+    stackRef.current?.channel === ch && !!stackRef.current.bands[stackKey(satTs)];
+
+  // Draw the cursor's slot from the active channel's stack onto its canvas layer: synchronous and
+  // network-free, so scrubbing the whole 48 h range is as fast as the cursor moves.
+  const showStackFrame = (ch: SatelliteChannel, ts: string): boolean => {
+    const m = map.current;
+    const stack = stackRef.current;
+    if (!m || !stack || stack.channel !== ch) return false;
+    return drawStackFrame(m, stack, stackKey(satelliteTimestampFor(ts)), getSatelliteBeforeId(m));
+  };
+
+  const hideStack = () => {
+    const m = map.current;
+    if (m) hideStackLayer(m, channelRef.current);
+  };
+
+  const slotHasStackLayer = (ch: SatelliteChannel, ts: string) => {
+    if (ts === timeNow || ts === getCursorNow()) return false;
+    return stackCovers(ch, satelliteTimestampFor(ts));
+  };
+
+  const showFrameInstant = (ch: SatelliteChannel, ts: string) => {
+    const m = map.current;
+    if (!m) return;
+    requestedKeyRef.current = null;
+    currentKeyRef.current = null;
+    setSatelliteLayerVisibility(m, false, ch);
+    showStackFrame(ch, ts);
+    const miss = stackRef.current?.missing[stackKey(satelliteTimestampFor(ts))];
+    setPartialDeduped(miss && miss.length ? miss : null);
+    setErrorDeduped(null);
+    setLoadingDeduped(false);
+  };
 
   const fetchIntoCache = async (
     ch: SatelliteChannel,
@@ -351,6 +432,7 @@ const Map: FC<IMap> = ({
     latest = false
   ): Promise<TifLayerData | null> => {
     if (!latest && isFutureTimestamp(satTs)) return null;
+    // Network fallback (small LRU): a slot beyond the 48 h window, a gap, or stack not loaded yet.
     const key = satCacheKey(ch, satTs);
     if (!latest && tifCache.current.has(key)) return tifCache.current.get(key)!;
     const data = await fetchAndDecodeSatelliteTif(ch, satTs, latest);
@@ -358,14 +440,24 @@ const Map: FC<IMap> = ({
     return data;
   };
 
-  // `silent` suppresses the spinner: used by the background refresh below, where
-  // a frame is already on screen and flashing a loader every few minutes on an
-  // always-on wallboard is just noise.
-  const applyForTimestamp = async (sel: ChannelSelection, ts: string, silent = false) => {
+  // Put one decoded frame on the channel's layer, if it is still the one being requested.
+  const applyFrame = (channel: SatelliteChannel, key: string, data: TifLayerData | null) => {
+    if (requestedKeyRef.current !== key || !map.current) return;
+    currentKeyRef.current = key;
+    const beforeId = getSatelliteBeforeId(map.current);
+    applyTifLayerToMap(map.current, data, channel, showCloudRef.current, beforeId);
+    // Re-assert the layer's position: a lazily-created layer won't sit under the forecast/PV
+    // layers on its own.
+    positionSatelliteLayer(map.current, channel, beforeId);
+    setErrorDeduped(data ? null : "Satellite unavailable for this time");
+    // Flag a partial composite (some member bands missing from this frame).
+    setPartialDeduped(data?.missingChannels ?? null);
+  };
+
+  // `silent` suppresses the spinner: used by the background refresh below, where a frame is
+  // already on screen and flashing a loader every few minutes on an always-on wallboard is noise.
+  const applyForTimestamp = async (channel: SatelliteChannel, ts: string, silent = false) => {
     if (!map.current) return;
-    const setLoading = (loading: boolean) => {
-      if (!silent) setIsSatelliteLoading(loading);
-    };
     const satTs = satelliteTimestampFor(ts);
     // `timeNow` and `selectedISOTime` are written by two independent 60s timers
     // (use-time-now, mounted via ForecastHeader, and use-and-update-selected-time
@@ -381,51 +473,70 @@ const Map: FC<IMap> = ({
       applySatelliteVisibility(map.current, false);
       currentKeyRef.current = null;
       requestedKeyRef.current = null;
-      setLoading(false);
-      setSatelliteError("Satellite not yet available for future");
+      if (!silent) setLoadingDeduped(false);
+      setErrorDeduped("Satellite not yet available for future");
+      setPartialDeduped(null);
       return;
     }
-    // Key on the whole selection, since a composite applies several channels as
-    // one unit and must be superseded as one unit.
-    const key = satCacheKey(sel, satTs);
+    const key = satCacheKey(channel, satTs);
     requestedKeyRef.current = key;
-    if (!isNow && currentKeyRef.current === key) {
-      setLoading(false);
-      return;
+    if (!isNow && currentKeyRef.current === key) return;
+
+    // Hot path — a frame already in memory: apply synchronously, no spinner, no await. This is
+    // what makes scrubbing and playback smooth once the stack frames are rendered.
+    if (!isNow) {
+      const ready = tifCache.current.get(key);
+      if (ready) {
+        if (!silent) setLoadingDeduped(false);
+        applyFrame(channel, key, ready);
+        return;
+      }
     }
-    const channels = channelsForSelection(sel);
-    setLoading(true);
+
+    // Slow path — needs the network. Show the spinner (unless silent); re-check staleness after.
+    if (!silent) setLoadingDeduped(true);
     try {
-      const results = await Promise.all(
-        channels.map(async (ch) => ({ ch, data: await fetchIntoCache(ch, satTs, isNow) }))
-      );
-      // Bail if the selection or timestamp moved on while we were fetching.
+      const data = await fetchIntoCache(channel, satTs, isNow);
+      // Bail if the channel or timestamp moved on while we were fetching.
       if (requestedKeyRef.current !== key || !map.current) return;
-      currentKeyRef.current = key;
-      const beforeId = getSatelliteBeforeId(map.current);
-      results.forEach(({ ch, data }) =>
-        applyTifLayerToMap(map.current!, data, ch, showCloudRef.current, beforeId)
-      );
-      // `channels` is ordered bottom-most first; enforce it explicitly since
-      // lazily-created layers won't be in the right order on their own.
-      orderSatelliteLayers(map.current, channels, beforeId);
-      setSatelliteError(results.some((r) => r.data) ? null : "Satellite unavailable for this time");
+      //Send logs to sentry to notify us if sat ui is down
+      if (!data && !isFutureTimestamp(satTs) && !satelliteMissingReported) {
+        satelliteMissingReported = true;
+        Sentry.captureMessage(`Satellite frame missing: ${channel} at ${satTs}`, {
+          level: "error",
+          fingerprint: ["satellite_frame_missing"],
+          tags: { satellite_channel: channel, satellite_latest: String(isNow) },
+          extra: {
+            eventType: "SatelliteMissing",
+            channel,
+            satelliteTimestamp: satTs,
+            cursorTimestamp: ts,
+            latest: isNow,
+            stackLoaded: stackRef.current?.channel === channel,
+            reportedAt: new Date().toISOString()
+          }
+        });
+      }
+      applyFrame(channel, key, data);
     } catch (err) {
       Sentry.captureException(err, {
         tags: { error: "satellite tif fetch/decode failed" }
       });
-      setSatelliteError("Couldn't load satellite imagery");
-      // Let a retry of this key through, rather than stranding it as "current".
-      if (requestedKeyRef.current === key) currentKeyRef.current = null;
+      if (requestedKeyRef.current === key) {
+        setErrorDeduped("Couldn't load satellite imagery");
+        setPartialDeduped(null);
+        // Let a retry of this key through, rather than stranding it as "current".
+        currentKeyRef.current = null;
+      }
     } finally {
-      if (requestedKeyRef.current === key) setLoading(false);
+      if (!silent && requestedKeyRef.current === key) setLoadingDeduped(false);
     }
   };
 
   // One effect owns all satellite loading. It used to be two — one keyed on
   // selectedISOTime, one on timeNow — but both of those change in the same commit
   // when the half-hour rolls over, so both fired and each did a full uncached
-  // fetch/decode of every channel (the `latest` path deliberately bypasses the
+  // fetch/decode (the `latest` path deliberately bypasses the
   // cache, so the second pass was not free). Folding them together makes the
   // boundary cost exactly one pass.
   useEffect(() => {
@@ -437,6 +548,15 @@ const Map: FC<IMap> = ({
     // cloud cover in a particular area", a delta-shaped question). What it still excludes is
     // `sitesMap`, which has no satellite layers to drive.
     if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady || !selectedISOTime) return;
+    const m = map.current;
+
+    if (m && slotHasStackLayer(activeChannel, selectedISOTime)) {
+      showFrameInstant(activeChannel, selectedISOTime);
+      return;
+    }
+
+    if (m) hideStack();
+
     let cancelled = false;
     (async () => {
       // Load the frame the user is actually looking at first, then warm the
@@ -444,7 +564,6 @@ const Map: FC<IMap> = ({
       // speculative prefetches.
       await applyForTimestamp(activeChannel, selectedISOTime);
       if (cancelled) return;
-      const channels = channelsForSelection(activeChannel);
       for (let offset = -PREFETCH_STEPS; offset <= PREFETCH_STEPS; offset++) {
         if (offset === 0) continue;
         // One cursor step per offset, not a fixed half hour — on a 15-minute grid the old
@@ -453,7 +572,10 @@ const Map: FC<IMap> = ({
           addMinutesToISODate(selectedISOTime, offset * getCursorCadenceMinutes())
         );
         if (isFutureTimestamp(satTs)) continue;
-        channels.forEach((ch) => fetchIntoCache(ch, satTs).catch(() => {}));
+        // Skip slots the stack covers — they're drawn from it without a request, so a network
+        // prefetch would be wasted work. Only warm genuine fallbacks.
+        if (stackCovers(activeChannel, satTs)) continue;
+        fetchIntoCache(activeChannel, satTs).catch(() => {});
       }
     })();
 
@@ -475,6 +597,41 @@ const Map: FC<IMap> = ({
       if (refresh) clearInterval(refresh);
     };
   }, [selectedISOTime, activeChannel, isMapReady, showCloudLayer, timeNow, title]);
+
+  useEffect(() => {
+    if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady) return;
+    const channel = activeChannel;
+    let cancelled = false;
+    const load = () => {
+      fetchSatelliteStack(channel)
+        .then((stack) => {
+          // Guard against a channel switch or unmount during the fetch/decode.
+          if (cancelled || !stack || channelRef.current !== channel) return;
+          stackRef.current = stack;
+          // A ref assignment alone wouldn't re-render; the tick lets the effect below redraw the
+          // cursor's slot from the new stack.
+          setStackReadyTick((n) => n + 1);
+        })
+        .catch(() => {});
+    };
+    load();
+    const refresh = setInterval(load, STACK_REFRESH_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(refresh);
+    };
+  }, [activeChannel, isMapReady, showCloudLayer, title]);
+
+  // The stack just (re)loaded - first load for this channel, or the 15-minute refresh. If the
+  // cursor sits on a slot it covers, switch from the network fallback to the stack (or redraw it
+  // with the refreshed bands). Nothing is built per slot: the canvas layer is created on demand.
+  useEffect(() => {
+    const cursor = selectedTimeRef.current;
+    if (title !== MAP_TITLE_MAIN || !showCloudLayer || !isMapReady || !cursor) return;
+    if (slotHasStackLayer(activeChannel, cursor)) showFrameInstant(activeChannel, cursor);
+  }, [stackReadyTick]);
+
+  useEffect(() => () => teardownStackFrames(), []);
 
   // Keep the latest autoZoom value available inside Mapbox event handlers (avoid stale closures)
   const autozoomRef = useRef(autoZoom);
