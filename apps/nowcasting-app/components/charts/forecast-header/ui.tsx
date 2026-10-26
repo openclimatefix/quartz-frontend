@@ -146,7 +146,7 @@ const ComparisonEcho: React.FC = () => {
  */
 export const HEADER_ROW = "mx-1 mb-[5px] flex items-center gap-4";
 export const HEADER_TITLE = "mr-auto flex min-w-0 items-center gap-2";
-export const HEADER_FIGURES = "flex items-center gap-4 lg:gap-6";
+export const HEADER_FIGURES = "flex shrink-0 items-center gap-4 lg:gap-6";
 
 const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
@@ -175,7 +175,10 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           picker — a word true of every country, so the picker was doing the identifying and
           the heading was decoration. The picker moved out; the name moved in. */}
       <div className={HEADER_TITLE}>
-        <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
+        <span
+          className="truncate text-base leading-tight text-content lg:text-lg dash:text-2xl"
+          title={countryName}
+        >
           {countryName}
         </span>
         <ComparisonEcho />
