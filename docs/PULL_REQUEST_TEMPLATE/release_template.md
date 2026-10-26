@@ -248,7 +248,7 @@
 - [ ] Does an expired-trial user go to the "trial expired" page?
 
 ### Documentation
-- Update documentation - https://openclimatefix.notion.site/Quartz-Solar-Documentation-0d718915650e4f098470d695aa3494bf
+- Update documentation - https://openclimatefix.notion.site/OCF-Energy-Documentation-0d718915650e4f098470d695aa3494bf
   - [ ] Yes, done
   - [ ] No
 - Do we need to email the users
