@@ -180,6 +180,13 @@ const Map: FC<IMap> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   const map = useRef<mapboxgl.Map>();
+  // The `load` handler is registered once, on mount, so calling the prop from there ran the
+  // first render's overlay, whose geometry had not arrived. If a deferred update had already
+  // pushed the real geometry, that stale call could replace it with an empty collection, and
+  // nothing pushed it again until the parent next re-rendered: no fill, no borders, every
+  // request 200. Calling through a ref runs the latest render's overlay instead.
+  const loadDataOverlayRef = useRef(loadDataOverlay);
+  loadDataOverlayRef.current = loadDataOverlay;
   const [isMapReady, setIsMapReady] = useState(false);
   const [lng, setLng] = useCountryState("lng");
   const [lat, setLat] = useCountryState("lat");
@@ -704,7 +711,7 @@ const Map: FC<IMap> = ({
       map.current.on("load", (event) => {
         setIsMapReady(true);
         if (map.current) applyBrandLabelFont(map.current);
-        loadDataOverlay(map);
+        loadDataOverlayRef.current(map);
       });
 
       map.current.on("moveend", onMoveEnd);
