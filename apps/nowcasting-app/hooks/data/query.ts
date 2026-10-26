@@ -9,6 +9,7 @@ import {
 import { queryKey, type RequestDescriptor } from "../../lib/api/v1/queries";
 import { FetchJsonError } from "../../lib/api/fetch-json";
 import type { components, paths } from "../../lib/api/v1/schema";
+import { withholdFuture } from "../../lib/domain/trial";
 
 /**
  * The one place SWR is wired to the Phase 2 layers (`queries` -> `client` -> `normalise`).
@@ -338,7 +339,10 @@ export const useApiQuery = <P extends keyof paths, T>(
       ? null
       : async () => ({
           continuityKey: continuityKey(descriptor),
-          data: select(await fetchDescriptor(descriptor))
+          data: withholdFuture(
+            select(await fetchDescriptor(descriptor)),
+            (descriptor.params as { path?: { country?: string } }).path?.country
+          )
         }),
     { ...apiV1SwrOptions, ...options }
   );

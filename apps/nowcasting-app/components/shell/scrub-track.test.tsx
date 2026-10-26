@@ -157,6 +157,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+  setGlobalState("trialExpiredAt", "");
   setEnabledCountries(["GB"]);
 });
 
@@ -194,6 +195,40 @@ describe("following the cursor's other inputs", () => {
   });
 
   test("a cursor written off the track is shown at the end it ran past", () => {
+    setGlobalState("selectedISOTime", "2026-09-01T00:00:00.000Z");
+    render(<ScrubTrack />);
+    expect(slider()).toHaveAttribute("aria-valuenow", "95");
+  });
+});
+
+describe("a trial-expired user", () => {
+  // Live is 12:00, the 12:30 label, slot 24.
+  beforeEach(() => setGlobalState("trialExpiredAt", "2026-07-01"));
+
+  test("a cursor written past live is held at live", () => {
+    setGlobalState("selectedISOTime", "2026-08-11T20:00:00.000Z");
+    render(<ScrubTrack />);
+    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+    expect(slider()).toHaveAttribute("aria-valuemax", "24");
+  });
+
+  test("End and the right arrow stop at live", () => {
+    setGlobalState("selectedISOTime", "2026-08-10T12:00:00.000Z");
+    render(<ScrubTrack />);
+    fireEvent.keyDown(slider(), { key: "ArrowRight" });
+    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+    fireEvent.keyDown(slider(), { key: "End" });
+    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+  });
+
+  test("a drag to the far right end commits live, not the end of the made-up data", () => {
+    renderTrack();
+    down(TRACK_WIDTH);
+    expect(committed[committed.length - 1]).toBe("2026-08-10T12:00:00.000Z");
+  });
+
+  test("an ordinary user can still scrub to the end", () => {
+    setGlobalState("trialExpiredAt", "");
     setGlobalState("selectedISOTime", "2026-09-01T00:00:00.000Z");
     render(<ScrubTrack />);
     expect(slider()).toHaveAttribute("aria-valuenow", "95");
