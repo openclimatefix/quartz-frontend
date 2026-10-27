@@ -12,15 +12,15 @@ import {
 } from "./control-button";
 import useGlobalState from "../helpers/globalState";
 import {
-  SATELLITE_CHANNELS,
+  SATELLITE_BANDS,
+  SATELLITE_COMPOSITES,
   SATELLITE_CHANNEL_LABELS,
-  ChannelSelection,
-  COMPOSITE_SELECTIONS
+  SatelliteChannel
 } from "../helpers/satelliteLayer";
 
 /**
  * The forecast map's own basemap layer toggles — Clouds (satellite) and the yellow PV forecast
- * fill. The channel/composite picker that goes with them is `SatelliteChannelSelect` below,
+ * fill. The channel picker that goes with them is `SatelliteChannelSelect` below,
  * exported separately because it spans the panel's full width where these take half of it.
  *
  * Moved out of `map.tsx` by the Phase 6 followup (Track I), which consolidates every map
@@ -104,7 +104,7 @@ const MapLayerControls: FC = () => {
 };
 
 /**
- * The satellite channel/composite picker, exported separately from the layer buttons above it.
+ * The satellite channel picker, exported separately from the layer buttons above it.
  *
  * It is a full-width control living beside a half-width one. Inside `MapLayerControls` it was
  * confined to the "Layers" column and its longer option labels were clipped — "Couldn't load
@@ -121,38 +121,54 @@ export const SatelliteChannelSelect: FC = () => {
   const [showCloudLayer] = useGlobalState("showCloudLayer");
   const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
   const [satelliteError] = useGlobalState("satelliteError");
+  const [partialComposite] = useGlobalState("satellitePartialComposite");
 
   if (!showCloudLayer) return null;
 
   return (
-    <select
-      value={activeChannel}
-      onChange={(e) => setActiveChannel(e.target.value as ChannelSelection)}
-      disabled={!!satelliteError}
-      aria-label="Satellite channel"
-      className="col-span-5 w-full cursor-pointer rounded border-none bg-surface-inner px-2 py-1 text-xs font-semibold text-content outline-none disabled:cursor-not-allowed disabled:opacity-70"
-    >
-      {satelliteError ? (
-        <option value={activeChannel}>{satelliteError}</option>
-      ) : (
-        <>
-          <optgroup label="Composites">
-            {Object.entries(COMPOSITE_SELECTIONS).map(([key, { label }]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label="Individual bands">
-            {SATELLITE_CHANNELS.map((ch) => (
-              <option key={ch} value={ch}>
-                {SATELLITE_CHANNEL_LABELS[ch]}
-              </option>
-            ))}
-          </optgroup>
-        </>
-      )}
-    </select>
+    <>
+      <select
+        value={activeChannel}
+        onChange={(e) => setActiveChannel(e.target.value as SatelliteChannel)}
+        disabled={!!satelliteError}
+        aria-label="Satellite channel"
+        className="col-span-5 w-full cursor-pointer rounded border-none bg-surface-inner px-2 py-1 text-xs font-semibold text-content outline-none disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {satelliteError ? (
+          <option value={activeChannel}>{satelliteError}</option>
+        ) : (
+          <>
+            <optgroup label="Composites">
+              {SATELLITE_COMPOSITES.map((ch) => (
+                <option key={ch} value={ch}>
+                  {SATELLITE_CHANNEL_LABELS[ch]}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Individual bands">
+              {SATELLITE_BANDS.map((ch) => (
+                <option key={ch} value={ch}>
+                  {SATELLITE_CHANNEL_LABELS[ch]}
+                </option>
+              ))}
+            </optgroup>
+          </>
+        )}
+      </select>
+
+      {/* Show partial composite warning */}
+      {!satelliteError && partialComposite && partialComposite.length > 0 ? (
+        <p
+          className="col-span-5 -mt-0.5 text-2xs leading-tight text-content-muted"
+          title={`This composite was built without: ${partialComposite.join(", ")}`}
+        >
+          Partial composite — missing{" "}
+          {partialComposite
+            .map((ch) => SATELLITE_CHANNEL_LABELS[ch as SatelliteChannel] ?? ch)
+            .join(", ")}
+        </p>
+      ) : null}
+    </>
   );
 };
 
