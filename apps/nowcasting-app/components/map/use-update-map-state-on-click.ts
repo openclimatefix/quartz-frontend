@@ -130,11 +130,14 @@ const useUpdateMapStateOnClick = ({ map, isMapReady }: UseUpdateMapStateOnClickP
 
   useEffect(() => {
     if (!map) return;
-    if (!selectedMapRegionIds) return;
 
     // The selection always belongs to the focused country — contract §1's "selection sets
     // focus" is what guarantees it, and `focusAndSelectRegions` is what enforces it.
-    setMapFilterSelectedIds(map, focusedCountry, selectedMapRegionIds);
+    //
+    // A country with no selection yet reads `undefined`, which must still clear the outline:
+    // returning early left the previous country's region outlined after a switch with the
+    // country toggle, while the chart had already dropped it (UAT, v1.0.2).
+    setMapFilterSelectedIds(map, focusedCountry, selectedMapRegionIds ?? []);
   }, [selectedMapRegionIds, focusedCountry]);
 
   /**

@@ -14,7 +14,12 @@ const LegendItem: FC<{
    * clicks meant for it; the toggle to the right still shows and switches the line.
    */
   labelControl?: ReactNode;
-}> = ({ iconClasses, label, symbolStyle, dataKey, labelControl }) => {
+  /**
+   * Keep the normal size in dashboard mode. The display panel is a control, sized like the map
+   * settings panel beside it; only a legend read across the room should grow.
+   */
+  fixedSize?: boolean;
+}> = ({ iconClasses, label, symbolStyle, dataKey, labelControl, fixedSize = false }) => {
   const [visibleLines, setVisibleLines] = useGlobalState("visibleLines");
   const [mounted, setMounted] = useState(false);
 
@@ -24,7 +29,9 @@ const LegendItem: FC<{
   const isVisible = useMemo(() => visibleLines.includes(dataKey), [visibleLines, dataKey]);
 
   const labelClasses = `block sometimes-bold w-auto uppercase pl-1${
-    mounted && isVisible ? " font-extrabold dash:font-semibold" : " text-content-muted"
+    mounted && isVisible
+      ? ` font-extrabold${fixedSize ? "" : " dash:font-semibold"}`
+      : " text-content-muted"
   }`;
 
   const toggleLineVisibility = () => {
@@ -46,7 +53,9 @@ const LegendItem: FC<{
         <div className="inline-flex flex-1 pl-1 leading-tight">{labelControl}</div>
       ) : (
         <button
-          className="inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-2xs @lg:pr-1 @xl:pr-0 @xl:text-2xs dash:text-base dash:tracking-wider dash:pb-1"
+          className={`inline-flex flex-1 text-left pl-1 max-w-full w-auto leading-tight text-2xs @lg:pr-1 @xl:pr-0 @xl:text-2xs${
+            fixedSize ? "" : " dash:text-base dash:tracking-wider dash:pb-1"
+          }`}
           onClick={toggleLineVisibility}
         >
           <span className={labelClasses}>{label}</span>
