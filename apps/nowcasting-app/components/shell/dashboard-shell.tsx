@@ -118,14 +118,16 @@ const DashboardShell: FC<{
             <FloatingChart
               comparisonActive={comparisonActive}
               panel={
-                dashboardModeActive ? undefined : (
-                  <DisplayPanel
-                    attached
-                    open={displayPanelOpen}
-                    nudge={panelNudge}
-                    onToggle={() => setDisplayPanelOpen((open) => !open)}
-                  />
-                )
+                dashboardModeActive
+                  ? undefined
+                  : (attached) => (
+                      <DisplayPanel
+                        attached={attached}
+                        open={displayPanelOpen}
+                        nudge={panelNudge}
+                        onToggle={() => setDisplayPanelOpen((open) => !open)}
+                      />
+                    )
               }
             >
               {chart}
