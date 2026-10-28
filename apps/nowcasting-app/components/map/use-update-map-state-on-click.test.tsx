@@ -119,7 +119,11 @@ describe("the outline follows the focused country's selection", () => {
 
     act(() => click("GB", "12"));
     rerender();
-    expect(map.getFilter("latestPV-forecast-select-borders")).toEqual(["in", "featureKey", "GB:12"]);
+    expect(map.getFilter("latestPV-forecast-select-borders")).toEqual([
+      "in",
+      "featureKey",
+      "GB:12"
+    ]);
 
     // NL has never been selected in, so its slice reads `undefined` — the case that used to
     // leave GB:12 outlined while the chart had already dropped it.
