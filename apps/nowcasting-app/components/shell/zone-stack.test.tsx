@@ -43,6 +43,11 @@ describe("UTC stays on screen, demoted rather than dropped", () => {
     expect(screen.getByText("utc")).toBeInTheDocument();
     // A span, so it states no labelling convention; GB is focused, so it is GB's half hour.
     expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00–12:30");
+    // GB labels the end, so the API names this period 12:30.
+    expect(screen.getByText("utc").parentElement).toHaveAttribute(
+      "title",
+      "GB's selected period in UTC. API time_utc: 12:30"
+    );
   });
 });
 

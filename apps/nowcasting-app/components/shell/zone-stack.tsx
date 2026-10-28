@@ -3,7 +3,7 @@ import { FC } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig, sortCountryCodes } from "../../config/countries";
-import { periodForInstant, slotLabellingFor } from "../../lib/time/cursor";
+import { periodForInstant, slotForInstant, slotLabellingFor } from "../../lib/time/cursor";
 import {
   DEFAULT_LOCALE,
   DEFAULT_TIMEZONE,
@@ -118,6 +118,8 @@ const ZoneStack: FC = () => {
   const focusedPeriod = periodForInstant(selectedISOTime, focusedCountry);
   const atUtc = (instant: string) => formatISODateStringAsZonedTime(instant, "UTC");
   const utc = `${atUtc(focusedPeriod.start)}–${atUtc(focusedPeriod.end)}`;
+  // The instant the API names this period by, which is the focused country's own label for it.
+  const apiTimeUtc = atUtc(slotForInstant(selectedISOTime, focusedCountry));
   const cursorDate = formatISODateStringAsZonedDate(selectedISOTime, focusedZone, DEFAULT_LOCALE);
   const zoneOrder = sortCountryCodes(enabledCountries, (code) => code);
 
@@ -141,7 +143,7 @@ const ZoneStack: FC = () => {
       </span>
       <span
         className="flex items-baseline gap-1.5 text-2xs text-content-secondary dash:text-sm/none"
-        title={`${focusedCountry}'s period at the cursor, in UTC`}
+        title={`${focusedCountry}'s selected period in UTC. API time_utc: ${apiTimeUtc}`}
       >
         <span className="w-[2em] shrink-0 font-bold uppercase tracking-wider">utc</span>
         <span className="w-[7.2em] shrink-0 font-mono tabular-nums">{utc}</span>
