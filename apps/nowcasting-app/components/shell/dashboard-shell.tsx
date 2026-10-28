@@ -42,9 +42,10 @@ import useCursorHotkeys from "../hooks/use-cursor-hotkeys";
  * (`geometry.ts`'s `maxChartWidthPx`), so the inset is a fixed box again and opening the panel
  * moves nothing.
  *
- * §6's second constraint is derived rather than reacted to: dashboard mode renders no display
- * panel at all, and because that is a `&&` and not an effect, there is no state to fall out of
- * step. What dashboard mode does *not* do here is hide the header — the account menu is the
+ * Dashboard mode used to render no display panel at all (§6's second constraint). It shows it
+ * now: the panel parks behind the chart when shut, so it costs a wall display nothing, and
+ * hiding it left no way to change the series on one. What dashboard mode does *not* do here
+ * is hide the header — the account menu is the
  * only way back out of dashboard mode, and the prototype's separate exit affordance is out of
  * scope for this track.
  */
@@ -117,18 +118,14 @@ const DashboardShell: FC<{
           >
             <FloatingChart
               comparisonActive={comparisonActive}
-              panel={
-                dashboardModeActive
-                  ? undefined
-                  : (attached) => (
-                      <DisplayPanel
-                        attached={attached}
-                        open={displayPanelOpen}
-                        nudge={panelNudge}
-                        onToggle={() => setDisplayPanelOpen((open) => !open)}
-                      />
-                    )
-              }
+              panel={(attached) => (
+                <DisplayPanel
+                  attached={attached}
+                  open={displayPanelOpen}
+                  nudge={panelNudge}
+                  onToggle={() => setDisplayPanelOpen((open) => !open)}
+                />
+              )}
             >
               {chart}
             </FloatingChart>
