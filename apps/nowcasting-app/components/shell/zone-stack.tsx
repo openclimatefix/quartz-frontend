@@ -3,7 +3,7 @@ import { FC } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig, sortCountryCodes } from "../../config/countries";
-import { periodForInstant, slotForInstant, slotLabellingFor } from "../../lib/time/cursor";
+import { periodForInstant, slotLabellingFor } from "../../lib/time/cursor";
 import {
   DEFAULT_LOCALE,
   DEFAULT_TIMEZONE,
@@ -38,12 +38,13 @@ import {
  * is no lag left to report, and the length of the span states the cadence literally instead of
  * numerically.
  *
- * **UTC is demoted, not dropped, and follows the focused country's convention.** It keeps a
- * single instant rather than a span, because a span's length depends on the country. It used to
- * show the cursor's own value, which is the period's start, so with GB focused it disagreed
- * with every other time on screen: GB labels the end. It now shows the focused country's label
- * for the period in UTC (`slotForInstant`), the same instant the headline and the API's
- * `time_utc` name. A stopgap until the API carries explicit `start_utc`/`end_utc`.
+ * **UTC is demoted, not dropped, and shows the focused country's period.** It used to show a
+ * single instant, the cursor's own value, which is the period's start. GB labels the end, so
+ * with GB focused that instant disagreed with the GB row and the headline. Labelling it the
+ * focused country's way instead put it out of step with the other rows, which are periods
+ * containing the cursor. A span answers both: it states no convention, and taking the focused
+ * country's span fixes its length, which otherwise depends on the country. Revisit when the API
+ * carries explicit `start_utc`/`end_utc`.
  *
  * **Every enabled country appears, focused or not**, because focus should be a weight change
  * and never a reordering — the list must not shuffle under a reader. The cells are fixed-width
@@ -114,11 +115,9 @@ const ZoneStack: FC = () => {
   if (!selectedISOTime) return null;
 
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
-  const utc = formatISODateStringAsZonedTime(
-    slotForInstant(selectedISOTime, focusedCountry),
-    "UTC"
-  );
-  const utcLabelsStart = slotLabellingFor(focusedCountry) === "period-start";
+  const focusedPeriod = periodForInstant(selectedISOTime, focusedCountry);
+  const atUtc = (instant: string) => formatISODateStringAsZonedTime(instant, "UTC");
+  const utc = `${atUtc(focusedPeriod.start)}–${atUtc(focusedPeriod.end)}`;
   const cursorDate = formatISODateStringAsZonedDate(selectedISOTime, focusedZone, DEFAULT_LOCALE);
   const zoneOrder = sortCountryCodes(enabledCountries, (code) => code);
 
@@ -142,12 +141,10 @@ const ZoneStack: FC = () => {
       </span>
       <span
         className="flex items-baseline gap-1.5 text-2xs text-content-secondary dash:text-sm/none"
-        title={`UTC, labelled at the ${
-          utcLabelsStart ? "start" : "end"
-        } of the period, as ${focusedCountry} labels it`}
+        title={`${focusedCountry}'s period at the cursor, in UTC`}
       >
         <span className="w-[2em] shrink-0 font-bold uppercase tracking-wider">utc</span>
-        <span className="w-[4em] shrink-0 font-mono tabular-nums">{utc}</span>
+        <span className="w-[7.2em] shrink-0 font-mono tabular-nums">{utc}</span>
       </span>
       {zoneOrder.map((code) => (
         <CountrySlot

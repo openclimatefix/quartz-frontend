@@ -38,12 +38,11 @@ test("renders nothing without a cursor", () => {
 });
 
 describe("UTC stays on screen, demoted rather than dropped", () => {
-  test("the utc row labels the period the way the focused country does", () => {
+  test("the utc row shows the focused country's period", () => {
     render(<ZoneStack />);
     expect(screen.getByText("utc")).toBeInTheDocument();
-    // One instant, not a span. GB is focused and labels the end of its period, so the cursor's
-    // 12:00-12:30 period reads 12:30 — the same instant the headline and `time_utc` name.
-    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:30");
+    // A span, so it states no labelling convention; GB is focused, so it is GB's half hour.
+    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00–12:30");
   });
 });
 
@@ -65,7 +64,7 @@ describe("the period each row is showing", () => {
     // (14:00-14:15 CEST): NL's quarter nests inside GB's half hour.
     expect(row("GB")).toHaveTextContent("GB13:00–13:30");
     expect(row("NL")).toHaveTextContent("NL14:00–14:15");
-    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:30");
+    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00–12:30");
   });
 
   test("NL focused: the periods are unchanged, because focus is not a convention", () => {
@@ -74,8 +73,8 @@ describe("the period each row is showing", () => {
     render(<ZoneStack />);
     expect(row("GB")).toHaveTextContent("GB13:00–13:30");
     expect(row("NL")).toHaveTextContent("NL14:00–14:15");
-    // UTC is the one row that does follow focus: NL labels the start of its period.
-    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00");
+    // UTC is the one row that does follow focus: it takes NL's quarter hour.
+    expect(screen.getByText("utc").parentElement).toHaveTextContent("utc12:00–12:15");
   });
 
   test("a cursor between GB's slots still lands inside GB's stated period", () => {
