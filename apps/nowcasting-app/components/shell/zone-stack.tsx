@@ -3,7 +3,7 @@ import { FC } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useEnabledCountries, useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig, sortCountryCodes } from "../../config/countries";
-import { periodForInstant, slotLabellingFor } from "../../lib/time/cursor";
+import { periodForInstant, slotForInstant, slotLabellingFor } from "../../lib/time/cursor";
 import {
   DEFAULT_LOCALE,
   DEFAULT_TIMEZONE,
@@ -38,10 +38,12 @@ import {
  * is no lag left to report, and the length of the span states the cadence literally instead of
  * numerically.
  *
- * **UTC is demoted, not dropped.** It is the one unambiguous instant on screen and the
- * canonical value the rest derives from, so it keeps a single instant rather than a span — it
- * is the cursor's own value, not a publisher's period, and the one row with no convention
- * attached.
+ * **UTC is demoted, not dropped, and follows the focused country's convention.** It keeps a
+ * single instant rather than a span, because a span's length depends on the country. It used to
+ * show the cursor's own value, which is the period's start, so with GB focused it disagreed
+ * with every other time on screen: GB labels the end. It now shows the focused country's label
+ * for the period in UTC (`slotForInstant`), the same instant the headline and the API's
+ * `time_utc` name. A stopgap until the API carries explicit `start_utc`/`end_utc`.
  *
  * **Every enabled country appears, focused or not**, because focus should be a weight change
  * and never a reordering — the list must not shuffle under a reader. The cells are fixed-width
@@ -85,7 +87,7 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
 
   return (
     <span
-      className="flex items-baseline gap-1.5 text-2xs"
+      className="flex items-baseline gap-1.5 text-2xs dash:text-sm/none"
       title={`${code} published period, ${zone} — ${code} timestamps label the ${
         labelsStart ? "start" : "end"
       } of their period, so this one is ${code}'s ${
@@ -93,13 +95,13 @@ const CountrySlot: FC<{ code: string; cursor: string; focused: boolean }> = ({
       }${focused ? ". The cursor's grid and the axis follow this country" : ""}`}
     >
       <span
-        className={`w-5 shrink-0 font-bold uppercase tracking-wider ${
+        className={`w-[2em] shrink-0 font-bold uppercase tracking-wider ${
           focused ? "text-selected" : "text-content-secondary"
         }`}
       >
         {code}
       </span>
-      <span className="w-[4.5rem] shrink-0 font-mono tabular-nums text-content">{span}</span>
+      <span className="w-[7.2em] shrink-0 font-mono tabular-nums text-content">{span}</span>
     </span>
   );
 };
@@ -112,7 +114,11 @@ const ZoneStack: FC = () => {
   if (!selectedISOTime) return null;
 
   const focusedZone = getCountryConfig(focusedCountry)?.timezone ?? DEFAULT_TIMEZONE;
-  const utc = formatISODateStringAsZonedTime(selectedISOTime, "UTC");
+  const utc = formatISODateStringAsZonedTime(
+    slotForInstant(selectedISOTime, focusedCountry),
+    "UTC"
+  );
+  const utcLabelsStart = slotLabellingFor(focusedCountry) === "period-start";
   const cursorDate = formatISODateStringAsZonedDate(selectedISOTime, focusedZone, DEFAULT_LOCALE);
   const zoneOrder = sortCountryCodes(enabledCountries, (code) => code);
 
@@ -126,17 +132,22 @@ const ZoneStack: FC = () => {
     <div
       aria-label="Cursor time by zone"
       role="group"
-      className="ml-auto flex w-fit flex-col justify-center gap-px rounded-lg border border-content/10 bg-surface-panel/95 px-2 py-1.5 leading-none text-content shadow-2xl"
+      className="ml-auto flex w-fit flex-col justify-center gap-px dash:gap-0.5 rounded-lg border border-content/10 bg-surface-panel/95 px-2 py-1.5 leading-none dash:px-2.5 dash:py-2 text-content shadow-2xl"
     >
       <span
-        className="pb-0.5 font-mono text-2xs font-bold uppercase tracking-wider text-content"
+        className="pb-0.5 font-mono text-2xs font-bold dash:text-sm/none uppercase tracking-wider text-content"
         title={`Cursor date in ${focusedCountry}'s timezone (${focusedZone})`}
       >
         {cursorDate}
       </span>
-      <span className="flex items-baseline gap-1.5 text-2xs text-content-secondary">
-        <span className="w-5 shrink-0 font-bold uppercase tracking-wider">utc</span>
-        <span className="w-10 shrink-0 font-mono tabular-nums">{utc}</span>
+      <span
+        className="flex items-baseline gap-1.5 text-2xs text-content-secondary dash:text-sm/none"
+        title={`UTC, labelled at the ${
+          utcLabelsStart ? "start" : "end"
+        } of the period, as ${focusedCountry} labels it`}
+      >
+        <span className="w-[2em] shrink-0 font-bold uppercase tracking-wider">utc</span>
+        <span className="w-[4em] shrink-0 font-mono tabular-nums">{utc}</span>
       </span>
       {zoneOrder.map((code) => (
         <CountrySlot
