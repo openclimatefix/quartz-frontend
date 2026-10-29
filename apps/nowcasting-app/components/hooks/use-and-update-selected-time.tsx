@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import useGlobalState, {
-  get30MinNow,
+  getCursorNow,
   getGlobalState,
   setGlobalState
 } from "../helpers/globalState";
@@ -21,8 +21,7 @@ const clearIntervals = () => {
 const startNewInterval = () => {
   const newInterval = setInterval(() => {
     console.log("checking for new time");
-    const time30MinNow = get30MinNow();
-    setSelectedISOTime(time30MinNow);
+    setSelectedISOTime(getCursorNow());
   }, 1000 * 60);
   console.log("starting new interval: ", newInterval);
   setIntervals([...intervals, newInterval]);
@@ -48,7 +47,7 @@ export const useStopAndResetTime = () => {
   const resetTime = () => {
     console.log("restarting time");
     clearIntervals();
-    setSelectedISOTime(get30MinNow());
+    setSelectedISOTime(getCursorNow());
     startNewInterval();
   };
   return { stopTime, resetTime };

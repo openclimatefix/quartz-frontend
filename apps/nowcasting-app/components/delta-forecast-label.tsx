@@ -29,7 +29,7 @@ const DeltaForecastLabel: React.FC<DeltaForecastLabelProps> = ({
         )} flex hidden pointer-events-none z-40 mt-3 group-hover:flex flex-wrap`}
       >
         <span
-          className={`relative flex top-1 text-center mb-0 mt-2 z-10 text-xs px-1 py-1 leading-snug rounded-lg text-white bg-ocf-black`}
+          className={`relative flex top-1 text-center mb-0 mt-2 z-10 text-xs px-1 py-1 leading-snug rounded-lg text-content bg-surface-raised`}
         >
           {tip}
         </span>

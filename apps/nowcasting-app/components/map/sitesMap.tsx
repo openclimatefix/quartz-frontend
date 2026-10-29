@@ -1,44 +1,37 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
-import mapboxgl, { CircleLayer, Expression } from "mapbox-gl";
+import mapboxgl, { CircleLayer } from "mapbox-gl";
 
 import { FailedStateMap, LoadStateMap, Map as MapComponent } from "./";
-import { ActiveUnit, SelectedData } from "./types";
+import { ActiveUnit, MAP_TITLE_SOLAR_SITES } from "./types";
 import {
   AGGREGATION_LEVEL_MAX_ZOOM,
   AGGREGATION_LEVEL_MIN_ZOOM,
-  AGGREGATION_LEVELS,
-  MAX_POWER_GENERATED,
-  VIEWS
+  AGGREGATION_LEVELS
 } from "../../constant";
-import gspShapeData from "../../data/gsp_regions_20220314.json";
-import dnoShapeData from "../../data/dno_regions_lat_long_converted.json";
-import useGlobalState from "../helpers/globalState";
-import {
-  formatISODateString,
-  formatISODateStringHuman,
-  getRoundedPv,
-  getRoundedPvPercent
-} from "../helpers/utils";
+import { loadGeoAsset } from "../../lib/geo/assets";
+import useGlobalState, { useCountryState } from "../helpers/globalState";
+import { formatISODateStringHuman } from "../helpers/utils";
+import { useCountryFormatting } from "../../hooks/data/use-country-format";
 import {
   AggregatedSitesCombinedData,
   AggregatedSitesDataGroupMap,
   CombinedSitesData,
-  FcAllResData
+  SitesCombinedErrors
 } from "../types";
 import { theme } from "../../tailwind.config";
 import { Feature, FeatureCollection } from "geojson";
 import Slider from "./sitesMapFeatures/sitesZoomSlider";
-import { safelyUpdateMapData } from "../helpers/mapUtils";
+import { safelyUpdateMapData, setBoundarySourceData } from "../helpers/mapUtils";
 import dynamic from "next/dynamic";
 
-const yellow = theme.extend.colors["ocf-yellow"].DEFAULT;
 const ButtonGroup = dynamic(() => import("../../components/button-group"), { ssr: false });
 
 type SitesMapProps = {
   className?: string;
   sitesData: CombinedSitesData;
   aggregatedSitesData: AggregatedSitesCombinedData;
-  sitesErrors: any;
+  /** Typed rather than `any`, which is what let `sitesErrors?.length` compile on an object. */
+  sitesErrors: SitesCombinedErrors;
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
 };
@@ -52,24 +45,43 @@ const SitesMap: React.FC<SitesMapProps> = ({
   setActiveUnit
 }) => {
   const [selectedISOTime] = useGlobalState("selectedISOTime");
-  const [currentAggregationLevel, setAggregationLevel] = useGlobalState("aggregationLevel");
-  const [clickedSiteGroupId, setClickedSiteGroupId] = useGlobalState("clickedSiteGroupId");
+  const { timezone, locale } = useCountryFormatting();
+  const [currentAggregationLevel, setAggregationLevel] = useCountryState("aggregationLevel");
+  const [clickedSiteGroupId, setClickedSiteGroupId] = useCountryState("clickedSiteGroupId");
   const [autoZoom] = useGlobalState("autoZoom");
+
+  // GSP and DNO boundary polygons, used only to draw the two outline overlays below (never
+  // joined against site data — verified: neither feature set is keyed against site/GSP data
+  // anywhere in this file, both are added to Mapbox as-is), fetched once per session via the
+  // shared `loadGeoAsset` cache rather than bundled — this pair was 25 MB of the JS bundle.
+  // GSP boundaries are the canonical 2026 NESO file (`/geo/gb/gsp.json`), the same asset the
+  // region view uses — Brad's call, since sitesMap previously drew the stale 2022 vintage and
+  // there is now exactly one GSP boundary asset in the repo. `dno.json` is the same source
+  // file the region view's derived DNO level already ships, reused as-is.
+  const [gspShapeData, setGspShapeData] = useState<FeatureCollection | undefined>(undefined);
+  const [dnoShapeData, setDnoShapeData] = useState<FeatureCollection | undefined>(undefined);
 
   const [newDataForMap, setNewDataForMap] = useState(false);
   const [updatingMapData, setUpdatingMapData] = useState(false);
-  const latestForecastValue = 0;
-  const isNormalized = activeUnit === ActiveUnit.percentage;
-  let selectedDataName = SelectedData.expectedPowerGenerationMegawatts;
-  if (activeUnit === ActiveUnit.percentage)
-    selectedDataName = SelectedData.expectedPowerGenerationNormalized;
-  if (activeUnit === ActiveUnit.capacity) selectedDataName = SelectedData.installedCapacityMw;
-  // const {
-  //   data: initForecastData,
-  //   isValidating,
-  //   error: forecastError
-  // } = getForecastsData(isNormalized);
 
+  useEffect(() => {
+    let cancelled = false;
+    loadGeoAsset<FeatureCollection>("/geo/gb/gsp.json").then((data) => {
+      if (cancelled) return;
+      setGspShapeData(data);
+      // The boundary source is only added once its data has arrived (see
+      // addOrUpdateMapGroup below); re-flag so that pass runs again now that it has.
+      setNewDataForMap(true);
+    });
+    loadGeoAsset<FeatureCollection>("/geo/gb/dno.json").then((data) => {
+      if (cancelled) return;
+      setDnoShapeData(data);
+      setNewDataForMap(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   useEffect(() => {
     setNewDataForMap(true);
   }, [clickedSiteGroupId, autoZoom]);
@@ -80,18 +92,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
   }, [currentAggregationLevel, setClickedSiteGroupId]);
 
   const forecastLoading = false;
-
-  const getFillOpacity = (selectedData: string, isNormalized: boolean): Expression => [
-    "interpolate",
-    ["linear"],
-    ["to-number", ["get", selectedData]],
-    // on value 0 the opacity will be 0
-    0,
-    0,
-    // on value maximum the opacity will be 1
-    isNormalized ? 1 : MAX_POWER_GENERATED,
-    1
-  ];
 
   const getRingMultiplier = (aggregationLevel: AGGREGATION_LEVELS) => {
     // TODO: this will need to be dynamic depending on user's site capacities
@@ -107,49 +107,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
   };
 
-  const generateGeoJsonForecastData: (
-    forecastData?: FcAllResData,
-    targetTime?: string
-  ) => { forecastGeoJson: FeatureCollection } = (forecastData, targetTime) => {
-    // Exclude first item as it's not representing gsp area
-    const gspForecastData = forecastData?.forecasts?.slice(1);
-    const gspShapeJson = gspShapeData as FeatureCollection;
-    const forecastGeoJson = {
-      ...gspShapeData,
-      type: "FeatureCollection" as "FeatureCollection",
-      features: gspShapeJson.features.map((featureObj, index) => {
-        const forecastDatum = gspForecastData && gspForecastData[index];
-        let selectedFCValue;
-        if (gspForecastData && targetTime) {
-          selectedFCValue = forecastDatum?.forecastValues.find(
-            (fv) => formatISODateString(fv.targetTime) === formatISODateString(targetTime)
-          );
-        } else if (gspForecastData) {
-          selectedFCValue = forecastDatum?.forecastValues[latestForecastValue];
-        }
-
-        return {
-          ...featureObj,
-          properties: {
-            ...featureObj.properties,
-            [SelectedData.expectedPowerGenerationMegawattsRounded]:
-              selectedFCValue && getRoundedPv(selectedFCValue.expectedPowerGenerationMegawatts),
-            [SelectedData.expectedPowerGenerationNormalizedRounded]:
-              selectedFCValue &&
-              getRoundedPvPercent(selectedFCValue?.expectedPowerGenerationNormalized || 0),
-            [SelectedData.installedCapacityMw]: getRoundedPv(
-              forecastDatum?.location.installedCapacityMw || 0
-            )
-          }
-        };
-      })
-    };
-
-    return { forecastGeoJson };
-  };
-  // const generatedGeoJsonForecastData = useMemo(() => {
-  //   return generateGeoJsonForecastData(initForecastData, selectedISOTime);
-  // }, [initForecastData, selectedISOTime]);
   const setSourceData = (source: mapboxgl.GeoJSONSource, featuresArray: Feature[]) => {
     source.setData({
       type: "FeatureCollection",
@@ -281,15 +238,13 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
 
     if (groupName === "regions") {
-      let dnoBoundariesSource = map.getSource("dnoBoundaries") as unknown as
-        | mapboxgl.GeoJSONSource
-        | undefined;
-      if (!dnoBoundariesSource) {
-        map.addSource("dnoBoundaries", {
-          type: "geojson",
-          data: dnoShapeData as FeatureCollection
-        });
-      }
+      // dnoShapeData now arrives from a fetch (see the effect above) rather than being
+      // available synchronously on first render. The source is therefore added ONCE with an
+      // empty collection and populated when the geometry arrives — never conditionally on the
+      // data being present. The layer below is added unconditionally and names this source,
+      // so deferring the source until the fetch resolves makes `addLayer` reference a source
+      // that does not exist yet, which Mapbox throws on.
+      setBoundarySourceData(map, "dnoBoundaries", dnoShapeData);
 
       let dnoBoundariesLayer =
         (map.getLayer(`dnoBoundaries`) as unknown as CircleLayer) || undefined;
@@ -311,15 +266,9 @@ const SitesMap: React.FC<SitesMapProps> = ({
     }
 
     if (groupName === "gsps") {
-      let gspBoundariesSource = map.getSource("gspBoundaries") as unknown as
-        | mapboxgl.GeoJSONSource
-        | undefined;
-      if (!gspBoundariesSource) {
-        map.addSource("gspBoundaries", {
-          type: "geojson",
-          data: gspShapeData as FeatureCollection
-        });
-      }
+      // Same deferred-arrival handling as dnoBoundaries above: source added once, empty,
+      // then populated — so the unconditional `addLayer` below always has it to point at.
+      setBoundarySourceData(map, "gspBoundaries", gspShapeData);
 
       let gspBoundariesLayer =
         (map.getLayer(`gspBoundaries`) as unknown as CircleLayer) || undefined;
@@ -386,7 +335,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
             "case",
             ["boolean", ["get", "selected"], false],
             theme.extend.colors["ocf-orange"].DEFAULT || "#FFAC5F",
-            theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c"
+            theme.extend.colors.solar.DEFAULT || "#f9d71c"
           ],
           "circle-stroke-width": 1,
           "circle-opacity": 0
@@ -398,27 +347,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
         setClickedSiteGroupId(e.features?.[0].properties?.id);
       });
     }
-    // map.current.on("mousemove", `Capacity-${site.label}`, (e) => {
-    //   // Change the cursor style as a UI indicator.
-    //   map.current.getCanvas().style.cursor = "pointer";
-    //
-    //   // Copy coordinates array.
-    //   const properties = e.features?.[0].properties;
-    //
-    //   const popupContent = `<div class="flex flex-col min-w-[16rem] bg-mapbox-black-700 text-white">
-    //     <span class="text-lg">${site.label}</span>
-    //   </div>`;
-    //
-    //   // Populate the popup and set its coordinates
-    //   // based on the feature found.
-    //   popup.setLngLat(e.lngLat).setHTML(popupContent).addTo(map.current);
-    // });
-    //
-    // map.current.on("mouseleave", `Capacity-sites`, () => {
-    //   map.current.getCanvas().style.cursor = "";
-    //   popup.remove();
-    // });
-
     // Generation circle
     let generationLayer =
       (map.getLayer(`Generation-${groupName}`) as unknown as CircleLayer) || undefined;
@@ -456,7 +384,7 @@ const SitesMap: React.FC<SitesMapProps> = ({
             "case",
             ["boolean", ["get", "selected"], false],
             theme.extend.colors["ocf-orange"].DEFAULT || "#FFAC5F",
-            theme.extend.colors["ocf-yellow"].DEFAULT || "#f9d71c"
+            theme.extend.colors.solar.DEFAULT || "#f9d71c"
           ],
           "circle-opacity": 0.8
         }
@@ -467,14 +395,6 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
   const addFCData = (map: mapboxgl.Map) => {
     console.log("start addFCData");
-    // Create a popup, but don't add it to the map yet.
-    const popup = new mapboxgl.Popup({
-      closeButton: false,
-      closeOnClick: false,
-      anchor: "bottom-right",
-      maxWidth: "none"
-    });
-
     // Sites
     addOrUpdateMapGroup(
       map,
@@ -530,32 +450,38 @@ const SitesMap: React.FC<SitesMapProps> = ({
 
   return (
     <div className={`relative h-full w-full ${className}`}>
-      {sitesErrors?.length ? (
+      {/* `sitesErrors` is an object keyed by fetch, not an array — `?.length` was always
+          `undefined`, so this failure state could never render. Count the truthy entries, the
+          same way `useSitesViewData` does internally for its loading state. */}
+      {Object.values(sitesErrors ?? {}).some(Boolean) ? (
         <FailedStateMap error="Failed to load" />
       ) : forecastLoading ? (
         <LoadStateMap>
-          <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+          <ButtonGroup
+            rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+          />
         </LoadStateMap>
       ) : (
         <MapComponent
           loadDataOverlay={(map: { current: mapboxgl.Map }) =>
-            safelyUpdateMapData(map.current, addFCData)
+            safelyUpdateMapData(map.current, addFCData, "load")
           }
           updateData={{
             newData: newDataForMap,
             updateMapData: (map) => safelyUpdateMapData(map, updateMapData)
           }}
           controlOverlay={(map: { current?: mapboxgl.Map }) => (
-            <>
-              <ButtonGroup rightString={formatISODateStringHuman(selectedISOTime || "")} />
+            // Inset below the header, which has no fill and so now sits over the map (sites.tsx).
+            <div className="relative pt-14">
+              <ButtonGroup
+                rightString={formatISODateStringHuman(selectedISOTime || "", timezone, locale)}
+              />
               <Slider aggregation={currentAggregationLevel} setAggregation={setAggregationLevel} />
               {/* <ShowSiteCount /> */}
-            </>
+            </div>
           )}
-          title={VIEWS.SOLAR_SITES}
-        >
-          {/*<SitesLegend color={"color"} />*/}
-        </MapComponent>
+          title={MAP_TITLE_SOLAR_SITES}
+        ></MapComponent>
       )}
     </div>
   );

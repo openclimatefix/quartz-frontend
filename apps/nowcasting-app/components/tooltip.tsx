@@ -53,11 +53,11 @@ const Tooltip: React.FC<TooltipProps> = ({
         className={`absolute flex flex-col items-center hidden mt-6 group-hover:flex w-fit w-64 ${containerPositionClass}`}
       >
         <span
-          className={`absolute ${tipPositionClass} mb-1 z-30 p-2 text-xs leading-none text-white whitespace-no-wrap bg-ocf-black shadow-lg rounded-md`}
+          className={`absolute ${tipPositionClass} mb-1 z-30 p-2 text-xs leading-none text-content whitespace-no-wrap bg-surface-raised shadow-lg rounded-md`}
         >
           {tip}
         </span>
-        <div className="w-3 h-5 -mt-[6px] rotate-45 bg-ocf-black hidden"></div>
+        <div className="w-3 h-5 -mt-[6px] rotate-45 bg-surface-raised hidden"></div>
       </div>
       {position === "top" && children}
     </div>

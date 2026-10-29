@@ -1,79 +1,133 @@
 import React from "react";
-import useGlobalState, { get30MinNow, getNext30MinSlot } from "../../helpers/globalState";
+import { NO_VALUE } from "../../../lib/domain/power-unit";
+import { useFocusedCountry } from "../../../hooks/data/use-countries";
+import { cadenceMinutesFor, nextSlot, periodForLabel } from "../../../lib/time/cursor";
 import useTimeNow from "../../hooks/use-time-now";
-import PlayButton from "../../play-button";
-import { PvRealData, ForecastData } from "../../types";
 import {
-  convertISODateStringToLondonTime,
-  dateToLondonDateTimeString,
-  formatISODateAsLondonTime,
+  formatDateAsZonedTime,
   formatISODateString,
-  KWtoGW,
+  formatISODateStringAsZonedTime,
   MWtoGW
 } from "../../helpers/utils";
+import { useCountryFormatting } from "../../../hooks/data/use-country-format";
 import ForecastHeaderUI from "./ui";
 import { DeltaHeaderBlock } from "../delta-view/delta-header-block";
+import type { TimeSeries } from "../../../lib/domain/types";
 
 type ForecastHeaderProps = {
-  pvLiveData: PvRealData;
-  pvForecastData: ForecastData;
+  /** Canonical observed generation — the country's first observer. */
+  generationSeries?: TimeSeries;
+  /** Canonical primary forecast. */
+  forecastSeries?: TimeSeries;
   deltaView: boolean;
 };
 
+/**
+ * The latest point that actually carries a reading.
+ *
+ * v0's pvlive payload was newest-first, so the header simply took `[0]`. The canonical
+ * `TimeSeries` is time-ordered ascending and its trailing slots can be `null` (published but
+ * not yet reported), so "latest" has to be the last point with a number in it — `at(-1)`
+ * would show a blank as 0.0 GW every half hour.
+ */
+const latestReading = (series?: TimeSeries) => {
+  if (!series) return undefined;
+  for (let i = series.values.length - 1; i >= 0; i -= 1) {
+    if (typeof series.values[i].powerMw === "number") return series.values[i];
+  }
+  return undefined;
+};
+
+/** What the header prints for a figure with no published value behind it. */
+
+/** An MW reading in GW, or the placeholder when nothing was published. A real 0 stays 0.0. */
+const gwOrPlaceholder = (mw: number | null | undefined): string =>
+  typeof mw === "number" ? MWtoGW(mw) : NO_VALUE;
+
 const ForecastHeader: React.FC<ForecastHeaderProps> = ({
-  pvLiveData,
-  pvForecastData,
+  generationSeries,
+  forecastSeries,
   deltaView
 }) => {
   const timeNow = useTimeNow();
+  const { timezone, locale } = useCountryFormatting();
+  // The header reads one country's numbers, so it steps on that country's grid — 30 minutes
+  // for GB, 15 for NL — rather than on the shared cursor's.
+  const focusedCountry = useFocusedCountry();
+  const cadenceMinutes = cadenceMinutesFor(focusedCountry);
+
+  const latestGeneration = latestReading(generationSeries);
 
   // get the latest Actual pv value in GW
-  const selectedPvActualInGW = pvLiveData?.length
-    ? KWtoGW(pvLiveData?.[0]?.solarGenerationKw)
-    : "0.0";
+  const selectedPvActualInGW = generationSeries
+    ? gwOrPlaceholder(latestGeneration?.powerMw)
+    : NO_VALUE;
 
   // get pv times
-  const latestPvActualDatetime = pvLiveData?.[0]?.datetimeUtc || timeNow;
+  const latestPvActualDatetime =
+    (generationSeries ? latestGeneration?.timeUtc : undefined) || timeNow;
 
   // Use the same time for the Forecast historic
   const pvForecastDatetime = formatISODateString(latestPvActualDatetime) || timeNow;
 
   // Get the next OCF forecast following the latest PV actual datetime
-  const followingPvForecastDatetime = latestPvActualDatetime
-    ? getNext30MinSlot(new Date(latestPvActualDatetime))
-    : new Date(timeNow);
+  const followingPvForecastDatetime = new Date(
+    latestPvActualDatetime ? nextSlot(latestPvActualDatetime, cadenceMinutes) : timeNow
+  );
   const followingPvForecastDateString = formatISODateString(
     followingPvForecastDatetime.toISOString()
   );
 
+  /**
+   * The two headline times as the *periods* they name.
+   *
+   * `periodForLabel`, not `periodForInstant`: both instants here are published timestamps — the
+   * latest observed point's `timeUtc` and the forecast slot after it — and asking the cursor
+   * question about a label returns the period after the right one on a period-end country like
+   * GB (`lib/time/cursor.ts`). Same distinction as the chart's tooltip.
+   *
+   * `ui.tsx` stacks the pair under the clock rather than writing `17:00–17:30`, so this costs
+   * the header no width.
+   */
+  const periodTimes = (instant: string): [string, string] => {
+    const period = periodForLabel(instant, focusedCountry);
+    return [
+      formatISODateStringAsZonedTime(period.start, timezone, locale),
+      formatISODateStringAsZonedTime(period.end, timezone, locale)
+    ];
+  };
+  const pvTimeRange = periodTimes(latestPvActualDatetime);
+  const forecastNextTimeRange = periodTimes(followingPvForecastDatetime.toISOString());
+
+  const forecastPoints: { timeUtc: string; powerMw: number | null }[] = forecastSeries
+    ? forecastSeries.values.map((v) => ({ timeUtc: v.timeUtc, powerMw: v.powerMw }))
+    : [];
+  const forecastAt = (formattedDate: string) =>
+    forecastPoints.find((fc) => formatISODateString(fc.timeUtc) === formattedDate)?.powerMw;
+
   // Get the next OCF forecast for the last PV value time
-  const selectedPvForecastInGW = MWtoGW(
-    pvForecastData?.find((fc) => formatISODateString(fc.targetTime) === pvForecastDatetime)
-      ?.expectedPowerGenerationMegawatts || 0
-  );
+  const selectedPvForecastInGW = gwOrPlaceholder(forecastAt(pvForecastDatetime));
 
   // Get the next OCF forecast
-  const nextPvForecastInGW = MWtoGW(
-    pvForecastData?.find(
-      (fc) => formatISODateString(fc.targetTime) === followingPvForecastDateString
-    )?.expectedPowerGenerationMegawatts || 0
-  );
+  const nextPvForecastInGW = gwOrPlaceholder(forecastAt(followingPvForecastDateString));
 
   if (deltaView) {
-    const deltaValue = (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
+    // No delta unless both sides were published.
+    const deltaValue =
+      selectedPvActualInGW === NO_VALUE || selectedPvForecastInGW === NO_VALUE
+        ? NO_VALUE
+        : (Number(selectedPvActualInGW) - Number(selectedPvForecastInGW)).toFixed(1);
     return (
       <ForecastHeaderUI
         forecastNextPV={nextPvForecastInGW}
         actualPV={selectedPvActualInGW}
         forecastPV={selectedPvForecastInGW}
-        pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
-        forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
+        pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
+        forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
+        pvTimeRange={pvTimeRange}
+        forecastNextTimeRange={forecastNextTimeRange}
       >
         <DeltaHeaderBlock deltaValue={deltaValue} unit={"GW"} />
-        <PlayButton
-          startTime={get30MinNow()}
-          endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}
-        ></PlayButton>
       </ForecastHeaderUI>
     );
   }
@@ -83,14 +137,11 @@ const ForecastHeader: React.FC<ForecastHeaderProps> = ({
       forecastNextPV={nextPvForecastInGW}
       actualPV={selectedPvActualInGW}
       forecastPV={selectedPvForecastInGW}
-      pvTimeOnly={convertISODateStringToLondonTime(latestPvActualDatetime) || ""}
-      forecastNextTimeOnly={formatISODateAsLondonTime(followingPvForecastDatetime)}
-    >
-      <PlayButton
-        startTime={get30MinNow()}
-        endTime={pvForecastData?.[pvForecastData.length - 1]?.targetTime}
-      ></PlayButton>
-    </ForecastHeaderUI>
+      pvTimeOnly={formatISODateStringAsZonedTime(latestPvActualDatetime, timezone, locale) || ""}
+      forecastNextTimeOnly={formatDateAsZonedTime(followingPvForecastDatetime, timezone, locale)}
+      pvTimeRange={pvTimeRange}
+      forecastNextTimeRange={forecastNextTimeRange}
+    />
   );
 };
 
