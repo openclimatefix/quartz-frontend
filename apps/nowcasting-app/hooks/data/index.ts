@@ -20,7 +20,8 @@ export {
   useEnabledCountryListings,
   useEntitledCountries,
   useIsOcfAdmin,
-  useFocusedCountry
+  useFocusedCountry,
+  useNationalChartSeries
 } from "./use-countries";
 export type { UseCountriesResult } from "./use-countries";
 

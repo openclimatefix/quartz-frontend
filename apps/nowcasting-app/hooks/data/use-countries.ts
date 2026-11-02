@@ -103,6 +103,17 @@ export const useIsOcfAdmin = (): boolean => {
   return useMemo(() => isOcfAdmin(user), [user]);
 };
 
+export const useNationalChartSeries = (country: string) => {
+  const { user } = useUser();
+  return useMemo(
+    () =>
+      (getCountryConfig(country)?.nationalChartSeries ?? []).filter(
+        (s) => !s.requiresClaim || user?.[s.requiresClaim] || isOcfAdmin(user)
+      ),
+    [country, user]
+  );
+};
+
 /**
  * Whether the signed-in user is on a trial (`trial_ends_at` on the session user). Sits beside
  * entitlement so components explaining a missing country need not read the session themselves.

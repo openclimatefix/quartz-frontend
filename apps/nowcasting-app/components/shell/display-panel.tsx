@@ -9,7 +9,12 @@ import LegendItem from "../charts/LegendItem";
 import { GENERATION_CHART_KEYS } from "../charts/pv-remix-chart";
 import { N_HOUR_FORECAST_OPTIONS, P_LEVEL_OPTIONS } from "../../constant";
 import { CookieStorageKeys, setArraySettingInCookieStorage } from "../helpers/cookieStorage";
-import { useFocusedCountry, useGenerationSources, useNationalForecast } from "../../hooks/data";
+import {
+  useFocusedCountry,
+  useGenerationSources,
+  useNationalChartSeries,
+  useNationalForecast
+} from "../../hooks/data";
 import { getAvailablePLevels } from "../helpers/chartUtils";
 import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
 import { STAGE_GUTTER_PX } from "./geometry";
@@ -202,7 +207,7 @@ const NHourSelect: FC = () => {
 const SeriesToggles: FC = () => {
   const [showNHourView] = useGlobalState("showNHourView");
   const focusedCountry = useFocusedCountry();
-  const seriesConfig = getCountryConfig(focusedCountry)?.nationalChartSeries ?? [];
+  const seriesConfig = useNationalChartSeries(focusedCountry);
   const generationSources = useGenerationSources(
     focusedCountry ? { country: focusedCountry, source: "solar" } : null
   );
