@@ -182,7 +182,7 @@ const NHourSelect: FC = () => {
       <select
         value={nHourForecast}
         onChange={(event) => setNHourForecast(Number(event.target.value))}
-        className="m-0 h-auto w-auto cursor-pointer appearance-none border-0 bg-transparent bg-none p-0 pr-5 pl-1 text-2xs uppercase leading-tight text-content focus:outline-none focus:ring-0 focus-visible:ring-1 focus-visible:ring-interactive dash:text-base dash:tracking-wider"
+        className="m-0 h-auto w-auto cursor-pointer appearance-none border-0 bg-transparent bg-none p-0 pr-5 pl-1 text-2xs uppercase leading-tight text-content focus:outline-none focus:ring-0 focus-visible:ring-1 focus-visible:ring-interactive"
       >
         {N_HOUR_FORECAST_OPTIONS.map((option) => (
           <option key={`n-hour-${option}`} value={option} className="bg-surface text-content">
@@ -209,9 +209,16 @@ const SeriesToggles: FC = () => {
 
   return (
     <div className="flex flex-col">
-      <LegendItem iconClasses="text-solar" symbolStyle="both" label="OCF" dataKey="FORECAST" />
+      <LegendItem
+        fixedSize
+        iconClasses="text-solar"
+        symbolStyle="both"
+        label="OCF"
+        dataKey="FORECAST"
+      />
       {showNHourView && (
         <LegendItem
+          fixedSize
           iconClasses="text-series-nHour"
           symbolStyle="both"
           label="hour"
@@ -224,6 +231,7 @@ const SeriesToggles: FC = () => {
         .filter((series) => !!series.legend)
         .map((series) => (
           <LegendItem
+            fixedSize
             key={`rail-${series.key}`}
             iconClasses={series.legend!.iconClasses}
             symbolStyle="both"
@@ -235,6 +243,7 @@ const SeriesToggles: FC = () => {
         .slice(0, GENERATION_CHART_KEYS.length)
         .map((source, index) => (
           <LegendItem
+            fixedSize
             key={`rail-${GENERATION_CHART_KEYS[index]}`}
             iconClasses="text-solar-light"
             symbolStyle={index === 0 ? "dashed" : undefined}
@@ -243,11 +252,13 @@ const SeriesToggles: FC = () => {
           />
         ))}
       <LegendItem
+        fixedSize
         iconClasses="text-series-seasonal"
         label="Seasonal mean"
         dataKey="SEASONAL_MEAN"
       />
       <LegendItem
+        fixedSize
         iconClasses="text-series-seasonal"
         symbolStyle="area"
         label="Seasonal quantiles"

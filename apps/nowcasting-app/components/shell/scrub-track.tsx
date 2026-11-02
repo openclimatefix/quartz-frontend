@@ -689,10 +689,10 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
             {/* `text-box` trims each line box to cap height and baseline, so centring the two spans
                 centres the glyphs themselves. Without it the capitals sat off-centre, because
                 the two fonts put different space above and below their capitals. */}
-            <span className="text-[9px] font-bold uppercase leading-none tracking-wider text-interactive/80 [text-box:trim-both_cap_alphabetic]">
+            <span className="text-[9px] font-bold uppercase leading-none dash:text-xs tracking-wider text-interactive/80 [text-box:trim-both_cap_alphabetic]">
               {focusedCountry}
             </span>
-            <span className="font-mono text-[11px] font-semibold leading-none text-interactive [text-box:trim-both_cap_alphabetic]">
+            <span className="font-mono text-[11px] font-semibold leading-none dash:text-base text-interactive [text-box:trim-both_cap_alphabetic]">
               {focusedLocal}
             </span>
             {/* The live dot: state, on the thing that moves. The same colour as the lettering it
