@@ -1,4 +1,5 @@
 import { fromArrayBuffer, GeoTIFFImage } from "geotiff";
+import { API_V1_PREFIX } from "../../constant";
 import { getAccessToken } from "../../lib/api/auth/token";
 import type { Scope } from "../../lib/domain/types";
 
@@ -99,13 +100,10 @@ export type TifLayerData = {
   missingChannels?: string[];
 };
 
-// Satellite is on **neither v0 nor v1** — stripping `/v0` leaves the API root, so requests go to
-// an unversioned `/satellite/` route. An earlier comment described this as "its v0 endpoint",
-// which is wrong and matters: satellite is not waiting on a v1 migration, it sits outside the
-// versioning scheme entirely. Whether that is a deliberate exemption or an oversight is a
+// Satellite is on **neither v0 nor v1** — stripping the version leaves the API root, so requests go to
+// an unversioned `/satellite/` route. Whether that is a deliberate exemption or an oversight is a
 // question for the API side, worth settling before EU satellite coverage is planned on top of it.
-const API_PREFIX =
-  process.env.NEXT_PUBLIC_API_PREFIX?.replace("/v0", "") || "https://api-dev.ocf.energy";
+const API_PREFIX = API_V1_PREFIX.replace(/(\/v\d+)?\/?$/, "") || "https://api.ocf.energy";
 
 // One layer/source per channel. Kept here rather than in map.tsx so the ids have
 // a single home.
