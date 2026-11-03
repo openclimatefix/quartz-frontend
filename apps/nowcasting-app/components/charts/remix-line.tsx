@@ -76,6 +76,7 @@ const orange = theme.extend.colors.series.nHour;
 const ecmwfOnly = theme.extend.colors.series.ecmwf;
 const metOfficeOnly = theme.extend.colors.series.metOffice;
 const satOnly = theme.extend.colors.series.satellite;
+const uncurtailed = theme.extend.colors.data.purple;
 const seasonal = theme.extend.colors.series.seasonal;
 // The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
 // colour the map paints a region that came in under forecast, and one above it the colour it
@@ -123,6 +124,8 @@ export type ChartDataBase = {
   MET_OFFICE_ONLY?: number;
   PAST_MET_OFFICE_ONLY?: number;
   SAT_ONLY?: number;
+  UNCURTAILED?: number;
+  PAST_UNCURTAILED?: number;
 
   DELTA?: number;
   DELTA_BUCKET?: DELTA_BUCKET;
@@ -157,6 +160,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: "Met Office-only",
   SAT_ONLY: "Satellite-only",
   PAST_SAT_ONLY: "Satellite-only",
+  UNCURTAILED: "OCF Uncurtailed",
+  PAST_UNCURTAILED: "OCF Uncurtailed",
   N_HOUR_FORECAST: `N-hour`,
   N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
@@ -178,6 +183,8 @@ const toolTipColors: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: metOfficeOnly,
   SAT_ONLY: satOnly,
   PAST_SAT_ONLY: satOnly,
+  UNCURTAILED: uncurtailed,
+  PAST_UNCURTAILED: uncurtailed,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -1296,6 +1303,35 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("MET_OFFICE_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="PAST_UNCURTAILED"
+              dot={hoverDot}
+              activeDot={isSitesChart}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={uncurtailed}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("UNCURTAILED")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="UNCURTAILED"
+              dot={hoverDot}
+              activeDot={isSitesChart}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={uncurtailed}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("UNCURTAILED")}
               isAnimationActive={false}
             />
             <Line

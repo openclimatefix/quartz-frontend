@@ -136,11 +136,16 @@ describe("the national chart's series list", () => {
   });
 
   // The point of the whole exercise: the two-line-plus-five-comparisons chart is a GB fact.
-  test("NL charts one line, not GB's six", () => {
-    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(1);
+  test("NL charts the blend and OCF Uncurtailed, not GB's six", () => {
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(2);
     expect(COUNTRY_CONFIG.NL.nationalChartSeries[0]).toMatchObject({
       key: "FORECAST",
       model: "blend"
+    });
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries[1]).toMatchObject({
+      key: "UNCURTAILED",
+      model: "ecmwf_mo_sat_uncurtailed",
+      label: "OCF Uncurtailed"
     });
   });
 
