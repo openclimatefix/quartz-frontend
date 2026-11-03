@@ -251,19 +251,23 @@ const SeriesToggles: FC = () => {
             dataKey={GENERATION_CHART_KEYS[index]}
           />
         ))}
-      <LegendItem
-        fixedSize
-        iconClasses="text-series-seasonal"
-        label="Seasonal mean"
-        dataKey="SEASONAL_MEAN"
-      />
-      <LegendItem
-        fixedSize
-        iconClasses="text-series-seasonal"
-        symbolStyle="area"
-        label="Seasonal quantiles"
-        dataKey="SEASONAL_BOUNDS"
-      />
+      {getCountryConfig(focusedCountry)?.seasonalNorms && (
+        <>
+          <LegendItem
+            fixedSize
+            iconClasses="text-series-seasonal"
+            label="Seasonal mean"
+            dataKey="SEASONAL_MEAN"
+          />
+          <LegendItem
+            fixedSize
+            iconClasses="text-series-seasonal"
+            symbolStyle="area"
+            label="Seasonal quantiles"
+            dataKey="SEASONAL_BOUNDS"
+          />
+        </>
+      )}
     </div>
   );
 };
