@@ -21,6 +21,14 @@ export function PresenceMetadataBridge() {
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [dashboardMode] = useGlobalState("dashboardMode");
   const [mapUnit] = useGlobalState("activeUnit");
+  const [showCloudLayer] = useGlobalState("showCloudLayer");
+  const [activeChannel] = useGlobalState("activeChannel");
+  const [showConstraints] = useGlobalState("showConstraints");
+  const [chartZoomed] = useGlobalState("globalChartIsZoomed");
+  const [isPlaying] = useGlobalState("isPlaying");
+  const [zoom] = useGlobalState("zoom");
+  // Whole zoom levels only: the map updates zoom continuously while moving.
+  const mapZoom = Math.round(zoom);
 
   // Sync user email (swap to userHash below when user IDs are set up)
   useEffect(() => {
@@ -50,7 +58,13 @@ export function PresenceMetadataBridge() {
       showNHourView: !!showNHourView,
       selectedTime: selectedISOTime,
       selectedRegionIds: selectedMapRegionIds ?? [],
-      dashboardMode
+      dashboardMode,
+      showCloudLayer,
+      activeChannel,
+      showConstraints,
+      chartZoomed,
+      isPlaying,
+      mapZoom
     });
   }, [
     client,
@@ -62,7 +76,13 @@ export function PresenceMetadataBridge() {
     showNHourView,
     selectedISOTime,
     selectedMapRegionIds,
-    dashboardMode
+    dashboardMode,
+    showCloudLayer,
+    activeChannel,
+    showConstraints,
+    chartZoomed,
+    isPlaying,
+    mapZoom
   ]);
 
   return null;
