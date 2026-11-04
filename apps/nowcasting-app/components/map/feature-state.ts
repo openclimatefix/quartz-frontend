@@ -160,10 +160,11 @@ export const UNBANDED_COUNTRY_OPACITY = 1;
  */
 export const capacityTopFor = (
   country: string | null | undefined,
-  grouped: boolean
+  grouped: boolean,
+  topKey: "capacityTop" | "capacityDensityTop" = "capacityTop"
 ): number | undefined => {
   if (!country) return undefined;
-  const tops = COUNTRY_CONFIG[country.toUpperCase()]?.mapBands.capacityTop;
+  const tops = COUNTRY_CONFIG[country.toUpperCase()]?.mapBands[topKey];
   if (!tops) return undefined;
   return grouped ? tops.grouped ?? undefined : tops.region;
 };
@@ -256,10 +257,13 @@ const state = (key: keyof MapFeatureState): Expression =>
  * at `capacityTop` instead. Installed capacity is several times the output a region ever
  * reaches, so the two cannot share a top without one of them being useless.
  */
-const countryAwareCapacity = (input: Expression): Expression => {
+const countryAwareCapacity = (
+  input: Expression,
+  topKey: "capacityTop" | "capacityDensityTop" = "capacityTop"
+): Expression => {
   const arms: unknown[] = [];
   Object.entries(COUNTRY_CONFIG).forEach(([code, config]) => {
-    const { region, grouped } = config.mapBands.capacityTop;
+    const { region, grouped } = config.mapBands[topKey];
     const ramp = (top: number): Expression =>
       ["interpolate", ["linear"], input, 0, ZERO_OPACITY, top, 1] as unknown as Expression;
     arms.push(
@@ -312,6 +316,10 @@ export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
   if (unit === ActiveUnit.capacity) {
     return countryAwareCapacity(state("capacity"));
   }
+  if (unit === ActiveUnit.capacityDensity) {
+    const density = ["/", state("capacity"), ["get", "areaKm2"]] as unknown as Expression;
+    return countryAwareCapacity(density, "capacityDensityTop");
+  }
 
   // All three are continuous ramps now. What differs is where each saturates: percentage at
   // a fraction of capacity, MW at the country's top output threshold, capacity at its
@@ -335,7 +343,9 @@ export const fillOpacityExpression = (unit: ActiveUnit): Expression => {
 };
 
 export const fillColorExpression = (unit: ActiveUnit): Expression => {
-  if (unit === ActiveUnit.capacity) return yellow as unknown as Expression;
+  if (unit === ActiveUnit.capacity || unit === ActiveUnit.capacityDensity) {
+    return yellow as unknown as Expression;
+  }
   return [
     "case",
     ["==", ["feature-state", "dataState"], "no-data"],

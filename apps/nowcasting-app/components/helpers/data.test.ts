@@ -179,4 +179,41 @@ describe("buildMapGeometry — the region/feature join", () => {
     expect(shapes.features[0].id).toBeUndefined();
     expect(shapes.features[0].properties).toEqual({ GSPs: "CITR_1" });
   });
+
+  it("sets each feature's areaKm2 to its region's total area", () => {
+    // Squares on the equator: 1° x 1° is about 12,300 km², 2° x 2° four times that.
+    const square = (properties: Record<string, unknown>, size: number) => ({
+      type: "Feature" as const,
+      properties,
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [
+          [
+            [0, 0],
+            [size, 0],
+            [size, size],
+            [0, size],
+            [0, 0]
+          ]
+        ]
+      }
+    });
+    const result = buildMapGeometry({
+      level: gspLevel,
+      shapes: collection(
+        square({ GSPs: "CITR_1" }, 1),
+        square({ GSPs: "CITR_1" }, 2),
+        square({ GSPs: "GREM_P" }, 1)
+      ),
+      regions: [region("citr_1", { metadata: { gsp_id: 67 } })],
+      joinProperty: "GSPs",
+      joinTransform: "lowercase",
+      country: "GB"
+    });
+    const [a, b, c] = result.features.map((feature) => feature.properties?.areaKm2);
+    expect(a).toBe(b);
+    expect(a / c).toBeCloseTo(5, 1);
+    expect(c).toBeGreaterThan(12_000);
+    expect(c).toBeLessThan(12_500);
+  });
 });
