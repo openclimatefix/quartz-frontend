@@ -20,7 +20,10 @@ const AccessDeniedPage = ({ query }: { query: any }) => {
       document.cookie = "visited_access_denied=true; path=/; max-age=3600"; // 1 hour
     }
   }, []);
-  const isEmailVerification = errorDescription?.includes("Email not verified");
+  // Matches the wording the Auth0 post-login Action denies with (product-ops,
+  // auth0/actions/post-login-products.js) — it has never sent "Email not verified", which is
+  // why every new sign-up saw the Access denied page instead of this one.
+  const isEmailVerification = errorDescription?.includes("verify your email");
 
   return (
     <>
