@@ -268,7 +268,7 @@ describe("rollUpRegionValues", () => {
     expect(rolled.get("Unknown")!.dataState).toBe("unpublished");
   });
 
-  // CHARACTERISATION: GB's DNO groupings are not a partition — 15 GSPs appear in two
+  // CHARACTERISATION: GB's DNO groupings are not a partition — 21 GSPs appear in two
   // groupings each — so a GSP counted twice within one grouping (or across two) is summed
   // twice, in both power and capacity. Phase 5 regenerated the grouping files name-keyed and
   // reproduced the duplication exactly: the API owner has not answered whether a GSP feeding

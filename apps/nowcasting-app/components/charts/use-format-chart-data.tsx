@@ -13,9 +13,10 @@ import { DateTime } from "luxon";
 import { Invalid, Valid } from "luxon/src/_util";
 import { getAvailablePLevels, getUtcHalfHourIndex } from "../helpers/chartUtils";
 import type { TimeSeries } from "../../lib/domain/types";
-import { useSeasonalNorms, type SeasonalNormsData } from "../../hooks/data/use-seasonal-norms";
+import { useSeasonalNorms } from "../../hooks/data/use-seasonal-norms";
 import { useFocusedCountry } from "../../hooks/data/use-countries";
 import { cadenceMinutesFor, cursorNow, slotForInstant } from "../../lib/time/cursor";
+import type { SeasonalMetrics } from "./gsp-pv-remix-chart/use-gsp-seasonal-metrics";
 
 const NATIONAL_CAPACITY = 21504.629;
 
@@ -111,16 +112,16 @@ const getDelta = (datum: ChartData): number | undefined => {
 
 const getSeasonalMetricsForDate = (
   date: DateTime<Valid> | DateTime<Invalid>,
-  nationalMetrics: SeasonalNormsData
+  metrics: SeasonalMetrics
 ) => {
   if (date.isValid === false)
-    return { seasonalMean: [] as number[], seasonalBounds: [] as SeasonalBound[] };
+    return { seasonalMean: [] as (number | null)[], seasonalBounds: [] as SeasonalBound[] };
 
   const month = date.month;
   const day = date.day;
-  const seasonalQuantiles = nationalMetrics["keys"]["pLevels"];
-  // @ts-ignore
-  const seasonalMetricData = nationalMetrics["data"][month][day];
+  const seasonalQuantiles = metrics["keys"]["pLevels"];
+  // @ts-ignore - month/day are numbers indexing the string-keyed metrics map
+  const seasonalMetricData: any = metrics["data"][month][day];
   const seasonalMetrics = {
     seasonalMean: seasonalMetricData.mean,
     seasonalBounds: [] as SeasonalBound[]
@@ -153,7 +154,9 @@ const useFormatChartData = ({
   generationSeries,
   timeTrigger,
   delta = false,
-  gsp = false
+  gsp = false,
+  seasonalMetrics,
+  seasonalCapacity
 }: {
   /** The primary forecast: writes `FORECAST`/`PAST_FORECAST` and supplies the p-levels. */
   forecastSeries?: TimeSeries;
@@ -169,6 +172,11 @@ const useFormatChartData = ({
   timeTrigger?: string;
   delta?: boolean;
   gsp?: boolean;
+  // For GSP charts: the (capacity-weighted, normalised) seasonal metrics for the
+  // selected GSP(s) and their total installed capacity. National charts use the
+  // country's seasonal-norm dataset (`useSeasonalNorms`) + NATIONAL_CAPACITY.
+  seasonalMetrics?: SeasonalMetrics | null;
+  seasonalCapacity?: number;
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
@@ -286,7 +294,13 @@ const useFormatChartData = ({
         }
       }
 
-      // Add seasonal norm data
+      // Add seasonal norm data. National charts use the country's seasonal-norm dataset scaled
+      // by NATIONAL_CAPACITY; GSP charts use the selected GSP(s)' metrics scaled by the capacity
+      // of the GSPs that have metrics (see `useGspSeasonalMetrics`).
+      const metricsSource: SeasonalMetrics | null | undefined = gsp
+        ? seasonalMetrics
+        : nationalMetrics;
+      const metricsCapacity = gsp ? seasonalCapacity : NATIONAL_CAPACITY;
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key).toUTC();
         // The seasonal-norm arrays in national_metrics.json are bucketed by UTC time-of-day (the
@@ -294,32 +308,43 @@ const useFormatChartData = ({
         // NOT by the GB settlement period, which is counted from Europe/London midnight and runs
         // two slots ahead throughout BST. These used to be the same call (B9). `getUtcHalfHourIndex`
         // must stay UTC: localising it would shift every seasonal line by two slots all summer.
+        // The per-GSP and DNO metrics come from the same generator and share that indexing.
         const utcSlotIndex = getUtcHalfHourIndex(date);
         // `nationalMetrics` is `undefined` both while the fetch is in flight and permanently
         // for a country with `seasonalNorms: null` (NL). Either way: no seasonal keys written,
         // rather than falling back to whatever country's dataset last happened to be loaded.
-        if (!gsp && nationalMetrics) {
-          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date, nationalMetrics);
+        // Likewise `seasonalMetrics` is `null` while loading or for a level with no metrics.
+        if (metricsSource && metricsCapacity) {
+          const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date, metricsSource);
 
-          chartMap[key].SEASONAL_MEAN = seasonalMean[utcSlotIndex] * NATIONAL_CAPACITY;
+          // Values can be null where a GSP has no data for this slot; leave those keys unset so
+          // the chart shows a gap, not a 0.
+          const meanValue = seasonalMean[utcSlotIndex];
+          if (typeof meanValue === "number" && Number.isFinite(meanValue)) {
+            chartMap[key].SEASONAL_MEAN = meanValue * metricsCapacity;
+          }
           chartMap[key].SEASONAL_BOUNDS = seasonalBounds.map((boundPair) => Object.keys(boundPair));
           for (const boundPair of seasonalBounds) {
             for (const [index, bound] of Object.entries(boundPair)) {
-              if (bound) {
+              const boundValue = (bound as unknown as (number | null)[] | undefined)?.[
+                utcSlotIndex
+              ];
+              if (Number.isFinite(boundValue)) {
                 chartMap[key][`SEASONAL_${index as SeasonalQuantile}`] =
-                  bound[utcSlotIndex] * NATIONAL_CAPACITY;
+                  (boundValue as number) * metricsCapacity;
               }
             }
-            chartMap[key][
-              `SEASONAL_BOUND_${Object.keys(boundPair).join(
-                "_"
-              )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
-            ] = Object.values(boundPair).map((bound) => {
-              if (bound) {
-                return bound[utcSlotIndex] * NATIONAL_CAPACITY;
-              }
-              return 0;
-            });
+            // Only draw the band where both bounds have data for this slot.
+            const bandValues = Object.values(boundPair).map(
+              (bound) => (bound as unknown as (number | null)[] | undefined)?.[utcSlotIndex]
+            );
+            if (bandValues.every((value) => Number.isFinite(value))) {
+              chartMap[key][
+                `SEASONAL_BOUND_${Object.keys(boundPair).join(
+                  "_"
+                )}` as `SEASONAL_BOUND_${SeasonalQuantile}_${SeasonalQuantile}`
+              ] = bandValues.map((value) => (value as number) * metricsCapacity);
+            }
           }
         }
       }
@@ -360,6 +385,8 @@ const useFormatChartData = ({
     nHourForecast,
     pLevels,
     nationalMetrics,
+    seasonalMetrics,
+    seasonalCapacity,
     cadenceMinutes
   ]);
 
