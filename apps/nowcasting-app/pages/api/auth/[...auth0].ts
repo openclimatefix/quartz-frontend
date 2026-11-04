@@ -20,14 +20,6 @@ export default wrapApiHandlerWithSentry(
         const { redirectUri } = getUrls(req);
         const { query } = req;
         if (query.error?.includes("access_denied")) {
-          // If trial has expired, redirect to Trial Expired page
-          console.log("query.error_description?.toString()", query.error_description?.toString());
-          if (query.error_description?.includes("trial period")) {
-            res.redirect(
-              `/expired?email=${query.error_description?.toString().split("user_email:")[1]}`
-            );
-            return;
-          }
           res.redirect(
             `/auth/denied?${new URLSearchParams(query as Record<string, string>).toString()}`
           );
