@@ -38,7 +38,11 @@ jest.mock("next/router", () => ({ __esModule: true, default: { push: jest.fn() }
 jest.mock("@sentry/nextjs", () => ({ __esModule: true, captureException: jest.fn() }));
 jest.mock("@auth0/nextjs-auth0/client", () => ({
   __esModule: true,
-  useUser: () => ({ user: null, isLoading: false, error: undefined })
+  useUser: () => ({
+    user: { products: ["GB-SOLAR-CLOUDCASTING"] },
+    isLoading: false,
+    error: undefined
+  })
 }));
 // Mapbox never loads in jsdom and the GSP drill-down chart is not what is under test here.
 jest.mock("./gsp-pv-remix-chart", () => ({
@@ -184,7 +188,7 @@ describe("the forecast series are driven by the country's config, not by the com
       .find((c) => c.country === "GB")
       .region_types.find((rt: any) => rt.type === "national").forecast_models;
     expect(manifestModels.length).toBe(6);
-    expect(seen("/GB/solar/regions/national/forecast").length).toBe(4);
+    expect(seen("/GB/solar/regions/national/forecast").length).toBe(5);
   });
 
   // Adjustment is the `adjusted` parameter, not a model-name suffix.

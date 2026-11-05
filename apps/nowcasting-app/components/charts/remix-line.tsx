@@ -76,6 +76,7 @@ const orange = theme.extend.colors.series.nHour;
 const ecmwfOnly = theme.extend.colors.series.ecmwf;
 const metOfficeOnly = theme.extend.colors.series.metOffice;
 const satOnly = theme.extend.colors.series.satellite;
+const cloudcasting = theme.extend.colors.series.cloudcasting;
 const seasonal = theme.extend.colors.series.seasonal;
 // The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
 // colour the map paints a region that came in under forecast, and one above it the colour it
@@ -157,6 +158,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: "Met Office-only",
   SAT_ONLY: "Satellite-only",
   PAST_SAT_ONLY: "Satellite-only",
+  BLEND_CLOUDCASTING: "Blend Cloudcasting",
+  PAST_BLEND_CLOUDCASTING: "Blend Cloudcasting",
   N_HOUR_FORECAST: `N-hour`,
   N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
@@ -178,6 +181,8 @@ const toolTipColors: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: metOfficeOnly,
   SAT_ONLY: satOnly,
   PAST_SAT_ONLY: satOnly,
+  BLEND_CLOUDCASTING: cloudcasting,
+  PAST_BLEND_CLOUDCASTING: cloudcasting,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -1296,6 +1301,35 @@ const RemixLine: React.FC<RemixLineProps> = ({
               fillOpacity={100}
               strokeWidth={largeScreenMode ? 4 : 1.5}
               hide={!visibleLines.includes("MET_OFFICE_ONLY")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="PAST_BLEND_CLOUDCASTING"
+              dot={hoverDot}
+              activeDot={isSitesChart}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={cloudcasting}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("BLEND_CLOUDCASTING")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="BLEND_CLOUDCASTING"
+              dot={hoverDot}
+              activeDot={isSitesChart}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={cloudcasting}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("BLEND_CLOUDCASTING")}
               isAnimationActive={false}
             />
             <Line

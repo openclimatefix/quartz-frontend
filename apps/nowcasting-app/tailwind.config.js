@@ -273,6 +273,7 @@ module.exports = {
           ecmwf: ELECTRIC.blue, // Teal         (was ocf-teal-500 #70C2B6)
           metOffice: ELECTRIC.green, // Blue         (was #B9D532)
           satellite: ELECTRIC.sky, // Blue Light   (was solar-light, which now means actual)
+          cloudcasting: ELECTRIC.skyLight, // used for cloudcasting
           nHour: DATA.orange, // Orange       (was ocf-orange #FF9736)
           seasonal: DATA.orangeLight // Orange Light (was the bare literal #ffdfd1)
         },
