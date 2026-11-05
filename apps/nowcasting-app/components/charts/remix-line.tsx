@@ -76,7 +76,7 @@ const orange = theme.extend.colors.series.nHour;
 const ecmwfOnly = theme.extend.colors.series.ecmwf;
 const metOfficeOnly = theme.extend.colors.series.metOffice;
 const satOnly = theme.extend.colors.series.satellite;
-const cloudcasting = theme.extend.colors.data.purple;
+const cloudcasting = theme.extend.colors.series.cloudcasting;
 const seasonal = theme.extend.colors.series.seasonal;
 // The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
 // colour the map paints a region that came in under forecast, and one above it the colour it

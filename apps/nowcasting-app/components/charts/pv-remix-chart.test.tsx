@@ -38,7 +38,11 @@ jest.mock("next/router", () => ({ __esModule: true, default: { push: jest.fn() }
 jest.mock("@sentry/nextjs", () => ({ __esModule: true, captureException: jest.fn() }));
 jest.mock("@auth0/nextjs-auth0/client", () => ({
   __esModule: true,
-  useUser: () => ({ user: { cloudcasting: true }, isLoading: false, error: undefined })
+  useUser: () => ({
+    user: { products: ["GB-SOLAR-CLOUDCASTING"] },
+    isLoading: false,
+    error: undefined
+  })
 }));
 // Mapbox never loads in jsdom and the GSP drill-down chart is not what is under test here.
 jest.mock("./gsp-pv-remix-chart", () => ({
