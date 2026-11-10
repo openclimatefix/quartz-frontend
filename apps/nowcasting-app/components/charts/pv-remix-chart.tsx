@@ -24,11 +24,12 @@ import {
   useFocusedCountry,
   useGenerationSources,
   useLoadingState,
+  useNationalChartSeries,
   useNationalForecast,
   useNationalGeneration
 } from "../../hooks/data";
 import type { Scope } from "../../lib/domain/types";
-import { forecastSeriesModel, getCountryConfig } from "../../config/countries";
+import { forecastSeriesModel } from "../../config/countries";
 
 /**
  * The `ChartData` keys the observed-generation lines are written under, in manifest observer
@@ -64,7 +65,6 @@ const PvRemixChart: FC<{
   const cursorInstant = formatISODateString(selectedISOTime || new Date().toISOString());
 
   const focusedCountry = useFocusedCountry();
-  const countryConfig = getCountryConfig(focusedCountry);
 
   // The cursor is one instant; this chart reads one country. Playback can step it finer than
   // the focused country publishes (see `playbackStrideMinutes`), which leaves instants this
@@ -80,10 +80,8 @@ const PvRemixChart: FC<{
   // LIVE line sits a whole period early on a period-end country and matches no category at all.
   const liveSlot = formatISODateString(slotForInstant(timeNow, focusedCountry));
 
-  const seriesConfig = useMemo(
-    () => (countryConfig?.nationalChartSeries ?? []).slice(0, MAX_FORECAST_SERIES),
-    [countryConfig]
-  );
+  const visibleSeries = useNationalChartSeries(focusedCountry);
+  const seriesConfig = useMemo(() => visibleSeries.slice(0, MAX_FORECAST_SERIES), [visibleSeries]);
 
   const scope: Scope | null = focusedCountry
     ? { country: focusedCountry, source: "solar", regionType: NATIONAL_REGION_TYPE }

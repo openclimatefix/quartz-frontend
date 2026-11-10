@@ -76,6 +76,7 @@ const orange = theme.extend.colors.series.nHour;
 const ecmwfOnly = theme.extend.colors.series.ecmwf;
 const metOfficeOnly = theme.extend.colors.series.metOffice;
 const satOnly = theme.extend.colors.series.satellite;
+const cloudcasting = theme.extend.colors.series.cloudcasting;
 const seasonal = theme.extend.colors.series.seasonal;
 // The delta scale's own poles (`lib/domain/delta-ramp.ts`), so a bar below the axis is the
 // colour the map paints a region that came in under forecast, and one above it the colour it
@@ -102,10 +103,13 @@ export type SeasonalBound = {
 };
 
 // Key for a single p-level band's [min, max] range in ChartData, e.g. "PROBABILISTIC_RANGE_10_90".
-export type PLevelRangeKey = `PROBABILISTIC_RANGE_${number}_${number}`;
+export type PLevelRangeKey = `${"" | "BLEND_CLOUDCASTING_"}PROBABILISTIC_RANGE_${number}_${number}`;
 export type PLevelBounds = { [K in PLevelRangeKey]?: number[] };
-export const getPLevelRangeKey = (lower: number, upper: number): PLevelRangeKey =>
-  `PROBABILISTIC_RANGE_${lower}_${upper}`;
+export const getPLevelRangeKey = (
+  lower: number,
+  upper: number,
+  prefix: "" | "BLEND_CLOUDCASTING_" = ""
+): PLevelRangeKey => `${prefix}PROBABILISTIC_RANGE_${lower}_${upper}`;
 
 export type ChartDataBase = {
   formattedDate: string; // "2022-05-16T15:00",
@@ -157,6 +161,8 @@ const toolTiplabels: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: "Met Office-only",
   SAT_ONLY: "Satellite-only",
   PAST_SAT_ONLY: "Satellite-only",
+  BLEND_CLOUDCASTING: "Cloudcasting",
+  PAST_BLEND_CLOUDCASTING: "Cloudcasting",
   N_HOUR_FORECAST: `N-hour`,
   N_HOUR_PAST_FORECAST: "N-hour",
   DELTA: "Delta",
@@ -178,6 +184,8 @@ const toolTipColors: Record<string, string> = {
   PAST_MET_OFFICE_ONLY: metOfficeOnly,
   SAT_ONLY: satOnly,
   PAST_SAT_ONLY: satOnly,
+  BLEND_CLOUDCASTING: cloudcasting,
+  PAST_BLEND_CLOUDCASTING: cloudcasting,
   N_HOUR_FORECAST: orange,
   N_HOUR_PAST_FORECAST: orange,
   DELTA: deltaPos,
@@ -397,6 +405,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [pLevels] = useGlobalState("pLevels");
+  const [cloudcastingPLevels] = useGlobalState("cloudcastingPLevels");
   const { timezone, locale } = useCountryFormatting();
 
   /**
@@ -1021,6 +1030,25 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 isAnimationActive={false}
               />
             ))}
+            {cloudcastingPLevels.map(([lower, upper]) => (
+              <Area
+                key={`cloudcasting-${lower}-${upper}`}
+                type="monotone"
+                dataKey={getPLevelRangeKey(lower, upper, "BLEND_CLOUDCASTING_")}
+                dot={hoverDot}
+                activeDot={isSitesChart}
+                xAxisId={"x-axis"}
+                yAxisId={"y-axis"}
+                stroke={cloudcasting}
+                fill={cloudcasting}
+                fillOpacity={
+                  1 - Math.pow(1 - P_LEVEL_BAND_COMBINED_OPACITY, 1 / cloudcastingPLevels.length)
+                }
+                strokeWidth={0}
+                hide={!visibleLines.includes("BLEND_CLOUDCASTING")}
+                isAnimationActive={false}
+              />
+            ))}
 
             {data.length > 0 &&
               data[0].SEASONAL_BOUNDS?.map((boundPair) => {
@@ -1353,6 +1381,35 @@ const RemixLine: React.FC<RemixLineProps> = ({
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
+            <Line
+              type="monotone"
+              dataKey="PAST_BLEND_CLOUDCASTING"
+              dot={hoverDot}
+              activeDot={isSitesChart}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              stroke={cloudcasting}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("BLEND_CLOUDCASTING")}
+              isAnimationActive={false}
+            />
+            <Line
+              type="monotone"
+              dataKey="BLEND_CLOUDCASTING"
+              dot={hoverDot}
+              activeDot={isSitesChart}
+              xAxisId={"x-axis"}
+              yAxisId={"y-axis"}
+              strokeDasharray="5 5"
+              stroke={cloudcasting}
+              fill="transparent"
+              fillOpacity={100}
+              strokeWidth={largeScreenMode ? 4 : 1.5}
+              hide={!visibleLines.includes("BLEND_CLOUDCASTING")}
+              isAnimationActive={false}
+            />
             {zoomEnabled && globalIsZooming && (
               <ReferenceArea
                 x1={globalZoomArea?.x1}
@@ -1407,23 +1464,28 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   : formatISODateStringHumanNumbersOnly(formattedDate, timezone, locale);
 
                 // Show the p-levels in the tooltip higher ones above the current and lower below
-                const pLevelRows = pLevels
-                  .flatMap(([lower, upper]) => {
-                    // this forecast may not have data for a selected pair (e.g. missing plevels) - skip it
-                    const range = data[getPLevelRangeKey(lower, upper)];
-                    if (!range) return [];
-                    const [min, max] = range;
-                    return [
-                      [lower, min],
-                      [upper, max]
-                    ];
-                  })
-                  .filter(([, value]) => Math.round(value * 100) >= 0)
-                  .sort(([a], [b]) => b - a);
-                const pLevelRow = ([level, value]: number[]) => (
-                  <li key={level} className="font-sans text-2xs" style={{ color: yellow }}>
+                const getPLevelRows = (
+                  levels: [number, number][],
+                  prefix: "" | "BLEND_CLOUDCASTING_" = ""
+                ) =>
+                  levels
+                    .flatMap(([lower, upper]) => {
+                      // this forecast may not have data for a selected pair (e.g. missing plevels) - skip it
+                      const range = data[getPLevelRangeKey(lower, upper, prefix)];
+                      if (!range) return [];
+                      const [min, max] = range;
+                      return [
+                        [lower, min],
+                        [upper, max]
+                      ];
+                    })
+                    .filter(([, value]) => Math.round(value * 100) >= 0)
+                    .sort(([a], [b]) => b - a);
+                const pLevelRows = getPLevelRows(pLevels);
+                const pLevelRow = ([level, value]: number[], label = "OCF", color = yellow) => (
+                  <li key={`${label}-${level}`} className="font-sans text-2xs" style={{ color }}>
                     <div className="flex justify-between">
-                      <div>{`OCF P${level}`}:</div>
+                      <div>{`${label} P${level}`}:</div>
                       <div className="ml-4 font-mono tabular-nums">
                         {prettyPrintYNumberWithCommas(
                           String(value),
@@ -1435,8 +1497,21 @@ const RemixLine: React.FC<RemixLineProps> = ({
                     </div>
                   </li>
                 );
-                const upperRows = pLevelRows.filter(([level]) => level > 50).map(pLevelRow);
-                const lowerRows = pLevelRows.filter(([level]) => level < 50).map(pLevelRow);
+                const upperRows = pLevelRows
+                  .filter(([level]) => level > 50)
+                  .map((row) => pLevelRow(row));
+                const lowerRows = pLevelRows
+                  .filter(([level]) => level < 50)
+                  .map((row) => pLevelRow(row));
+                const cloudcastingRows = getPLevelRows(cloudcastingPLevels, "BLEND_CLOUDCASTING_");
+                const cloudcastingRow = (row: number[]) =>
+                  pLevelRow(row, "Cloudcasting", cloudcasting);
+                const cloudcastingUpperRows = cloudcastingRows
+                  .filter(([level]) => level > 50)
+                  .map(cloudcastingRow);
+                const cloudcastingLowerRows = cloudcastingRows
+                  .filter(([level]) => level < 50)
+                  .map(cloudcastingRow);
 
                 return (
                   <div className="px-3 py-2 bg-surface-raised bg-opacity-80 shadow">
@@ -1473,6 +1548,10 @@ const RemixLine: React.FC<RemixLineProps> = ({
                           )
                             return null;
                           const isForecast = ["FORECAST", "PAST_FORECAST"].includes(key);
+                          const isCloudcasting = [
+                            "BLEND_CLOUDCASTING",
+                            "PAST_BLEND_CLOUDCASTING"
+                          ].includes(key);
                           let textClass = "font-normal text-xs";
                           if (isForecast) textClass = "font-semibold";
                           if (key.includes("SEASONAL_P")) textClass = "text-2xs";
@@ -1515,6 +1594,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                             // the forecast is the p50, wrap it with the higher p-levels above and lower below
                             <React.Fragment key={`item-${key}`}>
                               {isForecast && upperRows}
+                              {isCloudcasting && cloudcastingUpperRows}
 
                               <li className="font-sans" style={{ color }}>
                                 <div
@@ -1529,6 +1609,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                               </li>
 
                               {isForecast && lowerRows}
+                              {isCloudcasting && cloudcastingLowerRows}
                             </React.Fragment>
                           );
                         })}

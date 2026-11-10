@@ -172,6 +172,7 @@ const useFormatChartData = ({
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
+  const [cloudcastingPLevels] = useGlobalState("cloudcastingPLevels");
   const nationalMetrics = useSeasonalNorms();
   // The past/future split has to land on a row this chart actually has, and the rows are the
   // focused country's timestamps — so it steps on that country's cadence, not on the shared
@@ -282,6 +283,32 @@ const useFormatChartData = ({
               (db: SeriesPoint) => db.timeUtc,
               (db: SeriesPoint) => getForecastChartData(timeNow, db, undefined, key)
             );
+            if (key === "BLEND_CLOUDCASTING" && fc.plevels && cloudcastingPLevels.length) {
+              const plevelValues = fc.plevels;
+              const availablePLevels = getAvailablePLevels(plevelValues, cloudcastingPLevels);
+              if (availablePLevels.length) {
+                addDataToMap(
+                  fc,
+                  (db: SeriesPoint) => db.timeUtc,
+                  (db: SeriesPoint) =>
+                    Object.fromEntries([
+                      [
+                        "PROBABILISTIC_UPPER_BOUND",
+                        Math.max(
+                          chartMap[db.timeUtc]?.PROBABILISTIC_UPPER_BOUND ?? 0,
+                          ...availablePLevels.map(
+                            ([, hi]) => plevelValues[`plevel_${hi}`] as number
+                          )
+                        )
+                      ],
+                      ...availablePLevels.map(([lo, hi]) => [
+                        getPLevelRangeKey(lo, hi, "BLEND_CLOUDCASTING_"),
+                        [plevelValues[`plevel_${lo}`], plevelValues[`plevel_${hi}`]]
+                      ])
+                    ])
+                );
+              }
+            }
           });
         }
       }
@@ -359,6 +386,7 @@ const useFormatChartData = ({
     timeTrigger,
     nHourForecast,
     pLevels,
+    cloudcastingPLevels,
     nationalMetrics,
     cadenceMinutes
   ]);

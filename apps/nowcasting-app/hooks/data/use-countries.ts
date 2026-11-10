@@ -7,6 +7,7 @@ import {
   readEntitlementClaim,
   isEntitled,
   isOcfAdmin,
+  readProductsClaim,
   isTrialUser
 } from "../../lib/api/auth/entitlement";
 import * as queries from "../../lib/api/v1/queries";
@@ -101,6 +102,20 @@ export const useEntitledCountries = (): UseCountriesResult => {
 export const useIsOcfAdmin = (): boolean => {
   const { user } = useUser();
   return useMemo(() => isOcfAdmin(user), [user]);
+};
+
+export const useNationalChartSeries = (country: string) => {
+  const { user } = useUser();
+  return useMemo(
+    () =>
+      (getCountryConfig(country)?.nationalChartSeries ?? []).filter(
+        (s) =>
+          !s.requiresProduct ||
+          readProductsClaim(user).includes(s.requiresProduct) ||
+          isOcfAdmin(user)
+      ),
+    [country, user]
+  );
 };
 
 /**

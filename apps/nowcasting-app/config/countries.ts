@@ -217,6 +217,7 @@ export type ForecastSeriesConfig = {
     /** Weather inputs ticked in the legend tooltip. */
     tooltipInputs: ForecastInput[];
   };
+  requiresProduct?: "gb-solar-cloudcasting";
 };
 
 /** The weather inputs a forecast model can consume. Mirrors `DataInput` in the legend tooltip. */
@@ -496,6 +497,13 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         model: "sat_8h",
         label: "Satellite-only",
         legend: { iconClasses: "text-series-satellite", tooltipInputs: ["SAT"] }
+      },
+      {
+        key: "BLEND_CLOUDCASTING",
+        model: "blend_cloudcasting",
+        label: "Cloudcasting",
+        legend: { iconClasses: "text-series-cloudcasting", tooltipInputs: ["SAT"] },
+        requiresProduct: "gb-solar-cloudcasting"
       }
     ],
     overlays: [{ id: "constraints", url: "/geo/gb/ng-constraints.json", label: "Constraints" }],
