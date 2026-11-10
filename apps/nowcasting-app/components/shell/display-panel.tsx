@@ -126,30 +126,66 @@ const useAvailablePLevels = (): [number, number][] => {
   }, [forecast.data]);
 };
 
-/** Confidence bands. Lifted out of the settings modal, which held nothing else. */
-const ConfidenceBands: FC = () => {
-  const [pLevels, setPLevels] = useGlobalState("pLevels");
-
-  const available = useAvailablePLevels();
-
-  const toggle = (pair: [number, number]) => {
-    const next = pLevels.some(([lower]) => lower === pair[0])
-      ? pLevels.filter(([lower]) => lower !== pair[0])
-      : [...pLevels, pair];
-    setPLevels(next);
-    setArraySettingInCookieStorage(CookieStorageKeys.P_LEVELS, next);
-  };
+const PLevelGroup: FC<{
+  label: string;
+  available: [number, number][];
+  pLevels: [number, number][];
+  setPLevels: (next: [number, number][]) => void;
+}> = ({ label, available, pLevels, setPLevels }) => {
+  const toggle = (pair: [number, number]) =>
+    setPLevels(
+      pLevels.some(([lower]) => lower === pair[0])
+        ? pLevels.filter(([lower]) => lower !== pair[0])
+        : [...pLevels, pair]
+    );
 
   return (
     <>
-      {available.map(([lower, upper]) => (
-        <RailRow
-          key={lower}
-          label={`P${lower} / P${upper}`}
-          on={pLevels.some(([l]) => l === lower)}
-          onToggle={() => toggle([lower, upper])}
+      <span className="block py-0.5 text-2xs uppercase tracking-wider text-content">{label}</span>
+      <div className="pl-3">
+        {available.map(([lower, upper]) => (
+          <RailRow
+            key={lower}
+            label={`P${lower} / P${upper}`}
+            on={pLevels.some(([l]) => l === lower)}
+            onToggle={() => toggle([lower, upper])}
+          />
+        ))}
+      </div>
+    </>
+  );
+};
+
+/** Confidence bands. Lifted out of the settings modal, which held nothing else. */
+const ConfidenceBands: FC = () => {
+  const [pLevels, setPLevels] = useGlobalState("pLevels");
+  const [cloudcastingPLevels, setCloudcastingPLevels] = useGlobalState("cloudcastingPLevels");
+  const focusedCountry = useFocusedCountry();
+  const hasCloudcasting = useNationalChartSeries(focusedCountry).some(
+    (s) => s.key === "BLEND_CLOUDCASTING"
+  );
+
+  const available = useAvailablePLevels();
+
+  return (
+    <>
+      <PLevelGroup
+        label="OCF Forecast"
+        available={available}
+        pLevels={pLevels}
+        setPLevels={(next) => {
+          setPLevels(next);
+          setArraySettingInCookieStorage(CookieStorageKeys.P_LEVELS, next);
+        }}
+      />
+      {hasCloudcasting && (
+        <PLevelGroup
+          label="Cloudcasting"
+          available={available}
+          pLevels={cloudcastingPLevels}
+          setPLevels={setCloudcastingPLevels}
         />
-      ))}
+      )}
     </>
   );
 };
@@ -208,6 +244,7 @@ const SeriesToggles: FC = () => {
   const [showNHourView] = useGlobalState("showNHourView");
   const focusedCountry = useFocusedCountry();
   const seriesConfig = useNationalChartSeries(focusedCountry);
+  const cloudcasting = seriesConfig.find((series) => series.key === "BLEND_CLOUDCASTING");
   const generationSources = useGenerationSources(
     focusedCountry ? { country: focusedCountry, source: "solar" } : null
   );
@@ -221,6 +258,15 @@ const SeriesToggles: FC = () => {
         label="OCF"
         dataKey="FORECAST"
       />
+      {cloudcasting && (
+        <LegendItem
+          fixedSize
+          iconClasses={cloudcasting.legend!.iconClasses}
+          symbolStyle="both"
+          label={cloudcasting.label}
+          dataKey={cloudcasting.key}
+        />
+      )}
       {showNHourView && (
         <LegendItem
           fixedSize
@@ -233,7 +279,7 @@ const SeriesToggles: FC = () => {
       )}
       {seriesConfig
         .slice(1)
-        .filter((series) => !!series.legend)
+        .filter((series) => !!series.legend && series !== cloudcasting)
         .map((series) => (
           <LegendItem
             fixedSize

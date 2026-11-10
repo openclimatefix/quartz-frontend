@@ -501,7 +501,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
       {
         key: "BLEND_CLOUDCASTING",
         model: "blend_cloudcasting",
-        label: "Blend Cloudcasting",
+        label: "Cloudcasting",
         legend: { iconClasses: "text-series-cloudcasting", tooltipInputs: ["SAT"] },
         requiresProduct: "gb-solar-cloudcasting"
       }
