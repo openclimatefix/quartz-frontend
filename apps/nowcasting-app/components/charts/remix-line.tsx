@@ -1001,6 +1001,53 @@ const RemixLine: React.FC<RemixLineProps> = ({
               </>
             )}
 
+            {/* Bands first: paint order is JSX order, so anything declared after these sits on
+                top of them. Declared later they were tinting the cursor, LIVE and every line. */}
+            {pLevels.map(([lower, upper]) => (
+              <Area
+                key={`${lower}-${upper}`}
+                type="monotone"
+                dataKey={getPLevelRangeKey(lower, upper)}
+                dot={hoverDot}
+                activeDot={isSitesChart}
+                xAxisId={"x-axis"}
+                yAxisId={"y-axis"}
+                stroke={yellow}
+                fill={yellow}
+                // Lowers each band's opacity as more bands are added, so overlapping bands always look like P_LEVEL_BAND_COMBINED_OPACITY, not darker.
+                fillOpacity={1 - Math.pow(1 - P_LEVEL_BAND_COMBINED_OPACITY, 1 / pLevels.length)}
+                strokeWidth={0}
+                hide={!visibleLines.includes("FORECAST")}
+                isAnimationActive={false}
+              />
+            ))}
+
+            {data.length > 0 &&
+              data[0].SEASONAL_BOUNDS?.map((boundPair) => {
+                return (
+                  <Area
+                    key={`SEASONAL_BOUND_${boundPair.join("_")}`}
+                    dataKey={`SEASONAL_BOUND_${boundPair.join("_")}`}
+                    type="monotone"
+                    dot={hoverDot}
+                    activeDot={isSitesChart}
+                    xAxisId={"x-axis"}
+                    yAxisId={"y-axis"}
+                    stroke={seasonal}
+                    fill={seasonal}
+                    fillOpacity={
+                      (1 /
+                        (Number(boundPair[1].replace("P", "")) -
+                          Number(boundPair[0].replace("P", "")))) *
+                      15
+                    }
+                    strokeWidth={0}
+                    hide={!visibleLines.includes("SEASONAL_BOUNDS")}
+                    isAnimationActive={false}
+                  />
+                );
+              })}
+
             {/* The cursor carries no label and no grip. The period reads once, in the footer,
                 tethered to the scrub handle; the grip collided with the LIVE marker, both being
                 `--interactive` objects at the top of a reference line. Click-to-set-time
@@ -1123,7 +1170,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   strokeDasharray="5 5"
                   strokeDashoffset={3}
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 1.5}
+                  strokeWidth={largeScreenMode ? 4 : 2}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
@@ -1136,31 +1183,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
                   xAxisId={"x-axis"}
                   // strokeDasharray="10 10"
                   stroke={orange} // blue
-                  strokeWidth={largeScreenMode ? 4 : 1.5}
+                  strokeWidth={largeScreenMode ? 4 : 2}
                   hide={!visibleLines.includes("N_HOUR_FORECAST")}
                   isAnimationActive={false}
                 />
               </>
             )}
-
-            {pLevels.map(([lower, upper]) => (
-              <Area
-                key={`${lower}-${upper}`}
-                type="monotone"
-                dataKey={getPLevelRangeKey(lower, upper)}
-                dot={hoverDot}
-                activeDot={isSitesChart}
-                xAxisId={"x-axis"}
-                yAxisId={"y-axis"}
-                stroke={yellow}
-                fill={yellow}
-                // Lowers each band's opacity as more bands are added, so overlapping bands always look like P_LEVEL_BAND_COMBINED_OPACITY, not darker.
-                fillOpacity={1 - Math.pow(1 - P_LEVEL_BAND_COMBINED_OPACITY, 1 / pLevels.length)}
-                strokeWidth={0}
-                hide={!visibleLines.includes("FORECAST")}
-                isAnimationActive={false}
-              />
-            ))}
 
             <Line
               type="monotone"
@@ -1182,32 +1210,6 @@ const RemixLine: React.FC<RemixLineProps> = ({
               hide={!visibleLines.includes("SEASONAL_MEAN")}
               isAnimationActive={false}
             />
-
-            {data.length > 0 &&
-              data[0].SEASONAL_BOUNDS?.map((boundPair) => {
-                return (
-                  <Area
-                    key={`SEASONAL_BOUND_${boundPair.join("_")}`}
-                    dataKey={`SEASONAL_BOUND_${boundPair.join("_")}`}
-                    type="monotone"
-                    dot={hoverDot}
-                    activeDot={isSitesChart}
-                    xAxisId={"x-axis"}
-                    yAxisId={"y-axis"}
-                    stroke={seasonal}
-                    fill={seasonal}
-                    fillOpacity={
-                      (1 /
-                        (Number(boundPair[1].replace("P", "")) -
-                          Number(boundPair[0].replace("P", "")))) *
-                      15
-                    }
-                    strokeWidth={0}
-                    hide={!visibleLines.includes("SEASONAL_BOUNDS")}
-                    isAnimationActive={false}
-                  />
-                );
-              })}
 
             <Line
               type="monotone"
@@ -1304,7 +1306,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
               stroke={toolTipColors.GENERATION}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 2}
               strokeDasharray="5 5"
               hide={!visibleLines.includes("GENERATION")}
               isAnimationActive={false}
@@ -1312,7 +1314,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
             <Line
               type="monotone"
               dataKey="GENERATION_UPDATED"
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 2}
               stroke={toolTipColors.GENERATION_UPDATED}
               xAxisId={"x-axis"}
               yAxisId={"y-axis"}
@@ -1332,7 +1334,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 2}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />
@@ -1347,7 +1349,7 @@ const RemixLine: React.FC<RemixLineProps> = ({
               stroke={yellow} //yellow
               fill="transparent"
               fillOpacity={100}
-              strokeWidth={largeScreenMode ? 4 : 1.5}
+              strokeWidth={largeScreenMode ? 4 : 2}
               hide={!visibleLines.includes("FORECAST")}
               isAnimationActive={false}
             />

@@ -31,9 +31,7 @@ export const ForecastHeadlineFigure: React.FC<{
   // Slimmed: the ramp topped out at text-6xl, which made the two readings the loudest thing
   // on the page and pushed the chart itself down. One step down across the board.
   const textSizeClasses = `font-mono tracking-normal text-base md:text-lg leading-none text-${color} pr-0.5 ${
-    gsp
-      ? "dash:2xl:text-4xl dash:xl:text-3xl xl:text-2xl lg:text-xl"
-      : "dash:3xl:text-4xl dash:xl:text-3xl lg:text-2xl"
+    gsp ? "xl:text-2xl lg:text-xl dash:lg:text-4xl" : "lg:text-2xl dash:lg:text-4xl"
   }`;
   return (
     <div
@@ -57,7 +55,7 @@ export const ForecastHeadlineFigure: React.FC<{
               {children}
             </ForecastLabel>
             {times && (
-              <span className="ml-1 font-sans text-2xs dash:text-sm dash:xl:text-base font-normal leading-none text-content">
+              <span className="ml-1 font-sans text-2xs dash:text-sm/none font-normal leading-none text-content">
                 {unit}
               </span>
             )}
@@ -70,7 +68,7 @@ export const ForecastHeadlineFigure: React.FC<{
             {times ? (
               /* The period's two ends, stacked, and nothing else: two 24-hour times read as a
                  span without a clock. Monospace and tabular, so they are the same width. */
-              <div className="flex flex-col gap-0.5 font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base leading-none dash:leading-none text-content">
+              <div className="flex flex-col gap-0.5 font-mono tabular-nums text-2xs dash:text-sm/none leading-none dash:leading-none text-content">
                 <span>{times[0]}</span>
                 {/* Same weight as the start. Dimming the end read as two different kinds of
                     value stacked, when they are two ends of one span. */}
@@ -82,13 +80,13 @@ export const ForecastHeadlineFigure: React.FC<{
                   {time && (
                     <>
                       <ClockIcon className="h-3" />
-                      <p className="font-mono tabular-nums text-2xs dash:text-sm dash:xl:text-base ml-0.5 dash:leading-none leading-none">
+                      <p className="font-mono tabular-nums text-2xs dash:text-sm/none ml-0.5 dash:leading-none leading-none">
                         {time}
                       </p>
                     </>
                   )}
                 </div>
-                <span className="text-2xs dash:text-sm dash:xl:text-base text-content font-normal dash:leading-none leading-none">
+                <span className="text-2xs dash:text-sm/none text-content font-normal dash:leading-none leading-none">
                   {unit}
                 </span>
               </>
@@ -146,7 +144,7 @@ const ComparisonEcho: React.FC = () => {
  */
 export const HEADER_ROW = "mx-1 mb-[5px] flex items-center gap-4";
 export const HEADER_TITLE = "mr-auto flex min-w-0 items-center gap-2";
-export const HEADER_FIGURES = "flex items-center gap-4 lg:gap-6";
+export const HEADER_FIGURES = "flex shrink-0 items-center gap-4 lg:gap-6";
 
 const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
   forecastNextPV,
@@ -175,7 +173,10 @@ const ForecastHeaderUI: React.FC<ForecastHeaderProps> = ({
           picker — a word true of every country, so the picker was doing the identifying and
           the heading was decoration. The picker moved out; the name moved in. */}
       <div className={HEADER_TITLE}>
-        <span className="text-base leading-tight text-content lg:text-lg dash:text-2xl">
+        <span
+          className="truncate text-base leading-tight text-content lg:text-lg dash:text-2xl"
+          title={countryName}
+        >
           {countryName}
         </span>
         <ComparisonEcho />

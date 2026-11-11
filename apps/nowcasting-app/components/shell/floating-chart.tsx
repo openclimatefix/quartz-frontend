@@ -78,7 +78,8 @@ const NARROW_QUERY = "(max-width: 1023px)";
 const FloatingChart: FC<{
   children: ReactNode;
   comparisonActive: boolean;
-  panel?: ReactNode;
+  /** Rendered attached to the chart's right edge when wide, docked inside it when narrow. */
+  panel?: (attached: boolean) => ReactNode;
 }> = ({ children, comparisonActive, panel }) => {
   const [selectedMapRegionIds] = useCountryState("selectedMapRegionIds");
   const [chartSplitOverrides] = useGlobalState("chartSplitOverrides");
@@ -154,7 +155,21 @@ const FloatingChart: FC<{
           className="pointer-events-none absolute top-0 z-0 flex h-full flex-col"
           style={{ left: `calc(100% + ${STAGE_GUTTER_PX}px)`, width: MAP_CONTROL_WIDTH_PX }}
         >
-          {panel}
+          {panel(true)}
+        </div>
+      )}
+
+      {/* Narrow, the chart spans the stage, so there is no room beside it: the panel docks
+          inside the chart's right edge instead, below the title row, and parks off the stage
+          edge when shut (`attached={false}`, the mode it had when it lived in the dock's
+          column). It used to be skipped entirely here, which left no way to toggle series or
+          bands on a small screen (UAT, v1.0.2). */}
+      {panel && isNarrow && (
+        <div
+          className="pointer-events-none absolute bottom-0 right-0 z-20 flex flex-col"
+          style={{ top: "3rem", width: MAP_CONTROL_WIDTH_PX }}
+        >
+          {panel(false)}
         </div>
       )}
 

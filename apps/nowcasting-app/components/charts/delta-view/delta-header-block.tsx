@@ -26,8 +26,8 @@ export const DeltaHeaderBlock: React.FC<{
   // Kept in step with `ForecastHeadlineFigure`'s own ramp, so the three figures in the row are
   // one size.
   const figureSize = gsp
-    ? "text-base md:text-lg lg:text-xl xl:text-2xl dash:xl:text-3xl dash:2xl:text-4xl"
-    : "text-base md:text-lg lg:text-2xl dash:xl:text-3xl dash:3xl:text-4xl";
+    ? "text-base md:text-lg lg:text-xl xl:text-2xl dash:lg:text-4xl"
+    : "text-base md:text-lg lg:text-2xl dash:lg:text-4xl";
 
   return (
     <div data-test="delta-header-figure" className="flex items-center gap-2 dash:py-0.5">
@@ -46,7 +46,7 @@ export const DeltaHeaderBlock: React.FC<{
         )}
         {deltaValue}
       </div>
-      <div className="flex flex-col gap-0.5 text-2xs dash:text-sm dash:xl:text-base leading-none dash:leading-none text-content">
+      <div className="flex flex-col gap-0.5 text-2xs dash:text-sm/none leading-none dash:leading-none text-content">
         <span>Delta</span>
         <span className="font-normal">{unit}</span>
       </div>

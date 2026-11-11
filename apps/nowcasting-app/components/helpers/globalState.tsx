@@ -10,7 +10,7 @@ import {
 } from "./cookieStorage";
 import { LoadingState, SitesEndpointStates } from "../types";
 import { ActiveUnit } from "../map/types";
-import type { ChannelSelection } from "./satelliteLayer";
+import type { SatelliteChannel } from "./satelliteLayer";
 import { getCountryConfig } from "../../config/countries";
 import { ComparisonSelection } from "./comparison";
 import type { CoverageGap } from "../map/country-coverage";
@@ -161,7 +161,7 @@ export type FlatGlobalStateType = {
   nHourForecast: number;
   pLevels: [number, number][];
   showCloudLayer: boolean;
-  activeChannel: ChannelSelection;
+  activeChannel: SatelliteChannel;
   showPvLayer: boolean;
   /**
    * The satellite fetch/decode pipeline's own status, lifted out of `map.tsx`'s local state by
@@ -172,6 +172,7 @@ export type FlatGlobalStateType = {
    */
   isSatelliteLoading: boolean;
   satelliteError: string | null;
+  satellitePartialComposite: string[] | null;
   /**
    * Enabled countries the map has nothing to draw for at the cursor. `pvLatestMap` writes it,
    * since it holds the per-country pipelines; the header renders it beside the country toggle,
@@ -305,10 +306,15 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     nHourForecast: 4,
     pLevels: getValidatedPLevels(),
     showCloudLayer: false,
+    // COMPOSITE_VISIBLE — the default satellite channel (see satelliteLayer.ts). Inlined
+    // as a literal rather than imported so this module's dependency on satelliteLayer stays
+    // type-only: a value import would pull geotiff (ESM) into every test that loads
+    // global state, which Jest can't transform.
     activeChannel: "COMPOSITE_VISIBLE",
     showPvLayer: true,
     isSatelliteLoading: false,
     satelliteError: null,
+    satellitePartialComposite: null,
     coverageGaps: [],
     chartSplitOverrides: getValidatedChartSplitOverrides()
   });
