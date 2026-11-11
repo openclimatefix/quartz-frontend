@@ -37,5 +37,9 @@ yarn-error.log*
 .sentryclirc
 
 
+# cypress
+cypress/snapshots/**/__diff_output__/
+cypress/screenshots/
+
 # eslint --cache (lint-staged)
 .eslintcache

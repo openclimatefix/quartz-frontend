@@ -1,0 +1,12 @@
+[
+  {
+    "name": "Deutschland",
+    "type": "national",
+    "capacity_kW": 58212000,
+    "centroid": {
+      "lat": 51.16,
+      "lng": 10.45
+    },
+    "metadata": {}
+  }
+]
