@@ -300,7 +300,13 @@ const useFormatChartData = ({
       const metricsSource: SeasonalMetrics | null | undefined = gsp
         ? seasonalMetrics
         : nationalMetrics;
-      const metricsCapacity = gsp ? seasonalCapacity : NATIONAL_CAPACITY;
+      // Norms are yields (fractions of capacity); GB national keeps its fixed figure, other
+      // countries scale by the live national capacity their forecast carries.
+      const metricsCapacity = gsp
+        ? seasonalCapacity
+        : focusedCountry === "GB"
+        ? NATIONAL_CAPACITY
+        : forecastSeries?.capacityMw;
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key).toUTC();
         // The seasonal-norm arrays in national_metrics.json are bucketed by UTC time-of-day (the
@@ -309,13 +315,14 @@ const useFormatChartData = ({
         // two slots ahead throughout BST. These used to be the same call (B9). `getUtcHalfHourIndex`
         // must stay UTC: localising it would shift every seasonal line by two slots all summer.
         // The per-GSP and DNO metrics come from the same generator and share that indexing.
-        const utcSlotIndex = getUtcHalfHourIndex(date);
         // `nationalMetrics` is `undefined` both while the fetch is in flight and permanently
-        // for a country with `seasonalNorms: null` (NL). Either way: no seasonal keys written,
+        // for a country with `seasonalNorms: null` (DE). Either way: no seasonal keys written,
         // rather than falling back to whatever country's dataset last happened to be loaded.
         // Likewise `seasonalMetrics` is `null` while loading or for a level with no metrics.
         if (metricsSource && metricsCapacity) {
           const { seasonalMean, seasonalBounds } = getSeasonalMetricsForDate(date, metricsSource);
+          // Slot size comes from the dataset: GB has 48 half-hours a day, NL 96 quarter-hours.
+          const utcSlotIndex = getUtcHalfHourIndex(date, 1440 / seasonalMean.length);
 
           // Values can be null where a GSP has no data for this slot; leave those keys unset so
           // the chart shows a gap, not a 0.
@@ -387,7 +394,8 @@ const useFormatChartData = ({
     nationalMetrics,
     seasonalMetrics,
     seasonalCapacity,
-    cadenceMinutes
+    cadenceMinutes,
+    focusedCountry
   ]);
 
   return data;

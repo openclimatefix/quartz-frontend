@@ -588,7 +588,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // but no public attribution page has been confirmed for it — so the (i) states NL's
     // convention without a link rather than inventing one.
     publisher: null,
-    seasonalNorms: null,
+    seasonalNorms: "/data/nl/national-metrics.json",
     displayUnit: "GW",
     product: "nl-solar",
     auth0Role: "NL_ROLE_ID"
