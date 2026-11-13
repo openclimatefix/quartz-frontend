@@ -97,6 +97,7 @@ beforeEach(() => {
   // react-hooks-global-state has no provider, so state is module-global and leaks between tests.
   setGlobalState("nHourForecast", 4);
   setGlobalState("pLevels", [[10, 90]]);
+  setGlobalState("focusedCountry", "GB");
   mockedUseSeasonalNorms.mockReturnValue(nationalMetrics as ReturnType<typeof useSeasonalNorms>);
 });
 
@@ -561,7 +562,7 @@ describe("seasonal norms", () => {
   });
 
   // `useSeasonalNorms` returns `undefined` both while its fetch is in flight and permanently
-  // for a country with no dataset (`seasonalNorms: null`, e.g. NL) — that collapse is its own
+  // for a country with no dataset (`seasonalNorms: null`, e.g. DE) — that collapse is its own
   // contract, tested in `hooks/data/use-seasonal-norms.test.ts`. This is the one thing this
   // hook must get right about it: render the rest of the chart normally and write no seasonal
   // keys at all, rather than falling back to a previously-loaded country's norms or to zeros.
@@ -594,6 +595,30 @@ describe("seasonal norms", () => {
     expect(datum.SEASONAL_MEAN).toBeCloseTo(0.4283 * NATIONAL_CAPACITY, 6);
     expect(datum.SEASONAL_P10).toBeCloseTo(0.263 * NATIONAL_CAPACITY, 6);
     expect(datum.SEASONAL_P90).toBeCloseTo(0.6177 * NATIONAL_CAPACITY, 6);
+  });
+
+  test("non-GB countries scale the norms by the forecast's live capacity, not GB's", () => {
+    setGlobalState("focusedCountry", "NL");
+    const slot = 21;
+    const metrics = nationalMetrics.data["7"]["1"];
+    const datum = at(
+      run(baseProps({ forecastSeries: { ...ts([[BOUNDARY_BST, 100]]), capacityMw: 25000 } })),
+      "2025-07-01T10:30"
+    );
+    expect(datum.SEASONAL_MEAN).toBeCloseTo(metrics.mean[slot] * 25000, 6);
+    expect(datum.SEASONAL_P90).toBeCloseTo(metrics.pLevels[1][slot] * 25000, 6);
+
+    // NL's dataset is 15-minute (96 slots/day): 10:30 UTC must read slot 42, not the half-hour 21.
+    const quarterHourly = Array.from({ length: 96 }, (_, i) => i / 100);
+    mockedUseSeasonalNorms.mockReturnValue({
+      data: { "7": { "1": { mean: quarterHourly, pLevels: [quarterHourly, quarterHourly] } } },
+      keys: { pLevels: ["p10", "p90"] }
+    });
+    const nlDatum = at(
+      run(baseProps({ forecastSeries: { ...ts([[BOUNDARY_BST, 100]]), capacityMw: 25000 } })),
+      "2025-07-01T10:30"
+    );
+    expect(nlDatum.SEASONAL_MEAN).toBeCloseTo(0.42 * 25000, 6);
   });
 
   test("a GMT date reads the January arrays", () => {

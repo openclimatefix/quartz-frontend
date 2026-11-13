@@ -8,7 +8,7 @@
  * was selected.
  *
  * Uses the real `config/countries.ts` registry (unmocked) so these tests exercise GB's actual
- * configured `seasonalNorms` URL and NL's actual `null`, rather than a URL a mock invented.
+ * configured `seasonalNorms` URL and DE's actual `null`, rather than a URL a mock invented.
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react";
@@ -80,8 +80,8 @@ describe("useSeasonalNorms", () => {
     expect(view.result.current).toEqual(fixture);
   });
 
-  test("NL has no seasonal-norm dataset: no fetch, and undefined forever", async () => {
-    focusedCountry = "NL";
+  test("DE has no seasonal-norm dataset: no fetch, and undefined forever", async () => {
+    focusedCountry = "DE";
     const view = renderHook(() => useSeasonalNorms());
     expect(requestedUrls).toEqual([]);
     expect(view.result.current).toBeUndefined();
@@ -95,13 +95,13 @@ describe("useSeasonalNorms", () => {
     const view = renderHook(() => useSeasonalNorms());
     expect(requestedUrls).toEqual([GB_URL]);
 
-    // The user switches to NL — which has no dataset — before GB's fetch lands.
-    focusedCountry = "NL";
+    // The user switches to DE — which has no dataset — before GB's fetch lands.
+    focusedCountry = "DE";
     view.rerender();
     expect(view.result.current).toBeUndefined();
 
     // GB's response arrives late. It must not be applied: the hook is now keyed on `undefined`
-    // (NL has no url), not on GB_URL, so there is nowhere for this answer to land.
+    // (DE has no url), not on GB_URL, so there is nowhere for this answer to land.
     await settle(GB_URL, fixture);
     expect(view.result.current).toBeUndefined();
   });
@@ -111,7 +111,7 @@ describe("useSeasonalNorms", () => {
     await settle(GB_URL, fixture);
     await waitFor(() => expect(view.result.current).toBeDefined());
 
-    focusedCountry = "NL";
+    focusedCountry = "DE";
     view.rerender();
     expect(view.result.current).toBeUndefined();
 

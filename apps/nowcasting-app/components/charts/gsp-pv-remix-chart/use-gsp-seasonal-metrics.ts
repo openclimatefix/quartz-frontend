@@ -4,6 +4,7 @@ import dnoMetricsManifest from "../../../public/data/gb/dno-metrics/manifest.jso
 // Served from `public/`, per country like `public/data/gb/national-metrics.json`.
 const GSP_METRICS_URL = "/data/gb/gsp-metrics";
 const DNO_METRICS_URL = "/data/gb/dno-metrics";
+const PROVINCE_METRICS_URL = "/data/nl/province-metrics";
 
 // Same shape as national_metrics.json: normalised (0-1) seasonal stats keyed by
 // month -> day, each with a 48-slot (UTC half-hour) mean and pLevel arrays. Values
@@ -91,7 +92,9 @@ type DnoManifest = Record<string, { file: string }>;
  *   the full present-day capacity.
  *   A DNO with no pre-baked file (or several DNOs selected at once, with no
  *   `selectionName`) falls back to combining its member GSPs, as at GSP level.
- * - Other aggregations (Zone/National, and every non-GB level): not yet
+ * - NL province (one selected): fetches public/data/nl/province-metrics/{name}.json and
+ *   scales by `selectionCapacity`, the province's live installed capacity.
+ * - Other aggregations (Zone/National, several provinces, other countries): not yet
  *   supported -> null.
  *
  * `aggregationLevel` is the registry's region type name ("gsp", "dno", …).
@@ -99,7 +102,8 @@ type DnoManifest = Record<string, { file: string }>;
 const useGspSeasonalMetrics = (
   gspLocationInfo?: { gspId: number; installedCapacityMw: number }[],
   aggregationLevel?: string,
-  selectionName?: string
+  selectionName?: string,
+  selectionCapacity?: number
 ): GspSeasonalMetrics | null => {
   const [metrics, setMetrics] = useState<GspSeasonalMetrics | null>(null);
 
@@ -107,15 +111,20 @@ const useGspSeasonalMetrics = (
     aggregationLevel === "dno"
       ? (dnoMetricsManifest as DnoManifest)[selectionName || ""]?.file
       : undefined;
-  const isDno = !!dnoFile;
-  const combinesGsps = aggregationLevel === "gsp" || (aggregationLevel === "dno" && !isDno);
-  const totalCapacity = (gspLocationInfo || []).reduce(
-    (acc, g) => acc + (g.installedCapacityMw || 0),
-    0
-  );
+  // A single pre-baked file for the whole selection: a GB DNO or an NL province.
+  const prebakedUrl = dnoFile
+    ? `${DNO_METRICS_URL}/${dnoFile}`
+    : aggregationLevel === "province" && selectionName
+    ? `${PROVINCE_METRICS_URL}/${selectionName}.json`
+    : undefined;
+  const isPrebaked = !!prebakedUrl;
+  const combinesGsps = aggregationLevel === "gsp" || (aggregationLevel === "dno" && !isPrebaked);
+  const totalCapacity =
+    selectionCapacity ??
+    (gspLocationInfo || []).reduce((acc, g) => acc + (g.installedCapacityMw || 0), 0);
   // Stable dependency for the selection, disambiguated by aggregation level.
   const selectionKey = `${aggregationLevel}|${
-    isDno
+    isPrebaked
       ? `${selectionName}:${totalCapacity}`
       : (gspLocationInfo || [])
           .map((g) => `${g.gspId}:${g.installedCapacityMw}`)
@@ -126,14 +135,14 @@ const useGspSeasonalMetrics = (
   useEffect(() => {
     let cancelled = false;
 
-    // DNO: use the pre-baked, capacity-weighted DNO metrics, scaled by the
-    // DNO's current total installed capacity.
-    if (isDno) {
+    // DNO / province: use the pre-baked metrics file, scaled by the selection's
+    // current total installed capacity.
+    if (isPrebaked) {
       if (!totalCapacity) {
         setMetrics(null);
         return;
       }
-      fetch(`${DNO_METRICS_URL}/${dnoFile}`)
+      fetch(prebakedUrl as string)
         .then((r) => r.json())
         .then((m) => {
           if (cancelled) return;

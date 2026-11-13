@@ -360,10 +360,17 @@ const GspPvRemixChart: FC<{
       ? [{ gspId, installedCapacityMw: region.capacityMw ?? 0 }]
       : [];
   }, [isSingleGsp, gspId, gspRegionData.region, gspAggregateData.memberGsps]);
+  // An NL province has no gsp_id, so it is looked up by name and scaled by its own capacity.
+  const isSingleProvince = level?.regionType === "province" && multiSelectNames?.length === 1;
   const gspSeasonalMetrics = useGspSeasonalMetrics(
     seasonalMembers,
     level?.regionType,
-    isGroupSelection && !isMultiGroup ? groupName ?? undefined : undefined
+    isSingleProvince
+      ? multiSelectNames?.[0]
+      : isGroupSelection && !isMultiGroup
+      ? groupName ?? undefined
+      : undefined,
+    isSingleProvince ? gspInstalledCapacity : undefined
   );
 
   const chartData = useFormatChartData({
