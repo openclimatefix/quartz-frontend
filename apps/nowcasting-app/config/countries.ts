@@ -694,7 +694,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     ],
     overlays: [],
     publisher: { name: "ENTSO-E", url: "https://transparency.entsoe.eu/" },
-    seasonalNorms: null,
+    seasonalNorms: "/data/de/national-metrics.json",
     displayUnit: "GW",
     product: "de-solar",
     auth0Role: "DE_ROLE_ID"

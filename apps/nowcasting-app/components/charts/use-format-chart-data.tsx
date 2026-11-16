@@ -343,7 +343,7 @@ const useFormatChartData = ({
         // must stay UTC: localising it would shift every seasonal line by two slots all summer.
         // The per-GSP and DNO metrics come from the same generator and share that indexing.
         // `nationalMetrics` is `undefined` both while the fetch is in flight and permanently
-        // for a country with `seasonalNorms: null` (DE). Either way: no seasonal keys written,
+        // for a country with `seasonalNorms: null`. Either way: no seasonal keys written,
         // rather than falling back to whatever country's dataset last happened to be loaded.
         // Likewise `seasonalMetrics` is `null` while loading or for a level with no metrics.
         if (metricsSource && metricsCapacity) {

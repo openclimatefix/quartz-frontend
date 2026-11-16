@@ -172,6 +172,7 @@ console.log(
 
 writeJson("/data/gb/national-metrics.json", readJson(join(DATA, "national_metrics.json")));
 writeJson("/data/nl/national-metrics.json", readJson(join(DATA, "nl_national_metrics.json")));
+writeJson("/data/de/national-metrics.json", readJson(join(DATA, "de_national_metrics.json")));
 
 // ---------------------------------------------------------------------------------------
 // Sites view (Phase 5 Track E / peripherals).
