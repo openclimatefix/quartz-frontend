@@ -7,7 +7,7 @@ import {
   readEntitlementClaim,
   isEntitled,
   isOcfAdmin,
-  readProductsClaim,
+  canSeeSeries,
   isTrialUser
 } from "../../lib/api/auth/entitlement";
 import * as queries from "../../lib/api/v1/queries";
@@ -108,11 +108,8 @@ export const useNationalChartSeries = (country: string) => {
   const { user } = useUser();
   return useMemo(
     () =>
-      (getCountryConfig(country)?.nationalChartSeries ?? []).filter(
-        (s) =>
-          !s.requiresProduct ||
-          readProductsClaim(user).includes(s.requiresProduct) ||
-          isOcfAdmin(user)
+      (getCountryConfig(country)?.nationalChartSeries ?? []).filter((s) =>
+        canSeeSeries(s.requiresProduct, user)
       ),
     [country, user]
   );
