@@ -34,7 +34,7 @@ Sentry.init({
   // Don't record random sessions: dashboards left open all day used up the replay quota
   // with idle recordings. Only record when an error happens, and only in production.
   replaysSessionSampleRate: 0,
-  replaysOnErrorSampleRate: process.env.NEXT_PUBLIC_SENTRY_ENV_LABEL === "production" ? 1.0 : 0,
+  replaysOnErrorSampleRate: process.env.NEXT_PUBLIC_VERCEL_ENV === "production" ? 1.0 : 0,
 
   // TMP remove it after v1 merge
   // suppress known noisy/expected errors

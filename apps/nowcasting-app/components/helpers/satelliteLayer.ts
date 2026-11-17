@@ -103,7 +103,7 @@ export type TifLayerData = {
 // Satellite is on **neither v0 nor v1** — stripping the version leaves the API root, so requests go to
 // an unversioned `/satellite/` route. Whether that is a deliberate exemption or an oversight is a
 // question for the API side, worth settling before EU satellite coverage is planned on top of it.
-const API_PREFIX = API_V1_PREFIX.replace(/(\/v\d+)?\/?$/, "") || "https://api.ocf.energy";
+const API_PREFIX = API_V1_PREFIX.replace(/(\/v\d+)?\/?$/, "");
 
 // One layer/source per channel. Kept here rather than in map.tsx so the ids have
 // a single home.
