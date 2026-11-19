@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 
 import useGlobalState from "../helpers/globalState";
-import { useFocusedCountry, useGenerationSources } from "../../hooks/data";
+import { useFocusedCountry, useGenerationSources, useNationalChartSeries } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { useDisplayPanel } from "../shell/display-panel";
 import { LegendAreaGraphIcon, LegendLineGraphIcon } from "../icons/icons";
@@ -57,7 +57,7 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { attract } = useDisplayPanel();
   const focusedCountry = useFocusedCountry();
-  const seriesConfig = getCountryConfig(focusedCountry)?.nationalChartSeries ?? [];
+  const seriesConfig = useNationalChartSeries(focusedCountry);
   const generationSources = useGenerationSources(
     focusedCountry ? { country: focusedCountry, source: "solar" } : null
   );
