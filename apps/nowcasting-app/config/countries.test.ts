@@ -8,6 +8,7 @@ import {
   type CountryConfig,
   sortCountryCodes
 } from "./countries";
+import countriesFixture from "../lib/api/v1/__fixtures__/countries.json";
 
 const entries = Object.entries(COUNTRY_CONFIG);
 
@@ -137,12 +138,23 @@ describe("the national chart's series list", () => {
   });
 
   // The point of the whole exercise: the two-line-plus-five-comparisons chart is a GB fact.
-  test("NL charts one line, not GB's six", () => {
-    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(1);
+  test("NL charts the blend and OCF Uncurtailed, not GB's six", () => {
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(2);
     expect(COUNTRY_CONFIG.NL.nationalChartSeries[0]).toMatchObject({
       key: "FORECAST",
       model: "blend"
     });
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries[1]).toMatchObject({
+      key: "UNCURTAILED",
+      label: "OCF Uncurtailed"
+    });
+    // Checked against the manifest, not a literal, so a retired model name fails here.
+    const nlNational = countriesFixture
+      .find((c) => c.country === "NL")!
+      .region_types.find((r) => r.type === "national")!;
+    expect(nlNational.forecast_models.map((m) => m.name)).toContain(
+      forecastSeriesModel(COUNTRY_CONFIG.NL.nationalChartSeries[1])
+    );
   });
 
   // Only the series that had a legend entry before have one now; the two PVNet comparison

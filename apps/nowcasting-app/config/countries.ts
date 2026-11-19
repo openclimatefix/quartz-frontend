@@ -590,11 +590,21 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // No client-side groupings: the API's province level is the only sub-national one NL
     // has, and `ned_nl` is its single generation observer.
     derivedRegionTypes: {},
-    // NL national offers `blend` and `ecmwf_mo_sat_uncurtailed` (each also
-    // available adjusted). Only the blend is charted: the second is the blend's single input, so drawing
-    // both would be a comparison of a series against itself. Nobody has asked for the NL
-    // comparison lines GB has; add them here when they do.
-    nationalChartSeries: [{ key: "FORECAST", model: "blend", label: "OCF" }],
+    // NL national offers `blend` and `ecmwf_mo_pv_sat_uncurtailed` (each also available
+    // adjusted). The uncurtailed line shows what the fleet would have produced without
+    // curtailment, so on curtailed days users can see how much the blend has been held down.
+    nationalChartSeries: [
+      { key: "FORECAST", model: "blend", label: "OCF" },
+      {
+        key: "UNCURTAILED",
+        model: "ecmwf_mo_pv_sat_uncurtailed",
+        label: "OCF Uncurtailed",
+        legend: {
+          iconClasses: "text-series-uncurtailed",
+          tooltipInputs: ["ECMWF", "MET_OFFICE", "SAT"]
+        }
+      }
+    ],
     overlays: [],
     // NED publishes NL's generation (it is the source of the period-start convention above),
     // but no public attribution page has been confirmed for it — so the (i) states NL's
