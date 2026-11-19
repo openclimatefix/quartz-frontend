@@ -494,6 +494,11 @@ const PvLatestMap: React.FC<PvLatestMapProps> = ({ className, activeUnit, setAct
             actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">% of National</span>
             <div><span>${actualValue}</span> <span class="text-2xs text-content-muted">%</span></div>`;
           }
+          if (currentActiveUnit === ActiveUnit.capacityDensity) {
+            const density = (capacity / properties?.areaKm2).toFixed(2);
+            actualAndForecastSection = `<span class="text-2xs uppercase tracking-wide text-content-muted">Capacity Density</span>
+            <div><span>${density}</span> <span class="text-2xs text-content-muted">MW/km²</span></div>`;
+          }
 
           // The delta line, in delta mode only.
           //
