@@ -159,6 +159,10 @@
 ### Series
 - [ ] Can I toggle each forecast line and actual generation line on and off?
 - [ ] GB: Are ECMWF-only, Met Office-only and Satellite-only offered, and do they draw in the right colours?
+- [ ] GB: Is Cloudcasting offered to a user with the `gb-solar-cloudcasting` product (and OCF admins), and does it draw in sky blue?
+- [ ] GB: Is Cloudcasting hidden for a user without that product?
+- [ ] GB: Does Cloudcasting's P-level shading show on the charts when toggled on?
+- [ ] NL: Is OCF Uncurtailed offered on the national chart, drawn in cream, and at or above the OCF line?
 
 ### Confidence (P-levels)
 - [ ] Are only the P-level pairs the country actually has offered (GB: P2/P98, P10/P90, P25/P75)?
@@ -170,6 +174,7 @@
 
 ### Seasonal (GB)
 - [ ] Do the Seasonal mean and Seasonal quantiles toggles add/remove them from the chart?
+- [ ] Are the Seasonal toggles absent for countries without a seasonal mean (NL, DE)?
 
 
 ## N Hour View

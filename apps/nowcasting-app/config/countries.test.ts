@@ -8,6 +8,7 @@ import {
   type CountryConfig,
   sortCountryCodes
 } from "./countries";
+import countriesFixture from "../lib/api/v1/__fixtures__/countries.json";
 
 const entries = Object.entries(COUNTRY_CONFIG);
 
@@ -115,7 +116,7 @@ describe("the national chart's series list", () => {
   // The v0 -> v1 model mapping, pinned. Every one of these existed as a hardcoded fetch in
   // pages/index.tsx; if a name drifts, the line silently disappears rather than erroring,
   // because an unknown model is the API's problem and the chart just draws nothing.
-  test("GB charts the blend and the three single-input models, under the v1 names", () => {
+  test("GB charts the blend, the three single-input models and cloudcasting, under the v1 names", () => {
     // Four, not v0's six: `pvnet_day_ahead` and `pvnet_intraday` were fetched but had neither a
     // legend entry nor a line to draw them on, and they are most of what the blend is made of.
     // Every key here must have both, which is what stops this list growing dead entries again.
@@ -123,7 +124,8 @@ describe("the national chart's series list", () => {
       ["FORECAST", "blend"],
       ["INTRADAY_ECMWF_ONLY", "ecmwf"],
       ["MET_OFFICE_ONLY", "mo"],
-      ["SAT_ONLY", "sat_8h"]
+      ["SAT_ONLY", "sat_8h"],
+      ["BLEND_CLOUDCASTING", "blend_cloudcasting"]
     ]);
   });
 
@@ -136,12 +138,23 @@ describe("the national chart's series list", () => {
   });
 
   // The point of the whole exercise: the two-line-plus-five-comparisons chart is a GB fact.
-  test("NL charts one line, not GB's six", () => {
-    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(1);
+  test("NL charts the blend and OCF Uncurtailed, not GB's six", () => {
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries).toHaveLength(2);
     expect(COUNTRY_CONFIG.NL.nationalChartSeries[0]).toMatchObject({
       key: "FORECAST",
       model: "blend"
     });
+    expect(COUNTRY_CONFIG.NL.nationalChartSeries[1]).toMatchObject({
+      key: "UNCURTAILED",
+      label: "OCF Uncurtailed"
+    });
+    // Checked against the manifest, not a literal, so a retired model name fails here.
+    const nlNational = countriesFixture
+      .find((c) => c.country === "NL")!
+      .region_types.find((r) => r.type === "national")!;
+    expect(nlNational.forecast_models.map((m) => m.name)).toContain(
+      forecastSeriesModel(COUNTRY_CONFIG.NL.nationalChartSeries[1])
+    );
   });
 
   // Only the series that had a legend entry before have one now; the two PVNet comparison
@@ -150,7 +163,12 @@ describe("the national chart's series list", () => {
     const withLegend = COUNTRY_CONFIG.GB.nationalChartSeries
       .filter((s) => !!s.legend)
       .map((s) => s.key);
-    expect(withLegend).toEqual(["INTRADAY_ECMWF_ONLY", "MET_OFFICE_ONLY", "SAT_ONLY"]);
+    expect(withLegend).toEqual([
+      "INTRADAY_ECMWF_ONLY",
+      "MET_OFFICE_ONLY",
+      "SAT_ONLY",
+      "BLEND_CLOUDCASTING"
+    ]);
   });
 
   describe("forecastSeriesModel", () => {

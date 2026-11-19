@@ -199,3 +199,7 @@ export const isTrialUser = (user: unknown): boolean => {
   const trialEndsAt = (user as { trial_ends_at?: unknown } | null | undefined)?.trial_ends_at;
   return Boolean(trialEndsAt);
 };
+
+/** Whether `user` may see a series gated on `requiresProduct`. Admins and dev mode see all. */
+export const canSeeSeries = (requiresProduct: string | undefined, user: unknown): boolean =>
+  !requiresProduct || readProductsClaim(user).includes(requiresProduct) || isOcfAdmin(user);

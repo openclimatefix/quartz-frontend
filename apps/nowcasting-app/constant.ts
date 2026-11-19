@@ -1,5 +1,3 @@
-// export const API_PREFIX = "http://localhost:8000/v0";
-export const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "https://api-dev.ocf.energy/v0";
 export const SITES_API_PREFIX =
   process.env.NEXT_PUBLIC_SITES_API_PREFIX || "https://api-site-dev.quartz.solar";
 // Production is the only host the current token works against — dev hosts sit behind a
