@@ -600,7 +600,7 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
         model: "ecmwf_mo_pv_sat_uncurtailed",
         label: "OCF Uncurtailed",
         legend: {
-          iconClasses: "text-series-satellite",
+          iconClasses: "text-series-uncurtailed",
           tooltipInputs: ["ECMWF", "MET_OFFICE", "SAT"]
         }
       }
