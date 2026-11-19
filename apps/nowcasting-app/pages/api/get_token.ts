@@ -8,6 +8,7 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
       if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
         return res.status(200).json({ accessToken: "FAKE_TOKEN" });
       }
+
       try {
         const accessToken = await getAccessToken(req, res);
         res.status(200).json(accessToken);
@@ -19,27 +20,30 @@ export default process.env.NEXT_PUBLIC_DEV_MODE === "true"
       if (process.env.NEXT_PUBLIC_DEV_MODE === "true") {
         return res.status(200).json({ accessToken: "FAKE_TOKEN" });
       }
+
       try {
         const accessToken = await getAccessToken(req, res);
         const session = await getSession(req, res);
-        const trialEndsAt = session?.user?.trial_ends_at;
-        if (trialEndsAt && new Date(trialEndsAt) < new Date()) {
-          return res.status(403).json({ error: "trial_expired", email: session?.user?.email });
-        }
-        // Surfaced alongside the token so a client that only ever talks to this endpoint
-        // still learns its entitlement. `products` is the cleaned claim; `countries` is the
-        // countries it entitles under the same rule the UI applies, changeover fallback
-        // included (see `readEntitlementClaim`). Both degrade to `[]`, never an error.
         const user = session?.user;
+
+        const trialEndsAt = user?.trial_ends_at;
+        const trialExpired = !!trialEndsAt && new Date(trialEndsAt) < new Date();
+
         res.status(200).json({
           ...accessToken,
           products: readProductsClaim(user),
-          countries: entitledCountryCodes(user)
+          countries: entitledCountryCodes(user),
+          trialExpired,
+          trialEndsAt
         });
       } catch (error: any) {
         if (error.message?.includes("access_denied")) {
-          return res.status(403).json({ error: "access_denied", message: error.message });
+          return res.status(403).json({
+            error: "access_denied",
+            message: error.message
+          });
         }
+
         res.status(error.status || 400).end(error.message);
       }
     });

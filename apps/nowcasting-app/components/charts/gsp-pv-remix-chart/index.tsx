@@ -87,6 +87,7 @@ const GspPvRemixChart: FC<{
   const displayUnit = displayUnitFor(focusedCountry);
   const [show4hView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
 
   // v1 covers every selection. Exactly one selected GSP takes the cheap per-region path
   // (`useGspRegionData`); a multi-select (shift-click) or a DNO/NG-zone/national grouping
@@ -355,7 +356,8 @@ const GspPvRemixChart: FC<{
     generationSeries: activeGenerationSeries,
     timeTrigger: selectedTime,
     delta: deltaView,
-    gsp: true
+    gsp: true,
+    appendTeaserForecast: !!trialExpiredAt
   });
 
   // set ymax to the installed capacity of the graph
@@ -420,6 +422,7 @@ const GspPvRemixChart: FC<{
           deltaView={deltaView}
           deltaYMaxOverride={Math.ceil(Number(gspInstalledCapacity) / 200) * 100 || 500}
           yTicks={getTicks(yMax, Y_MAX_TICKS)}
+          trialExpiredAt={trialExpiredAt}
         />
       </div>
     </>

@@ -61,6 +61,7 @@ const PvRemixChart: FC<{
   const [timeNow] = useGlobalState("timeNow");
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
   const { stopTime, resetTime } = useStopAndResetTime();
   const cursorInstant = formatISODateString(selectedISOTime || new Date().toISOString());
 
@@ -188,7 +189,8 @@ const PvRemixChart: FC<{
     modelSeries,
     nHourSeries: nHour.data,
     generationSeries,
-    timeTrigger: selectedTime
+    timeTrigger: selectedTime,
+    appendTeaserForecast: !!trialExpiredAt
   });
 
   // The window the scrub track draws, taken off what this chart plots rather than derived a
@@ -278,6 +280,7 @@ const PvRemixChart: FC<{
               yMax={yMax}
               visibleLines={visibleLines}
               yTicks={getTicks(yMax, Y_MAX_TICKS)}
+              trialExpiredAt={trialExpiredAt}
             />
           </div>
         </div>
