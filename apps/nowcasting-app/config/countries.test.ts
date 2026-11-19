@@ -8,6 +8,7 @@ import {
   type CountryConfig,
   sortCountryCodes
 } from "./countries";
+import countriesFixture from "../lib/api/v1/__fixtures__/countries.json";
 
 const entries = Object.entries(COUNTRY_CONFIG);
 
@@ -145,9 +146,15 @@ describe("the national chart's series list", () => {
     });
     expect(COUNTRY_CONFIG.NL.nationalChartSeries[1]).toMatchObject({
       key: "UNCURTAILED",
-      model: "ecmwf_mo_sat_uncurtailed",
       label: "OCF Uncurtailed"
     });
+    // Checked against the manifest, not a literal, so a retired model name fails here.
+    const nlNational = countriesFixture
+      .find((c) => c.country === "NL")!
+      .region_types.find((r) => r.type === "national")!;
+    expect(nlNational.forecast_models.map((m) => m.name)).toContain(
+      forecastSeriesModel(COUNTRY_CONFIG.NL.nationalChartSeries[1])
+    );
   });
 
   // Only the series that had a legend entry before have one now; the two PVNet comparison

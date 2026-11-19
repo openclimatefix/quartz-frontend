@@ -312,8 +312,10 @@ describe("observers are per country and there may be exactly one", () => {
     expect(queryValues("/NL/solar/regions/national/generation", "observer_name")).toEqual([
       "ned_nl"
     ]);
-    // ...and two forecast lines (blend and uncurtailed), not GB's four.
-    expect(seen("/NL/solar/regions/national/forecast")).toHaveLength(2);
+    // ...and NL's own configured models, not GB's four.
+    expect(queryValues("/NL/solar/regions/national/forecast", "model_name")).toEqual(
+      COUNTRY_CONFIG.NL.nationalChartSeries.map(forecastSeriesModel).sort()
+    );
     expect(seen("/GB/solar/regions/national/generation")).toHaveLength(0);
   });
 });

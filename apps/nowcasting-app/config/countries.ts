@@ -590,16 +590,19 @@ export const COUNTRY_CONFIG: Record<string, CountryConfig> = {
     // No client-side groupings: the API's province level is the only sub-national one NL
     // has, and `ned_nl` is its single generation observer.
     derivedRegionTypes: {},
-    // NL national offers `blend` and `ecmwf_mo_sat_uncurtailed` (each also
-    // available adjusted). The uncurtailed model is charted alongside the blend as
-    // "OCF Uncurtailed".
+    // NL national offers `blend` and `ecmwf_mo_pv_sat_uncurtailed` (each also available
+    // adjusted). The uncurtailed line shows what the fleet would have produced without
+    // curtailment, so on curtailed days users can see how much the blend has been held down.
     nationalChartSeries: [
       { key: "FORECAST", model: "blend", label: "OCF" },
       {
         key: "UNCURTAILED",
-        model: "ecmwf_mo_sat_uncurtailed",
+        model: "ecmwf_mo_pv_sat_uncurtailed",
         label: "OCF Uncurtailed",
-        legend: { iconClasses: "text-data-purple", tooltipInputs: ["ECMWF", "MET_OFFICE", "SAT"] }
+        legend: {
+          iconClasses: "text-series-satellite",
+          tooltipInputs: ["ECMWF", "MET_OFFICE", "SAT"]
+        }
       }
     ],
     overlays: [],
