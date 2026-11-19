@@ -364,6 +364,24 @@ describe("the chart's own key", () => {
     );
   });
 
+  test.each([
+    [["gb-solar"], 0, 6],
+    [["gb-solar", "gb-solar-cloudcasting"], 1, 7]
+  ])(
+    "GB with %j and Cloudcasting switched on: %i Cloudcasting entries",
+    async (products, shown, requestCount) => {
+      mockUser = { products };
+      setGlobalState("visibleLines", ["FORECAST", "BLEND_CLOUDCASTING"]);
+      const view = renderChart();
+      await settled(view, requestCount);
+      await waitFor(() => {
+        rerender(view);
+        expect(screen.queryByLabelText("Chart series")).not.toBeNull();
+      });
+      expect(screen.queryAllByText("Cloudcasting")).toHaveLength(shown);
+    }
+  );
+
   test("NL: the key follows the country's own series", async () => {
     setGlobalState("focusedCountry", "NL");
     const view = renderChart();
