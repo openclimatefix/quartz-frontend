@@ -5,6 +5,7 @@ import {
   COUNTRY_CLAIM_KEY,
   EntitlementClaim,
   PRODUCTS_CLAIM_KEY,
+  canSeeSeries,
   entitledCountryCodes,
   isDevModeEntitlementBypass,
   isEntitled,
@@ -262,5 +263,19 @@ describe("isOcfAdmin", () => {
   test("ocf-admin alone entitles no country, and stops the countries fallback", () => {
     const user = { [PRODUCTS_CLAIM_KEY]: ["ocf-admin"], [COUNTRY_CLAIM_KEY]: ["GB"] };
     expect(entitledCountryCodes(user)).toEqual([]);
+  });
+});
+
+describe("canSeeSeries", () => {
+  test("entitled and unentitled", () => {
+    expect(canSeeSeries("gb-solar-cloudcasting", { products: ["gb-solar-cloudcasting"] })).toBe(
+      true
+    );
+    expect(canSeeSeries("gb-solar-cloudcasting", { products: ["gb-solar"] })).toBe(false);
+  });
+
+  test("dev mode", () => {
+    process.env.NEXT_PUBLIC_DEV_MODE = "true";
+    expect(canSeeSeries("gb-solar-cloudcasting", null)).toBe(true);
   });
 });

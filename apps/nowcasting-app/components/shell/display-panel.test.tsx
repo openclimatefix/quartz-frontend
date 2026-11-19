@@ -9,7 +9,8 @@ jest.mock("../charts/pv-remix-chart", () => ({ GENERATION_CHART_KEYS: [] }));
 jest.mock("../../hooks/data", () => ({
   useFocusedCountry: () => "gb",
   useGenerationSources: () => ({ data: [] }),
-  useNationalForecast: () => ({ data: undefined })
+  useNationalForecast: () => ({ data: undefined }),
+  useNationalChartSeries: () => []
 }));
 
 const Harness = () => {
