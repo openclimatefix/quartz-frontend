@@ -36,9 +36,10 @@ import { SWRConfig } from "swr";
 
 jest.mock("next/router", () => ({ __esModule: true, default: { push: jest.fn() } }));
 jest.mock("@sentry/nextjs", () => ({ __esModule: true, captureException: jest.fn() }));
+let mockUser: Record<string, unknown> | null = { products: ["gb-solar"] };
 jest.mock("@auth0/nextjs-auth0/client", () => ({
   __esModule: true,
-  useUser: () => ({ user: null, isLoading: false, error: undefined })
+  useUser: () => ({ user: mockUser, isLoading: false, error: undefined })
 }));
 // Mapbox never loads in jsdom and the GSP drill-down chart is not what is under test here.
 jest.mock("./gsp-pv-remix-chart", () => ({
@@ -78,6 +79,7 @@ class ResizeObserverStub {
 (globalThis as unknown as { ResizeObserver: unknown }).ResizeObserver = ResizeObserverStub;
 
 const V1 = "https://api.ocf.energy/v1";
+const ungatedSeries = COUNTRY_CONFIG.GB.nationalChartSeries.filter((s) => !s.requiresProduct);
 
 let requests: { path: string; url: URL }[] = [];
 const seen = (path: string) => requests.filter((r) => r.path === path);
@@ -122,6 +124,7 @@ afterEach(() => {
 });
 afterAll(() => server.close());
 beforeEach(() => {
+  mockUser = { products: ["gb-solar"] };
   resetTokenCache();
   // react-hooks-global-state is module-global with no provider, so it leaks between tests.
   setGlobalState("focusedCountry", DEFAULT_COUNTRY_CODE);
@@ -162,12 +165,12 @@ const settled = async (view: View, expected: number) => {
 };
 
 describe("the forecast series are driven by the country's config, not by the component", () => {
-  test("GB asks for exactly its four configured models, by their v1 names", async () => {
+  test("GB asks for exactly the configured models the user may see, by their v1 names", async () => {
     const view = renderChart();
     await settled(view, 6);
 
     const path = "/GB/solar/regions/national/forecast";
-    const configured = COUNTRY_CONFIG.GB.nationalChartSeries.map(forecastSeriesModel);
+    const configured = ungatedSeries.map(forecastSeriesModel);
     expect(queryValues(path, "model_name")).toEqual([...configured].sort());
     expect(seen(path)).toHaveLength(configured.length);
   });
@@ -185,6 +188,24 @@ describe("the forecast series are driven by the country's config, not by the com
       .region_types.find((rt: any) => rt.type === "national").forecast_models;
     expect(manifestModels.length).toBe(6);
     expect(seen("/GB/solar/regions/national/forecast").length).toBe(4);
+    // Without the product, blend_cloudcasting would 403.
+    expect(queryValues("/GB/solar/regions/national/forecast", "model_name")).not.toContain(
+      "blend_cloudcasting"
+    );
+  });
+
+  test("with the cloudcasting product, blend_cloudcasting is requested too", async () => {
+    mockUser = { products: ["gb-solar", "gb-solar-cloudcasting"] };
+    const view = renderChart();
+    const path = "/GB/solar/regions/national/forecast";
+    await waitFor(
+      () => {
+        rerender(view);
+        expect(seen(path)).toHaveLength(5);
+      },
+      { timeout: 5000 }
+    );
+    expect(queryValues(path, "model_name")).toContain("blend_cloudcasting");
   });
 
   // Adjustment is the `adjusted` parameter, not a model-name suffix.
@@ -260,7 +281,7 @@ describe("the forecast series are driven by the country's config, not by the com
     await settled(view, 6);
     // One entry per configured series, none of them carrying a horizon.
     expect(queryValues("/GB/solar/regions/national/forecast", "horizon_minutes")).toEqual(
-      new Array(COUNTRY_CONFIG.GB.nationalChartSeries.length).fill(null)
+      new Array(ungatedSeries.length).fill(null)
     );
   });
 });
@@ -343,6 +364,24 @@ describe("the chart's own key", () => {
     );
   });
 
+  test.each([
+    [["gb-solar"], 0, 6],
+    [["gb-solar", "gb-solar-cloudcasting"], 1, 7]
+  ])(
+    "GB with %j and Cloudcasting switched on: %i Cloudcasting entries",
+    async (products, shown, requestCount) => {
+      mockUser = { products };
+      setGlobalState("visibleLines", ["FORECAST", "BLEND_CLOUDCASTING"]);
+      const view = renderChart();
+      await settled(view, requestCount);
+      await waitFor(() => {
+        rerender(view);
+        expect(screen.queryByLabelText("Chart series")).not.toBeNull();
+      });
+      expect(screen.queryAllByText("Cloudcasting")).toHaveLength(shown);
+    }
+  );
+
   test("NL: the key follows the country's own series", async () => {
     setGlobalState("focusedCountry", "NL");
     const view = renderChart();
@@ -367,9 +406,7 @@ describe("the staleness indicator", () => {
     // asserting a count nothing produces any more.
     await waitFor(() => {
       rerender(view);
-      expect(seen("/GB/solar/regions/national/forecast")).toHaveLength(
-        COUNTRY_CONFIG.GB.nationalChartSeries.length
-      );
+      expect(seen("/GB/solar/regions/national/forecast")).toHaveLength(ungatedSeries.length);
     });
     expect(seen("/GB/solar/regions/national/generation")).toHaveLength(2);
     expect(seen("/countries").length).toBeGreaterThanOrEqual(1);

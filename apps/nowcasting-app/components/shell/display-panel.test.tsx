@@ -6,10 +6,12 @@ import DisplayPanel, { DisplayPanelContext, useDisplayPanel } from "./display-pa
 import useGlobalState from "../helpers/globalState";
 
 jest.mock("../charts/pv-remix-chart", () => ({ GENERATION_CHART_KEYS: [] }));
+let mockCountry = "gb";
 jest.mock("../../hooks/data", () => ({
-  useFocusedCountry: () => "gb",
+  useFocusedCountry: () => mockCountry,
   useGenerationSources: () => ({ data: [] }),
-  useNationalForecast: () => ({ data: undefined })
+  useNationalForecast: () => ({ data: undefined }),
+  useNationalChartSeries: () => []
 }));
 
 const Harness = () => {
@@ -51,6 +53,17 @@ describe("display panel", () => {
   test("the drawer is narrower than the dock column", () => {
     renderPanel();
     expect(screen.getByLabelText("Display settings").className).toContain("w-52");
+  });
+
+  test.each([
+    ["gb", true],
+    ["nl", false]
+  ])("seasonal toggles for %s shown: %s", (country, shown) => {
+    mockCountry = country;
+    renderPanel();
+    expect(screen.queryByText("Seasonal mean") !== null).toBe(shown);
+    expect(screen.queryByText("Seasonal quantiles") !== null).toBe(shown);
+    mockCountry = "gb";
   });
 });
 
