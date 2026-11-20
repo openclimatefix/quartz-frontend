@@ -12,6 +12,7 @@ export interface CSVRow {
   delta: number | null;
   solarForecast: number | null;
   nForecast: number | null;
+  cloudcastingForecast?: number | null;
   pLevelValues: Record<number, number | null>;
 }
 
@@ -67,7 +68,8 @@ const getColumnConfig = (
   nForecast: {
     key: "nForecast",
     header: `${getNHourForecastLabel(nHourForecast)} (MW)`
-  }
+  },
+  cloudcastingForecast: { key: "cloudcastingForecast", header: "Cloudcasting Forecast (MW)" }
 });
 
 // Phase 3: the zone the export renders its datetimes in, and counts settlement periods from,
@@ -127,6 +129,7 @@ export type NationalCsvSeries = {
   generationInitial?: TimeSeries;
   generationUpdated?: TimeSeries;
   nHour?: TimeSeries;
+  cloudcasting?: TimeSeries;
 };
 
 /**
@@ -174,6 +177,11 @@ export const buildCsvRows = (
   series.nHour?.values.forEach((point) => {
     const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
     row.nForecast = point.powerMw;
+  });
+
+  series.cloudcasting?.values.forEach((point) => {
+    const row = getOrCreateRow(dataByTimestamp, point.timeUtc, timezone, country);
+    row.cloudcastingForecast = point.powerMw;
   });
 
   dataByTimestamp.forEach((row) => updateRowDelta(row));
