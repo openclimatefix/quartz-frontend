@@ -19,3 +19,16 @@ test("an NL province fetches its own file by name and scales by the province's c
   expect(fetchMock).toHaveBeenCalledWith("/data/nl/province-metrics/noord-brabant.json");
   expect(result.current).toEqual({ metrics, capacity: 4200 });
 });
+
+test("a DE TSO fetches its own file by name, the same way", async () => {
+  const fetchMock = jest.fn<() => Promise<unknown>>().mockResolvedValue({
+    json: () => Promise.resolve(metrics)
+  });
+  global.fetch = fetchMock as unknown as typeof fetch;
+
+  const { result } = renderHook(() => useGspSeasonalMetrics([], "tso", "50hertz", 25000));
+
+  await waitFor(() => expect(result.current).not.toBeNull());
+  expect(fetchMock).toHaveBeenCalledWith("/data/de/tso-metrics/50hertz.json");
+  expect(result.current).toEqual({ metrics, capacity: 25000 });
+});

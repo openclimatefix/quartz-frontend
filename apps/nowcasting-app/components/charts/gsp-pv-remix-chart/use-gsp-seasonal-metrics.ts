@@ -4,7 +4,11 @@ import dnoMetricsManifest from "../../../public/data/gb/dno-metrics/manifest.jso
 // Served from `public/`, per country like `public/data/gb/national-metrics.json`.
 const GSP_METRICS_URL = "/data/gb/gsp-metrics";
 const DNO_METRICS_URL = "/data/gb/dno-metrics";
-const PROVINCE_METRICS_URL = "/data/nl/province-metrics";
+// Region types whose regions each have one pre-baked file, named by v1 region name.
+const NAMED_REGION_METRICS_URLS: Record<string, string> = {
+  province: "/data/nl/province-metrics",
+  tso: "/data/de/tso-metrics"
+};
 
 // Same shape as national_metrics.json: normalised (0-1) seasonal stats keyed by
 // month -> day, each with a 48-slot (UTC half-hour) mean and pLevel arrays. Values
@@ -92,9 +96,10 @@ type DnoManifest = Record<string, { file: string }>;
  *   the full present-day capacity.
  *   A DNO with no pre-baked file (or several DNOs selected at once, with no
  *   `selectionName`) falls back to combining its member GSPs, as at GSP level.
- * - NL province (one selected): fetches public/data/nl/province-metrics/{name}.json and
- *   scales by `selectionCapacity`, the province's live installed capacity.
- * - Other aggregations (Zone/National, several provinces, other countries): not yet
+ * - NL province / DE TSO (one selected): fetches its file by name from
+ *   `NAMED_REGION_METRICS_URLS` and scales by `selectionCapacity`, the region's live
+ *   installed capacity.
+ * - Other aggregations (Zone/National, several provinces or TSOs): not yet
  *   supported -> null.
  *
  * `aggregationLevel` is the registry's region type name ("gsp", "dno", …).
@@ -111,11 +116,12 @@ const useGspSeasonalMetrics = (
     aggregationLevel === "dno"
       ? (dnoMetricsManifest as DnoManifest)[selectionName || ""]?.file
       : undefined;
-  // A single pre-baked file for the whole selection: a GB DNO or an NL province.
+  // A single pre-baked file for the whole selection: a GB DNO, an NL province or a DE TSO.
+  const namedRegionUrl = NAMED_REGION_METRICS_URLS[aggregationLevel ?? ""];
   const prebakedUrl = dnoFile
     ? `${DNO_METRICS_URL}/${dnoFile}`
-    : aggregationLevel === "province" && selectionName
-    ? `${PROVINCE_METRICS_URL}/${selectionName}.json`
+    : namedRegionUrl && selectionName
+    ? `${namedRegionUrl}/${selectionName}.json`
     : undefined;
   const isPrebaked = !!prebakedUrl;
   const combinesGsps = aggregationLevel === "gsp" || (aggregationLevel === "dno" && !isPrebaked);

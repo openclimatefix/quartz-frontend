@@ -8,7 +8,7 @@
  * was selected.
  *
  * Uses the real `config/countries.ts` registry (unmocked) so these tests exercise GB's actual
- * configured `seasonalNorms` URL and DE's actual `null`, rather than a URL a mock invented.
+ * and NL's actual configured `seasonalNorms` URLs, rather than URLs a mock invented.
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "@jest/globals";
 import { act, renderHook, waitFor } from "@testing-library/react";
@@ -45,6 +45,7 @@ jest.mock("../../lib/geo/assets", () => ({
 import { useSeasonalNorms, type SeasonalNormsData } from "./use-seasonal-norms";
 
 const GB_URL = "/data/gb/national-metrics.json";
+const NL_URL = "/data/nl/national-metrics.json";
 
 const fixture: SeasonalNormsData = {
   data: { "7": { "1": { mean: [0.5], pLevels: [[0.3], [0.7]] } } },
@@ -80,30 +81,25 @@ describe("useSeasonalNorms", () => {
     expect(view.result.current).toEqual(fixture);
   });
 
-  test("DE has no seasonal-norm dataset: no fetch, and undefined forever", async () => {
-    focusedCountry = "DE";
-    const view = renderHook(() => useSeasonalNorms());
-    expect(requestedUrls).toEqual([]);
-    expect(view.result.current).toBeUndefined();
-
-    // Give any stray microtask a turn; there is nothing in flight for it to resolve.
-    await act(async () => {});
-    expect(view.result.current).toBeUndefined();
-  });
-
   test("a country switch mid-fetch never applies the stale country's response", async () => {
     const view = renderHook(() => useSeasonalNorms());
     expect(requestedUrls).toEqual([GB_URL]);
 
-    // The user switches to DE — which has no dataset — before GB's fetch lands.
-    focusedCountry = "DE";
+    // The user switches to NL before GB's fetch lands.
+    focusedCountry = "NL";
     view.rerender();
     expect(view.result.current).toBeUndefined();
 
-    // GB's response arrives late. It must not be applied: the hook is now keyed on `undefined`
-    // (DE has no url), not on GB_URL, so there is nowhere for this answer to land.
+    // GB's response arrives late. It must not be applied: the hook is now keyed on NL_URL.
     await settle(GB_URL, fixture);
     expect(view.result.current).toBeUndefined();
+
+    const nlFixture = {
+      ...fixture,
+      data: { "7": { "1": { mean: [0.6], pLevels: [[0.4], [0.8]] } } }
+    };
+    await settle(NL_URL, nlFixture);
+    await waitFor(() => expect(view.result.current).toEqual(nlFixture));
   });
 
   test("switching back to a country whose asset already resolved uses it without refetching", async () => {
@@ -111,13 +107,13 @@ describe("useSeasonalNorms", () => {
     await settle(GB_URL, fixture);
     await waitFor(() => expect(view.result.current).toBeDefined());
 
-    focusedCountry = "DE";
+    focusedCountry = "NL";
     view.rerender();
     expect(view.result.current).toBeUndefined();
 
     focusedCountry = "GB";
     view.rerender();
     await waitFor(() => expect(view.result.current).toEqual(fixture));
-    expect(requestedUrls).toEqual([GB_URL]);
+    expect(requestedUrls).toEqual([GB_URL, NL_URL]);
   });
 });

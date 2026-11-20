@@ -562,7 +562,7 @@ describe("seasonal norms", () => {
   });
 
   // `useSeasonalNorms` returns `undefined` both while its fetch is in flight and permanently
-  // for a country with no dataset (`seasonalNorms: null`, e.g. DE) — that collapse is its own
+  // for a country with no dataset (`seasonalNorms: null`) — that collapse is its own
   // contract, tested in `hooks/data/use-seasonal-norms.test.ts`. This is the one thing this
   // hook must get right about it: render the rest of the chart normally and write no seasonal
   // keys at all, rather than falling back to a previously-loaded country's norms or to zeros.

@@ -21,7 +21,7 @@ export type SeasonalNormsData = {
  * module cache the map geometry uses, rather than bundled into the JS.
  *
  * `undefined` covers two cases the caller must treat identically: the fetch is still in
- * flight, or the country has no dataset (`seasonalNorms: null`, e.g. NL). Neither is an
+ * flight, or the country has no dataset (`seasonalNorms: null`, or no config at all). Neither is an
  * error — a country with no seasonal-norm dataset must render no seasonal-norm series, not
  * another country's, and not zeros standing in for absence. Collapsing "loading" and
  * "permanently absent" into the same `undefined` is what makes that the only possible
