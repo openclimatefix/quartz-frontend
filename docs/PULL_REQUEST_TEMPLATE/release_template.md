@@ -193,15 +193,22 @@
 - [ ] Does the Nhr forecast toggle persist across refreshes/logouts using cookie?
 
 
-## Time Footer
-- [ ] Does the footer show the selected day, time and country, in that country's local time?
-- [ ] Does it show whether I'm following live?
-- [ ] Can I drag the scrub handle, and does it follow the pointer?
-- [ ] Do the left/right arrow keys step one period on the focused country's grid?
-- [ ] Does Play step through time in a loop, and does dragging or arrow keys stop playback?
-- [ ] Does "Return to live" jump back to now and keep following it?
-- [ ] Is "Now" marked on the track?
+## Time Scrubber (in the chart)
+- [ ] Does the scrub track sit under the chart, lined up with the chart's x-axis at both ends?
+- [ ] Can I drag the scrub handle, and does it follow the pointer smoothly?
+- [ ] Does the reading above the handle show the selected time in the focused country's local time?
+- [ ] Is "Now" marked on the track, with the past filled and the future not?
+- [ ] Are midnight, midday and daylight marked on the track?
+- [ ] Do the left/right arrow keys step one period on the finest enabled country's grid?
+- [ ] Do Home/End jump to the ends of the track, and PageUp/PageDown jump 3 hours?
+- [ ] Does Play step through time in a loop, and does the speed button cycle the speed?
+- [ ] Does dragging or using the arrow keys stop playback?
+- [ ] Does "Return to live" show only when I've scrubbed away, and jump back to now and keep following it?
 - [ ] After 10 mins on live, does the forecast update?
+
+## Time Stack
+- [ ] Does each enabled country show its current period as a span, in its own local time?
+- [ ] Does the UTC row show the focused country's period as a UTC span, with the API's `time_utc` in its tooltip?
 
 
 ## Combined views
