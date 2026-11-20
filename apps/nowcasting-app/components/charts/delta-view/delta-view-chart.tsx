@@ -571,6 +571,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
               it, and it is where most charting libraries put one. */}
         <div className="flex px-2 pb-2 dash:h-auto">
           <ChartLegend generationKeys={GENERATION_CHART_KEYS} />
+          {cloudcastingSeries && visibleLines.includes("BLEND_CLOUDCASTING") && (
+            <span className="ml-auto self-center text-xs text-content/65">
+              Delta is actuals vs the {primarySeries?.label} forecast, not Cloudcasting
+            </span>
+          )}
         </div>
         <div
           // Chips and headings fixed, only the rows scrolling beneath them — the chips used to
