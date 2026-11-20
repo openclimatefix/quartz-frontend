@@ -27,6 +27,7 @@ import {
   useFocusedCountry,
   useGenerationSources,
   useLoadingState,
+  useNationalChartSeries,
   useNationalForecast,
   useNationalGeneration
 } from "../../../hooks/data";
@@ -358,6 +359,17 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
   });
 
+  const cloudcastingSeries = useNationalChartSeries(focusedCountry).find(
+    (s) => s.key === "BLEND_CLOUDCASTING"
+  );
+  const cloudcasting = useNationalForecast(cloudcastingSeries ? scope : null, {
+    model: cloudcastingSeries && forecastSeriesModel(cloudcastingSeries)
+  });
+  const modelSeries = useMemo(
+    () => [{ key: "BLEND_CLOUDCASTING", series: cloudcasting.data }],
+    [cloudcasting.data]
+  );
+
   // Observers come from the manifest, never a hardcoded pair — see pv-remix-chart.tsx.
   const generationSources = useGenerationSources(scope);
   const observers = useMemo(
@@ -408,6 +420,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   const chartData = useFormatChartData({
     forecastSeries: forecast.data,
+    modelSeries,
     nHourSeries: nHour.data,
     generationSeries,
     timeTrigger: selectedLabel,
