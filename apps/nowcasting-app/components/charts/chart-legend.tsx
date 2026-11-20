@@ -1,7 +1,7 @@
 import { FC, ReactNode } from "react";
 
 import useGlobalState from "../helpers/globalState";
-import { useFocusedCountry, useGenerationSources } from "../../hooks/data";
+import { useFocusedCountry, useGenerationSources, useNationalChartSeries } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
 import { useDisplayPanel } from "../shell/display-panel";
 import { LegendAreaGraphIcon, LegendLineGraphIcon } from "../icons/icons";
@@ -57,7 +57,7 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
   const [nHourForecast] = useGlobalState("nHourForecast");
   const { attract } = useDisplayPanel();
   const focusedCountry = useFocusedCountry();
-  const seriesConfig = getCountryConfig(focusedCountry)?.nationalChartSeries ?? [];
+  const seriesConfig = useNationalChartSeries(focusedCountry);
   const generationSources = useGenerationSources(
     focusedCountry ? { country: focusedCountry, source: "solar" } : null
   );
@@ -91,20 +91,24 @@ const ChartLegend: FC<{ generationKeys: readonly string[] }> = ({ generationKeys
       iconClasses: "text-solar-light",
       symbolStyle: index === 0 ? ("dashed" as const) : undefined
     })),
-    {
-      key: "SEASONAL_MEAN",
-      label: "Seasonal mean",
-      iconClasses: "text-series-seasonal",
-      // The chart draws it heavier and softer than the forecast lines; the icon says so.
-      strokeWidth: 4,
-      strokeOpacity: 0.5
-    },
-    {
-      key: "SEASONAL_BOUNDS",
-      label: "Seasonal quantiles",
-      iconClasses: "text-series-seasonal",
-      symbolStyle: "area"
-    }
+    ...(getCountryConfig(focusedCountry)?.seasonalNorms
+      ? [
+          {
+            key: "SEASONAL_MEAN",
+            label: "Seasonal mean",
+            iconClasses: "text-series-seasonal",
+            // The chart draws it heavier and softer than the forecast lines; the icon says so.
+            strokeWidth: 4,
+            strokeOpacity: 0.5
+          },
+          {
+            key: "SEASONAL_BOUNDS",
+            label: "Seasonal quantiles",
+            iconClasses: "text-series-seasonal",
+            symbolStyle: "area" as const
+          }
+        ]
+      : [])
   ];
 
   const drawn = entries.filter((entry) => visibleLines.includes(entry.key));

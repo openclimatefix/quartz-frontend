@@ -27,6 +27,7 @@ import {
   useFocusedCountry,
   useGenerationSources,
   useLoadingState,
+  useNationalChartSeries,
   useNationalForecast,
   useNationalGeneration
 } from "../../../hooks/data";
@@ -358,6 +359,17 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
   });
 
+  const cloudcastingSeries = useNationalChartSeries(focusedCountry).find(
+    (s) => s.key === "BLEND_CLOUDCASTING"
+  );
+  const cloudcasting = useNationalForecast(cloudcastingSeries ? scope : null, {
+    model: cloudcastingSeries && forecastSeriesModel(cloudcastingSeries)
+  });
+  const modelSeries = useMemo(
+    () => [{ key: "BLEND_CLOUDCASTING", series: cloudcasting.data }],
+    [cloudcasting.data]
+  );
+
   // Observers come from the manifest, never a hardcoded pair — see pv-remix-chart.tsx.
   const generationSources = useGenerationSources(scope);
   const observers = useMemo(
@@ -408,6 +420,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
 
   const chartData = useFormatChartData({
     forecastSeries: forecast.data,
+    modelSeries,
     nHourSeries: nHour.data,
     generationSeries,
     timeTrigger: selectedLabel,
@@ -558,6 +571,11 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
               it, and it is where most charting libraries put one. */}
         <div className="flex px-2 pb-2 dash:h-auto">
           <ChartLegend generationKeys={GENERATION_CHART_KEYS} />
+          {cloudcastingSeries && visibleLines.includes("BLEND_CLOUDCASTING") && (
+            <span className="ml-auto self-center text-xs text-content/65">
+              Delta is actuals vs the {primarySeries?.label} forecast, not Cloudcasting
+            </span>
+          )}
         </div>
         <div
           // Chips and headings fixed, only the rows scrolling beneath them — the chips used to
