@@ -360,10 +360,18 @@ const GspPvRemixChart: FC<{
       ? [{ gspId, installedCapacityMw: region.capacityMw ?? 0 }]
       : [];
   }, [isSingleGsp, gspId, gspRegionData.region, gspAggregateData.memberGsps]);
+  // A non-GB region (eg NL province) has no gsp_id, so it is looked up by name and scaled by its
+  // own capacity; the hook returns null for region types with no named files.
+  const isSingleNamedRegion = !isSingleGsp && !level?.derived && multiSelectNames?.length === 1;
   const gspSeasonalMetrics = useGspSeasonalMetrics(
     seasonalMembers,
     level?.regionType,
-    isGroupSelection && !isMultiGroup ? groupName ?? undefined : undefined
+    isSingleNamedRegion
+      ? multiSelectNames?.[0]
+      : isGroupSelection && !isMultiGroup
+      ? groupName ?? undefined
+      : undefined,
+    isSingleNamedRegion ? gspInstalledCapacity : undefined
   );
 
   const chartData = useFormatChartData({

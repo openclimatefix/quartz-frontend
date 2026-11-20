@@ -127,10 +127,10 @@ export const getTicks = (yMax: number, yMax_levels: number[]) => {
  * Converting it to local time would shift every seasonal line by two slots throughout BST. See
  * "B9: what the audit got wrong" in docs/adaptive-eu-ui.md.
  */
-export const getUtcHalfHourIndex = (date: DateTime): number => {
+export const getUtcHalfHourIndex = (date: DateTime, slotMinutes = 30): number => {
   const utcDate = date.toUTC();
   const midnightBefore = utcDate.startOf("day");
-  return Math.floor(utcDate.diff(midnightBefore, "minutes").minutes / 30);
+  return Math.floor(utcDate.diff(midnightBefore, "minutes").minutes / slotMinutes);
 };
 
 /** Tick steps that read as round numbers at any power of ten. */
