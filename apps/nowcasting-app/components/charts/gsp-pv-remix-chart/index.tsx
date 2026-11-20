@@ -31,6 +31,7 @@ import {
   periodForLabel,
   slotForInstant
 } from "../../../lib/time/cursor";
+import useGspSeasonalMetrics from "./use-gsp-seasonal-metrics";
 import Spinner from "../../icons/spinner";
 import React, { FC, useMemo } from "react";
 import { getTicks } from "../../helpers/chartUtils";
@@ -170,7 +171,7 @@ const GspPvRemixChart: FC<{
     ? `${resolvedGroups.length} ${pluralise(level?.label ?? "")}`
     : resolvedGroups[0] ?? selectedRegions[0] ?? null;
   // The union of the selected groups' members, each counted once: GB's DNO and NG-zone
-  // groupings share members (15 GSPs sit in two DNOs), so two selected groups can both list
+  // groupings share members (21 GSPs sit in two DNOs), so two selected groups can both list
   // the same GSP, and summing it twice would double its generation and capacity.
   const groupRegions = useMemo(() => {
     if (resolvedGroups.length === 0) {
@@ -349,13 +350,33 @@ const GspPvRemixChart: FC<{
           displayDecimalsFor(displayUnit)
         );
 
+  // The selection's GSPs with their capacities, for the seasonal mean and p10/p90 band. A
+  // single DNO passes its name so the hook can use the pre-baked DNO file; several DNOs (or a
+  // DNO with no file) fall back to combining their member GSPs.
+  const seasonalMembers = useMemo(() => {
+    if (!isSingleGsp) return gspAggregateData.memberGsps;
+    const region = gspRegionData.region;
+    return region && gspId !== undefined
+      ? [{ gspId, installedCapacityMw: region.capacityMw ?? 0 }]
+      : [];
+  }, [isSingleGsp, gspId, gspRegionData.region, gspAggregateData.memberGsps]);
+  const gspSeasonalMetrics = useGspSeasonalMetrics(
+    seasonalMembers,
+    level?.regionType,
+    isGroupSelection && !isMultiGroup ? groupName ?? undefined : undefined
+  );
+
   const chartData = useFormatChartData({
     forecastSeries: activeForecast,
     nHourSeries: isSingleGsp && show4hView ? gspRegionData.nHour : undefined,
     generationSeries: activeGenerationSeries,
     timeTrigger: selectedTime,
     delta: deltaView,
-    gsp: true
+    gsp: true,
+    // Use the capacity of only the GSPs that actually have metrics, so a
+    // selection containing "new" GSPs (no metrics yet) still scales correctly.
+    seasonalMetrics: gspSeasonalMetrics?.metrics ?? null,
+    seasonalCapacity: gspSeasonalMetrics?.capacity
   });
 
   // set ymax to the installed capacity of the graph
