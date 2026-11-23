@@ -62,6 +62,22 @@ const MapUIButton = <T,>({
   );
 };
 
+export type UnitOption = { unit: ActiveUnit; label: string };
+
+const ALL_UNITS: readonly UnitOption[] = [
+  { unit: ActiveUnit.percentage, label: "%" },
+  { unit: ActiveUnit.MW, label: "MW" },
+  { unit: ActiveUnit.capacity, label: "Capacity" },
+  { unit: ActiveUnit.capacityDensity, label: "MW/km²" }
+];
+
+const BUTTON_IDS: Record<ActiveUnit, string> = {
+  [ActiveUnit.percentage]: "UnitButtonPercentage",
+  [ActiveUnit.MW]: "UnitButtonMW",
+  [ActiveUnit.capacity]: "UnitButtonCapacity",
+  [ActiveUnit.capacityDensity]: "UnitButtonCapacityDensity"
+};
+
 /**
  * The %/MW/Capacity unit toggle. Split out of the combined `MeasuringUnit` (Phase 6 followup,
  * Track I) so the consolidated map panel can keep it always visible — it changes the numbers
@@ -69,6 +85,8 @@ const MapUIButton = <T,>({
  * layer controls would hide the reason the legend's numbers just changed.
  */
 export const UnitToggle: FC<{
+  /** The buttons to show, in order. Defaults to every unit. */
+  options?: readonly UnitOption[];
   activeUnit: ActiveUnit;
   setActiveUnit: Dispatch<SetStateAction<ActiveUnit>>;
   isLoading: boolean;
@@ -88,7 +106,14 @@ export const UnitToggle: FC<{
   unavailableUnits?: readonly ActiveUnit[];
   /** Why those units are unavailable, for the disabled buttons' tooltip. */
   unavailableReason?: string;
-}> = ({ activeUnit, setActiveUnit, isLoading, unavailableUnits = [], unavailableReason }) => {
+}> = ({
+  options = ALL_UNITS,
+  activeUnit,
+  setActiveUnit,
+  isLoading,
+  unavailableUnits = [],
+  unavailableReason
+}) => {
   const onToggleUnit = async (
     event: ReactMouseEvent<HTMLButtonElement, MouseEvent>,
     unit: ActiveUnit
@@ -101,39 +126,20 @@ export const UnitToggle: FC<{
   // legend it re-scales, and a full-width row of three reads as one control with three settings.
   return (
     <div className={CONTROL_ROW}>
-      <MapUIButton<ActiveUnit>
-        grow
-        id={"UnitButtonPercentage"}
-        active={activeUnit === ActiveUnit.percentage}
-        isLoading={isLoading}
-        onToggle={onToggleUnit}
-        text={"%"}
-        value={ActiveUnit.percentage}
-        unavailable={unavailableUnits.includes(ActiveUnit.percentage)}
-        unavailableReason={unavailableReason}
-      />
-      <MapUIButton<ActiveUnit>
-        grow
-        id={"UnitButtonMW"}
-        active={activeUnit === ActiveUnit.MW}
-        isLoading={isLoading}
-        onToggle={onToggleUnit}
-        text={"MW"}
-        value={ActiveUnit.MW}
-        unavailable={unavailableUnits.includes(ActiveUnit.MW)}
-        unavailableReason={unavailableReason}
-      />
-      <MapUIButton<ActiveUnit>
-        grow
-        id={"UnitButtonCapacity"}
-        active={activeUnit === ActiveUnit.capacity}
-        isLoading={isLoading}
-        onToggle={onToggleUnit}
-        text={"Capacity"}
-        value={ActiveUnit.capacity}
-        unavailable={unavailableUnits.includes(ActiveUnit.capacity)}
-        unavailableReason={unavailableReason}
-      />
+      {options.map(({ unit, label }) => (
+        <MapUIButton<ActiveUnit>
+          key={unit}
+          grow
+          id={BUTTON_IDS[unit]}
+          active={activeUnit === unit}
+          isLoading={isLoading}
+          onToggle={onToggleUnit}
+          text={label}
+          value={unit}
+          unavailable={unavailableUnits.includes(unit)}
+          unavailableReason={unavailableReason}
+        />
+      ))}
     </div>
   );
 };
