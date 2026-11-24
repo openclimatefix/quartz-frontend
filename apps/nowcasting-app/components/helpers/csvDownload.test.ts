@@ -804,3 +804,14 @@ describe("generateCsv — headers come from config and manifest labels", () => {
     expect(csvLabelsFor({}, [{ name: "ned_nl", label: "" }]).observerLabels[0]).toBe("ned_nl");
   });
 });
+
+describe("cloudcasting column", () => {
+  test("cloudcasting values land in their own column", () => {
+    const rows = buildCsvRows(
+      { cloudcasting: series([{ timeUtc: "2025-01-15T12:00:00Z", powerMw: 0 }]) },
+      []
+    );
+    const csv = generateCsv(rows, ["cloudcastingForecast"], 4, []);
+    expect(rowsOf(csv)).toEqual(["Cloudcasting Forecast (MW)", "0"]);
+  });
+});

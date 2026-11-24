@@ -11,6 +11,7 @@ export type CSVColumn =
   | "solarGenerationPvliveUpdated"
   | "solarForecast"
   | "nForecast"
+  | "cloudcastingForecast"
   | "delta"
   | "pLevels";
 
@@ -23,6 +24,7 @@ const SELECTABLE_COLUMNS: { id: CSVColumn; label: string }[] = [
   { id: "solarForecast", label: "OCF Forecast" },
   { id: "pLevels", label: "Forecast P-levels" },
   { id: "nForecast", label: "N Forecast" },
+  { id: "cloudcastingForecast", label: "Cloudcasting Forecast" },
   { id: "delta", label: "Delta" }
 ];
 
@@ -35,6 +37,8 @@ interface Props {
   comparisonActive: boolean;
   /** The period and observer labels the file uses, so the modal and the file agree. */
   labels?: CsvLabels;
+  /** Whether the user's product claim includes cloudcasting. */
+  hasCloudcasting?: boolean;
 }
 
 export const CSVDownloadModal: React.FC<Props> = ({
@@ -43,7 +47,8 @@ export const CSVDownloadModal: React.FC<Props> = ({
   onDownload,
   nHourForecast,
   comparisonActive,
-  labels = DEFAULT_CSV_LABELS
+  labels = DEFAULT_CSV_LABELS,
+  hasCloudcasting = false
 }) => {
   const selectableColumns = useMemo(
     () =>
@@ -51,6 +56,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
         if (column.id === "nForecast")
           return [{ ...column, label: `${getNHourForecastLabel(nHourForecast)}` }];
         if (column.id === "settlementPeriod") return [{ ...column, label: labels.periodLabel }];
+        if (column.id === "cloudcastingForecast") return hasCloudcasting ? [column] : [];
         // A single-observer country has no second generation column.
         if (
           column.id === "solarGenerationPvliveInitial" ||
@@ -61,7 +67,7 @@ export const CSVDownloadModal: React.FC<Props> = ({
         }
         return [column];
       }),
-    [nHourForecast, labels]
+    [nHourForecast, labels, hasCloudcasting]
   );
 
   const availableSelectableColumns = useMemo(
