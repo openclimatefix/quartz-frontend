@@ -94,7 +94,7 @@ export const ChartInfo: React.FC<ChartInfoProps> = ({ timezone = DEFAULT_TIMEZON
           To learn more, please see our{" "}
           <span className="underline font-bold">
             <a
-              href="https://openclimatefix.notion.site/User-Interface-053005e5db144f6dbd7a3d0fe108d7f2"
+              href="https://openclimatefix.notion.site/User-Interface-4059894e1aa9804b900fe578f9e13bd0"
               target="_blank"
               rel="noreferrer"
             >

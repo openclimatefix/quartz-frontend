@@ -18,13 +18,18 @@ const rows = [
   { formattedDate: "2026-09-29T11:30", FORECAST: 9400 }
 ];
 
+let mockChartSeries: { key: string; model: string }[] = [];
+const mockUseNationalForecast = jest.fn((_scope: unknown, _opts: unknown) => ({
+  data: { values: [] }
+}));
 jest.mock("../../../hooks/data", () => ({
   __esModule: true,
   NATIONAL_REGION_TYPE: "national",
   useFocusedCountry: () => "GB",
   useGenerationSources: () => ({ data: [{ name: "pvlive_in_day", label: "PV Live" }] }),
   useLoadingState: () => ({}),
-  useNationalForecast: () => ({ data: { values: [] } }),
+  useNationalChartSeries: () => mockChartSeries,
+  useNationalForecast: (scope: unknown, opts: unknown) => mockUseNationalForecast(scope, opts),
   useNationalGeneration: () => ({ data: { values: [] } })
 }));
 jest.mock("../use-format-chart-data", () => ({ __esModule: true, default: () => rows }));
@@ -73,5 +78,33 @@ describe("DeltaChart on entry", () => {
     expect(getGlobalState("selectedISOTime")).toBe(cursor);
     // The existing empty state is what the user sees there.
     expect(screen.getByText(/No actuals yet for this time/)).toBeTruthy();
+  });
+});
+
+describe("DeltaChart cloudcasting line", () => {
+  const cloudcastingCalls = () =>
+    mockUseNationalForecast.mock.calls.filter(
+      ([, opts]) => (opts as { model?: string }).model === "blend_cloudcasting"
+    );
+
+  beforeEach(() => {
+    mockUseNationalForecast.mockClear();
+  });
+
+  test("fetches cloudcasting when the product claim lets the series through", () => {
+    mockChartSeries = [{ key: "BLEND_CLOUDCASTING", model: "blend_cloudcasting" }];
+    render(<DeltaChart />);
+    expect(cloudcastingCalls()[0][0]).toMatchObject({ country: "GB" });
+  });
+
+  test("fetches nothing for cloudcasting without the product claim", () => {
+    mockChartSeries = [];
+    render(<DeltaChart />);
+    // Only the primary and N-hour forecasts are requested; the cloudcasting slot gets a null scope.
+    const requested = mockUseNationalForecast.mock.calls.filter(([scope]) => scope !== null);
+    expect(requested.map(([, opts]) => opts)).toEqual([
+      { model: "blend" },
+      { horizonMinutes: 240 }
+    ]);
   });
 });

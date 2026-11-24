@@ -19,6 +19,7 @@ import {
   NATIONAL_REGION_TYPE,
   useFocusedCountry,
   useGenerationSources,
+  useNationalChartSeries,
   useNationalForecast,
   useNationalGeneration
 } from "../../../hooks/data";
@@ -62,6 +63,13 @@ const ProfileDropDown = () => {
     model: primarySeries ? forecastSeriesModel(primarySeries) : undefined
   });
 
+  const cloudcastingSeries = useNationalChartSeries(focusedCountry).find(
+    (s) => s.key === "BLEND_CLOUDCASTING"
+  );
+  const cloudcasting = useNationalForecast(cloudcastingSeries ? nationalScope : null, {
+    model: cloudcastingSeries && forecastSeriesModel(cloudcastingSeries)
+  });
+
   const generationSources = useGenerationSources(nationalScope);
   const observers = useMemo(
     () => (generationSources.data ?? []).map((source) => source.name),
@@ -94,7 +102,8 @@ const ProfileDropDown = () => {
         forecast: forecast.data,
         generationInitial: generationInitial.data,
         generationUpdated: generationUpdated.data,
-        nHour: nHour.data
+        nHour: nHour.data,
+        cloudcasting: cloudcasting.data
       },
       selectedColumns,
       nHourForecast,
@@ -321,6 +330,7 @@ const ProfileDropDown = () => {
         nHourForecast={nHourForecast}
         comparisonActive={!!comparison}
         labels={csvLabels}
+        hasCloudcasting={!!cloudcastingSeries}
       />
     </>
   );

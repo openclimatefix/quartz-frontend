@@ -160,6 +160,7 @@ export type FlatGlobalStateType = {
   sitesLoadingState: LoadingState<SitesEndpointStates>;
   nHourForecast: number;
   pLevels: [number, number][];
+  cloudcastingPLevels: [number, number][];
   showCloudLayer: boolean;
   activeChannel: SatelliteChannel;
   showPvLayer: boolean;
@@ -305,6 +306,7 @@ export const { useGlobalState, getGlobalState, setGlobalState } =
     },
     nHourForecast: 4,
     pLevels: getValidatedPLevels(),
+    cloudcastingPLevels: [],
     showCloudLayer: false,
     // COMPOSITE_VISIBLE — the default satellite channel (see satelliteLayer.ts). Inlined
     // as a literal rather than imported so this module's dependency on satelliteLayer stays
