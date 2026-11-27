@@ -11,12 +11,11 @@ const TrialEndedPopup: React.FC = () => {
   const close = () => setDismissed(true);
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/60" onClick={close} />
       <div
         role="dialog"
-        aria-modal="true"
+        aria-modal="false"
         aria-labelledby="trial-ended-title"
-        className="fixed left-1/2 top-1/2 z-50 flex w-[min(calc(100vw-2rem),40rem)] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 rounded-2xl bg-[#121212] px-8 py-12 text-center text-white shadow-2xl"
+        className="fixed bottom-4 right-4 h-[50vh] z-50 flex w-[min(calc(100vw-2rem),40rem)] flex-col items-center justify-center gap-3 rounded-2xl bg-[#121212] px-8 py-16 text-center text-white shadow-2xl"
       >
         <button
           type="button"
