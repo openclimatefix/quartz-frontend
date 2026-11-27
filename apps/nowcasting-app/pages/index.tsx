@@ -8,6 +8,7 @@ import Layout from "../components/layout/layout";
 import ClientOnly from "../components/shell/client-only";
 import BootScreen from "../components/shell/boot-screen";
 import DashboardShell from "../components/shell/dashboard-shell";
+import TrialEndedPopup from "../components/shell/trial-ended-popup";
 import { PvLatestMap } from "../components/map";
 import PvRemixChart from "../components/charts/pv-remix-chart";
 import DeltaViewChart from "../components/charts/delta-view/delta-view-chart";
@@ -109,6 +110,7 @@ export default function Home({ dashboardModeServer }: { dashboardModeServer: str
           map={<PvLatestMap activeUnit={activeUnit} setActiveUnit={setActiveUnit} />}
           chart={comparison ? <DeltaViewChart /> : <PvRemixChart />}
         />
+        <TrialEndedPopup />
       </Layout>
     </ClientOnly>
   );
