@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { cursorCadenceMinutes, periodForLabel, slotForInstant } from "../../lib/time/cursor";
+import { addMinutesToISODate } from "../helpers/utils";
 import {
   middayInstants,
   midnightInstants,
@@ -277,8 +278,8 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
   const scale = useMemo(() => {
     if (!range?.start || !range?.end) return null;
     const selectable = selectableLabelRange(range, focusedCountry);
-    // Trial-expired: drawn against all of it, but the handle may not stop past live.
-    const live = slotForInstant(timeNow, focusedCountry);
+    // Trial-expired: drawn against all of it, but the handle may not stop past now - 30 min.
+    const live = slotForInstant(addMinutesToISODate(timeNow, -30), focusedCountry);
     return scrubScale(range, cadenceMinutes, {
       ...selectable,
       end: trialExpiredAt && Date.parse(live) < Date.parse(selectable.end) ? live : selectable.end
@@ -733,7 +734,7 @@ const ScrubTrack: FC<{ zone?: string; range?: CursorRange | null }> = ({
                 to" — which says nothing when you are already there, and that is exactly when it
                 sits on top of the handle and hides the one thing you would want to grab. It
                 comes back the moment you scrub away, which is when it starts being useful. */}
-              {!isLive && (
+              {!isLive && !trialExpiredAt && (
                 <button
                   type="button"
                   // The track owns pointerdown for scrubbing; without this, pressing the button

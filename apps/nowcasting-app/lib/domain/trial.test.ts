@@ -31,9 +31,15 @@ describe("withholdFuture", () => {
     expect(withholdFuture(series)).toBe(series);
   });
 
-  test("keeps the label of the period in progress", () => {
-    const soon = { ...series, values: [{ timeUtc: "2025-07-01T10:30:00Z", powerMw: 9 }] };
-    expect(withholdFuture(soon).values).toHaveLength(1);
+  test("withholds the period in progress, keeping the last settled one", () => {
+    jest.setSystemTime(new Date("2025-07-01T10:12:00Z"));
+    const values = ["09:30", "10:00", "10:30"].map((t, i) => ({
+      timeUtc: `2025-07-01T${t}:00Z`,
+      powerMw: i
+    }));
+    expect(withholdFuture({ ...series, values }, "GB").values.map((p) => p.powerMw)).toEqual([
+      0, 1
+    ]);
   });
 
   test("cuts a time series after now, keeping now itself", () => {

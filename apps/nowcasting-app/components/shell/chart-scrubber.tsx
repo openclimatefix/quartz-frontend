@@ -3,7 +3,7 @@ import { FC } from "react";
 import useGlobalState from "../helpers/globalState";
 import { useFocusedCountry } from "../../hooks/data";
 import { getCountryConfig } from "../../config/countries";
-import { DEFAULT_TIMEZONE } from "../helpers/utils";
+import { addMinutesToISODate, DEFAULT_TIMEZONE } from "../helpers/utils";
 import { PLOT_INSET_LEFT_PX, PLOT_INSET_RIGHT_PX } from "../charts/remix-line";
 import PlayButton from "../play-button";
 import ScrubTrack from "./scrub-track";
@@ -63,10 +63,10 @@ const ChartScrubber: FC<{ domain?: CursorRange | null; insetRightPx?: number }> 
   const [timeNow] = useGlobalState("timeNow");
   const [trialExpiredAt] = useGlobalState("trialExpiredAt");
   const selectableBounds = playRange ? selectableCursorRange(playRange, focusedCountry) : null;
-  // Trial-expired: play stops at live, like the track.
+  // Trial-expired: play stops at now - 30 min, like the track.
   const playBounds =
     selectableBounds && trialExpiredAt && Date.parse(timeNow) < Date.parse(selectableBounds.end)
-      ? { ...selectableBounds, end: timeNow }
+      ? { ...selectableBounds, end: addMinutesToISODate(timeNow, -30) }
       : selectableBounds;
 
   return (

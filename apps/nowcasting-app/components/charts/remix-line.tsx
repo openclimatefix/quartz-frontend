@@ -839,8 +839,9 @@ const RemixLine: React.FC<RemixLineProps> = ({
   }
 
   const activeData = zoomEnabled && globalIsZoomed ? filteredPreppedData : preppedData;
-  // The blur starts 1h before "now" so its fade-in sits over the tail of the real data.
-  const blurStart = new Date(new Date(`${currentTime}:00Z`).getTime() - 60 * 60 * 1000)
+  // The blur starts 30 min before "now": the last period an expired trial sees, so it covers
+  // only the empty rows after the real data.
+  const blurStart = new Date(new Date(`${currentTime}:00Z`).getTime() - 30 * 60 * 1000)
     .toISOString()
     .slice(0, 16);
   const teaserRows = trialExpiredAt
@@ -888,26 +889,12 @@ const RemixLine: React.FC<RemixLineProps> = ({
           className="pointer-events-auto absolute z-20 flex items-center justify-center overflow-hidden"
           style={{
             top: plotBox.y,
-            height: plotBox.h,
+            height: plotBox.h + 1.5,
             left: plotBox.x + plotBox.w * teaserStart,
-            width: plotBox.w * (1 - teaserStart)
+            width: plotBox.w * (1 - teaserStart) + 1.5
           }}
         >
-          {/* Blur fades in from the left edge, so there is no seam against the real data. */}
-          <div
-            className="absolute inset-0 backdrop-blur-sm"
-            style={{
-              maskImage: "linear-gradient(to right, transparent, black 20%)",
-              WebkitMaskImage: "linear-gradient(to right, transparent, black 20%)"
-            }}
-          />
-          <div
-            className="absolute inset-0 backdrop-blur-md"
-            style={{
-              maskImage: "linear-gradient(to right, transparent 15%, black 50%)",
-              WebkitMaskImage: "linear-gradient(to right, transparent 15%, black 50%)"
-            }}
-          />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
           <div className="relative flex max-w-full flex-col items-center gap-2 px-2 text-center">
             {teaserLayout === "full" && (
               <p className="max-w-xs text-sm font-light text-content">
@@ -1198,18 +1185,22 @@ const RemixLine: React.FC<RemixLineProps> = ({
                 the pill. A period is the ground a boundary is drawn across. */}
             <ReferenceLine
               x={isSitesChart ? new Date(currentTime + ":00.000Z").getTime() : currentTime}
-              stroke={plot.axis}
+              // Expired trial: a solid line, as thin and faint as the grid's, marks where the data stops.
+              stroke={trialExpiredAt ? plot.stroke : plot.axis}
               strokeWidth={1}
               yAxisId={"y-axis"}
               xAxisId={"x-axis"}
               scale={isSitesChart ? "time" : "auto"}
-              strokeDasharray="3 3"
+              strokeDasharray={trialExpiredAt ? undefined : "3 3"}
+              // No LIVE jump for an expired trial: live is past what the trial can see.
               label={
-                <CustomizedLabel
-                  className="cursor-pointer z-30 text-sm"
-                  value={"LIVE"}
-                  onClick={resetTime}
-                />
+                trialExpiredAt ? undefined : (
+                  <CustomizedLabel
+                    className="cursor-pointer z-30 text-sm"
+                    value={"LIVE"}
+                    onClick={resetTime}
+                  />
+                )
               }
             />
 

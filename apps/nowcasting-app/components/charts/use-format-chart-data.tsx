@@ -146,6 +146,9 @@ const getSeasonalMetricsForDate = (
   return seasonalMetrics;
 };
 
+/** How far past the last period an expired trial sees the chart's axis runs, empty. */
+const TRIAL_HORIZON_MINUTES = 24 * 60;
+
 const useFormatChartData = ({
   forecastSeries,
   modelSeries,
@@ -172,6 +175,7 @@ const useFormatChartData = ({
 }) => {
   const [nHourForecast] = useGlobalState("nHourForecast");
   const [pLevels] = useGlobalState("pLevels");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
   const nationalMetrics = useSeasonalNorms();
   // The past/future split has to land on a row this chart actually has, and the rows are the
   // focused country's timestamps — so it steps on that country's cadence, not on the shared
@@ -286,6 +290,25 @@ const useFormatChartData = ({
         }
       }
 
+      // Expired trial: the data stops at the last period the trial sees, so the axis gets 24h of
+      // rows past it for the chart's trial blur to sit on. Added before the seasonal norms, so the
+      // seasonal mean carries on across them.
+      const last = Object.values(chartMap).reduce(
+        (max, point) => (point.formattedDate > max ? point.formattedDate : max),
+        ""
+      );
+      if (trialExpiredAt && last) {
+        const lastSlot = DateTime.fromISO(`${last}:00.000Z`, { zone: "utc" });
+        for (
+          let minutes = cadenceMinutes;
+          minutes <= TRIAL_HORIZON_MINUTES;
+          minutes += cadenceMinutes
+        ) {
+          const iso = lastSlot.plus({ minutes }).toISO({ suppressMilliseconds: true }) as string;
+          chartMap[iso] = { formattedDate: formatISODateString(iso) } as unknown as ChartData;
+        }
+      }
+
       // Add seasonal norm data
       for (const key of Object.keys(chartMap)) {
         const date = DateTime.fromISO(key).toUTC();
@@ -360,7 +383,8 @@ const useFormatChartData = ({
     nHourForecast,
     pLevels,
     nationalMetrics,
-    cadenceMinutes
+    cadenceMinutes,
+    trialExpiredAt
   ]);
 
   return data;

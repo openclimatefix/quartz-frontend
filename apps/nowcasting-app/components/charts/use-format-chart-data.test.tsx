@@ -943,3 +943,24 @@ describe("B6: the useMemo dependency array omits delta and gsp", () => {
     expect(at(view.result.current, "2025-07-01T10:00").DELTA).toBe(1);
   });
 });
+
+describe("an expired trial", () => {
+  afterEach(() => setGlobalState("trialExpiredAt", ""));
+
+  test("runs the axis 24h past the last row with only the seasonal norms, so the blur has room", () => {
+    setGlobalState("trialExpiredAt", "2025-06-01");
+    const data = run(baseProps({ forecastSeries: ts([[BEFORE_BST, 100]]) }));
+    const empty = data.filter((d) => d.formattedDate > "2025-07-01T10:00");
+    expect(empty).toHaveLength(48);
+    expect(empty.every((d) => d.FORECAST === undefined && d.SEASONAL_MEAN !== undefined)).toBe(
+      true
+    );
+    expect(empty[0].formattedDate).toBe("2025-07-01T10:30");
+    expect(empty[47].formattedDate).toBe("2025-07-02T10:00");
+  });
+
+  test("adds nothing for anyone else", () => {
+    const data = run(baseProps({ forecastSeries: ts([[BEFORE_BST, 100]]) }));
+    expect(data.filter((d) => d.formattedDate > "2025-07-01T10:00")).toEqual([]);
+  });
+});

@@ -7,8 +7,9 @@ export const withholdFuture = <T>(data: T, country?: string): T => {
   // Arrays (region and country lists) are not time-bearing, and `"values" in []` is true.
   if (!getGlobalState("trialExpiredAt") || typeof data !== "object" || data === null) return data;
   if (Array.isArray(data)) return data;
-  const nowStart = Date.parse(cursorNow(cadenceMinutesFor(country)));
-  const isPast = (label: string) => Date.parse(periodForLabel(label, country).start) <= nowStart;
+  // For trial expired acc cut: now - 30 min, which on 15- and 30-minute periods is also the previous period.
+  const lastStart = Date.parse(cursorNow(cadenceMinutesFor(country), -30));
+  const isPast = (label: string) => Date.parse(periodForLabel(label, country).start) <= lastStart;
   const d = data as unknown as TimeSeries | RegionSeries | RegionSnapshot;
 
   if ("values" in d && Array.isArray(d.values)) {

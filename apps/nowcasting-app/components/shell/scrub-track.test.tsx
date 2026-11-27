@@ -202,29 +202,38 @@ describe("following the cursor's other inputs", () => {
 });
 
 describe("a trial-expired user", () => {
-  // Live is 12:00, the 12:30 label, slot 24.
-  beforeEach(() => setGlobalState("trialExpiredAt", "2026-07-01"));
+  // Live is 12:00, the 12:30 label, slot 24. The trial stops 30 min back: 11:30, the 12:00
+  // label, slot 23.
+  beforeEach(() => {
+    setGlobalState("trialExpiredAt", "2026-07-01");
+  });
 
-  test("a cursor written past live is held at live", () => {
+  test("a cursor written past the trial's last period is held there", () => {
     setGlobalState("selectedISOTime", "2026-08-11T20:00:00.000Z");
     render(<ScrubTrack />);
-    expect(slider()).toHaveAttribute("aria-valuenow", "24");
-    expect(slider()).toHaveAttribute("aria-valuemax", "24");
+    expect(slider()).toHaveAttribute("aria-valuenow", "23");
+    expect(slider()).toHaveAttribute("aria-valuemax", "23");
   });
 
-  test("End and the right arrow stop at live", () => {
-    setGlobalState("selectedISOTime", "2026-08-10T12:00:00.000Z");
+  test("End and the right arrow stop at the trial's last period, short of live", () => {
+    setGlobalState("selectedISOTime", "2026-08-10T11:00:00.000Z");
     render(<ScrubTrack />);
     fireEvent.keyDown(slider(), { key: "ArrowRight" });
-    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+    expect(slider()).toHaveAttribute("aria-valuenow", "23");
     fireEvent.keyDown(slider(), { key: "End" });
-    expect(slider()).toHaveAttribute("aria-valuenow", "24");
+    expect(slider()).toHaveAttribute("aria-valuenow", "23");
   });
 
-  test("a drag to the far right end commits live, not the end of the made-up data", () => {
+  test("a drag to the far right end commits the trial's last period, not live", () => {
     renderTrack();
     down(TRACK_WIDTH);
-    expect(committed[committed.length - 1]).toBe("2026-08-10T12:00:00.000Z");
+    expect(committed[committed.length - 1]).toBe("2026-08-10T11:30:00.000Z");
+  });
+
+  test("offers no way back to live", () => {
+    setGlobalState("intervals", []);
+    render(<ScrubTrack />);
+    expect(screen.queryByRole("button", { name: "Return to live" })).toBeNull();
   });
 
   test("an ordinary user can still scrub to the end", () => {
