@@ -191,8 +191,7 @@ const PvRemixChart: FC<{
     modelSeries,
     nHourSeries: nHour.data,
     generationSeries,
-    timeTrigger: selectedTime,
-    appendTeaserForecast: !!trialExpiredAt
+    timeTrigger: selectedTime
   });
 
   // The window the scrub track draws, taken off what this chart plots rather than derived a

@@ -356,8 +356,7 @@ const GspPvRemixChart: FC<{
     generationSeries: activeGenerationSeries,
     timeTrigger: selectedTime,
     delta: deltaView,
-    gsp: true,
-    appendTeaserForecast: !!trialExpiredAt
+    gsp: true
   });
 
   // set ymax to the installed capacity of the graph

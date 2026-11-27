@@ -412,8 +412,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
     nHourSeries: nHour.data,
     generationSeries,
     timeTrigger: selectedLabel,
-    delta: true,
-    appendTeaserForecast: !!trialExpiredAt
+    delta: true
   });
 
   // See `pv-remix-chart.tsx` and `plotted-domain.ts`.
