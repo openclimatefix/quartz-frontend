@@ -32,7 +32,12 @@ describe("/api/get_token entitlement fields", () => {
     mockSession = { user: { products: ["GB-Solar", "asset-solar"], countries: ["NL"] } };
     expect(await call()).toEqual({
       status: 200,
-      body: { accessToken: "test-token", products: ["gb-solar", "asset-solar"], countries: ["GB"] }
+      body: {
+        accessToken: "test-token",
+        products: ["gb-solar", "asset-solar"],
+        countries: ["GB"],
+        trialExpired: false
+      }
     });
   });
 
@@ -40,14 +45,14 @@ describe("/api/get_token entitlement fields", () => {
     mockSession = { user: { countries: ["nl"] } };
     expect(await call()).toEqual({
       status: 200,
-      body: { accessToken: "test-token", products: [], countries: ["NL"] }
+      body: { accessToken: "test-token", products: [], countries: ["NL"], trialExpired: false }
     });
   });
 
   test("with no session, both are empty", async () => {
     expect(await call()).toEqual({
       status: 200,
-      body: { accessToken: "test-token", products: [], countries: [] }
+      body: { accessToken: "test-token", products: [], countries: [], trialExpired: false }
     });
   });
 });

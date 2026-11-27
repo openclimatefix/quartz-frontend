@@ -310,6 +310,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
   const [visibleLines] = useGlobalState("visibleLines");
   const [selectedBuckets] = useGlobalState("selectedBuckets");
   const [selectedISOTime, setSelectedISOTime] = useGlobalState("selectedISOTime");
+  const [trialExpiredAt] = useGlobalState("trialExpiredAt");
   const [timeNow] = useGlobalState("timeNow");
   const [showNHourView] = useGlobalState("showNHourView");
   const [nHourForecast] = useGlobalState("nHourForecast");
@@ -539,6 +540,7 @@ const DeltaChart: FC<DeltaChartProps> = ({ className }) => {
                 yTicks={getTicks(yMax, Y_MAX_TICKS)}
                 visibleLines={visibleLines}
                 deltaView={true}
+                trialExpiredAt={trialExpiredAt}
               />
             </div>
           </div>
