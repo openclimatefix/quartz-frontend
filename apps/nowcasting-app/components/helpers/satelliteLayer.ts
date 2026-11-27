@@ -396,6 +396,7 @@ export const stackKey = (iso: string): string =>
 
 export type SatelliteStack = {
   channel: SatelliteChannel;
+  route: StackRoute;
   bands: Record<string, ArrayLike<number>>;
   // Per-slot composite degradation (the band-level `missing_channels` tag the API writes on the
   // stack). Only slots that were partial appear here; absent keys mean a complete frame.
@@ -405,14 +406,19 @@ export type SatelliteStack = {
   bounds: TifLayerData["bounds"];
 };
 
+// "cloudcasting/stack" is the forecast stack: same format, over a smaller box.
+const STACK_ROUTES = ["stack", "cloudcasting/stack"] as const;
+type StackRoute = (typeof STACK_ROUTES)[number];
+
 export async function fetchSatelliteStack(
-  channel: SatelliteChannel
+  channel: SatelliteChannel,
+  route: StackRoute = "stack"
 ): Promise<SatelliteStack | null> {
   await acquireRequestSlot();
   let buf: ArrayBuffer | null;
   try {
     buf = await requestTifFromRoute(
-      `${API_PREFIX}/satellite/stack?channel=${encodeURIComponent(channel)}`
+      `${API_PREFIX}/satellite/${route}?channel=${encodeURIComponent(channel)}`
     );
   } finally {
     releaseRequestSlot();
@@ -440,6 +446,7 @@ export async function fetchSatelliteStack(
   }
   return {
     channel,
+    route,
     bands: frames,
     missing,
     width: image.getWidth(),
@@ -448,8 +455,12 @@ export async function fetchSatelliteStack(
   };
 }
 
-const stackLayerId = (ch: SatelliteChannel) => `satellite-stack-layer-${ch}`;
-const stackSourceId = (ch: SatelliteChannel) => `satellite-stack-source-${ch}`;
+// One canvas layer per channel *and* route: observed and forecast differ in bounds, so sharing
+// one would rebuild the source every time the cursor crosses "now".
+const stackLayerId = (ch: SatelliteChannel, route: StackRoute) =>
+  `satellite-stack-layer-${route}-${ch}`;
+const stackSourceId = (ch: SatelliteChannel, route: StackRoute) =>
+  `satellite-stack-source-${route}-${ch}`;
 
 type StackCanvas = {
   canvas: HTMLCanvasElement; // what Mapbox samples, refilled per slot
@@ -474,15 +485,24 @@ function stackLut(channel: SatelliteChannel): Uint32Array {
 }
 
 export function removeStackLayer(map: mapboxgl.Map, channel: SatelliteChannel): void {
-  if (map.getLayer(stackLayerId(channel))) map.removeLayer(stackLayerId(channel));
-  if (map.getSource(stackSourceId(channel))) map.removeSource(stackSourceId(channel));
-  stackCanvases.get(map)?.delete(channel);
+  STACK_ROUTES.forEach((route) => {
+    if (map.getLayer(stackLayerId(channel, route))) map.removeLayer(stackLayerId(channel, route));
+    if (map.getSource(stackSourceId(channel, route)))
+      map.removeSource(stackSourceId(channel, route));
+    stackCanvases.get(map)?.delete(stackLayerId(channel, route));
+  });
 }
 
-export function hideStackLayer(map: mapboxgl.Map, channel: SatelliteChannel): void {
-  if (map.getLayer(stackLayerId(channel))) {
-    map.setLayoutProperty(stackLayerId(channel), "visibility", "none");
-  }
+export function hideStackLayer(
+  map: mapboxgl.Map,
+  channel: SatelliteChannel,
+  routes: readonly StackRoute[] = STACK_ROUTES
+): void {
+  routes.forEach((route) => {
+    if (map.getLayer(stackLayerId(channel, route))) {
+      map.setLayoutProperty(stackLayerId(channel, route), "visibility", "none");
+    }
+  });
 }
 
 // Draw one slot of the stack onto the channel's single stack layer (creating it on first use)
@@ -496,17 +516,18 @@ export function showStackFrame(
   const band = stack.bands[key];
   if (!band) return false;
   const channel = stack.channel;
-  const sourceId = stackSourceId(channel);
-  const layerId = stackLayerId(channel);
+  const sourceId = stackSourceId(channel, stack.route);
+  const layerId = stackLayerId(channel, stack.route);
 
   let perMap = stackCanvases.get(map);
   if (!perMap) {
     perMap = new Map();
     stackCanvases.set(map, perMap);
   }
-  let sc = perMap.get(channel);
+  let sc = perMap.get(layerId);
   if (sc && (sc.canvas.width !== stack.width || sc.canvas.height !== stack.height)) {
-    removeStackLayer(map, channel);
+    map.removeLayer(layerId);
+    map.removeSource(sourceId);
     sc = undefined;
   }
   if (!sc || !map.getSource(sourceId)) {
@@ -522,7 +543,7 @@ export function showStackFrame(
       pixels: new Uint32Array(image.data.buffer),
       lut: stackLut(channel)
     };
-    perMap.set(channel, sc);
+    perMap.set(layerId, sc);
     const [minLon, minLat, maxLon, maxLat] = stack.bounds;
     // `canvas` is a valid Mapbox source type that the bundled typings omit.
     map.addSource(sourceId, {
@@ -563,6 +584,11 @@ export function showStackFrame(
   src.play();
   src.pause();
   map.setLayoutProperty(layerId, "visibility", "visible");
+  hideStackLayer(
+    map,
+    channel,
+    STACK_ROUTES.filter((r) => r !== stack.route)
+  );
   return true;
 }
 

@@ -46,6 +46,10 @@ jest.mock("quick-lru", () => ({
 }));
 
 jest.mock("mapbox-gl/dist/mapbox-gl.css", () => ({}), { virtual: true });
+jest.mock("@auth0/nextjs-auth0/client", () => ({
+  __esModule: true,
+  useUser: () => ({ user: null, isLoading: false, error: undefined })
+}));
 
 describe("Map load handler", () => {
   const originalCi = process.env.NEXT_PUBLIC_CI;

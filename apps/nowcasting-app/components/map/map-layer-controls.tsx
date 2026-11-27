@@ -122,6 +122,9 @@ export const SatelliteChannelSelect: FC = () => {
   const [activeChannel, setActiveChannel] = useGlobalState("activeChannel");
   const [satelliteError] = useGlobalState("satelliteError");
   const [partialComposite] = useGlobalState("satellitePartialComposite");
+  const [selectedISOTime] = useGlobalState("selectedISOTime");
+  // map.tsx draws a cursor slot's image from 15 min before it; a future one can only be cloudcasting.
+  const isForecast = new Date(selectedISOTime).getTime() - 15 * 60 * 1000 > Date.now();
 
   if (!showCloudLayer) return null;
 
@@ -166,6 +169,12 @@ export const SatelliteChannelSelect: FC = () => {
           {partialComposite
             .map((ch) => SATELLITE_CHANNEL_LABELS[ch as SatelliteChannel] ?? ch)
             .join(", ")}
+        </p>
+      ) : null}
+
+      {!satelliteError && isForecast ? (
+        <p className="col-span-5 -mt-0.5 text-2xs leading-tight text-content-muted">
+          Cloud forecast (cloudcasting)
         </p>
       ) : null}
     </>
